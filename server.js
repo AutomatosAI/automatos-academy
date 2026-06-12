@@ -25,7 +25,7 @@ app.use(compression());
 app.use(express.json());
 
 // ── Health check (Railway / uptime) ───────────────────────────────────
-app.get("/healthz", (_req, res) => res.json({ ok: true, service: "automatos-learning" }));
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "automatos-academy" }));
 
 // ── API namespace reserved for the future backend ─────────────────────
 // Returns 501 today so client code can feature-detect a backend cleanly.

@@ -2,7 +2,7 @@
 
 **A+ prep. Only top people qualify.** — the Automatos learning model, applied to AI-architecture certifications.
 
-> Deployed at **learning.automatos.app**. Flagship track: **Anthropic Claude Certified Architect — Foundations (CCA-F)**.
+> Deployed at **academy.automatos.app**. Flagship track: **Anthropic Claude Certified Architect — Foundations (CCA-F)**.
 
 Automatos teaches one way, everywhere: a repeatable pedagogy —
 
@@ -34,7 +34,7 @@ There is **no build step**. It's a vanilla-JS SPA (ES modules) with JSON content
 
 ## Architecture
 
-- `public/index.html` — SPA shell · `public/learn.css` — design system (Automatos tokens: Instrument Serif / Geist, bone+pitch themes, grade-seal motif)
+- `public/index.html` — SPA shell · `public/academy.css` — design system (Automatos tokens: Instrument Serif / Geist, bone+pitch themes, grade-seal motif)
 - `public/js/engine/` — `quiz` · `exam` · `scenario` · `readiness` (pure, framework-free)
 - `public/js/{content,store,router,markdown,ui}.js` — content loader, local-first progress store, hash router, tiny markdown, DOM helpers
 - `public/js/views/` — one renderer per surface

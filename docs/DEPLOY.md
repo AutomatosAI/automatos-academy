@@ -1,4 +1,4 @@
-# Deploy — learning.automatos.app
+# Deploy — academy.automatos.app
 
 The app is a **static SPA with hash routing** plus a thin Express server. Hash routing means every route lives under `/#/…`, so the only real server paths are `/` and static assets — **it deploys anywhere**, with or without the server.
 
@@ -30,13 +30,13 @@ Wherever automatos.app's DNS lives (Cloudflare / registrar):
 
 | Type | Name | Value |
 |---|---|---|
-| CNAME | `learning` | the target your host gives you (e.g. `cname.vercel-dns.com`, `<proj>.pages.dev`, or the Railway domain) |
+| CNAME | `academy` | the target your host gives you (e.g. `cname.vercel-dns.com`, `<proj>.pages.dev`, or the Railway domain) |
 
-Then add `learning.automatos.app` as a custom domain in the host's dashboard so it issues the TLS cert. Propagation is usually minutes.
+Then add `academy.automatos.app` as a custom domain in the host's dashboard so it issues the TLS cert. Propagation is usually minutes. (Want `learning.automatos.app` too? Add a second CNAME + custom domain aliasing the same deploy.)
 
 ## Verify after deploy
 
-1. `https://learning.automatos.app/` loads the catalog.
+1. `https://academy.automatos.app/` loads the catalog.
 2. Start the flagship track → curriculum shows 5 weighted domains.
 3. Open a D1 lesson, answer the knowledge check (feedback appears).
 4. Run a mock exam → timer counts down, score is /1000, review shows explanations.
