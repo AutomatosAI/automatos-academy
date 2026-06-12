@@ -1,0 +1,585 @@
+{
+  "id": "d1-agentic-architectures",
+  "order": 1,
+  "code": "D1",
+  "name": "Agentic Architectures",
+  "weight": 0.27,
+  "tagline": "Choose the right tier, then wire the loop, sessions, and multi-agent orchestration.",
+  "overview": "The heaviest domain on the exam. It tests whether you can choose the right tier — single call, workflow, or agent — and then architect agentic systems correctly: the agentic loop and stop reasons, Managed Agents (Agent → Session), session lifecycle, multi-agent coordination, and task decomposition.",
+  "objectives": [
+    "Choose the right tier — single call, workflow, or agent — and justify it against complexity, value, viability, and cost of error.",
+    "Trace the agentic loop and handle every stop reason: end_turn, tool_use, pause_turn, max_tokens, refusal.",
+    "Apply the cardinal Managed Agents rule: model, system, and tools live on the persisted Agent; Sessions only reference it.",
+    "Design multi-agent systems with a coordinator and sub-agents, respecting the one-level-deep and shared-filesystem-not-context constraints.",
+    "Decompose a task into the smallest reliable unit of autonomy."
+  ],
+  "lessons": [
+    {
+      "id": "l1-tiers",
+      "title": "When to build an agent — and when not to",
+      "estMinutes": 12,
+      "objective": "Pick the cheapest tier that meets the need and defend the choice.",
+      "body": "## Start at the simplest tier\n\nThe most common architecture mistake is reaching for an agent when a single API call would do. Anthropic's guidance is explicit: **default to the simplest tier that meets the need**, and escalate only when the task genuinely requires it.\n\n- **Single LLM call** — classification, extraction, summarisation, Q&A. One request, one response.\n- **Workflow** — a multi-step pipeline where *your code* orchestrates the steps and the control flow is known in advance. Deterministic, debuggable, cheap.\n- **Agent** — the model decides its own trajectory: which tools to call, in what order, when it is done. Maximum flexibility, maximum cost and latency, hardest to make reliable.\n\n## The four questions before you build an agent\n\nBefore choosing the agent tier, all four should be *yes*:\n\n1. **Complexity** — is the task multi-step and hard to fully specify up front?\n2. **Value** — does the outcome justify higher cost and latency?\n3. **Viability** — is the model actually capable at this task type?\n4. **Cost of error** — can mistakes be caught and recovered (tests, review, rollback)?\n\nIf any answer is *no*, drop a tier. A workflow with three scripted steps beats a flaky agent every time the steps are knowable.\n\n## Why the exam cares\n\nThis is the largest slice of the blueprint and the root of most scenario questions. The examiner is testing judgement: given a brief, can you pick the *cheapest tier that works* and defend it? `Build an agent` is rarely the best first answer.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-1",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A team needs to extract three fields (date, total, vendor) from uploaded invoice PDFs at high volume. What is the right tier?",
+          "options": [
+            { "id": "a", "text": "A single LLM call with structured output", "correct": true },
+            { "id": "b", "text": "An open-ended agent with a file-reading toolset" },
+            { "id": "c", "text": "A multi-agent coordinator, one sub-agent per field" },
+            { "id": "d", "text": "A long-running session with memory across invoices" }
+          ],
+          "explanation": "Extraction with a known, fixed output shape is a textbook **single call** — ideally with structured outputs to guarantee the schema. The task is fully specifiable, so adding agency only adds cost, latency, and failure modes.",
+          "sourceRefs": ["r-docs"]
+        },
+        {
+          "id": "kc-d1-2",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which is **not** one of the four checks before committing to the agent tier?",
+          "options": [
+            { "id": "a", "text": "Complexity — is the task hard to specify up front?" },
+            { "id": "b", "text": "The per-token price of the model you'll use", "correct": true },
+            { "id": "c", "text": "Viability — is the model capable at this task?" },
+            { "id": "d", "text": "Cost of error — can mistakes be caught and recovered?" }
+          ],
+          "explanation": "The four checks are complexity, value, viability, and cost of error. Per-token price isn't one of them — *value* already weighs whether the outcome justifies higher cost and latency.",
+          "sourceRefs": ["r-docs"]
+        }
+      ]
+    },
+    {
+      "id": "l2-loop",
+      "title": "The agentic loop and stop reasons",
+      "estMinutes": 14,
+      "objective": "Trace tool_use → tool_result → repeat, and branch correctly on every stop reason.",
+      "body": "## One endpoint, one loop\n\nEverything goes through `POST /v1/messages`. Tools are a *feature* of that endpoint, not a separate API. The agentic loop is:\n\n1. Send messages (+ tool definitions).\n2. If the response `stop_reason` is `tool_use`, execute the requested tool(s) yourself.\n3. Append the assistant turn **and** a `tool_result` for each `tool_use` (matched by `tool_use_id`).\n4. Loop until `stop_reason` is `end_turn`.\n\n```python\nwhile True:\n    resp = client.messages.create(model='claude-opus-4-8', max_tokens=16000, tools=tools, messages=messages)\n    if resp.stop_reason == 'end_turn':\n        break\n    messages.append({'role': 'assistant', 'content': resp.content})\n    results = [run_tool(b) for b in resp.content if b.type == 'tool_use']\n    messages.append({'role': 'user', 'content': results})\n```\n\n## Stop reasons you must handle\n\n- **end_turn** — the model is done. Read the text.\n- **tool_use** — execute the tool(s) and continue the loop.\n- **pause_turn** — a *server-side* tool loop hit its iteration cap. Re-send the assistant turn to resume; do **not** add a 'continue' message.\n- **max_tokens** — output was cut off. Raise `max_tokens` or stream.\n- **refusal** — the model declined for safety. Check `stop_reason` **before** reading `content`; on some models a pre-output refusal returns an empty `content` array.\n\n## Tool runner vs manual loop\n\nThe SDK tool runner drives the loop for you. Write the **manual loop** when you need to gate, log, or approve each tool call (human-in-the-loop) — exactly the kind of control a production architecture needs for irreversible actions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-3",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A response comes back with `stop_reason: \"pause_turn\"` during a web-search call. What's the correct next step?",
+          "options": [
+            { "id": "a", "text": "Re-send the conversation including the assistant turn so the server resumes", "correct": true },
+            { "id": "b", "text": "Append a user message saying 'continue' and re-send" },
+            { "id": "c", "text": "Treat it as a failure and restart the request" },
+            { "id": "d", "text": "Increase max_tokens and retry from scratch" }
+          ],
+          "explanation": "`pause_turn` means a server-side tool loop paused at its iteration cap. You resume by re-sending the conversation (with the assistant turn); the server detects the trailing server-tool block and continues. Adding a 'continue' message is wrong.",
+          "sourceRefs": ["r-docs"]
+        },
+        {
+          "id": "kc-d1-4",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why prefer a manual agentic loop over the SDK tool runner in a production system that can send money?",
+          "options": [
+            { "id": "a", "text": "The manual loop lets you gate or require approval before each irreversible tool call", "correct": true },
+            { "id": "b", "text": "The tool runner cannot call more than one tool" },
+            { "id": "c", "text": "The manual loop is always faster" },
+            { "id": "d", "text": "The tool runner does not support Claude models" }
+          ],
+          "explanation": "The manual loop gives you the interception point: validate inputs, log, and require human approval before executing hard-to-reverse actions. The tool runner executes automatically — great for read-only tools, risky for money-moving ones.",
+          "sourceRefs": ["r-docs"]
+        }
+      ]
+    },
+    {
+      "id": "l3-managed-agents",
+      "title": "Managed Agents: Agent first, then Session",
+      "estMinutes": 15,
+      "objective": "Internalise the cardinal rule — config lives on the Agent; the Session only references it.",
+      "body": "## The mandatory flow\n\nManaged Agents has one rule that the exam loves: **create the Agent once, reference it from every Session.**\n\n- An **Agent** is a *persisted, versioned* configuration: `model`, `system`, `tools`, `mcp_servers`, `skills`. Created once.\n- A **Session** is one run. It references an agent by id and pins an environment. The session body takes **no** `model`/`system`/`tools`.\n\n```python\n# Setup — once. Store agent.id.\nagent = client.beta.agents.create(\n    name='Reviewer', model='claude-opus-4-8',\n    system='You are a senior reviewer.',\n    tools=[{'type': 'agent_toolset_20260401'}])\n\n# Runtime — every task.\nsession = client.beta.sessions.create(\n    agent=agent.id, environment_id=env.id)\n```\n\n## The #1 anti-pattern\n\nPutting `model`/`tools` on `sessions.create()`, or calling `agents.create()` at the top of every request. Both are wrong: the first is rejected (those fields live on the agent), the second accumulates orphaned agents, pays create latency every run, and throws away the whole point of versioning.\n\n## Why versioning exists\n\nEach update to an agent makes a new immutable version. Running sessions keep their pinned version; new sessions get the latest (or pin explicitly). That buys you reproducibility, safe iteration, and rollback. The container where tools execute is provisioned per session from the **environment**; the agent loop itself runs on Anthropic's orchestration layer.\n\n## Reading the run\n\nSessions stream **events** (SSE): `agent.message`, `agent.tool_use`, `session.status_idle`, `session.status_terminated`. Break on terminal idle (a terminal `stop_reason`) or termination — not on the first idle, which can be transient.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-5",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Where do `model`, `system`, and `tools` belong in Managed Agents?",
+          "options": [
+            { "id": "a", "text": "On the persisted Agent, created once and referenced by every Session", "correct": true },
+            { "id": "b", "text": "On each Session at creation time" },
+            { "id": "c", "text": "On the Environment template" },
+            { "id": "d", "text": "Split — model on the Session, tools on the Agent" }
+          ],
+          "explanation": "Those fields live on the Agent. The Session only takes a pointer to the agent (id + optional version) plus the environment. Putting them on the session is the single most common Managed Agents mistake.",
+          "sourceRefs": ["r-docs"]
+        },
+        {
+          "id": "kc-d1-6",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You see `agents.create()` called at the top of a function that runs on every incoming request. What's wrong?",
+          "options": [
+            { "id": "a", "text": "It accumulates orphaned agents, pays create latency per run, and defeats versioning", "correct": true },
+            { "id": "b", "text": "Nothing — agents are cheap and meant to be created per request" },
+            { "id": "c", "text": "Agents can only be created from the CLI, never the SDK" },
+            { "id": "d", "text": "It will fail because sessions must be created first" }
+          ],
+          "explanation": "Agent creation is a one-time setup step; store the id and reuse it. Creating per request is the documented anti-pattern — orphaned objects, needless latency, and no version pinning.",
+          "sourceRefs": ["r-docs"]
+        },
+        {
+          "id": "kc-d1-7",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A session emits `session.status_idle`. Why is breaking your event loop on that alone a bug?",
+          "options": [
+            { "id": "a", "text": "Idle can be transient (e.g. awaiting a tool result); break only on idle with a terminal stop_reason or on termination", "correct": true },
+            { "id": "b", "text": "Idle never fires for healthy sessions" },
+            { "id": "c", "text": "Idle means the session already terminated, so the break is redundant" },
+            { "id": "d", "text": "You should break on the first agent.message instead" }
+          ],
+          "explanation": "A session goes idle transiently — between parallel tools or while waiting on a custom tool result / confirmation. Break when idle carries a terminal stop_reason, or on session.status_terminated. Otherwise you cut the run off mid-task.",
+          "sourceRefs": ["r-docs"]
+        }
+      ]
+    },
+    {
+      "id": "l4-multiagent",
+      "title": "Multi-agent orchestration & task decomposition",
+      "estMinutes": 12,
+      "objective": "Decide when to fan out, and wire a coordinator within the documented constraints.",
+      "body": "## Coordinator + sub-agents\n\nA **coordinator** agent can delegate to other agents in one session. You declare a roster with the `multiagent` field on the **agent** definition — not on the session, and not as a tool.\n\nKey constraints the exam tests:\n\n- **One level of delegation.** A sub-agent's own roster does not cascade. Depth greater than one is ignored.\n- **Threads share the filesystem, not context.** Each sub-agent runs in its own thread with its own conversation history, model, and tools. If the coordinator needs a sub-agent to act on something, it must say so explicitly (or write it to disk).\n- **Roster is bounded** (up to ~20 unique agents; the coordinator may spawn multiple copies).\n\n## When to fan out\n\nDelegate when work is **independent and parallelisable** — many files to read, many candidates to check, several perspectives to gather. Keep it sequential and direct when steps depend on each other or a single read solves it. Spawning a sub-agent for a one-file lookup is waste.\n\n## Decomposition\n\nThe craft is finding the **smallest reliable unit of autonomy**: scope each agent so its task is checkable and its errors are recoverable. A good decomposition turns one fragile mega-agent into several small agents whose outputs you can verify independently — and often a verifier sub-agent with fresh context beats self-critique.\n\n## Workflow vs agent, once more\n\nIf you can draw the control-flow graph in advance, that's a **workflow** (your code branches and loops). If the model must decide the trajectory at runtime, that's an **agent**. Multi-agent is the agent tier with delegation — still the most expensive option, chosen only when fan-out genuinely helps.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-8",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In a multi-agent session, a sub-agent needs a fact the coordinator discovered. Why can't it just 'see' it?",
+          "options": [
+            { "id": "a", "text": "Threads share the filesystem but not conversation context — the coordinator must pass the fact explicitly or write it to disk", "correct": true },
+            { "id": "b", "text": "Sub-agents have no tools, so they can't read anything" },
+            { "id": "c", "text": "Context is shared, so it actually can — the premise is wrong" },
+            { "id": "d", "text": "Only the environment carries context between threads" }
+          ],
+          "explanation": "Each thread has isolated conversation history. Shared state is the filesystem, not context. The coordinator must hand the fact over in the delegated message or via a written file.",
+          "sourceRefs": ["r-docs"]
+        },
+        {
+          "id": "kc-d1-9",
+          "domainId": "d1-agentic-architectures",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A coordinator delegates to a sub-agent, which itself declares a roster of further agents. What happens?",
+          "options": [
+            { "id": "a", "text": "Only the coordinator's delegation applies; the sub-agent's roster is ignored (one level deep)", "correct": true },
+            { "id": "b", "text": "It cascades, creating a tree of arbitrary depth" },
+            { "id": "c", "text": "The session is rejected at creation" },
+            { "id": "d", "text": "The sub-agents run but cannot use tools" }
+          ],
+          "explanation": "Delegation is one level only. A sub-agent's own multiagent roster does not cascade; depth greater than one is ignored.",
+          "sourceRefs": ["r-docs"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d1-1",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A product team can fully describe a 3-step pipeline (fetch → transform → notify) with known branching. Which architecture best fits?",
+      "options": [
+        { "id": "a", "text": "A code-orchestrated workflow with tool use", "correct": true },
+        { "id": "b", "text": "An open-ended agent that decides the steps" },
+        { "id": "c", "text": "A multi-agent coordinator" },
+        { "id": "d", "text": "A single LLM call with no tools" }
+      ],
+      "explanation": "Known steps and known branching means you control the loop — a **workflow**. Reach for an agent only when the trajectory can't be specified in advance. A single call can't run the pipeline's tools.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-2",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the agentic loop, what must accompany each `tool_use` block when you send results back?",
+      "options": [
+        { "id": "a", "text": "A tool_result block carrying the matching tool_use_id", "correct": true },
+        { "id": "b", "text": "A new system prompt" },
+        { "id": "c", "text": "A fresh agent definition" },
+        { "id": "d", "text": "A user message saying 'continue'" }
+      ],
+      "explanation": "Each `tool_use` needs a `tool_result` with the same `tool_use_id`, sent in a user turn after appending the assistant turn. Missing or mismatched ids break the loop.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-3",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "On a refusal-capable model, why check `stop_reason` before reading `response.content[0]`?",
+      "options": [
+        { "id": "a", "text": "A pre-output refusal can return an empty content array, so indexing it throws", "correct": true },
+        { "id": "b", "text": "content is always empty until you call a second endpoint" },
+        { "id": "c", "text": "stop_reason determines the model id" },
+        { "id": "d", "text": "Reading content first disables tool use" }
+      ],
+      "explanation": "A safety refusal arrives as a successful response with `stop_reason: \"refusal\"`; a pre-output refusal has an empty `content` array. Code that reads `content[0]` unconditionally will error on exactly those responses.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-4",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the primary engineering reason Managed Agents are persisted, versioned objects?",
+      "options": [
+        { "id": "a", "text": "Reproducibility, safe iteration, and rollback — sessions pin a known version", "correct": true },
+        { "id": "b", "text": "To bill per agent created" },
+        { "id": "c", "text": "Because sessions cannot store a system prompt" },
+        { "id": "d", "text": "To force one agent per user" }
+      ],
+      "explanation": "Versioning lets you iterate on an agent without breaking running sessions, pin a session to a known-good config, and roll back a regression. It's the reason creating an agent per run is an anti-pattern.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-5",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When is multi-agent fan-out the right call?",
+      "options": [
+        { "id": "a", "text": "When subtasks are independent and parallelisable (e.g. read many files at once)", "correct": true },
+        { "id": "b", "text": "Whenever a task has more than one step" },
+        { "id": "c", "text": "For any single-file read, to keep the main context clean" },
+        { "id": "d", "text": "Only when the model lacks tools" }
+      ],
+      "explanation": "Delegate for independent, parallel work. Sequential or single-read tasks should stay direct — spawning a sub-agent there just adds latency and coordination cost.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-6",
+      "domainId": "d1-agentic-architectures",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which of these are valid reasons to promote an action from a generic `bash` tool to a dedicated tool? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "You need to gate or require confirmation for an irreversible action", "correct": true },
+        { "id": "b", "text": "You want to render the action with custom UI", "correct": true },
+        { "id": "c", "text": "You want the harness to mark it parallel-safe vs unsafe", "correct": true },
+        { "id": "d", "text": "Dedicated tools are always cheaper in tokens than bash" }
+      ],
+      "explanation": "Promote to a dedicated tool to gate/confirm, to render, to audit, or to schedule (parallel-safe vs not). Token cost is not the reason — it's about giving the harness a typed, interceptable hook instead of an opaque command string.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-7",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which task is best served by a single LLM call rather than an agent?",
+      "options": [
+        { "id": "a", "text": "Classifying a support ticket into one of five categories", "correct": true },
+        { "id": "b", "text": "Turning a vague design doc into a merged pull request" },
+        { "id": "c", "text": "Investigating a flaky test across an unknown codebase" },
+        { "id": "d", "text": "Running an overnight migration with verification" }
+      ],
+      "explanation": "Classification is one request, one response — a single call. The other three are open-ended, multi-step, and hard to specify up front: the agent tier.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-8",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A session must run a tool that needs a third-party secret, but the sandbox must never see the key. What's the clean pattern?",
+      "options": [
+        { "id": "a", "text": "A custom tool whose call your orchestrator executes host-side with its own credentials", "correct": true },
+        { "id": "b", "text": "Put the API key in the system prompt" },
+        { "id": "c", "text": "Pass the key in the first user message" },
+        { "id": "d", "text": "Hard-code the key into the agent's tools array" }
+      ],
+      "explanation": "Declare a custom tool; when the agent invokes it, your orchestrator (which holds the secret) runs the call and returns the result. The container never sees the key. Secrets in prompts/messages persist in event history — never do that.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-9",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about workflows vs agents is correct?",
+      "options": [
+        { "id": "a", "text": "If you can draw the control-flow graph in advance, prefer a workflow", "correct": true },
+        { "id": "b", "text": "Agents are always cheaper than workflows" },
+        { "id": "c", "text": "Workflows can't use tools" },
+        { "id": "d", "text": "Workflows let the model choose its own trajectory" }
+      ],
+      "explanation": "Known control flow → workflow (your code orchestrates). Unknown, model-decided trajectory → agent. Agents are the more expensive, less predictable tier, chosen only when needed.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-10",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A long-running agent must remember facts across separate sessions (not just within one run). Which mechanism fits?",
+      "options": [
+        { "id": "a", "text": "A persistent memory store / memory tool the agent reads and writes", "correct": true },
+        { "id": "b", "text": "Prompt caching" },
+        { "id": "c", "text": "Raising max_tokens" },
+        { "id": "d", "text": "Context compaction within the session" }
+      ],
+      "explanation": "Cross-session persistence needs memory (a memory store / memory tool). Compaction and context editing operate within a single session; caching is a cost/latency optimisation, not state.",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-11",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In Managed Agents, what is an Environment?",
+      "options": [
+        { "id": "a", "text": "A reusable template for provisioning the per-session container where tools execute", "correct": true },
+        { "id": "b", "text": "The model configuration for an agent" },
+        { "id": "c", "text": "A synonym for the session's conversation history" },
+        { "id": "d", "text": "The billing scope for an organisation" }
+      ],
+      "explanation": "Environments are reusable configuration templates for spinning up containers (e.g. networking policy, packages). The agent loop runs on the orchestration layer; the container provisioned from the environment is where the agent's tools execute.",
+      "sourceRefs": ["r-d1-managed"]
+    },
+    {
+      "id": "q-d1-12",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A session is `idle` with a stop_reason of `requires_action`. What does that mean?",
+      "options": [
+        { "id": "a", "text": "The agent is blocked waiting on you — e.g. a custom tool result or a tool confirmation", "correct": true },
+        { "id": "b", "text": "The session has terminated and cannot continue" },
+        { "id": "c", "text": "The model refused the request for safety reasons" },
+        { "id": "d", "text": "The container ran out of disk space" }
+      ],
+      "explanation": "`requires_action` means the session is waiting on a client-side event — a `custom_tool_result` or a `tool_confirmation`. Handle it and the session resumes; treating it as terminal deadlocks the run.",
+      "sourceRefs": ["r-d1-managed"]
+    },
+    {
+      "id": "q-d1-13",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which workflow pattern best fits: 'classify the request, then send it down one of three fixed pipelines'?",
+      "options": [
+        { "id": "a", "text": "Routing — one classifier step directs traffic to specialised handlers", "correct": true },
+        { "id": "b", "text": "An open-ended agent with all three pipelines as tools" },
+        { "id": "c", "text": "Parallelisation — run all three pipelines and vote" },
+        { "id": "d", "text": "A single call with a longer prompt" }
+      ],
+      "explanation": "This is the routing workflow: a cheap classification step followed by deterministic, specialised pipelines. Running all three in parallel wastes cost; an agent adds non-determinism where the control flow is already known.",
+      "sourceRefs": ["r-d1-agents"]
+    },
+    {
+      "id": "q-d1-14",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You want an unattended Managed Agents run to keep iterating until a deliverable meets explicit criteria. Which mechanism is designed for this?",
+      "options": [
+        { "id": "a", "text": "Define an outcome with a gradeable rubric — the harness runs an iterate → grade → revise loop", "correct": true },
+        { "id": "b", "text": "Send 'keep going' user messages on a timer" },
+        { "id": "c", "text": "Raise max_tokens until the task completes in one turn" },
+        { "id": "d", "text": "Create a new agent version after each attempt" }
+      ],
+      "explanation": "Outcomes are the built-in iterate-and-grade loop: you state what 'done' looks like as a rubric, and an independent grader scores each iteration and feeds gaps back until satisfied, capped by max iterations. Timed nudges and token raises don't verify anything.",
+      "sourceRefs": ["r-d1-managed"]
+    },
+    {
+      "id": "q-d1-15",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For a long-horizon agentic task on a modern frontier model, what is the recommended way to control how hard the model works?",
+      "options": [
+        { "id": "a", "text": "The effort parameter (e.g. high/xhigh for agentic work), with adaptive thinking", "correct": true },
+        { "id": "b", "text": "A fixed thinking token budget (budget_tokens)" },
+        { "id": "c", "text": "Setting temperature to 0" },
+        { "id": "d", "text": "Sending the task twice and diffing the answers" }
+      ],
+      "explanation": "Modern models use adaptive thinking plus the effort parameter as the depth/cost control; higher effort suits long-horizon agentic work. Fixed thinking budgets are removed on the newest models, and sampling knobs like temperature are not the mechanism (and are dropped there too).",
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "q-d1-16",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An orchestrator spawns sub-agents for a research task. Which design gets the best wall-clock and context efficiency?",
+      "options": [
+        { "id": "a", "text": "Long-lived sub-agents working asynchronously while the orchestrator continues, reporting back as they finish", "correct": true },
+        { "id": "b", "text": "Spawn one sub-agent at a time and block until each returns" },
+        { "id": "c", "text": "Give every sub-agent the orchestrator's full conversation history" },
+        { "id": "d", "text": "Replace sub-agents with one giant context window" }
+      ],
+      "explanation": "Async delegation keeps the orchestrator unblocked and lets sub-agents keep their own context across subtasks. Spawn-and-block serialises on the slowest worker; copying full history into every sub-agent wastes tokens and defeats context isolation.",
+      "sourceRefs": ["r-d1-agents"]
+    },
+    {
+      "id": "q-d1-17",
+      "domainId": "d1-agentic-architectures",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which behaviours characterise a well-designed autonomous agent run? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Progress claims are grounded in tool-result evidence from the session", "correct": true },
+        { "id": "b", "text": "Irreversible actions pass through an explicit gate or approval", "correct": true },
+        { "id": "c", "text": "A verification step checks the work against the original specification", "correct": true },
+        { "id": "d", "text": "The agent expands scope opportunistically to maximise value" }
+      ],
+      "explanation": "Reliable autonomy = evidence-grounded status, gated irreversible actions, and explicit verification. Opportunistic scope expansion is an anti-pattern — unrequested adjacent actions are how autonomous runs go wrong.",
+      "sourceRefs": ["r-d1-agents"]
+    },
+    {
+      "id": "q-d1-18",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does the orchestrator-workers (coordinator/sub-agent) pattern buy you over one large agent?",
+      "options": [
+        { "id": "a", "text": "Parallel independent work with isolated contexts whose outputs can be verified separately", "correct": true },
+        { "id": "b", "text": "Strictly lower total token cost in all cases" },
+        { "id": "c", "text": "Elimination of the need for tools" },
+        { "id": "d", "text": "Guaranteed determinism" }
+      ],
+      "explanation": "Fan-out buys parallelism and context isolation, and each worker's output is independently checkable. It usually costs *more* tokens, not fewer — the trade is speed and reliability, not price.",
+      "sourceRefs": ["r-d1-agents"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d1-bank",
+      "domainIds": ["d1-agentic-architectures"],
+      "title": "Customer-support assistant for a bank",
+      "tagline": "Tier, context, gating, model — four calls under real constraints.",
+      "context": "A retail bank wants an assistant that answers account questions and can issue small refunds. Conversations can run very long. Refunds move money. Compliance requires an audit trail and human sign-off above a threshold. You're the architect.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "What tier should the assistant be?",
+          "choices": [
+            { "id": "a", "text": "An agent with tools — the task is open-ended and multi-step", "verdict": "best", "rationale": "Conversations are unpredictable and require tool actions chosen at runtime — the agent tier. The four checks pass: complex, valuable, viable, and errors are recoverable with gating and audit." },
+            { "id": "b", "text": "A single LLM call per message", "verdict": "wrong", "rationale": "A single call can't take account actions or carry the run; you'd be re-implementing the loop badly around it." },
+            { "id": "c", "text": "A fixed workflow with no model-chosen steps", "verdict": "viable", "rationale": "A workflow handles common intents but breaks on the long tail of free-form support; you'd end up adding agency anyway." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Conversations reach hundreds of turns and approach the context window. How do you keep the assistant coherent?",
+          "choices": [
+            { "id": "a", "text": "Enable compaction so earlier context is summarised server-side, and pass the compaction blocks back", "verdict": "best", "rationale": "Compaction is built for exactly this — it condenses history near the limit. You must append the returned compaction blocks, not just the text, or you lose the summarised state." },
+            { "id": "b", "text": "Truncate the oldest messages client-side and hope nothing important was dropped", "verdict": "wrong", "rationale": "Blind truncation drops account context the assistant may still need, and silently. Compaction summarises rather than deletes." },
+            { "id": "c", "text": "Start a fresh session every 50 turns", "verdict": "viable", "rationale": "Resets context but loses the thread of a single customer conversation; acceptable only with memory to carry state forward." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "How should the refund capability be exposed?",
+          "choices": [
+            { "id": "a", "text": "A dedicated `issue_refund` tool with an approval gate and full audit logging", "verdict": "best", "rationale": "A money-moving, irreversible action belongs in a typed dedicated tool your harness can gate, confirm, and audit. The manual loop lets you require human sign-off above the threshold." },
+            { "id": "b", "text": "A generic bash tool so the agent can call the refund API with curl", "verdict": "wrong", "rationale": "Bash gives the harness an opaque command string — no gate, no typed validation, no clean audit. Exactly the wrong shape for an irreversible action." },
+            { "id": "c", "text": "A dedicated tool, but auto-approved for all amounts to reduce latency", "verdict": "viable", "rationale": "Right tool shape, wrong policy: compliance requires human sign-off above a threshold, so unconditional auto-approve violates the brief." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Which model default is the sensible starting point for the production assistant?",
+          "choices": [
+            { "id": "a", "text": "A capable default (e.g. Opus-tier) with effort tuned per workload", "verdict": "best", "rationale": "Start with a strong default and tune effort/cost from measurement. Correctness and good tool selection matter for money actions." },
+            { "id": "b", "text": "The cheapest small model everywhere to minimise cost", "verdict": "viable", "rationale": "Cost-rational for simple intents, but under-powered for nuanced compliance-sensitive decisions; route by complexity instead of defaulting low." },
+            { "id": "c", "text": "Hard-code temperature 0 on a legacy model for 'determinism'", "verdict": "wrong", "rationale": "Modern models drop sampling params, and temperature never guaranteed identical outputs. Steer with prompting and effort, not a legacy knob." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-docs"]
+    },
+    {
+      "id": "s-d1-migration",
+      "domainIds": ["d1-agentic-architectures"],
+      "title": "Overnight code-migration agent",
+      "tagline": "Managed vs raw loop, fan-out, config placement, memory.",
+      "context": "You must migrate 400 source files to a new API across an unfamiliar repo, overnight, unattended, with verification. Each file is independent. You want reproducibility and an audit trail.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Managed Agents or your own hosted API loop?",
+          "choices": [
+            { "id": "a", "text": "Managed Agents — Anthropic runs the loop and hosts a per-session container for tool execution", "verdict": "best", "rationale": "A long-running, file-mutating, unattended task with a workspace is the Managed Agents sweet spot: persisted/versioned config, per-session container, event stream, and outcomes." },
+            { "id": "b", "text": "A raw client-side agentic loop you host yourself", "verdict": "viable", "rationale": "Workable if you want to own the compute and tool runtime, but you re-build sandboxing, lifecycle, and streaming that Managed Agents already provides." },
+            { "id": "c", "text": "A single batch call with all 400 files inlined", "verdict": "wrong", "rationale": "No agency, no verification loop, and it won't fit or recover from errors. Wrong tier entirely." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "400 independent files. How do you structure the work?",
+          "choices": [
+            { "id": "a", "text": "A coordinator that fans out to sub-agents over batches of files, each verifying its own work", "verdict": "best", "rationale": "Independent units → parallel fan-out. A verifier with fresh context per batch beats one mega-agent self-checking 400 files." },
+            { "id": "b", "text": "One agent iterating all 400 files sequentially in a single thread", "verdict": "viable", "rationale": "Correct but slow and context-heavy; coherence degrades over a giant single thread. Fan-out is the better fit for independent work." },
+            { "id": "c", "text": "400 sub-agents nested three levels deep", "verdict": "wrong", "rationale": "Delegation is one level deep — nesting is ignored — and 400 concurrent threads blow past limits. Batch instead." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Where does the migration prompt and toolset live so every nightly run is reproducible?",
+          "choices": [
+            { "id": "a", "text": "On a versioned Agent created once; each nightly Session pins that agent version", "verdict": "best", "rationale": "Config on the persisted Agent + version pinning = reproducible runs and clean rollback. Sessions just reference it." },
+            { "id": "b", "text": "On each Session at creation time", "verdict": "wrong", "rationale": "model/system/tools aren't session fields — this is the cardinal Managed Agents mistake and won't behave as intended." },
+            { "id": "c", "text": "Re-create the agent at the start of every nightly job", "verdict": "wrong", "rationale": "Per-run creation orphans agents and defeats versioning. Create once, store the id, pin the version." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-docs"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d1-loop",
+      "domainId": "d1-agentic-architectures",
+      "title": "Build a manual tool-use loop with an approval gate",
+      "goal": "Write the agentic loop by hand so you control every irreversible tool call.",
+      "steps": "## What you'll build\n\nA loop that calls Claude with one read-only tool (`get_weather`) and one gated tool (`send_email`), printing each tool call and requiring a y/n before any send.\n\n## Steps\n\n1. Define two tools with clear `description`s and JSON input schemas.\n2. Loop: call `messages.create`, break on `end_turn`.\n3. On `tool_use`, append the assistant turn, then for each block: if the tool is read-only, execute and return a `tool_result`; if it's `send_email`, prompt for approval first.\n4. Append all `tool_result` blocks (matched by `tool_use_id`) as a user turn and continue.\n5. Handle `pause_turn` by re-sending; handle `refusal` by checking `stop_reason` before reading content.\n\n## Why it matters\n\nThis is the exact shape a production system needs for money-moving or destructive actions — the interception point the SDK tool runner doesn't give you.",
+      "checklist": [
+        "Loop breaks cleanly on end_turn",
+        "Every tool_use gets a tool_result with the matching id",
+        "send_email is blocked until approved",
+        "pause_turn resumes by re-sending; refusal is checked before reading content"
+      ]
+    },
+    {
+      "id": "lab-d1-managed",
+      "domainId": "d1-agentic-architectures",
+      "title": "Stand up a Managed Agent (Agent → Session)",
+      "goal": "Create a versioned agent once, then run a session that references it — the right way.",
+      "steps": "## Steps\n\n1. Create an **environment** (cloud).\n2. Create an **agent** with `model`, `system`, and the prebuilt toolset. Store `agent.id` and `agent.version`.\n3. Create a **session** that references the agent id + environment id. Note that you pass **no** model/tools here.\n4. Open the event stream **before** sending the first message; send a `user.message`.\n5. Drain events; break on terminal idle or termination — not the first idle.\n6. Update the agent's system prompt; confirm a new version is created and old sessions are unaffected.\n\n## Checkpoint\n\nIf you ever typed `model=` or `tools=` into `sessions.create()`, stop — that's the cardinal mistake. Move it to the agent.",
+      "checklist": [
+        "Agent created once; id + version stored",
+        "Session body contains no model/system/tools",
+        "Stream opened before the first message",
+        "Loop breaks on terminal idle / termination, not first idle",
+        "Agent update produced a new version without breaking the running session"
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "r-d1-agents", "title": "Building effective agents (Anthropic)", "url": "https://www.anthropic.com/engineering/building-effective-agents", "kind": "blog", "annotation": "The canonical 'should you build an agent, and at what tier' essay. Read it first.", "domainIds": ["d1-agentic-architectures"] },
+    { "id": "r-d1-tooluse", "title": "Tool use overview", "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview", "kind": "official-doc", "annotation": "The loop, stop reasons, tool_result shape, and tool_choice. Internalise the stop-reason table.", "domainIds": ["d1-agentic-architectures"] },
+    { "id": "r-d1-managed", "title": "Managed Agents — overview", "url": "https://platform.claude.com/docs/en/managed-agents/overview", "kind": "official-doc", "annotation": "Agent → Session, versioning, environments, events. The cardinal rule lives here.", "domainIds": ["d1-agentic-architectures"] }
+  ],
+  "videos": [
+    { "id": "v-d1-1", "title": "D1 · Choosing the right tier", "provider": "youtube", "url": "", "domainIds": ["d1-agentic-architectures"], "sourceNotebook": "cca-f / domain 1", "status": "placeholder" },
+    { "id": "v-d1-2", "title": "D1 · The agentic loop & stop reasons", "provider": "youtube", "url": "", "domainIds": ["d1-agentic-architectures"], "sourceNotebook": "cca-f / domain 1", "status": "placeholder" },
+    { "id": "v-d1-3", "title": "D1 · Managed Agents: Agent → Session", "provider": "youtube", "url": "", "domainIds": ["d1-agentic-architectures"], "sourceNotebook": "cca-f / domain 1", "status": "placeholder" }
+  ]
+}

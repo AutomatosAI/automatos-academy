@@ -1,0 +1,31 @@
+{
+  "vendorName": "Anthropic",
+  "name": "Claude Certified Architect — Foundations",
+  "code": "CCA-F",
+  "summary": "Anthropic's first official technical credential (launched March 2026). Validates that you can design and ship production-grade Claude applications at enterprise scale — agentic systems, tool & MCP design, Claude Code operations, prompt engineering, and context/reliability.",
+  "exam": {
+    "questionCount": 60,
+    "durationMinutes": 120,
+    "passingScore": 720,
+    "scoreScale": 1000,
+    "proctored": true,
+    "closedBook": true,
+    "scenarioPool": 6,
+    "scenariosPresented": 4,
+    "recommendedPrep": "~6 months hands-on Claude API + Claude Code"
+  },
+  "blueprintNote": "Five weighted domains: D1 Agentic Architectures 27%, D2 Tool Design & MCP 18%, D3 Agent Operations & Claude Code 20%, D4 Prompt Engineering 20%, D5 Context & Reliability 15%. Verify against the official Anthropic Academy page before relying on weights.",
+  "domainFiles": [
+    "d1-agentic-architectures.json",
+    "d2-tools-mcp.json",
+    "d3-agent-ops-claude-code.json",
+    "d4-prompt-engineering.json",
+    "d5-context-reliability.json"
+  ],
+  "officialResources": [
+    { "id": "r-academy", "title": "Anthropic Academy — official free prep", "url": "https://anthropic.skilljar.com/", "kind": "official-doc", "annotation": "The free course library is the closest thing to official study material. Work it end to end.", "domainIds": [] },
+    { "id": "r-docs", "title": "Claude platform documentation", "url": "https://platform.claude.com/docs", "kind": "official-doc", "annotation": "Primary source for every technical claim on this track. When a community guide and the docs disagree, the docs win.", "domainIds": [] },
+    { "id": "r-mcp", "title": "Model Context Protocol — spec & concepts", "url": "https://modelcontextprotocol.io/", "kind": "spec", "annotation": "Read the transport, tools, resources, and prompts sections. Core to Domain 2.", "domainIds": ["d2-tools-mcp"] },
+    { "id": "r-guide", "title": "Community study guide (daronyondem)", "url": "https://github.com/daronyondem/claude-architect-exam-guide", "kind": "repo", "annotation": "A solid community blueprint to cross-check coverage. Use it to find gaps, not to memorise answers.", "domainIds": [] }
+  ]
+}

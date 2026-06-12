@@ -1,0 +1,540 @@
+{
+  "id": "d3-agent-ops-claude-code",
+  "order": 3,
+  "code": "D3",
+  "name": "Agent Operations & Claude Code",
+  "weight": 0.20,
+  "tagline": "Configure the harness: memory precedence, hooks that actually block, permissions, MCP, and headless CI runs.",
+  "overview": "This domain moves from API theory to operating a real agent harness. It tests how you configure Claude Code: the CLAUDE.md memory hierarchy and its precedence, slash commands and subagents, hooks that deterministically gate or react to tool calls, the permissions and settings.json model, MCP wiring, plan mode, and headless usage for CI and bulk work. The throughline is one distinction: CLAUDE.md is context the model may follow, while hooks and permissions are enforcement the harness applies regardless.",
+  "objectives": [
+    "Resolve the CLAUDE.md memory hierarchy by precedence: managed policy > project (incl. nested per-directory) > user, with CLAUDE.local.md as the gitignored personal variant.",
+    "Author the right extension for the job: slash commands in .claude/commands/, skills (SKILL.md) with progressive disclosure, and subagents in .claude/agents/ with their own context, tools, and system prompt.",
+    "Use hooks (PreToolUse / PostToolUse / Stop) to deterministically block, auto-format, or react to tool calls — and know when a hook beats a CLAUDE.md instruction.",
+    "Govern an agent with settings.json: allow/ask/deny permission rules where deny wins, plan mode, MCP scopes (local/project/user, .mcp.json), and the dangerous skip-permissions flag.",
+    "Run Claude Code non-interactively for automation — claude -p with --output-format json/stream-json, piping, and exit codes — and choose the Batches API for non-latency-sensitive bulk work at 50% cost."
+  ],
+  "lessons": [
+    {
+      "id": "l1-memory",
+      "title": "CLAUDE.md memory & its precedence",
+      "estMinutes": 14,
+      "objective": "Resolve which instruction wins when memory files exist at several scopes — and know what memory cannot do.",
+      "body": "## Two memory systems, one rule\n\nEvery Claude Code session starts with a fresh context window. **CLAUDE.md** files carry persistent instructions you write — project conventions, build/test commands, architecture, and 'always do X' guardrails. (A separate *auto memory* system lets Claude write its own learnings; CLAUDE.md is the part you control.)\n\nThe rule the exam tests: **CLAUDE.md is context, not enforced configuration.** Claude reads it and tries to comply, but there is no guarantee. To *block* an action regardless of what the model decides, you need a hook or a permission rule — not a line in CLAUDE.md.\n\n## The hierarchy, broadest to most specific\n\nFiles load from broadest scope to most specific, and are **concatenated** (not overridden). Instructions closer to where you launched Claude are read **last**, so the most-specific scope effectively wins a conflict:\n\n1. **Managed policy** (highest authority, cannot be excluded) — `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS), `/etc/claude-code/CLAUDE.md` (Linux/WSL), `C:\\Program Files\\ClaudeCode\\CLAUDE.md` (Windows). Deployed by IT for org-wide standards and compliance.\n2. **Project** — `./CLAUDE.md` or `./.claude/CLAUDE.md`, plus **nested per-directory `CLAUDE.md` files** in subtrees. Shared with the team via source control.\n3. **User** — `~/.claude/CLAUDE.md`. Your personal preferences across all projects.\n\n**`CLAUDE.local.md`** is the gitignored, project-specific *personal* variant — your sandbox URLs, preferred test data — loaded alongside `CLAUDE.md` but never committed.\n\n## How resolution actually works\n\nClaude walks **up** the directory tree from the working directory, collecting every `CLAUDE.md` / `CLAUDE.local.md` on the way. Root-to-leaf ordering means a parent file appears in context *before* a deeper one. Nested `CLAUDE.md` files in subdirectories below the launch dir load **on demand** when Claude reads files there — not all at launch. Managed policy always wins and cannot be excluded; that's the point of it.\n\n## Why the exam cares\n\nGiven a regulated monorepo with files at several scopes, you must say which instruction governs and — crucially — recognise when the answer is 'none of them reliably; use a hook.' Mistaking CLAUDE.md for an enforcement layer is the classic trap.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-1",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A user `~/.claude/CLAUDE.md` says 'use tabs'; the project `./CLAUDE.md` says 'use 2-space indentation'. Which wins, and why?",
+          "options": [
+            { "id": "a", "text": "The project file — it loads after the user file (closer scope read last), so it takes precedence", "correct": true },
+            { "id": "b", "text": "The user file — home-directory settings always override project settings" },
+            { "id": "c", "text": "Whichever file is alphabetically first" },
+            { "id": "d", "text": "Neither loads; conflicting memory files are skipped entirely" }
+          ],
+          "explanation": "Memory files are concatenated broadest-to-most-specific, and content closer to the working directory is read last — so the project instruction effectively overrides the user one. They aren't skipped; the more-specific scope simply wins. Managed policy would beat both.",
+          "sourceRefs": ["r-d3-memory"]
+        },
+        {
+          "id": "kc-d3-2",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Compliance requires that the agent NEVER run `git push` to main. Where does this belong?",
+          "options": [
+            { "id": "a", "text": "A permission deny rule (or a PreToolUse hook) — CLAUDE.md is context the model may not follow", "correct": true },
+            { "id": "b", "text": "A bold 'NEVER push to main' line in the project CLAUDE.md" },
+            { "id": "c", "text": "The user CLAUDE.md, so it applies everywhere" },
+            { "id": "d", "text": "A comment inside CLAUDE.md, which is enforced at runtime" }
+          ],
+          "explanation": "CLAUDE.md shapes behaviour but is not enforced — Claude can still deviate. A hard guarantee comes from `permissions.deny` or a PreToolUse hook, which the harness applies regardless of what the model decides.",
+          "sourceRefs": ["r-d3-memory", "r-d3-settings"]
+        },
+        {
+          "id": "kc-d3-3",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is `CLAUDE.local.md` for?",
+          "options": [
+            { "id": "a", "text": "A gitignored, personal, project-specific memory file (e.g. your sandbox URLs)", "correct": true },
+            { "id": "b", "text": "The highest-precedence org-wide policy file" },
+            { "id": "c", "text": "A backup of CLAUDE.md created automatically" },
+            { "id": "d", "text": "A file that disables all other memory files" }
+          ],
+          "explanation": "`CLAUDE.local.md` is the personal variant of the project memory: it loads alongside `CLAUDE.md` but you add it to `.gitignore` so your private preferences aren't committed. It is not org policy and overrides nothing by authority.",
+          "sourceRefs": ["r-d3-memory"]
+        }
+      ]
+    },
+    {
+      "id": "l2-commands-agents",
+      "title": "Slash commands, skills & subagents",
+      "estMinutes": 13,
+      "objective": "Pick the right extension — command, skill, or subagent — and place it at the correct scope.",
+      "body": "## Three ways to extend the harness\n\n**Custom slash commands** are Markdown files. A file at `.claude/commands/deploy.md` becomes `/deploy` for the **project**; the same file in `~/.claude/commands/` is a **personal** command available across all your projects. The command name comes from the filename; subdirectories namespace it. Inside the file you can use `$ARGUMENTS` (everything after the command) or positional `$1`, `$2`, and YAML frontmatter such as `allowed-tools`, `argument-hint`, and `model`.\n\n```text\n.claude/commands/deploy.md   ->  /deploy   (project, shared via git)\n~/.claude/commands/note.md   ->  /note     (personal, all projects)\n```\n\n> In current Claude Code, commands have been **merged into skills** — `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both create `/deploy`. Existing command files keep working.\n\n## Skills and progressive disclosure\n\nA **skill** is a `SKILL.md` file with YAML frontmatter (a `description` that tells Claude *when* to use it) plus a Markdown body of instructions. The key property is **progressive disclosure**: only the short description sits in context by default; the full body loads **only when the skill is invoked**. That makes long reference material almost free until needed — the opposite of CLAUDE.md, which loads in full every session. Set `disable-model-invocation: true` for side-effecting workflows you want to trigger yourself (e.g. `/deploy`).\n\n## Subagents: isolated context\n\nA **subagent** is a Markdown file with YAML frontmatter in `.claude/agents/` (project) or `~/.claude/agents/` (user). Each subagent runs in **its own context window** with its **own system prompt** (the Markdown body), its **own tool access** (`tools`), and its own `model` and `permissionMode`. Required frontmatter is `name` and `description`; Claude delegates to a subagent when a task matches its description, and the subagent returns only a summary — keeping search output and logs out of the main conversation.\n\n## Choosing between them\n\n- A **command/skill** packages a repeatable prompt or procedure you (or Claude) invoke.\n- A **subagent** isolates work in a fresh context — research, review, parallel fan-out — so it doesn't flood your main thread, and lets you restrict its tools.\n- Reach for a **skill over CLAUDE.md** when a CLAUDE.md section has grown from a *fact* into a *multi-step procedure*: move it to a skill so it loads on demand.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-4",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You add `release.md` to your repo's `.claude/commands/` directory. What does it create?",
+          "options": [
+            { "id": "a", "text": "A project slash command `/release`, shared with the team via git", "correct": true },
+            { "id": "b", "text": "A personal command available only to you across all projects" },
+            { "id": "c", "text": "A subagent named release with its own context window" },
+            { "id": "d", "text": "Nothing until you register it in settings.json" }
+          ],
+          "explanation": "A Markdown file in the project's `.claude/commands/` becomes `/<filename>` — here `/release` — and is committed with the repo, so the whole team gets it. Personal commands live in `~/.claude/commands/`. No settings.json registration is needed.",
+          "sourceRefs": ["r-d3-skills"]
+        },
+        {
+          "id": "kc-d3-5",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is the defining property of a skill's progressive disclosure?",
+          "options": [
+            { "id": "a", "text": "Only the short description is always in context; the full SKILL.md body loads when the skill is invoked", "correct": true },
+            { "id": "b", "text": "The entire skill loads in full at the start of every session, like CLAUDE.md" },
+            { "id": "c", "text": "Skills are encrypted until a password is supplied" },
+            { "id": "d", "text": "The skill body is summarised by the model before it loads" }
+          ],
+          "explanation": "Progressive disclosure means the description sits in context so Claude knows the skill exists, but the (potentially long) body only enters context on invocation. That keeps reference material cheap. CLAUDE.md, by contrast, loads in full every session.",
+          "sourceRefs": ["r-d3-skills"]
+        },
+        {
+          "id": "kc-d3-6",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why route a noisy codebase search to a subagent instead of doing it in the main conversation?",
+          "options": [
+            { "id": "a", "text": "The subagent runs in its own context window and returns only a summary, keeping logs and file dumps out of the main thread", "correct": true },
+            { "id": "b", "text": "Subagents are the only thing that can read files" },
+            { "id": "c", "text": "A subagent shares the main conversation's context, so nothing is isolated" },
+            { "id": "d", "text": "Subagents bypass all permission checks by default" }
+          ],
+          "explanation": "Each subagent has its own context window, system prompt, and tool access; it does the heavy exploration and hands back a summary, preserving the main context. It does not share that context, and it does not bypass permissions.",
+          "sourceRefs": ["r-d3-subagents"]
+        }
+      ]
+    },
+    {
+      "id": "l3-hooks-plan",
+      "title": "Hooks & plan mode: deterministic control",
+      "estMinutes": 15,
+      "objective": "Wire hooks that block or react to tool calls deterministically, and use plan mode to gate execution.",
+      "body": "## Hooks are shell, not the model\n\nHooks are **deterministic** shell commands the harness runs at fixed lifecycle events, configured in **settings.json**. They are the enforcement layer CLAUDE.md is not: a hook fires every time its event and matcher match, regardless of what the model 'decides'.\n\nThe events you must know:\n\n- **PreToolUse** — fires *before* a tool executes and can **BLOCK** it.\n- **PostToolUse** — fires *after* a tool succeeds (e.g. auto-format or lint an edited file).\n- **Stop / SessionEnd** — fires when the agent finishes / the session ends (final checks).\n\n**Matchers** select which tools trigger a hook by matching the tool name — exact (`Bash`), pipe-separated (`Edit|Write`), regex (`mcp__memory__.*`), or `*` for all.\n\n## How PreToolUse blocks\n\nTwo deterministic mechanisms:\n\n1. **Exit code 2** — the tool call is blocked and whatever the hook wrote to **stderr** is fed back to Claude as the reason.\n2. **Exit 0 + JSON** on stdout with a `permissionDecision` of `deny` / `allow` / `ask` (under `hookSpecificOutput`), giving structured control with a `permissionDecisionReason`.\n\n```bash\n#!/bin/bash\ncmd=$(jq -r '.tool_input.command')\nif [[ \"$cmd\" == rm\\ -rf* ]]; then\n  echo 'Blocked: rm -rf is not allowed' >&2\n  exit 2\nfi\nexit 0\n```\n\nExit code **0** with no decision means 'no opinion — fall through to the normal permission flow.' Any other non-zero, non-2 code is a non-blocking error.\n\n## Hook vs CLAUDE.md — the decision\n\nIf an instruction *must* happen at a specific point — before every commit, after each edit — write it as a **hook**, not a CLAUDE.md line. CLAUDE.md is best-effort guidance; a hook is a guarantee. This is the single most-tested distinction in the domain.\n\n## Plan mode\n\n**Plan mode** is a read-only phase before execution: Claude explores and analyses but makes **no** changes, then proposes a plan and **waits for your approval** before acting. (During plan mode, codebase research is delegated to a read-only Plan subagent so exploration stays in a separate context.) It's the deliberate gate for risky or far-reaching changes — you review the plan before any edit happens. As a permission mode it sits alongside `default`, `acceptEdits`, `dontAsk`, and `bypassPermissions`.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-7",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A PreToolUse hook exits with code 2 and writes 'secrets path is off-limits' to stderr. What happens?",
+          "options": [
+            { "id": "a", "text": "The tool call is blocked and the stderr text is returned to Claude as the reason", "correct": true },
+            { "id": "b", "text": "The tool runs anyway; exit codes are advisory" },
+            { "id": "c", "text": "The whole session terminates immediately" },
+            { "id": "d", "text": "stderr is discarded; only stdout JSON can block" }
+          ],
+          "explanation": "Exit code 2 from a PreToolUse hook blocks the tool call, and its stderr is fed back to Claude as the explanation. (A JSON `permissionDecision: deny` on exit 0 is the alternative path.) Exit codes are not advisory for hooks.",
+          "sourceRefs": ["r-d3-hooks"]
+        },
+        {
+          "id": "kc-d3-8",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want every Python file auto-formatted right after Claude edits it. Which hook event?",
+          "options": [
+            { "id": "a", "text": "PostToolUse, matched to the edit tools", "correct": true },
+            { "id": "b", "text": "PreToolUse, so it runs before the edit" },
+            { "id": "c", "text": "Stop, so it runs once at the end" },
+            { "id": "d", "text": "SessionStart, so it runs at launch" }
+          ],
+          "explanation": "Auto-format-after-edit is the canonical **PostToolUse** use case — it fires after the edit tool succeeds. PreToolUse runs before (nothing to format yet); Stop/SessionStart fire at session boundaries, not per edit.",
+          "sourceRefs": ["r-d3-hooks"]
+        },
+        {
+          "id": "kc-d3-9",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is plan mode?",
+          "options": [
+            { "id": "a", "text": "A read-only phase where Claude proposes a plan and waits for approval before making any changes", "correct": true },
+            { "id": "b", "text": "A mode that auto-accepts all edits to move faster" },
+            { "id": "c", "text": "A mode that skips all permission prompts" },
+            { "id": "d", "text": "A billing tier for long-running agents" }
+          ],
+          "explanation": "Plan mode is read-only: the agent analyses and presents a plan, making no edits until you approve. `acceptEdits` and `bypassPermissions` are the opposite — they reduce or remove prompts. Plan mode is the gate, not the accelerator.",
+          "sourceRefs": ["r-d3-subagents"]
+        }
+      ]
+    },
+    {
+      "id": "l4-permissions-headless",
+      "title": "Permissions, MCP & headless runs",
+      "estMinutes": 14,
+      "objective": "Govern an agent with settings.json and run it non-interactively for CI and bulk work.",
+      "body": "## settings.json & the permission model\n\nPermissions live under `permissions` in **settings.json** as three arrays — **allow**, **ask**, **deny** — each holding rules in tool-pattern syntax like `Bash(npm run test:*)`, `Read(./.env)`, or `Write(./src/**)`. Settings resolve by precedence: **managed/policy > command-line > local (`.claude/settings.local.json`, gitignored) > project (`.claude/settings.json`, committed) > user (`~/.claude/settings.json`)**. The non-negotiable rule: **`deny` wins**. If an action matches a deny rule it is blocked even if an allow rule also matches; `allow` and `ask` arrays merge across scopes.\n\n```json\n{\n  \"permissions\": {\n    \"allow\": [\"Bash(npm run test:*)\", \"Read(./src/**)\"],\n    \"deny\":  [\"Bash(curl:*)\", \"Read(./.env)\"]\n  }\n}\n```\n\n**`--dangerously-skip-permissions`** (and the `bypassPermissions` mode) skips prompts entirely — powerful for trusted sandboxes, dangerous in general use. Treat it as a sharp tool, not a default.\n\n## MCP in Claude Code\n\nMCP servers attach at three **scopes**:\n\n- **local** (default) — current project only, private to you, stored in `~/.claude.json`.\n- **project** — shared with the team via a **`.mcp.json`** file checked into the repo root.\n- **user** — available across all your projects.\n\nAdd one with `claude mcp add --scope project --transport http <name> <url>` (or `claude mcp add-json`). Project-scoped servers from `.mcp.json` require approval before they load, since they come from version control.\n\n## Headless / CI usage\n\nRun Claude Code non-interactively with **`claude -p \"...\"`** (print mode). Control output with **`--output-format`**:\n\n- `text` (default) — plain text.\n- `json` — a structured object with the `result`, `session_id`, cost, and usage metadata.\n- `stream-json` — newline-delimited events for real-time streaming.\n\nYou can **pipe** stdin in (`git diff main | claude -p '...'`) and parse stdout with `jq`. Pre-approve tools with `--allowedTools \"Read,Edit\"` or set a baseline with `--permission-mode` (e.g. `dontAsk` for a locked-down CI run). It exits non-zero on failure, so a `claude -p` call drops straight into a **CI gate** — a typo linter, a security reviewer on the PR diff, a guard that fails the build.\n\n## Bulk work: the Batches API\n\nFor large, **non-latency-sensitive** workloads — evals, bulk classification, dataset summarisation — use the **Message Batches API**: it runs standard Messages requests **asynchronously at 50% of normal cost**, up to **100,000 requests (or 256 MB)** per batch, completing **within 24 hours** (most finish in under an hour). It's the right tool when you don't need an answer *now* and want the discount; it is not for interactive agents.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-10",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "`Bash(git push:*)` is in `deny`; a broad `Bash(git:*)` is in `allow`. Can the agent run `git push`?",
+          "options": [
+            { "id": "a", "text": "No — deny takes precedence over allow when both match", "correct": true },
+            { "id": "b", "text": "Yes — the more general allow rule wins" },
+            { "id": "c", "text": "Yes — the agent is prompted and may proceed" },
+            { "id": "d", "text": "Only if the deny rule is in a lower-precedence file" }
+          ],
+          "explanation": "Deny always wins. When an action matches both an allow and a deny rule, it is blocked — that's what makes deny a safe guardrail. The scope a deny rule lives in doesn't change this; deny outranks allow regardless.",
+          "sourceRefs": ["r-d3-settings"]
+        },
+        {
+          "id": "kc-d3-11",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team wants a shared MCP server every developer gets, version-controlled with the repo. Which scope and file?",
+          "options": [
+            { "id": "a", "text": "Project scope, stored in .mcp.json at the repo root", "correct": true },
+            { "id": "b", "text": "Local scope, stored in ~/.claude.json" },
+            { "id": "c", "text": "User scope, available across all your projects" },
+            { "id": "d", "text": "Managed policy only, set by IT" }
+          ],
+          "explanation": "Project scope writes to `.mcp.json` at the repo root, which is checked into version control so the whole team shares it. Local scope is private and lives in `~/.claude.json`; user scope is personal across projects.",
+          "sourceRefs": ["r-d3-mcp"]
+        },
+        {
+          "id": "kc-d3-12",
+          "domainId": "d3-agent-ops-claude-code",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which `--output-format` gives a CI script the result plus session id and cost as a parseable object?",
+          "options": [
+            { "id": "a", "text": "json", "correct": true },
+            { "id": "b", "text": "text" },
+            { "id": "c", "text": "stream-json" },
+            { "id": "d", "text": "yaml" }
+          ],
+          "explanation": "`--output-format json` returns a structured object with the `result`, `session_id`, and usage/cost metadata — ideal for `jq`. `text` is plain output; `stream-json` is newline-delimited events for live streaming, not a single object.",
+          "sourceRefs": ["r-d3-headless"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d3-1",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which CLAUDE.md location has the highest authority and cannot be excluded by an individual developer?",
+      "options": [
+        { "id": "a", "text": "Managed policy (e.g. /Library/Application Support/ClaudeCode/CLAUDE.md)", "correct": true },
+        { "id": "b", "text": "Project — ./CLAUDE.md" },
+        { "id": "c", "text": "User — ~/.claude/CLAUDE.md" },
+        { "id": "d", "text": "CLAUDE.local.md" }
+      ],
+      "explanation": "Managed policy CLAUDE.md is deployed by IT and cannot be excluded by individual settings — that's its purpose for org-wide standards. Project and user files are lower authority; CLAUDE.local.md is just a gitignored personal file.",
+      "sourceRefs": ["r-d3-memory"]
+    },
+    {
+      "id": "q-d3-2",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Running in `repo/services/api/`, you have `repo/CLAUDE.md` and `repo/services/api/CLAUDE.md`. How are they applied?",
+      "options": [
+        { "id": "a", "text": "Both are concatenated; the deeper api/CLAUDE.md is read last, so it wins conflicts", "correct": true },
+        { "id": "b", "text": "Only the root CLAUDE.md loads; nested files are ignored" },
+        { "id": "c", "text": "Only the deepest CLAUDE.md loads; the root is ignored" },
+        { "id": "d", "text": "They are merged alphabetically by directory name" }
+      ],
+      "explanation": "Claude walks up the tree and concatenates every CLAUDE.md root-to-leaf, so the closer (deeper) file is read last and effectively overrides the parent on conflicts. Both apply — nothing is dropped.",
+      "sourceRefs": ["r-d3-memory"]
+    },
+    {
+      "id": "q-d3-3",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team wrote 'always run the linter before committing' into CLAUDE.md, but the agent still sometimes commits without linting. What's the correct fix?",
+      "options": [
+        { "id": "a", "text": "Move it to a hook that runs the linter at the commit point — CLAUDE.md is best-effort, not enforced", "correct": true },
+        { "id": "b", "text": "Put the same line in the user CLAUDE.md as well for redundancy" },
+        { "id": "c", "text": "Capitalise and bold the instruction so the model obeys" },
+        { "id": "d", "text": "Add the instruction to .mcp.json" }
+      ],
+      "explanation": "CLAUDE.md shapes behaviour but cannot guarantee it. An instruction that *must* run at a specific lifecycle point belongs in a hook, which the harness executes deterministically. Duplicating or shouting the instruction doesn't change that it's non-enforced.",
+      "sourceRefs": ["r-d3-memory", "r-d3-hooks"]
+    },
+    {
+      "id": "q-d3-4",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which hook event can prevent a tool call from executing at all?",
+      "options": [
+        { "id": "a", "text": "PreToolUse", "correct": true },
+        { "id": "b", "text": "PostToolUse" },
+        { "id": "c", "text": "Stop" },
+        { "id": "d", "text": "SessionEnd" }
+      ],
+      "explanation": "Only PreToolUse fires before the tool runs and can block it (exit code 2, or JSON `permissionDecision: deny`). PostToolUse runs after success; Stop and SessionEnd fire at session boundaries and can't block a specific call.",
+      "sourceRefs": ["r-d3-hooks"]
+    },
+    {
+      "id": "q-d3-5",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In `permissions`, an action matches a rule in `allow` and also a rule in `deny`. What is the outcome?",
+      "options": [
+        { "id": "a", "text": "It is denied — deny takes precedence over allow", "correct": true },
+        { "id": "b", "text": "It is allowed — allow is listed first conceptually" },
+        { "id": "c", "text": "The user is always prompted to decide" },
+        { "id": "d", "text": "It depends on which file is alphabetically first" }
+      ],
+      "explanation": "Deny wins. The deny list is the hard guardrail; an allow rule never overrides it. (allow and ask arrays merge across scopes, but deny still trumps a match.)",
+      "sourceRefs": ["r-d3-settings"]
+    },
+    {
+      "id": "q-d3-6",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does `claude -p \"summarise this repo\"` do?",
+      "options": [
+        { "id": "a", "text": "Runs Claude Code non-interactively (print mode) and returns the result, suitable for scripts and CI", "correct": true },
+        { "id": "b", "text": "Opens an interactive REPL session" },
+        { "id": "c", "text": "Permanently changes the project's permissions" },
+        { "id": "d", "text": "Creates a new MCP server named summarise" }
+      ],
+      "explanation": "`-p` / `--print` is headless mode: one prompt in, the result out, no interactive UI — the basis for automation. It doesn't open a REPL, change permissions, or create servers.",
+      "sourceRefs": ["r-d3-headless"]
+    },
+    {
+      "id": "q-d3-7",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You must process 60,000 documents for classification overnight, cost-sensitive, no latency requirement. Best mechanism?",
+      "options": [
+        { "id": "a", "text": "The Message Batches API — async, 50% cost, up to 100k requests, within 24h", "correct": true },
+        { "id": "b", "text": "60,000 interactive single calls in a tight loop" },
+        { "id": "c", "text": "A single Messages request with all 60,000 documents inlined" },
+        { "id": "d", "text": "A multi-agent Claude Code session per document" }
+      ],
+      "explanation": "Bulk, non-latency-sensitive work is exactly the Batches API's niche: asynchronous at half price, up to 100,000 requests per batch within a 24-hour window. A serial loop is slow and full-price; one giant request won't fit; per-doc agents are wild overkill.",
+      "sourceRefs": ["r-d3-batches"]
+    },
+    {
+      "id": "q-d3-8",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A `.mcp.json` server appears as 'pending approval' in a teammate's clone and its tools aren't available. Why — and is this correct?",
+      "options": [
+        { "id": "a", "text": "Project-scoped servers from version control require explicit approval before loading — yes, this is the intended safety gate", "correct": true },
+        { "id": "b", "text": "The file is corrupt; .mcp.json never needs approval" },
+        { "id": "c", "text": "Project scope is deprecated; only local scope loads" },
+        { "id": "d", "text": "Their user settings disabled MCP globally and must be reset" }
+      ],
+      "explanation": "Because `.mcp.json` is checked into the repo, a project-scoped server runs only after the user approves it — code from a repo shouldn't auto-execute arbitrary servers. The behaviour is correct, not a corruption or a global toggle.",
+      "sourceRefs": ["r-d3-mcp"]
+    },
+    {
+      "id": "q-d3-9",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about subagents is correct?",
+      "options": [
+        { "id": "a", "text": "Each subagent runs in its own context window with its own system prompt and tool access", "correct": true },
+        { "id": "b", "text": "Subagents share the parent's context window so nothing is isolated" },
+        { "id": "c", "text": "Subagents are configured only in settings.json, not as files" },
+        { "id": "d", "text": "A subagent always has the same tools as the main conversation" }
+      ],
+      "explanation": "Subagents are Markdown files in `.claude/agents/` (or `~/.claude/agents/`) that run in a separate context with their own system prompt (the body) and a restrictable tool set. They don't share the parent context, and `tools` can narrow what they may use.",
+      "sourceRefs": ["r-d3-subagents"]
+    },
+    {
+      "id": "q-d3-10",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which are legitimate uses of a PreToolUse hook? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Block any Bash command matching a destructive pattern by exiting with code 2", "correct": true },
+        { "id": "b", "text": "Return JSON with permissionDecision deny/allow/ask for structured control", "correct": true },
+        { "id": "c", "text": "Deterministically enforce a rule the model is told about in CLAUDE.md but ignores", "correct": true },
+        { "id": "d", "text": "Auto-format a file immediately after Claude edits it" }
+      ],
+      "explanation": "PreToolUse fires *before* a tool runs: it can block via exit 2, return a structured `permissionDecision`, and deterministically enforce what CLAUDE.md can only suggest. Auto-format *after* an edit is a PostToolUse job — the wrong event for PreToolUse.",
+      "sourceRefs": ["r-d3-hooks"]
+    },
+    {
+      "id": "q-d3-11",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which are valid ways to add custom behaviour to Claude Code? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "A Markdown file in .claude/commands/ that becomes a /slash command", "correct": true },
+        { "id": "b", "text": "A SKILL.md skill that loads its body on demand (progressive disclosure)", "correct": true },
+        { "id": "c", "text": "A subagent definition in .claude/agents/ with its own tools and prompt", "correct": true },
+        { "id": "d", "text": "Editing the model's base weights from settings.json" }
+      ],
+      "explanation": "Commands (`.claude/commands/`), skills (`SKILL.md`), and subagents (`.claude/agents/`) are the three first-class extension points. You cannot edit model weights from settings.json — that option is nonsense.",
+      "sourceRefs": ["r-d3-skills", "r-d3-subagents"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d3-monorepo",
+      "domainIds": ["d3-agent-ops-claude-code"],
+      "title": "Configure Claude Code for a regulated team's monorepo",
+      "tagline": "Memory precedence, enforcement vs guidance, scoped MCP, and a safe default mode.",
+      "context": "A bank's platform team runs a large monorepo. Compliance has non-negotiable rules (never touch `infra/prod/`, never read `.env`). Each squad wants its own conventions per subtree. Developers also want personal sandbox notes that must never be committed. You own the Claude Code setup.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Where do the org-wide compliance conventions go so no developer can drop them?",
+          "choices": [
+            { "id": "a", "text": "A managed-policy CLAUDE.md deployed by IT — highest authority, cannot be excluded", "verdict": "best", "rationale": "Managed policy is exactly for org-wide standards that individuals must not override or remove. It loads ahead of project and user memory and can't be excluded by local settings." },
+            { "id": "b", "text": "The root project ./CLAUDE.md, committed to the repo", "verdict": "viable", "rationale": "Shares the conventions team-wide, but a developer can add a closer nested CLAUDE.md or local settings that override them — not a hard guarantee for compliance." },
+            { "id": "c", "text": "Each developer's ~/.claude/CLAUDE.md", "verdict": "wrong", "rationale": "User memory is personal and lowest-authority here; it won't apply to teammates and is trivially changed. Wrong layer for org policy." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The hard rules are 'never touch infra/prod/' and 'never read .env'. How do you guarantee them?",
+          "choices": [
+            { "id": "a", "text": "Permission deny rules (and/or a PreToolUse hook) in settings.json — deny wins regardless of the model", "verdict": "best", "rationale": "Enforcement, not guidance: `deny` rules block the action even if something else allows it, and a PreToolUse hook can hard-stop a matching tool call. This is the only layer that *guarantees* the rule." },
+            { "id": "b", "text": "A prominent 'NEVER do this' section in the managed CLAUDE.md", "verdict": "viable", "rationale": "Raises the odds the model complies and documents intent, but CLAUDE.md is context, not enforcement — it can still be violated. Acceptable only as a complement to deny rules." },
+            { "id": "c", "text": "Tell developers to watch the agent and stop it manually", "verdict": "wrong", "rationale": "Manual vigilance is not a control. Compliance requires a deterministic block, not human babysitting." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Each squad wants its own conventions for its part of the tree, plus a shared internal MCP server. How?",
+          "choices": [
+            { "id": "a", "text": "Nested per-directory CLAUDE.md files per squad subtree, and the MCP server in project-scoped .mcp.json", "verdict": "best", "rationale": "Nested CLAUDE.md files scope conventions to each subtree and load when Claude works there; a project-scoped `.mcp.json` is version-controlled so every squad member gets the same server." },
+            { "id": "b", "text": "One giant root CLAUDE.md containing every squad's rules", "verdict": "viable", "rationale": "Works but bloats context for everyone and mixes unrelated conventions; nested files keep each squad's rules local and lighter. Functional, not ideal." },
+            { "id": "c", "text": "Local-scope MCP servers each developer adds by hand", "verdict": "wrong", "rationale": "Local scope is private and per-machine, so it isn't shared and drifts across the team. The brief asks for a *shared* server — that's project scope." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Developers want private sandbox URLs and test data the agent can use but that must never be committed.",
+          "choices": [
+            { "id": "a", "text": "A gitignored CLAUDE.local.md at the project root", "verdict": "best", "rationale": "CLAUDE.local.md is the personal project-memory variant: it loads alongside CLAUDE.md and, once in .gitignore, never lands in source control. Exactly the right home for private per-project notes." },
+            { "id": "b", "text": "Add the URLs to the committed ./CLAUDE.md", "verdict": "wrong", "rationale": "That commits personal/sandbox details to the shared repo — the opposite of the requirement, and a potential data leak." },
+            { "id": "c", "text": "Put them in ~/.claude/CLAUDE.md", "verdict": "viable", "rationale": "Keeps them out of the repo, but they'd then apply to every project, not just this one. Workable, just not project-scoped like CLAUDE.local.md." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d3-memory", "r-d3-settings", "r-d3-mcp"]
+    },
+    {
+      "id": "s-d3-cigate",
+      "domainIds": ["d3-agent-ops-claude-code"],
+      "title": "Wire a CI gate with headless Claude Code",
+      "tagline": "Headless invocation, output format, permission posture, and bulk vs gate.",
+      "context": "You want every pull request checked by Claude Code in CI: it should review the diff for security issues and fail the build if it finds a blocker. It must run unattended, deterministically, with no interactive prompts, and feed a result your pipeline can parse.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "How do you invoke Claude Code from the CI job?",
+          "choices": [
+            { "id": "a", "text": "Headless: pipe the diff into `claude -p` with a review instruction", "verdict": "best", "rationale": "`-p` (print mode) is the non-interactive entry point built for scripts and CI; piping `git diff` in means Claude doesn't even need Bash permission to fetch it." },
+            { "id": "b", "text": "Launch the interactive TUI and have the runner type into it", "verdict": "wrong", "rationale": "The interactive UI isn't meant for unattended CI; it blocks on prompts and isn't scriptable. Headless mode exists precisely to avoid this." },
+            { "id": "c", "text": "Stand up a long-lived Claude Code server the pipeline calls", "verdict": "viable", "rationale": "Possible with the Agent SDK, but heavier than needed for a per-PR check; a one-shot `claude -p` per run is simpler and stateless." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The pipeline must read the result programmatically. Which output format?",
+          "choices": [
+            { "id": "a", "text": "--output-format json and parse the result field with jq", "verdict": "best", "rationale": "`json` returns a structured object (result, session_id, cost/usage) that a script can parse reliably with jq — the right shape for gating logic." },
+            { "id": "b", "text": "Default text and grep the prose", "verdict": "viable", "rationale": "Works for trivial checks but is brittle — phrasing changes break your grep. JSON is the robust choice for a gate." },
+            { "id": "c", "text": "stream-json and act on the first event", "verdict": "wrong", "rationale": "stream-json emits incremental events for live streaming; acting on one event misses the final result. Use json for a single parseable outcome." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "What permission posture keeps the CI run safe and unattended?",
+          "choices": [
+            { "id": "a", "text": "A locked-down mode (e.g. dontAsk / a tight --allowedTools list) so nothing outside the allowlist runs", "verdict": "best", "rationale": "CI should pre-approve only the minimal tools the job needs and deny the rest, so an unattended run can't be derailed by an unexpected tool prompt or action." },
+            { "id": "b", "text": "--dangerously-skip-permissions to avoid any prompt", "verdict": "wrong", "rationale": "Skipping all permissions removes your guardrails in an automated context — a destructive command would run unchecked. Use a tight allowlist, not a blanket bypass." },
+            { "id": "c", "text": "Default interactive prompting", "verdict": "wrong", "rationale": "There's no human to answer prompts in CI; the job would hang. Headless runs need an explicit, non-interactive permission posture." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Separately, the team wants to bulk-summarise 40,000 archived PRs overnight for analytics. Same approach?",
+          "choices": [
+            { "id": "a", "text": "No — use the Message Batches API: async, 50% cost, up to 100k requests within 24h", "verdict": "best", "rationale": "Bulk, non-latency-sensitive work is the Batches API's niche — half price and high throughput, results within 24 hours. The CI gate is per-PR and latency-sensitive; the bulk job is neither." },
+            { "id": "b", "text": "Yes — loop `claude -p` 40,000 times in the pipeline", "verdict": "wrong", "rationale": "Serial headless calls are slow and full-price, and tie up CI. Batch is the purpose-built, discounted path for this volume." },
+            { "id": "c", "text": "Run one headless session that processes all 40,000 in a single context", "verdict": "wrong", "rationale": "40,000 PRs won't fit one context and there's no recovery if it fails midway. Independent batched requests are the correct decomposition." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d3-headless", "r-d3-batches", "r-d3-settings"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d3-hook",
+      "domainId": "d3-agent-ops-claude-code",
+      "title": "Block a dangerous command with a PreToolUse hook",
+      "goal": "Prove that a hook enforces a rule the model can ignore in CLAUDE.md — by deterministically blocking a destructive Bash call.",
+      "steps": "## What you'll build\n\nA PreToolUse hook on the Bash tool that blocks any `rm -rf` command and feeds the reason back to Claude.\n\n## Steps\n\n1. Write a short script, e.g. `.claude/hooks/block-rm.sh`, that reads the tool input from stdin and extracts the command (`cmd=$(jq -r '.tool_input.command')`).\n2. If the command matches a destructive pattern (`rm -rf*`), write a reason to **stderr** and `exit 2`; otherwise `exit 0`.\n3. Register it in `settings.json` under `hooks.PreToolUse` with a `matcher` of `Bash` pointing at the script.\n4. Add a CLAUDE.md line that *says* 'never run rm -rf' — then ask Claude to delete a temp tree and watch the hook block it regardless.\n5. Swap the exit-2 path for a JSON `permissionDecision: deny` on exit 0 and confirm the same block via the structured path.\n\n## Why it matters\n\nThis is the enforcement-vs-guidance lesson made concrete: CLAUDE.md asks, the hook guarantees. PreToolUse is your hard stop for irreversible actions.",
+      "checklist": [
+        "Hook reads tool_input from stdin and inspects the command",
+        "Destructive command is blocked via exit code 2 with a stderr reason",
+        "Matcher in settings.json targets the Bash tool",
+        "The same block works via JSON permissionDecision: deny",
+        "Block fires even though CLAUDE.md only 'asks' for the rule"
+      ]
+    },
+    {
+      "id": "lab-d3-headless",
+      "domainId": "d3-agent-ops-claude-code",
+      "title": "Build a headless PR review gate",
+      "goal": "Run Claude Code non-interactively over a diff and turn its verdict into a build pass/fail.",
+      "steps": "## Steps\n\n1. From a feature branch, produce the diff: `git diff main`.\n2. Pipe it into headless mode with a focused instruction and JSON output:\n   `git diff main | claude -p 'You are a security reviewer. Report any blocker as the word BLOCK on its own line, else PASS.' --output-format json`.\n3. Parse the `result` field with `jq -r '.result'`.\n4. In a wrapper script, exit non-zero if the result contains `BLOCK`, so the CI step fails the build.\n5. Lock the permission posture: pass a tight `--allowedTools` (or a `dontAsk` permission mode) so the unattended run can't execute anything unexpected.\n6. Add it as a `package.json` script (e.g. `lint:claude`) so it runs in CI like any other check.\n\n## Checkpoint\n\nIf you reached for `--dangerously-skip-permissions` to silence prompts, stop — use a minimal allowlist instead. Skipping all permissions in CI removes the guardrails an unattended agent needs most.",
+      "checklist": [
+        "Diff is piped into `claude -p` (no Bash permission needed to read it)",
+        "--output-format json used and parsed with jq",
+        "Wrapper exits non-zero on a blocker, failing the build",
+        "Permission posture is a tight allowlist, not a blanket skip",
+        "Runs as a CI script without any interactive prompt"
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "r-d3-memory", "title": "Claude Code — Memory (CLAUDE.md)", "url": "https://docs.claude.com/en/docs/claude-code/memory", "kind": "official-doc", "annotation": "The precedence table (managed > project incl. nested > user), CLAUDE.local.md, load order, and the crucial 'context not enforcement' caveat. Start here.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-hooks", "title": "Claude Code — Hooks", "url": "https://docs.claude.com/en/docs/claude-code/hooks", "kind": "official-doc", "annotation": "Events (PreToolUse/PostToolUse/Stop), matchers, and how PreToolUse blocks via exit code 2 or a JSON permissionDecision. The enforcement layer.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-settings", "title": "Claude Code — Settings & permissions", "url": "https://docs.claude.com/en/docs/claude-code/settings", "kind": "official-doc", "annotation": "settings.json precedence, the allow/ask/deny model where deny wins, permission rule syntax, and the skip-permissions flag.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-skills", "title": "Claude Code — Skills & slash commands", "url": "https://docs.claude.com/en/docs/claude-code/skills", "kind": "official-doc", "annotation": "Custom commands in .claude/commands/ (project) vs ~/.claude/commands/ (personal), SKILL.md progressive disclosure, $ARGUMENTS, and frontmatter.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-subagents", "title": "Claude Code — Subagents", "url": "https://docs.claude.com/en/docs/claude-code/sub-agents", "kind": "official-doc", "annotation": "Subagents in .claude/agents/ with their own context window, system prompt, tools, model, and permissionMode — plus where plan mode fits among the permission modes.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-mcp", "title": "Claude Code — MCP", "url": "https://docs.claude.com/en/docs/claude-code/mcp", "kind": "official-doc", "annotation": "The three MCP scopes (local default / project via .mcp.json / user), claude mcp add --scope, transports, and the project-server approval gate.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-headless", "title": "Claude Code — Run programmatically (headless)", "url": "https://docs.claude.com/en/docs/claude-code/headless", "kind": "official-doc", "annotation": "claude -p, --output-format text/json/stream-json, piping stdin, --allowedTools and permission modes for CI gates.", "domainIds": ["d3-agent-ops-claude-code"] },
+    { "id": "r-d3-batches", "title": "Message Batches API — batch processing", "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing", "kind": "official-doc", "annotation": "Async bulk processing at 50% cost, up to 100k requests (or 256 MB) within 24h. The right tool for non-latency-sensitive volume.", "domainIds": ["d3-agent-ops-claude-code"] }
+  ],
+  "videos": [
+    { "id": "v-d3-1", "title": "D3 · CLAUDE.md memory & precedence", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" },
+    { "id": "v-d3-2", "title": "D3 · Hooks, permissions & plan mode", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" },
+    { "id": "v-d3-3", "title": "D3 · Headless Claude Code & the Batches API", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" }
+  ]
+}
