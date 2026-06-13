@@ -28,9 +28,13 @@ const PORT = process.env.PORT || 4321;
 function hydrateChatConfig() {
   const tpl = resolve(PUBLIC, "chat-config.js.template");
   if (!existsSync(tpl)) return;
+  // Defaults are the Academy workspace's PUBLIC key + tutor agent. An ak_pub_*
+  // key is origin-allow-listed server-side, so it is safe to ship in client JS
+  // (it only works from the Academy's own allowed_domains). Railway env vars
+  // override these if set.
   const out = readFileSync(tpl, "utf8")
-    .replace(/\$\{ACADEMY_CHAT_PUBLIC_KEY\}/g, process.env.ACADEMY_CHAT_PUBLIC_KEY || "")
-    .replace(/\$\{ACADEMY_CHAT_AGENT_ID\}/g, process.env.ACADEMY_CHAT_AGENT_ID || "");
+    .replace(/\$\{ACADEMY_CHAT_PUBLIC_KEY\}/g, process.env.ACADEMY_CHAT_PUBLIC_KEY || "ak_pub_267f4a7135d136ac8cfce0c193f3b52715d72346b3e0f5df8af55eec7508b9a3")
+    .replace(/\$\{ACADEMY_CHAT_AGENT_ID\}/g, process.env.ACADEMY_CHAT_AGENT_ID || "bdfe4212-bd85-4875-8b9a-27c16c1b938c");
   writeFileSync(resolve(PUBLIC, "chat-config.js"), out, "utf8");
 }
 hydrateChatConfig();
