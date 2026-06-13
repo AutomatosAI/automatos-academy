@@ -3,7 +3,7 @@
   "order": 4,
   "code": "D4",
   "name": "Prompt Engineering",
-  "weight": 0.20,
+  "weight": 0.2,
   "tagline": "Put durable context in system, the clean task in user, and calibrate your language to a model that now obeys it literally.",
   "overview": "Prompt engineering on modern Claude is less about coaxing and more about precision: the system turn carries durable instructions, the user turn is the clean task, and structured outputs replace the prefill tricks of older models. This domain tests the mechanics that actually move the needle — prefix-match prompt caching, adaptive thinking and effort, the removal of assistant prefill, and the instruction-following recalibration that turns yesterday's 'CRITICAL: YOU MUST' into today's over-trigger.",
   "objectives": [
@@ -28,13 +28,29 @@
           "difficulty": 1,
           "stem": "Where should durable instructions and standing context live, and what should the user turn carry?",
           "options": [
-            { "id": "a", "text": "Durable instructions/context in the system turn; the clean task in the user turn", "correct": true },
-            { "id": "b", "text": "Everything in the user turn so the model sees it last" },
-            { "id": "c", "text": "Instructions in the user turn; context prefilled in an assistant turn" },
-            { "id": "d", "text": "Split the task across system and user to balance the tokens" }
+            {
+              "id": "a",
+              "text": "Durable instructions/context in the system turn; the clean task in the user turn",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Everything in the user turn so the model sees it last"
+            },
+            {
+              "id": "c",
+              "text": "Instructions in the user turn; context prefilled in an assistant turn"
+            },
+            {
+              "id": "d",
+              "text": "Split the task across system and user to balance the tokens"
+            }
           ],
           "explanation": "System carries the durable instructions, rules, and context; the user turn is the clean task for this turn. It mirrors the chatbot pattern and keeps the system prefix stable for caching.",
-          "sourceRefs": ["r-d4-caching", "r-d4-structured"]
+          "sourceRefs": [
+            "r-d4-caching",
+            "r-d4-structured"
+          ]
         },
         {
           "id": "kc-d4-2",
@@ -43,13 +59,28 @@
           "difficulty": 2,
           "stem": "You need guaranteed-parseable JSON from a modern Claude model. What's the right mechanism?",
           "options": [
-            { "id": "a", "text": "output_config.format with a json_schema", "correct": true },
-            { "id": "b", "text": "A trailing assistant turn prefilled with '{' to force JSON" },
-            { "id": "c", "text": "The top-level output_format parameter on messages.create()" },
-            { "id": "d", "text": "A system instruction saying 'reply only in valid JSON' and hope" }
+            {
+              "id": "a",
+              "text": "output_config.format with a json_schema",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A trailing assistant turn prefilled with '{' to force JSON"
+            },
+            {
+              "id": "c",
+              "text": "The top-level output_format parameter on messages.create()"
+            },
+            {
+              "id": "d",
+              "text": "A system instruction saying 'reply only in valid JSON' and hope"
+            }
           ],
           "explanation": "`output_config.format` with a `json_schema` constrains the response so it parses. Prefill returns 400 on modern models, and the top-level `output_format` param is deprecated.",
-          "sourceRefs": ["r-d4-structured"]
+          "sourceRefs": [
+            "r-d4-structured"
+          ]
         }
       ]
     },
@@ -67,13 +98,28 @@
           "difficulty": 2,
           "stem": "A high-volume endpoint reuses a 30KB system prompt, but cache_read_input_tokens is 0 on every request. The system prompt header starts with 'Current time: {datetime.now()}'. Why?",
           "options": [
-            { "id": "a", "text": "The timestamp changes the prefix every request, invalidating everything after it", "correct": true },
-            { "id": "b", "text": "30KB is below the minimum cacheable prefix" },
-            { "id": "c", "text": "cache_read_input_tokens only populates after 4 identical requests" },
-            { "id": "d", "text": "System prompts are never cached — only tools are" }
+            {
+              "id": "a",
+              "text": "The timestamp changes the prefix every request, invalidating everything after it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "30KB is below the minimum cacheable prefix"
+            },
+            {
+              "id": "c",
+              "text": "cache_read_input_tokens only populates after 4 identical requests"
+            },
+            {
+              "id": "d",
+              "text": "System prompts are never cached — only tools are"
+            }
           ],
           "explanation": "Caching is a prefix match. A `datetime.now()` at the front of the system prompt makes the prefix differ every request, so nothing after it can ever be read from cache. Move volatile content past the last breakpoint.",
-          "sourceRefs": ["r-d4-caching"]
+          "sourceRefs": [
+            "r-d4-caching"
+          ]
         },
         {
           "id": "kc-d4-4",
@@ -82,13 +128,28 @@
           "difficulty": 2,
           "stem": "In what order does the API render the prompt for cache-prefix purposes?",
           "options": [
-            { "id": "a", "text": "tools → system → messages", "correct": true },
-            { "id": "b", "text": "system → messages → tools" },
-            { "id": "c", "text": "messages → system → tools" },
-            { "id": "d", "text": "system → tools → messages" }
+            {
+              "id": "a",
+              "text": "tools → system → messages",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "system → messages → tools"
+            },
+            {
+              "id": "c",
+              "text": "messages → system → tools"
+            },
+            {
+              "id": "d",
+              "text": "system → tools → messages"
+            }
           ],
           "explanation": "Render order is tools, then system, then messages. That's why changing a tool definition (position 0) invalidates the whole cache, and a breakpoint on the last system block covers tools + system.",
-          "sourceRefs": ["r-d4-caching"]
+          "sourceRefs": [
+            "r-d4-caching"
+          ]
         },
         {
           "id": "kc-d4-5",
@@ -97,13 +158,28 @@
           "difficulty": 3,
           "stem": "Which change does NOT invalidate the tools+system cache?",
           "options": [
-            { "id": "a", "text": "Changing tool_choice or toggling thinking on/off", "correct": true },
-            { "id": "b", "text": "Adding a new tool to the tools array" },
-            { "id": "c", "text": "Switching the model" },
-            { "id": "d", "text": "Editing one sentence of the system prompt" }
+            {
+              "id": "a",
+              "text": "Changing tool_choice or toggling thinking on/off",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Adding a new tool to the tools array"
+            },
+            {
+              "id": "c",
+              "text": "Switching the model"
+            },
+            {
+              "id": "d",
+              "text": "Editing one sentence of the system prompt"
+            }
           ],
           "explanation": "The cache has tiers. `tool_choice` and `thinking` toggles sit below the tools/system tiers, so they don't force a rebuild. Tool-definition edits and model switches render at position 0 and invalidate everything.",
-          "sourceRefs": ["r-d4-caching"]
+          "sourceRefs": [
+            "r-d4-caching"
+          ]
         }
       ]
     },
@@ -121,13 +197,29 @@
           "difficulty": 2,
           "stem": "You want deeper reasoning on Opus 4.8 and you write thinking={'type':'enabled','budget_tokens':20000}. What happens?",
           "options": [
-            { "id": "a", "text": "400 error — fixed budget_tokens is removed; use thinking:{type:'adaptive'} + effort", "correct": true },
-            { "id": "b", "text": "It works and caps thinking at 20000 tokens" },
-            { "id": "c", "text": "It silently falls back to adaptive thinking" },
-            { "id": "d", "text": "It works but only if budget_tokens < max_tokens" }
+            {
+              "id": "a",
+              "text": "400 error — fixed budget_tokens is removed; use thinking:{type:'adaptive'} + effort",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It works and caps thinking at 20000 tokens"
+            },
+            {
+              "id": "c",
+              "text": "It silently falls back to adaptive thinking"
+            },
+            {
+              "id": "d",
+              "text": "It works but only if budget_tokens < max_tokens"
+            }
           ],
           "explanation": "On modern models the fixed-budget thinking form is removed and returns 400. Reasoning depth is controlled by adaptive thinking plus output_config.effort, not a token budget.",
-          "sourceRefs": ["r-d4-adaptive", "r-d4-effort"]
+          "sourceRefs": [
+            "r-d4-adaptive",
+            "r-d4-effort"
+          ]
         },
         {
           "id": "kc-d4-7",
@@ -136,13 +228,28 @@
           "difficulty": 1,
           "stem": "Which effort level is the recommended default for most coding and agentic work on modern Opus?",
           "options": [
-            { "id": "a", "text": "xhigh", "correct": true },
-            { "id": "b", "text": "low" },
-            { "id": "c", "text": "max" },
-            { "id": "d", "text": "minimal" }
+            {
+              "id": "a",
+              "text": "xhigh",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "low"
+            },
+            {
+              "id": "c",
+              "text": "max"
+            },
+            {
+              "id": "d",
+              "text": "minimal"
+            }
           ],
           "explanation": "`xhigh` (between high and max) is the best setting for most coding and agentic use cases and is the default in Claude Code. Use a minimum of high for intelligence-sensitive work.",
-          "sourceRefs": ["r-d4-effort"]
+          "sourceRefs": [
+            "r-d4-effort"
+          ]
         }
       ]
     },
@@ -160,13 +267,28 @@
           "difficulty": 2,
           "stem": "A migrated assistant now calls its search tool on almost every turn, including ones that don't need it. The system prompt says 'CRITICAL: YOU MUST always use search.' Best fix?",
           "options": [
-            { "id": "a", "text": "Soften to 'Use search when the answer needs current information' — the aggressive language over-triggers on literal models", "correct": true },
-            { "id": "b", "text": "Add 'NEVER over-use search' in capitals below the existing line" },
-            { "id": "c", "text": "Switch to an older model that ignores the instruction more" },
-            { "id": "d", "text": "Remove the search tool entirely" }
+            {
+              "id": "a",
+              "text": "Soften to 'Use search when the answer needs current information' — the aggressive language over-triggers on literal models",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Add 'NEVER over-use search' in capitals below the existing line"
+            },
+            {
+              "id": "c",
+              "text": "Switch to an older model that ignores the instruction more"
+            },
+            {
+              "id": "d",
+              "text": "Remove the search tool entirely"
+            }
           ],
           "explanation": "Modern models follow the system prompt literally, so 'YOU MUST always' now over-fires. Dial the language back to a conditional 'use it when…'. Stacking more aggressive guardrails makes it worse.",
-          "sourceRefs": ["r-d4-effort"]
+          "sourceRefs": [
+            "r-d4-effort"
+          ]
         },
         {
           "id": "kc-d4-9",
@@ -175,13 +297,28 @@
           "difficulty": 2,
           "stem": "You want an operator instruction (mode switch) delivered mid-conversation without invalidating the cached history. What do you do?",
           "options": [
-            { "id": "a", "text": "Append a {role:'system'} message to messages[] — it sits after the cached prefix", "correct": true },
-            { "id": "b", "text": "Edit the top-level system prompt to add the new instruction" },
-            { "id": "c", "text": "Prefill an assistant turn with the new mode" },
-            { "id": "d", "text": "Restart the conversation with a fresh system prompt" }
+            {
+              "id": "a",
+              "text": "Append a {role:'system'} message to messages[] — it sits after the cached prefix",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Edit the top-level system prompt to add the new instruction"
+            },
+            {
+              "id": "c",
+              "text": "Prefill an assistant turn with the new mode"
+            },
+            {
+              "id": "d",
+              "text": "Restart the conversation with a fresh system prompt"
+            }
           ],
           "explanation": "Editing top-level system changes the prefix ahead of the whole history and re-processes it uncached. A mid-conversation {role:'system'} message appended to messages[] preserves the cached prefix (beta) — phrase it as context, not override.",
-          "sourceRefs": ["r-d4-caching"]
+          "sourceRefs": [
+            "r-d4-caching"
+          ]
         }
       ]
     }
@@ -194,13 +331,28 @@
       "difficulty": 1,
       "stem": "On a modern Claude model, a developer appends a trailing assistant turn containing '{\"summary\": \"' to force the response into JSON. What is the result?",
       "options": [
-        { "id": "a", "text": "A 400 error — assistant prefill is not supported; use output_config.format instead", "correct": true },
-        { "id": "b", "text": "The model continues the JSON cleanly — prefill is the recommended approach" },
-        { "id": "c", "text": "The model ignores the prefill but still answers" },
-        { "id": "d", "text": "It works only if max_tokens is high enough" }
+        {
+          "id": "a",
+          "text": "A 400 error — assistant prefill is not supported; use output_config.format instead",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model continues the JSON cleanly — prefill is the recommended approach"
+        },
+        {
+          "id": "c",
+          "text": "The model ignores the prefill but still answers"
+        },
+        {
+          "id": "d",
+          "text": "It works only if max_tokens is high enough"
+        }
       ],
       "explanation": "A trailing assistant turn (prefill) returns 400 on modern models. To guarantee output shape, use output_config.format with a json_schema, or a system instruction.",
-      "sourceRefs": ["r-d4-structured"]
+      "sourceRefs": [
+        "r-d4-structured"
+      ]
     },
     {
       "id": "q-d4-2",
@@ -209,13 +361,28 @@
       "difficulty": 2,
       "stem": "Which placement caches a large shared preamble while still getting cache hits across requests with different final questions?",
       "options": [
-        { "id": "a", "text": "Breakpoint at the end of the shared preamble; leave the varying question unmarked", "correct": true },
-        { "id": "b", "text": "Breakpoint on the varying question so the whole prompt is cached" },
-        { "id": "c", "text": "A breakpoint on every content block, including the question" },
-        { "id": "d", "text": "No breakpoints — the API caches automatically regardless of order" }
+        {
+          "id": "a",
+          "text": "Breakpoint at the end of the shared preamble; leave the varying question unmarked",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Breakpoint on the varying question so the whole prompt is cached"
+        },
+        {
+          "id": "c",
+          "text": "A breakpoint on every content block, including the question"
+        },
+        {
+          "id": "d",
+          "text": "No breakpoints — the API caches automatically regardless of order"
+        }
       ],
       "explanation": "Put the breakpoint at the end of the *shared* portion. If you mark the end of the whole prompt, every request writes a distinct cache entry (because the question differs) and nothing is ever read.",
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "q-d4-3",
@@ -224,13 +391,28 @@
       "difficulty": 3,
       "stem": "Two requests are built with an identical system prompt and tools, but cache_read_input_tokens is 0 on the second. The only difference: the tools array is built from a Python set, so its order varies. Why does this break caching?",
       "options": [
-        { "id": "a", "text": "Tools render at position 0; non-deterministic tool order changes the prefix bytes and invalidates everything after", "correct": true },
-        { "id": "b", "text": "Sets can't be serialized, so the request silently drops the tools" },
-        { "id": "c", "text": "Tool order never affects caching — the cause must be elsewhere" },
-        { "id": "d", "text": "cache_read_input_tokens is only populated when thinking is disabled" }
+        {
+          "id": "a",
+          "text": "Tools render at position 0; non-deterministic tool order changes the prefix bytes and invalidates everything after",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Sets can't be serialized, so the request silently drops the tools"
+        },
+        {
+          "id": "c",
+          "text": "Tool order never affects caching — the cause must be elsewhere"
+        },
+        {
+          "id": "d",
+          "text": "cache_read_input_tokens is only populated when thinking is disabled"
+        }
       ],
       "explanation": "Tools render first (position 0). Iterating a set yields a non-deterministic order, so the rendered tool bytes differ between requests and the entire cache rebuilds. Serialize tools deterministically (sort by name).",
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "q-d4-4",
@@ -239,13 +421,28 @@
       "difficulty": 2,
       "stem": "Which output_config.effort value is best for a latency-sensitive subagent doing a simple, scoped lookup?",
       "options": [
-        { "id": "a", "text": "low", "correct": true },
-        { "id": "b", "text": "xhigh" },
-        { "id": "c", "text": "max" },
-        { "id": "d", "text": "high" }
+        {
+          "id": "a",
+          "text": "low",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "xhigh"
+        },
+        {
+          "id": "c",
+          "text": "max"
+        },
+        {
+          "id": "d",
+          "text": "high"
+        }
       ],
       "explanation": "`low` is the right call for subagents and simple, latency-sensitive tasks — fewer, more-consolidated tool calls and terser output. Reserve high/xhigh/max for intelligence-sensitive and agentic work.",
-      "sourceRefs": ["r-d4-effort"]
+      "sourceRefs": [
+        "r-d4-effort"
+      ]
     },
     {
       "id": "q-d4-5",
@@ -254,13 +451,28 @@
       "difficulty": 1,
       "stem": "Which field on the response confirms a prompt-cache hit?",
       "options": [
-        { "id": "a", "text": "usage.cache_read_input_tokens", "correct": true },
-        { "id": "b", "text": "usage.output_tokens" },
-        { "id": "c", "text": "stop_reason == 'cached'" },
-        { "id": "d", "text": "usage.cache_creation_input_tokens" }
+        {
+          "id": "a",
+          "text": "usage.cache_read_input_tokens",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "usage.output_tokens"
+        },
+        {
+          "id": "c",
+          "text": "stop_reason == 'cached'"
+        },
+        {
+          "id": "d",
+          "text": "usage.cache_creation_input_tokens"
+        }
       ],
       "explanation": "`cache_read_input_tokens` reports tokens served from cache (the read). `cache_creation_input_tokens` is the write. If reads stay 0 across identical-prefix requests, a silent invalidator is in the prefix.",
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "q-d4-6",
@@ -269,13 +481,28 @@
       "difficulty": 2,
       "stem": "A modern model is now under-using a custom tool you want it to call more often. What's the most effective fix?",
       "options": [
-        { "id": "a", "text": "Add an explicit 'when to use this' trigger to the tool's description and the system prompt", "correct": true },
-        { "id": "b", "text": "Wrap the tool name in CRITICAL/YOU-MUST language" },
-        { "id": "c", "text": "Lower max_tokens to force the model to act faster" },
-        { "id": "d", "text": "Remove all other tools so it has no choice" }
+        {
+          "id": "a",
+          "text": "Add an explicit 'when to use this' trigger to the tool's description and the system prompt",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Wrap the tool name in CRITICAL/YOU-MUST language"
+        },
+        {
+          "id": "c",
+          "text": "Lower max_tokens to force the model to act faster"
+        },
+        {
+          "id": "d",
+          "text": "Remove all other tools so it has no choice"
+        }
       ],
       "explanation": "Modern models reach for tools conservatively. A prescriptive description that states *when* to call the tool gives measurable lift. Aggressive must-do language tends to over-trigger or backfire; the calibrated fix is explicit triggering.",
-      "sourceRefs": ["r-d4-effort"]
+      "sourceRefs": [
+        "r-d4-effort"
+      ]
     },
     {
       "id": "q-d4-7",
@@ -284,13 +511,28 @@
       "difficulty": 2,
       "stem": "You're iterating on a flaky extraction prompt. What's the disciplined way to improve it?",
       "options": [
-        { "id": "a", "text": "Change one thing, then measure it on a small eval set before rolling out", "correct": true },
-        { "id": "b", "text": "Rewrite all the instructions at once and ship if it looks better on one example" },
-        { "id": "c", "text": "Add more aggressive language until the failure stops" },
-        { "id": "d", "text": "Switch models until one passes the single failing case" }
+        {
+          "id": "a",
+          "text": "Change one thing, then measure it on a small eval set before rolling out",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Rewrite all the instructions at once and ship if it looks better on one example"
+        },
+        {
+          "id": "c",
+          "text": "Add more aggressive language until the failure stops"
+        },
+        {
+          "id": "d",
+          "text": "Switch models until one passes the single failing case"
+        }
       ],
       "explanation": "Eval-driven iteration: change one variable, measure on a small eval set. Changing many things at once hides which one moved the metric — and on a literal model the changes can interact.",
-      "sourceRefs": ["r-d4-structured"]
+      "sourceRefs": [
+        "r-d4-structured"
+      ]
     },
     {
       "id": "q-d4-8",
@@ -299,13 +541,28 @@
       "difficulty": 3,
       "stem": "If you stream a modern model with thinking enabled but see a long pause and no visible reasoning before the answer, what's the likely cause?",
       "options": [
-        { "id": "a", "text": "display defaults to 'omitted' — set thinking:{type:'adaptive', display:'summarized'} to surface reasoning", "correct": true },
-        { "id": "b", "text": "Thinking is disabled; you must set budget_tokens" },
-        { "id": "c", "text": "The model refused; check stop_reason" },
-        { "id": "d", "text": "max_tokens is too low to emit any thinking" }
+        {
+          "id": "a",
+          "text": "display defaults to 'omitted' — set thinking:{type:'adaptive', display:'summarized'} to surface reasoning",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Thinking is disabled; you must set budget_tokens"
+        },
+        {
+          "id": "c",
+          "text": "The model refused; check stop_reason"
+        },
+        {
+          "id": "d",
+          "text": "max_tokens is too low to emit any thinking"
+        }
       ],
       "explanation": "On the newest models thinking display defaults to 'omitted' — thinking blocks stream with empty text, so the UI looks like a pause. Set display:'summarized' to render a readable summary.",
-      "sourceRefs": ["r-d4-adaptive"]
+      "sourceRefs": [
+        "r-d4-adaptive"
+      ]
     },
     {
       "id": "q-d4-9",
@@ -314,13 +571,28 @@
       "difficulty": 2,
       "stem": "On a modern model, a developer sets temperature=0.2 for 'more deterministic' extraction. What happens?",
       "options": [
-        { "id": "a", "text": "400 error — sampling params are removed; steer with prompting and effort instead", "correct": true },
-        { "id": "b", "text": "Output becomes byte-for-byte identical across runs" },
-        { "id": "c", "text": "It's ignored silently and the request proceeds" },
-        { "id": "d", "text": "It only works alongside thinking:{type:'disabled'}" }
+        {
+          "id": "a",
+          "text": "400 error — sampling params are removed; steer with prompting and effort instead",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Output becomes byte-for-byte identical across runs"
+        },
+        {
+          "id": "c",
+          "text": "It's ignored silently and the request proceeds"
+        },
+        {
+          "id": "d",
+          "text": "It only works alongside thinking:{type:'disabled'}"
+        }
       ],
       "explanation": "temperature/top_p/top_k are removed on modern models and return 400. Determinism was never guaranteed by temperature anyway; steer behaviour with prompting and a low effort level.",
-      "sourceRefs": ["r-d4-effort"]
+      "sourceRefs": [
+        "r-d4-effort"
+      ]
     },
     {
       "id": "q-d4-10",
@@ -329,13 +601,28 @@
       "difficulty": 3,
       "stem": "A team adds a 'mode: verbose' line by editing the top-level system prompt on every request that needs it. Cache hit rate collapses. Why, and what's the fix?",
       "options": [
-        { "id": "a", "text": "Editing top-level system changes the prefix ahead of the whole history; deliver the mode as a mid-conversation {role:'system'} message instead", "correct": true },
-        { "id": "b", "text": "Verbose mode disables caching server-side; there is no fix" },
-        { "id": "c", "text": "The mode line is too short to cache; pad it to 1024 tokens" },
-        { "id": "d", "text": "Caching only works with tools present; add a dummy tool" }
+        {
+          "id": "a",
+          "text": "Editing top-level system changes the prefix ahead of the whole history; deliver the mode as a mid-conversation {role:'system'} message instead",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Verbose mode disables caching server-side; there is no fix"
+        },
+        {
+          "id": "c",
+          "text": "The mode line is too short to cache; pad it to 1024 tokens"
+        },
+        {
+          "id": "d",
+          "text": "Caching only works with tools present; add a dummy tool"
+        }
       ],
       "explanation": "The system prompt is the front of the cached prefix — editing it per request invalidates everything downstream. A mid-conversation system message sits after the cached history (beta), so the prefix stays intact.",
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "q-d4-11",
@@ -344,13 +631,30 @@
       "difficulty": 2,
       "stem": "Which of these belong AFTER the last cache_control breakpoint (i.e. are volatile prefix-invalidators)? Select all that apply.",
       "options": [
-        { "id": "a", "text": "The current timestamp", "correct": true },
-        { "id": "b", "text": "A per-request UUID", "correct": true },
-        { "id": "c", "text": "The varying user question for this turn", "correct": true },
-        { "id": "d", "text": "The frozen system prompt shared by every request" }
+        {
+          "id": "a",
+          "text": "The current timestamp",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A per-request UUID",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "The varying user question for this turn",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "The frozen system prompt shared by every request"
+        }
       ],
       "explanation": "Volatile content — timestamps, per-request ids, the varying question — must sit after the last breakpoint so it never invalidates the shared prefix. The frozen system prompt is the stable prefix and belongs first.",
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "q-d4-12",
@@ -359,19 +663,39 @@
       "difficulty": 3,
       "stem": "Which statements about modern-model prompting are correct? Select all that apply.",
       "options": [
-        { "id": "a", "text": "Aggressive 'CRITICAL: YOU MUST' tool language tends to over-trigger and should be dialled back", "correct": true },
-        { "id": "b", "text": "Positive examples generally beat negative 'don't do X' instructions", "correct": true },
-        { "id": "c", "text": "Explicit 'when to use this' triggers help when you want more tool/subagent use", "correct": true },
-        { "id": "d", "text": "Fixed budget_tokens is the recommended way to control reasoning depth" }
+        {
+          "id": "a",
+          "text": "Aggressive 'CRITICAL: YOU MUST' tool language tends to over-trigger and should be dialled back",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Positive examples generally beat negative 'don't do X' instructions",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Explicit 'when to use this' triggers help when you want more tool/subagent use",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Fixed budget_tokens is the recommended way to control reasoning depth"
+        }
       ],
       "explanation": "Modern models follow instructions literally, so aggressive language over-fires; positive examples beat negative ones; and explicit triggers raise conservative tool use. Reasoning depth is controlled by adaptive thinking + effort — fixed budget_tokens is removed (400).",
-      "sourceRefs": ["r-d4-effort", "r-d4-adaptive"]
+      "sourceRefs": [
+        "r-d4-effort",
+        "r-d4-adaptive"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d4-rag-cost",
-      "domainIds": ["d4-prompt-engineering"],
+      "domainIds": [
+        "d4-prompt-engineering"
+      ],
       "title": "Cut cost on a high-volume RAG endpoint with caching",
       "tagline": "Order the prompt, place the breakpoint, verify the hit, keep the cache warm.",
       "context": "A support RAG endpoint serves thousands of requests an hour. Each request stuffs a 40KB instruction block plus the retrieved docs into the system prompt, then the user's question. Cost is high and latency is creeping. You're asked to make caching actually work.",
@@ -380,44 +704,108 @@
           "id": "st1",
           "prompt": "The system prompt header currently begins with 'Request ID: {uuid4()} — Time: {now}'. What's the first move?",
           "choices": [
-            { "id": "a", "text": "Remove the per-request id and timestamp from the prefix (or move them into the user turn at the end)", "verdict": "best", "rationale": "Those are silent invalidators at the very front of the prefix — they change the bytes every request, so nothing downstream ever caches. Removing them is the single highest-impact fix." },
-            { "id": "b", "text": "Add a cache_control breakpoint on the system block and leave the id/time in place", "verdict": "wrong", "rationale": "A breakpoint can't save a prefix that changes every request — you'd write a fresh cache entry each time and read none. Fix the prefix first." },
-            { "id": "c", "text": "Switch to the 1-hour TTL to keep entries alive longer", "verdict": "viable", "rationale": "TTL helps bursty traffic, but it's irrelevant while a uuid in the prefix invalidates every entry. Order matters: remove the invalidator before tuning TTL." }
+            {
+              "id": "a",
+              "text": "Remove the per-request id and timestamp from the prefix (or move them into the user turn at the end)",
+              "verdict": "best",
+              "rationale": "Those are silent invalidators at the very front of the prefix — they change the bytes every request, so nothing downstream ever caches. Removing them is the single highest-impact fix."
+            },
+            {
+              "id": "b",
+              "text": "Add a cache_control breakpoint on the system block and leave the id/time in place",
+              "verdict": "wrong",
+              "rationale": "A breakpoint can't save a prefix that changes every request — you'd write a fresh cache entry each time and read none. Fix the prefix first."
+            },
+            {
+              "id": "c",
+              "text": "Switch to the 1-hour TTL to keep entries alive longer",
+              "verdict": "viable",
+              "rationale": "TTL helps bursty traffic, but it's irrelevant while a uuid in the prefix invalidates every entry. Order matters: remove the invalidator before tuning TTL."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "The retrieved docs differ per question but the 40KB instruction block is identical. How do you structure the prompt?",
           "choices": [
-            { "id": "a", "text": "Put the frozen instruction block first with a breakpoint after it; place the per-question docs and question later, unmarked", "verdict": "best", "rationale": "Stable-first, volatile-last. The shared 40KB caches and is read on every request; the varying docs sit past the breakpoint so they don't invalidate it." },
-            { "id": "b", "text": "Put the retrieved docs first so the model reads context before instructions, breakpoint at the end", "verdict": "wrong", "rationale": "Docs vary per question, so a prefix that starts with them shares nothing — every request is a cache miss. And a breakpoint at the very end caches the varying tail, which is never reused." },
-            { "id": "c", "text": "Cache the instruction block AND the docs together under one breakpoint", "verdict": "viable", "rationale": "Works only if a given doc-set repeats often. For mostly-unique retrievals you pay the write premium with few reads — cache the stable block, not the volatile docs." }
+            {
+              "id": "a",
+              "text": "Put the frozen instruction block first with a breakpoint after it; place the per-question docs and question later, unmarked",
+              "verdict": "best",
+              "rationale": "Stable-first, volatile-last. The shared 40KB caches and is read on every request; the varying docs sit past the breakpoint so they don't invalidate it."
+            },
+            {
+              "id": "b",
+              "text": "Put the retrieved docs first so the model reads context before instructions, breakpoint at the end",
+              "verdict": "wrong",
+              "rationale": "Docs vary per question, so a prefix that starts with them shares nothing — every request is a cache miss. And a breakpoint at the very end caches the varying tail, which is never reused."
+            },
+            {
+              "id": "c",
+              "text": "Cache the instruction block AND the docs together under one breakpoint",
+              "verdict": "viable",
+              "rationale": "Works only if a given doc-set repeats often. For mostly-unique retrievals you pay the write premium with few reads — cache the stable block, not the volatile docs."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "After deploying, cache_read_input_tokens is still 0 on identical-question replays. What do you check?",
           "choices": [
-            { "id": "a", "text": "Diff the rendered prompt bytes of two requests to find a remaining silent invalidator (unsorted JSON, a stray timestamp, a varying tool list)", "verdict": "best", "rationale": "Zero reads across an identical prefix means *something* still differs. Byte-diffing two rendered prompts pinpoints it — commonly json.dumps without sort_keys or a set-ordered tool list." },
-            { "id": "b", "text": "Conclude caching is broken and file a support ticket", "verdict": "wrong", "rationale": "The mechanism is deterministic; a 0 read rate is almost always a self-inflicted invalidator, not a platform bug. Diff first." },
-            { "id": "c", "text": "Raise max_tokens to give the cache room to populate", "verdict": "wrong", "rationale": "max_tokens has nothing to do with cache reads. It bounds output, not the prefix match." }
+            {
+              "id": "a",
+              "text": "Diff the rendered prompt bytes of two requests to find a remaining silent invalidator (unsorted JSON, a stray timestamp, a varying tool list)",
+              "verdict": "best",
+              "rationale": "Zero reads across an identical prefix means *something* still differs. Byte-diffing two rendered prompts pinpoints it — commonly json.dumps without sort_keys or a set-ordered tool list."
+            },
+            {
+              "id": "b",
+              "text": "Conclude caching is broken and file a support ticket",
+              "verdict": "wrong",
+              "rationale": "The mechanism is deterministic; a 0 read rate is almost always a self-inflicted invalidator, not a platform bug. Diff first."
+            },
+            {
+              "id": "c",
+              "text": "Raise max_tokens to give the cache room to populate",
+              "verdict": "wrong",
+              "rationale": "max_tokens has nothing to do with cache reads. It bounds output, not the prefix match."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "Traffic is continuous (requests well under a minute apart). Should you add a scheduled pre-warm call?",
           "choices": [
-            { "id": "a", "text": "No — continuous traffic keeps the cache warm; the first real request writes it and the rest read it", "verdict": "best", "rationale": "Pre-warming pays an extra write to lower first-request latency. With requests arriving inside the TTL, real traffic already keeps the entry warm — a separate warm call is pure cost." },
-            { "id": "b", "text": "Yes — fire a max_tokens:0 warm-up every 5 minutes regardless", "verdict": "wrong", "rationale": "On continuous traffic that's a redundant write. Pre-warming earns its keep for cold starts and gappy/bursty traffic, not a hot endpoint." },
-            { "id": "c", "text": "Only pre-warm at deploy/boot, before traffic ramps", "verdict": "viable", "rationale": "A single boot-time warm can shave the very first request's latency post-deploy — reasonable, but minor here since steady traffic warms it within seconds anyway." }
+            {
+              "id": "a",
+              "text": "No — continuous traffic keeps the cache warm; the first real request writes it and the rest read it",
+              "verdict": "best",
+              "rationale": "Pre-warming pays an extra write to lower first-request latency. With requests arriving inside the TTL, real traffic already keeps the entry warm — a separate warm call is pure cost."
+            },
+            {
+              "id": "b",
+              "text": "Yes — fire a max_tokens:0 warm-up every 5 minutes regardless",
+              "verdict": "wrong",
+              "rationale": "On continuous traffic that's a redundant write. Pre-warming earns its keep for cold starts and gappy/bursty traffic, not a hot endpoint."
+            },
+            {
+              "id": "c",
+              "text": "Only pre-warm at deploy/boot, before traffic ramps",
+              "verdict": "viable",
+              "rationale": "A single boot-time warm can shave the very first request's latency post-deploy — reasonable, but minor here since steady traffic warms it within seconds anyway."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d4-caching"]
+      "sourceRefs": [
+        "r-d4-caching"
+      ]
     },
     {
       "id": "s-d4-overtrigger",
-      "domainIds": ["d4-prompt-engineering"],
+      "domainIds": [
+        "d4-prompt-engineering"
+      ],
       "title": "Tame an over-triggering tool-using assistant",
       "tagline": "Recalibrate literal-following language, then iterate on evals.",
       "context": "An internal assistant was ported from an older model. Its system prompt is full of 'CRITICAL: YOU MUST' lines written to force the old model to act. On the new model it now calls tools constantly, escalates to subagents for trivial reads, and pads every answer. You own the prompt.",
@@ -426,31 +814,79 @@
           "id": "st1",
           "prompt": "The prompt says 'CRITICAL: YOU MUST always call the lookup tool before answering.' The assistant now calls it even for questions answerable from context. First change?",
           "choices": [
-            { "id": "a", "text": "Soften to 'Use the lookup tool when the answer depends on data not already in the conversation'", "verdict": "best", "rationale": "Modern models follow literally, so 'always' over-fires. A conditional 'use it when…' restores judgement without removing the capability." },
-            { "id": "b", "text": "Add a second line: 'But DO NOT over-call the tool!!!' in capitals", "verdict": "wrong", "rationale": "Stacking contradictory aggressive instructions on a literal model makes behaviour worse, not better. Replace the bad instruction, don't pile on." },
-            { "id": "c", "text": "Leave it and lower effort so it acts less", "verdict": "viable", "rationale": "Lower effort does reduce tool calls somewhat, but it's a blunt instrument that also dulls reasoning. Fix the instruction first; tune effort second." }
+            {
+              "id": "a",
+              "text": "Soften to 'Use the lookup tool when the answer depends on data not already in the conversation'",
+              "verdict": "best",
+              "rationale": "Modern models follow literally, so 'always' over-fires. A conditional 'use it when…' restores judgement without removing the capability."
+            },
+            {
+              "id": "b",
+              "text": "Add a second line: 'But DO NOT over-call the tool!!!' in capitals",
+              "verdict": "wrong",
+              "rationale": "Stacking contradictory aggressive instructions on a literal model makes behaviour worse, not better. Replace the bad instruction, don't pile on."
+            },
+            {
+              "id": "c",
+              "text": "Leave it and lower effort so it acts less",
+              "verdict": "viable",
+              "rationale": "Lower effort does reduce tool calls somewhat, but it's a blunt instrument that also dulls reasoning. Fix the instruction first; tune effort second."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Now it spawns a subagent to read a single file. How do you scope delegation?",
           "choices": [
-            { "id": "a", "text": "Add explicit guidance: 'Use subagents only for independent, parallel work; for single-file reads, work directly'", "verdict": "best", "rationale": "Give a clear when/when-not boundary. Modern models respond to explicit triggers — here you're telling it precisely where delegation pays off and where it's waste." },
-            { "id": "b", "text": "Remove the subagent capability entirely", "verdict": "viable", "rationale": "Kills the over-spawning but throws away genuine fan-out value for parallel work. Prefer scoping the trigger over amputating the capability." },
-            { "id": "c", "text": "Add 'NEVER use subagents' in capitals", "verdict": "wrong", "rationale": "Over-corrects to the opposite failure — now it won't parallelise legitimately independent work. Calibrate the boundary, don't flip to a blanket ban." }
+            {
+              "id": "a",
+              "text": "Add explicit guidance: 'Use subagents only for independent, parallel work; for single-file reads, work directly'",
+              "verdict": "best",
+              "rationale": "Give a clear when/when-not boundary. Modern models respond to explicit triggers — here you're telling it precisely where delegation pays off and where it's waste."
+            },
+            {
+              "id": "b",
+              "text": "Remove the subagent capability entirely",
+              "verdict": "viable",
+              "rationale": "Kills the over-spawning but throws away genuine fan-out value for parallel work. Prefer scoping the trigger over amputating the capability."
+            },
+            {
+              "id": "c",
+              "text": "Add 'NEVER use subagents' in capitals",
+              "verdict": "wrong",
+              "rationale": "Over-corrects to the opposite failure — now it won't parallelise legitimately independent work. Calibrate the boundary, don't flip to a blanket ban."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "You want to verify each change rather than guess. How do you iterate?",
           "choices": [
-            { "id": "a", "text": "Change one instruction, run the assistant against a small fixed eval set, compare tool-call rate and answer quality, then proceed", "verdict": "best", "rationale": "Eval-driven, one variable at a time. You get a clean signal on whether the softened line fixed over-triggering without regressing answers." },
-            { "id": "b", "text": "Rewrite every aggressive line at once and ship because the demo looked calmer", "verdict": "wrong", "rationale": "Batching changes hides which one helped or hurt, and on a literal model they interact. A single demo isn't a measurement." },
-            { "id": "c", "text": "Ask the model to grade its own prompt and apply its suggestions", "verdict": "viable", "rationale": "Self-critique can surface ideas, but it's not a substitute for measuring behaviour on real cases. Use it to generate hypotheses, then test on the eval set." }
+            {
+              "id": "a",
+              "text": "Change one instruction, run the assistant against a small fixed eval set, compare tool-call rate and answer quality, then proceed",
+              "verdict": "best",
+              "rationale": "Eval-driven, one variable at a time. You get a clean signal on whether the softened line fixed over-triggering without regressing answers."
+            },
+            {
+              "id": "b",
+              "text": "Rewrite every aggressive line at once and ship because the demo looked calmer",
+              "verdict": "wrong",
+              "rationale": "Batching changes hides which one helped or hurt, and on a literal model they interact. A single demo isn't a measurement."
+            },
+            {
+              "id": "c",
+              "text": "Ask the model to grade its own prompt and apply its suggestions",
+              "verdict": "viable",
+              "rationale": "Self-critique can surface ideas, but it's not a substitute for measuring behaviour on real cases. Use it to generate hypotheses, then test on the eval set."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d4-effort", "r-d4-structured"]
+      "sourceRefs": [
+        "r-d4-effort",
+        "r-d4-structured"
+      ]
     }
   ],
   "labs": [
@@ -482,14 +918,57 @@
     }
   ],
   "resources": [
-    { "id": "r-d4-caching", "title": "Prompt caching (Anthropic docs)", "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching", "kind": "official-doc", "annotation": "The prefix-match invariant, breakpoint placement, the 4-breakpoint limit, and verifying with usage. The single most exam-relevant page in D4.", "domainIds": ["d4-prompt-engineering"] },
-    { "id": "r-d4-effort", "title": "Effort parameter (Anthropic docs)", "url": "https://platform.claude.com/docs/en/build-with-claude/effort", "kind": "official-doc", "annotation": "low | medium | high | xhigh | max and the cost-quality tradeoff. Read why xhigh is the coding/agentic default.", "domainIds": ["d4-prompt-engineering"] },
-    { "id": "r-d4-structured", "title": "Structured outputs (Anthropic docs)", "url": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs", "kind": "official-doc", "annotation": "output_config.format with json_schema and strict:true on tools — the prefill replacement. Note the deprecated top-level output_format.", "domainIds": ["d4-prompt-engineering"] },
-    { "id": "r-d4-adaptive", "title": "Adaptive thinking (Anthropic docs)", "url": "https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking", "kind": "official-doc", "annotation": "thinking:{type:'adaptive'}, the display setting, and why fixed budget_tokens is gone on modern models.", "domainIds": ["d4-prompt-engineering"] }
+    {
+      "id": "r-d4-caching",
+      "title": "Prompt caching (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+      "kind": "official-doc",
+      "annotation": "The prefix-match invariant, breakpoint placement, the 4-breakpoint limit, and verifying with usage. The single most exam-relevant page in D4.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    },
+    {
+      "id": "r-d4-effort",
+      "title": "Effort parameter (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/effort",
+      "kind": "official-doc",
+      "annotation": "low | medium | high | xhigh | max and the cost-quality tradeoff. Read why xhigh is the coding/agentic default.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    },
+    {
+      "id": "r-d4-structured",
+      "title": "Structured outputs (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+      "kind": "official-doc",
+      "annotation": "output_config.format with json_schema and strict:true on tools — the prefill replacement. Note the deprecated top-level output_format.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    },
+    {
+      "id": "r-d4-adaptive",
+      "title": "Adaptive thinking (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+      "kind": "official-doc",
+      "annotation": "thinking:{type:'adaptive'}, the display setting, and why fixed budget_tokens is gone on modern models.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    }
   ],
   "videos": [
-    { "id": "v-d4-1", "title": "D4 · Roles & structured outputs", "provider": "youtube", "url": "", "domainIds": ["d4-prompt-engineering"], "sourceNotebook": "cca-f / domain 4", "status": "placeholder" },
-    { "id": "v-d4-2", "title": "D4 · Prompt caching is a prefix match", "provider": "youtube", "url": "", "domainIds": ["d4-prompt-engineering"], "sourceNotebook": "cca-f / domain 4", "status": "placeholder" },
-    { "id": "v-d4-3", "title": "D4 · Adaptive thinking, effort & calibration", "provider": "youtube", "url": "", "domainIds": ["d4-prompt-engineering"], "sourceNotebook": "cca-f / domain 4", "status": "placeholder" }
+    {
+      "id": "v-d4-1",
+      "title": "Prompt engineering — domain overview",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d4.mp4",
+      "status": "published",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    }
   ]
 }

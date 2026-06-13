@@ -28,13 +28,28 @@
           "difficulty": 1,
           "stem": "Which three fields define a tool you pass to Claude?",
           "options": [
-            { "id": "a", "text": "name, description, and input_schema", "correct": true },
-            { "id": "b", "text": "id, prompt, and output_schema" },
-            { "id": "c", "text": "name, system, and tool_choice" },
-            { "id": "d", "text": "title, body, and parameters_required" }
+            {
+              "id": "a",
+              "text": "name, description, and input_schema",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "id, prompt, and output_schema"
+            },
+            {
+              "id": "c",
+              "text": "name, system, and tool_choice"
+            },
+            {
+              "id": "d",
+              "text": "title, body, and parameters_required"
+            }
           ],
           "explanation": "A tool is `name` (identifier), `description` (when/how to use it), and `input_schema` (a JSON Schema of the parameters). `tool_choice` and `system` are request-level settings, not part of a tool object; there is no `output_schema` on a tool definition.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-2",
@@ -43,13 +58,28 @@
           "difficulty": 2,
           "stem": "A tool is being under-called — the model answers from memory instead of invoking it. What is the most effective fix to the tool definition?",
           "options": [
-            { "id": "a", "text": "Rewrite the description prescriptively to state the conditions under which it should be called", "correct": true },
-            { "id": "b", "text": "Rename the tool to something shorter" },
-            { "id": "c", "text": "Remove the input_schema so the model has fewer constraints" },
-            { "id": "d", "text": "Add more required parameters to make it look important" }
+            {
+              "id": "a",
+              "text": "Rewrite the description prescriptively to state the conditions under which it should be called",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Rename the tool to something shorter"
+            },
+            {
+              "id": "c",
+              "text": "Remove the input_schema so the model has fewer constraints"
+            },
+            {
+              "id": "d",
+              "text": "Add more required parameters to make it look important"
+            }
           ],
           "explanation": "Modern models call tools conservatively, so the description must make the case: name the trigger conditions ('Call this when the user asks about…'). A shorter name doesn't add intent, dropping the schema breaks argument generation, and extra required params make the tool harder to call, not more likely.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-3",
@@ -58,13 +88,28 @@
           "difficulty": 2,
           "stem": "What does setting `strict: true` on a tool do?",
           "options": [
-            { "id": "a", "text": "Validates the model's generated arguments against the tool's JSON Schema", "correct": true },
-            { "id": "b", "text": "Forces the model to call that tool on every turn" },
-            { "id": "c", "text": "Disables parallel tool use globally" },
-            { "id": "d", "text": "Makes the tool run on Anthropic's servers instead of yours" }
+            {
+              "id": "a",
+              "text": "Validates the model's generated arguments against the tool's JSON Schema",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Forces the model to call that tool on every turn"
+            },
+            {
+              "id": "c",
+              "text": "Disables parallel tool use globally"
+            },
+            {
+              "id": "d",
+              "text": "Makes the tool run on Anthropic's servers instead of yours"
+            }
           ],
           "explanation": "Strict tool use validates generated parameters against your schema so malformed inputs are caught. Forcing a specific tool is `tool_choice`; single-tool-per-turn is `disable_parallel_tool_use`; server execution is a property of server-side/hosted tools, not `strict`.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         }
       ]
     },
@@ -82,13 +127,28 @@
           "difficulty": 2,
           "stem": "You want Claude to always route a message through your `classify` tool — never answer in free text. Which setting?",
           "options": [
-            { "id": "a", "text": "tool_choice = { type: 'tool', name: 'classify' }", "correct": true },
-            { "id": "b", "text": "tool_choice = { type: 'none' }" },
-            { "id": "c", "text": "tool_choice = { type: 'auto' }" },
-            { "id": "d", "text": "Remove the tool so the model is forced to use it" }
+            {
+              "id": "a",
+              "text": "tool_choice = { type: 'tool', name: 'classify' }",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "tool_choice = { type: 'none' }"
+            },
+            {
+              "id": "c",
+              "text": "tool_choice = { type: 'auto' }"
+            },
+            {
+              "id": "d",
+              "text": "Remove the tool so the model is forced to use it"
+            }
           ],
           "explanation": "`{ type: 'tool', name: 'classify' }` forces that specific tool. `none` forbids tools, `auto` lets the model choose (so it might answer in text), and removing the tool makes it impossible to call.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-5",
@@ -97,13 +157,28 @@
           "difficulty": 2,
           "stem": "A `charge_card` tool must never run alongside another tool in the same turn. What do you set?",
           "options": [
-            { "id": "a", "text": "disable_parallel_tool_use: true inside tool_choice", "correct": true },
-            { "id": "b", "text": "strict: true on the tool" },
-            { "id": "c", "text": "tool_choice type 'any'" },
-            { "id": "d", "text": "Lower max_tokens so only one block fits" }
+            {
+              "id": "a",
+              "text": "disable_parallel_tool_use: true inside tool_choice",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "strict: true on the tool"
+            },
+            {
+              "id": "c",
+              "text": "tool_choice type 'any'"
+            },
+            {
+              "id": "d",
+              "text": "Lower max_tokens so only one block fits"
+            }
           ],
           "explanation": "`disable_parallel_tool_use: true` forces one tool per turn — the right guard for side-effecting calls. `strict` validates arguments, `any` still allows parallel calls, and `max_tokens` is unrelated to how many tool blocks are emitted.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-6",
@@ -112,13 +187,28 @@
           "difficulty": 1,
           "stem": "Your tool call fails because of a bad upstream API response. What should the tool_result contain?",
           "options": [
-            { "id": "a", "text": "is_error: true and a clear message describing the failure", "correct": true },
-            { "id": "b", "text": "An empty string so the model moves on" },
-            { "id": "c", "text": "A plausible fake success value to keep the conversation flowing" },
-            { "id": "d", "text": "Nothing — omit the tool_result for that tool_use_id" }
+            {
+              "id": "a",
+              "text": "is_error: true and a clear message describing the failure",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "An empty string so the model moves on"
+            },
+            {
+              "id": "c",
+              "text": "A plausible fake success value to keep the conversation flowing"
+            },
+            {
+              "id": "d",
+              "text": "Nothing — omit the tool_result for that tool_use_id"
+            }
           ],
           "explanation": "Return `is_error: true` with an informative message so the model can adapt (retry, ask, or route around it). Empty or fabricated results make the model build on a false premise; omitting the tool_result breaks the loop, which requires a result for every tool_use_id.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         }
       ]
     },
@@ -136,13 +226,28 @@
           "difficulty": 2,
           "stem": "What is the key criterion for promoting an action from a generic bash tool to a dedicated tool?",
           "options": [
-            { "id": "a", "text": "Reversibility — irreversible actions need a typed tool you can gate, confirm, and audit", "correct": true },
-            { "id": "b", "text": "Token cost — dedicated tools are always cheaper" },
-            { "id": "c", "text": "Popularity — promote the most frequently called commands" },
-            { "id": "d", "text": "Output length — promote tools that return a lot of text" }
+            {
+              "id": "a",
+              "text": "Reversibility — irreversible actions need a typed tool you can gate, confirm, and audit",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Token cost — dedicated tools are always cheaper"
+            },
+            {
+              "id": "c",
+              "text": "Popularity — promote the most frequently called commands"
+            },
+            {
+              "id": "d",
+              "text": "Output length — promote tools that return a lot of text"
+            }
           ],
           "explanation": "Reversibility drives the decision: hard-to-undo actions deserve a typed, interceptable tool so the harness can gate, confirm, render, audit, and schedule them. Bash's opaque command string offers none of that. Token cost and popularity aren't the criterion.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-8",
@@ -151,13 +256,28 @@
           "difficulty": 2,
           "stem": "A plain `code_execution` call needs to fetch a page from the public internet. What happens?",
           "options": [
-            { "id": "a", "text": "It can't — the code-execution sandbox has no general internet access; use web_fetch/web_search for that", "correct": true },
-            { "id": "b", "text": "It works normally; the sandbox has full outbound internet" },
-            { "id": "c", "text": "It silently returns the page from Anthropic's cache" },
-            { "id": "d", "text": "It escalates to your host machine to make the request" }
+            {
+              "id": "a",
+              "text": "It can't — the code-execution sandbox has no general internet access; use web_fetch/web_search for that",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It works normally; the sandbox has full outbound internet"
+            },
+            {
+              "id": "c",
+              "text": "It silently returns the page from Anthropic's cache"
+            },
+            {
+              "id": "d",
+              "text": "It escalates to your host machine to make the request"
+            }
           ],
           "explanation": "The code-execution container is sandboxed and isolated, without general internet access for plain code-exec — that's why it's safe for untrusted analysis. To pull live web content with citations, use the hosted `web_fetch`/`web_search` tools instead.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         }
       ]
     },
@@ -175,13 +295,29 @@
           "difficulty": 2,
           "stem": "What three kinds of capability does an MCP server expose?",
           "options": [
-            { "id": "a", "text": "tools, resources, and prompts", "correct": true },
-            { "id": "b", "text": "agents, sessions, and environments" },
-            { "id": "c", "text": "models, vaults, and tokens" },
-            { "id": "d", "text": "functions, files, and webhooks" }
+            {
+              "id": "a",
+              "text": "tools, resources, and prompts",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "agents, sessions, and environments"
+            },
+            {
+              "id": "c",
+              "text": "models, vaults, and tokens"
+            },
+            {
+              "id": "d",
+              "text": "functions, files, and webhooks"
+            }
           ],
           "explanation": "An MCP server exposes tools (actions), resources (readable data/content), and prompts (reusable templates), over Streamable HTTP/SSE. Agents/sessions/environments are Managed Agents concepts, not MCP server capabilities.",
-          "sourceRefs": ["r-mcp", "r-docs"]
+          "sourceRefs": [
+            "r-mcp",
+            "r-docs"
+          ]
         },
         {
           "id": "kc-d2-10",
@@ -190,13 +326,29 @@
           "difficulty": 3,
           "stem": "A hosted GitHub MCP server fails to authenticate after you stored your GitHub REST personal-access token in a vault. Most likely cause?",
           "options": [
-            { "id": "a", "text": "The server expects an OAuth bearer token, which is a different auth system from the REST API key", "correct": true },
-            { "id": "b", "text": "Vaults can only hold one credential per session" },
-            { "id": "c", "text": "The url must include the token as a query parameter" },
-            { "id": "d", "text": "MCP servers don't support GitHub" }
+            {
+              "id": "a",
+              "text": "The server expects an OAuth bearer token, which is a different auth system from the REST API key",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Vaults can only hold one credential per session"
+            },
+            {
+              "id": "c",
+              "text": "The url must include the token as a query parameter"
+            },
+            {
+              "id": "d",
+              "text": "MCP servers don't support GitHub"
+            }
           ],
           "explanation": "Hosted MCP servers typically authenticate via OAuth bearer tokens, not the service's native REST API key — they're separate mechanisms. Provision the OAuth credential (Anthropic auto-refreshes it) and reference it by vault; the REST PAT is the wrong credential type, and you never put tokens in the url.",
-          "sourceRefs": ["r-docs", "r-mcp"]
+          "sourceRefs": [
+            "r-docs",
+            "r-mcp"
+          ]
         },
         {
           "id": "kc-d2-11",
@@ -205,13 +357,28 @@
           "difficulty": 3,
           "stem": "Why does tool search append matching tool schemas rather than swapping them in and out of the prompt?",
           "options": [
-            { "id": "a", "text": "Appending preserves the prompt cache; swapping would invalidate earlier cached context", "correct": true },
-            { "id": "b", "text": "Appending lets the model call tools without a tool_result" },
-            { "id": "c", "text": "Swapping is impossible over Streamable HTTP" },
-            { "id": "d", "text": "Appending is required to use tool_choice: any" }
+            {
+              "id": "a",
+              "text": "Appending preserves the prompt cache; swapping would invalidate earlier cached context",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Appending lets the model call tools without a tool_result"
+            },
+            {
+              "id": "c",
+              "text": "Swapping is impossible over Streamable HTTP"
+            },
+            {
+              "id": "d",
+              "text": "Appending is required to use tool_choice: any"
+            }
           ],
           "explanation": "Schemas are appended so the cached prefix stays valid — you get on-demand discovery for large tool libraries without re-processing the whole prompt each turn. Swapping schemas in/out would change the prefix and bust the cache. It has nothing to do with tool_result or tool_choice.",
-          "sourceRefs": ["r-docs"]
+          "sourceRefs": [
+            "r-docs"
+          ]
         }
       ]
     }
@@ -224,13 +391,28 @@
       "difficulty": 1,
       "stem": "Which field of a tool definition most directly influences whether Claude decides to call it?",
       "options": [
-        { "id": "a", "text": "The description, especially if it states when to call the tool", "correct": true },
-        { "id": "b", "text": "The name, because longer names rank higher" },
-        { "id": "c", "text": "The number of required parameters" },
-        { "id": "d", "text": "The order of the tool in the tools array" }
+        {
+          "id": "a",
+          "text": "The description, especially if it states when to call the tool",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The name, because longer names rank higher"
+        },
+        {
+          "id": "c",
+          "text": "The number of required parameters"
+        },
+        {
+          "id": "d",
+          "text": "The order of the tool in the tools array"
+        }
       ],
       "explanation": "The description is where the model reads whether and how to use the tool; prescriptive, trigger-stating descriptions raise the should-call rate. Name length, required-param count, and array order are not what drives the decision.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-2",
@@ -239,13 +421,28 @@
       "difficulty": 2,
       "stem": "Which description is best for a tool that returns live exchange rates?",
       "options": [
-        { "id": "a", "text": "'Call this when the user asks for a current or live exchange rate between two currencies. Not for historical rates.'", "correct": true },
-        { "id": "b", "text": "'Exchange rate tool.'" },
-        { "id": "c", "text": "'Returns a number.'" },
-        { "id": "d", "text": "'This is the most powerful currency tool available.'" }
+        {
+          "id": "a",
+          "text": "'Call this when the user asks for a current or live exchange rate between two currencies. Not for historical rates.'",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "'Exchange rate tool.'"
+        },
+        {
+          "id": "c",
+          "text": "'Returns a number.'"
+        },
+        {
+          "id": "d",
+          "text": "'This is the most powerful currency tool available.'"
+        }
       ],
       "explanation": "The best description is prescriptive: it names the trigger condition (current/live rate, two currencies) and the boundary (not historical). The others are vague labels or marketing — they give the model nothing to decide on.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-3",
@@ -254,13 +451,28 @@
       "difficulty": 2,
       "stem": "What does `tool_choice: { type: 'any' }` enforce?",
       "options": [
-        { "id": "a", "text": "The model must call some tool, but it chooses which one", "correct": true },
-        { "id": "b", "text": "The model must call one specific named tool" },
-        { "id": "c", "text": "The model may not call any tool" },
-        { "id": "d", "text": "The model may call at most one tool per conversation" }
+        {
+          "id": "a",
+          "text": "The model must call some tool, but it chooses which one",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model must call one specific named tool"
+        },
+        {
+          "id": "c",
+          "text": "The model may not call any tool"
+        },
+        {
+          "id": "d",
+          "text": "The model may call at most one tool per conversation"
+        }
       ],
       "explanation": "`any` requires a tool call but leaves the choice of tool to the model. Forcing a specific tool is `type: 'tool', name: …`; forbidding tools is `type: 'none'`; there is no per-conversation cap implied by `any`.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-4",
@@ -269,13 +481,28 @@
       "difficulty": 1,
       "stem": "How should a tool report that it could not complete its action?",
       "options": [
-        { "id": "a", "text": "Return a tool_result with is_error: true and an informative message", "correct": true },
-        { "id": "b", "text": "Throw the exception so the whole request fails" },
-        { "id": "c", "text": "Return a normal-looking but fake success value" },
-        { "id": "d", "text": "Return an empty content block" }
+        {
+          "id": "a",
+          "text": "Return a tool_result with is_error: true and an informative message",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Throw the exception so the whole request fails"
+        },
+        {
+          "id": "c",
+          "text": "Return a normal-looking but fake success value"
+        },
+        {
+          "id": "d",
+          "text": "Return an empty content block"
+        }
       ],
       "explanation": "An honest error — `is_error: true` plus a clear message — lets the model adapt (retry, ask, route around). Crashing the request, faking success, or returning empty all either break the loop or make the model build on a false premise.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-5",
@@ -284,13 +511,28 @@
       "difficulty": 2,
       "stem": "An action deletes production records. Why prefer a dedicated `delete_records` tool over letting the agent run `rm`/SQL via a bash tool?",
       "options": [
-        { "id": "a", "text": "A dedicated tool gives the harness a typed hook to gate, confirm, and audit an irreversible action", "correct": true },
-        { "id": "b", "text": "Bash tools can't return errors" },
-        { "id": "c", "text": "Dedicated tools always use fewer tokens" },
-        { "id": "d", "text": "Bash tools are not supported by Claude models" }
+        {
+          "id": "a",
+          "text": "A dedicated tool gives the harness a typed hook to gate, confirm, and audit an irreversible action",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Bash tools can't return errors"
+        },
+        {
+          "id": "c",
+          "text": "Dedicated tools always use fewer tokens"
+        },
+        {
+          "id": "d",
+          "text": "Bash tools are not supported by Claude models"
+        }
       ],
       "explanation": "Irreversible actions need interception — confirmation, validation, audit — which a typed dedicated tool provides and an opaque bash command string does not. Bash can return errors and is supported; token count isn't the reason.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-6",
@@ -299,13 +541,30 @@
       "difficulty": 3,
       "stem": "Which statements about Anthropic-hosted server-side tools are correct? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "They are declared in tools[] but executed on Anthropic's infrastructure", "correct": true },
-        { "id": "b", "text": "web_search and web_fetch return cited results", "correct": true },
-        { "id": "c", "text": "Plain code_execution has no general internet access", "correct": true },
-        { "id": "d", "text": "You must execute their calls yourself and return a tool_result" }
+        {
+          "id": "a",
+          "text": "They are declared in tools[] but executed on Anthropic's infrastructure",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "web_search and web_fetch return cited results",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Plain code_execution has no general internet access",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "You must execute their calls yourself and return a tool_result"
+        }
       ],
       "explanation": "Server-side tools are listed in `tools[]` but run on Anthropic infra (so you do not execute them or hand-build their tool_result). web_search/web_fetch return cited content, and the code_execution sandbox is isolated without general internet for plain code-exec. Option D describes client-side tools.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-7",
@@ -314,13 +573,28 @@
       "difficulty": 1,
       "stem": "Which transport do remote MCP servers use to communicate with a client?",
       "options": [
-        { "id": "a", "text": "Streamable HTTP / SSE", "correct": true },
-        { "id": "b", "text": "Raw TCP sockets only" },
-        { "id": "c", "text": "gRPC bidirectional streams" },
-        { "id": "d", "text": "SMTP" }
+        {
+          "id": "a",
+          "text": "Streamable HTTP / SSE",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Raw TCP sockets only"
+        },
+        {
+          "id": "c",
+          "text": "gRPC bidirectional streams"
+        },
+        {
+          "id": "d",
+          "text": "SMTP"
+        }
       ],
       "explanation": "Remote MCP servers communicate over Streamable HTTP / SSE. The other transports are not the MCP remote transport.",
-      "sourceRefs": ["r-mcp"]
+      "sourceRefs": [
+        "r-mcp"
+      ]
     },
     {
       "id": "q-d2-8",
@@ -329,13 +603,29 @@
       "difficulty": 2,
       "stem": "How do you declare a remote MCP server so Claude can connect to it?",
       "options": [
-        { "id": "a", "text": "{ type: 'url', name, url } with no credentials inline", "correct": true },
-        { "id": "b", "text": "{ type: 'url', name, url, api_key } with the REST key inline" },
-        { "id": "c", "text": "By pasting the OAuth token into the url as a query parameter" },
-        { "id": "d", "text": "By adding the server's tools individually to the tools[] array by hand" }
+        {
+          "id": "a",
+          "text": "{ type: 'url', name, url } with no credentials inline",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "{ type: 'url', name, url, api_key } with the REST key inline"
+        },
+        {
+          "id": "c",
+          "text": "By pasting the OAuth token into the url as a query parameter"
+        },
+        {
+          "id": "d",
+          "text": "By adding the server's tools individually to the tools[] array by hand"
+        }
       ],
       "explanation": "You declare the server by `type: 'url'`, `name`, and `url` — and deliberately omit auth from the declaration. Credentials are supplied separately (vaults in Managed Agents); never inline an API key or put a token in the url.",
-      "sourceRefs": ["r-docs", "r-mcp"]
+      "sourceRefs": [
+        "r-docs",
+        "r-mcp"
+      ]
     },
     {
       "id": "q-d2-9",
@@ -344,13 +634,28 @@
       "difficulty": 3,
       "stem": "In Managed Agents, how is auth supplied to a hosted MCP server, and what does Anthropic do with it?",
       "options": [
-        { "id": "a", "text": "Via vault_ids on the session; Anthropic stores the credential and auto-refreshes OAuth tokens", "correct": true },
-        { "id": "b", "text": "By embedding the API key in the agent's system prompt" },
-        { "id": "c", "text": "By passing the token in every user message" },
-        { "id": "d", "text": "Auth isn't needed — MCP servers are always public" }
+        {
+          "id": "a",
+          "text": "Via vault_ids on the session; Anthropic stores the credential and auto-refreshes OAuth tokens",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "By embedding the API key in the agent's system prompt"
+        },
+        {
+          "id": "c",
+          "text": "By passing the token in every user message"
+        },
+        {
+          "id": "d",
+          "text": "Auth isn't needed — MCP servers are always public"
+        }
       ],
       "explanation": "Auth is attached out-of-band through vaults (`vault_ids` on the session); Anthropic holds the credential and auto-refreshes OAuth tokens so calls keep working. Secrets in prompts or messages persist in history and are the wrong pattern; MCP servers are frequently authenticated, not public.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-10",
@@ -359,13 +664,30 @@
       "difficulty": 2,
       "stem": "Which are valid uses of the `tool_choice` parameter? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "Force the model to call a specific named tool", "correct": true },
-        { "id": "b", "text": "Require the model to call some tool but let it pick", "correct": true },
-        { "id": "c", "text": "Forbid any tool call on this turn", "correct": true },
-        { "id": "d", "text": "Validate the model's tool arguments against the schema" }
+        {
+          "id": "a",
+          "text": "Force the model to call a specific named tool",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Require the model to call some tool but let it pick",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Forbid any tool call on this turn",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Validate the model's tool arguments against the schema"
+        }
       ],
       "explanation": "`tool_choice` supports `tool` (force a named tool), `any` (must call some tool), `auto` (model decides), and `none` (no tool). Argument validation against the schema is `strict: true`, a separate tool-level setting — not part of tool_choice.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "q-d2-11",
@@ -374,19 +696,36 @@
       "difficulty": 3,
       "stem": "An agent has 300 tools across many MCP servers and the prompt is too large. What does tool search do, and why does it append schemas?",
       "options": [
-        { "id": "a", "text": "It discovers relevant tools on demand and appends their schemas, which preserves the prompt cache", "correct": true },
-        { "id": "b", "text": "It deletes unused tools permanently from the server" },
-        { "id": "c", "text": "It swaps schemas in and out each turn to minimise total tokens" },
-        { "id": "d", "text": "It compresses every schema into a single summary tool" }
+        {
+          "id": "a",
+          "text": "It discovers relevant tools on demand and appends their schemas, which preserves the prompt cache",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It deletes unused tools permanently from the server"
+        },
+        {
+          "id": "c",
+          "text": "It swaps schemas in and out each turn to minimise total tokens"
+        },
+        {
+          "id": "d",
+          "text": "It compresses every schema into a single summary tool"
+        }
       ],
       "explanation": "Tool search surfaces only the relevant tools without loading all schemas up front, appending the matched schemas so the cached prefix stays valid. Swapping schemas in/out would invalidate the cache; it doesn't delete server tools or merge them into one.",
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d2-payments",
-      "domainIds": ["d2-tools-mcp"],
+      "domainIds": [
+        "d2-tools-mcp"
+      ],
       "title": "Tooling a payments support agent",
       "tagline": "Description, gating, parallelism, and honest errors on a money-moving toolset.",
       "context": "You're adding tools to a support agent that can look up orders and issue refunds. Refunds are irreversible. The agent keeps refunding when it should only quote a price, and a flaky payment API sometimes 500s. You own the tool definitions.",
@@ -395,44 +734,108 @@
           "id": "st1",
           "prompt": "The agent over-calls `issue_refund` for questions that only need a price quote. First fix?",
           "choices": [
-            { "id": "a", "text": "Rewrite the refund tool's description prescriptively — 'Call only when the user explicitly requests a refund of a specific order' — and give a separate get_price tool a clear when-to-call line", "verdict": "best", "rationale": "The description is the lever: stating the exact trigger (and boundary) for each tool fixes wrong-tool selection at the source, which is what conservative modern models read." },
-            { "id": "b", "text": "Delete the refund tool so it can never fire by mistake", "verdict": "wrong", "rationale": "That removes a required capability to dodge a description problem; the agent can no longer do its job." },
-            { "id": "c", "text": "Set tool_choice to 'any' so the model is forced to pick a tool every turn", "verdict": "viable", "rationale": "It forces a tool but doesn't fix which one — the model may still pick refund over price. It also forbids plain text answers. Fix the descriptions first." }
+            {
+              "id": "a",
+              "text": "Rewrite the refund tool's description prescriptively — 'Call only when the user explicitly requests a refund of a specific order' — and give a separate get_price tool a clear when-to-call line",
+              "verdict": "best",
+              "rationale": "The description is the lever: stating the exact trigger (and boundary) for each tool fixes wrong-tool selection at the source, which is what conservative modern models read."
+            },
+            {
+              "id": "b",
+              "text": "Delete the refund tool so it can never fire by mistake",
+              "verdict": "wrong",
+              "rationale": "That removes a required capability to dodge a description problem; the agent can no longer do its job."
+            },
+            {
+              "id": "c",
+              "text": "Set tool_choice to 'any' so the model is forced to pick a tool every turn",
+              "verdict": "viable",
+              "rationale": "It forces a tool but doesn't fix which one — the model may still pick refund over price. It also forbids plain text answers. Fix the descriptions first."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "How should the refund capability itself be shaped, given refunds are irreversible?",
           "choices": [
-            { "id": "a", "text": "A dedicated issue_refund tool the harness can gate with confirmation and audit", "verdict": "best", "rationale": "Reversibility is the criterion: an irreversible action belongs in a typed, interceptable tool with a confirmation gate and a clean audit record." },
-            { "id": "b", "text": "A generic bash tool so the agent can curl the refund endpoint", "verdict": "wrong", "rationale": "Bash hands the harness an opaque command string — no gate, no typed validation, no clean audit. Exactly the wrong shape for an irreversible action." },
-            { "id": "c", "text": "A dedicated tool, but auto-approved for every amount to cut latency", "verdict": "viable", "rationale": "Right tool shape, weak policy: skipping confirmation on an irreversible money action throws away the main benefit of promoting it." }
+            {
+              "id": "a",
+              "text": "A dedicated issue_refund tool the harness can gate with confirmation and audit",
+              "verdict": "best",
+              "rationale": "Reversibility is the criterion: an irreversible action belongs in a typed, interceptable tool with a confirmation gate and a clean audit record."
+            },
+            {
+              "id": "b",
+              "text": "A generic bash tool so the agent can curl the refund endpoint",
+              "verdict": "wrong",
+              "rationale": "Bash hands the harness an opaque command string — no gate, no typed validation, no clean audit. Exactly the wrong shape for an irreversible action."
+            },
+            {
+              "id": "c",
+              "text": "A dedicated tool, but auto-approved for every amount to cut latency",
+              "verdict": "viable",
+              "rationale": "Right tool shape, weak policy: skipping confirmation on an irreversible money action throws away the main benefit of promoting it."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "A refund and an unrelated order-lookup must not run in the same turn so the refund can be confirmed in isolation. What do you set?",
           "choices": [
-            { "id": "a", "text": "disable_parallel_tool_use: true so the model emits one tool call per turn", "verdict": "best", "rationale": "Forcing one tool per turn lets you intercept and confirm the side-effecting refund cleanly, without a parallel lookup muddying the turn." },
-            { "id": "b", "text": "strict: true on both tools", "verdict": "wrong", "rationale": "strict validates arguments against the schema; it does nothing about how many tools run in a turn." },
-            { "id": "c", "text": "Leave parallelism on and just hope the model serialises them", "verdict": "viable", "rationale": "Default parallelism may emit both at once; relying on luck for a money action is fragile. Disable parallel use to make it deterministic." }
+            {
+              "id": "a",
+              "text": "disable_parallel_tool_use: true so the model emits one tool call per turn",
+              "verdict": "best",
+              "rationale": "Forcing one tool per turn lets you intercept and confirm the side-effecting refund cleanly, without a parallel lookup muddying the turn."
+            },
+            {
+              "id": "b",
+              "text": "strict: true on both tools",
+              "verdict": "wrong",
+              "rationale": "strict validates arguments against the schema; it does nothing about how many tools run in a turn."
+            },
+            {
+              "id": "c",
+              "text": "Leave parallelism on and just hope the model serialises them",
+              "verdict": "viable",
+              "rationale": "Default parallelism may emit both at once; relying on luck for a money action is fragile. Disable parallel use to make it deterministic."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "The payment API returns a 500 mid-refund. What does the tool return to the model?",
           "choices": [
-            { "id": "a", "text": "A tool_result with is_error: true and a message like 'Payment gateway returned 500; refund not applied, safe to retry'", "verdict": "best", "rationale": "An honest, actionable error lets the model retry or escalate instead of assuming the refund went through — critical when the action is irreversible." },
-            { "id": "b", "text": "A fake success so the conversation stays smooth", "verdict": "wrong", "rationale": "Faking success on a failed refund is dangerous: the model (and user) believe money moved when it didn't." },
-            { "id": "c", "text": "An empty tool_result and let the model infer something went wrong", "verdict": "viable", "rationale": "Better than a fake success, but an empty result gives the model nothing to act on; an informative is_error message is far stronger." }
+            {
+              "id": "a",
+              "text": "A tool_result with is_error: true and a message like 'Payment gateway returned 500; refund not applied, safe to retry'",
+              "verdict": "best",
+              "rationale": "An honest, actionable error lets the model retry or escalate instead of assuming the refund went through — critical when the action is irreversible."
+            },
+            {
+              "id": "b",
+              "text": "A fake success so the conversation stays smooth",
+              "verdict": "wrong",
+              "rationale": "Faking success on a failed refund is dangerous: the model (and user) believe money moved when it didn't."
+            },
+            {
+              "id": "c",
+              "text": "An empty tool_result and let the model infer something went wrong",
+              "verdict": "viable",
+              "rationale": "Better than a fake success, but an empty result gives the model nothing to act on; an informative is_error message is far stronger."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-docs"]
+      "sourceRefs": [
+        "r-docs"
+      ]
     },
     {
       "id": "s-d2-mcp",
-      "domainIds": ["d2-tools-mcp"],
+      "domainIds": [
+        "d2-tools-mcp"
+      ],
       "title": "Connecting a managed agent to a GitHub MCP server",
       "tagline": "Declaration, auth, hosted vs custom tools, and scaling the tool library.",
       "context": "A Managed Agent must use a remote GitHub MCP server to read issues and open PRs, plus pull live release notes from the web. You're wiring the connections and auth, and the agent will eventually have many MCP servers attached.",
@@ -441,40 +844,103 @@
           "id": "st1",
           "prompt": "How do you declare the GitHub MCP server?",
           "choices": [
-            { "id": "a", "text": "{ type: 'url', name: 'github', url: '…' } with no credentials in the declaration", "verdict": "best", "rationale": "Servers are declared by url with auth handled separately — keeping credentials out of the declaration is the documented pattern." },
-            { "id": "b", "text": "Put the GitHub REST token inside the server object as api_key", "verdict": "wrong", "rationale": "Auth is never inline in the declaration, and the REST token is usually the wrong credential type anyway." },
-            { "id": "c", "text": "Skip MCP and re-implement each GitHub action as a hand-written bash curl tool", "verdict": "viable", "rationale": "It works but throws away MCP's ready-made, maintained tools/resources/prompts and adds a pile of opaque bash to gate yourself." }
+            {
+              "id": "a",
+              "text": "{ type: 'url', name: 'github', url: '…' } with no credentials in the declaration",
+              "verdict": "best",
+              "rationale": "Servers are declared by url with auth handled separately — keeping credentials out of the declaration is the documented pattern."
+            },
+            {
+              "id": "b",
+              "text": "Put the GitHub REST token inside the server object as api_key",
+              "verdict": "wrong",
+              "rationale": "Auth is never inline in the declaration, and the REST token is usually the wrong credential type anyway."
+            },
+            {
+              "id": "c",
+              "text": "Skip MCP and re-implement each GitHub action as a hand-written bash curl tool",
+              "verdict": "viable",
+              "rationale": "It works but throws away MCP's ready-made, maintained tools/resources/prompts and adds a pile of opaque bash to gate yourself."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "The GitHub MCP server expects OAuth. How do you supply auth in the managed agent?",
           "choices": [
-            { "id": "a", "text": "Provision an OAuth credential and attach it via vault_ids on the session; let Anthropic auto-refresh the token", "verdict": "best", "rationale": "Vaults are the auth mechanism for hosted MCP; Anthropic stores the credential and refreshes OAuth so calls keep working." },
-            { "id": "b", "text": "Store your GitHub REST personal-access token in a vault and assume it works", "verdict": "wrong", "rationale": "Hosted MCP usually wants an OAuth bearer token, not the service's REST API key — different auth systems. The PAT is the wrong credential type." },
-            { "id": "c", "text": "Hard-code a long-lived token and refresh it yourself on a cron", "verdict": "viable", "rationale": "Technically possible but reinvents refresh that vaults already handle, and long-lived tokens are a security liability." }
+            {
+              "id": "a",
+              "text": "Provision an OAuth credential and attach it via vault_ids on the session; let Anthropic auto-refresh the token",
+              "verdict": "best",
+              "rationale": "Vaults are the auth mechanism for hosted MCP; Anthropic stores the credential and refreshes OAuth so calls keep working."
+            },
+            {
+              "id": "b",
+              "text": "Store your GitHub REST personal-access token in a vault and assume it works",
+              "verdict": "wrong",
+              "rationale": "Hosted MCP usually wants an OAuth bearer token, not the service's REST API key — different auth systems. The PAT is the wrong credential type."
+            },
+            {
+              "id": "c",
+              "text": "Hard-code a long-lived token and refresh it yourself on a cron",
+              "verdict": "viable",
+              "rationale": "Technically possible but reinvents refresh that vaults already handle, and long-lived tokens are a security liability."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "The agent also needs current release notes from the public web. Best tool choice?",
           "choices": [
-            { "id": "a", "text": "The hosted web_fetch / web_search tools, which return cited results", "verdict": "best", "rationale": "Live web data with citations is exactly what the hosted web tools provide, run on Anthropic infra and declared in tools[]." },
-            { "id": "b", "text": "A bash tool running curl against the release page", "verdict": "viable", "rationale": "It can fetch bytes but gives you no citations, no managed sandbox, and an opaque command to gate. The hosted tool is the cleaner fit." },
-            { "id": "c", "text": "code_execution that downloads the page in Python", "verdict": "wrong", "rationale": "Plain code_execution is sandboxed with no general internet access, so the fetch fails. Use web_fetch for live web content." }
+            {
+              "id": "a",
+              "text": "The hosted web_fetch / web_search tools, which return cited results",
+              "verdict": "best",
+              "rationale": "Live web data with citations is exactly what the hosted web tools provide, run on Anthropic infra and declared in tools[]."
+            },
+            {
+              "id": "b",
+              "text": "A bash tool running curl against the release page",
+              "verdict": "viable",
+              "rationale": "It can fetch bytes but gives you no citations, no managed sandbox, and an opaque command to gate. The hosted tool is the cleaner fit."
+            },
+            {
+              "id": "c",
+              "text": "code_execution that downloads the page in Python",
+              "verdict": "wrong",
+              "rationale": "Plain code_execution is sandboxed with no general internet access, so the fetch fails. Use web_fetch for live web content."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "Over time the agent accumulates many MCP servers and hundreds of tools, bloating the prompt. What do you enable?",
           "choices": [
-            { "id": "a", "text": "Tool search, so Claude discovers relevant tools on demand and their schemas are appended", "verdict": "best", "rationale": "Tool search avoids loading every schema up front; appending the matched schemas keeps the prompt cache valid while still surfacing the right tools." },
-            { "id": "b", "text": "Manually delete servers until only a handful remain", "verdict": "viable", "rationale": "It shrinks the prompt but at the cost of capability; tool search keeps the breadth without the upfront token bloat." },
-            { "id": "c", "text": "Swap tool schemas in and out of the prompt each turn to save tokens", "verdict": "wrong", "rationale": "Swapping changes the cached prefix and busts the prompt cache; tool search deliberately appends instead, for exactly that reason." }
+            {
+              "id": "a",
+              "text": "Tool search, so Claude discovers relevant tools on demand and their schemas are appended",
+              "verdict": "best",
+              "rationale": "Tool search avoids loading every schema up front; appending the matched schemas keeps the prompt cache valid while still surfacing the right tools."
+            },
+            {
+              "id": "b",
+              "text": "Manually delete servers until only a handful remain",
+              "verdict": "viable",
+              "rationale": "It shrinks the prompt but at the cost of capability; tool search keeps the breadth without the upfront token bloat."
+            },
+            {
+              "id": "c",
+              "text": "Swap tool schemas in and out of the prompt each turn to save tokens",
+              "verdict": "wrong",
+              "rationale": "Swapping changes the cached prefix and busts the prompt cache; tool search deliberately appends instead, for exactly that reason."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-docs", "r-mcp"]
+      "sourceRefs": [
+        "r-docs",
+        "r-mcp"
+      ]
     }
   ],
   "labs": [
@@ -507,14 +973,57 @@
     }
   ],
   "resources": [
-    { "id": "r-d2-tooluse", "title": "Tool use overview (Anthropic)", "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview", "kind": "official-doc", "annotation": "Extract the tool object shape (name/description/input_schema), tool_choice options, disable_parallel_tool_use, and the is_error tool_result. The backbone of D2.", "domainIds": ["d2-tools-mcp"] },
-    { "id": "r-d2-mcp-spec", "title": "Model Context Protocol — spec & concepts", "url": "https://modelcontextprotocol.io/", "kind": "spec", "annotation": "Read the transport (Streamable HTTP/SSE) and the tools/resources/prompts sections. Extract what a server exposes and how a client connects.", "domainIds": ["d2-tools-mcp"] },
-    { "id": "r-d2-mcp-connector", "title": "MCP connector / connecting to remote servers", "url": "https://platform.claude.com/docs/en/agents-and-tools/mcp-connector", "kind": "official-doc", "annotation": "Extract how mcp_servers is declared ({type:'url', name, url}) and that auth is handled separately — the source for the OAuth-vs-REST-key distinction.", "domainIds": ["d2-tools-mcp"] },
-    { "id": "r-d2-servertools", "title": "Server-side tools: web search, code execution, memory", "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool", "kind": "official-doc", "annotation": "Extract which tools run on Anthropic infra, that web_search/web_fetch return citations, and that plain code_execution has no general internet access.", "domainIds": ["d2-tools-mcp"] }
+    {
+      "id": "r-d2-tooluse",
+      "title": "Tool use overview (Anthropic)",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+      "kind": "official-doc",
+      "annotation": "Extract the tool object shape (name/description/input_schema), tool_choice options, disable_parallel_tool_use, and the is_error tool_result. The backbone of D2.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-mcp-spec",
+      "title": "Model Context Protocol — spec & concepts",
+      "url": "https://modelcontextprotocol.io/",
+      "kind": "spec",
+      "annotation": "Read the transport (Streamable HTTP/SSE) and the tools/resources/prompts sections. Extract what a server exposes and how a client connects.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-mcp-connector",
+      "title": "MCP connector / connecting to remote servers",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/mcp-connector",
+      "kind": "official-doc",
+      "annotation": "Extract how mcp_servers is declared ({type:'url', name, url}) and that auth is handled separately — the source for the OAuth-vs-REST-key distinction.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-servertools",
+      "title": "Server-side tools: web search, code execution, memory",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+      "kind": "official-doc",
+      "annotation": "Extract which tools run on Anthropic infra, that web_search/web_fetch return citations, and that plain code_execution has no general internet access.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    }
   ],
   "videos": [
-    { "id": "v-d2-1", "title": "D2 · Writing tools the model reaches for", "provider": "youtube", "url": "", "domainIds": ["d2-tools-mcp"], "sourceNotebook": "cca-f / domain 2", "status": "placeholder" },
-    { "id": "v-d2-2", "title": "D2 · tool_choice, parallelism & honest errors", "provider": "youtube", "url": "", "domainIds": ["d2-tools-mcp"], "sourceNotebook": "cca-f / domain 2", "status": "placeholder" },
-    { "id": "v-d2-3", "title": "D2 · MCP servers and the OAuth-vs-API-key trap", "provider": "youtube", "url": "", "domainIds": ["d2-tools-mcp"], "sourceNotebook": "cca-f / domain 2", "status": "placeholder" }
+    {
+      "id": "v-d2-1",
+      "title": "Tool design & MCP — domain overview",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d2.mp4",
+      "status": "published",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    }
   ]
 }

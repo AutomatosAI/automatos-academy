@@ -3,7 +3,7 @@
   "order": 3,
   "code": "D3",
   "name": "Agent Operations & Claude Code",
-  "weight": 0.20,
+  "weight": 0.2,
   "tagline": "Configure the harness: memory precedence, hooks that actually block, permissions, MCP, and headless CI runs.",
   "overview": "This domain moves from API theory to operating a real agent harness. It tests how you configure Claude Code: the CLAUDE.md memory hierarchy and its precedence, slash commands and subagents, hooks that deterministically gate or react to tool calls, the permissions and settings.json model, MCP wiring, plan mode, and headless usage for CI and bulk work. The throughline is one distinction: CLAUDE.md is context the model may follow, while hooks and permissions are enforcement the harness applies regardless.",
   "objectives": [
@@ -28,13 +28,28 @@
           "difficulty": 2,
           "stem": "A user `~/.claude/CLAUDE.md` says 'use tabs'; the project `./CLAUDE.md` says 'use 2-space indentation'. Which wins, and why?",
           "options": [
-            { "id": "a", "text": "The project file — it loads after the user file (closer scope read last), so it takes precedence", "correct": true },
-            { "id": "b", "text": "The user file — home-directory settings always override project settings" },
-            { "id": "c", "text": "Whichever file is alphabetically first" },
-            { "id": "d", "text": "Neither loads; conflicting memory files are skipped entirely" }
+            {
+              "id": "a",
+              "text": "The project file — it loads after the user file (closer scope read last), so it takes precedence",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The user file — home-directory settings always override project settings"
+            },
+            {
+              "id": "c",
+              "text": "Whichever file is alphabetically first"
+            },
+            {
+              "id": "d",
+              "text": "Neither loads; conflicting memory files are skipped entirely"
+            }
           ],
           "explanation": "Memory files are concatenated broadest-to-most-specific, and content closer to the working directory is read last — so the project instruction effectively overrides the user one. They aren't skipped; the more-specific scope simply wins. Managed policy would beat both.",
-          "sourceRefs": ["r-d3-memory"]
+          "sourceRefs": [
+            "r-d3-memory"
+          ]
         },
         {
           "id": "kc-d3-2",
@@ -43,13 +58,29 @@
           "difficulty": 2,
           "stem": "Compliance requires that the agent NEVER run `git push` to main. Where does this belong?",
           "options": [
-            { "id": "a", "text": "A permission deny rule (or a PreToolUse hook) — CLAUDE.md is context the model may not follow", "correct": true },
-            { "id": "b", "text": "A bold 'NEVER push to main' line in the project CLAUDE.md" },
-            { "id": "c", "text": "The user CLAUDE.md, so it applies everywhere" },
-            { "id": "d", "text": "A comment inside CLAUDE.md, which is enforced at runtime" }
+            {
+              "id": "a",
+              "text": "A permission deny rule (or a PreToolUse hook) — CLAUDE.md is context the model may not follow",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A bold 'NEVER push to main' line in the project CLAUDE.md"
+            },
+            {
+              "id": "c",
+              "text": "The user CLAUDE.md, so it applies everywhere"
+            },
+            {
+              "id": "d",
+              "text": "A comment inside CLAUDE.md, which is enforced at runtime"
+            }
           ],
           "explanation": "CLAUDE.md shapes behaviour but is not enforced — Claude can still deviate. A hard guarantee comes from `permissions.deny` or a PreToolUse hook, which the harness applies regardless of what the model decides.",
-          "sourceRefs": ["r-d3-memory", "r-d3-settings"]
+          "sourceRefs": [
+            "r-d3-memory",
+            "r-d3-settings"
+          ]
         },
         {
           "id": "kc-d3-3",
@@ -58,13 +89,28 @@
           "difficulty": 1,
           "stem": "What is `CLAUDE.local.md` for?",
           "options": [
-            { "id": "a", "text": "A gitignored, personal, project-specific memory file (e.g. your sandbox URLs)", "correct": true },
-            { "id": "b", "text": "The highest-precedence org-wide policy file" },
-            { "id": "c", "text": "A backup of CLAUDE.md created automatically" },
-            { "id": "d", "text": "A file that disables all other memory files" }
+            {
+              "id": "a",
+              "text": "A gitignored, personal, project-specific memory file (e.g. your sandbox URLs)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The highest-precedence org-wide policy file"
+            },
+            {
+              "id": "c",
+              "text": "A backup of CLAUDE.md created automatically"
+            },
+            {
+              "id": "d",
+              "text": "A file that disables all other memory files"
+            }
           ],
           "explanation": "`CLAUDE.local.md` is the personal variant of the project memory: it loads alongside `CLAUDE.md` but you add it to `.gitignore` so your private preferences aren't committed. It is not org policy and overrides nothing by authority.",
-          "sourceRefs": ["r-d3-memory"]
+          "sourceRefs": [
+            "r-d3-memory"
+          ]
         }
       ]
     },
@@ -82,13 +128,28 @@
           "difficulty": 1,
           "stem": "You add `release.md` to your repo's `.claude/commands/` directory. What does it create?",
           "options": [
-            { "id": "a", "text": "A project slash command `/release`, shared with the team via git", "correct": true },
-            { "id": "b", "text": "A personal command available only to you across all projects" },
-            { "id": "c", "text": "A subagent named release with its own context window" },
-            { "id": "d", "text": "Nothing until you register it in settings.json" }
+            {
+              "id": "a",
+              "text": "A project slash command `/release`, shared with the team via git",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A personal command available only to you across all projects"
+            },
+            {
+              "id": "c",
+              "text": "A subagent named release with its own context window"
+            },
+            {
+              "id": "d",
+              "text": "Nothing until you register it in settings.json"
+            }
           ],
           "explanation": "A Markdown file in the project's `.claude/commands/` becomes `/<filename>` — here `/release` — and is committed with the repo, so the whole team gets it. Personal commands live in `~/.claude/commands/`. No settings.json registration is needed.",
-          "sourceRefs": ["r-d3-skills"]
+          "sourceRefs": [
+            "r-d3-skills"
+          ]
         },
         {
           "id": "kc-d3-5",
@@ -97,13 +158,28 @@
           "difficulty": 2,
           "stem": "What is the defining property of a skill's progressive disclosure?",
           "options": [
-            { "id": "a", "text": "Only the short description is always in context; the full SKILL.md body loads when the skill is invoked", "correct": true },
-            { "id": "b", "text": "The entire skill loads in full at the start of every session, like CLAUDE.md" },
-            { "id": "c", "text": "Skills are encrypted until a password is supplied" },
-            { "id": "d", "text": "The skill body is summarised by the model before it loads" }
+            {
+              "id": "a",
+              "text": "Only the short description is always in context; the full SKILL.md body loads when the skill is invoked",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The entire skill loads in full at the start of every session, like CLAUDE.md"
+            },
+            {
+              "id": "c",
+              "text": "Skills are encrypted until a password is supplied"
+            },
+            {
+              "id": "d",
+              "text": "The skill body is summarised by the model before it loads"
+            }
           ],
           "explanation": "Progressive disclosure means the description sits in context so Claude knows the skill exists, but the (potentially long) body only enters context on invocation. That keeps reference material cheap. CLAUDE.md, by contrast, loads in full every session.",
-          "sourceRefs": ["r-d3-skills"]
+          "sourceRefs": [
+            "r-d3-skills"
+          ]
         },
         {
           "id": "kc-d3-6",
@@ -112,13 +188,28 @@
           "difficulty": 2,
           "stem": "Why route a noisy codebase search to a subagent instead of doing it in the main conversation?",
           "options": [
-            { "id": "a", "text": "The subagent runs in its own context window and returns only a summary, keeping logs and file dumps out of the main thread", "correct": true },
-            { "id": "b", "text": "Subagents are the only thing that can read files" },
-            { "id": "c", "text": "A subagent shares the main conversation's context, so nothing is isolated" },
-            { "id": "d", "text": "Subagents bypass all permission checks by default" }
+            {
+              "id": "a",
+              "text": "The subagent runs in its own context window and returns only a summary, keeping logs and file dumps out of the main thread",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Subagents are the only thing that can read files"
+            },
+            {
+              "id": "c",
+              "text": "A subagent shares the main conversation's context, so nothing is isolated"
+            },
+            {
+              "id": "d",
+              "text": "Subagents bypass all permission checks by default"
+            }
           ],
           "explanation": "Each subagent has its own context window, system prompt, and tool access; it does the heavy exploration and hands back a summary, preserving the main context. It does not share that context, and it does not bypass permissions.",
-          "sourceRefs": ["r-d3-subagents"]
+          "sourceRefs": [
+            "r-d3-subagents"
+          ]
         }
       ]
     },
@@ -136,13 +227,28 @@
           "difficulty": 2,
           "stem": "A PreToolUse hook exits with code 2 and writes 'secrets path is off-limits' to stderr. What happens?",
           "options": [
-            { "id": "a", "text": "The tool call is blocked and the stderr text is returned to Claude as the reason", "correct": true },
-            { "id": "b", "text": "The tool runs anyway; exit codes are advisory" },
-            { "id": "c", "text": "The whole session terminates immediately" },
-            { "id": "d", "text": "stderr is discarded; only stdout JSON can block" }
+            {
+              "id": "a",
+              "text": "The tool call is blocked and the stderr text is returned to Claude as the reason",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The tool runs anyway; exit codes are advisory"
+            },
+            {
+              "id": "c",
+              "text": "The whole session terminates immediately"
+            },
+            {
+              "id": "d",
+              "text": "stderr is discarded; only stdout JSON can block"
+            }
           ],
           "explanation": "Exit code 2 from a PreToolUse hook blocks the tool call, and its stderr is fed back to Claude as the explanation. (A JSON `permissionDecision: deny` on exit 0 is the alternative path.) Exit codes are not advisory for hooks.",
-          "sourceRefs": ["r-d3-hooks"]
+          "sourceRefs": [
+            "r-d3-hooks"
+          ]
         },
         {
           "id": "kc-d3-8",
@@ -151,13 +257,28 @@
           "difficulty": 2,
           "stem": "You want every Python file auto-formatted right after Claude edits it. Which hook event?",
           "options": [
-            { "id": "a", "text": "PostToolUse, matched to the edit tools", "correct": true },
-            { "id": "b", "text": "PreToolUse, so it runs before the edit" },
-            { "id": "c", "text": "Stop, so it runs once at the end" },
-            { "id": "d", "text": "SessionStart, so it runs at launch" }
+            {
+              "id": "a",
+              "text": "PostToolUse, matched to the edit tools",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "PreToolUse, so it runs before the edit"
+            },
+            {
+              "id": "c",
+              "text": "Stop, so it runs once at the end"
+            },
+            {
+              "id": "d",
+              "text": "SessionStart, so it runs at launch"
+            }
           ],
           "explanation": "Auto-format-after-edit is the canonical **PostToolUse** use case — it fires after the edit tool succeeds. PreToolUse runs before (nothing to format yet); Stop/SessionStart fire at session boundaries, not per edit.",
-          "sourceRefs": ["r-d3-hooks"]
+          "sourceRefs": [
+            "r-d3-hooks"
+          ]
         },
         {
           "id": "kc-d3-9",
@@ -166,13 +287,28 @@
           "difficulty": 1,
           "stem": "What is plan mode?",
           "options": [
-            { "id": "a", "text": "A read-only phase where Claude proposes a plan and waits for approval before making any changes", "correct": true },
-            { "id": "b", "text": "A mode that auto-accepts all edits to move faster" },
-            { "id": "c", "text": "A mode that skips all permission prompts" },
-            { "id": "d", "text": "A billing tier for long-running agents" }
+            {
+              "id": "a",
+              "text": "A read-only phase where Claude proposes a plan and waits for approval before making any changes",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A mode that auto-accepts all edits to move faster"
+            },
+            {
+              "id": "c",
+              "text": "A mode that skips all permission prompts"
+            },
+            {
+              "id": "d",
+              "text": "A billing tier for long-running agents"
+            }
           ],
           "explanation": "Plan mode is read-only: the agent analyses and presents a plan, making no edits until you approve. `acceptEdits` and `bypassPermissions` are the opposite — they reduce or remove prompts. Plan mode is the gate, not the accelerator.",
-          "sourceRefs": ["r-d3-subagents"]
+          "sourceRefs": [
+            "r-d3-subagents"
+          ]
         }
       ]
     },
@@ -190,13 +326,28 @@
           "difficulty": 2,
           "stem": "`Bash(git push:*)` is in `deny`; a broad `Bash(git:*)` is in `allow`. Can the agent run `git push`?",
           "options": [
-            { "id": "a", "text": "No — deny takes precedence over allow when both match", "correct": true },
-            { "id": "b", "text": "Yes — the more general allow rule wins" },
-            { "id": "c", "text": "Yes — the agent is prompted and may proceed" },
-            { "id": "d", "text": "Only if the deny rule is in a lower-precedence file" }
+            {
+              "id": "a",
+              "text": "No — deny takes precedence over allow when both match",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Yes — the more general allow rule wins"
+            },
+            {
+              "id": "c",
+              "text": "Yes — the agent is prompted and may proceed"
+            },
+            {
+              "id": "d",
+              "text": "Only if the deny rule is in a lower-precedence file"
+            }
           ],
           "explanation": "Deny always wins. When an action matches both an allow and a deny rule, it is blocked — that's what makes deny a safe guardrail. The scope a deny rule lives in doesn't change this; deny outranks allow regardless.",
-          "sourceRefs": ["r-d3-settings"]
+          "sourceRefs": [
+            "r-d3-settings"
+          ]
         },
         {
           "id": "kc-d3-11",
@@ -205,13 +356,28 @@
           "difficulty": 2,
           "stem": "Your team wants a shared MCP server every developer gets, version-controlled with the repo. Which scope and file?",
           "options": [
-            { "id": "a", "text": "Project scope, stored in .mcp.json at the repo root", "correct": true },
-            { "id": "b", "text": "Local scope, stored in ~/.claude.json" },
-            { "id": "c", "text": "User scope, available across all your projects" },
-            { "id": "d", "text": "Managed policy only, set by IT" }
+            {
+              "id": "a",
+              "text": "Project scope, stored in .mcp.json at the repo root",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Local scope, stored in ~/.claude.json"
+            },
+            {
+              "id": "c",
+              "text": "User scope, available across all your projects"
+            },
+            {
+              "id": "d",
+              "text": "Managed policy only, set by IT"
+            }
           ],
           "explanation": "Project scope writes to `.mcp.json` at the repo root, which is checked into version control so the whole team shares it. Local scope is private and lives in `~/.claude.json`; user scope is personal across projects.",
-          "sourceRefs": ["r-d3-mcp"]
+          "sourceRefs": [
+            "r-d3-mcp"
+          ]
         },
         {
           "id": "kc-d3-12",
@@ -220,13 +386,28 @@
           "difficulty": 1,
           "stem": "Which `--output-format` gives a CI script the result plus session id and cost as a parseable object?",
           "options": [
-            { "id": "a", "text": "json", "correct": true },
-            { "id": "b", "text": "text" },
-            { "id": "c", "text": "stream-json" },
-            { "id": "d", "text": "yaml" }
+            {
+              "id": "a",
+              "text": "json",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "text"
+            },
+            {
+              "id": "c",
+              "text": "stream-json"
+            },
+            {
+              "id": "d",
+              "text": "yaml"
+            }
           ],
           "explanation": "`--output-format json` returns a structured object with the `result`, `session_id`, and usage/cost metadata — ideal for `jq`. `text` is plain output; `stream-json` is newline-delimited events for live streaming, not a single object.",
-          "sourceRefs": ["r-d3-headless"]
+          "sourceRefs": [
+            "r-d3-headless"
+          ]
         }
       ]
     }
@@ -239,13 +420,28 @@
       "difficulty": 1,
       "stem": "Which CLAUDE.md location has the highest authority and cannot be excluded by an individual developer?",
       "options": [
-        { "id": "a", "text": "Managed policy (e.g. /Library/Application Support/ClaudeCode/CLAUDE.md)", "correct": true },
-        { "id": "b", "text": "Project — ./CLAUDE.md" },
-        { "id": "c", "text": "User — ~/.claude/CLAUDE.md" },
-        { "id": "d", "text": "CLAUDE.local.md" }
+        {
+          "id": "a",
+          "text": "Managed policy (e.g. /Library/Application Support/ClaudeCode/CLAUDE.md)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Project — ./CLAUDE.md"
+        },
+        {
+          "id": "c",
+          "text": "User — ~/.claude/CLAUDE.md"
+        },
+        {
+          "id": "d",
+          "text": "CLAUDE.local.md"
+        }
       ],
       "explanation": "Managed policy CLAUDE.md is deployed by IT and cannot be excluded by individual settings — that's its purpose for org-wide standards. Project and user files are lower authority; CLAUDE.local.md is just a gitignored personal file.",
-      "sourceRefs": ["r-d3-memory"]
+      "sourceRefs": [
+        "r-d3-memory"
+      ]
     },
     {
       "id": "q-d3-2",
@@ -254,13 +450,28 @@
       "difficulty": 2,
       "stem": "Running in `repo/services/api/`, you have `repo/CLAUDE.md` and `repo/services/api/CLAUDE.md`. How are they applied?",
       "options": [
-        { "id": "a", "text": "Both are concatenated; the deeper api/CLAUDE.md is read last, so it wins conflicts", "correct": true },
-        { "id": "b", "text": "Only the root CLAUDE.md loads; nested files are ignored" },
-        { "id": "c", "text": "Only the deepest CLAUDE.md loads; the root is ignored" },
-        { "id": "d", "text": "They are merged alphabetically by directory name" }
+        {
+          "id": "a",
+          "text": "Both are concatenated; the deeper api/CLAUDE.md is read last, so it wins conflicts",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Only the root CLAUDE.md loads; nested files are ignored"
+        },
+        {
+          "id": "c",
+          "text": "Only the deepest CLAUDE.md loads; the root is ignored"
+        },
+        {
+          "id": "d",
+          "text": "They are merged alphabetically by directory name"
+        }
       ],
       "explanation": "Claude walks up the tree and concatenates every CLAUDE.md root-to-leaf, so the closer (deeper) file is read last and effectively overrides the parent on conflicts. Both apply — nothing is dropped.",
-      "sourceRefs": ["r-d3-memory"]
+      "sourceRefs": [
+        "r-d3-memory"
+      ]
     },
     {
       "id": "q-d3-3",
@@ -269,13 +480,29 @@
       "difficulty": 3,
       "stem": "A team wrote 'always run the linter before committing' into CLAUDE.md, but the agent still sometimes commits without linting. What's the correct fix?",
       "options": [
-        { "id": "a", "text": "Move it to a hook that runs the linter at the commit point — CLAUDE.md is best-effort, not enforced", "correct": true },
-        { "id": "b", "text": "Put the same line in the user CLAUDE.md as well for redundancy" },
-        { "id": "c", "text": "Capitalise and bold the instruction so the model obeys" },
-        { "id": "d", "text": "Add the instruction to .mcp.json" }
+        {
+          "id": "a",
+          "text": "Move it to a hook that runs the linter at the commit point — CLAUDE.md is best-effort, not enforced",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Put the same line in the user CLAUDE.md as well for redundancy"
+        },
+        {
+          "id": "c",
+          "text": "Capitalise and bold the instruction so the model obeys"
+        },
+        {
+          "id": "d",
+          "text": "Add the instruction to .mcp.json"
+        }
       ],
       "explanation": "CLAUDE.md shapes behaviour but cannot guarantee it. An instruction that *must* run at a specific lifecycle point belongs in a hook, which the harness executes deterministically. Duplicating or shouting the instruction doesn't change that it's non-enforced.",
-      "sourceRefs": ["r-d3-memory", "r-d3-hooks"]
+      "sourceRefs": [
+        "r-d3-memory",
+        "r-d3-hooks"
+      ]
     },
     {
       "id": "q-d3-4",
@@ -284,13 +511,28 @@
       "difficulty": 2,
       "stem": "Which hook event can prevent a tool call from executing at all?",
       "options": [
-        { "id": "a", "text": "PreToolUse", "correct": true },
-        { "id": "b", "text": "PostToolUse" },
-        { "id": "c", "text": "Stop" },
-        { "id": "d", "text": "SessionEnd" }
+        {
+          "id": "a",
+          "text": "PreToolUse",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "PostToolUse"
+        },
+        {
+          "id": "c",
+          "text": "Stop"
+        },
+        {
+          "id": "d",
+          "text": "SessionEnd"
+        }
       ],
       "explanation": "Only PreToolUse fires before the tool runs and can block it (exit code 2, or JSON `permissionDecision: deny`). PostToolUse runs after success; Stop and SessionEnd fire at session boundaries and can't block a specific call.",
-      "sourceRefs": ["r-d3-hooks"]
+      "sourceRefs": [
+        "r-d3-hooks"
+      ]
     },
     {
       "id": "q-d3-5",
@@ -299,13 +541,28 @@
       "difficulty": 2,
       "stem": "In `permissions`, an action matches a rule in `allow` and also a rule in `deny`. What is the outcome?",
       "options": [
-        { "id": "a", "text": "It is denied — deny takes precedence over allow", "correct": true },
-        { "id": "b", "text": "It is allowed — allow is listed first conceptually" },
-        { "id": "c", "text": "The user is always prompted to decide" },
-        { "id": "d", "text": "It depends on which file is alphabetically first" }
+        {
+          "id": "a",
+          "text": "It is denied — deny takes precedence over allow",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is allowed — allow is listed first conceptually"
+        },
+        {
+          "id": "c",
+          "text": "The user is always prompted to decide"
+        },
+        {
+          "id": "d",
+          "text": "It depends on which file is alphabetically first"
+        }
       ],
       "explanation": "Deny wins. The deny list is the hard guardrail; an allow rule never overrides it. (allow and ask arrays merge across scopes, but deny still trumps a match.)",
-      "sourceRefs": ["r-d3-settings"]
+      "sourceRefs": [
+        "r-d3-settings"
+      ]
     },
     {
       "id": "q-d3-6",
@@ -314,13 +571,28 @@
       "difficulty": 1,
       "stem": "What does `claude -p \"summarise this repo\"` do?",
       "options": [
-        { "id": "a", "text": "Runs Claude Code non-interactively (print mode) and returns the result, suitable for scripts and CI", "correct": true },
-        { "id": "b", "text": "Opens an interactive REPL session" },
-        { "id": "c", "text": "Permanently changes the project's permissions" },
-        { "id": "d", "text": "Creates a new MCP server named summarise" }
+        {
+          "id": "a",
+          "text": "Runs Claude Code non-interactively (print mode) and returns the result, suitable for scripts and CI",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Opens an interactive REPL session"
+        },
+        {
+          "id": "c",
+          "text": "Permanently changes the project's permissions"
+        },
+        {
+          "id": "d",
+          "text": "Creates a new MCP server named summarise"
+        }
       ],
       "explanation": "`-p` / `--print` is headless mode: one prompt in, the result out, no interactive UI — the basis for automation. It doesn't open a REPL, change permissions, or create servers.",
-      "sourceRefs": ["r-d3-headless"]
+      "sourceRefs": [
+        "r-d3-headless"
+      ]
     },
     {
       "id": "q-d3-7",
@@ -329,13 +601,28 @@
       "difficulty": 2,
       "stem": "You must process 60,000 documents for classification overnight, cost-sensitive, no latency requirement. Best mechanism?",
       "options": [
-        { "id": "a", "text": "The Message Batches API — async, 50% cost, up to 100k requests, within 24h", "correct": true },
-        { "id": "b", "text": "60,000 interactive single calls in a tight loop" },
-        { "id": "c", "text": "A single Messages request with all 60,000 documents inlined" },
-        { "id": "d", "text": "A multi-agent Claude Code session per document" }
+        {
+          "id": "a",
+          "text": "The Message Batches API — async, 50% cost, up to 100k requests, within 24h",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "60,000 interactive single calls in a tight loop"
+        },
+        {
+          "id": "c",
+          "text": "A single Messages request with all 60,000 documents inlined"
+        },
+        {
+          "id": "d",
+          "text": "A multi-agent Claude Code session per document"
+        }
       ],
       "explanation": "Bulk, non-latency-sensitive work is exactly the Batches API's niche: asynchronous at half price, up to 100,000 requests per batch within a 24-hour window. A serial loop is slow and full-price; one giant request won't fit; per-doc agents are wild overkill.",
-      "sourceRefs": ["r-d3-batches"]
+      "sourceRefs": [
+        "r-d3-batches"
+      ]
     },
     {
       "id": "q-d3-8",
@@ -344,13 +631,28 @@
       "difficulty": 3,
       "stem": "A `.mcp.json` server appears as 'pending approval' in a teammate's clone and its tools aren't available. Why — and is this correct?",
       "options": [
-        { "id": "a", "text": "Project-scoped servers from version control require explicit approval before loading — yes, this is the intended safety gate", "correct": true },
-        { "id": "b", "text": "The file is corrupt; .mcp.json never needs approval" },
-        { "id": "c", "text": "Project scope is deprecated; only local scope loads" },
-        { "id": "d", "text": "Their user settings disabled MCP globally and must be reset" }
+        {
+          "id": "a",
+          "text": "Project-scoped servers from version control require explicit approval before loading — yes, this is the intended safety gate",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The file is corrupt; .mcp.json never needs approval"
+        },
+        {
+          "id": "c",
+          "text": "Project scope is deprecated; only local scope loads"
+        },
+        {
+          "id": "d",
+          "text": "Their user settings disabled MCP globally and must be reset"
+        }
       ],
       "explanation": "Because `.mcp.json` is checked into the repo, a project-scoped server runs only after the user approves it — code from a repo shouldn't auto-execute arbitrary servers. The behaviour is correct, not a corruption or a global toggle.",
-      "sourceRefs": ["r-d3-mcp"]
+      "sourceRefs": [
+        "r-d3-mcp"
+      ]
     },
     {
       "id": "q-d3-9",
@@ -359,13 +661,28 @@
       "difficulty": 2,
       "stem": "Which statement about subagents is correct?",
       "options": [
-        { "id": "a", "text": "Each subagent runs in its own context window with its own system prompt and tool access", "correct": true },
-        { "id": "b", "text": "Subagents share the parent's context window so nothing is isolated" },
-        { "id": "c", "text": "Subagents are configured only in settings.json, not as files" },
-        { "id": "d", "text": "A subagent always has the same tools as the main conversation" }
+        {
+          "id": "a",
+          "text": "Each subagent runs in its own context window with its own system prompt and tool access",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Subagents share the parent's context window so nothing is isolated"
+        },
+        {
+          "id": "c",
+          "text": "Subagents are configured only in settings.json, not as files"
+        },
+        {
+          "id": "d",
+          "text": "A subagent always has the same tools as the main conversation"
+        }
       ],
       "explanation": "Subagents are Markdown files in `.claude/agents/` (or `~/.claude/agents/`) that run in a separate context with their own system prompt (the body) and a restrictable tool set. They don't share the parent context, and `tools` can narrow what they may use.",
-      "sourceRefs": ["r-d3-subagents"]
+      "sourceRefs": [
+        "r-d3-subagents"
+      ]
     },
     {
       "id": "q-d3-10",
@@ -374,13 +691,30 @@
       "difficulty": 3,
       "stem": "Which are legitimate uses of a PreToolUse hook? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "Block any Bash command matching a destructive pattern by exiting with code 2", "correct": true },
-        { "id": "b", "text": "Return JSON with permissionDecision deny/allow/ask for structured control", "correct": true },
-        { "id": "c", "text": "Deterministically enforce a rule the model is told about in CLAUDE.md but ignores", "correct": true },
-        { "id": "d", "text": "Auto-format a file immediately after Claude edits it" }
+        {
+          "id": "a",
+          "text": "Block any Bash command matching a destructive pattern by exiting with code 2",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Return JSON with permissionDecision deny/allow/ask for structured control",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Deterministically enforce a rule the model is told about in CLAUDE.md but ignores",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Auto-format a file immediately after Claude edits it"
+        }
       ],
       "explanation": "PreToolUse fires *before* a tool runs: it can block via exit 2, return a structured `permissionDecision`, and deterministically enforce what CLAUDE.md can only suggest. Auto-format *after* an edit is a PostToolUse job — the wrong event for PreToolUse.",
-      "sourceRefs": ["r-d3-hooks"]
+      "sourceRefs": [
+        "r-d3-hooks"
+      ]
     },
     {
       "id": "q-d3-11",
@@ -389,19 +723,39 @@
       "difficulty": 2,
       "stem": "Which are valid ways to add custom behaviour to Claude Code? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "A Markdown file in .claude/commands/ that becomes a /slash command", "correct": true },
-        { "id": "b", "text": "A SKILL.md skill that loads its body on demand (progressive disclosure)", "correct": true },
-        { "id": "c", "text": "A subagent definition in .claude/agents/ with its own tools and prompt", "correct": true },
-        { "id": "d", "text": "Editing the model's base weights from settings.json" }
+        {
+          "id": "a",
+          "text": "A Markdown file in .claude/commands/ that becomes a /slash command",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A SKILL.md skill that loads its body on demand (progressive disclosure)",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "A subagent definition in .claude/agents/ with its own tools and prompt",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Editing the model's base weights from settings.json"
+        }
       ],
       "explanation": "Commands (`.claude/commands/`), skills (`SKILL.md`), and subagents (`.claude/agents/`) are the three first-class extension points. You cannot edit model weights from settings.json — that option is nonsense.",
-      "sourceRefs": ["r-d3-skills", "r-d3-subagents"]
+      "sourceRefs": [
+        "r-d3-skills",
+        "r-d3-subagents"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d3-monorepo",
-      "domainIds": ["d3-agent-ops-claude-code"],
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ],
       "title": "Configure Claude Code for a regulated team's monorepo",
       "tagline": "Memory precedence, enforcement vs guidance, scoped MCP, and a safe default mode.",
       "context": "A bank's platform team runs a large monorepo. Compliance has non-negotiable rules (never touch `infra/prod/`, never read `.env`). Each squad wants its own conventions per subtree. Developers also want personal sandbox notes that must never be committed. You own the Claude Code setup.",
@@ -410,44 +764,110 @@
           "id": "st1",
           "prompt": "Where do the org-wide compliance conventions go so no developer can drop them?",
           "choices": [
-            { "id": "a", "text": "A managed-policy CLAUDE.md deployed by IT — highest authority, cannot be excluded", "verdict": "best", "rationale": "Managed policy is exactly for org-wide standards that individuals must not override or remove. It loads ahead of project and user memory and can't be excluded by local settings." },
-            { "id": "b", "text": "The root project ./CLAUDE.md, committed to the repo", "verdict": "viable", "rationale": "Shares the conventions team-wide, but a developer can add a closer nested CLAUDE.md or local settings that override them — not a hard guarantee for compliance." },
-            { "id": "c", "text": "Each developer's ~/.claude/CLAUDE.md", "verdict": "wrong", "rationale": "User memory is personal and lowest-authority here; it won't apply to teammates and is trivially changed. Wrong layer for org policy." }
+            {
+              "id": "a",
+              "text": "A managed-policy CLAUDE.md deployed by IT — highest authority, cannot be excluded",
+              "verdict": "best",
+              "rationale": "Managed policy is exactly for org-wide standards that individuals must not override or remove. It loads ahead of project and user memory and can't be excluded by local settings."
+            },
+            {
+              "id": "b",
+              "text": "The root project ./CLAUDE.md, committed to the repo",
+              "verdict": "viable",
+              "rationale": "Shares the conventions team-wide, but a developer can add a closer nested CLAUDE.md or local settings that override them — not a hard guarantee for compliance."
+            },
+            {
+              "id": "c",
+              "text": "Each developer's ~/.claude/CLAUDE.md",
+              "verdict": "wrong",
+              "rationale": "User memory is personal and lowest-authority here; it won't apply to teammates and is trivially changed. Wrong layer for org policy."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "The hard rules are 'never touch infra/prod/' and 'never read .env'. How do you guarantee them?",
           "choices": [
-            { "id": "a", "text": "Permission deny rules (and/or a PreToolUse hook) in settings.json — deny wins regardless of the model", "verdict": "best", "rationale": "Enforcement, not guidance: `deny` rules block the action even if something else allows it, and a PreToolUse hook can hard-stop a matching tool call. This is the only layer that *guarantees* the rule." },
-            { "id": "b", "text": "A prominent 'NEVER do this' section in the managed CLAUDE.md", "verdict": "viable", "rationale": "Raises the odds the model complies and documents intent, but CLAUDE.md is context, not enforcement — it can still be violated. Acceptable only as a complement to deny rules." },
-            { "id": "c", "text": "Tell developers to watch the agent and stop it manually", "verdict": "wrong", "rationale": "Manual vigilance is not a control. Compliance requires a deterministic block, not human babysitting." }
+            {
+              "id": "a",
+              "text": "Permission deny rules (and/or a PreToolUse hook) in settings.json — deny wins regardless of the model",
+              "verdict": "best",
+              "rationale": "Enforcement, not guidance: `deny` rules block the action even if something else allows it, and a PreToolUse hook can hard-stop a matching tool call. This is the only layer that *guarantees* the rule."
+            },
+            {
+              "id": "b",
+              "text": "A prominent 'NEVER do this' section in the managed CLAUDE.md",
+              "verdict": "viable",
+              "rationale": "Raises the odds the model complies and documents intent, but CLAUDE.md is context, not enforcement — it can still be violated. Acceptable only as a complement to deny rules."
+            },
+            {
+              "id": "c",
+              "text": "Tell developers to watch the agent and stop it manually",
+              "verdict": "wrong",
+              "rationale": "Manual vigilance is not a control. Compliance requires a deterministic block, not human babysitting."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Each squad wants its own conventions for its part of the tree, plus a shared internal MCP server. How?",
           "choices": [
-            { "id": "a", "text": "Nested per-directory CLAUDE.md files per squad subtree, and the MCP server in project-scoped .mcp.json", "verdict": "best", "rationale": "Nested CLAUDE.md files scope conventions to each subtree and load when Claude works there; a project-scoped `.mcp.json` is version-controlled so every squad member gets the same server." },
-            { "id": "b", "text": "One giant root CLAUDE.md containing every squad's rules", "verdict": "viable", "rationale": "Works but bloats context for everyone and mixes unrelated conventions; nested files keep each squad's rules local and lighter. Functional, not ideal." },
-            { "id": "c", "text": "Local-scope MCP servers each developer adds by hand", "verdict": "wrong", "rationale": "Local scope is private and per-machine, so it isn't shared and drifts across the team. The brief asks for a *shared* server — that's project scope." }
+            {
+              "id": "a",
+              "text": "Nested per-directory CLAUDE.md files per squad subtree, and the MCP server in project-scoped .mcp.json",
+              "verdict": "best",
+              "rationale": "Nested CLAUDE.md files scope conventions to each subtree and load when Claude works there; a project-scoped `.mcp.json` is version-controlled so every squad member gets the same server."
+            },
+            {
+              "id": "b",
+              "text": "One giant root CLAUDE.md containing every squad's rules",
+              "verdict": "viable",
+              "rationale": "Works but bloats context for everyone and mixes unrelated conventions; nested files keep each squad's rules local and lighter. Functional, not ideal."
+            },
+            {
+              "id": "c",
+              "text": "Local-scope MCP servers each developer adds by hand",
+              "verdict": "wrong",
+              "rationale": "Local scope is private and per-machine, so it isn't shared and drifts across the team. The brief asks for a *shared* server — that's project scope."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "Developers want private sandbox URLs and test data the agent can use but that must never be committed.",
           "choices": [
-            { "id": "a", "text": "A gitignored CLAUDE.local.md at the project root", "verdict": "best", "rationale": "CLAUDE.local.md is the personal project-memory variant: it loads alongside CLAUDE.md and, once in .gitignore, never lands in source control. Exactly the right home for private per-project notes." },
-            { "id": "b", "text": "Add the URLs to the committed ./CLAUDE.md", "verdict": "wrong", "rationale": "That commits personal/sandbox details to the shared repo — the opposite of the requirement, and a potential data leak." },
-            { "id": "c", "text": "Put them in ~/.claude/CLAUDE.md", "verdict": "viable", "rationale": "Keeps them out of the repo, but they'd then apply to every project, not just this one. Workable, just not project-scoped like CLAUDE.local.md." }
+            {
+              "id": "a",
+              "text": "A gitignored CLAUDE.local.md at the project root",
+              "verdict": "best",
+              "rationale": "CLAUDE.local.md is the personal project-memory variant: it loads alongside CLAUDE.md and, once in .gitignore, never lands in source control. Exactly the right home for private per-project notes."
+            },
+            {
+              "id": "b",
+              "text": "Add the URLs to the committed ./CLAUDE.md",
+              "verdict": "wrong",
+              "rationale": "That commits personal/sandbox details to the shared repo — the opposite of the requirement, and a potential data leak."
+            },
+            {
+              "id": "c",
+              "text": "Put them in ~/.claude/CLAUDE.md",
+              "verdict": "viable",
+              "rationale": "Keeps them out of the repo, but they'd then apply to every project, not just this one. Workable, just not project-scoped like CLAUDE.local.md."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d3-memory", "r-d3-settings", "r-d3-mcp"]
+      "sourceRefs": [
+        "r-d3-memory",
+        "r-d3-settings",
+        "r-d3-mcp"
+      ]
     },
     {
       "id": "s-d3-cigate",
-      "domainIds": ["d3-agent-ops-claude-code"],
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ],
       "title": "Wire a CI gate with headless Claude Code",
       "tagline": "Headless invocation, output format, permission posture, and bulk vs gate.",
       "context": "You want every pull request checked by Claude Code in CI: it should review the diff for security issues and fail the build if it finds a blocker. It must run unattended, deterministically, with no interactive prompts, and feed a result your pipeline can parse.",
@@ -456,40 +876,104 @@
           "id": "st1",
           "prompt": "How do you invoke Claude Code from the CI job?",
           "choices": [
-            { "id": "a", "text": "Headless: pipe the diff into `claude -p` with a review instruction", "verdict": "best", "rationale": "`-p` (print mode) is the non-interactive entry point built for scripts and CI; piping `git diff` in means Claude doesn't even need Bash permission to fetch it." },
-            { "id": "b", "text": "Launch the interactive TUI and have the runner type into it", "verdict": "wrong", "rationale": "The interactive UI isn't meant for unattended CI; it blocks on prompts and isn't scriptable. Headless mode exists precisely to avoid this." },
-            { "id": "c", "text": "Stand up a long-lived Claude Code server the pipeline calls", "verdict": "viable", "rationale": "Possible with the Agent SDK, but heavier than needed for a per-PR check; a one-shot `claude -p` per run is simpler and stateless." }
+            {
+              "id": "a",
+              "text": "Headless: pipe the diff into `claude -p` with a review instruction",
+              "verdict": "best",
+              "rationale": "`-p` (print mode) is the non-interactive entry point built for scripts and CI; piping `git diff` in means Claude doesn't even need Bash permission to fetch it."
+            },
+            {
+              "id": "b",
+              "text": "Launch the interactive TUI and have the runner type into it",
+              "verdict": "wrong",
+              "rationale": "The interactive UI isn't meant for unattended CI; it blocks on prompts and isn't scriptable. Headless mode exists precisely to avoid this."
+            },
+            {
+              "id": "c",
+              "text": "Stand up a long-lived Claude Code server the pipeline calls",
+              "verdict": "viable",
+              "rationale": "Possible with the Agent SDK, but heavier than needed for a per-PR check; a one-shot `claude -p` per run is simpler and stateless."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "The pipeline must read the result programmatically. Which output format?",
           "choices": [
-            { "id": "a", "text": "--output-format json and parse the result field with jq", "verdict": "best", "rationale": "`json` returns a structured object (result, session_id, cost/usage) that a script can parse reliably with jq — the right shape for gating logic." },
-            { "id": "b", "text": "Default text and grep the prose", "verdict": "viable", "rationale": "Works for trivial checks but is brittle — phrasing changes break your grep. JSON is the robust choice for a gate." },
-            { "id": "c", "text": "stream-json and act on the first event", "verdict": "wrong", "rationale": "stream-json emits incremental events for live streaming; acting on one event misses the final result. Use json for a single parseable outcome." }
+            {
+              "id": "a",
+              "text": "--output-format json and parse the result field with jq",
+              "verdict": "best",
+              "rationale": "`json` returns a structured object (result, session_id, cost/usage) that a script can parse reliably with jq — the right shape for gating logic."
+            },
+            {
+              "id": "b",
+              "text": "Default text and grep the prose",
+              "verdict": "viable",
+              "rationale": "Works for trivial checks but is brittle — phrasing changes break your grep. JSON is the robust choice for a gate."
+            },
+            {
+              "id": "c",
+              "text": "stream-json and act on the first event",
+              "verdict": "wrong",
+              "rationale": "stream-json emits incremental events for live streaming; acting on one event misses the final result. Use json for a single parseable outcome."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "What permission posture keeps the CI run safe and unattended?",
           "choices": [
-            { "id": "a", "text": "A locked-down mode (e.g. dontAsk / a tight --allowedTools list) so nothing outside the allowlist runs", "verdict": "best", "rationale": "CI should pre-approve only the minimal tools the job needs and deny the rest, so an unattended run can't be derailed by an unexpected tool prompt or action." },
-            { "id": "b", "text": "--dangerously-skip-permissions to avoid any prompt", "verdict": "wrong", "rationale": "Skipping all permissions removes your guardrails in an automated context — a destructive command would run unchecked. Use a tight allowlist, not a blanket bypass." },
-            { "id": "c", "text": "Default interactive prompting", "verdict": "wrong", "rationale": "There's no human to answer prompts in CI; the job would hang. Headless runs need an explicit, non-interactive permission posture." }
+            {
+              "id": "a",
+              "text": "A locked-down mode (e.g. dontAsk / a tight --allowedTools list) so nothing outside the allowlist runs",
+              "verdict": "best",
+              "rationale": "CI should pre-approve only the minimal tools the job needs and deny the rest, so an unattended run can't be derailed by an unexpected tool prompt or action."
+            },
+            {
+              "id": "b",
+              "text": "--dangerously-skip-permissions to avoid any prompt",
+              "verdict": "wrong",
+              "rationale": "Skipping all permissions removes your guardrails in an automated context — a destructive command would run unchecked. Use a tight allowlist, not a blanket bypass."
+            },
+            {
+              "id": "c",
+              "text": "Default interactive prompting",
+              "verdict": "wrong",
+              "rationale": "There's no human to answer prompts in CI; the job would hang. Headless runs need an explicit, non-interactive permission posture."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "Separately, the team wants to bulk-summarise 40,000 archived PRs overnight for analytics. Same approach?",
           "choices": [
-            { "id": "a", "text": "No — use the Message Batches API: async, 50% cost, up to 100k requests within 24h", "verdict": "best", "rationale": "Bulk, non-latency-sensitive work is the Batches API's niche — half price and high throughput, results within 24 hours. The CI gate is per-PR and latency-sensitive; the bulk job is neither." },
-            { "id": "b", "text": "Yes — loop `claude -p` 40,000 times in the pipeline", "verdict": "wrong", "rationale": "Serial headless calls are slow and full-price, and tie up CI. Batch is the purpose-built, discounted path for this volume." },
-            { "id": "c", "text": "Run one headless session that processes all 40,000 in a single context", "verdict": "wrong", "rationale": "40,000 PRs won't fit one context and there's no recovery if it fails midway. Independent batched requests are the correct decomposition." }
+            {
+              "id": "a",
+              "text": "No — use the Message Batches API: async, 50% cost, up to 100k requests within 24h",
+              "verdict": "best",
+              "rationale": "Bulk, non-latency-sensitive work is the Batches API's niche — half price and high throughput, results within 24 hours. The CI gate is per-PR and latency-sensitive; the bulk job is neither."
+            },
+            {
+              "id": "b",
+              "text": "Yes — loop `claude -p` 40,000 times in the pipeline",
+              "verdict": "wrong",
+              "rationale": "Serial headless calls are slow and full-price, and tie up CI. Batch is the purpose-built, discounted path for this volume."
+            },
+            {
+              "id": "c",
+              "text": "Run one headless session that processes all 40,000 in a single context",
+              "verdict": "wrong",
+              "rationale": "40,000 PRs won't fit one context and there's no recovery if it fails midway. Independent batched requests are the correct decomposition."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d3-headless", "r-d3-batches", "r-d3-settings"]
+      "sourceRefs": [
+        "r-d3-headless",
+        "r-d3-batches",
+        "r-d3-settings"
+      ]
     }
   ],
   "labs": [
@@ -523,18 +1007,137 @@
     }
   ],
   "resources": [
-    { "id": "r-d3-memory", "title": "Claude Code — Memory (CLAUDE.md)", "url": "https://docs.claude.com/en/docs/claude-code/memory", "kind": "official-doc", "annotation": "The precedence table (managed > project incl. nested > user), CLAUDE.local.md, load order, and the crucial 'context not enforcement' caveat. Start here.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-hooks", "title": "Claude Code — Hooks", "url": "https://docs.claude.com/en/docs/claude-code/hooks", "kind": "official-doc", "annotation": "Events (PreToolUse/PostToolUse/Stop), matchers, and how PreToolUse blocks via exit code 2 or a JSON permissionDecision. The enforcement layer.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-settings", "title": "Claude Code — Settings & permissions", "url": "https://docs.claude.com/en/docs/claude-code/settings", "kind": "official-doc", "annotation": "settings.json precedence, the allow/ask/deny model where deny wins, permission rule syntax, and the skip-permissions flag.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-skills", "title": "Claude Code — Skills & slash commands", "url": "https://docs.claude.com/en/docs/claude-code/skills", "kind": "official-doc", "annotation": "Custom commands in .claude/commands/ (project) vs ~/.claude/commands/ (personal), SKILL.md progressive disclosure, $ARGUMENTS, and frontmatter.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-subagents", "title": "Claude Code — Subagents", "url": "https://docs.claude.com/en/docs/claude-code/sub-agents", "kind": "official-doc", "annotation": "Subagents in .claude/agents/ with their own context window, system prompt, tools, model, and permissionMode — plus where plan mode fits among the permission modes.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-mcp", "title": "Claude Code — MCP", "url": "https://docs.claude.com/en/docs/claude-code/mcp", "kind": "official-doc", "annotation": "The three MCP scopes (local default / project via .mcp.json / user), claude mcp add --scope, transports, and the project-server approval gate.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-headless", "title": "Claude Code — Run programmatically (headless)", "url": "https://docs.claude.com/en/docs/claude-code/headless", "kind": "official-doc", "annotation": "claude -p, --output-format text/json/stream-json, piping stdin, --allowedTools and permission modes for CI gates.", "domainIds": ["d3-agent-ops-claude-code"] },
-    { "id": "r-d3-batches", "title": "Message Batches API — batch processing", "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing", "kind": "official-doc", "annotation": "Async bulk processing at 50% cost, up to 100k requests (or 256 MB) within 24h. The right tool for non-latency-sensitive volume.", "domainIds": ["d3-agent-ops-claude-code"] }
+    {
+      "id": "r-d3-memory",
+      "title": "Claude Code — Memory (CLAUDE.md)",
+      "url": "https://docs.claude.com/en/docs/claude-code/memory",
+      "kind": "official-doc",
+      "annotation": "The precedence table (managed > project incl. nested > user), CLAUDE.local.md, load order, and the crucial 'context not enforcement' caveat. Start here.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-hooks",
+      "title": "Claude Code — Hooks",
+      "url": "https://docs.claude.com/en/docs/claude-code/hooks",
+      "kind": "official-doc",
+      "annotation": "Events (PreToolUse/PostToolUse/Stop), matchers, and how PreToolUse blocks via exit code 2 or a JSON permissionDecision. The enforcement layer.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-settings",
+      "title": "Claude Code — Settings & permissions",
+      "url": "https://docs.claude.com/en/docs/claude-code/settings",
+      "kind": "official-doc",
+      "annotation": "settings.json precedence, the allow/ask/deny model where deny wins, permission rule syntax, and the skip-permissions flag.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-skills",
+      "title": "Claude Code — Skills & slash commands",
+      "url": "https://docs.claude.com/en/docs/claude-code/skills",
+      "kind": "official-doc",
+      "annotation": "Custom commands in .claude/commands/ (project) vs ~/.claude/commands/ (personal), SKILL.md progressive disclosure, $ARGUMENTS, and frontmatter.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-subagents",
+      "title": "Claude Code — Subagents",
+      "url": "https://docs.claude.com/en/docs/claude-code/sub-agents",
+      "kind": "official-doc",
+      "annotation": "Subagents in .claude/agents/ with their own context window, system prompt, tools, model, and permissionMode — plus where plan mode fits among the permission modes.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-mcp",
+      "title": "Claude Code — MCP",
+      "url": "https://docs.claude.com/en/docs/claude-code/mcp",
+      "kind": "official-doc",
+      "annotation": "The three MCP scopes (local default / project via .mcp.json / user), claude mcp add --scope, transports, and the project-server approval gate.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-headless",
+      "title": "Claude Code — Run programmatically (headless)",
+      "url": "https://docs.claude.com/en/docs/claude-code/headless",
+      "kind": "official-doc",
+      "annotation": "claude -p, --output-format text/json/stream-json, piping stdin, --allowedTools and permission modes for CI gates.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "r-d3-batches",
+      "title": "Message Batches API — batch processing",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+      "kind": "official-doc",
+      "annotation": "Async bulk processing at 50% cost, up to 100k requests (or 256 MB) within 24h. The right tool for non-latency-sensitive volume.",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    }
   ],
   "videos": [
-    { "id": "v-d3-1", "title": "D3 · CLAUDE.md memory & precedence", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" },
-    { "id": "v-d3-2", "title": "D3 · Hooks, permissions & plan mode", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" },
-    { "id": "v-d3-3", "title": "D3 · Headless Claude Code & the Batches API", "provider": "youtube", "url": "", "domainIds": ["d3-agent-ops-claude-code"], "sourceNotebook": "cca-f / domain 3", "status": "placeholder" }
+    {
+      "id": "v-d3-1",
+      "title": "Agent ops & Claude Code — domain overview",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d3.mp4",
+      "status": "published",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "v-d3-2",
+      "title": "CLAUDE.md configuration hierarchy",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d3-config-hierarchy.mp4",
+      "status": "published",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "v-d3-3",
+      "title": "Path-specific rules",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d3-path-rules.mp4",
+      "status": "published",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "v-d3-4",
+      "title": "Iterative refinement",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d3-iterative-refinement.mp4",
+      "status": "published",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    },
+    {
+      "id": "v-d3-5",
+      "title": "Advanced skill isolation",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d3-skill-isolation.mp4",
+      "status": "published",
+      "domainIds": [
+        "d3-agent-ops-claude-code"
+      ]
+    }
   ]
 }

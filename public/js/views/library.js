@@ -32,27 +32,43 @@ function ytEmbed(u) {
   } catch (_) { return u; }
 }
 
+// A video is either a self-hosted file (provider "file" or a media URL),
+// rendered with <video>, or a YouTube embed rendered with <iframe>.
+function videoFrame(vd) {
+  const published = vd.status === "published" && vd.url;
+  if (!published) return el("div", { class: "frame placeholder" }, [el("div", { class: "play" }, ["▶"])]);
+  const isFile = vd.provider === "file" || /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(vd.url);
+  return el("div", { class: "frame" }, [
+    isFile
+      ? el("video", { src: vd.url, controls: true, preload: "metadata", playsinline: true })
+      : el("iframe", { src: ytEmbed(vd.url), title: vd.title, loading: "lazy", allow: "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture", allowfullscreen: true }),
+  ]);
+}
+
+function videoCard(vd) {
+  const published = vd.status === "published" && vd.url;
+  return el("div", { class: "vid-card" }, [
+    videoFrame(vd),
+    el("div", { class: "cap" }, [
+      el("span", { class: "mono-label", text: vd.domainName || "" }),
+      el("div", { class: "serif", style: { fontSize: "18px", marginTop: "6px" }, text: vd.title }),
+      !published ? el("div", { class: "mono-label", style: { marginTop: "8px", color: "var(--muted)" }, text: "Video coming" }) : null,
+    ]),
+  ]);
+}
+
 export function videosView(ctx) {
   const { track } = ctx;
+  const overview = (track.videos || []).map((v) => ({ ...v, domainName: "Course overview" }));
   const vids = allVideos(track);
-  const card = (vd) => {
-    const published = vd.status === "published" && vd.url;
-    return el("div", { class: "vid-card" }, [
-      el("div", { class: "frame" + (published ? "" : " placeholder") },
-        published
-          ? [el("iframe", { src: ytEmbed(vd.url), title: vd.title, loading: "lazy", allow: "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture", allowfullscreen: true })]
-          : [el("div", { class: "play" }, ["▶"])]),
-      el("div", { class: "cap" }, [
-        el("span", { class: "mono-label", text: vd.domainName || "" }),
-        el("div", { class: "serif", style: { fontSize: "18px", marginTop: "6px" }, text: vd.title }),
-        !published ? el("div", { class: "mono-label", style: { marginTop: "8px", color: "var(--muted)" }, text: "Video coming" }) : null,
-      ]),
-    ]);
-  };
+  const grid = (list) => el("div", { class: "vid-grid", style: { marginTop: "20px" } }, list.map(videoCard));
   return el("div", {}, [trackHeader(track, "videos"), section(
     el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Video hub" }),
-    el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Short, focused overviews per domain. Produced with NotebookLM, hosted unlisted on YouTube — and there's a documented pipeline to make more." }),
-    vids.length ? el("div", { class: "vid-grid", style: { marginTop: "26px" } }, vids.map(card)) : el("p", { class: "muted", text: "Videos coming soon." }),
-    el("p", { class: "muted", style: { marginTop: "24px", fontSize: "13px" } }, ["Producing more: see ", el("b", { text: "docs/VIDEO_PIPELINE.md" }), " — source → NotebookLM Video Overview → unlisted YouTube → register in the domain's ", el("code", { text: "videos[]" }), "."]),
+    el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Short, focused overviews — produced with NotebookLM, hosted on Automatos. Watch the course primers first, then the per-domain deep dives." }),
+    overview.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "34px 0 6px" }, text: "Start here" }) : null,
+    overview.length ? grid(overview) : null,
+    el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 6px" }, text: "By domain" }),
+    vids.length ? grid(vids) : el("p", { class: "muted", text: "Videos coming soon." }),
+    el("p", { class: "muted", style: { marginTop: "26px", fontSize: "13px" } }, ["Producing more: see ", el("b", { text: "docs/VIDEO_PIPELINE.md" }), "."]),
   )]);
 }

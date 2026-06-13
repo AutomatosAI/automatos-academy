@@ -28,13 +28,28 @@
           "difficulty": 1,
           "stem": "You need to know whether a 40-page document will fit in the context window before sending it. What's the correct way to count its tokens?",
           "options": [
-            { "id": "a", "text": "Call the count_tokens endpoint with the same model id you'll use for inference", "correct": true },
-            { "id": "b", "text": "Run it through tiktoken and add the message overhead" },
-            { "id": "c", "text": "Divide the character count by four" },
-            { "id": "d", "text": "Set max_tokens to the window size and let the API tell you" }
+            {
+              "id": "a",
+              "text": "Call the count_tokens endpoint with the same model id you'll use for inference",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Run it through tiktoken and add the message overhead"
+            },
+            {
+              "id": "c",
+              "text": "Divide the character count by four"
+            },
+            {
+              "id": "d",
+              "text": "Set max_tokens to the window size and let the API tell you"
+            }
           ],
           "explanation": "Token counts are model-specific, so you call `count_tokens` with the model you'll actually run. `tiktoken` is OpenAI's tokenizer and undercounts Claude; character/4 is a rough heuristic, not a budget; and `max_tokens` is the output cap, not the window.",
-          "sourceRefs": ["r-d5-tokens"]
+          "sourceRefs": [
+            "r-d5-tokens"
+          ]
         },
         {
           "id": "kc-d5-2",
@@ -43,13 +58,28 @@
           "difficulty": 2,
           "stem": "A request returns `stop_reason: \"max_tokens\"`. What does that tell you?",
           "options": [
-            { "id": "a", "text": "The output hit the max_tokens cap and was cut off — raise it or stream", "correct": true },
-            { "id": "b", "text": "The whole conversation exceeded the context window" },
-            { "id": "c", "text": "The model refused the request for safety reasons" },
-            { "id": "d", "text": "A server-side tool loop paused at its iteration cap" }
+            {
+              "id": "a",
+              "text": "The output hit the max_tokens cap and was cut off — raise it or stream",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The whole conversation exceeded the context window"
+            },
+            {
+              "id": "c",
+              "text": "The model refused the request for safety reasons"
+            },
+            {
+              "id": "d",
+              "text": "A server-side tool loop paused at its iteration cap"
+            }
           ],
           "explanation": "`max_tokens` caps the *output*; hitting it truncates the reply, and the fix is a higher cap or streaming. Exceeding the whole window is the separate `model_context_window_exceeded` reason; the others are `refusal` and `pause_turn`.",
-          "sourceRefs": ["r-d5-windows"]
+          "sourceRefs": [
+            "r-d5-windows"
+          ]
         }
       ]
     },
@@ -67,13 +97,28 @@
           "difficulty": 3,
           "stem": "Your long chat enables compaction, but after a while the agent keeps losing the thread and the window keeps filling up. You append `resp.content[0].text` to the history each turn. What's wrong?",
           "options": [
-            { "id": "a", "text": "You must append the full response.content (including the compaction block), not just the text — appending only the text silently discards the compaction state", "correct": true },
-            { "id": "b", "text": "Compaction only works if you also enable context editing in the same request" },
-            { "id": "c", "text": "You forgot to lower max_tokens, so there's no room to compact" },
-            { "id": "d", "text": "Compaction needs a memory store attached to persist the summary" }
+            {
+              "id": "a",
+              "text": "You must append the full response.content (including the compaction block), not just the text — appending only the text silently discards the compaction state",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Compaction only works if you also enable context editing in the same request"
+            },
+            {
+              "id": "c",
+              "text": "You forgot to lower max_tokens, so there's no room to compact"
+            },
+            {
+              "id": "d",
+              "text": "Compaction needs a memory store attached to persist the summary"
+            }
           ],
           "explanation": "The API returns a compaction block in `response.content` and uses it to replace the compacted history next turn. Appending only the extracted text drops that block, so every request re-sends the full uncompacted history and the summary is lost — with no error.",
-          "sourceRefs": ["r-d5-compaction"]
+          "sourceRefs": [
+            "r-d5-compaction"
+          ]
         },
         {
           "id": "kc-d5-4",
@@ -82,13 +127,28 @@
           "difficulty": 2,
           "stem": "An agent must recall a customer's preferences in a brand-new session next week. Which mechanism fits?",
           "options": [
-            { "id": "a", "text": "A memory store / memory tool the agent reads and writes", "correct": true },
-            { "id": "b", "text": "Compaction" },
-            { "id": "c", "text": "Context editing" },
-            { "id": "d", "text": "A larger max_tokens" }
+            {
+              "id": "a",
+              "text": "A memory store / memory tool the agent reads and writes",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Compaction"
+            },
+            {
+              "id": "c",
+              "text": "Context editing"
+            },
+            {
+              "id": "d",
+              "text": "A larger max_tokens"
+            }
           ],
           "explanation": "Compaction and context editing both operate only within a single session. Cross-session persistence is exactly what memory is for — it survives process restarts.",
-          "sourceRefs": ["r-d5-compaction"]
+          "sourceRefs": [
+            "r-d5-compaction"
+          ]
         },
         {
           "id": "kc-d5-5",
@@ -97,13 +157,28 @@
           "difficulty": 2,
           "stem": "Which statement correctly contrasts context editing with compaction?",
           "options": [
-            { "id": "a", "text": "Editing removes stale tool results and old thinking blocks; compaction summarises earlier context into a block", "correct": true },
-            { "id": "b", "text": "Editing summarises old turns; compaction deletes them" },
-            { "id": "c", "text": "Both summarise, but editing runs across sessions" },
-            { "id": "d", "text": "Both persist state to disk between runs" }
+            {
+              "id": "a",
+              "text": "Editing removes stale tool results and old thinking blocks; compaction summarises earlier context into a block",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Editing summarises old turns; compaction deletes them"
+            },
+            {
+              "id": "c",
+              "text": "Both summarise, but editing runs across sessions"
+            },
+            {
+              "id": "d",
+              "text": "Both persist state to disk between runs"
+            }
           ],
           "explanation": "Context editing prunes (removes) stale content past a threshold; compaction summarises near the limit and returns a compaction block. Neither persists across sessions — that's memory.",
-          "sourceRefs": ["r-d5-editing"]
+          "sourceRefs": [
+            "r-d5-editing"
+          ]
         }
       ]
     },
@@ -121,13 +196,28 @@
           "difficulty": 2,
           "stem": "Your code does `text = response.content[0].text` and occasionally throws an index error. The status code is always 200. What's the likely cause?",
           "options": [
-            { "id": "a", "text": "A safety refusal returned stop_reason 'refusal' with an empty content array — check stop_reason before indexing content", "correct": true },
-            { "id": "b", "text": "The request was rate-limited and returned no body" },
-            { "id": "c", "text": "max_tokens was zero, so content is always empty" },
-            { "id": "d", "text": "The model id was wrong, returning a 200 with an empty payload" }
+            {
+              "id": "a",
+              "text": "A safety refusal returned stop_reason 'refusal' with an empty content array — check stop_reason before indexing content",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The request was rate-limited and returned no body"
+            },
+            {
+              "id": "c",
+              "text": "max_tokens was zero, so content is always empty"
+            },
+            {
+              "id": "d",
+              "text": "The model id was wrong, returning a 200 with an empty payload"
+            }
           ],
           "explanation": "A refusal is a successful 200 with `stop_reason: \"refusal\"`; a pre-output refusal has an empty `content` array, so unconditional `content[0]` access throws. Branch on `stop_reason` first.",
-          "sourceRefs": ["r-d5-errors"]
+          "sourceRefs": [
+            "r-d5-errors"
+          ]
         },
         {
           "id": "kc-d5-7",
@@ -136,13 +226,28 @@
           "difficulty": 2,
           "stem": "You're seeing intermittent 429s under load. What's the recommended first move?",
           "options": [
-            { "id": "a", "text": "Rely on the SDK's automatic 429/5xx exponential backoff (respecting retry-after); tune max_retries if needed", "correct": true },
-            { "id": "b", "text": "Write a custom retry loop with a fixed 1-second sleep" },
-            { "id": "c", "text": "Ignore the retry-after header and retry immediately" },
-            { "id": "d", "text": "Switch off retries and surface every 429 to the user" }
+            {
+              "id": "a",
+              "text": "Rely on the SDK's automatic 429/5xx exponential backoff (respecting retry-after); tune max_retries if needed",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Write a custom retry loop with a fixed 1-second sleep"
+            },
+            {
+              "id": "c",
+              "text": "Ignore the retry-after header and retry immediately"
+            },
+            {
+              "id": "d",
+              "text": "Switch off retries and surface every 429 to the user"
+            }
           ],
           "explanation": "The SDK already retries 429 and 5xx with exponential backoff (default ~2 retries) and respects `retry-after`. Hand-rolling usually fights that and ignores the header; tune `max_retries` rather than reinventing it.",
-          "sourceRefs": ["r-d5-errors"]
+          "sourceRefs": [
+            "r-d5-errors"
+          ]
         }
       ]
     }
@@ -155,13 +260,28 @@
       "difficulty": 3,
       "stem": "An agent has compaction enabled but keeps re-exceeding the context window. Logs show the full early history is re-sent on every request. The dev appends `''.join(b.text for b in resp.content if b.type == 'text')` each turn. What's the fix?",
       "options": [
-        { "id": "a", "text": "Append the whole resp.content (compaction block included) back to messages, not a reconstructed text string", "correct": true },
-        { "id": "b", "text": "Add a memory store so the compaction summary persists" },
-        { "id": "c", "text": "Lower max_tokens so compaction has room to run" },
-        { "id": "d", "text": "Switch from compaction to context editing — compaction doesn't summarise" }
+        {
+          "id": "a",
+          "text": "Append the whole resp.content (compaction block included) back to messages, not a reconstructed text string",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Add a memory store so the compaction summary persists"
+        },
+        {
+          "id": "c",
+          "text": "Lower max_tokens so compaction has room to run"
+        },
+        {
+          "id": "d",
+          "text": "Switch from compaction to context editing — compaction doesn't summarise"
+        }
       ],
       "explanation": "The compaction block lives in `response.content`; the API needs it to replace the compacted history next turn. Rebuilding a text-only string drops the block, so the uncompacted history is re-sent every request — silently, with no error.",
-      "sourceRefs": ["r-d5-compaction"]
+      "sourceRefs": [
+        "r-d5-compaction"
+      ]
     },
     {
       "id": "q-d5-2",
@@ -170,13 +290,29 @@
       "difficulty": 2,
       "stem": "Match each mechanism to what it actually does.",
       "options": [
-        { "id": "a", "text": "Compaction summarises, context editing prunes, memory persists across sessions", "correct": true },
-        { "id": "b", "text": "Compaction prunes, context editing summarises, memory caches" },
-        { "id": "c", "text": "All three summarise; only the trigger threshold differs" },
-        { "id": "d", "text": "Compaction and editing both persist across sessions; memory is per-request" }
+        {
+          "id": "a",
+          "text": "Compaction summarises, context editing prunes, memory persists across sessions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Compaction prunes, context editing summarises, memory caches"
+        },
+        {
+          "id": "c",
+          "text": "All three summarise; only the trigger threshold differs"
+        },
+        {
+          "id": "d",
+          "text": "Compaction and editing both persist across sessions; memory is per-request"
+        }
       ],
       "explanation": "Compaction condenses earlier context into a block, context editing removes stale tool results / old thinking, and memory is the only one that survives across separate sessions. Caching is a separate cost/latency optimisation.",
-      "sourceRefs": ["r-d5-compaction", "r-d5-editing"]
+      "sourceRefs": [
+        "r-d5-compaction",
+        "r-d5-editing"
+      ]
     },
     {
       "id": "q-d5-3",
@@ -185,13 +321,28 @@
       "difficulty": 1,
       "stem": "Why is `tiktoken` the wrong tool for sizing a Claude prompt?",
       "options": [
-        { "id": "a", "text": "It's OpenAI's tokenizer and undercounts Claude tokens — use the count_tokens endpoint with the target model", "correct": true },
-        { "id": "b", "text": "It's accurate but too slow for production" },
-        { "id": "c", "text": "It only counts output tokens, not input" },
-        { "id": "d", "text": "It requires an API key Claude users don't have" }
+        {
+          "id": "a",
+          "text": "It's OpenAI's tokenizer and undercounts Claude tokens — use the count_tokens endpoint with the target model",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It's accurate but too slow for production"
+        },
+        {
+          "id": "c",
+          "text": "It only counts output tokens, not input"
+        },
+        {
+          "id": "d",
+          "text": "It requires an API key Claude users don't have"
+        }
       ],
       "explanation": "`tiktoken` is built for OpenAI models and undercounts Claude (~15-20% on prose, more on code/non-English). Accurate counts come from `count_tokens` against the same model you'll run.",
-      "sourceRefs": ["r-d5-tokens"]
+      "sourceRefs": [
+        "r-d5-tokens"
+      ]
     },
     {
       "id": "q-d5-4",
@@ -200,13 +351,28 @@
       "difficulty": 2,
       "stem": "A response arrives with HTTP 200 and `stop_reason: \"refusal\"`. How should the application treat it?",
       "options": [
-        { "id": "a", "text": "As a successful, intentional outcome — surface the refusal; don't blindly retry the same prompt, and don't index content before checking stop_reason", "correct": true },
-        { "id": "b", "text": "As a transient server error to retry with backoff" },
-        { "id": "c", "text": "As a malformed request to fix and resend unchanged" },
-        { "id": "d", "text": "As proof the API key lacks permission for the model" }
+        {
+          "id": "a",
+          "text": "As a successful, intentional outcome — surface the refusal; don't blindly retry the same prompt, and don't index content before checking stop_reason",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "As a transient server error to retry with backoff"
+        },
+        {
+          "id": "c",
+          "text": "As a malformed request to fix and resend unchanged"
+        },
+        {
+          "id": "d",
+          "text": "As proof the API key lacks permission for the model"
+        }
       ],
       "explanation": "A refusal is a deliberate, successful response (`stop_reason: \"refusal\"`), not an error. Pre-output refusals can have empty content, so check `stop_reason` first; retrying the identical prompt will just refuse again.",
-      "sourceRefs": ["r-d5-errors"]
+      "sourceRefs": [
+        "r-d5-errors"
+      ]
     },
     {
       "id": "q-d5-5",
@@ -215,13 +381,28 @@
       "difficulty": 2,
       "stem": "Which prompt-caching layout maximises cache hits?",
       "options": [
-        { "id": "a", "text": "Stable prefix first (frozen system prompt, deterministic tool list); volatile content (timestamps, varying question) last", "correct": true },
-        { "id": "b", "text": "Volatile content first so it's processed before the cache breakpoint" },
-        { "id": "c", "text": "Interleave a fresh timestamp into the system prompt each request" },
-        { "id": "d", "text": "Reorder the tool list per request to keep it fresh" }
+        {
+          "id": "a",
+          "text": "Stable prefix first (frozen system prompt, deterministic tool list); volatile content (timestamps, varying question) last",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Volatile content first so it's processed before the cache breakpoint"
+        },
+        {
+          "id": "c",
+          "text": "Interleave a fresh timestamp into the system prompt each request"
+        },
+        {
+          "id": "d",
+          "text": "Reorder the tool list per request to keep it fresh"
+        }
       ],
       "explanation": "Caching is a prefix match — any byte change in the prefix invalidates everything after it. Render order is tools -> system -> messages, so keep stable content first and push volatile content (timestamps, ids, the question) after the breakpoint. A `datetime.now()` in the system prompt silently busts every cache.",
-      "sourceRefs": ["r-d5-windows"]
+      "sourceRefs": [
+        "r-d5-windows"
+      ]
     },
     {
       "id": "q-d5-6",
@@ -230,13 +411,28 @@
       "difficulty": 1,
       "stem": "In a multi-step research agent, what does tracking information provenance buy you?",
       "options": [
-        { "id": "a", "text": "The ability to verify each fact against the source it came from (document, tool result, URL)", "correct": true },
-        { "id": "b", "text": "A larger effective context window" },
-        { "id": "c", "text": "Automatic deduplication of tool calls" },
-        { "id": "d", "text": "Faster token counting" }
+        {
+          "id": "a",
+          "text": "The ability to verify each fact against the source it came from (document, tool result, URL)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A larger effective context window"
+        },
+        {
+          "id": "c",
+          "text": "Automatic deduplication of tool calls"
+        },
+        {
+          "id": "d",
+          "text": "Faster token counting"
+        }
       ],
       "explanation": "Provenance carries the source alongside each fact so a human or the agent can check it. It's the defence against confident fabrication and the foundation of honest status reporting.",
-      "sourceRefs": ["r-d5-windows"]
+      "sourceRefs": [
+        "r-d5-windows"
+      ]
     },
     {
       "id": "q-d5-7",
@@ -245,13 +441,28 @@
       "difficulty": 3,
       "stem": "A 6-hour agent's final summary claims 'all migrations applied and tests green', but the run log shows two tool calls returned errors it never surfaced. Which reliability principle was violated?",
       "options": [
-        { "id": "a", "text": "Honest status reporting — progress claims must be grounded against actual tool results, not a cheerful summary", "correct": true },
-        { "id": "b", "text": "Token budgeting — the summary exceeded max_tokens" },
-        { "id": "c", "text": "Prefix caching — the summary invalidated the cache" },
-        { "id": "d", "text": "Compaction — the errors were summarised away" }
+        {
+          "id": "a",
+          "text": "Honest status reporting — progress claims must be grounded against actual tool results, not a cheerful summary",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Token budgeting — the summary exceeded max_tokens"
+        },
+        {
+          "id": "c",
+          "text": "Prefix caching — the summary invalidated the cache"
+        },
+        {
+          "id": "d",
+          "text": "Compaction — the errors were summarised away"
+        }
       ],
       "explanation": "An agent that reports success it can't evidence is failing on honest status reporting. Each claim should be audited against a real tool result; failures and skipped steps must be stated plainly.",
-      "sourceRefs": ["r-d5-windows"]
+      "sourceRefs": [
+        "r-d5-windows"
+      ]
     },
     {
       "id": "q-d5-8",
@@ -260,13 +471,28 @@
       "difficulty": 2,
       "stem": "A tool returns malformed data early in an agentic run, and every later step builds on it and goes wrong. What is this failure mode, and the standard defence?",
       "options": [
-        { "id": "a", "text": "Error propagation — validate at tool boundaries and add escalation/human-review gates for low-confidence or irreversible actions", "correct": true },
-        { "id": "b", "text": "Context degradation — fix it by lowering effort" },
-        { "id": "c", "text": "Cache invalidation — fix it by freezing the system prompt" },
-        { "id": "d", "text": "A refusal — fix it by retrying on another model" }
+        {
+          "id": "a",
+          "text": "Error propagation — validate at tool boundaries and add escalation/human-review gates for low-confidence or irreversible actions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Context degradation — fix it by lowering effort"
+        },
+        {
+          "id": "c",
+          "text": "Cache invalidation — fix it by freezing the system prompt"
+        },
+        {
+          "id": "d",
+          "text": "A refusal — fix it by retrying on another model"
+        }
       ],
       "explanation": "A bad early tool result poisoning downstream steps is error propagation. You contain it by validating tool outputs at the boundary and gating risky or uncertain actions behind escalation rather than letting the agent build on bad data.",
-      "sourceRefs": ["r-d5-windows"]
+      "sourceRefs": [
+        "r-d5-windows"
+      ]
     },
     {
       "id": "q-d5-9",
@@ -275,13 +501,31 @@
       "difficulty": 3,
       "stem": "Which stop reasons must a robust agentic loop branch on explicitly? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "refusal", "correct": true },
-        { "id": "b", "text": "max_tokens", "correct": true },
-        { "id": "c", "text": "model_context_window_exceeded", "correct": true },
-        { "id": "d", "text": "pause_turn", "correct": true }
+        {
+          "id": "a",
+          "text": "refusal",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "max_tokens",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "model_context_window_exceeded",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "pause_turn",
+          "correct": true
+        }
       ],
       "explanation": "All four need distinct handling: `refusal` is a successful safety decline (check before reading content); `max_tokens` truncates output (raise it or stream); `model_context_window_exceeded` means compact or split; `pause_turn` means a server-tool loop paused — resume by re-sending. (The non-terminal happy paths `end_turn` and `tool_use` round out the set.)",
-      "sourceRefs": ["r-d5-errors"]
+      "sourceRefs": [
+        "r-d5-errors"
+      ]
     },
     {
       "id": "q-d5-10",
@@ -290,19 +534,40 @@
       "difficulty": 2,
       "stem": "Which are accurate statements about the three context-management mechanisms? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "A long-running agent can use compaction, context editing, and memory together", "correct": true },
-        { "id": "b", "text": "Each progressive-summarisation pass can drop a detail a later turn needs", "correct": true },
-        { "id": "c", "text": "Memory is the only one of the three that persists across separate sessions", "correct": true },
-        { "id": "d", "text": "Context editing summarises old turns into a compact block", "correct": false }
+        {
+          "id": "a",
+          "text": "A long-running agent can use compaction, context editing, and memory together",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Each progressive-summarisation pass can drop a detail a later turn needs",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Memory is the only one of the three that persists across separate sessions",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Context editing summarises old turns into a compact block",
+          "correct": false
+        }
       ],
       "explanation": "Compaction, editing, and memory are complementary and often used together; summarisation is lossy, so each pass risks dropping a needed detail (context degradation); and memory alone spans sessions. The false option describes compaction — context editing *prunes*, it doesn't summarise.",
-      "sourceRefs": ["r-d5-compaction", "r-d5-editing"]
+      "sourceRefs": [
+        "r-d5-compaction",
+        "r-d5-editing"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d5-long-agent",
-      "domainIds": ["d5-context-reliability"],
+      "domainIds": [
+        "d5-context-reliability"
+      ],
       "title": "Keep a 6-hour agent coherent and honest",
       "tagline": "Window pressure, the compaction gotcha, persistence, and truthful reporting.",
       "context": "You run an unattended 6-hour research-and-build agent. The conversation grows to hundreds of turns and approaches the context window. Findings discovered early must still be usable late, results must be verifiable, and the final report must be trustworthy. You're the architect.",
@@ -311,35 +576,84 @@
           "id": "st1",
           "prompt": "The conversation is approaching the context window. What's the first lever?",
           "choices": [
-            { "id": "a", "text": "Enable compaction so earlier context is summarised server-side as you near the limit", "verdict": "best", "rationale": "Compaction is purpose-built for nearing the window: it condenses earlier history into a block so the run can continue. It's the right primary tool for window pressure inside a session." },
-            { "id": "b", "text": "Truncate the oldest messages client-side and hope nothing important was dropped", "verdict": "wrong", "rationale": "Blind truncation silently deletes context the agent may still need. Compaction summarises rather than guessing what to discard." },
-            { "id": "c", "text": "Add context editing to prune stale tool results, alongside compaction", "verdict": "viable", "rationale": "Editing genuinely helps by removing dead tool outputs, and the two compose well — but on its own it doesn't address the summarise-near-the-limit need that compaction covers." }
+            {
+              "id": "a",
+              "text": "Enable compaction so earlier context is summarised server-side as you near the limit",
+              "verdict": "best",
+              "rationale": "Compaction is purpose-built for nearing the window: it condenses earlier history into a block so the run can continue. It's the right primary tool for window pressure inside a session."
+            },
+            {
+              "id": "b",
+              "text": "Truncate the oldest messages client-side and hope nothing important was dropped",
+              "verdict": "wrong",
+              "rationale": "Blind truncation silently deletes context the agent may still need. Compaction summarises rather than guessing what to discard."
+            },
+            {
+              "id": "c",
+              "text": "Add context editing to prune stale tool results, alongside compaction",
+              "verdict": "viable",
+              "rationale": "Editing genuinely helps by removing dead tool outputs, and the two compose well — but on its own it doesn't address the summarise-near-the-limit need that compaction covers."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "You enable compaction. How do you handle the response each turn?",
           "choices": [
-            { "id": "a", "text": "Append the full response.content (including the compaction block) back to messages", "verdict": "best", "rationale": "The API returns a compaction block in content and uses it to replace the compacted history next turn. Appending the full content preserves that state — the single most important compaction rule." },
-            { "id": "b", "text": "Extract and append only the assistant's text so the history stays small", "verdict": "wrong", "rationale": "Appending only the text drops the compaction block; the next request re-sends the full uncompacted history and the summary is lost, silently, with no error." },
-            { "id": "c", "text": "Append the full content, and also write key findings to a memory store", "verdict": "viable", "rationale": "Appending the full content is exactly right; adding memory is a sensible belt-and-braces for high-stakes facts that a summary might erode — slightly more than the step strictly asked, but not wrong." }
+            {
+              "id": "a",
+              "text": "Append the full response.content (including the compaction block) back to messages",
+              "verdict": "best",
+              "rationale": "The API returns a compaction block in content and uses it to replace the compacted history next turn. Appending the full content preserves that state — the single most important compaction rule."
+            },
+            {
+              "id": "b",
+              "text": "Extract and append only the assistant's text so the history stays small",
+              "verdict": "wrong",
+              "rationale": "Appending only the text drops the compaction block; the next request re-sends the full uncompacted history and the summary is lost, silently, with no error."
+            },
+            {
+              "id": "c",
+              "text": "Append the full content, and also write key findings to a memory store",
+              "verdict": "viable",
+              "rationale": "Appending the full content is exactly right; adding memory is a sensible belt-and-braces for high-stakes facts that a summary might erode — slightly more than the step strictly asked, but not wrong."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Early findings risk being summarised away, and the final report must be verifiable and honest. What do you build in?",
           "choices": [
-            { "id": "a", "text": "Track provenance per fact, pin/persist critical findings to memory, and ground every status claim against a tool result", "verdict": "best", "rationale": "Provenance makes facts checkable, persisting critical findings protects them from lossy summarisation, and grounding claims against real results gives honest status reporting — directly addressing degradation, verifiability, and trust." },
-            { "id": "b", "text": "Trust compaction to retain what matters and let the agent summarise its own success at the end", "verdict": "wrong", "rationale": "Summarisation is lossy and self-reported success without evidence is exactly the dishonest-status failure to avoid. Neither verifiability nor durability is addressed." },
-            { "id": "c", "text": "Persist findings to memory and add citations, but skip auditing the final status against tool results", "verdict": "viable", "rationale": "Persistence and provenance cover durability and verifiability, but skipping the status audit leaves the door open to a cheerful-but-false summary — the honesty gap remains." }
+            {
+              "id": "a",
+              "text": "Track provenance per fact, pin/persist critical findings to memory, and ground every status claim against a tool result",
+              "verdict": "best",
+              "rationale": "Provenance makes facts checkable, persisting critical findings protects them from lossy summarisation, and grounding claims against real results gives honest status reporting — directly addressing degradation, verifiability, and trust."
+            },
+            {
+              "id": "b",
+              "text": "Trust compaction to retain what matters and let the agent summarise its own success at the end",
+              "verdict": "wrong",
+              "rationale": "Summarisation is lossy and self-reported success without evidence is exactly the dishonest-status failure to avoid. Neither verifiability nor durability is addressed."
+            },
+            {
+              "id": "c",
+              "text": "Persist findings to memory and add citations, but skip auditing the final status against tool results",
+              "verdict": "viable",
+              "rationale": "Persistence and provenance cover durability and verifiability, but skipping the status audit leaves the door open to a cheerful-but-false summary — the honesty gap remains."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d5-compaction"]
+      "sourceRefs": [
+        "r-d5-compaction"
+      ]
     },
     {
       "id": "s-d5-flaky-endpoint",
-      "domainIds": ["d5-context-reliability"],
+      "domainIds": [
+        "d5-context-reliability"
+      ],
       "title": "Stabilise a flaky high-volume endpoint under rate limits",
       "tagline": "Retries, refusals, and caching — three calls under real load.",
       "context": "A high-traffic endpoint wraps a single Claude call. Under load it throws intermittent 429s, occasionally crashes on certain inputs, and your token costs are climbing. You're the architect tasked with stabilising it.",
@@ -348,31 +662,78 @@
           "id": "st1",
           "prompt": "The 429s are spiking. What's the right first response?",
           "choices": [
-            { "id": "a", "text": "Rely on the SDK's built-in exponential backoff for 429/5xx and respect retry-after; tune max_retries", "verdict": "best", "rationale": "The SDK already retries 429/5xx with backoff and honours retry-after. Leaning on it (and tuning max_retries) is correct, less code, and avoids fighting the built-in behaviour." },
-            { "id": "b", "text": "Add a tight custom loop that retries immediately on any 429, ignoring retry-after", "verdict": "wrong", "rationale": "Immediate retries that ignore retry-after hammer the API and worsen the rate-limit situation, while duplicating logic the SDK already provides." },
-            { "id": "c", "text": "Disable SDK retries and surface every 429 to the caller to handle upstream", "verdict": "viable", "rationale": "Pushing retries upstream can be a deliberate architecture choice for a queue, but as a default it just exposes transient blips the SDK would have absorbed for free." }
+            {
+              "id": "a",
+              "text": "Rely on the SDK's built-in exponential backoff for 429/5xx and respect retry-after; tune max_retries",
+              "verdict": "best",
+              "rationale": "The SDK already retries 429/5xx with backoff and honours retry-after. Leaning on it (and tuning max_retries) is correct, less code, and avoids fighting the built-in behaviour."
+            },
+            {
+              "id": "b",
+              "text": "Add a tight custom loop that retries immediately on any 429, ignoring retry-after",
+              "verdict": "wrong",
+              "rationale": "Immediate retries that ignore retry-after hammer the API and worsen the rate-limit situation, while duplicating logic the SDK already provides."
+            },
+            {
+              "id": "c",
+              "text": "Disable SDK retries and surface every 429 to the caller to handle upstream",
+              "verdict": "viable",
+              "rationale": "Pushing retries upstream can be a deliberate architecture choice for a queue, but as a default it just exposes transient blips the SDK would have absorbed for free."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "The endpoint occasionally crashes with an index error reading the response, always on a 200. What's the cause and fix?",
           "choices": [
-            { "id": "a", "text": "Some inputs trigger a refusal (stop_reason 'refusal') with empty content; check stop_reason before reading content[0]", "verdict": "best", "rationale": "A pre-output refusal is a 200 with an empty content array; unconditional content[0] access throws on exactly those. Branching on stop_reason first is the fix." },
-            { "id": "b", "text": "Wrap the content access in a try/except and return a generic error on failure", "verdict": "viable", "rationale": "It stops the crash, but masks a legitimate refusal as a generic error and loses the chance to handle it properly — a band-aid over the real cause." },
-            { "id": "c", "text": "Retry the request on the same model until content is non-empty", "verdict": "wrong", "rationale": "Retrying an identical prompt that was refused just refuses again, burning quota and latency for nothing." }
+            {
+              "id": "a",
+              "text": "Some inputs trigger a refusal (stop_reason 'refusal') with empty content; check stop_reason before reading content[0]",
+              "verdict": "best",
+              "rationale": "A pre-output refusal is a 200 with an empty content array; unconditional content[0] access throws on exactly those. Branching on stop_reason first is the fix."
+            },
+            {
+              "id": "b",
+              "text": "Wrap the content access in a try/except and return a generic error on failure",
+              "verdict": "viable",
+              "rationale": "It stops the crash, but masks a legitimate refusal as a generic error and loses the chance to handle it properly — a band-aid over the real cause."
+            },
+            {
+              "id": "c",
+              "text": "Retry the request on the same model until content is non-empty",
+              "verdict": "wrong",
+              "rationale": "Retrying an identical prompt that was refused just refuses again, burning quota and latency for nothing."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Token costs are climbing because every request re-sends a large fixed instruction block. What do you do?",
           "choices": [
-            { "id": "a", "text": "Add prompt caching with the stable instruction block in the prefix and the per-request input after the breakpoint", "verdict": "best", "rationale": "A large fixed prefix is the ideal cache target. Keep it first (stable), put the varying input last, and cache reads cost a fraction of fresh input — verified via cache_read_input_tokens." },
-            { "id": "b", "text": "Cache the prompt but interpolate the current timestamp into the system block for logging", "verdict": "wrong", "rationale": "Any byte change in the prefix invalidates the cache; a per-request timestamp in the system block silently busts it every call, so you pay the write premium and never get a read." },
-            { "id": "c", "text": "Move the instruction block to a memory store the model reads each call", "verdict": "viable", "rationale": "Externalising shared context is reasonable, but it doesn't directly cut per-request input tokens the way a stable cached prefix does — caching is the more targeted fix here." }
+            {
+              "id": "a",
+              "text": "Add prompt caching with the stable instruction block in the prefix and the per-request input after the breakpoint",
+              "verdict": "best",
+              "rationale": "A large fixed prefix is the ideal cache target. Keep it first (stable), put the varying input last, and cache reads cost a fraction of fresh input — verified via cache_read_input_tokens."
+            },
+            {
+              "id": "b",
+              "text": "Cache the prompt but interpolate the current timestamp into the system block for logging",
+              "verdict": "wrong",
+              "rationale": "Any byte change in the prefix invalidates the cache; a per-request timestamp in the system block silently busts it every call, so you pay the write premium and never get a read."
+            },
+            {
+              "id": "c",
+              "text": "Move the instruction block to a memory store the model reads each call",
+              "verdict": "viable",
+              "rationale": "Externalising shared context is reasonable, but it doesn't directly cut per-request input tokens the way a stable cached prefix does — caching is the more targeted fix here."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d5-errors"]
+      "sourceRefs": [
+        "r-d5-errors"
+      ]
     }
   ],
   "labs": [
@@ -404,14 +765,67 @@
     }
   ],
   "resources": [
-    { "id": "r-d5-compaction", "title": "Compaction", "url": "https://platform.claude.com/docs/en/build-with-claude/compaction", "kind": "official-doc", "annotation": "Setup, the trigger threshold, and the critical rule: append response.content (with the compaction block) back every turn.", "domainIds": ["d5-context-reliability"] },
-    { "id": "r-d5-editing", "title": "Context editing", "url": "https://platform.claude.com/docs/en/build-with-claude/context-editing", "kind": "official-doc", "annotation": "Thresholds and what gets cleared. It prunes stale tool results / thinking — it does not summarise.", "domainIds": ["d5-context-reliability"] },
-    { "id": "r-d5-windows", "title": "Context windows", "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows", "kind": "official-doc", "annotation": "Window sizes and token management — and why max_tokens (output cap) is separate from the window.", "domainIds": ["d5-context-reliability"] },
-    { "id": "r-d5-tokens", "title": "Token counting", "url": "https://platform.claude.com/docs/en/build-with-claude/token-counting", "kind": "official-doc", "annotation": "Use the count_tokens endpoint with the target model. Never tiktoken — it undercounts Claude.", "domainIds": ["d5-context-reliability"] },
-    { "id": "r-d5-errors", "title": "Errors & rate limits", "url": "https://platform.claude.com/docs/en/api/errors", "kind": "official-doc", "annotation": "Error codes, the retryable set, SDK auto-backoff for 429/5xx, and respecting retry-after.", "domainIds": ["d5-context-reliability"] }
+    {
+      "id": "r-d5-compaction",
+      "title": "Compaction",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/compaction",
+      "kind": "official-doc",
+      "annotation": "Setup, the trigger threshold, and the critical rule: append response.content (with the compaction block) back every turn.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-editing",
+      "title": "Context editing",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/context-editing",
+      "kind": "official-doc",
+      "annotation": "Thresholds and what gets cleared. It prunes stale tool results / thinking — it does not summarise.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-windows",
+      "title": "Context windows",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "kind": "official-doc",
+      "annotation": "Window sizes and token management — and why max_tokens (output cap) is separate from the window.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-tokens",
+      "title": "Token counting",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/token-counting",
+      "kind": "official-doc",
+      "annotation": "Use the count_tokens endpoint with the target model. Never tiktoken — it undercounts Claude.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-errors",
+      "title": "Errors & rate limits",
+      "url": "https://platform.claude.com/docs/en/api/errors",
+      "kind": "official-doc",
+      "annotation": "Error codes, the retryable set, SDK auto-backoff for 429/5xx, and respecting retry-after.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    }
   ],
   "videos": [
-    { "id": "v-d5-1", "title": "D5 · Token budgeting & the context window", "provider": "youtube", "url": "", "domainIds": ["d5-context-reliability"], "sourceNotebook": "cca-f / domain 5", "status": "placeholder" },
-    { "id": "v-d5-2", "title": "D5 · Compaction, context editing & memory", "provider": "youtube", "url": "", "domainIds": ["d5-context-reliability"], "sourceNotebook": "cca-f / domain 5", "status": "placeholder" }
+    {
+      "id": "v-d5-1",
+      "title": "Context & reliability — domain overview",
+      "provider": "file",
+      "url": "/content/anthropic/videos/d5.mp4",
+      "status": "published",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    }
   ]
 }
