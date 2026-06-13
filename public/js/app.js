@@ -14,6 +14,7 @@ import { examView } from "./views/exam.js";
 import { scenariosIndex, scenarioRun } from "./views/scenario.js";
 import { readinessView } from "./views/readiness.js";
 import { libraryView, videosView } from "./views/library.js";
+import { tutorPageView, mountTutor } from "./tutor.js";
 
 const appEl = document.getElementById("app");
 const progressEl = document.getElementById("ac-progress");
@@ -52,6 +53,7 @@ route("/t/:vendor/:track/scenario/:scenario", scenarioRun);
 route("/t/:vendor/:track/quiz/:domain", quizView);
 route("/t/:vendor/:track/exam", examView);
 route("/t/:vendor/:track/readiness", readinessView);
+route("/tutor", tutorPageView);
 
 async function handle(match) {
   setProgress(18);
@@ -78,7 +80,7 @@ async function handle(match) {
 function syncTopnav(path) {
   document.querySelectorAll(".ac-topnav a[data-nav]").forEach((a) => {
     const k = a.getAttribute("data-nav");
-    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method");
+    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor");
     if (on) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
@@ -99,3 +101,4 @@ function syncTopnav(path) {
 })();
 
 start(handle);
+mountTutor();

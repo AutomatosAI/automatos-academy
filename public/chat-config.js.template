@@ -1,0 +1,21 @@
+/**
+ * Automatos Academy — tutor runtime config.
+ *
+ * Hydrated from container env at startup by server.js (hydrateChatConfig).
+ * The tutor is a SEPARATE agent on the Automatos platform (not the main site
+ * bot): create an Academy workspace, build its "everything Claude" knowledge
+ * graph, create the tutor agent, then set these two env vars on the deploy:
+ *
+ *   ACADEMY_CHAT_PUBLIC_KEY = ak_pub_...   (Academy workspace public key)
+ *   ACADEMY_CHAT_AGENT_ID   = <agent uuid> (the tutor agent; optional —
+ *                                            omit to use the workspace default)
+ *
+ * The ak_pub_* key is origin-allow-listed server-side, so it's safe in client
+ * JS as long as the key's allowed_domains includes this origin
+ * (academy.automatos.app + the railway URL + localhost for dev).
+ */
+window.ACADEMY_CHAT = {
+  publicKey: "${ACADEMY_CHAT_PUBLIC_KEY}",
+  agentId:   "${ACADEMY_CHAT_AGENT_ID}",
+  apiBase:   "https://api.automatos.app",
+};

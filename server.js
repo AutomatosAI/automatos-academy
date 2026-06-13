@@ -14,11 +14,26 @@ import express from "express";
 import compression from "compression";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(__dirname, "public");
 const PORT = process.env.PORT || 4321;
+
+// ── Hydrate the tutor's chat config from env at startup ───────────────
+// Mirrors the landing site's _config.js pattern. The tutor is a separate
+// agent on the Automatos platform; set ACADEMY_CHAT_PUBLIC_KEY (and optionally
+// ACADEMY_CHAT_AGENT_ID) from the Academy workspace. Missing vars → empty
+// strings, and the tutor shows a graceful "coming online" state.
+function hydrateChatConfig() {
+  const tpl = resolve(PUBLIC, "chat-config.js.template");
+  if (!existsSync(tpl)) return;
+  const out = readFileSync(tpl, "utf8")
+    .replace(/\$\{ACADEMY_CHAT_PUBLIC_KEY\}/g, process.env.ACADEMY_CHAT_PUBLIC_KEY || "")
+    .replace(/\$\{ACADEMY_CHAT_AGENT_ID\}/g, process.env.ACADEMY_CHAT_AGENT_ID || "");
+  writeFileSync(resolve(PUBLIC, "chat-config.js"), out, "utf8");
+}
+hydrateChatConfig();
 
 const app = express();
 app.use(compression());
