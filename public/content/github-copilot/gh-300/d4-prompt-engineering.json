@@ -1,0 +1,710 @@
+{
+  "id": "d4-prompt-engineering",
+  "order": 4,
+  "code": "D4",
+  "name": "Apply Prompt Engineering and Context Crafting",
+  "weight": 0.13,
+  "tagline": "Say what you want clearly, give Copilot the right context, show it the pattern, and iterate. The 4 Ss, few-shot, and grounding — the craft that makes every other feature work.",
+  "overview": "A focused domain (10–15%). It tests whether you can steer Copilot with words and context: structure a prompt that is single, specific, and short; surround it with the right open files, references, and descriptive names; give examples when you want a pattern followed; and refine through a conversation instead of expecting a perfect first answer. It also covers the durable habits that scale prompting — reusable custom instructions and prompt files for consistency, and richer context sources like Spaces and MCP. The exam rewards the instinct that a vague ask gets a vague answer, and that most 'Copilot got it wrong' moments are really 'the prompt or context was thin'.",
+  "objectives": [
+    "Structure a Copilot prompt that is clear, specific, and scoped — and break a big ask into steps.",
+    "Craft context: open relevant files, keep helpful tabs open, use #-references and @-participants, and let descriptive names and comments steer completions.",
+    "Choose between zero-shot and few-shot prompting, giving examples of the pattern you want.",
+    "Refine iteratively — treat prompting as a conversation and correct course when the first answer misses.",
+    "Scale good prompting with reusable custom instructions and prompt files, and richer context via Spaces and MCP."
+  ],
+  "lessons": [
+    {
+      "id": "l1-structure",
+      "title": "Prompt structure: the 4 Ss and breaking down the ask",
+      "estMinutes": 12,
+      "objective": "Write prompts that are single, specific, and short — and split big asks into steps.",
+      "body": "## A vague ask gets a vague answer\n\nCopilot can only act on what you tell it. The single most reliable upgrade to your results is a clearer prompt. Microsoft Learn sums the fundamentals up as the **4 Ss**:\n\n- **Single** — focus each prompt on one well-defined task or question. 'Fix the bug and add tests and refactor the module' is three prompts wearing a trench coat.\n- **Specific** — be explicit and detailed. 'Write a Python function to filter and return the even numbers from a list' beats 'clean up this list code'.\n- **Short** — say enough to be specific, then stop. Rambling context buries the actual request.\n- **Surround** — keep related files open and use descriptive filenames and names so Copilot has the context around the prompt. (More on that in the next lesson.)\n\n## Start general, then get specific\n\nGitHub's own guidance is to open with a broad description of the goal, then list the concrete requirements. Give it the shape first — 'a REST endpoint that creates an order' — then the details — 'validate the payload, return 201 with the order id, 400 on a bad body'.\n\n## Break big asks into steps\n\nWhen a task is genuinely large, decompose it into **multiple simple, small tasks** rather than one mega-prompt. Ask for the data model, then the endpoint, then the tests. Each step is easier for Copilot to get right and easier for you to check — and it mirrors how Plan mode works for agents.\n\n## Avoid ambiguity\n\nDon't lean on words like 'this' or 'that' when Copilot can't see what you mean. Name the file, the function, the symbol. Ambiguity is where wrong answers come from.\n\n## Why the exam cares\n\nThis is the heart of the domain. Expect questions that show you two prompts and ask which is better, or hand you a sprawling request and ask how to improve it. The grader's instinct: **single, specific, short — and split what's too big.**",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-1",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which prompt best follows the 'single' and 'specific' principles?",
+          "options": [
+            { "id": "a", "text": "\"Write a Python function that returns only the even numbers from a list of integers.\"", "correct": true },
+            { "id": "b", "text": "\"Clean up this file and make it better.\"" },
+            { "id": "c", "text": "\"Fix the bug, add tests, refactor the module, and update the docs.\"" },
+            { "id": "d", "text": "\"Do the thing with the numbers.\"" }
+          ],
+          "explanation": "The first prompt is one well-defined task, stated explicitly — **single** and **specific**. 'Make it better' and 'do the thing' are vague; the fix-tests-refactor-docs prompt bundles several tasks and should be split.",
+          "sourceRefs": ["r-d4-prompt"]
+        },
+        {
+          "id": "kc-d4-2",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need Copilot to build a data model, an API endpoint, and tests for a new feature. What does the prompt-engineering guidance recommend?",
+          "options": [
+            { "id": "a", "text": "Break it into multiple small prompts — model, then endpoint, then tests", "correct": true },
+            { "id": "b", "text": "Put all three in one long prompt so Copilot has full context at once" },
+            { "id": "c", "text": "Ask only for the endpoint and let Copilot infer the rest silently" },
+            { "id": "d", "text": "Skip prompting and accept whatever completions appear" }
+          ],
+          "explanation": "Large asks should be **decomposed into simple, small tasks**. Each step is easier for Copilot to get right and for you to verify. One giant prompt invites a muddled, hard-to-check answer.",
+          "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+        },
+        {
+          "id": "kc-d4-3",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A teammate's prompt says: \"Refactor this so it's faster.\" Copilot's answer misses the mark. What's the most likely root cause?",
+          "options": [
+            { "id": "a", "text": "The prompt is ambiguous — 'this' and 'faster' aren't specific, and no context pins down what to change", "correct": true },
+            { "id": "b", "text": "Copilot cannot refactor code under any circumstances" },
+            { "id": "c", "text": "The model tier is too high for refactoring work" },
+            { "id": "d", "text": "Refactoring always requires the coding agent, never chat" }
+          ],
+          "explanation": "'This' and 'faster' are ambiguous — Copilot doesn't know which code or which metric. **Avoid ambiguity**: name the function, say what 'faster' means, and give context. The other options misdescribe Copilot's abilities.",
+          "sourceRefs": ["r-d4-prompt"]
+        }
+      ]
+    },
+    {
+      "id": "l2-context",
+      "title": "Context crafting: surround the prompt with the right signal",
+      "estMinutes": 14,
+      "objective": "Feed Copilot context through open files, references, participants, and descriptive names.",
+      "body": "## Copilot reads more than the prompt\n\nThe words you type are only part of the input. Copilot also reads the context around them — and the 'Surround' S is about controlling that context deliberately.\n\n## Open the right files, close the wrong ones\n\n- **Open relevant files, close irrelevant ones.** Copilot uses your open editor and **parallel open tabs** as context. Keeping the files a change touches open — and closing noise — pulls its suggestions toward the right code.\n- **Highlight the code you mean.** In chat, selecting the code you're asking about tells Copilot exactly what to reference.\n\n## Point at things explicitly\n\n- **`#`-references** name specific context: a file, a symbol, a selection. `#-reference` a file and Copilot reads *that* file rather than guessing.\n- **`@`-participants** bring in a domain of context. `@workspace` (VS Code) or `@project` (JetBrains) lets Copilot reason over your whole project instead of just the open file. Use them when the answer depends on code you don't have on screen.\n\n## Let the code itself steer\n\nCopilot leans on your existing code as context, so **descriptive names and comments are prompts**:\n\n- A function named `sendPasswordResetEmail(user)` steers completions far better than `doIt(x)`.\n- A short comment describing intent above the cursor — 'parse the ISO date and return the weekday' — often yields production-ready code with no chat at all. Adding a few detail comments at the top of a file is a cheap, high-leverage way to give context while staying short.\n- Consistent code style and clear structure make every suggestion more on-target.\n\n## Richer context sources\n\nBeyond references, two features (from the Features domain) are really context tools:\n\n- **Copilot Spaces** curate a reusable bundle — repos, files, docs, notes — so chat is grounded in your system's conventions.\n- **MCP** connects live external tools and data, so a prompt can draw on real tickets or query results.\n\nBoth exist to solve the same problem this domain keeps hitting: **generic answers come from missing context.**\n\n## Why the exam cares\n\nContext crafting is half of this domain's name. Expect questions on which context lever fits — open a file, `#`-reference a symbol, `@workspace`, a descriptive name, a Space — when a bare prompt isn't enough.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-4",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You want a Copilot completion to reflect the module you're editing. Beyond the prompt itself, what most directly improves the context?",
+          "options": [
+            { "id": "a", "text": "Keep the relevant files open (and close unrelated ones) so Copilot uses them as context", "correct": true },
+            { "id": "b", "text": "Close every file so Copilot starts from a blank slate" },
+            { "id": "c", "text": "Rename your branch to match the feature" },
+            { "id": "d", "text": "Increase your screen resolution" }
+          ],
+          "explanation": "Copilot uses open files and **parallel open tabs** as context. Keeping the right files open — and closing noise — is the 'Surround' principle in action. A blank slate removes context; branch names and resolution don't feed the model.",
+          "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+        },
+        {
+          "id": "kc-d4-5",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In Copilot Chat you ask a question whose answer depends on code across the repository, not just the open file. What brings that wider context in?",
+          "options": [
+            { "id": "a", "text": "The @workspace participant (or @project in JetBrains)", "correct": true },
+            { "id": "b", "text": "Typing the question in all capitals for emphasis" },
+            { "id": "c", "text": "The /deploy slash command" },
+            { "id": "d", "text": "Lowering the model temperature manually" }
+          ],
+          "explanation": "`@workspace` (VS Code) / `@project` (JetBrains) lets Copilot reason over the whole project rather than just the open file. Capitalisation, `/deploy`, and temperature knobs don't add project context.",
+          "sourceRefs": ["r-d4-prompt", "r-d4-spaces"]
+        },
+        {
+          "id": "kc-d4-6",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why do descriptive function names and a short intent comment improve Copilot's completions?",
+          "options": [
+            { "id": "a", "text": "Copilot uses surrounding code as context, so clear names and comments act as an in-code prompt", "correct": true },
+            { "id": "b", "text": "They change which language model Copilot uses" },
+            { "id": "c", "text": "They disable Copilot's content filtering for that file" },
+            { "id": "d", "text": "They have no effect; only the chat prompt matters" }
+          ],
+          "explanation": "Copilot reads the code around the cursor, so names and comments **are** context — `sendPasswordResetEmail(user)` plus a one-line intent comment steers far better than `doIt(x)`. They don't switch models or touch filtering, and they very much do matter.",
+          "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+        }
+      ]
+    },
+    {
+      "id": "l3-examples",
+      "title": "Zero-shot, few-shot, and role prompting",
+      "estMinutes": 12,
+      "objective": "Choose zero-shot vs few-shot, and use examples and roles to get the pattern you want.",
+      "body": "## Show, don't just tell\n\nWhen you want Copilot to follow a *specific* pattern — your naming, your error style, your test shape — describing it is weaker than showing it. Microsoft Learn frames this as three levels:\n\n- **Zero-shot** — no examples; Copilot relies on its training. Great for common, standard functionality: 'write a function that converts Celsius to Fahrenheit' needs no example. Reach for it when the pattern is generic.\n- **One-shot** — you give **one** example, then ask for more of the same. Good when you want output that matches *your* convention — show one temperature-conversion function, get a consistent sibling.\n- **Few-shot** — you give **several** examples. This handles more scenarios and edge cases, and is the tool when the pattern is non-obvious or must cover variations (e.g. a greeting that changes by time of day, shown across a few cases).\n\nThe trade-off: zero-shot is fastest but least controlled; few-shot costs a little setup but nails the pattern. Give examples when 'do it like *this*' matters.\n\n## Role prompting\n\nYou can tell Copilot to **act as a specific kind of expert** to bias its output toward that domain:\n\n- 'Act as a security expert. Write a password validation function that follows OWASP guidelines' tends to add input sanitisation and standard protections.\n- 'Act as a performance optimisation expert. Refactor this to handle large datasets efficiently' steers toward efficient algorithms and memory use.\n- 'Act as a testing specialist. Write unit tests for this module, including edge cases' produces broader coverage.\n\nRole prompting gets more targeted code on the first try — but the output is still assistive and must be reviewed (that's the Responsible-use domain's rule).\n\n## Why the exam cares\n\nExpect a question that hands you a 'follow this exact style' need and asks whether to add examples — the answer is **few-shot** (or one-shot). And expect to recognise zero-shot as the right, lighter choice for standard, generic code.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-7",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want Copilot to generate several functions that match your team's exact naming, docstring, and error-handling style. Which approach fits best?",
+          "options": [
+            { "id": "a", "text": "Few-shot prompting — provide a couple of examples in your style, then ask for more like them", "correct": true },
+            { "id": "b", "text": "Zero-shot prompting — describe the style in words and give no examples" },
+            { "id": "c", "text": "Turn off completions and write them all by hand" },
+            { "id": "d", "text": "Ask @workspace to change the model temperature" }
+          ],
+          "explanation": "Matching a **specific** pattern is what **few-shot** is for — show the examples and Copilot follows them. Zero-shot leaves the style to chance; the other options don't address pattern-matching.",
+          "sourceRefs": ["r-d4-learn"]
+        },
+        {
+          "id": "kc-d4-8",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "For a common, standard task like 'convert Celsius to Fahrenheit', which prompting style is usually sufficient?",
+          "options": [
+            { "id": "a", "text": "Zero-shot — no examples needed; Copilot handles it from its training", "correct": true },
+            { "id": "b", "text": "Few-shot — always provide at least three examples first" },
+            { "id": "c", "text": "It cannot be done without a Copilot Space" },
+            { "id": "d", "text": "Only the coding agent can write conversion functions" }
+          ],
+          "explanation": "Common, generic functionality is the sweet spot for **zero-shot** — describe it and Copilot produces it. Examples add value when the pattern is specific or non-obvious, not for standard code.",
+          "sourceRefs": ["r-d4-learn"]
+        },
+        {
+          "id": "kc-d4-9",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is role prompting, as described for Copilot?",
+          "options": [
+            { "id": "a", "text": "Instructing Copilot to act as a specific kind of expert to bias output toward that domain", "correct": true },
+            { "id": "b", "text": "Assigning GitHub repository roles to control who can use Copilot" },
+            { "id": "c", "text": "Choosing which IDE Copilot runs in" },
+            { "id": "d", "text": "A billing tier that unlocks more requests" }
+          ],
+          "explanation": "Role prompting tells Copilot to 'act as a security/performance/testing expert', steering the answer toward that domain's practices. It's a prompting technique, not an access-control role, an IDE choice, or a billing tier.",
+          "sourceRefs": ["r-d4-learn"]
+        }
+      ]
+    },
+    {
+      "id": "l4-iterate",
+      "title": "Iterate, and make good prompting reusable",
+      "estMinutes": 12,
+      "objective": "Refine prompts as a conversation, and standardise context with custom instructions and prompt files.",
+      "body": "## Prompting is a conversation\n\nYour first prompt won't always land production-ready code — and that's fine. Microsoft Learn calls the habit **assert and iterate**: don't start from scratch when the answer misses. Instead, enrich your prompt with more detail or an example and ask again. Each turn builds on the last, and this dialogue usually reaches good code faster than hand-editing a near-miss.\n\nIn chat you can **reference the previous response** in your next request to refine it, or delete an outdated turn and restart clean.\n\n## Keep the conversation efficient\n\nLong histories help context but grow costly and noisy. Good habits:\n\n- **Summarise** when a thread gets long — 'based on our auth work above, now add rate limiting' — instead of dragging the whole history forward.\n- **Reset with focused context** for a genuinely new task; start a fresh thread rather than piling onto an unrelated one.\n- **Reference concisely** instead of re-pasting whole implementations.\n\n## Make good prompting reusable\n\nRe-typing the same context every session doesn't scale. Two features fix that:\n\n- **Custom instructions** — a repository-wide `.github/copilot-instructions.md` file (natural-language Markdown) gives Copilot standing guidance for *every* request in that repo, so you don't repeat your conventions each chat. Path-specific instruction files can scope guidance to matching files.\n- **Prompt files** — save a reusable prompt for a recurring task so the whole team runs the same well-crafted instruction instead of reinventing it.\n\nThe payoff is **consistency**: the same guardrails and context apply automatically, which is exactly the 'Surround' principle made permanent.\n\n## Why the exam cares\n\nExpect two threads here: recognising iteration/conversation as the right response to a first-answer miss (not abandoning Copilot), and knowing that **custom instructions / prompt files** are the durable way to apply consistent context without repeating yourself.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-10",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Copilot's first answer is close but misses a requirement. What does the 'assert and iterate' practice recommend?",
+          "options": [
+            { "id": "a", "text": "Refine the prompt with more detail or an example and ask again, building on the context", "correct": true },
+            { "id": "b", "text": "Abandon Copilot for this task and write everything by hand" },
+            { "id": "c", "text": "Accept the near-miss unchanged to avoid extra requests" },
+            { "id": "d", "text": "Switch IDEs and start over" }
+          ],
+          "explanation": "Treat prompting as a **conversation**: enrich the prompt and iterate rather than starting from scratch. Abandoning Copilot, accepting a wrong answer, or switching tools all miss the point of iterative refinement.",
+          "sourceRefs": ["r-d4-learn", "r-d4-prompt"]
+        },
+        {
+          "id": "kc-d4-11",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team keeps re-typing the same conventions (naming, error style, framework choices) into Copilot chats. What applies that context to every request in the repo automatically?",
+          "options": [
+            { "id": "a", "text": "A repository custom-instructions file (.github/copilot-instructions.md)", "correct": true },
+            { "id": "b", "text": "Raising the model tier for the repository" },
+            { "id": "c", "text": "Adding the conventions to the commit message template" },
+            { "id": "d", "text": "Turning on inline completions" }
+          ],
+          "explanation": "Repository **custom instructions** give Copilot standing, natural-language guidance for every request in the repo — no re-typing. Model tier, commit templates, and completions don't carry your conventions into each chat.",
+          "sourceRefs": ["r-d4-instructions"]
+        },
+        {
+          "id": "kc-d4-12",
+          "domainId": "d4-prompt-engineering",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A long chat thread has grown expensive and noisy while you add features one by one. What's the recommended way to keep it efficient?",
+          "options": [
+            { "id": "a", "text": "Summarise the relevant context and/or reset into a focused new thread", "correct": true },
+            { "id": "b", "text": "Always keep the entire history so nothing is lost" },
+            { "id": "c", "text": "Delete the whole project and re-clone it" },
+            { "id": "d", "text": "Disable Copilot until the feature is done" }
+          ],
+          "explanation": "Summarise a lengthy thread or reset with focused context for a new task — that keeps the conversation on-point and cheaper. Hoarding full history is the problem; deleting the project or disabling Copilot are non-sequiturs.",
+          "sourceRefs": ["r-d4-learn"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d4-1",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What do the '4 Ss' of prompting stand for?",
+      "options": [
+        { "id": "a", "text": "Single, Specific, Short, Surround", "correct": true },
+        { "id": "b", "text": "Simple, Standard, Structured, Safe" },
+        { "id": "c", "text": "Scope, Speed, Style, Scale" },
+        { "id": "d", "text": "Static, Stateful, Streaming, Secure" }
+      ],
+      "explanation": "The 4 Ss are **Single, Specific, Short, Surround** — focus on one task, be explicit, stay concise, and surround the prompt with context. The other lists are invented.",
+      "sourceRefs": ["r-d4-learn"]
+    },
+    {
+      "id": "q-d4-2",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is the better-engineered prompt?",
+      "options": [
+        { "id": "a", "text": "\"Write a function that validates an email address with a regex and returns a boolean.\"", "correct": true },
+        { "id": "b", "text": "\"Make the email stuff work.\"" },
+        { "id": "c", "text": "\"Do email.\"" },
+        { "id": "d", "text": "\"Handle everything about users, emails, and login in one go.\"" }
+      ],
+      "explanation": "The first is single-focused and specific — a clear task with a stated output. 'Make it work' and 'do email' are vague; the last bundles several tasks and should be split.",
+      "sourceRefs": ["r-d4-learn", "r-d4-prompt"]
+    },
+    {
+      "id": "q-d4-3",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "GitHub's prompt guidance says to 'start general, then get specific'. What does that mean in practice?",
+      "options": [
+        { "id": "a", "text": "Open with the broad goal, then list the concrete requirements", "correct": true },
+        { "id": "b", "text": "Write the vaguest possible prompt and let Copilot ask you questions" },
+        { "id": "c", "text": "Always begin with the most obscure edge case" },
+        { "id": "d", "text": "Provide only the file name and nothing else" }
+      ],
+      "explanation": "State the shape of what you want first ('a REST endpoint that creates an order'), then the specifics (validation, status codes). It's not about staying vague or leading with edge cases.",
+      "sourceRefs": ["r-d4-prompt"]
+    },
+    {
+      "id": "q-d4-4",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A request spans a schema change, an API endpoint, and a test suite. What's the recommended prompting approach?",
+      "options": [
+        { "id": "a", "text": "Split it into small, sequential prompts and check each result", "correct": true },
+        { "id": "b", "text": "Combine all three into a single maximal prompt" },
+        { "id": "c", "text": "Ask only for the schema and hope the rest follows" },
+        { "id": "d", "text": "Prompt once, then accept the output without review" }
+      ],
+      "explanation": "Break complex tasks into **simple, small tasks** — easier for Copilot to nail and for you to verify. One giant prompt muddies the result; asking for only part or skipping review both fail the task.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+    },
+    {
+      "id": "q-d4-5",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Copilot uses which of the following as context, in addition to your typed prompt?",
+      "options": [
+        { "id": "a", "text": "Your open files and parallel open tabs", "correct": true },
+        { "id": "b", "text": "The colour theme of your editor" },
+        { "id": "c", "text": "Your keyboard layout" },
+        { "id": "d", "text": "The size of your monitor" }
+      ],
+      "explanation": "Copilot draws context from **open files and parallel open tabs** — the 'Surround' principle. Themes, keyboard layout, and monitor size don't feed the model.",
+      "sourceRefs": ["r-d4-learn", "r-d4-prompt"]
+    },
+    {
+      "id": "q-d4-6",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want Copilot Chat to reason across the whole project, not just the file on screen. What do you use?",
+      "options": [
+        { "id": "a", "text": "The @workspace participant (or @project in JetBrains)", "correct": true },
+        { "id": "b", "text": "A longer prompt written in bold" },
+        { "id": "c", "text": "The /explain command alone" },
+        { "id": "d", "text": "Renaming the repository" }
+      ],
+      "explanation": "`@workspace` / `@project` widens context to the whole project. Formatting, `/explain` on its own, and repo renaming don't broaden the context set.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-spaces"]
+    },
+    {
+      "id": "q-d4-7",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How do you point Copilot at a specific file or symbol as context in chat?",
+      "options": [
+        { "id": "a", "text": "Use a #-reference to the file or symbol (or highlight the code)", "correct": true },
+        { "id": "b", "text": "Describe it vaguely as 'that thing from earlier'" },
+        { "id": "c", "text": "Attach a screenshot of the code as the only reference" },
+        { "id": "d", "text": "Change the file's extension" }
+      ],
+      "explanation": "`#`-references name specific context — a file, symbol, or selection — and highlighting the code works too. Vague pointers, screenshots, and extension changes don't reliably attach the context.",
+      "sourceRefs": ["r-d4-prompt"]
+    },
+    {
+      "id": "q-d4-8",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which naming choice better steers Copilot's completions?",
+      "options": [
+        { "id": "a", "text": "sendPasswordResetEmail(user)", "correct": true },
+        { "id": "b", "text": "doIt(x)" },
+        { "id": "c", "text": "f1(a)" },
+        { "id": "d", "text": "temp(z)" }
+      ],
+      "explanation": "Descriptive names are in-code prompts — `sendPasswordResetEmail(user)` tells Copilot the intent. `doIt`, `f1`, and `temp` carry no signal.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+    },
+    {
+      "id": "q-d4-9",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For a common utility like formatting a date, which prompting style is usually enough?",
+      "options": [
+        { "id": "a", "text": "Zero-shot — no examples; Copilot generates it from training", "correct": true },
+        { "id": "b", "text": "Few-shot — supply several examples first, always" },
+        { "id": "c", "text": "Role prompting as a compiler" },
+        { "id": "d", "text": "A dedicated MCP server" }
+      ],
+      "explanation": "Standard, generic tasks are ideal for **zero-shot**. Examples help when the pattern is specific; a 'compiler' role and an MCP server are overkill for a common utility.",
+      "sourceRefs": ["r-d4-learn"]
+    },
+    {
+      "id": "q-d4-10",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need generated code to match a specific, non-obvious pattern that varies across cases. Which technique fits?",
+      "options": [
+        { "id": "a", "text": "Few-shot prompting — give several examples covering the variations", "correct": true },
+        { "id": "b", "text": "Zero-shot prompting — describe it once with no examples" },
+        { "id": "c", "text": "Shorten the prompt until it fits one word" },
+        { "id": "d", "text": "Disable content exclusions" }
+      ],
+      "explanation": "Several examples — **few-shot** — is how you convey a specific pattern with variations and edge cases. Zero-shot leaves it to chance; one-word prompts and content exclusions are irrelevant here.",
+      "sourceRefs": ["r-d4-learn"]
+    },
+    {
+      "id": "q-d4-11",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is 'one-shot' prompting?",
+      "options": [
+        { "id": "a", "text": "Giving a single example, then asking Copilot to produce more of the same", "correct": true },
+        { "id": "b", "text": "Sending exactly one prompt and never replying" },
+        { "id": "c", "text": "Using Copilot only once per day" },
+        { "id": "d", "text": "A one-time free trial of Copilot" }
+      ],
+      "explanation": "One-shot means **one example** to anchor the pattern, then a request for similar output. It's not about a single message, daily limits, or trials.",
+      "sourceRefs": ["r-d4-learn"]
+    },
+    {
+      "id": "q-d4-12",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You're writing a password-validation function and want OWASP-aligned output on the first try. Which prompting technique helps most?",
+      "options": [
+        { "id": "a", "text": "Role prompting — 'Act as a security expert...'", "correct": true },
+        { "id": "b", "text": "Asking in a shorter sentence with no detail" },
+        { "id": "c", "text": "Switching to inline completions with no comment" },
+        { "id": "d", "text": "Removing all context from the file" }
+      ],
+      "explanation": "Telling Copilot to **act as a security expert** biases output toward sanitisation and standard protections. Stripping detail or context does the opposite.",
+      "sourceRefs": ["r-d4-learn"]
+    },
+    {
+      "id": "q-d4-13",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The first response isn't quite right. What's the best next move?",
+      "options": [
+        { "id": "a", "text": "Refine the prompt (add detail or an example) and iterate on the same thread", "correct": true },
+        { "id": "b", "text": "Give up and write it manually from scratch" },
+        { "id": "c", "text": "Repeat the identical prompt verbatim and hope" },
+        { "id": "d", "text": "Accept it as-is to save a request" }
+      ],
+      "explanation": "Prompting is a conversation — enrich and iterate. Giving up, repeating verbatim, or accepting a wrong answer all abandon the refinement loop.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+    },
+    {
+      "id": "q-d4-14",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does a repository custom-instructions file (.github/copilot-instructions.md) do?",
+      "options": [
+        { "id": "a", "text": "Gives Copilot standing, natural-language guidance applied to every request in that repository", "correct": true },
+        { "id": "b", "text": "Trains a private model on the repository each night" },
+        { "id": "c", "text": "Blocks Copilot from the repository entirely" },
+        { "id": "d", "text": "Merges pull requests that follow the instructions" }
+      ],
+      "explanation": "Custom instructions provide repo-wide context so you don't repeat conventions in every chat. They don't train models, block Copilot, or merge PRs.",
+      "sourceRefs": ["r-d4-instructions"]
+    },
+    {
+      "id": "q-d4-15",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Chat answers keep ignoring your team's internal frameworks and conventions. Which grounding feature curates that knowledge for reuse?",
+      "options": [
+        { "id": "a", "text": "A Copilot Space bundling the relevant repos, docs, and notes", "correct": true },
+        { "id": "b", "text": "A longer prompt each time" },
+        { "id": "c", "text": "A higher completion length setting" },
+        { "id": "d", "text": "Turning off duplication detection" }
+      ],
+      "explanation": "A **Copilot Space** curates a reusable, shareable context bundle so answers reflect your conventions. Re-typing, length settings, and duplication detection don't curate context.",
+      "sourceRefs": ["r-d4-spaces"]
+    },
+    {
+      "id": "q-d4-16",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want a prompt to draw on live data from an external system (real tickets, real query results). What's the right context source?",
+      "options": [
+        { "id": "a", "text": "An MCP server connecting that system to Copilot", "correct": true },
+        { "id": "b", "text": "Pasting yesterday's export into the prompt" },
+        { "id": "c", "text": "A screenshot of the dashboard" },
+        { "id": "d", "text": "A more descriptive variable name" }
+      ],
+      "explanation": "Live external data is what **MCP** connects. A stale export or screenshot isn't live, and a variable name doesn't reach an external system.",
+      "sourceRefs": ["r-d4-mcp"]
+    },
+    {
+      "id": "q-d4-17",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which statement best captures the relationship between prompt engineering and Copilot's context features (references, Spaces, MCP)?",
+      "options": [
+        { "id": "a", "text": "They're two halves of the same craft — clear instructions plus the right context both shape the output", "correct": true },
+        { "id": "b", "text": "Context features replace prompt quality, so wording no longer matters" },
+        { "id": "c", "text": "Prompt wording replaces context, so you never need references or grounding" },
+        { "id": "d", "text": "They are unrelated; only the model tier determines quality" }
+      ],
+      "explanation": "The domain is 'prompt engineering **and** context crafting' — a clear prompt and the right context work together. Neither replaces the other, and model tier alone doesn't determine quality.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-spaces"]
+    },
+    {
+      "id": "q-d4-18",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A prompt reads: \"Update this to fix the issue.\" Why is it likely to underperform?",
+      "options": [
+        { "id": "a", "text": "It's ambiguous — 'this' and 'the issue' aren't specified and no context is attached", "correct": true },
+        { "id": "b", "text": "It's too long and detailed" },
+        { "id": "c", "text": "It names too many files explicitly" },
+        { "id": "d", "text": "It uses a forbidden slash command" }
+      ],
+      "explanation": "'This' and 'the issue' are undefined, and nothing is referenced — classic ambiguity. The problem is too little specificity and context, not too much.",
+      "sourceRefs": ["r-d4-prompt"]
+    },
+    {
+      "id": "q-d4-19",
+      "domainId": "d4-prompt-engineering",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which techniques directly improve the context Copilot has for a task? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Keeping the relevant files (and helpful tabs) open", "correct": true },
+        { "id": "b", "text": "#-referencing the specific file or symbol involved", "correct": true },
+        { "id": "c", "text": "Using @workspace so it can reason across the project", "correct": true },
+        { "id": "d", "text": "Writing the prompt in a larger font" }
+      ],
+      "explanation": "Open files/tabs, `#`-references, and `@workspace` are all context levers. Font size is presentation, not context.",
+      "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+    },
+    {
+      "id": "q-d4-20",
+      "domainId": "d4-prompt-engineering",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which are sound ways to keep a long Copilot Chat conversation effective and efficient? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Summarise the relevant context when the thread gets long", "correct": true },
+        { "id": "b", "text": "Reset into a focused new thread for a genuinely new task", "correct": true },
+        { "id": "c", "text": "Reference prior work concisely instead of re-pasting whole implementations", "correct": true },
+        { "id": "d", "text": "Always carry the entire history forward, no matter how long" }
+      ],
+      "explanation": "Summarising, resetting for new tasks, and concise references keep the conversation on-point. Hoarding the full history is the inefficiency these practices fix.",
+      "sourceRefs": ["r-d4-learn"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d4-refine",
+      "domainIds": ["d4-prompt-engineering"],
+      "title": "Turn a vague ask into a grounded, well-scoped prompt",
+      "tagline": "Refine a one-liner into a single, specific, well-contextualised prompt, step by step.",
+      "context": "A teammate opens Copilot Chat and types: \"Make the checkout better.\" The result is generic and unhelpful. Coach the prompt from vague to effective, one decision at a time.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First, tighten the scope. What's the best rewrite of \"Make the checkout better\"?",
+          "choices": [
+            { "id": "a", "text": "\"In the checkout flow, add server-side validation that rejects an empty cart and returns a 400 with a clear message.\"", "verdict": "best", "rationale": "One well-defined task, stated specifically — Single and Specific. Copilot now knows exactly what to do." },
+            { "id": "b", "text": "\"Improve checkout: validation, performance, tests, logging, and the UI — all of it.\"", "verdict": "wrong", "rationale": "That bundles many tasks into one prompt; it should be split, not merged." },
+            { "id": "c", "text": "\"Make checkout better, but this time really think about it.\"", "verdict": "viable", "rationale": "Slightly more emphatic but still vague — no specific task or output, so Copilot still has to guess." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The validation lives in code Copilot can't see from the open file. How do you give it the right context?",
+          "choices": [
+            { "id": "a", "text": "Open the checkout files, #-reference the validation module, and use @workspace so Copilot reasons across the flow", "verdict": "best", "rationale": "Open files + a #-reference + @workspace is exactly the 'Surround' toolkit — precise, project-aware context." },
+            { "id": "b", "text": "Paste a blurry screenshot of the module and nothing else", "verdict": "wrong", "rationale": "A screenshot isn't reliable context; Copilot can't reference the actual code." },
+            { "id": "c", "text": "Describe the module from memory in prose", "verdict": "viable", "rationale": "Better than nothing, but error-prone and stale — referencing the real file is stronger." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "You want the new validation errors to match your codebase's existing error-response shape exactly. What technique fits?",
+          "choices": [
+            { "id": "a", "text": "Few-shot: show one or two existing error responses, then ask Copilot to follow that pattern", "verdict": "best", "rationale": "A specific, existing pattern is best conveyed by example — few-shot makes Copilot match your shape." },
+            { "id": "b", "text": "Zero-shot: just say 'match our error style' with no example", "verdict": "viable", "rationale": "It might work, but without an example the exact shape is left to chance." },
+            { "id": "c", "text": "Tell Copilot the style doesn't matter as long as it's valid JSON", "verdict": "wrong", "rationale": "That abandons the requirement — you specifically need it to match the existing shape." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The first answer is close but skips the empty-cart case. What's the right next step?",
+          "choices": [
+            { "id": "a", "text": "Iterate: reference the previous response, add the empty-cart requirement (with an example input), and ask again", "verdict": "best", "rationale": "Assert-and-iterate — refine on the same thread rather than restarting. This is how you converge on correct code." },
+            { "id": "b", "text": "Discard Copilot and hand-write the whole validator", "verdict": "wrong", "rationale": "Throwing away a near-miss wastes the context you've built; one more turn likely finishes it." },
+            { "id": "c", "text": "Accept the answer and add the empty-cart handling silently later", "verdict": "viable", "rationale": "It works, but folding the fix back into the prompt keeps Copilot's future suggestions aligned and is the taught habit." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d4-prompt", "r-d4-learn"]
+    },
+    {
+      "id": "s-d4-consistency",
+      "domainIds": ["d4-prompt-engineering"],
+      "title": "Make good prompting stick across a team",
+      "tagline": "Move from re-typing context to durable, reusable context.",
+      "context": "Your team gets good Copilot results only when individuals remember to spell out the same conventions every time. You want that context to apply automatically and consistently.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Everyone re-types the same coding conventions into each chat. What makes that context standing for the whole repo?",
+          "choices": [
+            { "id": "a", "text": "Add a .github/copilot-instructions.md custom-instructions file with the conventions", "verdict": "best", "rationale": "Repository custom instructions apply to every request in the repo — no re-typing, consistent for all." },
+            { "id": "b", "text": "Put the conventions in a wiki page and hope people read it before prompting", "verdict": "viable", "rationale": "Good documentation, but it doesn't feed Copilot automatically — people still have to supply it." },
+            { "id": "c", "text": "Ask everyone to memorise the conventions and paste them each time", "verdict": "wrong", "rationale": "That's exactly the manual, inconsistent process custom instructions remove." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "One recurring task (scaffolding a new service module) always needs the same detailed prompt. How do you standardise it?",
+          "choices": [
+            { "id": "a", "text": "Save it as a reusable prompt file the whole team can run", "verdict": "best", "rationale": "A prompt file captures a well-crafted instruction once so everyone runs the same thing — consistency by design." },
+            { "id": "b", "text": "Keep the prompt in a personal note and paste it when you remember", "verdict": "viable", "rationale": "Works for you alone, but it isn't shared or guaranteed consistent across the team." },
+            { "id": "c", "text": "Have each engineer reinvent the prompt every time", "verdict": "wrong", "rationale": "Reinventing it guarantees drift — the opposite of the goal." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The team also wants chat grounded in one service's docs and conventions for everyone. What fits best?",
+          "choices": [
+            { "id": "a", "text": "Publish a shared Copilot Space bundling that service's repo, docs, and notes", "verdict": "best", "rationale": "A Space curates reusable, shareable context so answers reflect the service's conventions for the whole team." },
+            { "id": "b", "text": "Tell people to open the docs in a browser tab while they chat", "verdict": "viable", "rationale": "A browser tab isn't Copilot context; it helps the human, not the model." },
+            { "id": "c", "text": "Raise the model tier and assume it will infer the conventions", "verdict": "wrong", "rationale": "A stronger model still lacks your private context — grounding is the real fix, not tier." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d4-instructions", "r-d4-spaces"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d4-refine",
+      "domainId": "d4-prompt-engineering",
+      "title": "From vague to specific: refine one prompt with the 4 Ss",
+      "goal": "Feel how much scope, context, and examples change the answer.",
+      "steps": "## What you'll do\n\nTake one real task in a repo you know and iterate a single prompt through four passes.\n\n1. **Vague** — prompt Copilot with a deliberately loose one-liner (e.g. 'improve this'). Note how generic the result is.\n2. **Single + Specific** — rewrite it as one well-defined task with an explicit output. Compare.\n3. **Surround** — open the relevant files, `#`-reference the key symbol, and add `@workspace` (or `@project`). Re-run and see the context shift the answer.\n4. **Few-shot** — add one or two examples of the exact pattern you want. Re-run and check the output now matches your style.\n\n## Why it matters\n\nThe exam repeatedly asks you to pick the better prompt or fix a weak one. Watching one prompt improve across the 4 Ss makes the difference concrete.",
+      "checklist": [
+        "Saw a generic answer from the vague prompt",
+        "Rewrote it as a single, specific task",
+        "Added open files + a #-reference + @workspace",
+        "Used an example (few-shot) to match a specific pattern"
+      ]
+    },
+    {
+      "id": "lab-d4-instructions",
+      "domainId": "d4-prompt-engineering",
+      "title": "Make context reusable with custom instructions",
+      "goal": "Stop re-typing conventions by giving the repo standing guidance.",
+      "steps": "## Steps\n\n1. In a test repo, create **.github/copilot-instructions.md** and write a few natural-language conventions (naming, error style, preferred framework).\n2. Ask Copilot Chat a question that would normally need those conventions spelled out — **without** repeating them in the prompt. Confirm the answer respects them.\n3. Remove or change one instruction and re-ask; watch the behaviour change. That's the file doing the work.\n4. (Optional) Capture a recurring task as a reusable **prompt file** and run it twice to confirm consistent output.\n\n## Checkpoint\n\nIf the answer honoured your conventions without you restating them, you've turned 'Surround' into something permanent and team-wide.",
+      "checklist": [
+        "Created .github/copilot-instructions.md with real conventions",
+        "Got a convention-respecting answer without restating them",
+        "Changed an instruction and saw the behaviour change",
+        "Can explain when to use instructions vs a Space vs MCP"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-d4-prompt",
+      "title": "Prompt engineering for GitHub Copilot",
+      "url": "https://docs.github.com/en/copilot/concepts/prompting/prompt-engineering",
+      "kind": "official-doc",
+      "annotation": "GitHub's own guidance: start general then specific, break tasks down, avoid ambiguity, provide context (open files, references, @participants), give examples, and iterate. The spine of this domain.",
+      "domainIds": ["d4-prompt-engineering"]
+    },
+    {
+      "id": "r-d4-learn",
+      "title": "Introduction to prompt engineering with GitHub Copilot (MS Learn)",
+      "url": "https://learn.microsoft.com/en-us/training/modules/introduction-prompt-engineering-with-github-copilot/",
+      "kind": "learning-path",
+      "annotation": "The official module that defines the 4 Ss, zero-/one-/few-shot learning, role prompting, assert-and-iterate, and chat-history management. Work it end to end.",
+      "domainIds": ["d4-prompt-engineering"]
+    },
+    {
+      "id": "r-d4-instructions",
+      "title": "Repository custom instructions & prompt files",
+      "url": "https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions",
+      "kind": "official-doc",
+      "annotation": "How .github/copilot-instructions.md and path-specific instruction files give Copilot standing context, so conventions apply to every request without repeating them.",
+      "domainIds": ["d4-prompt-engineering"]
+    },
+    {
+      "id": "r-d4-spaces",
+      "title": "GitHub Copilot Spaces",
+      "url": "https://docs.github.com/en/copilot/concepts/context/spaces",
+      "kind": "official-doc",
+      "annotation": "Curate a reusable, shareable bundle of context (repos, files, docs, notes) to ground chat in your conventions — context crafting at team scale.",
+      "domainIds": ["d4-prompt-engineering"]
+    },
+    {
+      "id": "r-d4-mcp",
+      "title": "Model Context Protocol in Copilot",
+      "url": "https://docs.github.com/en/copilot/concepts/context/mcp",
+      "kind": "official-doc",
+      "annotation": "Connect Copilot to live external tools and data so a prompt can draw on real tickets, queries, and actions — the richest context source.",
+      "domainIds": ["d4-prompt-engineering"]
+    },
+    {
+      "id": "r-d4-copilot-docs",
+      "title": "GitHub Copilot documentation (root)",
+      "url": "https://docs.github.com/en/copilot",
+      "kind": "official-doc",
+      "annotation": "The primary source for every Copilot feature claim. When a community guide and the docs disagree, the docs win.",
+      "domainIds": ["d4-prompt-engineering"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d4-1",
+      "title": "D4 · Prompt engineering & context crafting — the 4 Ss, few-shot, iterate",
+      "provider": "youtube",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d4-prompt-engineering"],
+      "sourceNotebook": "gh-300 / d4 / prompt-engineering"
+    }
+  ]
+}
