@@ -1,0 +1,719 @@
+{
+  "id": "d2-responsible-ai",
+  "order": 2,
+  "code": "D2",
+  "name": "Use GitHub Copilot Responsibly",
+  "weight": 0.18,
+  "tagline": "Copilot proposes; you decide. Review every suggestion, own what you commit, and know where the tool falls short.",
+  "overview": "A meaty slice of GH-300 (15–20%). It tests the mindset, not the buttons: the principles of responsible AI, why a human stays accountable for AI-generated code, and how to work around Copilot's real limitations — plausible-but-wrong output, insecure or outdated patterns, bias in the training data, and a model that doesn't actually know your intent. The instinct being graded is simple and relentless: never trust a suggestion blindly. Validate it, understand it, test it, and only then take ownership. This domain also covers over-reliance risk, fairness and transparency, an IP-aware mindset toward code that matches public sources, and the per-feature responsible-use guidance GitHub ships for chat, completions, and agents.",
+  "objectives": [
+    "State the responsible-AI principles behind Copilot and why people — not the model — are accountable for AI output.",
+    "Always review, understand, and test a suggestion before accepting it; treat Copilot as assistive, not authoritative.",
+    "Recognise Copilot's limitations — plausible-but-wrong, insecure, outdated, or subtly buggy code, and no real grasp of your intent.",
+    "Mitigate over-reliance and bias, and keep an IP-aware mindset about code that may match public sources.",
+    "Judge when to be extra cautious or not use Copilot at all — safety-critical, licensing-sensitive, or unfamiliar work."
+  ],
+  "lessons": [
+    {
+      "id": "l1-principles",
+      "title": "The responsible-AI principles and human accountability",
+      "estMinutes": 12,
+      "objective": "Name the responsible-AI principles behind Copilot and internalise that a human is always accountable for AI output.",
+      "body": "## Six principles behind responsible AI\n\nMicrosoft and GitHub frame responsible AI with six principles. They're the backbone of this domain, so learn them by name:\n\n- **Fairness** — AI systems should treat all people fairly.\n- **Reliability and safety** — they should perform reliably and safely, and behave predictably.\n- **Privacy and security** — they should be secure and respect privacy.\n- **Inclusiveness** — they should empower everyone and engage people.\n- **Transparency** — they should be understandable, and honest about their capabilities and limitations.\n- **Accountability** — **people** should be accountable for AI systems.\n\n## Accountability is the load-bearing one\n\nFor a developer using Copilot, accountability is the principle that shows up every day. Copilot **proposes**; you dispose. The code that lands in your commit, your pull request, your production system is **your** code — you are answerable for its correctness, its security, and its licensing, exactly as if you had typed every line yourself.\n\nThat means the AI is a tool, not a replacement for human judgement. 'Copilot wrote it' is never a defence for a bug or a vulnerability that ships.\n\n## Transparency cuts both ways\n\nBeing honest about a tool's limitations is part of transparency. Responsible use starts from the premise that Copilot **can be wrong** — and building your workflow around that fact rather than hoping it isn't.\n\n## Why the exam cares\n\nExpect questions that name the principles and, more often, questions that hand you a situation and ask *who is responsible* or *what the responsible move is*. The reliable answer threads back to accountability: a human reviews, understands, and owns the output.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-1",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which responsible-AI principle most directly captures who is answerable for code that Copilot generated and you committed?",
+          "options": [
+            { "id": "a", "text": "Accountability — people are accountable for AI systems and their output", "correct": true },
+            { "id": "b", "text": "Inclusiveness" },
+            { "id": "c", "text": "Reliability and safety" },
+            { "id": "d", "text": "Privacy and security" }
+          ],
+          "explanation": "**Accountability** is the principle that people — not the model — answer for AI output; committed code is yours to own. Inclusiveness is about empowering diverse users, reliability is about consistent behaviour, and privacy is about protecting data — all relevant, but not the 'who is responsible' principle.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+        },
+        {
+          "id": "kc-d2-2",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A teammate ships a bug and says 'that wasn't my fault, Copilot generated that function'. From a responsible-use standpoint, what's wrong with that reasoning?",
+          "options": [
+            { "id": "a", "text": "Copilot is assistive; the developer who accepted and committed the code is accountable for it", "correct": true },
+            { "id": "b", "text": "Nothing — the AI vendor is liable for any code the model produces" },
+            { "id": "c", "text": "Nothing — accepted suggestions are automatically reviewed by GitHub" },
+            { "id": "d", "text": "It's wrong only if the repository is public" }
+          ],
+          "explanation": "Responsible use puts the human in the accountable seat: Copilot proposes, but you own what you accept and commit. There's no automatic review of accepted suggestions, the vendor doesn't assume liability for your merged code, and repository visibility doesn't change who's responsible.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+        },
+        {
+          "id": "kc-d2-3",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which pair correctly names two of Microsoft and GitHub's six responsible-AI principles?",
+          "options": [
+            { "id": "a", "text": "Transparency and Fairness", "correct": true },
+            { "id": "b", "text": "Profitability and Speed" },
+            { "id": "c", "text": "Autonomy and Determinism" },
+            { "id": "d", "text": "Backwards-compatibility and Portability" }
+          ],
+          "explanation": "The six are Fairness, Reliability and safety, Privacy and security, Inclusiveness, Transparency, and Accountability — so **Transparency and Fairness** is the valid pair. The others are engineering or business qualities, not the responsible-AI principles.",
+          "sourceRefs": ["r-d2-mslearn"]
+        }
+      ]
+    },
+    {
+      "id": "l2-validate",
+      "title": "Never trust blindly: review, understand, test",
+      "estMinutes": 13,
+      "objective": "Make validating every suggestion the default — review, understand, and test before you accept.",
+      "body": "## The one habit this domain is really testing\n\n**Always review and test code Copilot produces before you rely on it.** GitHub says it plainly: users are responsible for reviewing and validating what the tool generates. Human oversight is the safeguard, because the model *can* make mistakes.\n\nA useful loop for any suggestion:\n\n1. **Read it** — do you understand what it does, line by line? If you can't explain it, you can't own it.\n2. **Question it** — is it correct for *your* case, not just plausible in general? Does it handle edge cases and errors?\n3. **Check it for security** — could it expose data, mishandle input, or pull in a risky pattern?\n4. **Test it** — run it, and lean on your test suite. Generated code deserves the same tests as hand-written code.\n5. **Then accept** — and now it's yours.\n\n## Understand before you accept\n\nAccepting code you don't understand is the core anti-pattern. It feels productive and it's a trap: you inherit behaviour you can't reason about, can't debug, and can't defend in review. If a suggestion is a black box to you, slow down — ask Copilot to explain it, simplify it, or write it yourself.\n\n## Assistive, not authoritative\n\nTreat Copilot as a fast pair-programmer whose output always gets checked — **a tool rather than a replacement** for your own programming judgement. The productivity comes from Copilot doing the first draft, not from you skipping the review.\n\n## Why the exam cares\n\nThis is the most-tested instinct in the domain. Scenario stems will tempt you with 'just accept it, tests are green elsewhere' or 'trust the AI, it's usually right'. The graded answer is almost always: review, understand, and test first.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-4",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Copilot suggests a function that looks reasonable. What's the responsible default before you accept it?",
+          "options": [
+            { "id": "a", "text": "Read and understand it, check it for correctness and security, and test it", "correct": true },
+            { "id": "b", "text": "Accept it immediately — Copilot is trained on high-quality code" },
+            { "id": "c", "text": "Accept it if it compiles" },
+            { "id": "d", "text": "Accept it only if it came from Agent mode" }
+          ],
+          "explanation": "Responsible use means **review, understand, and test** before accepting — you're accountable for the result. Compiling isn't correctness, training quality doesn't guarantee your case, and the surface it came from doesn't remove the need to validate.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+        },
+        {
+          "id": "kc-d2-5",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why is 'accepting code you don't fully understand' called out as a core anti-pattern?",
+          "options": [
+            { "id": "a", "text": "You inherit behaviour you can't reason about, debug, or defend — and you still own it", "correct": true },
+            { "id": "b", "text": "Copilot revokes suggestions you don't rate" },
+            { "id": "c", "text": "Understood code runs faster than un-understood code" },
+            { "id": "d", "text": "It voids the exam's warranty" }
+          ],
+          "explanation": "If you can't explain a suggestion, you can't maintain or defend it — yet accountability still lands on you. The other options are nonsense; understanding is about ownership and maintainability, not runtime speed.",
+          "sourceRefs": ["r-d2-responsible"]
+        },
+        {
+          "id": "kc-d2-6",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How should generated code be treated relative to your test suite?",
+          "options": [
+            { "id": "a", "text": "It gets the same tests as hand-written code — generated code isn't exempt from verification", "correct": true },
+            { "id": "b", "text": "It needs no tests, since the model already validated it" },
+            { "id": "c", "text": "Only public-repo code needs tests" },
+            { "id": "d", "text": "Testing generated code is discouraged to save time" }
+          ],
+          "explanation": "Generated code deserves the **same verification** as anything you'd write by hand — tests are how you confirm it's correct for your case. The model doesn't validate against your requirements, visibility is irrelevant, and skipping tests to save time is exactly the trap.",
+          "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+        }
+      ]
+    },
+    {
+      "id": "l3-limits",
+      "title": "Copilot's limitations: plausible-but-wrong, insecure, biased",
+      "estMinutes": 13,
+      "objective": "Name Copilot's real limitations so you can review with the right suspicions.",
+      "body": "## It predicts likely code — not correct code\n\nCopilot is a language model completing patterns. That produces fluent, confident output that **can be wrong**. GitHub is explicit about the failure modes:\n\n- **Plausible-but-wrong** — code that *appears valid but is not semantically or syntactically correct*. It reads right and doesn't work.\n- **Subtly buggy logic** — off-by-one, wrong edge cases, an inverted condition. Fluent enough to slip past a skim.\n- **Insecure code** — generated code can *expose sensitive information or vulnerabilities*; it may reproduce insecure patterns from its training data.\n- **Outdated patterns** — it can suggest deprecated APIs or old idioms that were common in training data but are wrong today.\n- **Bias and errors in training data** — the data *may contain biases and errors*, which can surface in suggestions.\n- **It doesn't know your intent** — it can *misunderstand your intent* and confidently answer a slightly different question than the one you meant.\n- **Weaker on the obscure** — limited scope on complex structures and less-common languages; and *differing performance* with prompts in languages other than English.\n\n## Confidence is not correctness\n\nThe dangerous property is tone: Copilot doesn't hedge. A wrong answer looks exactly as assured as a right one. Over-reliance is the natural failure — accepting output because it's *usually* right and because spotting AI mistakes is genuinely hard. The fix is structural: review, understand, test — every time — rather than trusting the vibe.\n\n## Per-feature responsible-use guidance\n\nGitHub publishes responsible-use 'application cards' per feature — for **Copilot Chat**, **inline (code) suggestions**, and **Copilot agents** — each spelling out that feature's purpose, capabilities, and **limitations**. Same message, tuned per surface: know what the feature is bad at, and review accordingly.\n\n## Why the exam cares\n\nExpect stems that describe a specific failure — 'the code looks right but breaks', 'it used a deprecated API', 'the suggestion is subtly insecure' — and ask what's going on or how to guard against it. Knowing the named limitations lets you review with the right suspicion instead of blind faith.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-7",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A Copilot suggestion reads cleanly and looks correct, but fails at runtime. Which named limitation does this illustrate?",
+          "options": [
+            { "id": "a", "text": "It can produce code that appears valid but isn't semantically or syntactically correct", "correct": true },
+            { "id": "b", "text": "It refuses to generate code it isn't certain about" },
+            { "id": "c", "text": "It only ever produces provably correct code" },
+            { "id": "d", "text": "It always flags its own mistakes inline" }
+          ],
+          "explanation": "Plausible-but-wrong output — **appears valid but isn't correct** — is a core Copilot limitation and the reason review and tests are mandatory. Copilot doesn't gate on certainty, guarantee correctness, or reliably flag its own errors.",
+          "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+        },
+        {
+          "id": "kc-d2-8",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why can Copilot suggest insecure code or outdated patterns?",
+          "options": [
+            { "id": "a", "text": "It learns patterns from training data that can include vulnerabilities, bias, and now-deprecated idioms", "correct": true },
+            { "id": "b", "text": "It intentionally inserts vulnerabilities to test you" },
+            { "id": "c", "text": "It can only output code less than a week old" },
+            { "id": "d", "text": "Insecure output only happens in Agent mode" }
+          ],
+          "explanation": "Copilot predicts from patterns in training data, which **can contain biases, errors, insecure code, and dated idioms** — so those can surface in suggestions. It isn't adversarial, isn't limited to recent code, and the risk isn't tied to one mode.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+        },
+        {
+          "id": "kc-d2-9",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "GitHub publishes per-feature responsible-use 'application cards'. What do they describe?",
+          "options": [
+            { "id": "a", "text": "Each feature's purpose, capabilities, and limitations — for chat, inline suggestions, and agents", "correct": true },
+            { "id": "b", "text": "The pricing tiers for each feature" },
+            { "id": "c", "text": "Keyboard shortcuts for each IDE" },
+            { "id": "d", "text": "The model weights behind each feature" }
+          ],
+          "explanation": "Application cards set out a feature's **purpose, capabilities, and limitations** so you use it responsibly — there's one each for Copilot Chat, inline suggestions, and agents. They aren't pricing, shortcut, or model-weight references.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+        }
+      ]
+    },
+    {
+      "id": "l4-mitigate",
+      "title": "Over-reliance, IP awareness, and when to be cautious",
+      "estMinutes": 12,
+      "objective": "Mitigate over-reliance and bias, keep an IP-aware mindset, and know when to be extra careful or not use Copilot.",
+      "body": "## Over-reliance is the slow-motion risk\n\nThe day-to-day danger isn't one bad suggestion — it's the habit of not checking. Over-reliance creeps in because Copilot is right often enough that vigilance feels wasteful, and because AI errors are hard to spot. Mitigations are habits, not settings:\n\n- Keep reviewing and testing even when it's 'usually fine'.\n- Keep your own skills sharp — understand the code, don't just approve it.\n- Use Copilot to draft and accelerate, and keep human judgement as the gate.\n\n## An IP-aware mindset\n\nCopilot's training gives it an awareness question: a suggestion could closely match publicly available code, which carries licensing and attribution implications. At the responsible-use level the mindset is what matters — **be aware** that generated code may resemble public sources, and treat licensing as something you're accountable for. (The concrete control — Copilot's duplication-detection filter that can block matches against public code — is configuration; you'll set that up in the privacy-and-safeguards domain. Here, it's the awareness.)\n\n## Bias and fairness in practice\n\nBias in training data can surface in suggestions — in naming, in assumptions, in which patterns get offered. Fairness and inclusiveness aren't just model-builder concerns; as the developer accepting output, watch for assumptions that don't fit all users, and don't let a suggestion smuggle in a biased default.\n\n## When to be extra cautious — or not use Copilot\n\nResponsible use includes knowing the tool's edges:\n\n- **Safety-critical or high-stakes code** (medical, financial, security-sensitive) — heavier review, more scepticism, and sometimes writing it yourself.\n- **Licensing-sensitive contexts** — where matching public code matters, lean on your IP awareness and the duplication controls.\n- **Unfamiliar domains** — if you can't evaluate the output, you can't safely accept it; the risk of unnoticed error is highest exactly where your expertise is lowest.\n\n## Why the exam cares\n\nExpect judgement stems: 'a junior leans on Copilot for a payments module', 'the team's velocity is up but understanding is down', 'a suggestion may match public code'. The responsible answers cluster around mitigating over-reliance, staying IP-aware, and dialling up caution where stakes or unfamiliarity are high.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-10",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team's output is up, but reviewers notice engineers can no longer explain their own merged code. Which risk is this, and the right mitigation?",
+          "options": [
+            { "id": "a", "text": "Over-reliance — keep reviewing, understanding, and testing rather than rubber-stamping suggestions", "correct": true },
+            { "id": "b", "text": "Under-reliance — accept more suggestions to build trust" },
+            { "id": "c", "text": "A privacy breach — rotate all API keys" },
+            { "id": "d", "text": "A licensing issue — make every repo private" }
+          ],
+          "explanation": "Losing the ability to explain your own code is textbook **over-reliance**; the fix is to keep the human-review habit and understanding alive. It's not under-reliance, and it isn't a privacy or licensing incident.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+        },
+        {
+          "id": "kc-d2-11",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "At a responsible-use level, what's the right mindset when a Copilot suggestion might closely match publicly available code?",
+          "options": [
+            { "id": "a", "text": "Be aware it may carry licensing/attribution implications and treat that as your responsibility", "correct": true },
+            { "id": "b", "text": "Assume all generated code is public domain and use it freely", "correct": false },
+            { "id": "c", "text": "Ignore it — matching public code is impossible" },
+            { "id": "d", "text": "Assume it can never resemble existing code" }
+          ],
+          "explanation": "The responsible mindset is **awareness** that output can resemble public code and that licensing is yours to own (the duplication-detection control is configured in the privacy domain). Generated code isn't automatically public domain, and matching public code is a real possibility, not an impossible one.",
+          "sourceRefs": ["r-d2-responsible", "r-d2-hub"]
+        },
+        {
+          "id": "kc-d2-12",
+          "domainId": "d2-responsible-ai",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "In which situation should you be MOST cautious about accepting Copilot output with only a light review?",
+          "options": [
+            { "id": "a", "text": "A safety-critical module in a domain you don't know well", "correct": true },
+            { "id": "b", "text": "Boilerplate in a language you're expert in, fully covered by tests" },
+            { "id": "c", "text": "A throwaway script you'll delete after one run" },
+            { "id": "d", "text": "A comment reformatting change" }
+          ],
+          "explanation": "Risk is highest where **stakes are high and your expertise is low** — you can't catch what you can't evaluate, and the cost of an error is large. Expert-reviewed, well-tested, or throwaway work carries far less responsible-use risk.",
+          "sourceRefs": ["r-d2-responsible"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d2-1",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Who is ultimately accountable for AI-generated code that you accept and commit?",
+      "options": [
+        { "id": "a", "text": "You, the developer who accepted and committed it", "correct": true },
+        { "id": "b", "text": "GitHub, as the tool vendor" },
+        { "id": "c", "text": "The model provider" },
+        { "id": "d", "text": "No one — AI code is unowned" }
+      ],
+      "explanation": "The accountability principle puts responsibility on **people**: you own what you accept and merge. The vendor and model provider don't assume liability for your committed code, and code is never 'unowned'.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+    },
+    {
+      "id": "q-d2-2",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What's the responsible default before accepting a Copilot suggestion?",
+      "options": [
+        { "id": "a", "text": "Review, understand, and test it", "correct": true },
+        { "id": "b", "text": "Accept it if it looks plausible" },
+        { "id": "c", "text": "Accept it if it compiles" },
+        { "id": "d", "text": "Accept it and fix problems only if a user reports one" }
+      ],
+      "explanation": "Responsible use means **review, understand, and test** first — you're accountable for the result. Plausibility and compiling aren't correctness, and shipping-then-waiting-for-reports is the opposite of validation.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-3",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why is confident-sounding Copilot output especially risky?",
+      "options": [
+        { "id": "a", "text": "A wrong answer looks as assured as a right one, so errors slip past a skim", "correct": true },
+        { "id": "b", "text": "Confidence means the answer is correct" },
+        { "id": "c", "text": "It only sounds confident when it's guessing safely" },
+        { "id": "d", "text": "Confidence throttles the model to reduce quality" }
+      ],
+      "explanation": "Copilot doesn't hedge — **confidence is not correctness**, and uniform assurance is exactly why wrong output passes an unwary review. The other options misread tone as a reliability signal.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+    },
+    {
+      "id": "q-d2-4",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Copilot returns code that reads correctly but is semantically wrong. What is this a case of?",
+      "options": [
+        { "id": "a", "text": "Plausible-but-wrong output — a named limitation of the tool", "correct": true },
+        { "id": "b", "text": "A network error" },
+        { "id": "c", "text": "A licensing violation" },
+        { "id": "d", "text": "Proof the model is broken and should be reinstalled" }
+      ],
+      "explanation": "Code that **appears valid but isn't correct** is a documented Copilot limitation, not an infrastructure or licensing problem — and it's normal model behaviour, not a fault to reinstall away.",
+      "sourceRefs": ["r-d2-chat"]
+    },
+    {
+      "id": "q-d2-5",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why can Copilot occasionally suggest code with security vulnerabilities?",
+      "options": [
+        { "id": "a", "text": "It can reproduce insecure patterns and errors present in its training data", "correct": true },
+        { "id": "b", "text": "It deliberately weakens code to save tokens" },
+        { "id": "c", "text": "Vulnerabilities only appear in the Copilot CLI" },
+        { "id": "d", "text": "It never suggests insecure code" }
+      ],
+      "explanation": "Suggestions can **expose vulnerabilities** because the model learns from data that includes insecure code — which is why security review is part of validating output. It isn't deliberate, isn't CLI-specific, and 'never insecure' is false.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-6",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A prompt gets an answer to a slightly different question than you meant. Which limitation is this?",
+      "options": [
+        { "id": "a", "text": "Copilot can misunderstand your intent", "correct": true },
+        { "id": "b", "text": "Copilot has read your mind correctly and you're mistaken" },
+        { "id": "c", "text": "A billing error" },
+        { "id": "d", "text": "A guarantee the model is offline" }
+      ],
+      "explanation": "The model has no true grasp of your goal and can **misunderstand your intent**, answering a near-miss question confidently. That's a known limitation, not a billing or connectivity issue.",
+      "sourceRefs": ["r-d2-chat"]
+    },
+    {
+      "id": "q-d2-7",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How should Copilot be framed in a healthy workflow?",
+      "options": [
+        { "id": "a", "text": "A tool that assists you — not a replacement for human programming judgement", "correct": true },
+        { "id": "b", "text": "An authority whose output needs no checking" },
+        { "id": "c", "text": "A replacement for code review" },
+        { "id": "d", "text": "A guarantee of secure, correct code" }
+      ],
+      "explanation": "GitHub frames Copilot as **a tool rather than a replacement** for human programming — assistive, always reviewed. It's not an unchecked authority, a review replacement, or a correctness guarantee.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-8",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which responsible-AI principle says AI systems should be understandable and honest about their limitations?",
+      "options": [
+        { "id": "a", "text": "Transparency", "correct": true },
+        { "id": "b", "text": "Inclusiveness" },
+        { "id": "c", "text": "Reliability and safety" },
+        { "id": "d", "text": "Privacy and security" }
+      ],
+      "explanation": "**Transparency** is the principle of being understandable and honest about capabilities and limitations. Inclusiveness is about empowering everyone, reliability about consistent safe behaviour, and privacy about protecting data.",
+      "sourceRefs": ["r-d2-mslearn"]
+    },
+    {
+      "id": "q-d2-9",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A developer accepts every Copilot suggestion without reading it because 'it's usually right'. What is the primary risk?",
+      "options": [
+        { "id": "a", "text": "Over-reliance — trusting output without validation, so errors go unnoticed", "correct": true },
+        { "id": "b", "text": "Under-reliance — using Copilot too little" },
+        { "id": "c", "text": "A DNS misconfiguration" },
+        { "id": "d", "text": "Excessive test coverage" }
+      ],
+      "explanation": "Blanket acceptance is **over-reliance**: because AI mistakes are hard to spot, unchecked output lets errors through. It's the opposite of under-reliance and unrelated to DNS or too many tests.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+    },
+    {
+      "id": "q-d2-10",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why can bias appear in Copilot's suggestions?",
+      "options": [
+        { "id": "a", "text": "Its training data may contain biases that surface in output", "correct": true },
+        { "id": "b", "text": "Bias is added on purpose to comply with regulations" },
+        { "id": "c", "text": "Only images can carry bias, never code" },
+        { "id": "d", "text": "Bias only exists in the Enterprise plan" }
+      ],
+      "explanation": "Models learn from data, and that data **may contain biases and errors** that show up in suggestions — a fairness concern to watch for as you review. Bias isn't intentional, isn't limited to images, and isn't plan-specific.",
+      "sourceRefs": ["r-d2-mslearn", "r-d2-chat"]
+    },
+    {
+      "id": "q-d2-11",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "At a responsible-use level, what should you keep in mind about code that may match publicly available sources?",
+      "options": [
+        { "id": "a", "text": "It can carry licensing/attribution implications that you're responsible for", "correct": true },
+        { "id": "b", "text": "All AI output is automatically license-free" },
+        { "id": "c", "text": "Public code can never be reproduced by a model" },
+        { "id": "d", "text": "Licensing is solely the model provider's problem" }
+      ],
+      "explanation": "The responsible mindset is awareness that suggestions can resemble public code with **licensing implications you own**. It isn't license-free by default, matching is possible, and the responsibility doesn't shift to the provider. (The blocking filter is configured in the privacy domain.)",
+      "sourceRefs": ["r-d2-responsible", "r-d2-hub"]
+    },
+    {
+      "id": "q-d2-12",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What do GitHub's per-feature responsible-use 'application cards' describe?",
+      "options": [
+        { "id": "a", "text": "A feature's purpose, capabilities, and limitations", "correct": true },
+        { "id": "b", "text": "The commit history of the feature" },
+        { "id": "c", "text": "The GPU it runs on" },
+        { "id": "d", "text": "The exam blueprint weights" }
+      ],
+      "explanation": "Application cards document each feature's **purpose, capabilities, and limitations** — there are cards for Chat, inline suggestions, and agents. The other options aren't what the cards cover.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+    },
+    {
+      "id": "q-d2-13",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A junior developer is about to accept a Copilot-generated authorization check for a payments service, in a domain they don't know well. What's the most responsible course?",
+      "options": [
+        { "id": "a", "text": "Treat it as high-stakes: review deeply, get expert eyes, test hard, and understand it fully before accepting", "correct": true },
+        { "id": "b", "text": "Accept it — security code from Copilot is pre-hardened" },
+        { "id": "c", "text": "Accept it if it compiles, since payments code is well represented in training data" },
+        { "id": "d", "text": "Accept it and rely on customers to report auth failures" }
+      ],
+      "explanation": "High stakes plus low familiarity is the maximum-caution case — **deep review, expert input, thorough tests, and real understanding** before acceptance. Copilot's security output isn't pre-hardened, compiling isn't safety, and waiting for reports on an auth bug is reckless.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+    },
+    {
+      "id": "q-d2-14",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Copilot suggests a deprecated API that used to be standard. Which limitation explains this?",
+      "options": [
+        { "id": "a", "text": "It can reproduce outdated patterns common in its training data", "correct": true },
+        { "id": "b", "text": "It always uses the newest API available" },
+        { "id": "c", "text": "Deprecation only affects Agent mode" },
+        { "id": "d", "text": "It invents APIs that never existed, always" }
+      ],
+      "explanation": "Learning from historical data means Copilot can offer **outdated or deprecated patterns** that were once common — a reason to verify against current docs. It doesn't guarantee the newest API, and the risk isn't mode-specific.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-mslearn"]
+    },
+    {
+      "id": "q-d2-15",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is the best mitigation for over-reliance on Copilot across a team?",
+      "options": [
+        { "id": "a", "text": "Keep review, testing, and genuine understanding of the code as required habits", "correct": true },
+        { "id": "b", "text": "Disable tests so the team moves faster" },
+        { "id": "c", "text": "Mandate accepting every suggestion for consistency" },
+        { "id": "d", "text": "Stop code review to trust the AI" }
+      ],
+      "explanation": "Over-reliance is mitigated by **keeping the human-in-the-loop habits** — review, tests, understanding. Disabling tests, forcing acceptance, or dropping review all deepen the risk.",
+      "sourceRefs": ["r-d2-mslearn", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-16",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which statement about human oversight of Copilot is correct?",
+      "options": [
+        { "id": "a", "text": "Human oversight is a key safeguard because the AI can still make mistakes", "correct": true },
+        { "id": "b", "text": "Human oversight is unnecessary once tests pass anywhere in the repo" },
+        { "id": "c", "text": "Human oversight applies only to open-source projects" },
+        { "id": "d", "text": "Human oversight slows things down with no benefit" }
+      ],
+      "explanation": "GitHub calls **human oversight** an important safeguard precisely because the model can err. It isn't waived by unrelated passing tests, isn't limited to open source, and isn't a pointless drag — it's the accountability mechanism.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-17",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "'The Copilot suggestion passed our AI code review, so we can merge it without a human read.' What's the responsible-use flaw?",
+      "options": [
+        { "id": "a", "text": "AI review is assistive; a human must still be accountable for the merge", "correct": true },
+        { "id": "b", "text": "AI review is stricter than any human, so this is fine" },
+        { "id": "c", "text": "The flaw is only that it wasn't run twice" },
+        { "id": "d", "text": "Nothing — AI review transfers accountability to GitHub" }
+      ],
+      "explanation": "Stacking assistive tools doesn't remove the accountable human — someone must **own the merge**. AI review isn't a strictness guarantee, running it twice doesn't fix accountability, and responsibility never transfers to the vendor.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+    },
+    {
+      "id": "q-d2-18",
+      "domainId": "d2-responsible-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Copilot gives noticeably weaker help on an obscure language and a non-English prompt. How should you read this?",
+      "options": [
+        { "id": "a", "text": "As a known limitation — scope narrows on less-common languages and non-English prompts, so review more carefully", "correct": true },
+        { "id": "b", "text": "As a bug to file for a refund" },
+        { "id": "c", "text": "As proof Copilot supports no languages but English" },
+        { "id": "d", "text": "As a reason to accept output faster to compensate" }
+      ],
+      "explanation": "GitHub notes **limited scope on obscure languages and differing performance in non-English** prompts — a cue to raise scrutiny, not lower it. It's expected behaviour, not a bug or a total lack of support, and it never justifies looser review.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible"]
+    },
+    {
+      "id": "q-d2-19",
+      "domainId": "d2-responsible-ai",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which of these are legitimate limitations or risks of GitHub Copilot that responsible use must account for? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "It can produce plausible-but-incorrect code", "correct": true },
+        { "id": "b", "text": "It can suggest insecure or outdated patterns from training data", "correct": true },
+        { "id": "c", "text": "It can misunderstand your intent", "correct": true },
+        { "id": "d", "text": "It formally verifies every suggestion before showing it" }
+      ],
+      "explanation": "Plausible-but-wrong output, insecure/outdated patterns, and misread intent are all **named limitations** to guard against. Copilot does not formally verify suggestions — that false assurance is exactly the trap responsible review avoids.",
+      "sourceRefs": ["r-d2-chat", "r-d2-responsible", "r-d2-mslearn"]
+    },
+    {
+      "id": "q-d2-20",
+      "domainId": "d2-responsible-ai",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which practices reflect responsible use of Copilot? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Read and understand a suggestion before accepting it", "correct": true },
+        { "id": "b", "text": "Test generated code the same way you'd test hand-written code", "correct": true },
+        { "id": "c", "text": "Stay aware that output may match public code and carry licensing implications", "correct": true },
+        { "id": "d", "text": "Skip review when velocity is high, since Copilot is usually right" }
+      ],
+      "explanation": "Understanding before accepting, testing generated code, and IP awareness are all **responsible-use practices**. Skipping review under time pressure is over-reliance — the anti-pattern the whole domain warns against.",
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat", "r-d2-hub"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d2-overtrust",
+      "domainIds": ["d2-responsible-ai"],
+      "title": "Catch and correct an over-trusted suggestion",
+      "tagline": "A confident suggestion lands in a sensitive change — do you own it or wave it through?",
+      "context": "You're implementing input handling for an API endpoint. Copilot offers a slick, confident block that validates and parses the request. It looks great. You're under deadline. Walk the responsible path.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "The suggestion looks clean and you're short on time. What's your first move?",
+          "choices": [
+            { "id": "a", "text": "Read it line by line and make sure you understand exactly what it does", "verdict": "best", "rationale": "You can't own or defend code you don't understand — reading it first is the non-negotiable start of responsible acceptance." },
+            { "id": "b", "text": "Accept it now and understand it later if something breaks", "verdict": "wrong", "rationale": "Accepting un-understood code is the core anti-pattern; 'later' usually means after it's shipped a bug." },
+            { "id": "c", "text": "Skim it, and accept because it compiles", "verdict": "viable", "rationale": "A skim plus a compile is better than nothing but misses semantic and security errors — plausible-but-wrong code compiles fine." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Reading closely, you notice the validation is permissive in a way that could let bad input through. What now?",
+          "choices": [
+            { "id": "a", "text": "Treat it as a likely insecure-pattern case: fix the validation and add tests for the bad input", "verdict": "best", "rationale": "Suggestions can reproduce insecure patterns; catching it in review and proving the fix with tests is exactly the responsible loop." },
+            { "id": "b", "text": "Keep it — Copilot wouldn't suggest insecure validation", "verdict": "wrong", "rationale": "Copilot can and does surface insecure patterns from training data; trusting it here defeats the review." },
+            { "id": "c", "text": "Tighten the validation but skip adding tests to save time", "verdict": "viable", "rationale": "The fix helps, but without a test the gap can silently return — generated code deserves the same tests as hand-written code." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "A teammate says 'just merge it, the AI code review already approved the PR'. How do you respond?",
+          "choices": [
+            { "id": "a", "text": "AI review is assistive; a human still owns the merge, so I'll finish my review first", "verdict": "best", "rationale": "Accountability stays with a person — assistive tooling never removes the human review gate." },
+            { "id": "b", "text": "Fair enough — merge it, the AI approved", "verdict": "wrong", "rationale": "Delegating the merge decision to AI review abandons human accountability, the heart of responsible use." },
+            { "id": "c", "text": "Merge it but leave a note to review it next sprint", "verdict": "viable", "rationale": "Better than nothing, but reviewing after merge inverts the safeguard — the read belongs before the code lands." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The endpoint turns out to be part of a payments flow you don't know well. How does that change your stance?",
+          "choices": [
+            { "id": "a", "text": "Raise the caution level: pull in a domain expert and test harder before accepting", "verdict": "best", "rationale": "High stakes plus low familiarity is the maximum-scrutiny case — expert eyes and heavier testing are the responsible response." },
+            { "id": "b", "text": "No change — a suggestion is a suggestion regardless of context", "verdict": "wrong", "rationale": "Responsible use scales scrutiny with stakes and unfamiliarity; treating a payments path like boilerplate ignores the risk." },
+            { "id": "c", "text": "Proceed solo but re-read the diff one more time", "verdict": "viable", "rationale": "An extra read helps, but where you lack expertise you can't catch what you can't evaluate — expert review is the safer call." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d2-responsible", "r-d2-chat"]
+    },
+    {
+      "id": "s-d2-adopt",
+      "domainIds": ["d2-responsible-ai"],
+      "title": "Set responsible-use norms for a team adopting Copilot",
+      "tagline": "You're the tech lead; make responsible use the default, not an afterthought.",
+      "context": "Your team just got Copilot. Velocity is climbing. You want the upside without the over-reliance, bias, and IP traps. Set the norms.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Someone proposes 'to move fast, accept suggestions without review when tests are green'. Your call?",
+          "choices": [
+            { "id": "a", "text": "Reject it: keep review, understanding, and tests required for AI-generated code", "verdict": "best", "rationale": "Dropping review is the over-reliance trap; the responsible norm keeps humans validating output every time." },
+            { "id": "b", "text": "Adopt it — green tests prove correctness", "verdict": "wrong", "rationale": "Passing tests elsewhere don't validate a specific suggestion, and this normalises un-reviewed AI code." },
+            { "id": "c", "text": "Adopt it only for 'trivial' changes", "verdict": "viable", "rationale": "Lower-risk work is genuinely lower risk, but a blanket 'skip review' rule is hard to scope and erodes the habit." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "A reviewer flags that a suggestion looks nearly identical to a well-known open-source snippet. How do you handle it as a norm?",
+          "choices": [
+            { "id": "a", "text": "Treat matching public code as an IP-awareness issue you're accountable for, and lean on duplication controls", "verdict": "best", "rationale": "The responsible mindset is awareness of licensing implications; the concrete filter (configured in the privacy domain) backs it up." },
+            { "id": "b", "text": "Assume all AI output is license-free and merge it", "verdict": "wrong", "rationale": "Generated code isn't automatically license-free; assuming so is exactly the IP risk to avoid." },
+            { "id": "c", "text": "Ignore it because matching public code is impossible", "verdict": "wrong", "rationale": "Suggestions genuinely can resemble public sources — dismissing the possibility is factually wrong." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "A junior says they've stopped understanding their own merged code — Copilot writes most of it. What norm do you set?",
+          "choices": [
+            { "id": "a", "text": "Make 'understand before you accept' a hard rule and encourage using Copilot to explain, not just generate", "verdict": "best", "rationale": "Preserving understanding directly counters over-reliance and keeps skills sharp — the responsible mitigation." },
+            { "id": "b", "text": "Tell them it's fine as long as output increases", "verdict": "wrong", "rationale": "Output at the cost of understanding is the over-reliance failure the domain warns against." },
+            { "id": "c", "text": "Have them accept fewer suggestions overall but still not read them", "verdict": "viable", "rationale": "Less volume lowers exposure a little, but unread code — more or less of it — is still the wrong habit." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d2-responsible", "r-d2-mslearn", "r-d2-hub"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d2-review",
+      "domainId": "d2-responsible-ai",
+      "title": "Run the responsible-review loop on a real suggestion",
+      "goal": "Turn 'review, understand, test' from a slogan into a habit you can feel.",
+      "steps": "## What you'll do\n\nTake a non-trivial suggestion from Copilot (a function, a validation block, a query) and run it through the full loop before you accept.\n\n1. **Read** — explain the suggestion out loud, line by line. If any line is a mystery, ask Copilot to `/explain` it or rewrite it more clearly.\n2. **Question** — is it correct for *your* case? List the edge cases and error paths and check each.\n3. **Security pass** — ask specifically: could this expose data, mishandle input, or use an unsafe pattern?\n4. **Test** — write or run tests, including a deliberately nasty input. Watch it pass or fail.\n5. **Decide** — accept only now, and note to yourself: this is my code now.\n\n## Why it matters\n\nThe exam grades the instinct to validate before trusting. Doing the loop once, deliberately, makes the reflex stick.",
+      "checklist": [
+        "You explained the suggestion line by line",
+        "You listed and checked edge cases and error paths",
+        "You did an explicit security pass",
+        "You tested it, including a hostile input, before accepting"
+      ]
+    },
+    {
+      "id": "lab-d2-limits",
+      "domainId": "d2-responsible-ai",
+      "title": "Provoke a limitation on purpose",
+      "goal": "See a named Copilot limitation in the wild so you review with the right suspicion.",
+      "steps": "## Steps\n\n1. Ask Copilot for something in an area it's likely weaker at — an obscure language, an ambiguous prompt, or a fast-moving API. Look for plausible-but-wrong output, a deprecated pattern, or a misread of your intent.\n2. Note *which* limitation you hit: plausible-but-wrong, insecure, outdated, biased assumption, or intent mismatch.\n3. Read one of GitHub's responsible-use **application cards** (chat, inline suggestions, or agents) and match what you saw to a limitation it lists.\n4. Write one sentence: how would you review *this feature* differently now?\n\n## Checkpoint\n\nIf you can name the limitation you triggered and point to it on the application card, you've connected the concept to the reflex — that's the goal.",
+      "checklist": [
+        "You triggered and identified a specific limitation",
+        "You read the matching responsible-use application card",
+        "You can name the limitation in GitHub's terms",
+        "You stated how you'd adjust your review for that feature"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-d2-responsible",
+      "title": "Responsible use of GitHub Copilot features",
+      "url": "https://docs.github.com/en/copilot/responsible-use-of-github-copilot-features",
+      "kind": "official-doc",
+      "annotation": "The responsible-use hub: per-feature application cards (chat, inline suggestions, agents) covering each feature's purpose, capabilities, and limitations. The spine of this domain.",
+      "domainIds": ["d2-responsible-ai"]
+    },
+    {
+      "id": "r-d2-hub",
+      "title": "Responsible use of GitHub Copilot (root)",
+      "url": "https://docs.github.com/en/copilot/responsible-use",
+      "kind": "official-doc",
+      "annotation": "Entry point to GitHub's responsible-use guidance — links to the application cards and the validate-your-output discipline that runs through the whole domain.",
+      "domainIds": ["d2-responsible-ai"]
+    },
+    {
+      "id": "r-d2-chat",
+      "title": "Responsible use of GitHub Copilot Chat",
+      "url": "https://docs.github.com/en/copilot/responsible-use-of-github-copilot-features/responsible-use-of-github-copilot-chat-in-your-ide",
+      "kind": "official-doc",
+      "annotation": "A concrete application card: names Copilot Chat's limitations — inaccurate/plausible-but-wrong output, possible bias and vulnerabilities, misread intent — and the duty to review, validate, and test.",
+      "domainIds": ["d2-responsible-ai"]
+    },
+    {
+      "id": "r-d2-mslearn",
+      "title": "Responsible AI with GitHub Copilot (Microsoft Learn module)",
+      "url": "https://learn.microsoft.com/en-us/training/modules/responsible-ai-with-github-copilot/",
+      "kind": "learning-path",
+      "annotation": "The official module teaching the six responsible-AI principles, mitigating AI risks, and human oversight/accountability. Grounds the principles and the over-reliance material.",
+      "domainIds": ["d2-responsible-ai"]
+    },
+    {
+      "id": "r-d2-principles",
+      "title": "Microsoft & GitHub's six principles of responsible AI",
+      "url": "https://learn.microsoft.com/en-us/training/modules/responsible-ai-with-github-copilot/3-six-principles-of-responsible-ai",
+      "kind": "learning-path",
+      "annotation": "The unit that names all six principles — Fairness, Reliability & safety, Privacy & security, Inclusiveness, Transparency, Accountability — with a definition of each. Memorise these.",
+      "domainIds": ["d2-responsible-ai"]
+    },
+    {
+      "id": "r-d2-privacy-statement",
+      "title": "GitHub Copilot privacy statement (Trust Center)",
+      "url": "https://docs.github.com/en/site-policy/privacy-policies/github-copilot-business-privacy-statement",
+      "kind": "official-doc",
+      "annotation": "Backs the privacy-and-security principle with the actual data-handling commitments. Referenced here for the responsible-use angle; the mechanics live in the data/architecture and privacy domains.",
+      "domainIds": ["d2-responsible-ai"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d2-1",
+      "title": "D2 · Principles & accountability — you own the output",
+      "provider": "youtube",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d2-responsible-ai"],
+      "sourceNotebook": "gh-300 / d2 / principles-and-accountability"
+    },
+    {
+      "id": "v-d2-2",
+      "title": "D2 · Limitations & over-reliance — review, understand, test",
+      "provider": "youtube",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d2-responsible-ai"],
+      "sourceNotebook": "gh-300 / d2 / limitations-and-over-reliance"
+    }
+  ]
+}

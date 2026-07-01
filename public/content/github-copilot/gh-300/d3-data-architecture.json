@@ -1,0 +1,710 @@
+{
+  "id": "d3-data-architecture",
+  "order": 3,
+  "code": "D3",
+  "name": "Understand GitHub Copilot Data and Architecture",
+  "weight": 0.13,
+  "tagline": "Follow a prompt from your editor to the model and back — context assembly, the proxy that filters, what's retained, and which model does the thinking.",
+  "overview": "A focused domain (10–15%) that tests whether you understand what Copilot actually does under the hood: how a prompt is assembled from your code and context, the path it takes through GitHub's service to a language model and back, what that service filters on the way, how data is handled and retained differently for Business/Enterprise versus individual plans, and how model choice and the limits of large language models shape what you get. You don't need to name endpoints or memorise retention windows — you need the mental model of what leaves your machine, where inference happens, and why the answers are probabilistic and bounded by context.",
+  "objectives": [
+    "Describe how Copilot assembles a prompt from your open files, surrounding code, chat history, and #-references before sending it to a model.",
+    "Trace the data flow — IDE to GitHub's service to the language model and back — and say what the service filters (public-code matching, harmful/offensive content).",
+    "Distinguish how data is handled and retained for Copilot Business/Enterprise versus individual plans, and know that Business/Enterprise prompts and suggestions are not used to train the models.",
+    "Explain that Copilot is backed by multiple model providers, how and why you switch the chat model, and the trade-offs involved.",
+    "Reason about large-language-model limits — a bounded context window, probabilistic output, and no live knowledge of your private code beyond what's provided."
+  ],
+  "lessons": [
+    {
+      "id": "l1-prompt-assembly",
+      "title": "From your editor to a prompt: how Copilot gathers context",
+      "estMinutes": 12,
+      "objective": "Explain what goes into a Copilot prompt and where that context comes from.",
+      "body": "## A suggestion is only as good as its context\n\nCopilot doesn't send just the line you're on. Before anything reaches a model, the client **assembles a prompt** from the context it can see:\n\n- **The current file** — the code around your cursor, above and below.\n- **Neighbouring open tabs / related files** — other files you have open give the model a sense of your project's types, conventions, and APIs.\n- **Chat history** — in Copilot Chat, earlier turns in the thread are part of the context so follow-ups make sense.\n- **Explicit references** — in chat you add context deliberately with `#` references (files, symbols, selections) and participants like `@workspace`. This is you *telling* Copilot what matters.\n\nGitHub's own description of Copilot Chat is exactly this: your prompt is **pre-processed and combined with contextual information — the repository, open files, or chat history — and then sent to a large language model.**\n\n## Why this is the whole game\n\nThe model has no memory of your private codebase. It only knows what training gave it plus **the context assembled for this request**. Generic, wrong-shaped answers almost always trace back to thin context — the model was guessing because nothing told it your conventions. Adding the right file with `#`, or opening the relevant tab, changes the output because it changes the prompt.\n\n## Why the exam cares\n\nD3 tests the mental model, not trivia. Expect questions that ask *what forms the prompt*, *why an answer ignored your internal API* (it wasn't in the context), or *how to get a more grounded suggestion* (add the context). The instinct to grade for: **Copilot reasons over the context you give it for that request — nothing more.**",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-1",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Before Copilot sends a request to the model, what is combined into the prompt?",
+          "options": [
+            { "id": "a", "text": "Your input plus context such as the current file, open/related files, and chat history", "correct": true },
+            { "id": "b", "text": "Only the single line your cursor is on" },
+            { "id": "c", "text": "Your entire repository, always uploaded in full" },
+            { "id": "d", "text": "Nothing — the model already has your codebase memorised" }
+          ],
+          "explanation": "GitHub describes the prompt as your input **pre-processed and combined with contextual information** — the repository, open files, or chat history — then sent to the model. It isn't just one line, isn't the whole repo every time, and the model has no standing memory of your code.",
+          "sourceRefs": ["r-d3-chat-card"]
+        },
+        {
+          "id": "kc-d3-2",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In Copilot Chat, how do you deliberately tell Copilot which file or symbol matters for a question?",
+          "options": [
+            { "id": "a", "text": "Use a #-reference (or @workspace) to add that file/symbol to the context", "correct": true },
+            { "id": "b", "text": "Increase your monitor resolution" },
+            { "id": "c", "text": "Switch to a paid plan mid-question" },
+            { "id": "d", "text": "Delete the file so Copilot re-reads it" }
+          ],
+          "explanation": "`#`-references and `@workspace` are how you add explicit context to a chat prompt. Screen resolution, plan tier, and deleting files don't shape what context is sent.",
+          "sourceRefs": ["r-d3-context"]
+        },
+        {
+          "id": "kc-d3-3",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A developer complains Copilot keeps ignoring their internal API and inventing method names. What is the most likely cause?",
+          "options": [
+            { "id": "a", "text": "The relevant code wasn't in the context, so the model had nothing to ground on and guessed", "correct": true },
+            { "id": "b", "text": "The model was trained specifically to avoid their company's code" },
+            { "id": "c", "text": "Copilot only works for public repositories" },
+            { "id": "d", "text": "The IDE needs to be reinstalled" }
+          ],
+          "explanation": "The model only reasons over the context assembled for the request plus its training. If the internal API isn't in the prompt, the model can't know it and will guess. The fix is to add that context (open the file, use a `#`-reference), not reinstall anything.",
+          "sourceRefs": ["r-d3-context", "r-d3-chat-card"]
+        }
+      ]
+    },
+    {
+      "id": "l2-data-flow",
+      "title": "The round trip: IDE, GitHub's service, the model, and the filters",
+      "estMinutes": 14,
+      "objective": "Trace where a Copilot request goes and what gets filtered along the way.",
+      "body": "## The path a request takes\n\nOnce the prompt is assembled, the flow is:\n\n1. **Your IDE (or CLI) sends the request** to GitHub's Copilot service — a backend that sits between you and the model. It's the gatekeeper for the round trip.\n2. **The service forwards the request to a large language model** hosted in GitHub's managed cloud environment. **Inference happens on the server, not on your machine** — your laptop isn't running the model.\n3. **The model generates a response** and returns it through the service.\n4. **Filtering runs on the way in and the way out.** GitHub states that **all input requests and output responses pass through Copilot's content filtering systems.**\n\n## What the service filters\n\nTwo filters matter for the exam:\n\n- **Public-code matching.** Copilot **checks each suggestion for matches with publicly available code.** Depending on the *Suggestions matching public code* policy, a match is either **blocked** or shown **with a code reference** (the source repository and its licence). This is the duplication-detection behaviour.\n- **Harmful / offensive / off-topic content.** Both prompts and responses are scanned to detect and block harmful or offensive content.\n\nThe takeaway: the service isn't a dumb relay. It filters requests and responses, which is why suggestions can be suppressed or annotated before you ever see them.\n\n## Where the models actually run\n\nCopilot is backed by several providers, and GitHub hosts or contracts that inference — for example on a **GitHub-managed Azure environment** and via provider clouds — under agreements that govern data handling (covered next lesson). The point for D3: **the code and context in your prompt leave your machine and travel to a hosted model; the response comes back through GitHub's filtering.**\n\n## Why the exam cares\n\nScenario questions hand you a privacy or behaviour puzzle — 'does my code leave the IDE?', 'why was that suggestion blocked?', 'where does the model run?' The mental model to hold: **IDE → GitHub's filtering service → hosted model → back**, with public-code and content filters on both directions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-4",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Where does the language-model inference for a Copilot suggestion happen?",
+          "options": [
+            { "id": "a", "text": "On a hosted model in GitHub's managed cloud, reached through GitHub's Copilot service", "correct": true },
+            { "id": "b", "text": "Locally on your laptop, offline" },
+            { "id": "c", "text": "Inside your Git repository's hooks" },
+            { "id": "d", "text": "On the reviewer's machine when they open the PR" }
+          ],
+          "explanation": "The prompt is sent from your IDE to GitHub's service, which forwards it to a **hosted model** for inference. Your machine doesn't run the model; it isn't done in Git hooks or on a reviewer's machine.",
+          "sourceRefs": ["r-d3-model-hosting", "r-d3-chat-card"]
+        },
+        {
+          "id": "kc-d3-5",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What does the public-code matching filter do when a suggestion matches publicly available code?",
+          "options": [
+            { "id": "a", "text": "Blocks it or shows it with a code reference (source repo and licence), per the org policy", "correct": true },
+            { "id": "b", "text": "Silently commits it to your default branch" },
+            { "id": "c", "text": "Emails the original author for permission" },
+            { "id": "d", "text": "Deletes your local file that resembled it" }
+          ],
+          "explanation": "Copilot checks each suggestion against public code and, based on the *Suggestions matching public code* setting, either **blocks** the match or surfaces it **with a code reference**. It doesn't commit, email authors, or delete your files.",
+          "sourceRefs": ["r-d3-duplication"]
+        },
+        {
+          "id": "kc-d3-6",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which best describes GitHub's Copilot service in the request path?",
+          "options": [
+            { "id": "a", "text": "A backend between your IDE and the model that forwards requests and applies content filtering both ways", "correct": true },
+            { "id": "b", "text": "A local cache that never contacts GitHub" },
+            { "id": "c", "text": "A tool that trains a private model on your repo each night" },
+            { "id": "d", "text": "A billing system with no role in requests" }
+          ],
+          "explanation": "The service sits between the IDE/CLI and the hosted model, forwarding the request and running **content filtering on inputs and outputs**. It isn't a purely local cache, a training pipeline, or just billing.",
+          "sourceRefs": ["r-d3-chat-card", "r-d3-model-hosting"]
+        }
+      ]
+    },
+    {
+      "id": "l3-data-handling",
+      "title": "Data handling and retention: Business/Enterprise vs individual",
+      "estMinutes": 13,
+      "objective": "Distinguish what's retained and used for training across plan types, and separate prompts, suggestions, and telemetry.",
+      "body": "## Three kinds of data\n\nKeep these categories straight — the exam leans on the distinction:\n\n- **Prompts** — what you (and the assembled context) send.\n- **Suggestions / completions** — what the model sends back.\n- **Usage / engagement data (telemetry)** — signals about how you interact (e.g. whether a suggestion was shown, accepted, dismissed), not the code itself.\n\n## The plan divide that matters\n\n- **Copilot Business and Enterprise:** GitHub's commitment is that **your prompts and suggestions are not used to train the foundation models.** This is contractual — backed by GitHub's Data Protection Agreement — and providers operate under **zero-data-retention agreements** for the model calls. Some prompt/suggestion data may be **retained short-term** to make features work (for example, thread history so chat, mobile, and the CLI can use earlier turns), but it does not feed model training.\n- **Individual plans (Copilot Free / Pro / Pro+):** the individual has a **choice** — you can **opt in or opt out** of your data being used to improve the models. The default and the control live in your personal Copilot settings.\n\nThe clean exam line: **Business/Enterprise data is not used for training (no per-user toggle needed — it's contractual); individual users decide via an opt-in/opt-out setting.**\n\n## Retention, honestly\n\nGitHub retains some data for limited periods to operate and improve the service, and engagement data on its own timeline — but **don't memorise a specific number of days for the exam.** What's testable is the *shape*: prompts/suggestions may be retained briefly to power stateful features; **for Business/Enterprise they are not used to train models**; providers hold zero-data-retention terms for the inference itself.\n\n## Why the exam cares\n\nData-handling questions are the heart of D3. Expect 'is our code used to train the model on Business?' (no), 'how does an individual stop their data being used for training?' (the opt-out setting), and 'what's the difference between a prompt and telemetry?' Ground every answer in the plan type.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-7",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "On Copilot Business/Enterprise, are your prompts and suggestions used to train the underlying models?",
+          "options": [
+            { "id": "a", "text": "No — GitHub commits (contractually) that Business/Enterprise prompts and suggestions are not used for training", "correct": true },
+            { "id": "b", "text": "Yes — all Copilot data trains the models regardless of plan" },
+            { "id": "c", "text": "Only if the repository is public" },
+            { "id": "d", "text": "Only on Tuesdays during maintenance windows" }
+          ],
+          "explanation": "For Business and Enterprise, GitHub's agreements (its Data Protection Agreement) state customer prompts and suggestions are **not used to train** the models. It isn't conditional on repo visibility or a schedule.",
+          "sourceRefs": ["r-d3-privacy", "r-d3-model-hosting"]
+        },
+        {
+          "id": "kc-d3-8",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An individual Copilot Pro user wants to ensure their data isn't used to improve the models. What's the mechanism?",
+          "options": [
+            { "id": "a", "text": "Toggle the opt-out in their personal Copilot settings — individual plans offer an opt-in/opt-out choice", "correct": true },
+            { "id": "b", "text": "There is no way; individuals cannot control this" },
+            { "id": "c", "text": "Downgrade to a free email account" },
+            { "id": "d", "text": "Ask their organisation admin (they don't have one on an individual plan)" }
+          ],
+          "explanation": "Individual plans (Free/Pro/Pro+) give the user an **opt-in/opt-out** control in their own Copilot settings. It's not impossible, unrelated to email type, and an individual has no org admin to defer to.",
+          "sourceRefs": ["r-d3-privacy"]
+        },
+        {
+          "id": "kc-d3-9",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which best distinguishes a 'suggestion' from 'usage/engagement data'?",
+          "options": [
+            { "id": "a", "text": "A suggestion is the model's returned code/response; engagement data is interaction signals like whether it was shown or accepted", "correct": true },
+            { "id": "b", "text": "They are identical terms for the same thing" },
+            { "id": "c", "text": "A suggestion is telemetry; engagement data is your source code" },
+            { "id": "d", "text": "Both refer only to your billing information" }
+          ],
+          "explanation": "A **suggestion** is the completion/response the model produces; **engagement/usage data** is metadata about the interaction (shown, accepted, dismissed), not the code. They're distinct, and neither is billing data.",
+          "sourceRefs": ["r-d3-privacy"]
+        }
+      ]
+    },
+    {
+      "id": "l4-models-limits",
+      "title": "Models and their limits: providers, switching, and what an LLM can't do",
+      "estMinutes": 13,
+      "objective": "Explain multi-provider model choice, why you'd switch, and the inherent limits of large language models.",
+      "body": "## Copilot is not one model\n\nCopilot is backed by **multiple providers and models** — GitHub lists offerings from OpenAI, Anthropic, Google, and Microsoft. That's why you can **switch the model** used for a task.\n\n- **Where you switch:** you can change the model for **Copilot Chat** and for **inline suggestions** (availability depends on your plan and IDE version). There's also an **Auto** option that picks a model for you based on the task.\n- **Why you'd switch:** models differ. GitHub frames the trade-offs plainly — **some offer lower latency; others make fewer mistakes or perform better on specific tasks**, some handle **long contexts** better, some accept **visual/multimodal input** (diagrams, screenshots), and some are stronger at **multi-step reasoning and architecture-level analysis**. Higher-reasoning or larger-context modes can also **consume more credits**.\n\nThe practical rule: reach for a **faster, lighter** model for quick, in-flow help; reach for a **stronger, higher-reasoning** model for hard, multi-step, or long-context problems — accepting more latency and cost.\n\n## The limits every LLM shares\n\nWhatever the model, the same limits apply — and the exam tests that you know them:\n\n- **Bounded context window.** A model can only consider so much at once. Beyond that budget, earlier or less-relevant context is dropped. More context isn't free and isn't unlimited.\n- **Probabilistic output.** Suggestions are predictions, not proofs. The same prompt can yield different answers, and confident-looking output can be wrong — hence 'validate everything'.\n- **No live knowledge of your private code.** The model knows its training data plus the context you provide *right now*. It has no standing awareness of your repository and no live view of the internet or your systems (that's what MCP/Spaces add as context).\n- **A training cutoff.** The base model's built-in knowledge is frozen at training time; anything newer must come in as context.\n\n## Why the exam cares\n\nD3 rewards a realistic model of the tool: multiple swappable models with real trade-offs, and hard limits that make human review non-negotiable. Expect 'why switch models?', 'why did it forget the top of a huge file?' (context window), and 'why can two identical prompts differ?' (probabilistic).",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-10",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which statement about the models behind Copilot is correct?",
+          "options": [
+            { "id": "a", "text": "Copilot is backed by multiple providers/models, and you can switch the model for chat and inline suggestions", "correct": true },
+            { "id": "b", "text": "Copilot uses exactly one fixed model that can never change" },
+            { "id": "c", "text": "You must train your own model before using Copilot" },
+            { "id": "d", "text": "The model runs entirely offline on your device" }
+          ],
+          "explanation": "GitHub offers models from several providers and lets you switch the model for Chat and inline suggestions (with an Auto option). It isn't a single fixed model, you don't train your own, and inference is hosted, not on-device.",
+          "sourceRefs": ["r-d3-models", "r-d3-model-hosting"]
+        },
+        {
+          "id": "kc-d3-11",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why might you switch from a fast, lightweight model to a higher-reasoning one?",
+          "options": [
+            { "id": "a", "text": "For a hard, multi-step or long-context problem where depth matters more than latency and cost", "correct": true },
+            { "id": "b", "text": "To make Copilot stop sending data to any model" },
+            { "id": "c", "text": "To bypass content filtering" },
+            { "id": "d", "text": "To force suggestions to be deterministic and always identical" }
+          ],
+          "explanation": "Stronger models trade latency and (often) more credits for better reasoning and long-context handling — worth it on complex tasks. Switching models doesn't stop data flow, bypass filters, or make output deterministic.",
+          "sourceRefs": ["r-d3-models"]
+        },
+        {
+          "id": "kc-d3-12",
+          "domainId": "d3-data-architecture",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A model gives a slightly different answer to the exact same prompt on a second try. Why?",
+          "options": [
+            { "id": "a", "text": "LLM output is probabilistic — it predicts likely tokens, so responses can vary", "correct": true },
+            { "id": "b", "text": "The IDE is corrupting the file" },
+            { "id": "c", "text": "Copilot silently switched to your competitor's codebase" },
+            { "id": "d", "text": "The network dropped every second request" }
+          ],
+          "explanation": "Large language models are **probabilistic**: they sample likely continuations, so the same prompt can produce different outputs. That's inherent, not IDE corruption, data leakage, or a network issue.",
+          "sourceRefs": ["r-d3-chat-card"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d3-1",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of these is combined into a Copilot Chat prompt before it reaches the model?",
+      "options": [
+        { "id": "a", "text": "Contextual information such as the repository, open files, and chat history", "correct": true },
+        { "id": "b", "text": "Only the exact characters you typed, with no context" },
+        { "id": "c", "text": "A full copy of every private repo in your org" },
+        { "id": "d", "text": "Your operating system password" }
+      ],
+      "explanation": "GitHub describes the prompt as your input pre-processed and **combined with context** — repository, open files, chat history — before being sent to the model. It's neither context-free nor a wholesale upload of everything, and never credentials.",
+      "sourceRefs": ["r-d3-chat-card"]
+    },
+    {
+      "id": "q-d3-2",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Where does inference (the model actually generating text) take place for Copilot?",
+      "options": [
+        { "id": "a", "text": "On a hosted model in GitHub's managed cloud, reached via GitHub's Copilot service", "correct": true },
+        { "id": "b", "text": "On your local CPU, fully offline" },
+        { "id": "c", "text": "In the browser's local storage" },
+        { "id": "d", "text": "On each teammate's laptop simultaneously" }
+      ],
+      "explanation": "The request goes from your IDE to GitHub's service and on to a **hosted model**; inference is server-side. It isn't local, in browser storage, or distributed across teammates' machines.",
+      "sourceRefs": ["r-d3-model-hosting"]
+    },
+    {
+      "id": "q-d3-3",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What runs on both the input to and the output from Copilot's models?",
+      "options": [
+        { "id": "a", "text": "Content filtering, including public-code matching and harmful-content checks", "correct": true },
+        { "id": "b", "text": "A mandatory human approval step" },
+        { "id": "c", "text": "Compilation of your whole project" },
+        { "id": "d", "text": "Nothing — requests and responses are unfiltered" }
+      ],
+      "explanation": "GitHub states that **all input requests and output responses pass through Copilot's content filtering**, which includes public-code match checks and harmful/offensive-content detection. It isn't a human gate, a compile step, or unfiltered.",
+      "sourceRefs": ["r-d3-chat-card", "r-d3-duplication"]
+    },
+    {
+      "id": "q-d3-4",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "With the 'Suggestions matching public code' policy set to block, what happens to a suggestion that matches public code?",
+      "options": [
+        { "id": "a", "text": "It is suppressed so you don't receive it", "correct": true },
+        { "id": "b", "text": "It is committed automatically" },
+        { "id": "c", "text": "It is emailed to the original repository owner" },
+        { "id": "d", "text": "It is rewritten in a different programming language" }
+      ],
+      "explanation": "When the policy blocks matches, a suggestion matching public code is **not shown**. When set to allow with references, it's shown with source/licence info instead. It isn't auto-committed, emailed, or translated.",
+      "sourceRefs": ["r-d3-duplication"]
+    },
+    {
+      "id": "q-d3-5",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On Copilot Business and Enterprise, are customer prompts and suggestions used to train the models?",
+      "options": [
+        { "id": "a", "text": "No — they are not used for training (a contractual commitment)", "correct": true },
+        { "id": "b", "text": "Yes, always" },
+        { "id": "c", "text": "Yes, unless the repo is archived" },
+        { "id": "d", "text": "Only if fewer than ten people are on the plan" }
+      ],
+      "explanation": "For Business/Enterprise, GitHub's agreements state prompts and suggestions are **not used to train** the models. It's not conditional on archiving or team size.",
+      "sourceRefs": ["r-d3-privacy"]
+    },
+    {
+      "id": "q-d3-6",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does an individual (Copilot Free/Pro/Pro+) user control whether their data is used to improve the models?",
+      "options": [
+        { "id": "a", "text": "Through an opt-in/opt-out setting in their personal Copilot settings", "correct": true },
+        { "id": "b", "text": "They cannot; only enterprises have any control" },
+        { "id": "c", "text": "By deleting their IDE" },
+        { "id": "d", "text": "By committing more often" }
+      ],
+      "explanation": "Individual plans expose an **opt-in/opt-out** choice in the user's own settings. Enterprises aren't the only ones with control, and deleting an IDE or committing more doesn't change data use.",
+      "sourceRefs": ["r-d3-privacy"]
+    },
+    {
+      "id": "q-d3-7",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is the correct pairing of term to meaning?",
+      "options": [
+        { "id": "a", "text": "Prompt = your input+context sent to the model; suggestion = the model's returned response", "correct": true },
+        { "id": "b", "text": "Prompt = the model's answer; suggestion = your billing plan" },
+        { "id": "c", "text": "Prompt = telemetry only; suggestion = your OS version" },
+        { "id": "d", "text": "Prompt and suggestion both mean 'usage data'" }
+      ],
+      "explanation": "The **prompt** is what's sent (your input plus assembled context); the **suggestion** is what comes back. Neither is billing, OS info, or a synonym for telemetry.",
+      "sourceRefs": ["r-d3-privacy", "r-d3-chat-card"]
+    },
+    {
+      "id": "q-d3-8",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Copilot is backed by how many model providers?",
+      "options": [
+        { "id": "a", "text": "Multiple providers (e.g. OpenAI, Anthropic, Google, Microsoft)", "correct": true },
+        { "id": "b", "text": "Exactly one, fixed forever" },
+        { "id": "c", "text": "None — it uses a rules engine, not a model" },
+        { "id": "d", "text": "Only models you host yourself" }
+      ],
+      "explanation": "GitHub lists offerings from **several providers**, which is why models are swappable. It's not a single fixed model, not a rules engine, and not self-hosted by the user.",
+      "sourceRefs": ["r-d3-models", "r-d3-model-hosting"]
+    },
+    {
+      "id": "q-d3-9",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For which surfaces can you change the AI model Copilot uses?",
+      "options": [
+        { "id": "a", "text": "Copilot Chat and inline suggestions (subject to plan and IDE)", "correct": true },
+        { "id": "b", "text": "Only the GitHub website's search bar" },
+        { "id": "c", "text": "Only inside Git commit messages" },
+        { "id": "d", "text": "You can never change the model" }
+      ],
+      "explanation": "GitHub documents switching the model for **Copilot Chat** and **inline suggestions**, with availability depending on plan and IDE, plus an Auto option. It's not tied to search or commit messages, and it is changeable.",
+      "sourceRefs": ["r-d3-models"]
+    },
+    {
+      "id": "q-d3-10",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which trade-off is a real reason to pick one Copilot model over another?",
+      "options": [
+        { "id": "a", "text": "Latency vs reasoning depth/accuracy (and sometimes credit cost and context length)", "correct": true },
+        { "id": "b", "text": "Whether the model can bypass your firewall" },
+        { "id": "c", "text": "Whether it deletes your test files" },
+        { "id": "d", "text": "Whether it changes your keyboard layout" }
+      ],
+      "explanation": "GitHub frames model choice around **latency vs fewer mistakes/better task performance**, long-context handling, multimodal input, and credit consumption. Firewalls, file deletion, and keyboards aren't factors.",
+      "sourceRefs": ["r-d3-models"]
+    },
+    {
+      "id": "q-d3-11",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why can Copilot 'forget' code near the top of a very large file it's working in?",
+      "options": [
+        { "id": "a", "text": "The context window is bounded — beyond that budget, some context is left out", "correct": true },
+        { "id": "b", "text": "The file is corrupted by Copilot" },
+        { "id": "c", "text": "Copilot only reads the last line of any file" },
+        { "id": "d", "text": "It requires the file to be under 10 lines" }
+      ],
+      "explanation": "A model has a **finite context window**; very large inputs exceed it and some context is dropped. It's a capacity limit, not corruption, a last-line-only rule, or a 10-line cap.",
+      "sourceRefs": ["r-d3-models"]
+    },
+    {
+      "id": "q-d3-12",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about a large language model's knowledge is accurate?",
+      "options": [
+        { "id": "a", "text": "It knows its training data plus the context provided for the request — nothing about your private repo unless you give it", "correct": true },
+        { "id": "b", "text": "It continuously reads your private repository in real time" },
+        { "id": "c", "text": "It has live, up-to-the-minute internet access by default" },
+        { "id": "d", "text": "It memorises every prompt you've ever sent permanently" }
+      ],
+      "explanation": "The model reasons over **training data + the context you supply now**. It has no standing view of your private code, no default live internet, and doesn't permanently memorise your prompts.",
+      "sourceRefs": ["r-d3-chat-card", "r-d3-context"]
+    },
+    {
+      "id": "q-d3-13",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A teammate says 'Copilot must be sending our whole private repo to the model on every keystroke.' What's the accurate correction?",
+      "options": [
+        { "id": "a", "text": "Copilot assembles a prompt from relevant context (current file, related files, chat history) — not a full repo upload per keystroke", "correct": true },
+        { "id": "b", "text": "Correct — the entire repo is uploaded on every keystroke" },
+        { "id": "c", "text": "Copilot never sends any code anywhere, ever" },
+        { "id": "d", "text": "Only compiled binaries are sent, never source" }
+      ],
+      "explanation": "Copilot builds a prompt from **relevant assembled context**, not a wholesale repo upload. It's also wrong to say no code ever leaves (the prompt does travel to a hosted model) or that only binaries are sent.",
+      "sourceRefs": ["r-d3-chat-card", "r-d3-model-hosting"]
+    },
+    {
+      "id": "q-d3-14",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the safest thing to say about how long Copilot retains prompts and suggestions?",
+      "options": [
+        { "id": "a", "text": "Some may be retained briefly to power features; for Business/Enterprise they are not used to train models — consult the privacy statement for exact periods", "correct": true },
+        { "id": "b", "text": "They are retained forever and shared publicly" },
+        { "id": "c", "text": "They are never stored for even a moment under any plan" },
+        { "id": "d", "text": "Retention is identical to your Git commit history" }
+      ],
+      "explanation": "The verifiable shape: limited retention to operate features (e.g. thread history), and **no training use on Business/Enterprise** — with the privacy statement as the authority for specific periods. 'Forever/public', 'never stored', and 'same as Git history' are all inaccurate.",
+      "sourceRefs": ["r-d3-privacy"]
+    },
+    {
+      "id": "q-d3-15",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want Copilot to reason over live data from an internal system it has no built-in knowledge of. Architecturally, what has to happen?",
+      "options": [
+        { "id": "a", "text": "That data must be brought in as context (e.g. via references, Spaces, or an MCP server) — the model can't know it otherwise", "correct": true },
+        { "id": "b", "text": "The model already knows all internal systems from training" },
+        { "id": "c", "text": "You must retrain the base model yourself first" },
+        { "id": "d", "text": "Nothing — Copilot browses your intranet automatically" }
+      ],
+      "explanation": "A model only sees training data plus **provided context**, so live internal data must be supplied as context. It isn't in the base model, you don't retrain it, and Copilot doesn't auto-browse your intranet.",
+      "sourceRefs": ["r-d3-context", "r-d3-chat-card"]
+    },
+    {
+      "id": "q-d3-16",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The 'Auto' model option in Copilot does what?",
+      "options": [
+        { "id": "a", "text": "Automatically selects a model for the task instead of you choosing manually", "correct": true },
+        { "id": "b", "text": "Automatically merges pull requests" },
+        { "id": "c", "text": "Automatically disables content filtering" },
+        { "id": "d", "text": "Automatically deletes unused branches" }
+      ],
+      "explanation": "**Auto** picks an appropriate model for you rather than requiring a manual choice. It has nothing to do with merging PRs, filtering, or branch cleanup.",
+      "sourceRefs": ["r-d3-models"]
+    },
+    {
+      "id": "q-d3-17",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Because Copilot output is probabilistic and bounded by context, what follows for how you use it?",
+      "options": [
+        { "id": "a", "text": "You must review and validate suggestions — confident output can still be wrong", "correct": true },
+        { "id": "b", "text": "You can merge its output unreviewed because it's deterministic" },
+        { "id": "c", "text": "The output is formally proven correct" },
+        { "id": "d", "text": "It never needs any context to be accurate" }
+      ],
+      "explanation": "Probabilistic, context-bounded generation means output can be wrong and varies — so **human review is essential**. It's not deterministic, not proven correct, and not context-independent.",
+      "sourceRefs": ["r-d3-chat-card"]
+    },
+    {
+      "id": "q-d3-18",
+      "domainId": "d3-data-architecture",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about GitHub Copilot's data and architecture are accurate? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "The prompt is assembled from context and sent to a hosted model; inference is server-side", "correct": true },
+        { "id": "b", "text": "Input and output pass through content filtering (public-code and harmful-content checks)", "correct": true },
+        { "id": "c", "text": "Business/Enterprise prompts and suggestions are not used to train the models", "correct": true },
+        { "id": "d", "text": "The model runs locally and has permanent live access to your private repositories" }
+      ],
+      "explanation": "The first three are correct: context-assembled prompt → hosted inference; filtering both ways; no training use on Business/Enterprise. The last is false — inference is hosted and the model has no standing live access to your repos.",
+      "sourceRefs": ["r-d3-chat-card", "r-d3-duplication", "r-d3-privacy", "r-d3-model-hosting"]
+    },
+    {
+      "id": "q-d3-19",
+      "domainId": "d3-data-architecture",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which are genuine, exam-relevant limitations of the language models behind Copilot? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "A bounded context window limits how much it can consider at once", "correct": true },
+        { "id": "b", "text": "Output is probabilistic and can vary or be wrong", "correct": true },
+        { "id": "c", "text": "Built-in knowledge is frozen at a training cutoff; newer facts must arrive as context", "correct": true },
+        { "id": "d", "text": "It guarantees bug-free, compilable code every time" }
+      ],
+      "explanation": "Context-window limits, probabilistic output, and a training cutoff are all real constraints. A **guarantee** of bug-free code is not — that's exactly why validation is required.",
+      "sourceRefs": ["r-d3-models", "r-d3-chat-card"]
+    },
+    {
+      "id": "q-d3-20",
+      "domainId": "d3-data-architecture",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which sequence best represents a Copilot Chat request?",
+      "options": [
+        { "id": "a", "text": "Assemble prompt+context → GitHub's service (filtering) → hosted model → response back through filtering", "correct": true },
+        { "id": "b", "text": "Local model runs → commit to main → deploy → notify GitHub afterwards" },
+        { "id": "c", "text": "Upload entire repo → train a private model → return weights" },
+        { "id": "d", "text": "Send to a random public server → skip all filtering → paste result" }
+      ],
+      "explanation": "The real flow is **prompt assembly → GitHub's filtering service → hosted model → filtered response back**. It's not a local run that commits/deploys, not a training pipeline, and not an unfiltered send to a random server.",
+      "sourceRefs": ["r-d3-chat-card", "r-d3-model-hosting", "r-d3-duplication"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d3-dataflow",
+      "domainIds": ["d3-data-architecture"],
+      "title": "What actually leaves the IDE?",
+      "tagline": "Reason through the data flow when a security reviewer asks hard questions.",
+      "context": "Your security team is evaluating Copilot Business before rollout. They want precise answers about what data leaves developer machines, where the model runs, what gets filtered, and whether their code trains the model. Answer each accurately.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First question: 'When a developer types, does our entire private repo get uploaded to the model?'",
+          "choices": [
+            { "id": "a", "text": "No — Copilot assembles a prompt from relevant context (current file, related open files, chat history) and sends that", "verdict": "best", "rationale": "Copilot builds a context-scoped prompt; it doesn't upload the whole repo per request. This is the accurate architecture." },
+            { "id": "b", "text": "Yes, the full repository is sent on every keystroke", "verdict": "wrong", "rationale": "Incorrect — a scoped prompt of assembled context is sent, not the entire repo each time." },
+            { "id": "c", "text": "Nothing is ever sent; it all runs locally", "verdict": "wrong", "rationale": "Also incorrect — the assembled prompt does leave the machine and travel to a hosted model." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "'Where does the model actually run — on our developers' laptops?'",
+          "choices": [
+            { "id": "a", "text": "On a hosted model in GitHub's managed cloud, reached through GitHub's Copilot service", "verdict": "best", "rationale": "Inference is server-side on hosted models; the laptop doesn't run the model." },
+            { "id": "b", "text": "Locally on each laptop, fully offline", "verdict": "wrong", "rationale": "Wrong — Copilot requires the hosted service and model; it isn't offline local inference." },
+            { "id": "c", "text": "It depends — you could self-host the model if you wanted", "verdict": "viable", "rationale": "Not the standard architecture to teach; Copilot's models are hosted by GitHub/providers, not self-hosted by customers. Stated as a firm option it would mislead the reviewer." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "'What stops Copilot from handing us a verbatim copy of someone's licensed public code?'",
+          "choices": [
+            { "id": "a", "text": "The public-code matching filter checks suggestions and, per policy, blocks the match or shows it with a code reference and licence", "verdict": "best", "rationale": "This is exactly the duplication-detection/public-code filter and how the org policy governs it." },
+            { "id": "b", "text": "Nothing — Copilot never checks suggestions against public code", "verdict": "wrong", "rationale": "Incorrect — GitHub checks each suggestion against public code as part of filtering." },
+            { "id": "c", "text": "A reviewer has to manually diff every suggestion against GitHub search", "verdict": "viable", "rationale": "Human review is always good practice, but it's not the built-in mechanism the question asks about — the automated public-code filter is." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "'On Business, will our prompts and code be used to train GitHub's models?'",
+          "choices": [
+            { "id": "a", "text": "No — for Business/Enterprise, prompts and suggestions are not used to train the models; it's a contractual commitment under the DPA", "verdict": "best", "rationale": "Accurate: Business/Enterprise data is excluded from training by agreement, with providers under zero-data-retention terms for inference." },
+            { "id": "b", "text": "Yes, everything is used for training on every plan", "verdict": "wrong", "rationale": "False for Business/Enterprise — training use is contractually excluded." },
+            { "id": "c", "text": "Only if you remember to flip an opt-out toggle per developer", "verdict": "wrong", "rationale": "That's the individual-plan model. Business/Enterprise exclusion is contractual and doesn't rely on per-user opt-out." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d3-chat-card", "r-d3-model-hosting", "r-d3-duplication", "r-d3-privacy"]
+    },
+    {
+      "id": "s-d3-modelchoice",
+      "domainIds": ["d3-data-architecture"],
+      "title": "Choose the right model, respect the limits",
+      "tagline": "Match model choice and expectations to the task at hand.",
+      "context": "You're guiding a team on getting the most from Copilot's model options while staying realistic about what an LLM can do. Pick the best call at each step.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "A developer needs quick, in-flow help finishing boilerplate lines all day. Which model choice fits?",
+          "choices": [
+            { "id": "a", "text": "A fast, lower-latency model (or Auto), trading some depth for speed", "verdict": "best", "rationale": "For high-frequency, low-complexity help, latency matters most — a lighter model is the right trade." },
+            { "id": "b", "text": "Always force the heaviest reasoning model for everything", "verdict": "viable", "rationale": "It works but adds latency and cost for tasks that don't need deep reasoning — not the best fit for all-day boilerplate." },
+            { "id": "c", "text": "Turn Copilot off because model choice doesn't matter", "verdict": "wrong", "rationale": "Model choice does matter, and disabling the tool defeats the purpose." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Now a hard task: reason across a large module and propose an architecture-level refactor. Which model?",
+          "choices": [
+            { "id": "a", "text": "A higher-reasoning, larger-context model, accepting more latency and credit use", "verdict": "best", "rationale": "Multi-step, long-context problems are where a stronger model earns its extra cost and latency." },
+            { "id": "b", "text": "The fastest, smallest model to save credits", "verdict": "viable", "rationale": "Cheaper, but likely to miss depth on a genuinely hard, long-context problem — a false economy here." },
+            { "id": "c", "text": "No model — expect Copilot to be deterministic and always right", "verdict": "wrong", "rationale": "Copilot is probabilistic and can be wrong; expecting determinism/perfection is the wrong mental model." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The team hits a wall: on a huge file, the model seems to ignore code near the top. How do you frame it?",
+          "choices": [
+            { "id": "a", "text": "It's the bounded context window — trim/scope the context or point the model at the relevant part", "verdict": "best", "rationale": "Correctly attributes the behaviour to context limits and gives the practical fix: scope the context." },
+            { "id": "b", "text": "The model is broken; file a bug", "verdict": "wrong", "rationale": "This is an inherent limitation, not a defect — a bug report misdiagnoses it." },
+            { "id": "c", "text": "Split the file into smaller pieces so relevant context fits", "verdict": "viable", "rationale": "A reasonable practical tactic, but the primary point to teach is the context-window limit and scoping context for the request." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-d3-models", "r-d3-chat-card"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d3-dataflow",
+      "domainId": "d3-data-architecture",
+      "title": "Trace a request and watch the public-code filter",
+      "goal": "Make the data flow and filtering concrete instead of abstract.",
+      "steps": "## What you'll do\n\n1. **Map the path.** On paper, draw the round trip for a Chat request: your IDE assembles a prompt (current file + open files + chat history) → GitHub's Copilot service (content + public-code filtering) → hosted model → filtered response back. Label where inference happens (server-side) and where filtering happens (both directions).\n2. **Prove context matters.** Ask Copilot a question about a symbol *without* referencing the file, note the (vaguer) answer, then re-ask with a `#`-reference to the file. Compare — the only thing you changed was the context in the prompt.\n3. **See the public-code filter.** With code-referencing enabled, prompt for something likely to resemble well-known public code and watch for a suggestion surfaced **with a code reference** (source + licence) — or blocked, depending on policy.\n4. **Check your plan's data posture.** In settings, find where data-use is controlled: on an individual plan, locate the opt-in/opt-out; on Business/Enterprise, note that training exclusion is handled by agreement, not a per-user toggle.\n\n## Why it matters\n\nD3 questions reward a concrete model of what leaves the machine, where inference runs, what's filtered, and how plan type changes data use. Doing it once makes the exam framing obvious.",
+      "checklist": [
+        "You can draw IDE → service (filtering) → hosted model → back",
+        "You showed that adding a #-reference changed the answer",
+        "You saw a code reference (or a block) from the public-code filter",
+        "You located the data-use control appropriate to your plan"
+      ]
+    },
+    {
+      "id": "lab-d3-models",
+      "domainId": "d3-data-architecture",
+      "title": "Switch models and feel the trade-offs",
+      "goal": "Experience why model choice and context limits are real.",
+      "steps": "## Steps\n\n1. **Find the model picker.** In Copilot Chat, open the model selector and note the available models and the **Auto** option (availability depends on your plan and IDE).\n2. **Run the same hard prompt on two models.** Pick a multi-step reasoning task. Run it on a fast/light model and on a higher-reasoning model. Compare quality, latency, and (if shown) credit use.\n3. **Push the context window.** Ask about something near the very top of a very large file without scoping it, then again with a tight `#`-reference to just that part. Observe how scoping the context improves the answer.\n4. **Write the rule.** In one sentence each, note when you'd pick the lighter model vs the heavier one, and one limitation (context window, probabilistic output, or training cutoff) you saw in action.\n\n## Checkpoint\n\nIf you can state a task where the heavier model was worth its latency, and one where it wasn't, you've internalised the trade-off the exam tests.",
+      "checklist": [
+        "You located the model selector and the Auto option",
+        "You compared the same prompt across two models",
+        "You saw scoping context beat an over-long prompt",
+        "You wrote your own lighter-vs-heavier rule and named a real limitation"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-d3-chat-card",
+      "title": "Responsible use — GitHub Copilot Chat (how it works)",
+      "url": "https://docs.github.com/en/copilot/responsible-use/chat",
+      "kind": "official-doc",
+      "annotation": "GitHub's own description of the Chat pipeline: prompt pre-processed and combined with context (repository, open files, chat history), sent to a language model, response generated and formatted — with content filtering on inputs and outputs. The clearest official statement of the data flow.",
+      "domainIds": ["d3-data-architecture"]
+    },
+    {
+      "id": "r-d3-model-hosting",
+      "title": "Hosting of models for GitHub Copilot",
+      "url": "https://docs.github.com/en/copilot/reference/ai-models/model-hosting",
+      "kind": "official-doc",
+      "annotation": "Where inference runs: GitHub-managed cloud and provider environments across OpenAI, Anthropic, Google, and Microsoft, with zero-data-retention agreements and no-training commitments per provider. Grounds 'where does the model run' and the data posture.",
+      "domainIds": ["d3-data-architecture"]
+    },
+    {
+      "id": "r-d3-models",
+      "title": "Supported AI models & choosing a model",
+      "url": "https://docs.github.com/en/copilot/reference/ai-models/supported-models",
+      "kind": "spec",
+      "annotation": "Which providers/models back Copilot, how to switch the model for chat and inline suggestions (and the Auto option), and the trade-offs: latency vs accuracy/reasoning, long context, multimodal input, and credit use.",
+      "domainIds": ["d3-data-architecture"]
+    },
+    {
+      "id": "r-d3-privacy",
+      "title": "Copilot Business privacy statement (Trust Center)",
+      "url": "https://docs.github.com/en/site-policy/privacy-policies/github-copilot-business-privacy-statement",
+      "kind": "official-doc",
+      "annotation": "The authority for data handling: what's collected (prompts, suggestions, engagement data), retention, and the commitment that Business/Enterprise prompts and suggestions are not used for training. Consult it for exact retention periods rather than assuming.",
+      "domainIds": ["d3-data-architecture"]
+    },
+    {
+      "id": "r-d3-duplication",
+      "title": "Suggestions matching public code (duplication detection)",
+      "url": "https://docs.github.com/en/copilot/how-tos/configure-content-exclusion/exclude-content-from-copilot",
+      "kind": "official-doc",
+      "annotation": "How Copilot checks each suggestion against publicly available code and, per the 'Suggestions matching public code' policy, blocks the match or surfaces it with a code reference (source repo + licence). The public-code filter in the data flow.",
+      "domainIds": ["d3-data-architecture"]
+    },
+    {
+      "id": "r-d3-context",
+      "title": "Provide context to GitHub Copilot",
+      "url": "https://docs.github.com/en/copilot/how-tos/provide-context",
+      "kind": "official-doc",
+      "annotation": "How to shape the prompt's context — #-references, @-participants, open files — so the model reasons over the right code. Explains why context, not memory, drives grounded answers.",
+      "domainIds": ["d3-data-architecture"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d3-1",
+      "title": "D3 · Data & architecture — the prompt round trip",
+      "provider": "youtube",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d3-data-architecture"],
+      "sourceNotebook": "gh-300 / d3 / data-and-architecture"
+    }
+  ]
+}
