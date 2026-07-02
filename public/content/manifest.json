@@ -12,6 +12,7 @@
           "code": "CCA-F",
           "status": "live",
           "flagship": true,
+          "lane": "practitioner",
           "domains": 5,
           "summary": "Anthropic's first official technical credential. Design and ship production-grade Claude systems at enterprise scale.",
           "exam": { "questionCount": 60, "durationMinutes": 120, "passingScore": 720, "scoreScale": 1000 }
@@ -23,10 +24,20 @@
       "name": "Automatos",
       "tracks": [
         {
+          "trackId": "ai-business",
+          "name": "AI Business Foundations",
+          "code": "ABF",
+          "status": "coming-soon",
+          "lane": "operator",
+          "domains": 9,
+          "summary": "Run your business with AI — plain English, no exam. Nine modules from “what actually is AI?” to one real automation shipped in your own business."
+        },
+        {
           "trackId": "platform-architect",
           "name": "Automatos Platform Architect",
           "code": "APA",
           "status": "coming-soon",
+          "lane": "practitioner",
           "domains": 0,
           "summary": "Master the Automatos platform end to end — agents, recipes, the operating graph, and production operations."
         }
@@ -36,7 +47,7 @@
       "id": "openai",
       "name": "OpenAI",
       "tracks": [
-        { "trackId": "foundations", "name": "OpenAI Architect (planned)", "status": "coming-soon", "summary": "Same engine, a future vendor track. Drops in as content — no rebuild." }
+        { "trackId": "foundations", "name": "OpenAI Architect (planned)", "status": "coming-soon", "lane": "practitioner", "summary": "Same engine, a future vendor track. Drops in as content — no rebuild." }
       ]
     },
     {
@@ -48,6 +59,7 @@
           "name": "GitHub Copilot Certification — GH-300",
           "code": "GH-300",
           "status": "live",
+          "lane": "practitioner",
           "domains": 6,
           "summary": "Microsoft & GitHub's developer credential for GitHub Copilot — features & agents, responsible use, data & architecture, prompt engineering, productivity, and privacy safeguards.",
           "exam": { "questionCount": 60, "durationMinutes": 100, "passingScore": 700, "scoreScale": 1000 }
