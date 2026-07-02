@@ -1,0 +1,513 @@
+{
+  "id": "m00-what-is-automatos",
+  "order": 0,
+  "code": "00",
+  "name": "What is Automatos? — concepts, vocabulary & the Command Centre",
+  "tagline": "The mental model and the exact vocabulary you'll build on for the rest of the track: agents are workers not chatbots, the Universal Router directs them, Knowledge feeds them, and the Command Centre (the Activity page) shows it all. Learn the eleven core terms, tour the five tabs, and internalise the Learn→Build→Decide→Prove→Ready arc that this track runs on.",
+  "overview": "This is the orientation module for people who will seriously BUILD on Automatos — team members, power users, future partners — not just talk to it. Everything downstream assumes you already hold the mental model and the precise vocabulary this module installs, so it's worth slowing down here even though nothing is hard. Three ideas do most of the work. First: an agent is a worker, not a chatbot — it has a role, its own model, a persona, tools, and skills, and it does work rather than just answering. Second: you don't pick the worker — a multi-tier Universal Router reads every message and sends it to the best-suited agent, and you can override it. Third: visibility is built in — every action, tool call, and LLM request is tracked and costed, and you watch it all from one place, the Command Centre (which is the Activity page). Around those three ideas sits a small vocabulary you must be able to use exactly, because the rest of the track — and the product's own UI — uses these words precisely: Agent, Workspace, Playbook, Plugin, Skill, Tool, Knowledge Base, Universal Router, Mission, Channel, Knowledge Graph, Memory. This module defines each with a real example and, more importantly, teaches the JUDGMENT that separates them: when a piece of work wants a single agent, when it wants a multi-step Playbook, and when it wants an autonomous Mission — a distinction most newcomers blur, and the one that shapes every build decision you'll make. You'll also learn what actually happens on first login (a personal workspace is created for you, pre-populated with a roster of ten starter agents, and you're its Admin), tour the five tabs of the Command Centre (Dashboard, Feed, Reports, Memory, Missions) so you know where everything lives, and meet the arc this whole track runs on: Learn the platform, Build something real, Decide the judgment calls, Prove it works, and reach Ready. If you came from AI Business Foundations, this is the machinery under the hood: ABF taught you to spot the work and decide how to deploy it; APA teaches you to build and run it on Automatos, starting here with the map of the territory.",
+  "objectives": [
+    "State the platform's three founding ideas in your own words — agents are workers not chatbots, the Universal Router directs them so you don't have to, and visibility (every action, tool call, and cost) is built in — and explain why each one changes how you'd design work on the platform.",
+    "Use the eleven core concepts from the Key Concepts table precisely and without drift — Agent, Workspace, Playbook, Plugin, Skill, Tool, Knowledge Base, Universal Router, Mission, Channel, Knowledge Graph, Memory — including the distinctions people most often blur (Plugin vs Skill, Tool vs Skill, Knowledge Base vs Knowledge Graph).",
+    "Make the core build-time judgment call: given a piece of work, decide whether it wants a single agent, a multi-step Playbook, or an autonomous Mission — and justify the choice by the shape of the work, not by which feature sounds most impressive.",
+    "Describe what a new workspace ships with — a personal workspace auto-created on first login with you as its Admin, and a roster of ten starter agents — and why the workspace is the isolation and ownership boundary for everything you build.",
+    "Navigate the Command Centre (the Activity page): name what each of the four status cards (Working Now, Channels Live, Completed Today, Needs Attention) summarises, and what lives on each of the five tabs (Dashboard, Feed, Reports, Memory, Missions), so you know where to look when you're running real work.",
+    "Explain the Learn→Build→Decide→Prove→Ready arc that structures this track, and place this module (Learn) and the capstone (Prove) within it."
+  ],
+  "lessons": [
+    {
+      "id": "m00-l1-three-ideas",
+      "title": "The mental model: workers, a router, and built-in visibility",
+      "estMinutes": 14,
+      "objective": "Hold the three founding ideas that make Automatos different from a chatbot, and understand why each one changes how you design work on the platform.",
+      "body": "## Why you start with a mental model, not a feature list\n\nYou are here to build on Automatos, and the fastest way to build the wrong thing is to treat it as \"ChatGPT with extra buttons.\" It isn't. Three ideas from the platform's own *About* page do almost all the conceptual work; if you hold them, every screen and every later module clicks into place. Read them not as marketing lines but as design constraints you'll build around.\n\n## Idea 1 — Agents are workers, not chatbots\n\nThis is the founding claim, stated plainly in the docs: *\"Agents are workers, not chatbots.\"* Each agent has a **specific role** (Code Reviewer, Sentinel, QA Engineer), **its own model configuration**, a **persona**, and a **set of tools**. They don't just answer questions — they do work.\n\nWhy does this matter for how you build? Because it changes the unit you design. In a chatbot world you design *prompts*. On Automatos you design *workers*: you decide what a given agent is *for*, which model it runs on (a cheap fast model for triage, a stronger model for judgment — a lever we'll return to constantly), what persona it adopts, and — critically — which tools it can touch. An agent scoped to \"review pull requests\" with only GitHub tools is a fundamentally different, safer, more predictable thing than one omniscient assistant with every integration switched on. The worker framing is what makes least-privilege design possible, and it's why the platform ships not with one assistant but with a *roster* of specialised agents (Module 01 builds them properly).\n\n## Idea 2 — The platform routes, you don't have to\n\nThe second idea: *\"The platform routes, you don't have to.\"* A **multi-tier Universal Router** analyses every message and sends it to the best agent automatically. You can override routing, or let the system learn from your corrections.\n\nSit with the consequence. In most tools you must *choose* which assistant or mode you want before you type. Here you just describe what you need, and a router picks the worker. That has two build-time implications. First, it means your agents' roles and descriptions matter enormously — the Router reads them to decide who fits, so a vaguely-described agent gets mis-routed. Second, it means the platform is designed to grow: adding a twelfth specialist agent doesn't force users to learn a new menu, because the Router absorbs the choice. You'll meet the Router's exact tiers in Module 01; for now the mental model is simply *\"I describe the work; the system assigns the worker; I can overrule it.\"*\n\n## Idea 3 — Visibility is built in\n\nThird: *\"Visibility is built in.\"* Every agent action, every tool call, and every LLM request is tracked. You see real-time activity, read agent reports, and monitor costs down to the per-request level.\n\nFor a builder this is the difference between a toy and something you'd trust with real work. Autonomous workers that you *can't* see are a liability; workers whose every step, tool call, and cost is logged are auditable. This is why the platform has a whole surface — the Command Centre — dedicated to watching the workforce run (Lesson 3 tours it), and why cost is a first-class citizen rather than a surprise on your bill. It also quietly sets up the governance story: you can't hold agents to a policy you can't observe, so observability is the foundation the later governance module builds on.\n\n## The one-line map\n\nHere is the whole platform compressed into a sentence you can keep: **Agents do the work, the Router directs it, Knowledge feeds it, and the Command Centre shows it.** The architecture diagram in the docs draws exactly this flow — *You → Chat → Universal Router → Agents → (Tools · Knowledge Base · Workspace) → Reports* — and every concept in the next lesson slots onto that line.\n\n## Worked walkthrough: what one message actually sets in motion\n\nPicture the smallest possible interaction and trace it against the three ideas. You open Chat and type: *\"Check whether our latest pull request introduced any obvious security issues.\"*\n\n1. **The Router reads it (Idea 2).** It doesn't answer; it decides *who should*. It matches the request against your agents' roles and routes to, say, a Code Reviewer or a security-focused agent. The response header tells you which worker it picked — and if it picked wrong, you can override and it can learn from that.\n2. **A worker does work (Idea 1).** The chosen agent isn't improvising from a blank prompt. It has a role (review code), a model suited to that role, and a specific set of tools — so it can actually *reach into GitHub*, pull the PR, and reason over the diff, rather than politely telling you it can't access your repo.\n3. **You can see all of it (Idea 3).** That routing decision, the GitHub tool call, the agent's response, and the cost of the LLM request all land in the Command Centre's Feed as they happen. Nothing is hidden.\n\nOne sentence typed; a worker selected, real work done against your systems, and a fully auditable trail produced. That is the platform in one gesture — and notice none of it is \"a chatbot replied.\"\n\n## If you came from AI Business Foundations\n\nThis is the machinery behind ABF's opening idea. ABF taught you that AI is a *worker you delegate to* and that you should match how much autonomy you grant to the mistake-cost of the task. APA now shows you the actual workers, the actual router that assigns them, and the actual glass wall you watch them through. Same philosophy; here's the engine.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m00-l1-1",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The docs open with 'Agents are workers, not chatbots.' For someone building on the platform, what is the main practical consequence of that framing?",
+          "options": [
+            { "id": "a", "text": "The unit you design is a worker — a role, its own model, a persona, and a scoped set of tools — not just a prompt", "correct": true },
+            { "id": "b", "text": "Agents can only ever answer questions and cannot take actions in external systems", "correct": false },
+            { "id": "c", "text": "Every agent must use the same model and persona so behaviour stays consistent", "correct": false },
+            { "id": "d", "text": "You must write a fresh prompt for every message because agents keep no configuration", "correct": false }
+          ],
+          "explanation": "The worker framing means you design a configured entity — role, model, persona, and a scoped tool set — which is what makes specialised, least-privilege agents possible. Option b is the opposite of the point: 'workers, not chatbots' means they DO work (call tools, take actions), not just answer. Option c contradicts the docs, which say each agent has 'its own model configuration' and persona — variety across the roster is the design. Option d describes prompt-engineering a chatbot; agents carry standing configuration, so you don't rebuild them per message.",
+          "sourceRefs": ["r-gitbook-about", "r-automatos-repo"]
+        },
+        {
+          "id": "kc-m00-l1-2",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "'The platform routes, you don't have to.' Which build-time implication follows most directly from the Universal Router deciding who handles each message?",
+          "options": [
+            { "id": "a", "text": "How clearly you describe each agent's role matters a lot, because the Router reads those roles to decide who fits — and you can still override its choice", "correct": true },
+            { "id": "b", "text": "You must manually select which agent handles every message before you send it", "correct": false },
+            { "id": "c", "text": "Once routed, a message can never be reassigned, so a wrong route is permanent", "correct": false },
+            { "id": "d", "text": "Adding a new specialist agent forces every user to learn a new menu of options", "correct": false }
+          ],
+          "explanation": "Because the Router matches messages to agents by their roles/descriptions, vague agent definitions get mis-routed — so clear roles are a real design responsibility, and override plus learning-from-corrections remain available. Option b is exactly what the Router removes: you describe the work and it assigns the worker. Option c contradicts the documented ability to override routing (and let the system learn). Option d is backwards — the Router absorbing the choice is precisely why adding agents does NOT force users into a bigger menu.",
+          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+        },
+        {
+          "id": "kc-m00-l1-3",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why does the module treat 'visibility is built in' as the foundation for trusting agents with real work?",
+          "options": [
+            { "id": "a", "text": "Because every action, tool call, and LLM request is tracked and costed, autonomous workers become auditable rather than a black box — which is what later governance builds on", "correct": true },
+            { "id": "b", "text": "Because visibility makes agents run faster by caching their previous answers", "correct": false },
+            { "id": "c", "text": "Because it means agents never make mistakes once you can watch them", "correct": false },
+            { "id": "d", "text": "Because it lets you disable all logging to reduce cost", "correct": false }
+          ],
+          "explanation": "Observability turns an opaque autonomous worker into an auditable one — every step, tool call, and cost is recorded — and you can't govern what you can't see, so this is the base the governance module stands on. Option b confuses visibility with caching (a routing-tier concept), which is unrelated. Option c overclaims: watching agents doesn't make them infallible; it makes their mistakes visible and catchable. Option d inverts the value — the point is that the tracking exists, not that you'd switch it off.",
+          "sourceRefs": ["r-gitbook-about", "r-gitbook-activity"]
+        }
+      ]
+    },
+    {
+      "id": "m00-l2-vocabulary",
+      "title": "The vocabulary you build on — eleven concepts and the distinctions that matter",
+      "estMinutes": 17,
+      "objective": "Use the eleven core concepts precisely, and make the central judgment call — agent vs Playbook vs Mission — by the shape of the work.",
+      "body": "## Why precise words are a build skill, not pedantry\n\nThe rest of this track, and the product's own UI, use a specific vocabulary. Blur two terms and you'll build the wrong thing or misread a screen. This lesson walks the eleven concepts from the *Key Concepts* table, each with a real example, and then spends its real energy on the three distinctions newcomers get wrong. Learn the words exactly — the product does.\n\n## The eleven concepts\n\n- **Agent** — an AI worker with a model, persona, tools, and skills. *Example:* a Code Reviewer that reads pull requests and comments on them.\n- **Workspace** — an isolated environment for a team; agents, data, and config are scoped to it and don't leak to another team. *Example:* your company's workspace, separate from every other customer's. This is your ownership and isolation boundary — hold onto it, Lesson 3 returns to it.\n- **Playbook** — a multi-step workflow that coordinates multiple agents. *Example:* a nightly review that runs a security scan, then a summariser, then files a report. (Note the word: it's **Playbook**, not \"recipe\" — that older term shows up in a couple of legacy blurbs, but the platform's concept is the Playbook.)\n- **Plugin** — a marketplace-distributed *package* of skills, commands, and agent configs. *Example:* installing a \"DevOps pack\" that drops in several ready-made capabilities at once.\n- **Skill** — a git-based *capability* loaded into an agent from a repository. *Example:* a single \"triage-github-issue\" skill an agent gains by loading that repo.\n- **Tool** — an external app integration (GitHub, Slack, Jira) provided via Composio, spanning a very large catalogue of apps. *Example:* the GitHub tool that lets an agent actually open a PR.\n- **Knowledge Base** — a collection of documents indexed for semantic search (RAG). *Example:* your product docs uploaded so agents can quote them accurately.\n- **Universal Router** — the system that automatically sends each message to the right agent (Idea 2 from Lesson 1).\n- **Mission** — an autonomous, multi-step *objective* that agents plan and execute independently. *Example:* \"audit our API for security gaps,\" which agents break into tasks and work through over time.\n- **Channel** — an external messaging platform connected to your workspace (Telegram, Slack, WhatsApp, and others). *Example:* wiring Slack so a customer message reaches your agents.\n- **Knowledge Graph** — an auto-extracted network of entities and relationships pulled from your documents. *Example:* the platform noticing that \"Acme\" (a customer) relates to \"Project Falcon\" (a deal) across several uploaded files.\n- **Memory** — persistent agent memory across two documented tiers: **short-term** (within a session) and **long-term** (across conversations). *Example:* an agent remembering, next week, a preference you stated today. (You may see deeper memory architecture discussed in design material — treat that as direction; the shipped model users work with is these two tiers, with scope, consolidation, and pin/edit/delete, which Module 06 covers.)\n\n## Distinction 1 — Plugin vs Skill (a package vs a capability)\n\nThe words feel similar and aren't. A **Skill** is a *single* git-based capability an agent loads from a repo — one competence. A **Plugin** is a *package* distributed through the marketplace that can bundle *several* skills, commands, and agent configs together. So: skill = one capability; plugin = a shipped bundle that may contain many. When you install a plugin you may be adding a whole set of skills at once; when you add a skill you're adding exactly one. Module 02 lives here.\n\n## Distinction 2 — Tool vs Skill (reach vs know-how)\n\nEasy to conflate, very different in kind. A **Tool** is a *connection to an external app* — GitHub, Slack, Jira — provided via Composio; it's how an agent *reaches into another system* to do something there. A **Skill** is a *capability loaded from a git repo* — it's know-how the agent carries. Rough intuition: a Tool is a *hand that reaches out*; a Skill is a *technique the worker knows*. An agent might use the GitHub **Tool** (the reach) guided by a \"review-pull-request\" **Skill** (the know-how). Different axes entirely — one is integration, the other is competence.\n\n## Distinction 3 — Knowledge Base vs Knowledge Graph (documents vs the map between them)\n\nBoth are \"knowledge,\" both come from your data, but they're not the same object. A **Knowledge Base** is your *documents*, indexed for semantic search so an agent can retrieve relevant passages (classic RAG). A **Knowledge Graph** is the *network of entities and relationships* the platform auto-extracts *across* those documents — not the passages themselves but the map of how the things in them connect. You upload files to a Knowledge Base; the Knowledge Graph is what emerges from them. Module 03 goes deep on both.\n\n## The distinction that shapes every build: agent vs Playbook vs Mission\n\nThis is the judgment call, so slow down. Three ways work gets done, and choosing wrong makes everything harder than it needs to be:\n\n- **A single Agent** handles work that *one worker can do in one pass* — a self-contained request. *\"Review this PR.\" \"Summarise this document.\" \"Draft a reply to this email.\"* One role, one step, done.\n- **A Playbook** is for work that is *a known sequence of steps across possibly several agents* — you already know the recipe and want it to run reliably, often on a schedule. *\"Every night: run the security scan, then summarise the findings, then file a report.\"* The steps are fixed and defined in advance; the Playbook coordinates them. (This is what those scheduled routines on the Dashboard are made of.)\n- **A Mission** is for an *open-ended objective where you do NOT pre-specify the steps* — you state a goal and agents *plan and execute it independently*, breaking it into tasks and working through them over time. *\"Audit our whole API for security gaps.\"* You didn't hand it a step list; it works out the plan.\n\nThe cleanest way to choose: ask *\"do I know the exact steps in advance?\"* If it's one step → **Agent**. If it's a *fixed, known* sequence of steps → **Playbook**. If it's a *goal whose steps must be figured out* → **Mission**. Newcomers reach for a Mission because it sounds most powerful, then wonder why a simple, well-understood nightly job is hard to make reliable — when a Playbook (fixed steps) was the right tool. Match the mechanism to the *shape of the work*, not to what sounds impressive.\n\n## Worked walkthrough: three requests, three right answers\n\nSame team, three pieces of work in one week:\n\n1. *\"Summarise yesterday's support tickets.\"* One worker, one pass, done on demand → **Agent**. Wrapping this in a Mission would be absurd overkill.\n2. *\"Every morning at 8, pull overnight tickets, summarise them, and post the summary to Slack.\"* You know every step and it repeats on a schedule → **Playbook** (and the Slack step uses a **Channel** / the Slack **Tool**). It'll show up as a scheduled routine on the Dashboard.\n3. *\"Find out why our support satisfaction dropped last quarter and recommend fixes.\"* You can't pre-write the steps — the agents must investigate, follow leads, and assemble findings → **Mission**. Its progress lives on the Missions tab.\n\nOne team, one week, and the *shape* of each request — not its importance — told you which of the three to reach for. That instinct is the single most useful thing to take from this module.\n\n## If you came from AI Business Foundations\n\nModule 04 of ABF (\"from chats to systems\") walked you from one-off AI chats up to repeatable workflows, and Module 05 (\"delegation & guardrails\") into standing, autonomous delegation. Agent → Playbook → Mission is those same three altitudes, now as concrete platform objects you'll actually create.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m00-l2-1",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A teammate says 'a Plugin and a Skill are basically the same thing.' What's the accurate correction?",
+          "options": [
+            { "id": "a", "text": "A Skill is a single git-based capability loaded into an agent; a Plugin is a marketplace-distributed package that can bundle several skills, commands, and agent configs together", "correct": true },
+            { "id": "b", "text": "A Plugin is one capability and a Skill is the bundle that contains many plugins", "correct": false },
+            { "id": "c", "text": "Both are external app integrations provided through Composio", "correct": false },
+            { "id": "d", "text": "A Skill is installed from the marketplace and a Plugin is loaded from a git repository — they're just named differently", "correct": false }
+          ],
+          "explanation": "Per the Key Concepts table, a Skill is one git-based capability while a Plugin is a distributed package that may bundle several skills/commands/configs — package versus single capability. Option b reverses the containment (a Plugin contains skills, not the other way round). Option c describes Tools (Composio app integrations), which is a different concept entirely. Option d swaps their sources: skills are git-repo-loaded capabilities and plugins are the marketplace-distributed packages, so this inverts both facts.",
+          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+        },
+        {
+          "id": "kc-m00-l2-2",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need agents to actually reach into GitHub and Slack to perform actions there. Which concept provides that, and how does it differ from a Skill?",
+          "options": [
+            { "id": "a", "text": "A Tool — an external app integration via Composio (the 'reach' into another system); a Skill is a capability/know-how loaded from a git repo", "correct": true },
+            { "id": "b", "text": "A Skill — because skills are what connect agents to GitHub and Slack, while Tools are internal-only", "correct": false },
+            { "id": "c", "text": "A Knowledge Base — because connecting to apps is a form of document retrieval", "correct": false },
+            { "id": "d", "text": "A Channel — because any integration with GitHub or Slack is a messaging channel", "correct": false }
+          ],
+          "explanation": "Tools are the external app integrations (via Composio) that let an agent act in GitHub, Slack, Jira, etc. — the reach into another system — whereas a Skill is git-loaded know-how. Option b inverts the two: skills are capabilities, not app connectors. Option c confuses integration with RAG; a Knowledge Base indexes documents for search, it doesn't call the GitHub API. Option d over-extends 'Channel', which specifically means an external messaging platform (Telegram/Slack/WhatsApp) wired for conversation, not a general app integration like GitHub PR access.",
+          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+        },
+        {
+          "id": "kc-m00-l2-3",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Your team wants: 'every night at 23:45, run a security scan, then summarise the findings, then file a report.' Agent, Playbook, or Mission — and why?",
+          "options": [
+            { "id": "a", "text": "A Playbook — the steps are known and fixed in advance and it runs on a schedule, which is exactly a multi-step workflow coordinating several agents", "correct": true },
+            { "id": "b", "text": "A Mission — because any job with more than one step is by definition a Mission", "correct": false },
+            { "id": "c", "text": "A single Agent — because one agent should just do all three steps in one message", "correct": false },
+            { "id": "d", "text": "A Mission — because it runs unattended overnight, and anything unattended is a Mission", "correct": false }
+          ],
+          "explanation": "You know the exact sequence in advance and want it to run reliably on a schedule — that's the definition of a Playbook (a multi-step workflow coordinating agents), and it's what scheduled routines are built from. Option b is the classic error: multi-step alone doesn't mean Mission; a Mission is specifically for goals whose steps you do NOT pre-specify. Option c collapses a genuine multi-step, multi-agent sequence into one agent, losing the coordination and scheduling a Playbook provides. Option d misreads the test — 'unattended' isn't the deciding factor; 'are the steps known in advance?' is, and here they are.",
+          "sourceRefs": ["r-gitbook-about", "r-gitbook-dashboard", "r-gitbook-missions"]
+        }
+      ]
+    },
+    {
+      "id": "m00-l3-command-centre",
+      "title": "Your workspace and the Command Centre — where everything lives",
+      "estMinutes": 13,
+      "objective": "Know what a new workspace ships with and navigate the Command Centre's four status cards and five tabs, so you can find and watch real work.",
+      "body": "## First login: what you actually get\n\nWhen you sign in for the first time, the platform creates a **personal workspace for you automatically** — you don't set anything up, and you're the **Admin** of it. That word matters: a **Workspace** is the isolated environment for a team, and everything you build — agents, documents, tools, settings — is scoped to it and never leaks to another team's workspace. It's simultaneously your *sandbox* (safe to experiment, nothing you do touches anyone else) and your *ownership boundary* (you're the Admin, so you can do everything solo). Every hands-on step in this track happens inside your own workspace.\n\nAnd it isn't empty. A new workspace ships with a **roster of ten starter agents** — specialised workers like Code Reviewer, QA Engineer, Sentinel, Scribe, Scout, and Comms, among others — so you have a working team from the first minute and something for the Router to route to before you've built anything yourself. You'll study and extend that roster in Module 01; for now, just know it's there, and *don't create anything yet* — this module is a tour, not a build.\n\n## The Command Centre is the Activity page\n\nThe place you'll watch your workforce run is the **Command Centre**, which *is* the **Activity** page — the same surface, two names. The docs describe it exactly: *\"The Activity page is your command centre. It shows what your AI workforce is doing right now, what's scheduled, and what they've reported.\"* Learn to read it and you can always answer three questions: what's happening now, what's coming, and what happened.\n\n## The four status cards\n\nAcross the top of the Dashboard tab sit four cards that summarise the whole workspace at a glance:\n\n| Card | What it shows |\n| --- | --- |\n| **Working Now** | How many agents are actively processing tasks right now |\n| **Channels Live** | Active communication channels (Slack, email, and the like) |\n| **Completed Today** | Total tasks finished in the last 24 hours |\n| **Needs Attention** | Items requiring your review or intervention |\n\nTwo habits to build. First, **Needs Attention is the card you check first** — it's where the platform surfaces the things waiting on *you* (a review, an approval, an intervention), and a builder who ignores it lets work stall. Second, **any status card is clickable** — click it to drill straight into the underlying detail rather than hunting for it.\n\n## The five tabs\n\nThe Command Centre has five tabs, and knowing what lives on each saves you constant hunting:\n\n- **Dashboard** — the real-time overview: the four status cards, a **Schedule** (a weekly calendar of upcoming automated routines), **Active Now** (live tasks with progress bars and step counts), and **Agent Reports** (each agent's latest standup, with a *View Report* link). This is your default, at-a-glance view. It updates in real time via server-sent events, so you don't refresh.\n- **Feed** — the chronological activity log: *every* action, tool call, and agent response, newest first, filterable by agent, event type, time range, and keyword. This is where you go to *trace exactly what happened* — including routing decisions (\"Router selected Code Reviewer\"), tool calls, report generations, and memory operations.\n- **Reports** — where you *browse, filter, and grade* the reports agents file: what they found, what they did, and how well they did it. This is your quality-and-output surface (Module 07 goes deep).\n- **Memory** — where you *explore what your agents remember*: browse stored memories, search by topic, and manage the memory system. This is the user-facing window onto the two memory tiers from Lesson 2 (Module 06 goes deep).\n- **Missions** — where the *long-running, open-ended objectives* live: track progress toward goals that span multiple tasks and agents. This is the home of the Mission concept from Lesson 2 (Module 05 goes deep).\n\nNotice how neatly the tabs map onto the vocabulary you just learned: **Missions** shows Missions, **Memory** shows Memory, the Dashboard's Schedule is made of **Playbooks**, and the Feed shows the **Universal Router**'s decisions in flight. The Command Centre is the vocabulary made visible.\n\n## Worked walkthrough: reading the Command Centre like a builder\n\nYou log in on a Monday and want the state of things in thirty seconds. Here's the disciplined read:\n\n1. **Glance at the four cards.** *Working Now* shows 2 agents busy, *Completed Today* shows 14 tasks done overnight, *Channels Live* shows Slack connected — healthy. *Needs Attention* shows **1**. That's your first click.\n2. **Click Needs Attention.** It drills into the one item waiting on you — say, a Mission that has paused for your approval before spending more. You handle it or note it. (You resolved it because you *saw* it — Idea 3 from Lesson 1 in action.)\n3. **Scan the Dashboard's Schedule and Active Now.** The Schedule shows a `23:45 Sentinel Routine` and an `08:00 Comms Routine` coming up (both Playbooks); Active Now shows a report-generation task at \"Step 1/4.\" You know what's running and what's next.\n4. **Need the detail on last night's run?** Jump to **Feed**, filter by the Sentinel agent, and read its tool calls and the report it filed step by step. Want to grade that report? **Reports** tab.\n\nThirty seconds, and you know what's happening, what's queued, what needs you, and where to dig. That fluency — knowing which tab answers which question — is the entire point of this lesson, and it's the surface you'll live on for the rest of the track.\n\n## The arc this track runs on\n\nLast, the shape of the journey you're starting. This track moves through five stages: **Learn** the platform and its vocabulary (you're here), **Build** something real on it (Modules 01 onward, hands-on every time), **Decide** the judgment calls a builder faces — agent vs Playbook vs Mission, least-privilege tool scoping, cheaper-model routing as your biggest cost lever — **Prove** it works by shipping the capstone build, and reach **Ready**: an Automatos-ready practitioner who can build and run real work with confidence. This module is the *Learn* foundation; the capstone is the *Prove*. Everything between is Build and Decide — one module, one capability, at a time.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m00-l3-1",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What happens to your workspace the very first time you sign in?",
+          "options": [
+            { "id": "a", "text": "A personal workspace is created automatically with you as its Admin, pre-populated with a roster of ten starter agents", "correct": true },
+            { "id": "b", "text": "You get an empty workspace and must build all your agents from scratch before anything works", "correct": false },
+            { "id": "c", "text": "You're dropped into a shared global workspace that every user of the platform sees", "correct": false },
+            { "id": "d", "text": "Nothing is created until you manually provision a workspace and invite yourself to it", "correct": false }
+          ],
+          "explanation": "First login auto-creates your own workspace (you're its Admin), and it ships with ten starter agents so you have a working team immediately. Option b is wrong on two counts: the workspace isn't empty (ten starters ship) and you don't have to build before anything works. Option c contradicts the isolation model — a workspace is scoped to a team and never leaks to others; there's no shared global one. Option d describes manual provisioning, but the docs are explicit that the personal workspace is created automatically.",
+          "sourceRefs": ["r-gitbook-readme", "r-gitbook-about"]
+        },
+        {
+          "id": "kc-m00-l3-2",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want to trace the exact sequence of what an agent did last night — every tool call and the report it filed, step by step. Which Command Centre tab is built for that?",
+          "options": [
+            { "id": "a", "text": "Feed — the chronological log of every action, tool call, and response, filterable by agent, event type, and time", "correct": true },
+            { "id": "b", "text": "Dashboard — because the four status cards contain the full step-by-step history", "correct": false },
+            { "id": "c", "text": "Missions — because all agent activity is stored as missions", "correct": false },
+            { "id": "d", "text": "Memory — because tracing past actions means reading the agent's stored memories", "correct": false }
+          ],
+          "explanation": "The Feed is the chronological activity log — every action, tool call, response, and routing decision, filterable by agent and time — which is exactly a step-by-step trace. Option b misuses the Dashboard: the status cards are at-a-glance summaries (counts), not a detailed event history. Option c is wrong because Missions tracks long-running objectives, not the general activity log; most activity isn't a mission. Option d confuses the audit trail with memory — the Memory tab shows what agents remember, not a timeline of what they did.",
+          "sourceRefs": ["r-gitbook-feed", "r-gitbook-activity"]
+        },
+        {
+          "id": "kc-m00-l3-3",
+          "domainId": "m00-what-is-automatos",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Of the four status cards, which should a builder check first, and why?",
+          "options": [
+            { "id": "a", "text": "Needs Attention — it surfaces the items waiting on you (a review, an approval, an intervention), and ignoring it lets work stall", "correct": true },
+            { "id": "b", "text": "Working Now — because the number of busy agents is the only card that ever changes", "correct": false },
+            { "id": "c", "text": "Completed Today — because finished tasks are the only thing that requires action from you", "correct": false },
+            { "id": "d", "text": "Channels Live — because you must approve every channel before agents can run", "correct": false }
+          ],
+          "explanation": "Needs Attention is where the platform collects the things blocking on you — reviews, approvals, interventions — so it's the card that most directly demands action, and unchecked it stalls real work. Option b is wrong: all four cards update, and 'Working Now' is informational, not action-requiring. Option c inverts the point — completed tasks are done, so they're the least likely to need you, whereas pending items are. Option d invents a rule that isn't there; 'Channels Live' just reports active channels, it isn't an approval gate you clear first.",
+          "sourceRefs": ["r-gitbook-activity", "r-gitbook-dashboard"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m00-1",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which sentence best captures the one-line map of the platform this module teaches?",
+      "options": [
+        { "id": "a", "text": "Agents do the work, the Router directs it, Knowledge feeds it, and the Command Centre shows it", "correct": true },
+        { "id": "b", "text": "One assistant answers every question, and you switch modes manually depending on the task", "correct": false },
+        { "id": "c", "text": "The platform stores documents and lets you search them, with no autonomous action", "correct": false },
+        { "id": "d", "text": "You write prompts, the model replies, and nothing is tracked or costed", "correct": false }
+      ],
+      "explanation": "The module compresses the architecture (You → Chat → Router → Agents → Tools/Knowledge/Workspace → Reports) into exactly that line: agents work, the Router directs, Knowledge feeds, the Command Centre shows. Option b describes a mode-switching chatbot — the opposite of the Router auto-assigning specialised workers. Option c reduces the platform to a search box, ignoring agents that take action. Option d denies the built-in visibility (every action and cost is tracked), which is one of the three founding ideas.",
+      "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+    },
+    {
+      "id": "q-m00-2",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the Key Concepts vocabulary, what is a Workspace?",
+      "options": [
+        { "id": "a", "text": "An isolated environment for a team, where agents, data, and config are scoped and don't leak to another team", "correct": true },
+        { "id": "b", "text": "A single multi-step workflow that coordinates several agents", "correct": false },
+        { "id": "c", "text": "The system that routes each message to the best agent", "correct": false },
+        { "id": "d", "text": "A collection of documents indexed for semantic search", "correct": false }
+      ],
+      "explanation": "A Workspace is the isolation and ownership boundary — a team's environment where everything is scoped and nothing leaks across teams. Option b defines a Playbook (a multi-step, multi-agent workflow), not a workspace. Option c defines the Universal Router. Option d defines a Knowledge Base. Each distractor is a real concept from the same table, which is why keeping the vocabulary precise matters.",
+      "sourceRefs": ["r-gitbook-about"]
+    },
+    {
+      "id": "q-m00-3",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A colleague asks you to set up 'a quick chatbot to answer questions.' Framed by this module, why is that the wrong way to think about building on Automatos?",
+      "options": [
+        { "id": "a", "text": "Because agents are workers, not chatbots — you design a role, model, persona, and scoped tools so the agent can do work, and the Router assigns it, rather than building one Q&A bot", "correct": true },
+        { "id": "b", "text": "Because the platform cannot answer questions at all and only runs scheduled jobs", "correct": false },
+        { "id": "c", "text": "Because you must always build a Mission for any request, never a single agent", "correct": false },
+        { "id": "d", "text": "Because chatbots are faster, so you should avoid agents whenever possible", "correct": false }
+      ],
+      "explanation": "The founding idea is 'workers, not chatbots': you design configured workers (role/model/persona/tools) that take action, and the Router routes to them — a richer unit than a single Q&A bot. Option b overstates it — agents absolutely can answer, they just do more than that. Option c is wrong: a simple question is a single-agent job, not a Mission (matching mechanism to the shape of the work is the whole skill). Option d inverts the value proposition — the point of agents is capability and safety via scoping, not that chatbots are preferable.",
+      "sourceRefs": ["r-gitbook-about", "r-automatos-repo"]
+    },
+    {
+      "id": "q-m00-4",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing correctly distinguishes a Tool from a Skill?",
+      "options": [
+        { "id": "a", "text": "Tool = an external app integration via Composio (the reach into GitHub/Slack/Jira); Skill = a git-based capability/know-how loaded into an agent", "correct": true },
+        { "id": "b", "text": "Tool = a git-based capability loaded from a repo; Skill = an external app integration", "correct": false },
+        { "id": "c", "text": "Tool = a bundle of skills and configs from the marketplace; Skill = a single external integration", "correct": false },
+        { "id": "d", "text": "Tool and Skill are two names for the same marketplace package", "correct": false }
+      ],
+      "explanation": "A Tool is the Composio app integration (how an agent acts in an external system) while a Skill is git-loaded know-how the agent carries — reach versus competence. Option b swaps the two definitions. Option c describes a Plugin (a marketplace package) rather than a Tool, and mislabels a Skill. Option d denies the distinction entirely; they're different axes — integration versus capability.",
+      "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+    },
+    {
+      "id": "q-m00-5",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need a job that, every night on a fixed schedule, runs three known steps in order across a couple of agents. Which mechanism fits, and what's the deciding question?",
+      "options": [
+        { "id": "a", "text": "A Playbook — the deciding question is 'do I know the exact steps in advance?', and here the fixed, known sequence on a schedule is exactly a Playbook", "correct": true },
+        { "id": "b", "text": "A Mission — because it involves more than one agent, and multi-agent work is always a Mission", "correct": false },
+        { "id": "c", "text": "A single Agent — because bundling all three steps into one agent is simplest", "correct": false },
+        { "id": "d", "text": "A Channel — because scheduled multi-step work is configured as a messaging channel", "correct": false }
+      ],
+      "explanation": "Known steps + fixed order + schedule = a Playbook (a multi-step workflow coordinating agents), and the deciding test is whether you know the steps in advance. Option b misstates the rule: multi-agent doesn't imply Mission; a Mission is for goals whose steps you do NOT pre-specify. Option c loses the coordination and scheduling benefits and blurs three distinct steps into one worker. Option d confuses the concept entirely — a Channel is an external messaging platform, not an execution mechanism.",
+      "sourceRefs": ["r-gitbook-about", "r-gitbook-dashboard"]
+    },
+    {
+      "id": "q-m00-6",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "'Find out why our lead-conversion rate fell last month and recommend fixes.' Why is this a Mission rather than a Playbook, and what would go wrong if you forced it into a Playbook?",
+      "options": [
+        { "id": "a", "text": "It's an open-ended objective whose steps can't be pre-specified — agents must plan and investigate independently — so a Playbook (which needs a fixed, known sequence) can't express it; you'd have to guess the steps in advance and would likely miss the real cause", "correct": true },
+        { "id": "b", "text": "It's a Playbook really; you just write the investigation as three fixed steps and it behaves identically to a Mission", "correct": false },
+        { "id": "c", "text": "It's neither — open-ended questions can only be answered by a single agent in one message, never by a Mission", "correct": false },
+        { "id": "d", "text": "It's a Mission only because it's important; importance, not the shape of the work, decides Mission vs Playbook", "correct": false }
+      ],
+      "explanation": "A Mission fits because the goal is open-ended and the steps must be discovered — agents plan and execute independently — which a Playbook's fixed, pre-defined sequence cannot capture; forcing it into fixed steps means pre-committing to a hypothesis and likely missing the actual cause. Option b is the trap: an investigation whose path you can't know in advance isn't reducible to three fixed steps without losing exactly what makes it a Mission. Option c is wrong — open-ended, multi-lead investigations are precisely what Missions are for, not one-shot agent replies. Option d misattributes the decision to importance; the module is explicit that the SHAPE of the work (are the steps known?) decides, not how important it is.",
+      "sourceRefs": ["r-gitbook-about", "r-gitbook-missions"]
+    },
+    {
+      "id": "q-m00-7",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the difference between a Knowledge Base and a Knowledge Graph?",
+      "options": [
+        { "id": "a", "text": "A Knowledge Base is your documents indexed for semantic search (RAG); a Knowledge Graph is the auto-extracted network of entities and relationships that emerges across those documents", "correct": true },
+        { "id": "b", "text": "A Knowledge Base is the network of relationships; a Knowledge Graph is the raw document store", "correct": false },
+        { "id": "c", "text": "They are the same feature under two names", "correct": false },
+        { "id": "d", "text": "A Knowledge Base stores memories from conversations; a Knowledge Graph stores connected apps", "correct": false }
+      ],
+      "explanation": "A Knowledge Base holds your documents indexed for retrieval; a Knowledge Graph is the map of entities and relationships auto-extracted across them — the passages versus the connections between the things in them. Option b reverses the two definitions. Option c denies a real distinction the docs draw. Option d confuses both terms with unrelated concepts (Memory and Tools), which is exactly the drift precise vocabulary prevents.",
+      "sourceRefs": ["r-gitbook-about"]
+    },
+    {
+      "id": "q-m00-8",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The Command Centre and the Activity page are:",
+      "options": [
+        { "id": "a", "text": "The same surface under two names — the place you watch your AI workforce run", "correct": true },
+        { "id": "b", "text": "Two separate pages: the Command Centre for building agents and Activity for chatting", "correct": false },
+        { "id": "c", "text": "Two names for the Chat interface where you talk to agents", "correct": false },
+        { "id": "d", "text": "The Marketplace, where you install plugins and skills", "correct": false }
+      ],
+      "explanation": "The docs state it directly: the Activity page IS your command centre — one surface, two names, for watching the workforce. Option b invents a split that doesn't exist and misassigns building/chatting to it. Option c confuses it with Chat, a different surface for talking to agents. Option d confuses it with the Marketplace, where capabilities are installed — also different.",
+      "sourceRefs": ["r-gitbook-activity"]
+    },
+    {
+      "id": "q-m00-9",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "On the Command Centre, where do each of these live: an open-ended objective in progress; what an agent remembers; the chronological log of every action?",
+      "options": [
+        { "id": "a", "text": "Missions tab; Memory tab; Feed tab — respectively", "correct": true },
+        { "id": "b", "text": "Feed tab; Missions tab; Dashboard tab — respectively", "correct": false },
+        { "id": "c", "text": "Dashboard tab; Reports tab; Missions tab — respectively", "correct": false },
+        { "id": "d", "text": "Reports tab; Feed tab; Memory tab — respectively", "correct": false }
+      ],
+      "explanation": "Open-ended objectives live on Missions, remembered facts on Memory, and the chronological action log on Feed — the tabs map cleanly onto the vocabulary. Option b misplaces all three (an objective isn't the Feed; memory isn't Missions; the action log isn't the Dashboard summary). Option c is wrong because the Dashboard is the at-a-glance overview and Reports is for grading filed reports — neither is where an in-progress objective lives, and Missions isn't the raw action log. Option d puts the action log on Reports (that tab grades finished reports, it isn't the live event stream) and mislabels the objective's home as Feed.",
+      "sourceRefs": ["r-gitbook-activity", "r-gitbook-feed"]
+    },
+    {
+      "id": "q-m00-10",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Among the four status cards, why does the module tell builders to treat 'Needs Attention' as the first place to look?",
+      "options": [
+        { "id": "a", "text": "It collects items requiring your review or intervention, so it's where real work stalls if you don't act", "correct": true },
+        { "id": "b", "text": "It shows the total number of agents you've created, which you must verify each login", "correct": false },
+        { "id": "c", "text": "It lists your connected channels, and channels must be re-approved daily", "correct": false },
+        { "id": "d", "text": "It is the only card that can be clicked to drill in", "correct": false }
+      ],
+      "explanation": "Needs Attention aggregates the things waiting on you (reviews, approvals, interventions), so it's the highest-leverage first glance — unattended, it blocks progress. Option b describes an agent count, which isn't what this card is. Option c invents a daily re-approval rule for channels that doesn't exist (that's what 'Channels Live' reports, without any such gate). Option d is false — the docs say ANY status card can be clicked to drill down, not just this one.",
+      "sourceRefs": ["r-gitbook-activity"]
+    },
+    {
+      "id": "q-m00-11",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A teammate calls the multi-step workflows on the platform 'recipes.' What's the correct term, and why does it matter here?",
+      "options": [
+        { "id": "a", "text": "Playbook — 'recipe' is legacy/backend naming that appears in a few older blurbs, but the platform's concept and UI use Playbook, so using the right word keeps you aligned with the docs and product", "correct": true },
+        { "id": "b", "text": "Recipe is the current official term and Playbook is the deprecated one", "correct": false },
+        { "id": "c", "text": "Both terms are wrong; the correct term for a multi-step workflow is Mission", "correct": false },
+        { "id": "d", "text": "It doesn't matter which word you use, since the platform has no concept for multi-step workflows", "correct": false }
+      ],
+      "explanation": "The canonical concept is the Playbook; 'recipe' is older naming that survives in a couple of legacy blurbs, so a builder should say Playbook to stay aligned with the product and docs. Option b reverses the currency — Playbook is current, not deprecated. Option c wrongly substitutes Mission (an open-ended, unspecified-steps objective) for a defined multi-step workflow. Option d denies that the platform has multi-step workflows at all, which is false — that's exactly what a Playbook is.",
+      "sourceRefs": ["r-gitbook-about", "r-apa-survey"]
+    },
+    {
+      "id": "q-m00-12",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the Key Concepts table, Memory is described as having how many documented tiers, and what are they?",
+      "options": [
+        { "id": "a", "text": "Two tiers — short-term (within a session) and long-term (across conversations)", "correct": true },
+        { "id": "b", "text": "Five layers, L0 through L4, each a distinct storage engine", "correct": false },
+        { "id": "c", "text": "One tier only, cleared at the end of every message", "correct": false },
+        { "id": "d", "text": "Three tiers — session, workspace, and global — shared across all teams", "correct": false }
+      ],
+      "explanation": "The documented, user-facing model is two tiers: short-term (session) and long-term (cross-conversation). Option b (five layers L0–L4) is deeper architecture-direction vocabulary from design material, not the shipped user model — treat it as direction, not a live feature. Option c denies long-term memory, which the table explicitly includes. Option d invents a three-tier, cross-team scheme that would break workspace isolation — memory is scoped, not shared globally.",
+      "sourceRefs": ["r-gitbook-about", "r-apa-survey"]
+    },
+    {
+      "id": "q-m00-13",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "This track is structured around a five-stage arc. Which is it, and where does Module 00 sit?",
+      "options": [
+        { "id": "a", "text": "Learn → Build → Decide → Prove → Ready — and Module 00 is the Learn foundation, while the capstone is the Prove", "correct": true },
+        { "id": "b", "text": "Plan → Code → Test → Deploy → Monitor — and Module 00 is the Deploy stage", "correct": false },
+        { "id": "c", "text": "Install → Configure → Launch → Bill → Support — and Module 00 is Billing", "correct": false },
+        { "id": "d", "text": "Awareness → Interest → Decision → Action → Retention — and Module 00 is the sales funnel", "correct": false }
+      ],
+      "explanation": "The track's arc is Learn→Build→Decide→Prove→Ready; this orientation module is Learn, and the shipped capstone build is Prove. Option b is a generic software delivery lifecycle, not this track's arc. Option c is an unrelated product-lifecycle list. Option d is a marketing/sales funnel — explicitly not what this free, self-learning track is (per the brief, there's no conversion funnel).",
+      "sourceRefs": ["r-apa-prd", "r-apa-overview"]
+    },
+    {
+      "id": "q-m00-14",
+      "domainId": "m00-what-is-automatos",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You type one message in Chat and get a useful result. Which sequence correctly describes what the three founding ideas say happened behind it?",
+      "options": [
+        { "id": "a", "text": "The Universal Router selected a suitable agent (you can override); that agent used its role, model, and scoped tools to do actual work; and the routing decision, tool calls, and cost were all recorded in the Command Centre", "correct": true },
+        { "id": "b", "text": "A single general assistant answered from its own knowledge; no worker was selected and nothing was logged", "correct": false },
+        { "id": "c", "text": "You manually picked the agent, it answered without any tools, and the interaction left no trace", "correct": false },
+        { "id": "d", "text": "The message was stored as a document in a Knowledge Base and searched later; no agent acted on it", "correct": false }
+      ],
+      "explanation": "That sequence is the three ideas in action: the Router assigns a worker (Idea 2, override available), the worker does real work with its model and scoped tools (Idea 1), and everything is tracked and costed in the Command Centre (Idea 3). Option b denies both the Router's selection and the built-in visibility. Option c contradicts the Router (you don't manually pick), the worker's tool use, and the logging. Option d confuses a chat message with a Knowledge Base document — retrieval isn't what handles a live request; an agent is.",
+      "sourceRefs": ["r-gitbook-about", "r-gitbook-activity", "r-gitbook-feed"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m00-command-centre-tour",
+      "domainId": "m00-what-is-automatos",
+      "title": "🛠 Take the tour — map the Command Centre and meet your workforce",
+      "goal": "Produce your signature artifact for this module: a one-page 'orientation map' of your own workspace — the four status card readings, what you found on each of the five tabs, the starter agents you spotted, and which agent the Router picked for your first message. It's a tour, not a build: you create nothing on the platform, you just learn where everything lives so every later module has a home to land in.",
+      "steps": "## What you'll do\n\nYou'll sign in to the free platform, tour the Command Centre, glance at your starter workforce, and send exactly one chat message — writing down what you see as you go. Everything here is grounded in the platform's Welcome / Quick start and the Activity docs. **Don't create or configure anything** — Module 01 does the building.\n\n### Before you start\n\n- **Sign in.** A personal workspace is created for you automatically on first login, and you're its Admin — so you can do every step here solo, and nothing you do touches anyone else's workspace. (Platform Welcome / Quick start.)\n- **Have a notes doc open** (a note, a doc — anywhere off-platform). You'll jot short answers as you tour. This becomes your artifact.\n\n### Tour the Command Centre (the Activity page)\n\n1. **Open Activity — this is your Command Centre.** Read the four status cards along the top and write down each reading: **Working Now**, **Channels Live**, **Completed Today**, **Needs Attention**. Note which number is highest and whether anything sits in Needs Attention.\n2. **Click one status card to drill in.** Pick any card and click it to see the detail behind the summary. Write one line on what drilling in revealed. (If Needs Attention shows an item, click that one.)\n3. **Walk all five tabs and note what lives on each.** Click through **Dashboard**, **Feed**, **Reports**, **Memory**, **Missions** in turn. For each, write a single sentence: what would I come to this tab to see? (Aim to notice: Dashboard = the at-a-glance overview with Schedule and Active Now; Feed = the chronological action log; Reports = filed reports you can grade; Memory = what agents remember; Missions = open-ended objectives in progress.)\n\n### Meet the starter workforce\n\n4. **Open Agents and look at the starter roster.** A new workspace ships with a roster of ten starter agents. Skim them and write down five names you recognise (for example Code Reviewer, QA Engineer, Sentinel, Scribe, Scout, Comms). **Don't create or edit anything** — just observe that you already have a team. (Module 01 studies and extends this roster.)\n\n### The whole platform in one gesture\n\n5. **Open Chat and send one message:** *\"What can you help me with?\"* When the reply comes, look at the response header to see **which agent the Router picked** — you didn't choose it; the Universal Router did. Write down the agent it routed to. That single gesture — you describe, the Router assigns, a worker responds — is the platform in miniature.\n6. **Assemble your orientation map.** In your notes doc, collect the four card readings, your five per-tab sentences, the five starter agents, and the agent the Router chose. Add one closing line: *in your own words, the one-sentence map of the platform* (agents work, the Router directs, Knowledge feeds, the Command Centre shows). Save it — this is your artifact.\n\n### Why it matters\n\nEvery later module in this track ends in a hands-on step, and every one of them lands somewhere on this map: Module 01 builds agents into that roster, Module 04 creates the Playbooks that feed the Dashboard's Schedule, Module 05 launches the Missions you saw on that tab. Knowing the territory now means you're never lost later. Building the map yourself — and seeing the Router pick a worker for you — also gives you a first real feel for the three founding ideas, not just a description of them.\n\n### A note on cost\n\nSending a chat message uses an AI model, and models cost money per use. The realistic setup for a builder is bring-your-own-key — you supply your own provider key in Settings and pay the provider directly. This one message is trivially cheap, but it's worth knowing now; Module 09 (governance and operations) covers cost and the cheaper-model routing lever properly.",
+      "checklist": [
+        "Signed in and confirmed you're working in your own personal workspace (you're the Admin)",
+        "Wrote down all four status card readings (Working Now, Channels Live, Completed Today, Needs Attention) and noted anything in Needs Attention",
+        "Clicked at least one status card to drill in, and noted what the detail revealed",
+        "Visited all five tabs (Dashboard, Feed, Reports, Memory, Missions) and wrote one 'what would I come here for' sentence per tab",
+        "Opened Agents and recorded five starter agents from the ten-agent roster — without creating or editing anything",
+        "Sent 'What can you help me with?' in Chat and recorded which agent the Universal Router picked (from the response header)",
+        "ARTIFACT SAVED: a one-page orientation map (card readings + five tab sentences + five starter agents + the routed agent + your one-line platform map), kept for the rest of the track"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gitbook-about",
+      "title": "Automatos AI — About (platform docs)",
+      "url": "automatos-gitbook/about.md",
+      "kind": "first-party-doc",
+      "annotation": "The single most important page for this module: the three founding ideas (agents are workers not chatbots; the platform routes so you don't have to; visibility is built in), the architecture diagram, and — critically — the Key Concepts table you must be able to use word-for-word. Every concept in Lesson 2 comes straight from here. Note the vocabulary discipline: it's 'Playbook' (not 'recipe'), and Memory is the two documented tiers (short/long) — deeper five-layer memory you may see elsewhere is architecture direction, not the shipped user model.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-gitbook-readme",
+      "title": "Automatos AI — Welcome & Quick start (platform docs)",
+      "url": "automatos-gitbook/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The entry point and the 'what can you do?' map that links every surface (Chat, Agents, Activity, Tools, Knowledge, Marketplace, Team, Analytics, Settings, Channels). It's also the ground truth for the lab: sign in → a personal workspace is created automatically on first login → open Chat and type, and the platform routes your message to the best agent. Follow this for every hands-on step in the track.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-gitbook-activity",
+      "title": "Automatos AI — Activity / Command Centre (platform docs)",
+      "url": "automatos-gitbook/activity/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The Command Centre itself: the statement that the Activity page IS your command centre, the four status cards (Working Now / Channels Live / Completed Today / Needs Attention, all clickable), and the five tabs (Dashboard / Feed / Reports / Memory / Missions). Lesson 3 and the lab are built on this page — read it to know where every kind of activity lives before you start running real work.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-gitbook-dashboard",
+      "title": "Automatos AI — Activity Dashboard (platform docs)",
+      "url": "automatos-gitbook/activity/dashboard.md",
+      "kind": "first-party-doc",
+      "annotation": "The default Command Centre view up close: the weekly Schedule of upcoming automated routines (built from Playbooks with cron triggers — the example rows like '23:45 Sentinel Routine' are exactly what a Playbook produces), Active Now with progress bars and step counts, and the Agent Reports grid. Updates live via server-sent events, so you never refresh. Useful for seeing how the agent-vs-Playbook distinction from Lesson 2 shows up on screen.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-gitbook-feed",
+      "title": "Automatos AI — Activity Feed (platform docs)",
+      "url": "automatos-gitbook/activity/feed.md",
+      "kind": "first-party-doc",
+      "annotation": "The chronological activity log — the surface where 'visibility is built in' becomes concrete. Every action generates an entry: chat responses, tool calls, Playbook step completions, mission updates, memory operations, report generations, and — worth noticing — routing decisions ('Universal Router selected Code Reviewer'). Filterable by agent, event type, time, and keyword. This is the tab you use to trace exactly what happened, step by step.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-gitbook-missions",
+      "title": "Automatos AI — Missions (platform docs, referenced)",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "first-party-doc",
+      "annotation": "The home of the Mission concept: long-running, open-ended objectives that span multiple tasks and agents, which agents plan and execute independently — the third of the three execution mechanisms (agent / Playbook / Mission). Referenced here to anchor the vocabulary and the agent-vs-Playbook-vs-Mission judgment call; Module 05 goes deep on running missions, plan approval, and cost pause/resume.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-automatos-repo",
+      "title": "automatos-ai — platform repository (README + docs/) — architecture direction",
+      "url": "automatos-ai/README.md",
+      "kind": "reference",
+      "annotation": "The platform's own repo (README plus the docs/ tree) explains the WHY behind the concepts — the reasoning for the worker model, the multi-tier router, and the graphs. Treat it as architecture direction, NOT proof of what's shipped: the gitbook is the only evidence of live features. Read it to deepen your mental model of why the platform is shaped this way, and label anything you take from it as design intent when in doubt.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-apa-survey",
+      "title": "APA source survey — vocabulary & live-vs-roadmap map (track grounding)",
+      "url": "automatos-academy/docs/research/apa-source-survey-2026-07-02.md",
+      "kind": "reference",
+      "annotation": "The track's internal grounding map — the canonical vocabulary (Playbook not recipe; the Router tiers by exact name; roles Admin/Member/Viewer plus the Context Engineering permission; memory as two documented tiers) and the live-vs-roadmap table that flags what's shipped versus what's direction. Not learner-facing, but the authority behind why this module uses the words it does and what it deliberately labels as 'architecture direction' rather than a live feature.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-apa-prd",
+      "title": "APA track brief — PRD-S1 (training model & the Learn→Build→Decide→Prove→Ready arc)",
+      "url": "automatos-academy/docs/prds/PRD-S1-APA.md",
+      "kind": "reference",
+      "annotation": "The brief for this whole track: a free, first-party, no-exam platform-mastery curriculum (no A+ gate, no conversion funnel), built to make you 'Automatos-ready.' It sets the judgment-first mandate (when to use an agent vs a Playbook vs a Mission; least-privilege tool scoping; cheaper-model routing as the top cost lever) and the reference-build capstone that is the 'Prove' stage of the arc this module introduces.",
+      "domainIds": ["m00-what-is-automatos"]
+    },
+    {
+      "id": "r-apa-overview",
+      "title": "Module 00 design & NotebookLM prompts — 'What is Automatos?' (authoring source)",
+      "url": "automatos-academy/docs/roadmap/automatos-apa/00-overview.md",
+      "kind": "reference",
+      "annotation": "The module's design brief and the source of its practical voice: the mental-model framing (workers not chatbots; the platform routes; knowledge powers everything; visibility is built in), the one-line map 'agents do the work, the Router directs it, Knowledge feeds it, the Command Centre shows it,' and the 'Try it now' Command Centre tour that the lab is built from. Also the origin of the video prompts. Grounding for authors, not learner-facing.",
+      "domainIds": ["m00-what-is-automatos"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-00-1",
+      "title": "00 · What is Automatos? — workers not chatbots, the Router, and the one-line map",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m00-what-is-automatos"],
+      "sourceNotebook": "platform-architect / m00 / mental-model-and-vocabulary"
+    },
+    {
+      "id": "v-00-2",
+      "title": "00 · Tour the Command Centre — the four status cards, the five tabs, and your starter workforce",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m00-what-is-automatos"],
+      "sourceNotebook": "platform-architect / m00 / command-centre-tour"
+    }
+  ]
+}

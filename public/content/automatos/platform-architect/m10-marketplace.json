@@ -1,0 +1,602 @@
+{
+  "id": "m10-marketplace",
+  "order": 10,
+  "code": "10",
+  "name": "Marketplace & the contributor economy (coming) + the capstone",
+  "tagline": "Don't rebuild what the community already made. The Community Marketplace has five tabs — Applications, Agents, Playbooks, LLMs, Capabilities (Plugins + Skills) — where you browse and install extensions into your workspace, install a marketplace agent as an editable copy that lands on your Roster without touching the listing, and Submit your own agents/playbooks/plugins for the community. The contributor economy — a fuller creator ecosystem — is roadmap, framed honestly here as 'coming.' Then the payoff: the track capstone, where you ship one real thing end to end and earn the 'Automatos-ready' claim.",
+  "overview": "This is the last taught module before the capstone, and it closes the loop the whole track has been building toward: you've learned to make agents, skills, playbooks, missions, knowledge, memory, surfaces, and governance — now you learn to reuse what others made and contribute back, then you ship. The Community Marketplace is where you discover, browse, and install extensions for your workspace, laid out in five tabs. Applications are external app integrations (powered by Composio) you connect — each card shows tool count, trigger count, and install status. Agents are pre-built configurations that install as an editable COPY onto your Agent Roster (tuned system prompt, recommended model, pre-assigned skills, suggested tools) — you modify it freely without affecting the listing. Playbooks are ready-made multi-step workflows that install as independent copies and map their agent roles to your agents. LLMs is a browse-and-compare surface for models across providers (OpenRouter, OpenAI, Anthropic, DeepSeek, Google) — you compare pricing, context window, and capabilities before assigning a model to an agent; it does not 'install' anything. Capabilities has two sub-sections that a practitioner must never blur: Plugins are bundled packages (skills + commands + agent configs + prompt templates) and Skills are individual git-based modules (a single SKILL.md) — both install, then you assign them to agents. Publishing is the mirror image: from an agent, playbook, or plugin, click Submit to Marketplace, add a description, category, and tags, and submit for review; the published item becomes available to all Automatos users with your workspace name as the publisher, and every install is scoped per workspace so it never affects anyone else. Two honesty rails run through this module. First, the docs describe no reviewer, no SLA, no approval queue behaviour — 'submit for review' is exactly that and no more, so we teach it light. Second, and more important: the marketplace docs contain ZERO monetization language — no payouts, no revenue-share, no paid tier. Installing and publishing are live; the CONTRIBUTOR ECONOMY (creators being rewarded for what they share) is roadmap, and we frame it strictly as 'coming.' Nothing here implies creators earn money today, and nothing implies a paid academy — APA is free. The judgment thread is buy-vs-build: reach for the Marketplace when someone has already solved a common pattern (a support agent, a dependency-audit playbook, a summarisation skill), and hand-build only the bespoke work that is genuinely yours. Then the capstone. You'll ship one real thing end to end and self-verify it: Option A (the flagship) is the storefront-assistant pattern from module 08, scoped to exactly what's live — a widget-embedded chat agent, grounded in your product and policy documents, answering on any test web page via one script tag and a public key; Option B is an agent plus a playbook (or mission) that produces a real templated deliverable. Finishing either, with the checklist ticked, is what 'Automatos-ready' means.",
+  "objectives": [
+    "Name the five Marketplace tabs (Applications, Agents, Playbooks, LLMs, Capabilities) and state precisely what each one installs — or, for LLMs, that it is a browse-and-compare surface that assigns a model rather than installing an extension.",
+    "Explain that installing a marketplace agent creates an editable, workspace-scoped COPY on your Agent Roster (tuned prompt, recommended model, pre-assigned skills, suggested tools) that you can modify freely without affecting the listing or any other user.",
+    "Keep Plugins and Skills distinct inside the Capabilities tab — a Plugin is a bundle (skills + commands + agent configs + prompt templates); a Skill is a single git-based SKILL.md — and describe installing each and assigning it to an agent, tying back to module 02's skill library and signature agents.",
+    "Walk the publishing flow (Submit to Marketplace → description, category, tags → submit for review), and state accurately that published items are available to all users with your workspace name as publisher, that installs are workspace-scoped, and that the docs describe no reviewer/SLA behaviour.",
+    "Frame the contributor economy strictly as 'coming' — sharing (install/publish) is live today; creator rewards / monetization are roadmap with zero current language — and never imply creators earn money now or that the academy is paid.",
+    "Apply buy-vs-build judgment: choose a Marketplace install when a common pattern is already solved, and hand-build only bespoke work — remembering that installed playbooks are independent copies that don't auto-update.",
+    "Ship the track capstone end to end and self-verify it — Option A: a widget-embedded chat agent grounded in product/policy docs on a test page (script tag + public key + origin allow-list); Option B: an agent + playbook/mission producing a templated deliverable — and claim 'Automatos-ready.'"
+  ],
+  "lessons": [
+    {
+      "id": "m10-l1-five-tabs",
+      "title": "The five tabs — what the Marketplace is and what each tab installs",
+      "estMinutes": 14,
+      "objective": "Learn the layout of the Community Marketplace and know exactly what each of the five tabs gives you, so you reach for the right one and never confuse browsing a model with installing an extension.",
+      "body": "## What the Marketplace is\n\nThe **Community Marketplace** is where you discover, browse, and install extensions for your workspace. That is the whole idea, and it is the practitioner's answer to a simple question you'll ask constantly once you're building on Automatos: *do I really have to build this myself?* Often the answer is no — someone in the community already made a version of it, and you can install it in a click.\n\nThe page opens on a **stats bar** with four numbers, and it's worth reading them correctly because one of them means something non-obvious:\n\n| Metric | What it means |\n| --- | --- |\n| **Total Items** | Everything available across the marketplace |\n| **Categories** | How many distinct categories exist |\n| **Featured** | Curated / highlighted items |\n| **Total Installs** | Items **you've** installed into **your** workspace |\n\nThat last one trips people up: **Total Installs is your own install count**, not a global popularity score. It's a running tally of how much of the marketplace you've pulled into your workspace. And one **search** bar runs across all tabs — find items by name, description, or category without tab-hopping.\n\n## The five tabs, precisely\n\nThe Marketplace is organised into five tabs, and a practitioner needs to know not just their names but *what each one actually does when you click Install* — because they don't all do the same kind of thing.\n\n{% tabs %}\n**Applications** — External **app integrations** you connect to your workspace, powered by Composio. Browse by category (API Services, Productivity, Developer Tools, CRM, Marketing Automation, Email Marketing, Analytics). Each card shows the app name, category, **tool count** (how many actions), **trigger count** (how many event triggers), and install status (\"Added\" or an install button). Installing means authenticating (OAuth or API key); the app then shows as \"Added\" and its tools are available to assign to agents. This is the same integration surface as the Tools page from module 03 — the Applications tab is the *marketplace face* of it.\n\n**Agents** — Pre-built **agent configurations** you install into your workspace. Each ships with a tuned system prompt, a recommended model, a pre-assigned skill set, and suggested tools. Install and it lands on your **Agent Roster** — as a copy you own (lesson 2 is all about this).\n\n**Playbooks** — Ready-made **multi-step workflows** built by the community. Install one and it's copied into your workspace's playbook library (it appears under **Agents → Playbooks**); it references agent *roles* that map to your agents, and it's an independent copy. (You met these in module 04.)\n\n**LLMs** — A **browse-and-compare** surface for language models across providers (OpenRouter, OpenAI, Anthropic, DeepSeek, Google). Each model card shows pricing (per million input/output tokens), context window, capabilities (vision, function calling, JSON mode), and a speed rating. **This tab does not 'install' an extension** — you use it to *compare* models, then you actually assign a model to an agent during agent creation or editing. Treat LLMs as a shopping window, not a shopping cart.\n\n**Capabilities** — **Plugins and Skills** that extend what agents can do. Plugins are bundled packages (skills + commands + agent configs + prompt templates); Skills are individual git-based modules (a single SKILL.md). Both install, then you assign them to agents. Lesson 2 goes deep on the Plugins-vs-Skills distinction.\n{% endtabs %}\n\n## The one distinction that matters most on this page\n\nFour of the five tabs *install something into your workspace*: an app connection (Applications), an agent copy (Agents), a playbook copy (Playbooks), or a capability you assign (Capabilities). **The LLMs tab is the odd one out — it's a catalogue you compare against, not a thing you install.** Models get chosen for an agent in the agent editor; the LLMs tab exists so you can weigh pricing and context window *before* you make that choice. Getting this straight saves you hunting for an \"install\" button on a model card that was never meant to have one.\n\n> **Cost lever, flagged early.** Because the LLMs tab lays pricing side by side, it's where the single biggest cost decision on the platform gets informed: **which model an agent uses.** A cheaper model on a routine, high-volume agent is the number-one cost lever you have — you compare here, you assign in the agent editor, and you track the real spend in **Analytics → LLM & Costs** (module 09). Hold that thought; it's the practitioner reflex the whole track keeps returning to.\n\n## Worked walkthrough: sizing up the marketplace in two minutes\n\nSay you've just built a couple of things and you want to move faster. Open the Marketplace and read it top-down. The **stats bar** tells you how big the library is (Total Items) and how much you've already pulled in (Total Installs — currently low, because you're new). You hit **Applications** and see cards for GitHub, Slack, Stripe, Shopify — each showing a tool count like \"GitHub · 50+ tools\" — so you know these are integrations to connect, not agents to run. You flip to **Agents** and see pre-built configs with recommended models; to **Playbooks** and see multi-step workflows with step previews; to **Capabilities** and see two sub-tabs, Plugins and Skills. Then you hit **LLMs** and — crucially — you *don't* look for an install button, because you now know this tab is for comparing `claude-sonnet` against `gpt-4` against a cheaper OpenRouter model on price and context window, so you can pick well when you next edit an agent. Two minutes, and you can navigate the whole surface without a single wrong click. Lesson 2 turns 'browse' into 'install and own.'",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m10-l1-1",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which set correctly names the five Marketplace tabs?",
+          "options": [
+            { "id": "a", "text": "Applications, Agents, Playbooks, LLMs, Capabilities", "correct": true },
+            { "id": "b", "text": "Agents, Skills, Tools, Missions, Memory", "correct": false },
+            { "id": "c", "text": "Dashboard, Feed, Reports, Memory, Missions", "correct": false },
+            { "id": "d", "text": "Applications, Recipes, Models, Plugins, Channels", "correct": false }
+          ],
+          "explanation": "The documented five tabs are Applications, Agents, Playbooks, LLMs, and Capabilities (where Capabilities holds Plugins + Skills). Option b mixes real platform nouns but they aren't the marketplace tabs — Skills and Tools sit inside other surfaces, and Missions/Memory are the Activity command centre. Option c lists the Activity (Command Centre) tabs, not the Marketplace. Option d uses drift/near-miss names — 'Recipes' is legacy for Playbooks, and Models/Channels aren't the tab names (the model tab is 'LLMs', and Plugins is a sub-section of Capabilities, not a top-level tab).",
+          "sourceRefs": ["r-gb-marketplace-readme"]
+        },
+        {
+          "id": "kc-m10-l1-2",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You open the LLMs tab, find a great-looking model, and go hunting for an 'Install' button — but there isn't one. Why?",
+          "options": [
+            { "id": "a", "text": "The LLMs tab is a browse-and-compare surface (pricing, context window, capabilities); you don't install a model there — you assign a model to an agent during agent creation or editing", "correct": true },
+            { "id": "b", "text": "The model is out of stock and will get an install button when it's restocked", "correct": false },
+            { "id": "c", "text": "Models can only be installed from the Applications tab, not the LLMs tab", "correct": false },
+            { "id": "d", "text": "You must publish the model to the marketplace first before you can install it", "correct": false }
+          ],
+          "explanation": "The LLMs tab exists to compare models (price per million tokens, context window, capabilities) so you can choose well — the actual choice happens in the agent editor, where a model is assigned to an agent. Option b invents 'stock', which doesn't apply to a model catalogue. Option c is wrong — models aren't installed from Applications (that tab is for app integrations); models are assigned to agents. Option d is nonsensical — you don't publish a provider's model to install it; you select it when configuring an agent.",
+          "sourceRefs": ["r-gb-marketplace-llms", "r-gb-marketplace-readme"]
+        },
+        {
+          "id": "kc-m10-l1-3",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the Marketplace stats bar, what does the 'Total Installs' metric actually count?",
+          "options": [
+            { "id": "a", "text": "Items you've installed into your own workspace", "correct": true },
+            { "id": "b", "text": "The all-time global download count of the most popular item", "correct": false },
+            { "id": "c", "text": "The number of users currently browsing the marketplace", "correct": false },
+            { "id": "d", "text": "How many items are available in the marketplace in total", "correct": false }
+          ],
+          "explanation": "Total Installs is your own count — how many marketplace items you've pulled into your workspace. Option b reads it as a global popularity score, which it isn't. Option c invents a live-visitor metric that the stats bar doesn't show. Option d describes 'Total Items' (everything available), which is a different metric in the same bar.",
+          "sourceRefs": ["r-gb-marketplace-readme"]
+        }
+      ]
+    },
+    {
+      "id": "m10-l2-install-agent-and-capabilities",
+      "title": "Installing as an editable copy — agents, and Plugins vs Skills",
+      "estMinutes": 16,
+      "objective": "Install a marketplace agent as a copy you own and modify, and keep Plugins and Skills straight in the Capabilities tab so you assign the right kind of extension to your agents.",
+      "body": "## Installing an agent: you get a copy, and it's yours\n\nHere's the single most important fact about installing a marketplace **agent**, and it governs how confidently you can experiment: **installed agents are copies.** When you browse the Agents tab, click a card to see its details, and click **Install**, the agent lands on your **Agent Roster** — and from that moment it is *your* agent. You can rename it, swap its model, rewrite its system prompt, add or remove skills and tools, and none of that touches the marketplace listing or anybody else's copy.\n\nWhat you actually receive on install is a tuned starting point:\n\n- **A system prompt** — tested and optimised for that agent's role.\n- **A model recommendation** — which LLM the author found works best.\n- **A skill configuration** — git-based capabilities pre-assigned.\n- **Tool suggestions** — the integrations the agent expects to use.\n\nThink of a marketplace agent as a *well-made template*, not a locked appliance. The value is that someone already did the work of writing a good prompt and picking sensible skills for, say, a \"customer support\" or \"competitor research\" role — you install it, then tune it to your business. If the recommended model is pricier than you need for your volume, swap it (there's the cost lever again). If a suggested tool isn't connected in your workspace, connect it or drop the step. The copy is a launchpad you own.\n\n> **Why a copy and not a live link?** Because your edits shouldn't break the listing, and the author's later changes shouldn't silently rewrite your working agent. This is the same principle you met with marketplace **playbooks** in module 04 — installed playbooks are independent copies that don't auto-update — and it's deliberate: **install = snapshot you own**, across agents, playbooks, and capabilities alike.\n\n## The Capabilities tab: Plugins vs Skills\n\nThe **Capabilities** tab is where you install the things that extend what an agent can *do*, and it has two sub-sections that a practitioner must never blur. You drew this distinction back in module 02; here's how it shows up in the marketplace.\n\n| | **Plugin** | **Skill** |\n| --- | --- | --- |\n| **What it is** | A **bundled package** | A **single capability module** |\n| **Contains** | Skills + commands + agent configs + prompt templates | One `SKILL.md` file in a git repo (instructions, prompts, tool definitions) |\n| **Think of it as** | A boxed set — several related things installed together | One well-defined ability |\n| **Install → then** | Assign to agents (Agent Details → Plugins) | Assign to agents |\n\nThe mental model: a **Skill** is one ability — \"knows how to summarise a document well,\" \"knows a code-analysis pattern.\" A **Plugin** is a *bundle* — it might drop in several skills, a couple of custom commands, an agent config, and some prompt templates in one go. When someone has packaged a whole role's worth of capability, that's a plugin; when it's a single reusable ability, that's a skill. Both install the same way (browse the sub-tab → click a card → **Install**), and both then need to be **assigned to an agent** before they do anything — installing puts them in your workspace inventory; assigning attaches them to a specific agent.\n\n> **Tie back to module 02.** The Skills sub-tab is backed by the same library you toured in module 02 — the `automatos-skills` repo (the README indexes 128 skills across 16 groups) and the signature agents like SENTINEL and SCOUT. The marketplace is simply the install surface for that library, plus community-contributed additions. A skill is still a git-based `SKILL.md`; the marketplace just makes it a click instead of a git URL.\n\n## Installed vs available, and where assignment happens\n\nTwo states, and they map to two actions:\n\n- **Available** — in the marketplace, not yet in your workspace. Action: **Install**.\n- **Installed** — in your workspace inventory, ready to attach. Action: **Assign** to an agent.\n\nAssignment is where a capability actually starts affecting behaviour. A skill sitting in your workspace inventory does nothing until it's assigned to an agent — at which point that agent's system prompt gains the skill's know-how (module 02's mechanism). So the full loop for a capability is always two moves: **install** (into the workspace) then **assign** (to the agent). Miss the second and you'll wonder why your agent didn't get smarter.\n\n## Worked walkthrough: install a support agent, sharpen it with a skill\n\nSuppose you want a customer-support agent and you'd rather not write the prompt from scratch. Go to **Marketplace → Agents**, find a support-agent card, open it, and **Install** — it appears on your **Agent Roster** as an editable copy with a support-tuned prompt, a recommended model, and pre-assigned skills. You immediately make it yours: rename it to match your brand, and because your support volume is high and the questions are routine, swap the recommended model for a cheaper one to cut cost. Now you want it to write tidier replies, so you go to **Marketplace → Capabilities → Skills**, find a \"document summarisation\" or \"support-reply formatting\" skill, and **Install** it — that puts it in your workspace inventory. It's not doing anything yet, so you **assign** it to your new support agent (Agent Details → Plugins). Chat-test it: the replies should now follow the skill's format. You've done the two core reuse moves — installed an agent as a copy you own, and installed-and-assigned a capability to sharpen it — without hand-writing a single prompt. That reuse instinct is exactly what the Marketplace is for.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m10-l2-1",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You install an agent from the Marketplace and then heavily edit its system prompt and swap its model. What happens to the marketplace listing and to other users?",
+          "options": [
+            { "id": "a", "text": "Nothing — installed agents are copies on your own Roster; your edits don't affect the listing or any other user's copy", "correct": true },
+            { "id": "b", "text": "Your edits are pushed back to the marketplace listing, changing it for everyone who installs it next", "correct": false },
+            { "id": "c", "text": "Editing an installed agent is blocked — marketplace agents are read-only appliances", "correct": false },
+            { "id": "d", "text": "Every other user who installed that agent instantly receives your edits too", "correct": false }
+          ],
+          "explanation": "Installed agents are copies you own — modify them freely without affecting the listing or anyone else. Option b inverts the model: your edits stay local, they don't rewrite the public listing. Option c is false — the whole point is that the copy is editable (rename, re-prompt, re-model, re-skill). Option d describes a shared live link, which isn't how installs work; each install is an independent, workspace-scoped copy.",
+          "sourceRefs": ["r-gb-marketplace-agents"]
+        },
+        {
+          "id": "kc-m10-l2-2",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the Capabilities tab, what is the difference between a Plugin and a Skill?",
+          "options": [
+            { "id": "a", "text": "A Plugin is a bundled package (skills + commands + agent configs + prompt templates); a Skill is a single git-based module defined by one SKILL.md", "correct": true },
+            { "id": "b", "text": "A Plugin is a single SKILL.md; a Skill is a bundle of several plugins", "correct": false },
+            { "id": "c", "text": "A Plugin is an external app integration; a Skill is a language model", "correct": false },
+            { "id": "d", "text": "They are the same thing — the tab just lists each item twice", "correct": false }
+          ],
+          "explanation": "A Plugin bundles several things together (skills, commands, agent configs, prompt templates); a Skill is one capability module — a single SKILL.md in a git repo. Option b reverses the two. Option c confuses them with other marketplace concepts — app integrations live on the Applications tab and models on the LLMs tab, neither of which is a Plugin or a Skill. Option d is wrong — they are genuinely different: one is a boxed set, the other a single ability.",
+          "sourceRefs": ["r-gb-marketplace-capabilities"]
+        },
+        {
+          "id": "kc-m10-l2-3",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You installed a skill from the Capabilities tab, but your agent's behaviour hasn't changed. What did you most likely miss?",
+          "options": [
+            { "id": "a", "text": "Assigning the installed skill to the agent — installing puts it in your workspace inventory, but it only affects behaviour once assigned to a specific agent", "correct": true },
+            { "id": "b", "text": "Nothing to do — installed skills attach themselves to every agent automatically on install", "correct": false },
+            { "id": "c", "text": "You needed to publish the skill to the marketplace before it takes effect", "correct": false },
+            { "id": "d", "text": "Skills only work if you also delete the agent's existing prompt first", "correct": false }
+          ],
+          "explanation": "Install and assign are two separate moves: installing adds the skill to your workspace inventory; assigning it to an agent is what injects its know-how into that agent's system prompt. Option b is wrong — installed items don't auto-attach to every agent; you choose which agent gets which capability. Option c confuses publishing (sharing your own item) with using an installed one. Option d invents a destructive step; assigning a skill augments the agent, it doesn't require wiping the prompt.",
+          "sourceRefs": ["r-gb-marketplace-capabilities"]
+        }
+      ]
+    },
+    {
+      "id": "m10-l3-publishing-and-economy",
+      "title": "Publishing back, and the contributor economy (coming)",
+      "estMinutes": 13,
+      "objective": "Publish your own agent, playbook, or plugin to the community, understand exactly what publishing does and doesn't do, and frame the contributor economy honestly as roadmap — not a way to earn money today.",
+      "body": "## Contributing back: the publishing flow\n\nThe Marketplace isn't only somewhere you take from — you can give back, and the flow is short. From an item you've built — an **agent, a playbook, or a plugin** — you publish in four steps:\n\n1. Go to the item you want to publish.\n2. Click **Submit to Marketplace** (on an agent it may read **Publish to Marketplace** from the agent details).\n3. Add a **description**, a **category**, and **tags**.\n4. **Submit for review.**\n\nThat's it. Once published, the item is **available to all Automatos users**, and **your workspace name appears as the publisher**. Two facts frame what publishing actually means:\n\n- **The marketplace is community-driven.** What's in it comes from workspaces like yours, not just from Automatos.\n- **Installed items are scoped to the installer's workspace and don't affect other users.** When someone installs your agent, they get their own editable copy — they can't change yours, and you can't reach into theirs. Publishing shares a *snapshot*, not a live link.\n\n> **What we can and can't say about 'review.'** The docs say **\"submit for review,\"** and that's the honest extent of it — they describe **no reviewer, no approval queue, no SLA, no rejection workflow.** So we teach it exactly as written: you submit with a description, category, and tags, and the item enters the community library under your workspace name. Don't imagine a formal editorial gate the docs don't describe; equally, don't assume there's none — the platform simply doesn't document that detail, and a good practitioner states what's known and stops there.\n\n## What good publishing looks like\n\nBecause the description, category, and tags are what other people search and judge your item by, they're not busywork — they're the whole discoverability story (recall from lesson 1 that search runs across name, description, and category). A useful description says *what the item does and when to use it* in plain language; a sensible category puts it where people browsing that kind of thing will find it; specific tags catch the searches that matter. Publishing a \"weekly dependency audit\" playbook with the description \"audits your project's dependencies for known vulnerabilities every Monday and posts a summary\" and tags like `security`, `dependencies`, `scheduled` is far more useful to the community than one called \"my playbook\" with no tags. You're writing for a stranger who's searching — help them find and trust it.\n\n## The contributor economy: coming, not here\n\nNow the part this module has to get exactly right. There is a lot of talk in the wider world about \"creator economies\" — marketplaces where people who build things get *paid* for them. It's natural to assume Automatos's marketplace works that way. **It does not, today.**\n\nHere is the precise, honest position:\n\n- **Live now:** you can **install** community items and **publish** your own. Sharing works. Your workspace name is credited as publisher. That's the community library, and it's real.\n- **Coming (roadmap):** a fuller **contributor economy** — a richer creator ecosystem for sharing and, on the roadmap, *rewarding* community-built agents, playbooks, and skills. This is clearly forward-looking.\n\nWhat this means for how you talk and think about it:\n\n- **There is zero monetization in the marketplace today.** No creator payouts, no revenue-share, no paid tier, no \"earn from your agents.\" None of that is in the product. If you read a breathless claim that you can \"make money selling agents on Automatos,\" it's wrong for today.\n- **Publish because it's useful, not because it pays.** The reason to contribute now is the same reason people contribute to any open library: it helps others, it builds your reputation (your workspace name is on it), and it strengthens the ecosystem you depend on. Not money.\n- **Watch the Marketplace for it.** The contributor-economy features will roll out from roadmap/beta — sharing today, a fuller creator ecosystem \"coming.\" When it arrives, you'll see it in the product; until then, treat it as a direction, not a feature.\n\n> **And to be clear about the academy itself:** APA is **free**. Nothing in this module — or this track — implies a paid academy tier. The contributor economy being \"coming\" is about the *platform's* marketplace, and even there it's roadmap. Skill and awareness, not a sales funnel.\n\n## The buy-vs-build judgment, both directions\n\nEverything across these three lessons sharpens one practitioner reflex: **buy-vs-build.** Before you hand-build anything, ask whether the community already solved it — a support agent, a dependency-audit playbook, a summarisation skill. If they did, install it (as a copy you own) and tune it; you've saved hours. Build from scratch only the bespoke work that's genuinely yours. And when you *do* build something good and general, **publish it back** — that's the same judgment running in reverse, and it's how a community library stays worth using. Just remember the two honest caveats: installed items are independent copies that won't auto-update, and publishing today earns you credit and goodwill, not money.\n\n## Worked walkthrough: publish the playbook you built\n\nTake the \"Daily Repo Digest\" playbook you built back in module 04. You've run it, it works, and it's generic enough that other people would want it. So you publish it: open the playbook, click **Submit to Marketplace**, write a description (\"pulls recent commits from a connected repo, reviews them, and posts a short summary — good as a lightweight daily code digest\"), pick a sensible category (developer tools / automation), and add tags (`github`, `code-review`, `daily`, `scheduled`). You **submit for review**. It's now in the community library with *your workspace name* as the publisher, available for anyone to install — where they'll get their own editable copy that references agent roles mapped to *their* agents. You didn't get paid, and you shouldn't have expected to — the contributor economy is still \"coming.\" What you got was a credited contribution and a more useful marketplace. That's the whole loop: take a copy, tune it, give one back.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m10-l3-1",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is the documented publishing flow for sharing an agent, playbook, or plugin?",
+          "options": [
+            { "id": "a", "text": "Go to the item → Submit to Marketplace → add a description, category, and tags → submit for review", "correct": true },
+            { "id": "b", "text": "Email the item to Automatos support and wait for them to list it", "correct": false },
+            { "id": "c", "text": "Set a price and payout account, then publish it for sale", "correct": false },
+            { "id": "d", "text": "Export the item to a git repo; there is no in-product publish flow", "correct": false }
+          ],
+          "explanation": "The flow is exactly: open the item, click Submit to Marketplace, add description/category/tags, and submit for review. Option b invents an email process that the docs don't describe. Option c adds pricing and payouts — there is zero monetization in the marketplace today, so this is wrong. Option d is false — publishing is an in-product action from the item itself, not a manual git export.",
+          "sourceRefs": ["r-gb-marketplace-readme", "r-gb-marketplace-agents"]
+        },
+        {
+          "id": "kc-m10-l3-2",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A colleague says: 'Let's publish our best agents to the Automatos Marketplace and start earning revenue-share from installs.' How should you correct them, based on the docs?",
+          "options": [
+            { "id": "a", "text": "Publishing and installing are live, but there is no monetization in the marketplace today — creator rewards / revenue-share are roadmap ('coming'); publish for credit and community value, not income", "correct": true },
+            { "id": "b", "text": "They're right — revenue-share on installs is a current, documented feature", "correct": false },
+            { "id": "c", "text": "Publishing isn't possible at all, so the question is moot", "correct": false },
+            { "id": "d", "text": "You can earn money, but only from the LLMs tab, not from agents", "correct": false }
+          ],
+          "explanation": "The marketplace docs contain zero monetization language — install and publish work today, but creator rewards are strictly roadmap, framed as 'coming.' You publish for the credit (your workspace name as publisher) and community value, not income. Option b asserts a paid feature that doesn't exist. Option c is wrong — publishing is live (Submit to Marketplace with description/category/tags). Option d invents an earning mechanism on the LLMs tab, which is just a model-comparison surface with no payouts.",
+          "sourceRefs": ["r-gb-marketplace-readme", "r-gb-marketplace-llms"]
+        },
+        {
+          "id": "kc-m10-l3-3",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "After you publish an agent and someone else installs it, what is true about the two copies?",
+          "options": [
+            { "id": "a", "text": "They get their own workspace-scoped editable copy; they can't change yours, and your later edits don't reach theirs — publishing shares a snapshot, not a live link", "correct": true },
+            { "id": "b", "text": "You and the installer now share one live agent, so either of you editing it changes it for both", "correct": false },
+            { "id": "c", "text": "The installer's copy stays permanently linked and auto-updates whenever you edit yours", "correct": false },
+            { "id": "d", "text": "Installing gives them read-only access to your agent inside your workspace", "correct": false }
+          ],
+          "explanation": "Installs are scoped to the installer's workspace and are independent, editable copies — a snapshot, not a live link, so neither side's edits affect the other. Option b describes a single shared object, which isn't how it works. Option c claims auto-updating, but installed items don't auto-sync (the same rule as marketplace playbooks). Option d is wrong — they get their own copy to modify, not read-only access into your workspace.",
+          "sourceRefs": ["r-gb-marketplace-readme", "r-gb-marketplace-agents"]
+        }
+      ]
+    },
+    {
+      "id": "m10-l4-capstone-brief",
+      "title": "The capstone — ship one real thing, and become Automatos-ready",
+      "estMinutes": 15,
+      "objective": "Understand the two capstone options, choose the right one for you, and know precisely what 'live and in-scope' means so your build grounds only in shipped capabilities — then know what 'Automatos-ready' claims.",
+      "body": "## What the capstone is\n\nEverything in this track has been building to one thing: **shipping something real on Automatos.** The capstone is your first genuine build, run end to end, on the free platform. It is not a quiz and not a toy — it's a small, real, working piece of software that you stand up, test, and self-verify. Completing it, with the checklist ticked, is what earns the track's **\"Automatos-ready\"** claim: the honest statement that you can build and run real work on Automatos.\n\nThere are two options. Both are real; pick the one that fits what you want to make.\n\n> **If you came from AI Business Foundations**, this capstone is where that track's whole 'apply it in Automatos' thread pays off — you're not sketching an opportunity map any more, you're shipping the working thing.\n\n## Option A (the flagship): a widget-embedded storefront assistant\n\nThis is the storefront-assistant pattern from **module 08**, scoped to exactly what's **live** today. You'll ship a **chat widget on a real web page**, backed by an agent in your workspace, **grounded in your product and policy documents**, so it answers real questions about your (or a test) business.\n\nWhat makes this the flagship is that every piece of it is proven-live and it exercises the whole stack you learned: an **agent** (module 01), a **knowledge base** it's grounded in (module 03), and a **universal surface** — the embeddable widget (module 08). The widget contract is genuinely in production: the Automatos landing site runs on it, and so does *this academy's own tutor*. You're building on the same rails.\n\nThe shape of Option A, all in-scope:\n\n1. **An agent** in your workspace, configured for support/storefront answering.\n2. **A knowledge base** — you upload a handful of real docs (a product sheet, an FAQ, a returns/shipping policy) so the agent answers *from your content*, not from thin air (module 03's RAG).\n3. **The chat widget** embedded on a test page with **one script tag and one `init()` call**, authenticated by a **public key** (`ak_pub_*`) that's locked to your page's origin. The widget appears as a chat bubble; you ask it a question only your docs could answer, and it answers correctly.\n\n> **Scope discipline — Option A.** The architecture supports a whole family of storefront and back-office agents from one workspace, but **only the storefront chat widget grounded in your docs is what you build and claim here** — that's the confirmed-live slice. Multi-agent storefront seeding and admin-side agents are in-development; a public app-store listing isn't live yet. Build the live thing well; don't claim the roadmap.\n\n## Option B: an agent + a playbook (or mission) that produces a deliverable\n\nIf a storefront assistant isn't your use case, ship a **back-office** build instead: an **agent** plus a **playbook** (or a **mission**) that produces a **real, templated deliverable** — a report, a summary, a briefing — that a person would actually use. You know all the parts: agents (01), skills (02), knowledge (03), playbooks (04), missions (05), and deliverables from templates (07).\n\nThe shape of Option B:\n\n1. **An agent** (built or installed-and-tuned from the Marketplace) suited to the job.\n2. **A playbook** (known, repeatable steps) *or* a **mission** (an open-ended objective you approve) that does the work.\n3. **A deliverable produced from a template** — and here's the currency rail: the documented baseline is a **markdown template with `{{placeholders}}`** that the agent fills, saved as a markdown report (reports live at `/reports/{agent}/…`). **Branded PDF/DOCX generation and richer block templates are the roadmap edge — verify them in-product before you rely on them.** Ship the markdown deliverable; that's the live, dependable path.\n\n## What 'live and in-scope' means (and the traps to avoid)\n\nThe capstone's one hard rule is that **your build must stand on shipped capabilities**, because a build that leans on a roadmap feature isn't a build — it's a demo that breaks. Carry these currency rails from the whole track into your capstone so you don't accidentally ground on something that isn't there yet:\n\n- **Deliverables:** markdown templates with `{{placeholders}}` and markdown reports are the baseline. Branded **PDF/DOCX** generation and block templates — verify in-product; don't assume.\n- **Cloud sync for your knowledge docs:** **Dropbox and S3 are live**; **Google Drive and OneDrive are \"coming soon.\"** For the capstone, just **upload your docs directly** (module 03's Documents tab) — that's always live and needs no connector.\n- **Budgets:** there is **no pre-set hard spend ceiling.** What's live is **cost alerts** (Settings → General) and, for missions, **pause / resume-with-increased-budget** plus per-task cost. Manage cost by choosing a cheaper model and watching Analytics — not by setting a cap that doesn't exist.\n- **The contributor economy:** \"coming\" — you can install/publish, but don't build a plan around earning from it.\n\n> **The cost reflex, one last time.** Whichever option you pick, the biggest lever on what it costs to run is **which model your agent uses** — a cheaper model on a routine, high-volume job (a storefront FAQ bot, a nightly digest) is the number-one saving. Compare on the LLMs tab, assign in the agent editor, watch the spend in Analytics → LLM & Costs. This is the reflex that separates someone who ships something *sustainable* from someone who ships something expensive.\n\n## Worked walkthrough: choosing your option in one minute\n\nAsk yourself two questions. *Do I have a customer-facing surface where an AI answering visitor questions would help — a site, a store, a landing page?* If yes, **Option A** is your flagship: it's the most visible, most impressive thing you can ship, and it's fully live. *Or is my need internal — a recurring report or summary someone on my team would use?* If that's closer, **Option B** fits: an agent plus a playbook or mission producing a markdown deliverable. Either way, sketch the pieces before you build — for A, that's *agent + knowledge base + embedded widget*; for B, that's *agent + playbook/mission + templated deliverable* — confirm each piece is in the live-and-in-scope list above, and then go build it in the lab. Finishing it, checklist ticked, is the moment you're Automatos-ready.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m10-l4-1",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "For capstone Option A (the storefront assistant), which three pieces make up the in-scope, live build?",
+          "options": [
+            { "id": "a", "text": "An agent, a knowledge base of your product/policy docs it's grounded in, and the chat widget embedded on a test page via a script tag and a public key", "correct": true },
+            { "id": "b", "text": "A multi-agent fleet auto-seeded on Shopify install, plus admin-side agents and a public App Store listing", "correct": false },
+            { "id": "c", "text": "A branded PDF generator, a Google Drive sync, and a pre-set spend cap", "correct": false },
+            { "id": "d", "text": "A voice-cloning profile, a knowledge graph rebuild, and an NL2SQL benchmark", "correct": false }
+          ],
+          "explanation": "Option A's live slice is exactly an agent + a knowledge base it answers from + the embeddable chat widget (script tag + public key) on a test page. Option b lists the in-development parts (multi-agent seeding, admin agents, public App Store listing) — real architecture direction, but not what you build and claim here. Option c is built entirely from currency traps (branded PDF, GDrive sync, and a spend cap are all roadmap/non-existent). Option d names real platform features that simply aren't the storefront-assistant build.",
+          "sourceRefs": ["r-gb-api-widgets", "r-widget-embedding", "r-gb-knowledge-documents"]
+        },
+        {
+          "id": "kc-m10-l4-2",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "For capstone Option B, what is the documented, live baseline for producing the deliverable?",
+          "options": [
+            { "id": "a", "text": "A markdown template with {{placeholders}} the agent fills, saved as a markdown report — with branded PDF/DOCX generation treated as verify-in-product, not assumed", "correct": true },
+            { "id": "b", "text": "A branded, print-ready PDF with your brand kit applied — the documented default output", "correct": false },
+            { "id": "c", "text": "A live Google Docs file synced via the Drive connector", "correct": false },
+            { "id": "d", "text": "An Excel workbook auto-emailed to stakeholders on a spend budget", "correct": false }
+          ],
+          "explanation": "The documented deliverable baseline is a markdown template with {{placeholders}} rendered to a markdown report; branded PDF/DOCX is the roadmap edge you verify in-product before relying on it. Option b treats the roadmap output (branded PDF) as the default, which reverses the currency rail. Option c leans on Google Drive sync, which is 'coming soon' (Dropbox/S3 are the live connectors). Option d stacks two non-baseline assumptions (auto-email + a spend budget that doesn't exist as a hard cap).",
+          "sourceRefs": ["r-gb-knowledge-templates"]
+        },
+        {
+          "id": "kc-m10-l4-3",
+          "domainId": "m10-marketplace",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What does completing the capstone (with the checklist ticked) let you claim?",
+          "options": [
+            { "id": "a", "text": "'Automatos-ready' — you can build and run real work on Automatos; it's a shareable proof of skill, with no paid tier and no exam", "correct": true },
+            { "id": "b", "text": "A passing exam score above the A+ readiness gate", "correct": false },
+            { "id": "c", "text": "A paid certification you can only unlock by upgrading the academy", "correct": false },
+            { "id": "d", "text": "The right to sell your agents on the marketplace for revenue-share", "correct": false }
+          ],
+          "explanation": "APA is a skills track with no exam and no A+ gate — completion means 'Automatos-ready,' a shareable proof that you can build and run real work on the platform. Option b invents an exam score/A+ gate that this track deliberately doesn't have. Option c is wrong — the academy is free; there's no paid unlock. Option d ties completion to marketplace revenue-share, which doesn't exist (the contributor economy is 'coming').",
+          "sourceRefs": ["r-gb-marketplace-readme"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m10-1",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the Community Marketplace, in one sentence?",
+      "options": [
+        { "id": "a", "text": "Where you discover, browse, and install extensions for your workspace — applications, agents, playbooks, LLMs, and capabilities", "correct": true },
+        { "id": "b", "text": "The billing page where you buy academy course access", "correct": false },
+        { "id": "c", "text": "The Activity command centre where you monitor running missions", "correct": false },
+        { "id": "d", "text": "A public forum for chatting with other Automatos users", "correct": false }
+      ],
+      "explanation": "The Marketplace is the discover/browse/install surface for workspace extensions across the five tabs. Option b is wrong on two counts — it's not a billing page and the academy is free. Option c describes the Activity command centre (Dashboard/Feed/Missions), a different surface. Option d invents a forum; the marketplace is for installing and publishing items, not discussion.",
+      "sourceRefs": ["r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-2",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The Capabilities tab contains which two sub-sections?",
+      "options": [
+        { "id": "a", "text": "Plugins and Skills", "correct": true },
+        { "id": "b", "text": "Agents and Playbooks", "correct": false },
+        { "id": "c", "text": "Applications and LLMs", "correct": false },
+        { "id": "d", "text": "Tools and Triggers", "correct": false }
+      ],
+      "explanation": "Capabilities splits into Plugins (bundled packages) and Skills (individual git-based SKILL.md modules). Options b and c name other top-level Marketplace tabs (Agents, Playbooks, Applications, LLMs), not the sub-sections of Capabilities. Option d names concepts from the Applications/Tools surface (tool count, trigger count), not the Capabilities sub-sections.",
+      "sourceRefs": ["r-gb-marketplace-capabilities", "r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-3",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "When you install a pre-built agent from the Marketplace, where does it appear and in what form?",
+      "options": [
+        { "id": "a", "text": "On your Agent Roster, as an editable copy (tuned prompt, recommended model, pre-assigned skills, suggested tools) you can modify freely", "correct": true },
+        { "id": "b", "text": "In the Activity Feed, as a read-only log entry", "correct": false },
+        { "id": "c", "text": "On the marketplace listing only, until you pay to unlock it", "correct": false },
+        { "id": "d", "text": "Nowhere — installing an agent just bookmarks it for later", "correct": false }
+      ],
+      "explanation": "An installed marketplace agent lands on your Agent Roster as an editable copy with a tuned prompt, recommended model, pre-assigned skills, and suggested tools. Option b confuses installation with the Activity Feed's run log. Option c invents a paywall; installing is free and the copy is yours immediately. Option d is wrong — install creates a working agent, not a bookmark.",
+      "sourceRefs": ["r-gb-marketplace-agents"]
+    },
+    {
+      "id": "q-m10-4",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A Plugin differs from a Skill in the Capabilities tab because a Plugin is…",
+      "options": [
+        { "id": "a", "text": "…a bundled package that can include skills, commands, agent configs, and prompt templates, whereas a Skill is a single git-based SKILL.md module", "correct": true },
+        { "id": "b", "text": "…a single ability, whereas a Skill is a bundle of many plugins", "correct": false },
+        { "id": "c", "text": "…an external app integration, whereas a Skill is a pricing plan", "correct": false },
+        { "id": "d", "text": "…a language model, whereas a Skill is a channel connection", "correct": false }
+      ],
+      "explanation": "A Plugin bundles several things (skills + commands + agent configs + prompt templates); a Skill is one capability module defined by a single SKILL.md. Option b reverses them. Option c and option d both swap in unrelated concepts (app integrations, pricing, models, channels) that belong to other surfaces, not the Plugin/Skill distinction.",
+      "sourceRefs": ["r-gb-marketplace-capabilities"]
+    },
+    {
+      "id": "q-m10-5",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about the LLMs tab is correct?",
+      "options": [
+        { "id": "a", "text": "It's a browse-and-compare surface for models (pricing, context window, capabilities); you assign a model to an agent in the agent editor rather than 'installing' it", "correct": true },
+        { "id": "b", "text": "It installs a model into your workspace the way the Agents tab installs an agent", "correct": false },
+        { "id": "c", "text": "It's where you publish your own fine-tuned models for revenue-share", "correct": false },
+        { "id": "d", "text": "It only shows Anthropic models and hides every other provider", "correct": false }
+      ],
+      "explanation": "The LLMs tab lets you compare models across providers on price, context window, and capabilities; the actual model choice happens when you configure an agent. Option b is the key misconception — the tab doesn't install; it informs a choice made in the agent editor. Option c invents model publishing and revenue-share, neither of which exists. Option d is false — it lists many providers (OpenRouter, OpenAI, Anthropic, DeepSeek, Google), not just one.",
+      "sourceRefs": ["r-gb-marketplace-llms"]
+    },
+    {
+      "id": "q-m10-6",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the documented publishing flow, and what happens once an item is published?",
+      "options": [
+        { "id": "a", "text": "Submit to Marketplace with a description, category, and tags → submit for review; the item becomes available to all users with your workspace name as publisher, and installs are workspace-scoped", "correct": true },
+        { "id": "b", "text": "Set a price and connect a payout account; buyers then purchase your item", "correct": false },
+        { "id": "c", "text": "Publishing makes your live agent editable by anyone who installs it, changing your original", "correct": false },
+        { "id": "d", "text": "Nothing is published until an Automatos admin manually approves it within a documented 48-hour SLA", "correct": false }
+      ],
+      "explanation": "Publishing = Submit to Marketplace + description/category/tags + submit for review; the published item is available to all users, credited to your workspace name, and each install is a separate workspace-scoped copy. Option b adds pricing/payouts that don't exist. Option c is wrong — installs are independent copies, so no one editing their copy changes yours. Option d invents an SLA and approval detail the docs don't describe; we teach only what's documented ('submit for review').",
+      "sourceRefs": ["r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-7",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about the contributor economy is accurate today?",
+      "options": [
+        { "id": "a", "text": "Installing and publishing are live; a fuller creator ecosystem that rewards contributors is roadmap ('coming') — there is no monetization in the marketplace today", "correct": true },
+        { "id": "b", "text": "Creators earn revenue-share on every install, and it's a documented current feature", "correct": false },
+        { "id": "c", "text": "You must pay a subscription to publish anything to the marketplace", "correct": false },
+        { "id": "d", "text": "Publishing is disabled until the contributor economy launches", "correct": false }
+      ],
+      "explanation": "Sharing (install + publish) works now; creator rewards / monetization are strictly roadmap and framed as 'coming' — the marketplace docs contain zero monetization language. Option b asserts a paid feature that doesn't exist. Option c invents a pay-to-publish gate; publishing is free. Option d is wrong — publishing is live today; it's the rewarding of contributors that's still coming.",
+      "sourceRefs": ["r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-8",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You install a playbook from the Marketplace and later notice the original author has improved their version. What's true about your copy?",
+      "options": [
+        { "id": "a", "text": "Yours is an independent copy that does not auto-update; you'd have to re-install or apply changes yourself to get the author's improvements", "correct": true },
+        { "id": "b", "text": "Your copy auto-syncs to the latest version the moment the author edits theirs", "correct": false },
+        { "id": "c", "text": "Your copy is deleted and replaced automatically when the original changes", "correct": false },
+        { "id": "d", "text": "You never had a copy; you were always running the author's live version", "correct": false }
+      ],
+      "explanation": "Installed marketplace items are independent copies (a snapshot), so the author's later edits don't flow into yours automatically. Option b claims auto-sync, which is exactly what doesn't happen. Option c invents a destructive auto-replace. Option d is wrong — installing gives you your own copy, not a link to the author's live item.",
+      "sourceRefs": ["r-gb-marketplace-agents"]
+    },
+    {
+      "id": "q-m10-9",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You've installed a skill from the Capabilities tab. What's the next step to make an agent actually use it?",
+      "options": [
+        { "id": "a", "text": "Assign the skill to the agent — installing adds it to the workspace inventory; assigning attaches it to a specific agent (Agent Details → Plugins)", "correct": true },
+        { "id": "b", "text": "Nothing — installed skills automatically apply to every agent in the workspace", "correct": false },
+        { "id": "c", "text": "Publish the skill back to the marketplace to activate it", "correct": false },
+        { "id": "d", "text": "Restart the workspace so the skill loads globally", "correct": false }
+      ],
+      "explanation": "Install and assign are two distinct moves: the skill sits in your workspace inventory after install, and assigning it to an agent is what puts its know-how into that agent's system prompt. Option b is wrong — items don't auto-attach to every agent; you choose which agent gets which capability. Option c confuses publishing (sharing your own item) with using an installed one. Option d invents a restart step that isn't part of the flow.",
+      "sourceRefs": ["r-gb-marketplace-capabilities"]
+    },
+    {
+      "id": "q-m10-10",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Each card on the Applications tab shows a 'tool count' and a 'trigger count'. What do these mean?",
+      "options": [
+        { "id": "a", "text": "How many actions (tools) and how many event triggers that integration provides", "correct": true },
+        { "id": "b", "text": "How many times you've used the app and how many errors it threw", "correct": false },
+        { "id": "c", "text": "The app's price in tools and its refund count", "correct": false },
+        { "id": "d", "text": "The number of agents and playbooks that ship with the app", "correct": false }
+      ],
+      "explanation": "On the Applications tab, tool count is how many actions the integration exposes (e.g. GitHub's 50+ actions) and trigger count is how many event triggers it offers. Option b invents usage/error stats not shown on the card. Option c misreads the counts as pricing/refunds. Option d confuses an app integration with agents/playbooks, which are separate marketplace tabs.",
+      "sourceRefs": ["r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-11",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need a 'competitor research' agent and someone in the community has published a good one. What's the practitioner's buy-vs-build move?",
+      "options": [
+        { "id": "a", "text": "Install it from Marketplace → Agents as an editable copy and tune it to your needs, rather than hand-writing the prompt from scratch", "correct": true },
+        { "id": "b", "text": "Always build from scratch — installing community agents is unsafe and never worth it", "correct": false },
+        { "id": "c", "text": "Ask the author to give you edit access to their live agent", "correct": false },
+        { "id": "d", "text": "Buy the agent, since all marketplace agents are paid", "correct": false }
+      ],
+      "explanation": "Buy-vs-build says reuse what's already solved: install the community agent as a copy you own and tune it, saving the from-scratch effort. Option b is dogmatic — a well-made, editable copy you fully control is exactly what the marketplace is for. Option c misunderstands the model — you get your own copy, not access to the author's live agent. Option d is wrong — installing is free; there's no purchase.",
+      "sourceRefs": ["r-gb-marketplace-agents", "r-gb-marketplace-readme"]
+    },
+    {
+      "id": "q-m10-12",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "For the capstone Option A storefront assistant, a teammate proposes: 'auto-seed a fleet of storefront and admin agents on Shopify install, and list it on the public App Store.' How do you scope this correctly?",
+      "options": [
+        { "id": "a", "text": "Build and claim only the live slice — a single storefront chat widget grounded in your docs; multi-agent seeding, admin agents, and a public App Store listing are in-development, not part of the capstone", "correct": true },
+        { "id": "b", "text": "Build all of it — multi-agent seeding and the App Store listing are confirmed-live features", "correct": false },
+        { "id": "c", "text": "Skip the widget entirely and just ship the admin agents, which are the mature part", "correct": false },
+        { "id": "d", "text": "Abandon Option A — none of the storefront pattern is live enough to build on", "correct": false }
+      ],
+      "explanation": "The confirmed-live slice is one storefront chat widget grounded in your docs; the architecture supports more, but multi-agent seeding, admin agents, and a public App Store listing are in-development — so you build and claim only the live part. Option b treats roadmap items as live, exactly the currency trap to avoid. Option c inverts reality — admin agents are the in-development side, and the storefront widget is the live one. Option d over-corrects; the storefront widget is genuinely live (the landing site and the academy's own tutor run on it), so Option A is buildable.",
+      "sourceRefs": ["r-gb-api-widgets", "r-widget-embedding"]
+    },
+    {
+      "id": "q-m10-13",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the capstone, you want your knowledge docs available to the agent. Which approach is the reliably-live one?",
+      "options": [
+        { "id": "a", "text": "Upload the documents directly in the Documents tab — always live, no connector needed", "correct": true },
+        { "id": "b", "text": "Sync them from Google Drive, the documented default for the capstone", "correct": false },
+        { "id": "c", "text": "Sync them from OneDrive via the built-in connector", "correct": false },
+        { "id": "d", "text": "You can't get documents to an agent without a cloud-sync connector", "correct": false }
+      ],
+      "explanation": "Direct upload via the Documents tab is always live and needs no connector — the dependable path for the capstone. Options b and c both rely on Google Drive / OneDrive sync, which are 'coming soon' (Dropbox and S3 are the live cloud-sync connectors). Option d is false — direct upload is the primary way to load documents; cloud sync is an optional convenience, not a requirement.",
+      "sourceRefs": ["r-gb-knowledge-documents"]
+    },
+    {
+      "id": "q-m10-14",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Across both capstone options, what's described as the number-one lever for keeping running costs down?",
+      "options": [
+        { "id": "a", "text": "Choosing a cheaper model for routine, high-volume agents (compare on the LLMs tab, assign in the agent editor, track in Analytics → LLM & Costs)", "correct": true },
+        { "id": "b", "text": "Setting a hard pre-configured spend ceiling that blocks all activity at a fixed dollar amount", "correct": false },
+        { "id": "c", "text": "Publishing your agent to the marketplace to earn credits that offset usage", "correct": false },
+        { "id": "d", "text": "Turning off the knowledge base so the agent reads fewer tokens", "correct": false }
+      ],
+      "explanation": "Cheaper-model routing on routine, high-volume work is the biggest cost lever — you compare on the LLMs tab, assign in the agent editor, and watch spend in Analytics. Option b describes a hard spend cap, which isn't a live feature (the platform offers cost alerts and mission pause/resume-with-budget, not a pre-set ceiling). Option c invents earn-to-offset credits; the contributor economy is 'coming' and there's no such mechanism. Option d sabotages the build's whole point (grounded answers) to save trivial tokens — not the recommended lever.",
+      "sourceRefs": ["r-gb-marketplace-llms"]
+    },
+    {
+      "id": "q-m10-15",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A colleague, mid-capstone, wants to publish their half-finished storefront agent to the Marketplace 'to get feedback and maybe some early sales.' What's the accurate guidance?",
+      "options": [
+        { "id": "a", "text": "Publishing is live and free (Submit to Marketplace → description/category/tags), and it credits your workspace as publisher — but there are no sales; the contributor economy is 'coming', and you'd usually finish and test the agent before publishing", "correct": true },
+        { "id": "b", "text": "Go ahead — early sales revenue starts flowing as soon as anyone installs it", "correct": false },
+        { "id": "c", "text": "Publishing is impossible for individual users, so the idea can't work", "correct": false },
+        { "id": "d", "text": "Publishing requires a paid academy upgrade before it's allowed", "correct": false }
+      ],
+      "explanation": "The honest picture: publishing is a live, free flow that credits your workspace name, but there is no monetization — 'sales' don't exist, since creator rewards are roadmap ('coming'); good practice is to finish and test before you publish something others will install. Option b promises sales revenue that the marketplace doesn't provide. Option c is false — any workspace can publish its own agents/playbooks/plugins. Option d invents a paid gate; both the academy and publishing are free.",
+      "sourceRefs": ["r-gb-marketplace-readme", "r-gb-marketplace-agents"]
+    },
+    {
+      "id": "q-m10-16",
+      "domainId": "m10-marketplace",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Installing which one of the five tabs does NOT put a copy of an extension into your workspace?",
+      "options": [
+        { "id": "a", "text": "LLMs — it's a compare-before-you-choose catalogue; models are assigned to agents, not installed as workspace extensions", "correct": true },
+        { "id": "b", "text": "Agents — installing does nothing to your workspace", "correct": false },
+        { "id": "c", "text": "Capabilities — Plugins and Skills can't be installed", "correct": false },
+        { "id": "d", "text": "Applications — app integrations can't be added", "correct": false }
+      ],
+      "explanation": "LLMs is the browse-and-compare tab; you don't install a model there — you assign one to an agent in the editor. Option b is wrong — installing an agent puts an editable copy on your Roster. Option c is wrong — Plugins and Skills both install into your workspace inventory (then you assign them). Option d is wrong — Applications install app integrations (they show as 'Added'). Only the LLMs tab is a catalogue rather than an install surface.",
+      "sourceRefs": ["r-gb-marketplace-llms", "r-gb-marketplace-readme"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m10-install-and-publish",
+      "domainId": "m10-marketplace",
+      "title": "Reuse and contribute: install a marketplace agent, assign a capability, publish one back",
+      "goal": "Do the three core Marketplace moves for real: install a pre-built agent as an editable copy on your Roster, install a capability (a Skill or Plugin) and assign it to that agent, and publish one of your own agents or playbooks to the community. You'll come away having both consumed from and contributed to the community library.",
+      "steps": "## What you'll do\n\nThe module's 'Try it now', turned into a guided run. Everything here maps to `marketplace/README.md`, `marketplace/agents.md`, and `marketplace/capabilities.md`. No monetization is involved — publishing today credits you and helps the community; there are no earnings.\n\n### Before you start\n\n- **Sign in.** Your personal workspace is created automatically on first login and you're the Admin, so every step here is solo-achievable.\n- **Have one of your own items ready to publish.** An agent you built in module 01, or a playbook from module 04 (e.g. 'Daily Repo Digest'), is perfect for Part C.\n\n### Part A — Install a marketplace agent (as an editable copy)\n\n1. **Go to Marketplace → Agents.** Browse the cards; open one that fits a job you actually have (support, research, writing).\n2. **Read the card details** — note the tuned system prompt, the recommended model, and the pre-assigned skills. This is what you're about to receive.\n3. **Click Install.** Confirm the agent now appears on your **Agent Roster**.\n4. **Make it yours.** Open it and change something — rename it, or (the cost reflex) swap the recommended model for a cheaper one if your use is routine and high-volume. Confirm the edit sticks and that nothing about the marketplace listing changed — proof it's your own copy.\n\n### Part B — Install a capability and assign it\n\n5. **Go to Marketplace → Capabilities.** Choose the **Skills** sub-tab (a single ability) or **Plugins** (a bundle). Open a card that would sharpen your Part-A agent — e.g. a summarisation or formatting skill.\n6. **Click Install.** It's now in your workspace inventory (the 'Installed' state) — but not yet doing anything.\n7. **Assign it to your agent.** From the agent's details (Agent Details → Plugins), attach the installed capability to your Part-A agent.\n8. **Chat-test it.** Send the agent a message that exercises the new capability and confirm its behaviour changed (e.g. replies now follow the skill's format). That's the install-then-assign loop working.\n\n### Part C — Publish one of your own items back\n\n9. **Open one of your own items** — an agent or a playbook you built.\n10. **Click Submit to Marketplace** (on an agent it may read **Publish to Marketplace** from the agent details).\n11. **Add a good description, a sensible category, and specific tags.** Write for a stranger searching: say what it does and when to use it. (Description, category, and tags are what people search across — lesson 1.)\n12. **Submit for review.** Confirm the item is submitted with your workspace name as the publisher. You've now contributed to the community library.\n\n### A note on cost\n\nInstalling and publishing don't cost anything, but *running* your installed agent uses a model, and models cost money per use. The realistic setup for an operator is bring-your-own-key (supply your provider key in Settings). If you swapped to a cheaper model in Part A, you've already pulled the biggest cost lever — module 09 covers cost tracking in full.",
+      "checklist": [
+        "Signed in and working in your own personal workspace",
+        "Installed a pre-built agent from Marketplace → Agents and confirmed it appears on your Agent Roster",
+        "Edited the installed agent (renamed and/or swapped to a cheaper model) and confirmed it's an editable copy that didn't change the listing",
+        "Installed a capability from Marketplace → Capabilities (a Skill or a Plugin) into your workspace inventory",
+        "Assigned the installed capability to your agent (Agent Details → Plugins) and chat-tested that its behaviour changed",
+        "Opened one of your own agents or playbooks and clicked Submit/Publish to Marketplace",
+        "Added a description, category, and tags written for a searcher, and submitted for review with your workspace name as publisher",
+        "Understood that publishing credits you and helps the community — there is no monetization today (contributor economy is 'coming')"
+      ]
+    },
+    {
+      "id": "lab-m10-capstone-ship-it",
+      "domainId": "m10-marketplace",
+      "title": "TRACK CAPSTONE — ship one real thing end to end, and become Automatos-ready",
+      "goal": "Ship your first real, working build on Automatos and self-verify it. Choose Option A (flagship): a widget-embedded chat agent grounded in your product/policy docs, answering on a live test web page; or Option B: an agent plus a playbook (or mission) that produces a real markdown deliverable. Finishing either — checklist ticked — is what 'Automatos-ready' means.",
+      "steps": "## This is the one that counts\n\nEverything in the track led here. Pick ONE option and ship it end to end. Both are grounded in shipped capabilities — do not lean on anything from the currency-trap list (branded PDF/DOCX generation, Google Drive/OneDrive sync, a pre-set spend ceiling, or marketplace earnings). If a piece isn't in these steps, verify it's live in-product before you depend on it.\n\n---\n\n## OPTION A (flagship) — a widget-embedded storefront assistant\n\nThe module-08 storefront pattern, scoped to the live slice: an agent + a knowledge base + the embeddable chat widget on a test page. Grounded in `api-reference.md` (Widgets), the widget SDK's `EMBEDDING.md`, and `knowledge/documents.md`. Two live proof points you're building on the same rails as: the automatos.app landing site and this academy's own tutor.\n\n### A1 — Build and ground the agent\n\n1. **Create (or install-and-tune) an agent** for storefront/support answering. Installing a marketplace support agent (from the previous lab) as your starting point is entirely fair — tune it to your business.\n2. **Upload your knowledge docs** in the **Documents** tab — a product sheet, an FAQ, and a returns/shipping policy (real or realistic test content). Direct upload is always live; no cloud-sync connector needed. Wait for processing to complete (status 'completed').\n3. **Confirm grounding in Chat first.** Before touching the widget, ask the agent a question only your docs could answer (e.g. 'what's your return window?'). It should answer *from your content*. If it doesn't, check the docs finished processing and are retrievable (module 03's Search tab). Get grounding right here — the widget is just a surface over this same agent.\n\n### A2 — Get a public key (origin-locked)\n\n4. **Create a public API key** (`ak_pub_*`) scoped to the widget and locked to the origin your test page will run on. In the dashboard: Settings → API Keys → Create Key → type **Public**, check the **chat** permission, and add your domain(s) — use the bare host with no scheme or path (e.g. `localhost:5173` for local testing, or your real site host). **Copy the full key from the success modal — it's shown once.**\n\n### A3 — Embed the widget on a test page\n\n5. **Create a minimal test HTML page** (a single `.html` file is enough) and add the loader script tag plus one `init()` call in the head:\n   ```html\n   <script src=\"https://widgets.automatos.app/v0/widget.global.js\" defer crossorigin=\"anonymous\"></script>\n   <script>\n     document.addEventListener('DOMContentLoaded', function () {\n       AutomatosWidget.init({\n         apiKey: 'ak_pub_your_key_here',\n         widget: 'chat',\n         position: 'bottom-right',\n         greeting: 'Hi! Ask us about our products or policies.'\n       });\n     });\n   </script>\n   ```\n6. **Serve the page from an allowed origin** (the host you added to the key's allow-list) and open it. A chat bubble should appear bottom-right, backed by your workspace agent.\n\n### A4 — Prove it works\n\n7. **Ask the widget a docs-only question** (the same one from A1). It should answer correctly, from your knowledge base, in the widget on your page — not the Automatos app. That's a live, grounded, embedded storefront assistant. Screenshot it.\n8. **(Cost reflex)** If this is a high-volume FAQ bot, confirm the agent is on a sensibly cheap model — compare on the LLMs tab, set it in the agent editor.\n\n---\n\n## OPTION B — an agent + playbook/mission producing a deliverable\n\nA back-office build: an agent + a repeatable playbook (or an open-ended mission) that yields a real markdown deliverable. Grounded in `agents/playbooks.md`, `activity/missions.md`, `knowledge/templates.md`, and `activity/reports.md`.\n\n### B1 — Build the agent and the work\n\n1. **Create or install-and-tune an agent** for the job (a research/analyst/writer role).\n2. **Choose the execution mode with judgment** (module 04's core call): if the steps are known and you'll repeat them, build a **Playbook**; if it's an open-ended one-off, run a **Mission** (you approve its plan). Ground any docs it needs by uploading them in the Documents tab.\n\n### B2 — Produce a templated deliverable\n\n3. **Use a markdown template** with `{{placeholders}}` for the output (module 07's live baseline — e.g. a Research Summary or a status report), and have the agent fill it. The result is a **markdown report** (reports live at `/reports/{agent}/…`). Do **not** rely on branded PDF/DOCX unless you've verified it in-product.\n4. **Run it** — fire the playbook (Run + inputs) or approve and run the mission — and **watch it in Activity → Feed**.\n\n### B3 — Prove it works\n\n5. **Open the produced deliverable** and confirm it's real, correctly filled from the agent's work, and genuinely useful. Screenshot it.\n\n---\n\n## Self-verify — the 'Automatos-ready' claim\n\nWork the checklist for your chosen option. When every box for your option is ticked and you can point at a working artifact (the live widget answering, or the produced deliverable), you have shipped a real thing on Automatos end to end. **That is what 'Automatos-ready' means** — not an exam score, not a paid badge, but honest proof of skill: you can build and run real work on Automatos. Keep the screenshot; it's your evidence.",
+      "checklist": [
+        "Chose ONE option (A: storefront assistant, or B: agent + playbook/mission + deliverable) and confirmed every piece is on the live, in-scope list",
+        "OPTION A: built/tuned a support agent AND uploaded product/policy docs to the Documents tab (direct upload; processing completed)",
+        "OPTION A: confirmed the agent answers a docs-only question correctly in Chat BEFORE embedding (grounding verified)",
+        "OPTION A: created an origin-locked public key (ak_pub_*) with the chat permission and your test host on the allow-list",
+        "OPTION A: embedded the widget on a test page with the script tag + init() call and served it from the allowed origin",
+        "OPTION A: the widget answered a docs-only question correctly on the page (not in the Automatos app) — screenshot kept",
+        "OPTION B: built/tuned an agent AND chose Playbook (known/repeatable) or Mission (open-ended one-off) with correct judgment",
+        "OPTION B: produced a real markdown deliverable from a {{placeholder}} template, ran it, and watched it in Activity → Feed — screenshot kept",
+        "Did NOT depend on any currency-trap feature (branded PDF/DOCX, Google Drive/OneDrive sync, a pre-set spend ceiling, or marketplace earnings)",
+        "AUTOMATOS-READY: a real thing shipped end to end, self-verified, with a working artifact to show for it"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gb-marketplace-readme",
+      "title": "Automatos AI — Marketplace overview (platform docs)",
+      "url": "automatos-gitbook/marketplace/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The spine of this module: the five tabs (Applications / Agents / Playbooks / LLMs / Capabilities), including the Applications tab's app cards (name, category, tool count = actions, trigger count = event triggers, Added/Available status, Composio-powered); the stats bar (Total Items, Categories, Featured, and Total Installs = YOUR installs); search across all tabs; and the publishing flow (Submit to Marketplace → description/category/tags → submit for review; available to all users, your workspace name as publisher, installs workspace-scoped). Read the publishing section literally — it documents no reviewer/SLA and zero monetization; the contributor economy is 'coming', not a current earnings feature. Pairs with the APA track brief (PRD-S1): completion of the capstone = 'Automatos-ready', a shareable proof of skill on a FREE academy with no exam and no paid tier.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-marketplace-agents",
+      "title": "Automatos AI — Marketplace Agents (platform docs)",
+      "url": "automatos-gitbook/marketplace/agents.md",
+      "kind": "first-party-doc",
+      "annotation": "Installing a pre-built agent: what you receive (tuned system prompt, model recommendation, pre-assigned git-based skills, tool suggestions), that it lands on your Agent Roster, and the key fact for the whole module — installed agents are editable COPIES you can modify freely without affecting the marketplace listing or other users. The same 'install = independent copy' rule applies to marketplace PLAYBOOKS: they're copied into your workspace library (under Agents → Playbooks), reference agent ROLES mapped to your agents on install, and do NOT auto-update when the marketplace version changes. Also the per-agent 'Publish to Marketplace' path (description + category → submit for review). No monetization anywhere in this page.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-marketplace-capabilities",
+      "title": "Automatos AI — Marketplace Capabilities: Plugins & Skills (platform docs)",
+      "url": "automatos-gitbook/marketplace/capabilities.md",
+      "kind": "first-party-doc",
+      "annotation": "The source for the distinction a practitioner must keep straight: a Plugin is a bundled package (skills + commands + agent configs + prompt templates); a Skill is a single git-based module defined by one SKILL.md (instructions, prompts, tool definitions). Both install into your workspace inventory, then must be ASSIGNED to an agent (Agent Details → Plugins) to change behaviour. Installed vs available states. Ties directly to module 02's skill library (the automatos-skills repo) and the signature agents.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-marketplace-llms",
+      "title": "Automatos AI — Marketplace LLMs (platform docs)",
+      "url": "automatos-gitbook/marketplace/llms.md",
+      "kind": "first-party-doc",
+      "annotation": "The browse-and-COMPARE tab (not an install surface): model cards across providers (OpenRouter 100+, OpenAI, Anthropic, DeepSeek, Google) showing pricing per million tokens, context window, capabilities (vision/function-calling/JSON), and speed. The model is assigned to an agent in the agent editor, not 'installed' here. This is where the number-one cost lever gets informed — compare cheaper models on a routine, high-volume agent, then assign in the editor; the page itself points you to Analytics → LLM & Costs (module 09) to track ACTUAL spend, and reminds you list pricing differs from real cost by usage volume. Note the live budget model: cost alerts + mission pause/resume-with-increased-budget, NOT a pre-set hard spend ceiling.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-api-widgets",
+      "title": "Automatos AI — API Reference: Widgets (Embedded SDK) (platform docs)",
+      "url": "automatos-gitbook/api-reference.md",
+      "kind": "first-party-doc",
+      "annotation": "The gitbook's live proof of the embeddable widget for capstone Option A: the Widgets endpoint group (POST /api/widgets/chat SSE streaming, /api/widgets/documents, /api/widget-memory) backing a workspace agent. Confirms the widget chat surface is a shipped, documented capability — the storefront assistant is built on real, live rails, not roadmap.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-widget-embedding",
+      "title": "Automatos Widget SDK — EMBEDDING.md (automatos-widget-sdk/docs/EMBEDDING.md)",
+      "url": "automatos-widget-sdk/docs/EMBEDDING.md",
+      "kind": "first-party-doc",
+      "annotation": "The canonical how-to for capstone Option A: embed a chat widget on any page with one script tag (widgets.automatos.app/v0/widget.global.js) + one AutomatosWidget.init({ apiKey, widget:'chat', ... }) call, authenticated by an origin-locked public key (ak_pub_*, bare-host allow-list, shown once). Works on static HTML, React/Next/Vite, Shopify, WordPress, Webflow. Two live proof points to build on the same rails as: the automatos.app landing site and the academy's own tutor. This is a widget-SDK-repo source (the how); the gitbook api-reference is the proof it's live.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-knowledge-documents",
+      "title": "Automatos AI — Knowledge: Documents (platform docs)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "first-party-doc",
+      "annotation": "For grounding the capstone agent: direct document upload (drag/drop or Upload) → the always-live ingestion pipeline (parse → chunk → embed → index) → the Search tab to confirm retrieval is exactly what agents see. Supported types (.md/.txt/.csv/.json/.docx/.xlsx/.pptx/.pdf-with-OCR/code/.html). Use direct upload for the capstone — it's the reliably-live path and needs no cloud-sync connector. Currency caveat: of the cloud-sync connectors, Dropbox and S3 are LIVE while Google Drive and OneDrive are 'coming soon', so don't build the capstone around Drive/OneDrive sync — upload directly instead.",
+      "domainIds": ["m10-marketplace"]
+    },
+    {
+      "id": "r-gb-knowledge-templates",
+      "title": "Automatos AI — Knowledge: Templates (platform docs)",
+      "url": "automatos-gitbook/knowledge/templates.md",
+      "kind": "first-party-doc",
+      "annotation": "For capstone Option B's deliverable: templates are markdown document structures with {{placeholder}} variables the agent fills at generation time (Daily Standup, Security Audit, Code Review, Research Summary). The agent's filled output is saved as a markdown REPORT (reports live at /reports/{agent}/…) — this markdown baseline is the LIVE, dependable path. Branded PDF/DOCX generation, block templates, and a brand kit are the roadmap edge to verify in-product, not assume.",
+      "domainIds": ["m10-marketplace"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-10-1",
+      "title": "10 · The Marketplace — the five tabs, installing an agent as an editable copy, Plugins vs Skills, and publishing back",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m10-marketplace"],
+      "sourceNotebook": "platform-architect / m10 / marketplace-install-and-publish"
+    },
+    {
+      "id": "v-10-2",
+      "title": "10 · The capstone — ship one real thing end to end (storefront assistant or agent+deliverable) and become Automatos-ready",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m10-marketplace"],
+      "sourceNotebook": "platform-architect / m10 / capstone-ship-it"
+    }
+  ]
+}

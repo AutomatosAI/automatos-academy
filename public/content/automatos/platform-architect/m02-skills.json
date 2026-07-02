@@ -1,0 +1,582 @@
+{
+  "id": "m02-skills",
+  "order": 2,
+  "code": "02",
+  "name": "Skills — the library, the signature agents, authoring a SKILL.md",
+  "tagline": "A skill teaches an agent HOW to do a job — a git-based SKILL.md of instructions, process, output format, and guardrails that gets injected into the agent's system prompt, so a playbook doesn't have to micromanage every tool call. Keep skill / plugin / tool distinct, browse the library and the nine signature agents, install-and-assign a skill, then author a minimal SKILL.md of your own.",
+  "overview": "In Module 01 you built an agent from a brief and let the Universal Router send it work. That agent is competent but generic. This module is how you make it *good at a specific job* — by teaching it a skill. A skill in Automatos is a git-based capability defined by a single `SKILL.md` file: instructions, a numbered workflow with real tool calls, an output-format template, and a list of anti-patterns. When you assign it, that content is injected into the agent's system prompt, so the agent now knows the *procedure* for the job — which means a playbook can say 'file the P0 and P1 bugs as tickets' instead of spelling out every field of every tool call. The first thing to get straight, and to keep straight, is three words that people blur: a **Skill** teaches an agent how to do a job; a **Tool** is one external app action the agent can call (Composio, 1,000+ apps); a **Plugin** is a *bundle* — skills plus commands plus agent configs plus prompt templates, installed together. Get those confused and you'll misjudge what to reach for. From there you'll tour the library (the `automatos-skills` README indexes 128 skills across 16 groups), meet the nine signature agents that ship as pre-built configurations (SENTINEL, PATCHER, SCOUT, HARPER, ECHO, ATLAS, FORGE, ORACLE, RALLY), and learn the two hands-on moves every builder needs: installing a skill from Marketplace → Capabilities → Skills and assigning it to an agent, and authoring a minimal `SKILL.md` for a role you care about. The judgment thread running through it all: a skill is the right tool when you want *reusable know-how* attached to an agent — not when you want a one-off instruction (that's a chat message), a multi-step orchestration (that's a playbook, Module 04), or a raw capability (that's a tool, Module 03). And when you scope the tools a skill declares, you scope least-privilege on purpose. If you came from AI Business Foundations, this is the machinery behind Module 04's 'give the agent a job to do well.'",
+  "objectives": [
+    "Keep skill, plugin, and tool distinct: a skill teaches an agent HOW to do a job (a git-based SKILL.md injected into the system prompt), a tool is one external app action (Composio), and a plugin is a bundle of skills + commands + agent configs + prompt templates.",
+    "Explain how a skill changes agent behaviour — it moves the mechanical detail (tool names, parameters, output shape) into the agent so a playbook or chat message can carry only intent.",
+    "Navigate the library as documented in the automatos-skills README (128 skills indexed across 16 groups) and name the beat of each of the nine signature agents, including FORGE as the playbook builder (its 'recipe builder' blurb is legacy naming).",
+    "Install a skill from Marketplace → Capabilities → Skills and assign it to an agent via the Agent Details → Plugins tab (or Step 5 of the create-agent flow), then chat-test the sharper behaviour.",
+    "Author a minimal, valid SKILL.md — YAML frontmatter (name as the identity, description, version, tags, category: agent-role, a 3–6 tool list of real Automatos tool names) plus the four required body sections (Identity, Workflow with JSON tool calls, Output Format, What NOT To Do), kept to 60–100 lines.",
+    "Apply the judgment: choose a skill over a chat message, a playbook, or a new agent for the right reason; scope a skill's declared tools to least privilege; and use SENTINEL and SCOUT as the two reference patterns for a monitoring role versus a sales/outreach role."
+  ],
+  "lessons": [
+    {
+      "id": "m02-l1-skill-plugin-tool",
+      "title": "What a skill is — and how it differs from a plugin and a tool",
+      "estMinutes": 14,
+      "objective": "Define a skill precisely, keep it distinct from a plugin and a tool, and explain how assigning a skill changes what an agent does.",
+      "body": "## The one-sentence definition\n\nA **skill** is a git-based capability defined by a single `SKILL.md` file — instructions, a step-by-step process, an output format, and guardrails — that gets **injected into an agent's system prompt** when you assign it. In the platform's own words (Marketplace → Capabilities → Skills): *\"Skills are defined by a `SKILL.md` file in a git repository with instructions, prompts, and tool definitions.\"* The `automatos-skills` repo puts it more plainly: a skill *\"teaches it **how** to do a job without the recipe prompt micromanaging every tool call.\"*\n\nThat last clause is the whole point, so read it twice. Without a skill, if you want an agent to file bug tickets consistently, *something* has to specify the JIRA project key, the summary format, which priority maps to P0, which labels to attach — and that something ends up being a long, brittle playbook prompt. With a skill assigned, that mechanical knowledge lives *inside the agent*. The playbook shrinks to intent.\n\n## The three words people blur — keep them distinct\n\nMost confusion on this platform comes from treating Skill, Tool, and Plugin as loose synonyms. They are not. Hold these three definitions apart:\n\n- **Skill** — *know-how.* A `SKILL.md` that teaches an agent the procedure for a job: how to approach it, what steps to run, what the output should look like, what not to do. It carries no live app credentials of its own; it *references* tools by name.\n- **Tool** — *a capability.* One external app action the agent can call. On Automatos these come through Composio (1,000+ apps): `GMAIL_SEND_EMAIL`, `JIRA_CREATE_ISSUE`, `SLACK_SEND_MESSAGE`, plus the built-in `platform_*` and `workspace_*` functions. A tool is a *verb the agent can perform*; a skill is *the playbook for when and how to use those verbs*.\n- **Plugin** — *a bundle.* Per the docs, a plugin is a packaged set that *\"can include: Skills (git-based capabilities), Commands (custom tool definitions), Agent configurations, Prompt templates.\"* A plugin is the shipping container; a skill can be one of the things inside it.\n\nA clean mental model: **a Tool is a power drill, a Skill is the instruction sheet for building the shelf, and a Plugin is the flat-pack box that arrives with the drill bits, the instructions, and the pre-cut panels together.** You install a plugin to get several things at once; you install a skill to teach one job; the tools are the actions those instructions call.\n\n## What actually happens when you assign a skill\n\nHere is the mechanism, end to end, so the abstraction becomes concrete:\n\n1. You install a skill from the Marketplace. It lands in your **workspace inventory** (\"Installed\" items, versus \"Available\" ones still in the marketplace).\n2. You **assign** it to an agent (via Agent Details → Plugins, or at agent-creation Step 5 — covered next lesson).\n3. From then on, when that agent runs, the skill's body is **prepended to its system prompt**. The agent now behaves as though those instructions were part of how it was built.\n\nBecause a skill is just markdown injected as context, two consequences follow that experienced builders rely on. First, **skills compose** — the `automatos-skills` README notes that 1–3 skills per agent is the sweet spot, because you can stack a role skill with a thin integration skill (a Gmail skill, a Jira skill) and the agent gains both procedures. Second, **skills are cheap to change** — edit the `SKILL.md`, re-import, and the loader updates it in place. No redeploy.\n\n## Worked walkthrough: the same job, with and without a skill\n\nThe `automatos-skills` README ships a before/after that makes this tangible. The job: create Jira tickets for the P0 and P1 bugs coming out of a QA report.\n\n**Before — no skill assigned.** The playbook step has to carry every mechanical detail itself:\n\n```\nCreate JIRA tickets for P0 and P1 issues from the QA report.\nRead scratchpad key \"qa_report\" for the issues array.\nFor each issue where severity is P0 or P1, call JIRA_CREATE_ISSUE:\n  project_key: \"PILOT\"\n  summary: \"[Nightly Test] \" + issue.title\n  issue_type: \"Bug\"\n  priority_name: \"Highest\" (P0) or \"High\" (P1)\n  labels: [\"auto-test\", \"nightly-run\", issue.category]\n  description: test nodeid, error snippet, root cause hint, severity\n```\n\n**After — the `jira-admin` skill assigned.** The same result, but the step now carries only intent:\n\n```\nCreate Jira bug tickets in PILOT for all P0 and P1 bugs from the qa_report.\nLabel them \"auto-test\" and \"nightly-run\". Export ticket keys to scratchpad.\n```\n\nThe README's summary line is the lesson: *\"The skill owns the mechanical detail; the recipe owns the intent.\"* Notice what moved. The field mappings, the priority translation, the label conventions — all of that shifted from the fragile, per-run prompt into the reusable skill. Write it once in the skill, and every playbook or chat that uses that agent inherits it.\n\n## Why this matters for judgment\n\nOnce you see a skill as *portable know-how*, the choice of when to use one gets clearer (we return to it at the end of the module). A skill earns its keep when the same procedure will be used **more than once** — by multiple playbooks, across many chat sessions, or by several agents. If you only need a behaviour once, a chat message is enough. If you need several steps *orchestrated across agents*, that's a playbook's job, not a skill's. Keeping skill, tool, and plugin distinct is what lets you make that call without fumbling.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m02-l1-1",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In Automatos, what is a skill?",
+          "options": [
+            { "id": "a", "text": "A git-based capability defined by a SKILL.md file that gets injected into an agent's system prompt, teaching it how to do a job", "correct": true },
+            { "id": "b", "text": "A single external app action the agent can call, like sending an email or creating an issue", "correct": false },
+            { "id": "c", "text": "A bundled package containing skills, commands, agent configurations, and prompt templates", "correct": false },
+            { "id": "d", "text": "A live database connection that gives the agent access to your workspace data", "correct": false }
+          ],
+          "explanation": "A skill is a SKILL.md (instructions, process, output format, guardrails) loaded from git and injected into the agent's system prompt — it teaches the agent *how* to do a job. Option b describes a Tool, one external app action (Composio) — a skill references tools by name but is not itself a tool. Option c describes a Plugin, which is the bundle that can *contain* skills. Option d describes knowledge/RAG access (Module 03), not a skill.",
+          "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+        },
+        {
+          "id": "kc-m02-l1-2",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Using the drill / instruction-sheet / flat-pack-box analogy, which mapping is correct?",
+          "options": [
+            { "id": "a", "text": "Tool = the power drill; Skill = the instruction sheet for building the shelf; Plugin = the flat-pack box with drill bits, instructions, and panels together", "correct": true },
+            { "id": "b", "text": "Skill = the power drill; Tool = the instruction sheet; Plugin = a single drill bit", "correct": false },
+            { "id": "c", "text": "Plugin = the power drill; Skill = a single drill bit; Tool = the instruction sheet", "correct": false },
+            { "id": "d", "text": "Tool = the instruction sheet; Skill = the flat-pack box; Plugin = the power drill", "correct": false }
+          ],
+          "explanation": "A tool is the action-performing verb (the drill), a skill is the procedure that says when and how to use those actions (the instructions), and a plugin is the bundle that ships several things together (the flat-pack box). Options b, c, and d all swap at least one role — the give-away is that a skill is never the raw action-performer and a plugin is never a single item; a plugin is by definition a bundle.",
+          "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+        },
+        {
+          "id": "kc-m02-l1-3",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The automatos-skills README shows the same Jira-ticket job 'before' (a long playbook spelling out project key, summary format, priority mapping, and labels) and 'after' assigning the jira-admin skill (a two-line 'file the P0/P1 bugs, label them, export keys'). What changed?",
+          "options": [
+            { "id": "a", "text": "The mechanical detail moved from the per-run playbook into the reusable skill — 'the skill owns the mechanical detail; the recipe owns the intent'", "correct": true },
+            { "id": "b", "text": "The agent gained a new tool it didn't have before; the skill installed JIRA_CREATE_ISSUE for it", "correct": false },
+            { "id": "c", "text": "The job now runs without any tools at all, because the skill replaces tool calls with plain text", "correct": false },
+            { "id": "d", "text": "The skill made the job run faster by caching the previous Jira tickets", "correct": false }
+          ],
+          "explanation": "The field mappings, priority translation, and label conventions shifted from the fragile per-run prompt into the skill, so the playbook shrinks to intent — the README's exact summary. Option b confuses a skill with a tool: the skill references JIRA_CREATE_ISSUE but does not install a tool. Option c is wrong — the skill still drives real tool calls; only the *instructions for them* moved. Option d invents a caching behaviour that isn't part of what a skill does.",
+          "sourceRefs": ["r-skills-readme"]
+        }
+      ]
+    },
+    {
+      "id": "m02-l2-library-and-signatures",
+      "title": "The library and the nine signature agents — install and assign",
+      "estMinutes": 15,
+      "objective": "Navigate the skill library as the README documents it, name the nine signature agents' beats, and install-and-assign a skill to an agent.",
+      "body": "## The library, as documented\n\nThe `automatos-skills` repository is the canonical library, and its README is the source of truth for what's in it: **\"128 skills indexed,\"** physically organised into **16 top-level group directories**. Treat that 128 as the README's published figure, not a live meter — the working tree drifts (there are more `SKILL.md` files on disk than the indexed count) and the marketplace shows what's actually installable at any moment. When you cite a number, cite the README's 128 and say \"across 16 groups\"; don't assert a precise live count.\n\nThe 16 groups map to how real teams are shaped:\n\n| Group | What lives there |\n|---|---|\n| **team** (9) | The signature named agents (below) |\n| **shopify** (21) | Storefront + admin + build skills for the commerce vertical |\n| **engineering** (11) | Backend, frontend, mobile, data, database, architecture |\n| **quality** (9) | Code review, QA, security, accessibility, compliance |\n| **social** (12) | Per-channel specialists + cross-channel ops |\n| **design** (11) | UI, UX, brand, visuals, carousels |\n| **product** (8) | PM, project management, sprint planning, feedback synthesis |\n| **sales** (8) | Deal strategy, discovery, outbound, proposals, pipeline |\n| **integrations** (8) | Thin Composio skills — one toolkit each (Gmail, Slack, Jira…) |\n| **marketing** (7) | Growth, ASO, trends, PPC, creative |\n| **content** (7) | Editorial, technical writing, documents, SEO |\n| **devops** (6) | CI/CD, SRE, incident response, git workflow |\n| **analytics** (5) | Reporting, finance tracking, optimisation |\n| **people-ops** (3) | Recruitment, supply chain, dev advocacy |\n| **research** (2) | Web research, platform management |\n| **support** (1) | First-line support responder |\n\nTwo of those groups are worth calling out for the judgment they encode. The **integrations** group is deliberately *thin* — each skill teaches an agent how to use exactly one external toolkit, so you can compose a role skill with an integration skill (a `sales/deal-strategist` agent that also gets `integrations/gmail-automation`). And **quality** is where the code-review and security procedures live — the natural partner for the engineering agent you'll build later.\n\n## The nine signature agents\n\nUnder `team/` live the nine signature named agents — each has a persona, a beat, and ships as a **pre-built configuration** you can install straight from Marketplace → Agents (a tuned system prompt, a recommended model, and a pre-assigned skill set). Know each one's beat in a sentence:\n\n- **SENTINEL** — infrastructure/workspace watchdog: error spikes, slow LLM calls, cost anomalies, backed by evidence.\n- **PATCHER** — end-to-end bug fixer: read ticket → find code → write a failing test → minimal fix → verify → draft PR.\n- **SCOUT** — lead intelligence: qualify signups, score prospects, draft outreach, track pipeline.\n- **HARPER** — content machine: turn platform activity into LinkedIn posts, changelogs, social content.\n- **ECHO** — customer support: classify messages, auto-reply FAQs, create bug tickets, flag churn signals.\n- **ATLAS** — business intelligence: weekly cost/revenue, usage trends, anomaly detection, optimisation recs.\n- **FORGE** — **playbook builder**: natural language → a multi-step workflow with agent assignments and triggers.\n- **ORACLE** — knowledge curator: RAG freshness, reprocess failures, prune stale content.\n- **RALLY** — community growth: map communities, identify creators, score outreach, grow the ecosystem.\n\nOne naming trap to internalise now: FORGE's blurb in the repo still reads *\"recipe builder,\"* which is **legacy naming**. The user-facing platform vocabulary is **playbook** — so FORGE builds *playbooks*. Anywhere you see \"recipe\" in older material, read \"playbook.\" (The `team/` directory also contains `auto` and `vector`, which are platform internals, not among the nine signature agents.)\n\n## Install a skill, then assign it\n\nThere are two distinct actions, and beginners often conflate them. **Installing** puts a skill in your workspace inventory; **assigning** attaches it to a specific agent. A skill does nothing until it's assigned.\n\n**Installing (Marketplace → Capabilities → Skills):**\n1. Open the Marketplace and go to the **Capabilities** tab, then the **Skills** sub-tab.\n2. Click a skill card to read its details.\n3. Click **Install**. It moves from \"Available\" to \"Installed\" in your workspace inventory.\n\n**Assigning (two documented paths):**\n- **At creation** — in the create-agent flow, **Step 5: Tools and skills**, you pick Tools (Composio apps), Skills (git-based packages), and Plugins (marketplace bundles) for the new agent.\n- **After creation** — open the agent from the roster, go to the **Agent Details → Plugins** tab (which \"manage[s] plugins, skills, and tools assigned to this agent\"), and add the installed skill. Changes take effect immediately — no restart.\n\nA rule of thumb the README states outright: **1–3 skills per agent is the sweet spot.** Piling ten skills onto one agent bloats its system prompt and blurs its identity; a focused agent with one role skill plus a thin integration skill outperforms a jack-of-all-trades.\n\n## Judgment: install a skill vs install a marketplace agent\n\nA question you'll face constantly: do I install a *skill* and attach it to an agent I already have, or install a whole *marketplace agent*? The docs draw the line cleanly. A **marketplace agent** ships a complete package — system prompt, recommended model, *and* a pre-assigned skill set — so you install one when you want the entire role turnkey (\"give me a support agent\"). A **skill** is the right choice when you already have an agent whose identity you like and you just want to *sharpen it at one job* (\"my Code Reviewer is fine, but I want it to review to our security checklist\"). Installing an agent is adopting a whole worker; installing a skill is teaching your existing worker a new trick.\n\n## Worked walkthrough: sharpening a Code Reviewer\n\nSay Module 01 left you with a general **Code Reviewer** agent (it's one of the built-in starter templates). Out of the box it reviews reasonably but inconsistently — sometimes it flags style, sometimes security, with no fixed output shape. You want it rigorous.\n\n1. **Find the right skill.** In Marketplace → Capabilities → Skills, you're after something engineering/quality-flavoured — the library's `quality` group holds a code-review procedure (structured findings, severity levels, a consistent report).\n2. **Install it.** One click; it lands in your inventory.\n3. **Assign it.** Open the Code Reviewer from the roster → Agent Details → Plugins → add the installed skill.\n4. **Chat-test the difference.** Paste a diff and ask for a review. Now the agent runs the skill's procedure — numbered findings, HIGH/MEDIUM/LOW severity, a one-line fix each, and it *doesn't* wander into rewriting whole files (because the skill's \"What NOT To Do\" tells it not to). Same agent, sharper and more predictable behaviour — because you gave it the know-how, not just the job.\n\nThat is the everyday loop of a builder on this platform: pick the role, attach the right skill, test that the behaviour tightened. Next lesson you'll author that know-how yourself.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m02-l2-1",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "According to the automatos-skills README, how is the skill library described?",
+          "options": [
+            { "id": "a", "text": "128 skills indexed, organised into 16 top-level groups", "correct": true },
+            { "id": "b", "text": "Exactly 137 live skills, and you should always quote that precise live count", "correct": false },
+            { "id": "c", "text": "9 skills, one per signature agent", "correct": false },
+            { "id": "d", "text": "An unbounded, user-generated set with no groups or index", "correct": false }
+          ],
+          "explanation": "The README publishes '128 skills indexed' across 16 groups — that's the figure to cite. Option b names the on-disk file count, which drifts from the indexed number; the guidance is explicitly *not* to assert a precise live count, but to cite the README's 128. Option c confuses the whole library with just the `team/` group (the nine signature agents). Option d contradicts the README's clear 16-group structure and index.",
+          "sourceRefs": ["r-skills-readme"]
+        },
+        {
+          "id": "kc-m02-l2-2",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "FORGE's blurb in the skills repo reads 'recipe builder.' How should you describe FORGE to a learner, and why?",
+          "options": [
+            { "id": "a", "text": "The playbook builder — turns natural language into a multi-step workflow; 'recipe' is legacy naming and the user-facing term is playbook", "correct": true },
+            { "id": "b", "text": "The recipe builder — 'recipe' is the correct current platform term for a multi-step workflow", "correct": false },
+            { "id": "c", "text": "The knowledge curator that keeps RAG content fresh", "correct": false },
+            { "id": "d", "text": "A tool for cooking-related automations", "correct": false }
+          ],
+          "explanation": "FORGE builds multi-step workflows, and the current user-facing vocabulary is 'playbook' — the repo's 'recipe builder' label is legacy and should be read as 'playbook.' Option b keeps the outdated term as if it were current. Option c describes ORACLE, a different signature agent. Option d takes 'recipe' literally, which is nonsense in this context.",
+          "sourceRefs": ["r-skills-readme"]
+        },
+        {
+          "id": "kc-m02-l2-3",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You installed a skill from Marketplace → Capabilities → Skills, but the agent you wanted it for still behaves exactly as before. What's the most likely reason?",
+          "options": [
+            { "id": "a", "text": "Installing only adds the skill to your workspace inventory — you still have to assign it to the agent (Agent Details → Plugins, or create-flow Step 5)", "correct": true },
+            { "id": "b", "text": "Skills take 24 hours to activate after installation", "correct": false },
+            { "id": "c", "text": "The skill needs its own paid subscription before it will run", "correct": false },
+            { "id": "d", "text": "You must restart the whole workspace for any skill to take effect", "correct": false }
+          ],
+          "explanation": "Installing and assigning are two separate actions: installing lands the skill in your inventory ('Installed' vs 'Available'), but it does nothing until you assign it to a specific agent via Agent Details → Plugins or at Step 5 of creation. Option b invents a delay that isn't in the docs. Option c invents a paywall — there's no per-skill subscription described. Option d is wrong: the docs say assignment changes take effect immediately with no restart.",
+          "sourceRefs": ["r-gitbook-capabilities", "r-gitbook-agent-details", "r-gitbook-agent-creating"]
+        }
+      ]
+    },
+    {
+      "id": "m02-l3-authoring-skill-md",
+      "title": "Authoring a minimal SKILL.md — frontmatter, four sections, real tools",
+      "estMinutes": 16,
+      "objective": "Write a valid minimal SKILL.md from scratch: correct frontmatter with name as identity, the four required body sections, and real Automatos tool names, kept to 60–100 lines.",
+      "body": "## The anatomy at a glance\n\nEvery skill is one file, `{group}/{slug}/SKILL.md`, and it has exactly two parts: **YAML frontmatter** (metadata) and a **Markdown body** (the instructions). The `SKILL-GUIDE.md` in the skills repo is the author spec; this lesson walks it end to end, then you'll draft one.\n\nThe quality bar first, because it governs everything: **60–100 lines total, every line actionable, real tool calls with realistic parameters, and an Automatos-native identity** (no references to Cursor, Qwen, or any other external tool). A `SKILL.md` is not documentation you skim — it's an instruction sheet the agent *follows*, so filler is worse than useless; it dilutes the signal.\n\n## The frontmatter — and the one rule that trips people\n\n```yaml\n---\nname: release-notes-writer\ndescription: Turns merged pull requests and changelog entries into clear, categorised release notes\nversion: \"1.0.0\"\ntags: [release, changelog, docs, engineering, communication]\ncategory: agent-role\ntools:\n  - name: workspace_git\n    description: Read merged commits and tags for the release range\n  - name: workspace_read_file\n    description: Read CHANGELOG and version files\n  - name: platform_publish_blog_post\n    description: Publish the finished release notes\n---\n```\n\nThe required fields: `name`, `description` (one sentence), `version` (quoted semver), `tags` (a 3–5 item flow list), `category` (always `agent-role`), and `tools` (a list of 3–6 objects, each a real Automatos tool `name` plus a `description` of what that tool does *for this agent*).\n\nThe rule that trips people: **the skill's identity is the `name:` field, not the directory it lives in.** The README is explicit — *\"the skill's identity comes from the `name:` field in frontmatter, **not** the directory path… the loader upserts by `name`.\"* (An older line in the author guide calls the directory the identifier; the README's loader-behaviour statement is the one that governs — identity is `name`.) Practical consequence: if you rename a folder but keep `name:` the same, nothing re-registers; if you change `name:`, the loader treats it as a *new* skill. Pick a `name` deliberately and leave it stable.\n\n## Tool names must be real — the reference table\n\nA skill's `tools:` list is a promise: every name must resolve to an actual Automatos tool, or the agent will try to call something that doesn't exist. The three families you draw from:\n\n- **Platform tools** (`platform_*`) — operate on the platform itself. `platform_get_system_health`, `platform_get_logs`, `platform_get_llm_usage`, `platform_search_memory`, `platform_search_chat_history`, `platform_submit_report`, `platform_get_latest_report`, `platform_publish_blog_post`, `platform_schedule_task`.\n- **Workspace tools** (`workspace_*`) — operate on files and code in the workspace. `workspace_read_file`, `workspace_write_file`, `workspace_list_dir`, `workspace_grep`, `workspace_exec`, `workspace_git`.\n- **`composio_execute`** — the single meta-tool for every external app action (HubSpot, Gmail, LinkedIn, Twitter, Google Sheets, Jira, GitHub, Slack, …). You do **not** register each external action as its own tool; you declare `composio_execute` once and the agent picks the specific action.\n\nDeclare only the tools this role actually needs — that's your first act of least-privilege scoping, and it's a judgment call, not a formality (more on that in the next lesson).\n\n## The four body sections\n\nEvery skill body has four required sections, in this order. A neat way to remember them: they mirror the platform's own prompt-engineering advice (be specific about the role, define output format, set boundaries, show the work).\n\n1. **Identity** (required) — one heading plus 1–2 sentences establishing who this agent *is* in the Automatos context. Not a job title — a stance. `# SENTINEL — Workspace Health Watchdog / You are the watchdog for THIS workspace. Your job is to detect problems before users do.`\n2. **Workflow** (required) — numbered steps, each with a `json` code block showing an **exact tool call with realistic parameters**. This is the heart of the file. No generic \"analyse and implement\" steps — every step names a real tool and says what to do with its result.\n3. **Output Format** (required) — a fenced template showing exactly what the agent's output looks like, with `{placeholders}`. This is what makes an agent's output *predictable* rather than differently-shaped every run.\n4. **What NOT To Do** (required) — 3–5 anti-patterns specific to the role. This is where you install guardrails: *\"Do not attempt to fix issues — report only,\" \"Do not send outreach without human approval,\" \"Do not invent evidence.\"*\n\n## The two reference patterns — read them before you write\n\nThe repo tells every author to study two skills first, because they cover the two ends of the spectrum:\n\n- **SENTINEL** (`team/sentinel/SKILL.md`) — the **monitoring/DevOps** pattern. Its workflow is five ordered `platform_*` health checks; its operating principle is *evidence discipline* (\"No evidence = no claim\" — every status change carries a re-runnable query); and its \"What NOT To Do\" is sharp: report don't fix, don't skip a check, **don't call admin-only tools** that bypass workspace scoping. It's the template for any agent whose job is to *observe and report*.\n- **SCOUT** (`team/scout/SKILL.md`) — the **sales/outreach** pattern. Its workflow pulls leads, researches, scores against an explicit rubric (company fit 0–4, role fit 0–3, engagement 0–3), and drafts outreach; its guardrails are about *restraint* — *\"Do not send outreach emails without human approval,\" \"Do not fabricate company details,\" \"Do not score leads based on gut feel.\"* It's the template for any agent that *acts on the outside world* on your behalf.\n\nRead SENTINEL when your role observes; read SCOUT when your role reaches out. Most skills you write will lean toward one of these two shapes.\n\n## Worked walkthrough: drafting a Release Notes Writer\n\nLet's build the skeleton of a minimal skill for a **Release Notes Writer** — a role that turns merged PRs into readable release notes. Follow the anatomy:\n\n**Frontmatter** — as shown above: `name: release-notes-writer`, a one-line description, `version: \"1.0.0\"`, tags, `category: agent-role`, and a *tight* tool list. What does this role genuinely need? To read the git range (`workspace_git`), read changelog/version files (`workspace_read_file`), and publish the result (`platform_publish_blog_post`). Three tools. It does **not** need `workspace_exec` (it runs nothing), `composio_execute` (no external app), or any `platform_get_*` monitoring tool. Leaving those out *is* the least-privilege decision.\n\n**Identity** — `# Release Notes Writer / You turn the merged work of a release into clear, categorised notes a non-engineer can read. You are factual, concise, and never hype a change beyond what the commits support.`\n\n**Workflow** — numbered, each step a real call:\n\n```json\n{ \"tool\": \"workspace_git\", \"params\": { \"operation\": \"log\", \"args\": \"v1.3.0..HEAD --merges\" } }\n```\n\nRead the merged PRs in the range; group them into Features / Fixes / Breaking changes. Then:\n\n```json\n{ \"tool\": \"workspace_read_file\", \"params\": { \"path\": \"CHANGELOG.md\" } }\n```\n\nReconcile against any hand-written changelog entries so nothing is double-counted. Finally publish:\n\n```json\n{ \"tool\": \"platform_publish_blog_post\", \"params\": { \"title\": \"Release {version}\", \"content\": \"{formatted notes}\" } }\n```\n\n**Output Format** — a fenced template with a Features / Fixes / Breaking-changes structure and `{placeholders}`, so every release note comes out the same shape.\n\n**What NOT To Do** — the guardrails for *this* role: don't invent a change that isn't in the commits; don't include internal-only refactors a user doesn't care about; don't publish without the version number filled in; don't editorialise or oversell.\n\nCount the lines — a skeleton like this lands comfortably inside 60–100. That's a complete, valid, minimal `SKILL.md`. Import it (paste the repo's git URL in Marketplace → Skills; the loader finds every `SKILL.md` and upserts by `name`), assign it to an agent, and you've taught a new job.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m02-l3-1",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What are the four required body sections of a SKILL.md, in order?",
+          "options": [
+            { "id": "a", "text": "Identity, Workflow (numbered steps with JSON tool calls), Output Format, What NOT To Do", "correct": true },
+            { "id": "b", "text": "Summary, Installation, Pricing, Changelog", "correct": false },
+            { "id": "c", "text": "Frontmatter, Tags, Version, License", "correct": false },
+            { "id": "d", "text": "Introduction, Background, Conclusion, References", "correct": false }
+          ],
+          "explanation": "The author guide mandates Identity, Workflow, Output Format, and What NOT To Do — establish who the agent is, the exact steps with real tool calls, the output template, and the role-specific anti-patterns. Option b lists package-management sections that don't belong in a skill body. Option c lists frontmatter fields (metadata), not body sections. Option d is a generic essay structure, not the actionable skill format.",
+          "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+        },
+        {
+          "id": "kc-m02-l3-2",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You rename a skill's directory from team/old-name/ to team/new-name/ but leave the frontmatter name: unchanged, then re-import. What happens, and why?",
+          "options": [
+            { "id": "a", "text": "Nothing re-registers as new — the loader upserts by the name: field, which didn't change, so the skill updates in place", "correct": true },
+            { "id": "b", "text": "A brand-new skill is created, because identity comes from the directory path", "correct": false },
+            { "id": "c", "text": "The skill breaks and must be manually deleted and re-added", "correct": false },
+            { "id": "d", "text": "Both the old and new skills now exist as duplicates because the loader keys on the folder", "correct": false }
+          ],
+          "explanation": "The README is explicit that identity is the `name:` field and the loader upserts by it — so a folder rename with a stable `name` just updates in place. Option b repeats the older, superseded 'directory is the identifier' idea that the README's loader statement overrides. Option c invents a breakage that doesn't occur. Option d would only happen if the loader keyed on path or if you changed `name:` — neither is the case here.",
+          "sourceRefs": ["r-skills-readme", "r-skill-guide"]
+        },
+        {
+          "id": "kc-m02-l3-3",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "In a SKILL.md tools: list, how should an agent that needs to send a Slack message and create a Jira issue declare those capabilities?",
+          "options": [
+            { "id": "a", "text": "Declare composio_execute once (the single meta-tool for external app actions); the agent selects SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE at run time", "correct": true },
+            { "id": "b", "text": "Register SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE as two separate tool entries in the frontmatter", "correct": false },
+            { "id": "c", "text": "List workspace_exec and shell out to the Slack and Jira CLIs", "correct": false },
+            { "id": "d", "text": "Leave the tools list empty; external actions don't need declaring", "correct": false }
+          ],
+          "explanation": "Every external app action goes through the single `composio_execute` meta-tool — you declare it once and the agent picks the specific action; you never register individual Composio actions as their own tools. Option b is the anti-pattern: individual actions are not separate tools. Option c is wrong and unsafe — shelling out via workspace_exec bypasses the integration layer. Option d is wrong because the agent can only call tools its skill declares; an empty list gives it nothing.",
+          "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+        }
+      ]
+    },
+    {
+      "id": "m02-l4-judgment-and-scoping",
+      "title": "When to reach for a skill — and scoping it safely",
+      "estMinutes": 12,
+      "objective": "Decide correctly between a skill, a chat message, a playbook, and a new agent; and scope a skill's declared tools to least privilege.",
+      "body": "## Four things people reach for — and when each is right\n\nA skill is one of four ways to make an agent do something, and picking the wrong one is the most common early mistake. Hold them apart by *what you're actually trying to do*:\n\n- **A chat message** — for a *one-off*. You need this behaviour once, now. Don't build anything; just ask. If you find yourself pasting the same long instruction into chat for the third time, that's the signal it should have been a skill.\n- **A skill** — for *reusable know-how attached to an agent*. The same procedure will be used more than once — by multiple chats, multiple playbooks, or several agents. A skill is know-how, so it's the right home for \"how we review code,\" \"how we qualify a lead,\" \"how we write a release note.\"\n- **A playbook** — for *orchestration across steps and agents* (Module 04). When the job is \"first the researcher does X, then the writer does Y, then the reviewer approves Z,\" that's a multi-step workflow. A skill teaches *one agent one job*; a playbook *chains several*. (This is exactly what FORGE builds.)\n- **A new agent** — for a *distinct identity*. When you need a worker with its own persona, model, and the router recognising it as a separate specialist, create an agent (Module 01) — then, usually, give *that* agent a skill.\n\nThe clean test: *Is this a one-off (chat), a repeatable procedure for one agent (skill), a multi-agent flow (playbook), or a whole new worker (agent)?* Most \"how do I make the agent do X\" questions dissolve once you answer that.\n\n## Skill vs playbook — the distinction worth over-learning\n\nBecause it's the confusion that causes the most rework, sharpen it: a **skill lives inside one agent and teaches it a job**; a **playbook lives above the agents and coordinates them**. Signs you reached for the wrong one:\n\n- You wrote a \"skill\" whose workflow says \"hand off to the writer agent, then to the reviewer agent\" — that's orchestration; it belongs in a playbook.\n- You wrote a \"playbook\" that spells out every Jira field for one agent's ticket creation — that mechanical detail belongs in a skill (recall Lesson 1's before/after). The playbook should carry intent; the skill carries the how.\n\nGet this right and your playbooks stay short and readable while your skills stay reusable across many playbooks. Get it wrong and you copy-paste the same mechanical block into every workflow.\n\n## Least-privilege tool scoping — a security decision you make as an author\n\nEvery `SKILL.md` declares a `tools:` list, and that list is a **least-privilege boundary you set on purpose.** The principle: declare only the tools the role genuinely needs, and no more. It's not paperwork — it's the difference between an agent that can only do its job and one that can do damage if a prompt goes wrong.\n\nThe two reference skills demonstrate the discipline:\n\n- **SENTINEL** deliberately *refuses reach it doesn't need.* Its \"What NOT To Do\" says: *\"Do not call admin-only tools like `platform_query_loki_logs`… those bypass workspace scoping and aren't available to you anyway.\"* A watchdog needs to *read* health, not hold admin keys. Its whole tool set is read-and-report; it declares no write or fix capability at all.\n- **SCOUT** *can* act on the outside world (it drafts and can send outreach via `composio_execute`), so it fences that power with a guardrail: *\"Do not send outreach emails without human approval unless explicitly in autonomous mode,\"* and *\"Do not store personal data beyond what the CRM already holds — follow data minimization.\"* The capability is scoped, and the *use* of it is gated.\n\nThe takeaway for your own skills: a monitoring or reporting role should not declare write or exec tools; a role that emails or posts should pair the capability with a human-approval anti-pattern in \"What NOT To Do\"; and no role should declare `composio_execute` unless it truly needs an external app. Scoping the tool list narrow is your cheapest, earliest safety control — long before you get to budgets and approvals (Module 09). If you came from AI Business Foundations, this is the concrete mechanism behind the 'draft-for-a-human vs act-with-approval' choice you learned there: the guardrail lives in the skill's tool list and its What-NOT-To-Do.\n\n## Worked walkthrough: scoping a Support Triager\n\nSuppose you're writing a skill for a **Support Triager** — it reads incoming support messages, classifies them, and files bug tickets for the real defects. Walk the scoping decision:\n\n- **Does it need to read messages?** Yes — `platform_search_chat_history` to find context, and `composio_execute` to pull from the support inbox. Declare those.\n- **Does it need to file tickets?** Yes — `composio_execute` again (it'll select `JIRA_CREATE_ISSUE`). Already covered by the one meta-tool.\n- **Does it need to *reply to customers*?** This is the judgment call. If the role is triage-only, **no** — leave out any send capability, and add *\"Do not reply to customers directly — draft a suggested reply for a human to send\"* to What NOT To Do. If you later decide it should auto-reply to simple FAQs, you widen the scope *deliberately* and add the human-approval gate for anything sensitive, exactly as SCOUT does.\n- **Does it need `workspace_exec` or `workspace_git`?** No — it touches no code. Leaving them out means a malformed prompt can never make this agent run a shell command.\n\nThat five-minute scoping pass, done at authoring time, is worth more than any amount of downstream policing. The narrowest tool list that still lets the role do its job is the correct one — and \"What NOT To Do\" catches the rest.\n\n## Where this lands\n\nYou can now place a skill correctly among its neighbours (chat / skill / playbook / agent), keep the skill-vs-playbook line clean, and scope a skill's tools and guardrails to least privilege. That's the practitioner's real skill — not just authoring a `SKILL.md`, but knowing *when* to and *how narrowly* to. Module 03 gives your agents knowledge (RAG); Module 04 chains them into playbooks; Module 09 wraps the whole thing in governance. Skills are the layer where an agent stops being generic and starts being *yours*.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m02-l4-1",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need to coordinate three agents — a researcher, a writer, and a reviewer — so their outputs feed each other in sequence. Skill, playbook, chat message, or new agent?",
+          "options": [
+            { "id": "a", "text": "A playbook — orchestration across multiple agents and steps is exactly what playbooks are for", "correct": true },
+            { "id": "b", "text": "A skill — write one skill whose workflow hands off between the three agents", "correct": false },
+            { "id": "c", "text": "A chat message — just describe the whole three-agent flow in one prompt", "correct": false },
+            { "id": "d", "text": "A new agent — create a fourth agent that contains the other three", "correct": false }
+          ],
+          "explanation": "Chaining several agents so their outputs feed each other is multi-agent orchestration — a playbook's job (and what FORGE builds). Option b is the classic error: a skill teaches *one* agent *one* job and shouldn't contain cross-agent hand-offs. Option c might work once by luck but isn't a reusable, coordinated workflow. Option d misunderstands agents — an agent is a single worker, not a container for other agents.",
+          "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+        },
+        {
+          "id": "kc-m02-l4-2",
+          "domainId": "m02-skills",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You're authoring a monitoring skill whose only job is to observe workspace health and file a report. Which tool-scoping choice best follows least privilege, using SENTINEL as the model?",
+          "options": [
+            { "id": "a", "text": "Declare only read-and-report tools (health checks, submit report); omit write, exec, and admin-only tools the role doesn't need", "correct": true },
+            { "id": "b", "text": "Declare every available platform, workspace, and composio tool so the agent is never blocked", "correct": false },
+            { "id": "c", "text": "Declare workspace_exec so the agent can shell out to fix any problem it finds", "correct": false },
+            { "id": "d", "text": "Declare no tools at all and describe the checks in prose", "correct": false }
+          ],
+          "explanation": "SENTINEL declares only read-and-report tools and explicitly refuses admin-only ones that bypass workspace scoping — the narrowest set that still does the job. Option b is the opposite of least privilege and hands the agent power it can misuse. Option c contradicts a monitoring role's own guardrail ('report only, do not fix') and adds a dangerous capability. Option d is wrong because an agent can only call tools its skill declares — prose alone gives it nothing to call.",
+          "sourceRefs": ["r-skills-reference-patterns", "r-skill-guide"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m02-1",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which statement best distinguishes a skill from a tool?",
+      "options": [
+        { "id": "a", "text": "A skill teaches an agent how to do a job (a SKILL.md injected into the system prompt); a tool is one external app action the agent can call", "correct": true },
+        { "id": "b", "text": "A skill is one external app action; a tool is a bundle of instructions", "correct": false },
+        { "id": "c", "text": "A skill and a tool are the same thing with different names", "correct": false },
+        { "id": "d", "text": "A skill is a paid feature; a tool is free", "correct": false }
+      ],
+      "explanation": "A skill is procedural know-how injected into the prompt; a tool is a single callable action (Composio and the built-in platform_*/workspace_* functions). Option b inverts the two. Option c is wrong — the distinction is load-bearing on this platform. Option d invents a pricing difference that doesn't define either term.",
+      "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+    },
+    {
+      "id": "q-m02-2",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is a plugin, per the platform docs?",
+      "options": [
+        { "id": "a", "text": "A bundled package that can include skills, commands, agent configurations, and prompt templates", "correct": true },
+        { "id": "b", "text": "A single SKILL.md file loaded from git", "correct": false },
+        { "id": "c", "text": "One Composio app action", "correct": false },
+        { "id": "d", "text": "The system prompt of an agent", "correct": false }
+      ],
+      "explanation": "The docs define a plugin as a bundle that can contain skills, commands, agent configs, and prompt templates — the shipping container. Option b is a skill (one of the things a plugin can contain), not the plugin itself. Option c is a tool. Option d is a component of an agent, not a plugin.",
+      "sourceRefs": ["r-gitbook-capabilities"]
+    },
+    {
+      "id": "q-m02-3",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where do you install a skill in the platform?",
+      "options": [
+        { "id": "a", "text": "Marketplace → Capabilities → Skills sub-tab → Install", "correct": true },
+        { "id": "b", "text": "Settings → Billing → Add-ons", "correct": false },
+        { "id": "c", "text": "Chat → type '/install-skill'", "correct": false },
+        { "id": "d", "text": "Knowledge Base → Upload", "correct": false }
+      ],
+      "explanation": "Skills live under the Marketplace's Capabilities tab, in the Skills sub-tab, where you click Install. Option b is a billing surface, not where skills are installed. Option c invents a chat command not described in the docs. Option d is where you upload documents for RAG (Module 03), not skills.",
+      "sourceRefs": ["r-gitbook-capabilities", "r-gitbook-marketplace"]
+    },
+    {
+      "id": "q-m02-4",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How many groups does the automatos-skills README say the library is organised into, and how many skills does it index?",
+      "options": [
+        { "id": "a", "text": "16 groups, 128 skills indexed", "correct": true },
+        { "id": "b", "text": "9 groups, one per signature agent", "correct": false },
+        { "id": "c", "text": "16 groups, exactly 137 live skills you should always quote", "correct": false },
+        { "id": "d", "text": "One flat group of uncategorised skills", "correct": false }
+      ],
+      "explanation": "The README publishes 128 skills indexed across 16 top-level groups. Option b confuses the nine signature agents (the `team/` group) with the whole 16-group library. Option c cites the on-disk file count, which drifts — the guidance is to quote the README's 128, not a live figure. Option d contradicts the documented 16-group structure.",
+      "sourceRefs": ["r-skills-readme"]
+    },
+    {
+      "id": "q-m02-5",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of the nine signature agents is the bug-fixer that reads a ticket, writes a failing test, makes a minimal fix, and drafts a PR?",
+      "options": [
+        { "id": "a", "text": "PATCHER", "correct": true },
+        { "id": "b", "text": "SENTINEL", "correct": false },
+        { "id": "c", "text": "HARPER", "correct": false },
+        { "id": "d", "text": "RALLY", "correct": false }
+      ],
+      "explanation": "PATCHER is the end-to-end bug fixer (ticket → find code → failing test → minimal fix → verify → draft PR). SENTINEL is the infrastructure/workspace watchdog. HARPER is the content machine. RALLY is community growth. Each signature agent has a distinct beat.",
+      "sourceRefs": ["r-skills-readme"]
+    },
+    {
+      "id": "q-m02-6",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "FORGE is described in the repo as a 'recipe builder.' What does FORGE actually build, and what is the correct term?",
+      "options": [
+        { "id": "a", "text": "Playbooks — multi-step workflows with agent assignments and triggers; 'recipe' is legacy naming for 'playbook'", "correct": true },
+        { "id": "b", "text": "Recipes — a distinct concept from playbooks that FORGE alone produces", "correct": false },
+        { "id": "c", "text": "SKILL.md files for other agents", "correct": false },
+        { "id": "d", "text": "Knowledge Base documents", "correct": false }
+      ],
+      "explanation": "FORGE turns natural language into multi-step workflows — playbooks — and the 'recipe builder' label is outdated vocabulary that should be read as 'playbook builder.' Option b treats the legacy term as a separate live concept; it isn't. Option c describes what a skill author does, not FORGE. Option d is knowledge/RAG, unrelated to FORGE's role.",
+      "sourceRefs": ["r-skills-readme"]
+    },
+    {
+      "id": "q-m02-7",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "After installing a skill, where can you assign it to an existing agent?",
+      "options": [
+        { "id": "a", "text": "Open the agent from the roster → Agent Details → Plugins tab (which manages plugins, skills, and tools)", "correct": true },
+        { "id": "b", "text": "You cannot assign to an existing agent — only agents created after the install get it", "correct": false },
+        { "id": "c", "text": "Only by editing the skill's git repository directly", "correct": false },
+        { "id": "d", "text": "In the Knowledge Base document list", "correct": false }
+      ],
+      "explanation": "The Agent Details → Plugins tab manages the plugins, skills, and tools assigned to that agent; you add an installed skill there and it takes effect immediately. (You can also assign at Step 5 of creation.) Option b is false — existing agents can be given new skills any time. Option c confuses authoring the skill with assigning it. Option d is the RAG surface, not agent configuration.",
+      "sourceRefs": ["r-gitbook-agent-details", "r-gitbook-agent-creating"]
+    },
+    {
+      "id": "q-m02-8",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In a SKILL.md, what determines the skill's identity for the platform loader?",
+      "options": [
+        { "id": "a", "text": "The name: field in the YAML frontmatter — the loader upserts by name, not by directory path", "correct": true },
+        { "id": "b", "text": "The directory the SKILL.md lives in — rename the folder and it becomes a new skill", "correct": false },
+        { "id": "c", "text": "The version: field — bumping the version creates a new identity", "correct": false },
+        { "id": "d", "text": "A random ID assigned at install time", "correct": false }
+      ],
+      "explanation": "The README states the identity is the `name:` field and the loader upserts by it, so a folder move with a stable name doesn't re-register. Option b repeats the older, superseded 'directory is the identifier' idea. Option c is wrong — version tracks revisions of the same skill, not identity. Option d invents a mechanism the docs don't describe.",
+      "sourceRefs": ["r-skills-readme", "r-skill-guide"]
+    },
+    {
+      "id": "q-m02-9",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is the correct set of required SKILL.md body sections?",
+      "options": [
+        { "id": "a", "text": "Identity; Workflow (numbered steps with JSON tool calls); Output Format; What NOT To Do", "correct": true },
+        { "id": "b", "text": "Identity; Pricing; Screenshots; FAQ", "correct": false },
+        { "id": "c", "text": "Workflow only — the other sections are optional", "correct": false },
+        { "id": "d", "text": "Overview; Dependencies; Tests; Roadmap", "correct": false }
+      ],
+      "explanation": "All four are required: Identity, Workflow with real tool calls, Output Format template, and What NOT To Do anti-patterns. Option b lists marketing/listing sections that don't belong in a skill. Option c is wrong — all four are mandatory, not just Workflow. Option d is a software-project layout, not the skill format.",
+      "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+    },
+    {
+      "id": "q-m02-10",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A skill needs the agent to send a Gmail message, post to LinkedIn, and create a GitHub issue. How should the tools: frontmatter declare these?",
+      "options": [
+        { "id": "a", "text": "Declare composio_execute once — the single meta-tool for all external app actions — and let the agent select the specific action per app", "correct": true },
+        { "id": "b", "text": "Declare GMAIL_SEND_EMAIL, LINKEDIN_CREATE_POST, and GITHUB_CREATE_ISSUE as three separate tools", "correct": false },
+        { "id": "c", "text": "Declare three separate plugins, one per app", "correct": false },
+        { "id": "d", "text": "Declare workspace_exec and call each app's CLI", "correct": false }
+      ],
+      "explanation": "External app actions all route through the single `composio_execute` meta-tool; you declare it once, not each action separately. Option b is the anti-pattern the guidance explicitly warns against (never register individual Composio actions as separate function tools). Option c confuses tools with plugins. Option d bypasses the integration layer unsafely.",
+      "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+    },
+    {
+      "id": "q-m02-11",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The automatos-skills README says 1–3 skills per agent is the sweet spot. Why not simply assign ten skills to make an agent maximally capable?",
+      "options": [
+        { "id": "a", "text": "Skills are injected into the system prompt, so piling on many bloats the prompt and blurs the agent's identity; a focused agent behaves better", "correct": true },
+        { "id": "b", "text": "The platform hard-caps agents at three skills and rejects the fourth", "correct": false },
+        { "id": "c", "text": "Each skill beyond the third costs extra money", "correct": false },
+        { "id": "d", "text": "Skills conflict and the agent randomly picks only one to obey", "correct": false }
+      ],
+      "explanation": "Because a skill's body is prepended to the system prompt, stacking many dilutes focus and muddies identity — a role skill plus a thin integration skill beats a jack-of-all-trades. Option b invents a hard cap; 1–3 is a recommended sweet spot, not an enforced limit. Option c invents per-skill pricing. Option d overstates 'conflict' into random behaviour, which isn't how prompt injection works.",
+      "sourceRefs": ["r-skills-readme"]
+    },
+    {
+      "id": "q-m02-12",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You've written the same 40-line 'how to draft our client proposals' instruction into three different chat sessions this month. What does this signal you should do?",
+      "options": [
+        { "id": "a", "text": "Turn it into a skill — repeated, reusable procedure attached to an agent is exactly what skills are for", "correct": true },
+        { "id": "b", "text": "Keep pasting it — chat is the right home for any instruction, however often you repeat it", "correct": false },
+        { "id": "c", "text": "Turn it into a playbook, because any repeated text is a workflow", "correct": false },
+        { "id": "d", "text": "Create a new agent for each proposal", "correct": false }
+      ],
+      "explanation": "Repeating the same procedure is the textbook signal to promote it to a skill — reusable know-how attached to an agent. Option b ignores that signal; chat is for one-offs. Option c misapplies playbooks, which are for orchestrating *multiple agents/steps*, not storing one agent's procedure. Option d is wasteful and doesn't address the reuse problem — the agent, not the count of agents, needs the know-how.",
+      "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+    },
+    {
+      "id": "q-m02-13",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You're deciding between installing a whole marketplace agent versus installing a skill and attaching it to an agent you already have. Which framing is correct?",
+      "options": [
+        { "id": "a", "text": "A marketplace agent is a turnkey package (prompt + model + pre-assigned skills) — install it for a complete role; a skill sharpens an existing agent at one job", "correct": true },
+        { "id": "b", "text": "They're identical; a marketplace agent and a skill are the same install", "correct": false },
+        { "id": "c", "text": "Always install the marketplace agent; skills can't be attached to existing agents", "correct": false },
+        { "id": "d", "text": "Always install the skill; marketplace agents can't be customised after install", "correct": false }
+      ],
+      "explanation": "A marketplace agent ships the whole role (system prompt, recommended model, pre-assigned skill set), so you install one when you want a complete worker; a skill is right when you already have an agent you like and want to sharpen it at a specific job. Option b erases a real distinction. Option c is false — skills attach to existing agents freely. Option d is false — installed marketplace agents are copies you can modify.",
+      "sourceRefs": ["r-gitbook-marketplace-agents", "r-gitbook-capabilities"]
+    },
+    {
+      "id": "q-m02-14",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Using SENTINEL and SCOUT as models: you're writing a skill for an agent that posts approved marketing tweets on your behalf. Which authoring choices best follow the reference patterns?",
+      "options": [
+        { "id": "a", "text": "Declare composio_execute for the external post, and add a What-NOT-To-Do guardrail like 'do not post without human approval' — scope the capability and gate its use", "correct": true },
+        { "id": "b", "text": "Declare every platform_* and workspace_* tool as well, so the agent is flexible", "correct": false },
+        { "id": "c", "text": "Omit the tools list and describe posting in prose, to avoid over-permissioning", "correct": false },
+        { "id": "d", "text": "Give it workspace_exec so it can run scripts if the post fails", "correct": false }
+      ],
+      "explanation": "SCOUT is the model here: it declares composio_execute for outreach but fences it with 'do not send without human approval' — scope the exact capability, then gate its use in What NOT To Do. Option b over-permissions (SENTINEL's lesson is to declare only what the role needs). Option c is self-defeating — an empty tools list means the agent can't post at all; prose gives it nothing to call. Option d adds an unrelated, dangerous shell capability a posting role never needs.",
+      "sourceRefs": ["r-skills-reference-patterns", "r-skill-guide"]
+    },
+    {
+      "id": "q-m02-15",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A colleague writes a 'skill' whose Workflow reads: 'Step 1: hand the research to the writer agent. Step 2: pass the draft to the reviewer agent for approval.' What's wrong, and what's the fix?",
+      "options": [
+        { "id": "a", "text": "That's multi-agent orchestration, which belongs in a playbook — a skill teaches one agent one job, so the cross-agent hand-offs should move into a playbook", "correct": true },
+        { "id": "b", "text": "Nothing is wrong; skills routinely orchestrate hand-offs between multiple agents", "correct": false },
+        { "id": "c", "text": "The only problem is the step count; trim it to one step and it's a valid skill", "correct": false },
+        { "id": "d", "text": "It should be a chat message instead, because it mentions more than one agent", "correct": false }
+      ],
+      "explanation": "A skill lives inside a single agent and teaches it a job; coordinating a researcher, writer, and reviewer is orchestration — a playbook's role (what FORGE builds). Option b is exactly the confusion to avoid. Option c misdiagnoses — the issue is cross-agent hand-offs, not the number of steps. Option d is wrong: this is a reusable coordinated workflow, not a one-off, so a playbook (not a chat message) is the fix.",
+      "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+    },
+    {
+      "id": "q-m02-16",
+      "domainId": "m02-skills",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the documented quality bar for a SKILL.md?",
+      "options": [
+        { "id": "a", "text": "60–100 lines total, every line actionable, real tool calls with realistic parameters, Automatos-native identity", "correct": true },
+        { "id": "b", "text": "At least 500 lines of thorough documentation with background and rationale", "correct": false },
+        { "id": "c", "text": "As short as possible — a title and a one-line description are enough", "correct": false },
+        { "id": "d", "text": "Whatever length you like, as long as it references external tools like Cursor or Qwen for examples", "correct": false }
+      ],
+      "explanation": "The guide sets 60–100 lines, every line actionable, real tool calls with realistic params, and an Automatos-native identity. Option b is far too long — a skill is an instruction sheet the agent follows, not a manual. Option c is too thin to encode a real procedure (no workflow, output format, or guardrails). Option d violates the explicit rule against external-tool references and the Automatos-native identity requirement.",
+      "sourceRefs": ["r-skill-guide", "r-skills-readme"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m02-install-assign-skill",
+      "domainId": "m02-skills",
+      "title": "Give an agent a skill — install, assign, and feel the difference",
+      "goal": "Produce a sharpened agent: install a quality/engineering-flavoured skill from the Marketplace, assign it to a Code Reviewer agent, and capture a before/after chat test that shows the tightened behaviour. Your artifact is the before/after transcript plus a note on what changed.",
+      "steps": "## What you'll do\n\nYou'll take a general agent and make it good at a specific job by attaching a skill, then prove the change with a chat test. Everything here is on the free platform and achievable solo in your own workspace.\n\n### Before you start\n\n- **Sign in.** A personal workspace is created for you on first login and you're its admin — every step here is solo-achievable.\n- **Have a Code Reviewer agent.** New workspaces ship with a **Code Reviewer** starter agent; if you don't have one, create one from the template (Agent Management → + Create Agent → From Template → Code Reviewer). This is the same starter the docs reference.\n\n### Capture the 'before'\n\n1. **Open Chat, select your Code Reviewer** from the agent dropdown, and paste a small code diff (10–30 lines with a couple of deliberate issues — a missing null check, an unused import). Ask: *\"Review this diff.\"*\n2. **Save the response.** Copy it into a document — this is your 'before' baseline. Notice its shape: is the severity consistent? Is the output structured the same way every time? Usually a bare agent is a bit ad-hoc.\n\n### Install and assign a skill\n\n3. **Go to Marketplace → Capabilities → Skills.** Browse for something engineering- or quality-flavoured (a code-review or security-review procedure). Click a card to read what it teaches, then click **Install**. It moves to your 'Installed' inventory.\n4. **Assign it.** Open your Code Reviewer from the roster → **Agent Details → Plugins** tab → add the installed skill. (Changes take effect immediately — no restart.) Keep it to 1–3 skills on this agent; don't pile them on.\n\n### Capture the 'after' and compare\n\n5. **Re-run the exact same review.** Back in Chat, same agent, paste the *same diff*, ask the *same question*.\n6. **Save the new response** next to the first. Compare: is it now structured (numbered findings, severity levels, a fix suggestion each)? Does it stay in scope instead of wandering (a good skill's 'What NOT To Do' stops it rewriting whole files)? Write two sentences on what changed.\n\n### Why it matters\n\nThis is the everyday builder loop: pick a role, attach the right know-how, verify the behaviour tightened. You didn't retrain anything or write code — you gave the agent an instruction sheet, and its output got predictable. Keep the before/after; it's proof you can make an agent *yours*.\n\n### A note on cost\n\nEach chat turn calls an LLM, which costs money per use. The realistic setup for an operator is bring-your-own-key (supply your own provider key in Settings and pay the provider directly). This test is a few short turns and cheap; cost is covered properly in Module 09.",
+      "checklist": [
+        "Signed in and confirmed you have a Code Reviewer agent (starter template or created from template)",
+        "Captured a 'before' review: same diff, same question, response saved",
+        "Installed an engineering/quality-flavoured skill from Marketplace → Capabilities → Skills",
+        "Assigned the skill to the Code Reviewer via Agent Details → Plugins (kept to 1–3 skills total)",
+        "Captured an 'after' review: same diff, same question, response saved",
+        "Wrote two sentences comparing before vs after (structure, severity, staying in scope)",
+        "ARTIFACT SAVED: the before/after transcript plus your what-changed note"
+      ]
+    },
+    {
+      "id": "lab-m02-author-skill-md",
+      "domainId": "m02-skills",
+      "title": "Author a minimal SKILL.md — teach an agent a new job",
+      "goal": "Produce a complete, valid, minimal SKILL.md (60–100 lines) for a role you care about — say a 'Release Notes Writer' — with correct frontmatter (name as identity, 3–6 real tools), the four required body sections, then import it and assign it to an agent. Your artifact is the SKILL.md file plus a screenshot of it assigned to an agent.",
+      "steps": "## What you'll do\n\nYou'll write your own skill from the author spec, using SENTINEL and SCOUT as reference patterns, then load it into the platform and attach it to an agent. This is the move that turns you from a user of skills into an author of them.\n\n### Before you start\n\n- **Read the two reference skills.** Open `team/sentinel/SKILL.md` (the observe-and-report pattern) and `team/scout/SKILL.md` (the act-on-the-outside-world pattern) in the automatos-skills repo. Your skill will lean toward one of these shapes — pick which.\n- **Keep the author spec open.** `SKILL-GUIDE.md` is the checklist: frontmatter fields, the four body sections, the tool reference table, and the 60–100-line quality bar.\n- **Pick a role.** 'Release Notes Writer' is the worked example, but choose any repeatable single-agent job you'd actually use.\n\n### Write the frontmatter\n\n1. **Fill the required fields:** `name` (this is the identity — pick it deliberately and leave it stable), a one-sentence `description`, `version: \"1.0.0\"`, a 3–5 item `tags` flow list, and `category: agent-role`.\n2. **Declare 3–6 real tools — and scope them tight.** Use only names from the tool reference: `platform_*` (platform actions), `workspace_*` (files/code), and `composio_execute` (the one meta-tool for *all* external apps — never list individual actions like GMAIL_SEND_EMAIL separately). Ask of each tool: *does this role genuinely need it?* If not, leave it out — that omission is your least-privilege decision.\n\n### Write the four body sections\n\n3. **Identity** — one heading + 1–2 sentences on who this agent is and its stance (factual, concise, never oversells).\n4. **Workflow** — numbered steps, each with a ```json``` block showing a real tool call with realistic parameters. No generic 'analyse and implement' steps — every step names a real tool and says what to do with its result.\n5. **Output Format** — a fenced template with `{placeholders}` so every run comes out the same shape.\n6. **What NOT To Do** — 3–5 role-specific anti-patterns. This is where your guardrails live: e.g. 'do not invent a change not in the commits,' 'do not publish without the version number,' and — if your role can act externally — 'do not send/post without human approval' (copy SCOUT's discipline).\n\n### Check it against the bar\n\n7. **Count and prune.** 60–100 lines total, every line actionable, no filler, no references to external tools (Cursor/Qwen/etc.). If it's over 100 lines, you're documenting, not instructing — cut.\n\n### Load it and assign it\n\n8. **Import.** Put the file at `{group}/{slug}/SKILL.md` in a git repo, then in **Marketplace → Skills** use Upload/Import and paste the repo's git URL. The loader recursively finds every `SKILL.md` and upserts by `name`. (Re-importing later updates it in place.)\n9. **Assign.** Attach your new skill to an agent (Agent Details → Plugins) and chat-test that it now follows your procedure. Screenshot the skill assigned on the agent.\n\n### Why it matters\n\nAuthoring a `SKILL.md` is the deepest 'make it yours' move on the platform: you've encoded a repeatable procedure once, and now any agent or playbook that uses this agent inherits it. Scoping the tools narrow and writing sharp 'What NOT To Do' guardrails is also your earliest, cheapest safety control — long before budgets and approvals in Module 09.",
+      "checklist": [
+        "Read team/sentinel/SKILL.md and team/scout/SKILL.md and chose which pattern your role leans toward",
+        "Frontmatter complete: name (as identity), description, version (quoted), 3–5 tags, category: agent-role",
+        "tools: lists 3–6 REAL Automatos tools (platform_*/workspace_*/composio_execute), scoped to only what the role needs",
+        "All four body sections present: Identity, Workflow (numbered, with JSON tool calls), Output Format (with placeholders), What NOT To Do (3–5 anti-patterns)",
+        "60–100 lines total, every line actionable, no external-tool references",
+        "Imported via Marketplace → Skills (git URL) and confirmed it loaded",
+        "ARTIFACT SAVED: the SKILL.md file plus a screenshot of it assigned to an agent"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gitbook-capabilities",
+      "title": "Automatos AI — Marketplace: Capabilities (Plugins & Skills)",
+      "url": "automatos-gitbook/marketplace/capabilities.md",
+      "kind": "first-party-doc",
+      "annotation": "The canonical live-proof page for this module: the Capabilities tab splits into Plugins (bundles of skills + commands + agent configs + prompt templates) and Skills (git-based capability modules defined by a SKILL.md). Read it for the exact skill/plugin distinction and the Install → assign flow. Note: you can also create custom skills from your own repos.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-gitbook-marketplace",
+      "title": "Automatos AI — Community Marketplace (overview)",
+      "url": "automatos-gitbook/marketplace/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The five marketplace tabs — Applications, Agents, Playbooks, LLMs, and Capabilities (where Skills live). Read it to place skills in context and to see the browse/install/Submit-to-Marketplace flow. Currency note: install and publish-with-review are live; there is no contributor-economy or monetization language — that's 'coming', not shipped.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-gitbook-marketplace-agents",
+      "title": "Automatos AI — Marketplace Agents (pre-built configs)",
+      "url": "automatos-gitbook/marketplace/agents.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds the 'install a whole agent vs install a skill' judgment: a marketplace agent is a turnkey package — tested system prompt, recommended model, and a pre-assigned skill set. This is how the nine signature agents ship. Installed agents are copies you can modify freely.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-gitbook-agent-details",
+      "title": "Automatos AI — Agent Details (the Plugins tab)",
+      "url": "automatos-gitbook/agents/details.md",
+      "kind": "first-party-doc",
+      "annotation": "Where you assign a skill to an existing agent: the Agent Details → Plugins tab manages the plugins, skills, and tools for that agent, and changes take effect immediately (no restart). Also the home of per-agent Performance and Reports.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-gitbook-agent-creating",
+      "title": "Automatos AI — Creating an Agent (Step 5: tools and skills)",
+      "url": "automatos-gitbook/agents/creating.md",
+      "kind": "first-party-doc",
+      "annotation": "The other place skills attach: Step 5 of the create-agent flow, where you pick Tools (Composio apps), Skills (git packages), and Plugins (marketplace bundles). Its prompt-engineering tips (be specific about the role, define output format, set boundaries, include examples) map neatly onto the four SKILL.md sections. Confirms the Code Reviewer template used in the lab.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-skills-readme",
+      "title": "automatos-skills — README (the library index)",
+      "url": "automatos-skills/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The source of truth for the library: '128 skills indexed' across 16 groups, the nine signature agents and their beats, the SKILL.md format quick-reference, the loader behaviour (identity = the name: field; upsert by name; 1–3 skills per agent), and the before/after Jira example. Cite the 128 figure; don't assert a precise live count (the working tree drifts). Note FORGE's 'recipe builder' blurb is legacy — read 'playbook'.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-skill-guide",
+      "title": "automatos-skills — SKILL-GUIDE.md (the author spec)",
+      "url": "automatos-skills/SKILL-GUIDE.md",
+      "kind": "first-party-doc",
+      "annotation": "The authoring checklist: required frontmatter (name, description, version, tags, category: agent-role, tools[]), the four body sections (Identity, Workflow with JSON tool calls, Output Format, What NOT To Do), the 60–100-line quality bar, and the tool reference tables (platform_*, workspace_*, composio_execute). Note: where an older line calls the directory the identifier, the README's loader statement governs — identity is the name: field.",
+      "domainIds": ["m02-skills"]
+    },
+    {
+      "id": "r-skills-reference-patterns",
+      "title": "automatos-skills — SENTINEL & SCOUT (reference SKILL.md patterns)",
+      "url": "automatos-skills/team/sentinel/SKILL.md",
+      "kind": "first-party-doc",
+      "annotation": "The two skills every author is told to read first. SENTINEL (team/sentinel/SKILL.md) is the observe-and-report pattern — five ordered platform_* health checks, evidence discipline ('no evidence = no claim'), and least-privilege guardrails that refuse admin-only tools. SCOUT (team/scout/SKILL.md) is the act-on-the-outside-world pattern — an explicit scoring rubric and restraint guardrails ('do not send outreach without human approval', data minimisation). Study both before writing your own.",
+      "domainIds": ["m02-skills"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-02-1",
+      "title": "02 · Skills — what a skill is, the library, and the nine signature agents",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m02-skills"],
+      "sourceNotebook": "platform-architect / m02 / skills-library-and-signature-agents"
+    },
+    {
+      "id": "v-02-2",
+      "title": "02 · Authoring a SKILL.md — frontmatter, the four sections, and least-privilege tools",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m02-skills"],
+      "sourceNotebook": "platform-architect / m02 / authoring-skill-md"
+    }
+  ]
+}
