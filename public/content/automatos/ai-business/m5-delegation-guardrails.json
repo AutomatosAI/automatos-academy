@@ -1,0 +1,459 @@
+{
+  "id": "m5-delegation-guardrails",
+  "order": 5,
+  "code": "M5",
+  "name": "Delegating with guardrails",
+  "tagline": "Letting AI act on your behalf the way you'd delegate to a capable new hire: a bounded goal, a plan you approve, a spending limit, a written record — and trust that widens only as the track record earns it.",
+  "overview": "This module answers the question that decides whether AI is a curiosity or a workforce for you: can I trust it to act on its own? The honest answer is the same one you'd give about a new employee — yes, inside a lane you set, with checkpoints, and only as far as it has earned. Automatos has a specific shape for this called a mission: you hand the agents a plain-language goal, they come back with a plan, you approve or edit it, then they run it and report. Decisions stay yours; execution moves off your desk. Around that pattern sit four guardrails — scope (it can only touch what you allow), approval (anything leaving the building gets your sign-off first), budget (you watch what it costs and get alerted before surprises), and visibility (every action is logged, so you can always see what it did and why). You will set the approval line by mistake-cost — cheap-to-undo work runs on its own, customer-facing work is proposed first, and money-out or legal commitments are never done alone. And you will learn to read the activity log like a manager doing a five-minute weekly review. The module is honest that checkpoints shrink the blast radius of a mistake; they do not abolish mistakes, which is exactly why scope and budget exist alongside approval. You finish by running one real, bounded mission end to end — a plan you approved, a budget you watched — and deciding, deliberately, one lane you would give standing approval and one thing that stays never-alone.",
+  "objectives": [
+    "Describe the mission pattern — goal, plan, approve, run, report — and explain why it keeps decisions with you while moving execution off your desk.",
+    "Name the four guardrails (scope, approval, budget, visibility) in plain language and say what each one protects against.",
+    "Set an approval line by mistake-cost: auto-run cheap-to-undo work, propose customer-facing work first, and keep money-out and legal commitments never-alone.",
+    "Apply the graduated-trust ladder — approve everything at first, grant standing approval only to a proven low-stakes lane, and review weekly — the same way you'd onboard a new hire.",
+    "Read the activity log as a manager: what ran, what it touched, and what it cost, in about five minutes a week."
+  ],
+  "lessons": [
+    {
+      "id": "l1-mission-pattern",
+      "title": "The mission pattern: goal, plan, approve, run, report",
+      "estMinutes": 12,
+      "objective": "Explain how a mission turns a plain-language goal into an approved plan the agents then execute, and why that shape lets you delegate without losing control.",
+      "body": "## Delegating to software the way you'd delegate to a person\n\nThink about how you hand work to a capable new hire. You don't write out every keystroke, and you don't hand over the company card on day one. You give them a bounded job — \"chase our overdue invoices this week\" — they come back with how they plan to do it, you tweak it, and then they get on with it and tell you how it went. You keep the decisions; they take the legwork off your desk.\n\nAutomatos has a specific shape for exactly this, and it's worth learning by its name because the whole module hangs off it. It's called a **mission**: an objective you hand to your AI agents, which they plan and then carry out step by step once you've approved the plan. (One thing to know up front — an agent here is an AI *worker* with its own role, model, and tools, not a chatbot you type at. The platform is blunt about this: \"Agents are workers, not chatbots.\" A mission is how you put those workers on a job.)\n\n## The five beats of a mission\n\nEvery mission runs through the same five beats. Learn these and you understand the delegation model:\n\n1. **Goal** — you describe, in plain English, what you want done. The more specific, the better: \"Audit all five overdue invoices and draft a reminder for each\" beats \"chase the money.\"\n2. **Plan** — an agent turns your goal into an execution plan: the tasks it intends to do, in order, with milestones. The mission now sits in a state the platform labels **Plan Pending** — it is waiting for you.\n3. **Approve** — you read the plan and either **Approve** it or **Reject** it. Nothing executes until you approve. This is the single most important checkpoint in the whole system: the gate between \"the AI has an idea\" and \"the AI is doing it.\"\n4. **Run** — once approved, the mission goes **Active** and the agents work through the plan, using their tools and your uploaded knowledge as they go. You can **Pause**, **Resume**, or **Cancel** at any point.\n5. **Report** — when the work is done the mission is **Completed**: you get the results, a task-by-task record of what happened, and the option to **Save as Routine** if it's something you'll want to run again.\n\nNotice where the human sits. You are at the start (setting the goal) and at the gate (approving the plan) — the two points where judgement matters. You are *not* in the middle doing the typing. That's the trade the mission pattern makes: **decisions stay with you, execution moves off your desk.**\n\n## Worked example — the consultancy chases five overdue invoices\n\nA two-person consultancy has five clients who are late paying. The owner opens a new mission and writes the goal: *\"Chase our five overdue invoices. Draft a polite reminder email for each client, and flag the one that's over 60 days for a firmer follow-up.\"*\n\nAn agent comes back with a plan: pull the five overdue invoices, draft five reminder emails matched to each client, and mark the 60-day account for escalation. The mission sits at **Plan Pending**. The owner reads it — and catches something. One of those five clients paid yesterday; the bank just hadn't cleared it. So the owner edits the plan down to four, strikes that client off, and **Approves**.\n\nThe mission goes **Active**. The agents draft the four reminders. When it's **Completed**, the owner reads the report, sees the four drafts, and sends them. The whole thing took the owner about three minutes of judgement — reading the goal back, catching the paid client, approving — instead of an afternoon of writing dunning emails.\n\nThat is delegation with the human in exactly the right two places. And notice the catch the owner made at the approval gate: no amount of cleverness in the agent would have known that client paid yesterday. **The approval step isn't ceremony — it's where your knowledge of the business meets the AI's plan.**\n\n## One honest caveat\n\nApproving a good plan does not guarantee a good result. The agents could still draft a reminder with the wrong tone, or misread which invoice is which. Approval shrinks the chance of a bad outcome; it doesn't abolish it. That's precisely why the next lesson's other guardrails — scope, budget, visibility — sit alongside approval rather than instead of it. No single checkpoint is the whole safety net.\n\n> **A note on availability:** Missions run behind a setting the platform calls **Mission mode**, a feature flag an admin turns on. On a brand-new workspace it may be off. If you don't see a Missions tab, that flag is where to look — it's in General settings, and on your own personal workspace you're the admin, so you can switch it on yourself.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m5-l1-1",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In the mission pattern, at which point does the human make the go/no-go decision before any work is executed?",
+          "options": [
+            { "id": "a", "text": "When the mission reaches Plan Pending — you Approve or Reject the plan before it runs", "correct": true },
+            { "id": "b", "text": "After the mission has run, when you read the final report" },
+            { "id": "c", "text": "You don't — missions run fully autonomously once created" },
+            { "id": "d", "text": "Halfway through execution, when the agent pauses to ask" }
+          ],
+          "explanation": "The go/no-go gate is the **approval of the plan** while the mission sits at Plan Pending — nothing executes until you Approve. Reading the final report (b) happens after the work is already done, so it's too late to prevent it. Missions are not fully autonomous (c) — the whole point is the approval gate. And while you *can* pause mid-run, the deliberate decision point is the plan approval up front, not a mid-execution question (d).",
+          "sourceRefs": ["r-gb-missions"]
+        },
+        {
+          "id": "kc-m5-l1-2",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the consultancy example, the owner edited the plan to strike off a client who had actually paid. What does that illustrate about the approval step?",
+          "options": [
+            { "id": "a", "text": "The approval gate is where your knowledge of the business corrects the AI's plan — the agent couldn't have known the payment had cleared", "correct": true },
+            { "id": "b", "text": "That the AI made an error serious enough to abandon missions entirely" },
+            { "id": "c", "text": "That approval is a rubber-stamp formality with no real effect" },
+            { "id": "d", "text": "That the budget guardrail caught the mistake automatically" }
+          ],
+          "explanation": "The catch shows approval doing its real job: **your business context meets the AI's plan** at the gate, and you correct what the agent had no way to know. It's not a reason to abandon missions (b) — it's the system working as designed. It's the opposite of a rubber stamp (c) — the edit changed the outcome. And it was human judgement at the approval gate, not the budget guardrail (d), that caught it.",
+          "sourceRefs": ["r-gb-missions"]
+        }
+      ]
+    },
+    {
+      "id": "l2-four-guardrails",
+      "title": "The four guardrails and where to draw the approval line",
+      "estMinutes": 13,
+      "objective": "Name the four guardrails in plain language and set an approval line by mistake-cost — auto-run cheap-to-undo work, propose customer-facing work first, keep money and legal never-alone.",
+      "body": "## Four guardrails, one plain sentence each\n\nThe approval gate from the last lesson is one control. Around it sit three more. Together they're the four guardrails you set on any AI you let act on your behalf — and each one answers a fear you'd sensibly have about handing work to something new.\n\n- **Scope** — *it can only touch what you allow.* You decide which tools and which data an agent can reach, so its reach is bounded by design. The supplies agent at a café can read supplier emails and draft orders; it cannot see payroll, because it was never given access to it. On Automatos this is concrete: tools are assigned to specific agents, and each assignment carries a permission level — **Read only** (fetch, don't change), **Full access** (read and write), or **Custom** (only the specific actions you pick). The platform's own advice is the safe default: *\"Start with read-only for new agents. Expand permissions once you've verified the agent behaves correctly.\"*\n- **Approval** — *anything that leaves the building gets your sign-off first.* An email to a customer, an order, a payment: the agent proposes, you approve. You met this as the mission plan gate. There's a second place it lives too — when one agent wants to hand work to another, delegation can be set to **Approval required** (or **Auto-delegate**, or **Disabled**), so even agent-to-agent handoffs can wait for you.\n- **Budget** — *you watch what it costs, and you get warned before surprises.* Missions spend money as the agents work (they're calling paid AI models under the hood). You can see a **cost breakdown by task**, you can **Pause** a mission if it's running hotter than you expected, and you can **Resume with increased budget** if it genuinely needs more. You can also switch on **cost alerts** to be notified when spending crosses a threshold you set. Be clear-eyed about what this is: it's a live meter plus alerts and a pause button — a way to *watch and stop* — not a hard pre-set spend cap that blocks a run before it starts.\n- **Visibility** — *every action is logged; you can always see what it did and why.* The activity **Feed** records every significant action — every tool call, every agent response — with a timestamp, and each mission keeps a task-by-task event timeline. Nothing your AI workforce does is invisible. (This is also the raw material for the weekly review in the next lesson.)\n\nCommit these four to memory as a set: **scope bounds reach, approval gates action, budget bounds cost, visibility bounds surprise.** Any AI you delegate to should have all four set deliberately — not left on their defaults.\n\n## Drawing the approval line by mistake-cost\n\nThe hardest of the four to get right is approval, because \"approve everything\" is exhausting and \"approve nothing\" is reckless. The rule that resolves it: **set the approval line by what a mistake would cost you.** Three lanes:\n\n- **Auto-run — cheap to undo, stays inside.** Internal drafts, summaries, research, first-pass notes. If the worst case is \"I delete it and ask again,\" it doesn't need your sign-off every time. Let it run.\n- **Propose first — anything a customer or outsider sees.** A reply to a customer, a social post, an outbound email. The worst case here is a relationship, so the agent drafts and you approve before it sends — at least until it's earned otherwise.\n- **Never alone — money out, commitments, anything legal.** Paying an invoice, signing off a contract, making a promise on the company's behalf. These stay human-approved indefinitely. There is no track record long enough to auto-send money.\n\nSort your tasks into those three buckets and you've designed your approval policy. The line isn't about how clever the AI is; it's about how expensive the mistake is.\n\n## Worked example — the marketing agency's two lanes\n\nA small marketing agency runs client social accounts. Its owner sorts the AI's work by mistake-cost. **Drafting** next week's posts from the content calendar? Cheap to undo — nobody sees a draft — so that lane **auto-runs**, and the owner reviews the batch when convenient. **Publishing** a post to a client's public feed? That's customer-facing, and a wrong post is a real problem, so publishing is **propose-first**: the agent queues the post and a human approves before it goes live. **Renewing the agency's paid ad spend** or agreeing new scope with a client? That's money and commitment — **never alone**, full stop.\n\nSame AI, same competence, three different approval settings — because the owner set the line by consequence, not by capability. Drafting and publishing feel similar to the software; they are worlds apart in what a mistake costs. That gap is the whole reason you draw the line yourself.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m5-l2-1",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You're setting the budget guardrail on a mission. Which description matches what the platform actually gives you?",
+          "options": [
+            { "id": "a", "text": "A live cost breakdown by task, cost alerts at a threshold you set, and the ability to pause and resume-with-more-budget — a way to watch and stop, not a hard cap that blocks the run up front", "correct": true },
+            { "id": "b", "text": "A mandatory dollar ceiling you enter before the mission starts, which blocks execution the instant it's hit", "correct": false },
+            { "id": "c", "text": "No cost controls at all — you only find out the bill afterwards", "correct": false },
+            { "id": "d", "text": "A cap that automatically refunds any overspend to your account", "correct": false }
+          ],
+          "explanation": "The real controls are a **live per-task cost breakdown, threshold cost alerts, and pause / resume-with-increased-budget** — you watch and stop, rather than pre-set a hard blocking ceiling (b), which the platform doesn't offer. It's not true that there are no controls (c) — you can see spend live and pause. And there's no refund mechanism (d); that's not how metered AI cost works. Setting expectations honestly here matters, because over-promising a hard cap is exactly the mistake to avoid.",
+          "sourceRefs": ["r-gb-missions", "r-gb-settings-general", "r-gb-llm-costs"]
+        },
+        {
+          "id": "kc-m5-l2-2",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "By the mistake-cost rule, which task belongs in the 'never alone' lane rather than 'auto-run' or 'propose first'?",
+          "options": [
+            { "id": "a", "text": "Paying a supplier invoice on the company's behalf", "correct": true },
+            { "id": "b", "text": "Drafting an internal summary of this week's customer reviews", "correct": false },
+            { "id": "c", "text": "Drafting (not sending) a reply to a customer question", "correct": false },
+            { "id": "d", "text": "Producing a first-pass research note for your own eyes", "correct": false }
+          ],
+          "explanation": "**Paying an invoice** is money leaving the business — an expensive, hard-to-undo commitment — so it stays never-alone indefinitely. An internal summary (b) and a private research note (d) are cheap to undo and stay inside, so they're auto-run candidates. Drafting a customer reply (c) is customer-facing but it's only a draft until a human sends it, which is the classic propose-first case, not never-alone. The lane is set by consequence, not by how capable the AI is.",
+          "sourceRefs": ["r-gb-assigning", "r-gen-ai-leader"]
+        }
+      ]
+    },
+    {
+      "id": "l3-graduated-trust",
+      "title": "Graduated trust and reading the activity log",
+      "estMinutes": 11,
+      "objective": "Apply the graduated-trust ladder like onboarding a new hire, and read the activity log as a manager in about five minutes a week.",
+      "body": "## Trust is earned in steps, not granted on day one\n\nYou wouldn't give a new hire signing authority in their first week, and you wouldn't shadow a proven employee's every email in their second year. Trust moves — and it moves in one direction, earned by track record. The same ladder works for an AI agent, and it saves you from the two failure modes that sink most owners:\n\n- **All-or-nothing thinking.** Either terrified (so the AI never does anything real) or fully hands-off on day one (so the first mistake is a big one). Both skip the middle, which is where the value actually lives.\n- **Approval fatigue.** Approving everything forever means that within a week you're rubber-stamping without reading — which is *worse* than honest autonomy in a small lane, because now nobody is really checking.\n\nThe ladder that avoids both:\n\n1. **Week one — approve everything.** Every plan, every customer-facing action, you read and approve. You're learning how the agent thinks and it's building a record. Slow on purpose.\n2. **Then — grant standing approval to one proven, low-stakes lane.** Once a specific, cheap-to-undo task has gone right several times, let that lane run without per-item sign-off. Not everything — one lane. This is the same move as \"you can send routine order-status replies without checking with me first.\"\n3. **Review weekly, forever.** Standing approval isn't fire-and-forget. You spend a few minutes a week reading what ran in the trusted lane, exactly as you'd have a weekly check-in with a member of staff. If the record slips, you pull the lane back.\n\nWiden the lane as it earns it; narrow it the moment it doesn't. That's the whole discipline.\n\n## Reading the activity log like a manager\n\nStanding approval only works if you actually do the weekly review — and that review is a specific, quick habit, not a vague \"keep an eye on it.\" Automatos gives you the raw material in two places:\n\n- The activity **Feed** — a real-time, chronological log of everything: every tool call (an email sent, an API called), every agent response, each stamped with a time. You can **filter by action type** so you can look at, say, just the outbound actions.\n- Each mission's **event timeline and cost breakdown** — for a given job, what tasks ran, what they touched, and what they cost.\n\nA manager's weekly review is three questions, about five minutes:\n\n1. **What ran?** Skim the feed for the trusted lane. Did the expected work happen, and only the expected work?\n2. **What did it touch?** Any action on the wrong customer, the wrong data, the wrong tool? The log names what each action hit.\n3. **What did it cost?** Glance at the cost breakdown. Is spend where you'd expect, or is something running hot?\n\nIf all three read clean, you're done for the week. If something's off, that's your signal to tighten scope, narrow the lane, or set a tighter cost alert — the guardrails from the last lesson are your response.\n\n## Worked example — the café's weekly five minutes\n\nA café gave its supplies agent standing approval for one lane: drafting the weekly reorder from supplier emails (drafting only — placing the order stays propose-first). Every Monday the owner spends five minutes in the activity feed. **What ran?** Yes — one reorder draft, as expected, nothing extra. **What did it touch?** Supplier emails and the order draft; not the till, not payroll, because scope never gave it those. **What did it cost?** A few cents in AI usage — normal. Clean across the board, so standing approval holds for another week.\n\nOne week it wouldn't read clean — say the draft reordered twice as much coffee as usual off a misread email. The owner catches it in the Monday review before it becomes a real order (because placing the order was never auto-approved), narrows the agent's task, and the guardrails have done their job. That is the entire model working: a small trusted lane, a five-minute weekly read, and the cheap correction available because scope and approval kept the blast radius small. Delegate like you would to a new hire — small lane, checkpoints, a limit — and widen the lane only as it earns it.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m5-l3-1",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why is 'approve everything, forever' considered a failure mode rather than the safest choice?",
+          "options": [
+            { "id": "a", "text": "It leads to approval fatigue — you start rubber-stamping without reading, so nobody is genuinely checking anymore", "correct": true },
+            { "id": "b", "text": "It's the safest possible policy and the module recommends it permanently", "correct": false },
+            { "id": "c", "text": "The platform forbids approving more than a set number of actions per day", "correct": false },
+            { "id": "d", "text": "Approving anything at all removes your legal responsibility for the outcome", "correct": false }
+          ],
+          "explanation": "Approving everything indefinitely causes **approval fatigue**: the volume turns your review into a reflex click, so the checkpoint stops actually checking — worse than honest autonomy in a small, low-stakes lane. So it's not the recommended permanent policy (b). There's no platform-imposed daily approval limit (c) — this is a human-behaviour problem, not a system rule. And approving work doesn't offload your responsibility (d); if anything, you own what you approved.",
+          "sourceRefs": ["r-gen-ai-leader"]
+        },
+        {
+          "id": "kc-m5-l3-2",
+          "domainId": "m5-delegation-guardrails",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "During a weekly review you skim the activity feed for the trusted lane. Which three questions is that review meant to answer?",
+          "options": [
+            { "id": "a", "text": "What ran, what did it touch, and what did it cost", "correct": true },
+            { "id": "b", "text": "Which competitor is cheaper, which model is newest, and which agent is fastest", "correct": false },
+            { "id": "c", "text": "How to write better prompts, which tools to buy, and who to hire", "correct": false },
+            { "id": "d", "text": "Nothing specific — you just glance at it and hope it looks fine", "correct": false }
+          ],
+          "explanation": "The manager's weekly read is exactly **what ran / what did it touch / what did it cost** — did the expected work happen, did it stay on the right data and tools, and is spend where you'd expect. The other options drift into vendor comparison (b) or unrelated planning (c), which aren't what the log review is for, and 'just hope' (d) is the un-disciplined version the whole habit exists to replace. The feed and each mission's cost breakdown give you the answers.",
+          "sourceRefs": ["r-gb-feed", "r-gb-missions"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m5-1",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is a 'mission' on Automatos, in plain terms?",
+      "options": [
+        { "id": "a", "text": "An objective you describe in plain language that agents plan and then execute after you approve the plan", "correct": true },
+        { "id": "b", "text": "A single chat message you send to a chatbot", "correct": false },
+        { "id": "c", "text": "A paid subscription tier that unlocks premium features", "correct": false },
+        { "id": "d", "text": "A report the platform emails you every morning", "correct": false }
+      ],
+      "explanation": "A mission is an **autonomous, multi-step objective**: you state the goal, an agent plans it, and after you approve the plan the agents run it and report back. It's not a single chat message (b) — agents here are workers, not a chatbot, and a mission is multi-step. It's not a pricing tier (c) or a scheduled email (d); those describe other things entirely.",
+      "sourceRefs": ["r-gb-missions"]
+    },
+    {
+      "id": "q-m5-2",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Put the mission beats in the right order.",
+      "options": [
+        { "id": "a", "text": "Goal → plan → approve → run → report", "correct": true },
+        { "id": "b", "text": "Run → goal → report → approve → plan", "correct": false },
+        { "id": "c", "text": "Approve → goal → plan → report → run", "correct": false },
+        { "id": "d", "text": "Plan → run → approve → report → goal", "correct": false }
+      ],
+      "explanation": "You set the **goal**, the agent produces a **plan**, you **approve** it, the agents **run** it, and you get the **report** — in that order. The other sequences scramble the beats; the load-bearing fact is that approval comes *before* the run, never after, because that's the gate that keeps execution from starting without your sign-off.",
+      "sourceRefs": ["r-gb-missions"]
+    },
+    {
+      "id": "q-m5-3",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which set correctly names the four guardrails covered in this module?",
+      "options": [
+        { "id": "a", "text": "Scope, approval, budget, and visibility", "correct": true },
+        { "id": "b", "text": "Speed, accuracy, tone, and formatting", "correct": false },
+        { "id": "c", "text": "Login, password, backup, and encryption", "correct": false },
+        { "id": "d", "text": "Marketing, sales, support, and finance", "correct": false }
+      ],
+      "explanation": "The four guardrails are **scope** (what it can touch), **approval** (sign-off before action), **budget** (watching cost), and **visibility** (everything logged). The other sets describe output qualities (b), generic account security (c), or business functions (d) — none of which is the delegation-guardrail framework this module teaches.",
+      "sourceRefs": ["r-gb-missions", "r-gb-assigning", "r-gb-feed"]
+    },
+    {
+      "id": "q-m5-4",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The 'scope' guardrail is about limiting what an agent can touch. On Automatos, which mechanism most directly enforces it?",
+      "options": [
+        { "id": "a", "text": "Assigning tools to specific agents with a permission level — Read only, Full access, or Custom actions", "correct": true },
+        { "id": "b", "text": "Setting the agent's response temperature", "correct": false },
+        { "id": "c", "text": "Choosing which AI provider the agent uses", "correct": false },
+        { "id": "d", "text": "Writing a longer goal description", "correct": false }
+      ],
+      "explanation": "Scope is enforced by **which tools an agent is assigned and at what permission level** — Read only, Full access, or Custom — because an agent can only act through the tools you give it. Temperature (b) tunes creativity, and provider choice (c) affects the model, but neither bounds reach. A longer goal (d) describes the task but doesn't restrict what the agent can access. The safe default the docs recommend is starting read-only and expanding once the agent has proven itself.",
+      "sourceRefs": ["r-gb-assigning"]
+    },
+    {
+      "id": "q-m5-5",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A mission you approved is running hotter on cost than you expected. Which of these can you actually do on the platform?",
+      "options": [
+        { "id": "a", "text": "Pause the mission, review the per-task cost breakdown, and resume with an increased budget if it's justified", "correct": true },
+        { "id": "b", "text": "Nothing — once a mission is approved it cannot be paused or inspected", "correct": false },
+        { "id": "c", "text": "Automatically claw back the money already spent", "correct": false },
+        { "id": "d", "text": "Rely on a hard pre-set dollar cap that already blocked it before it started", "correct": false }
+      ],
+      "explanation": "You can **pause, inspect the cost breakdown by task, and resume with increased budget** — the platform gives you a live meter and a stop button. You are not stuck (b); pausing and inspecting are exactly the controls provided. There's no clawback of spent tokens (c). And there's no hard pre-set blocking cap (d) — the honest picture is watch-and-stop plus cost alerts, not a ceiling that prevents the run.",
+      "sourceRefs": ["r-gb-missions", "r-gb-settings-general"]
+    },
+    {
+      "id": "q-m5-6",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want to draw your approval line by mistake-cost. Which task most clearly belongs in the 'propose first' lane — not 'auto-run', not 'never alone'?",
+      "options": [
+        { "id": "a", "text": "Sending a reply to a customer's 'where's my order?' question", "correct": true },
+        { "id": "b", "text": "Writing an internal summary of this week's sales figures", "correct": false },
+        { "id": "c", "text": "Transferring payment to a supplier", "correct": false },
+        { "id": "d", "text": "Drafting a private brainstorm list only you will read", "correct": false }
+      ],
+      "explanation": "A **customer-facing reply** is the textbook propose-first case: a person outside the business sees it, so the worst case is a relationship, and the agent should draft while a human approves the send — at least until it's earned standing approval. An internal summary (b) and a private brainstorm (d) are cheap to undo and stay inside, so they're auto-run candidates. A supplier payment (c) is money out, which is never-alone. The lane is chosen by what a mistake would cost.",
+      "sourceRefs": ["r-gen-ai-leader"]
+    },
+    {
+      "id": "q-m5-7",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the correct way to use the graduated-trust ladder with a new agent?",
+      "options": [
+        { "id": "a", "text": "Approve everything at first, then grant standing approval to one proven low-stakes lane, and keep reviewing weekly", "correct": true },
+        { "id": "b", "text": "Grant full standing approval across all lanes on day one to save time", "correct": false },
+        { "id": "c", "text": "Approve everything forever and never widen the lane", "correct": false },
+        { "id": "d", "text": "Let the agent decide for itself which lanes it should be trusted with", "correct": false }
+      ],
+      "explanation": "The ladder is **approve-everything first → standing approval for one proven, low-stakes lane → weekly review, forever**, widening only as track record earns it. Full trust on day one (b) is the reckless failure mode. Approving everything forever (c) causes approval fatigue and never captures the value of delegation. And the agent doesn't self-authorise its own trust (d) — that decision is yours, set by mistake-cost and evidence.",
+      "sourceRefs": ["r-gen-ai-leader"]
+    },
+    {
+      "id": "q-m5-8",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Where on Automatos do you go to see a chronological, timestamped record of every action your agents took — the raw material for a weekly review?",
+      "options": [
+        { "id": "a", "text": "The activity Feed, which logs every tool call and agent response and can be filtered by action type", "correct": true },
+        { "id": "b", "text": "The billing page", "correct": false },
+        { "id": "c", "text": "The agent's system prompt", "correct": false },
+        { "id": "d", "text": "Nothing — agent actions aren't recorded anywhere you can see", "correct": false }
+      ],
+      "explanation": "The activity **Feed** is the chronological, timestamped log of every significant action — tool calls, responses — and you can filter it by action type to focus your review. Billing (b) shows charges, not the action-by-action record. A system prompt (c) is the agent's instructions, not a log of what it did. And it's simply not true that actions are invisible (d) — visibility is one of the four guardrails, and the feed is where it lives.",
+      "sourceRefs": ["r-gb-feed"]
+    },
+    {
+      "id": "q-m5-9",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "The module says 'checkpoints shrink the blast radius, they don't abolish mistakes.' Which statement best captures what that means for how you set guardrails?",
+      "options": [
+        { "id": "a", "text": "Because an approved plan can still produce a bad result, you set scope and budget too — so that when a mistake slips through, it can only reach so far and cost so much", "correct": true },
+        { "id": "b", "text": "Because mistakes are impossible once you approve a plan, the other guardrails are unnecessary", "correct": false },
+        { "id": "c", "text": "Because mistakes are inevitable, guardrails are pointless and you should either avoid AI or go fully hands-off", "correct": false },
+        { "id": "d", "text": "It means you should approve every single action forever to eliminate all risk", "correct": false }
+      ],
+      "explanation": "The point is that **no single checkpoint is the whole safety net**: approval reduces the odds of a bad outcome, and scope + budget contain how far and how expensive any mistake that slips through can get. It's the reason the guardrails work as a set. It's the opposite of 'mistakes are impossible, so skip the rest' (b), and it's not a counsel of despair (c) — guardrails are precisely how you make AI usable despite fallibility. Approving everything forever (d) is the approval-fatigue trap, not the lesson here.",
+      "sourceRefs": ["r-gb-missions", "r-gb-assigning"]
+    },
+    {
+      "id": "q-m5-10",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Approval shows up in two documented places on Automatos. Besides approving a mission plan, where else can you require your sign-off?",
+      "options": [
+        { "id": "a", "text": "Agent-to-agent delegation can be set to 'Approval required', so one agent handing work to another waits for your confirmation", "correct": true },
+        { "id": "b", "text": "You must approve each word an agent types before it appears", "correct": false },
+        { "id": "c", "text": "You approve the monthly invoice from the AI provider", "correct": false },
+        { "id": "d", "text": "There is no second approval surface — mission plans are the only one", "correct": false }
+      ],
+      "explanation": "Delegation rules include **Approval required** (alongside Auto-delegate and Disabled), so an agent passing a task to a teammate can be gated on your confirmation — a second, real approval surface. Word-by-word approval (b) isn't a thing and would be unusable. Approving a provider invoice (c) is billing, not an agent-action gate. And it's wrong that mission plans are the only surface (d) — delegation is the documented second one.",
+      "sourceRefs": ["r-gb-coordination", "r-gb-missions"]
+    },
+    {
+      "id": "q-m5-11",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "After a mission completes and you're happy with how it went, what does 'Save as Routine' let you do?",
+      "options": [
+        { "id": "a", "text": "Turn the one-off mission into a reusable playbook you can run again on demand or on a schedule", "correct": true },
+        { "id": "b", "text": "Permanently delete the mission and its record", "correct": false },
+        { "id": "c", "text": "Grant the agent admin rights over your workspace", "correct": false },
+        { "id": "d", "text": "Refund the tokens the mission used", "correct": false }
+      ],
+      "explanation": "**Save as Routine** extracts the completed mission's task pattern into a reusable **playbook** you can rerun or schedule — the bridge from a one-off job to a repeatable workflow. It doesn't delete anything (b), it has nothing to do with granting admin rights (c), and it isn't a refund mechanism (d). It's how a mission that worked becomes something you don't have to reassemble by hand next time.",
+      "sourceRefs": ["r-gb-missions"]
+    },
+    {
+      "id": "q-m5-12",
+      "domainId": "m5-delegation-guardrails",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You open your workspace to run your first mission but there's no Missions tab. What's the most likely explanation given how the platform is set up?",
+      "options": [
+        { "id": "a", "text": "Mission mode is a feature flag that may be off on a new workspace; as admin of your own personal workspace you can enable it in General settings", "correct": true },
+        { "id": "b", "text": "Missions require a paid plan you haven't purchased", "correct": false },
+        { "id": "c", "text": "Missions only work after you've run a hundred chats first", "correct": false },
+        { "id": "d", "text": "Your workspace is broken and needs to be recreated", "correct": false }
+      ],
+      "explanation": "Missions run behind the **Mission mode feature flag**, which can be off on a fresh workspace; since a personal workspace makes you its admin, you can toggle it on in General settings. It's not gated behind a purchase (b) in the way described, there's no hundred-chat prerequisite (c), and a missing flag doesn't mean a broken workspace (d) — it's a setting, not a fault.",
+      "sourceRefs": ["r-gb-settings-general", "r-gb-missions"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m5-order-status-autonomy",
+      "domainIds": ["m5-delegation-guardrails"],
+      "title": "How much autonomy for the 'where's my order?' replies?",
+      "tagline": "The e-commerce shop's judgement call: propose-first forever, or earned auto-send?",
+      "context": "You run a small e-commerce shop. Dozens of customers a day email 'where's my order?', and answering them by hand eats your mornings. The information needed is simple — a tracking status against an order number. You want AI to take this off your desk, but these are messages a real customer reads, so you're weighing how much autonomy to give. Walk the decision the way the module's debate frames it: earned and widening, with guardrails, not all-or-nothing.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "It's day one with a new agent on order-status replies. How do you set the approval line to start?",
+          "choices": [
+            { "id": "a", "text": "Propose-first: the agent drafts each reply, you approve before it sends — for now", "verdict": "best", "rationale": "These are customer-facing, so by the mistake-cost rule they start propose-first while the agent builds a track record. That's the graduated-trust ladder's week-one rung applied honestly." },
+            { "id": "b", "text": "Auto-send everything from day one — the task is simple, so trust it immediately", "verdict": "wrong", "rationale": "Full trust on day one is the reckless failure mode: the first mistake goes straight to a customer with no record earned. Simplicity of the task isn't the same as proven reliability." },
+            { "id": "c", "text": "Refuse to let AI near customer replies at all, indefinitely", "verdict": "viable", "rationale": "It's safe, and defensible if you have no capacity to review — but it forfeits the whole point of delegation and, done reflexively, is the 'terrified' half of all-or-nothing thinking. Propose-first captures the value while staying safe." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Two weeks in, the drafts have been consistently accurate and on-tone. You're tempted to grant standing approval so this lane auto-sends. What's the sound way to do it?",
+          "choices": [
+            { "id": "a", "text": "Grant standing approval to this one narrow lane (order-status replies only), keep scope tight, and commit to a weekly review of what it sent", "verdict": "best", "rationale": "This is the ladder's second rung done right: standing approval for one proven, low-stakes lane, with scope and a weekly log review as the safety net. The value finally leaves your desk without going unwatched." },
+            { "id": "b", "text": "Grant standing approval to order-status replies AND all other customer emails at once, since it's proven itself", "verdict": "wrong", "rationale": "The track record is for order-status replies only — widening to complaints, refunds, and everything else extrapolates trust the agent hasn't earned in those lanes. Widen one lane at a time." },
+            { "id": "c", "text": "Keep approving every reply by hand forever, to be safe", "verdict": "viable", "rationale": "Safe on paper, but two clean weeks is exactly the evidence the ladder waits for, and approving-forever invites approval fatigue — you'll start rubber-stamping. Standing approval on the narrow lane is the better use of a proven record." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "You give the order-status lane standing approval. Which guardrails do you keep in place so a mistake that slips through stays small?",
+          "choices": [
+            { "id": "a", "text": "Tight scope (the agent can read order/tracking data only, not payments or customer accounts), a cost alert, and a five-minute weekly log review", "verdict": "best", "rationale": "Exactly the point that checkpoints shrink blast radius but don't abolish mistakes: scope caps what a bad reply can reach, the cost alert catches runaway spend, and the weekly review catches drift early. Standing approval is safe only because the other three guardrails still hold." },
+            { "id": "b", "text": "Drop all guardrails — standing approval means the lane is fully trusted and needs no further oversight", "verdict": "wrong", "rationale": "Standing approval removes the per-item gate, not the other three guardrails. Dropping scope, budget, and visibility is how a small misfire becomes a large, invisible, expensive one." },
+            { "id": "c", "text": "Keep only the weekly review and rely on it alone to catch anything", "verdict": "viable", "rationale": "The review is essential but reactive — it finds problems after they've happened. Scope (so a mistake can't touch payments) and a cost alert are cheap, proactive containment you'd be foolish to give up. Keep all three, not just the review." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-gb-missions", "r-gb-assigning", "r-gb-feed", "r-gen-ai-leader"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m5-first-mission",
+      "domainId": "m5-delegation-guardrails",
+      "title": "Run your first budgeted, approved mission",
+      "goal": "Delegate one real, bounded job to your AI workforce end to end — a plan you approved, a cost you watched, a report you read — and come away with a written standing-approval lane and a never-alone list you'll carry into Module 06. The artifact is one completed mission plus your two-line delegation decision.",
+      "steps": "## Before you start\n\nYou'll do this on your own free Automatos workspace, where you're the admin. Missions run behind a setting called **Mission mode** — if you don't see a Missions tab, open **General settings** and switch on the **Mission mode** feature flag first. (If you'd rather not enable it, you can still complete the *design* half of this lab — steps 5 and 6 — as a paper exercise, and run the mission later.)\n\n## Steps\n\n1. **Pick one real, bounded goal.** Choose something genuinely useful and cheap to undo. Good candidates: chase this month's overdue invoices (draft the reminders), prep next week's social drafts, or summarise this week's customer reviews and draft replies. Bounded beats ambitious for a first run.\n2. **Set scope first.** Before you run anything, look at which agent will do the work and what tools it's assigned. Start it **Read only** where you can (from the Tools page or the agent's Plugins tab) so this first mission drafts and reads rather than sends and changes. Scope is the guardrail you set *before* the plan, not after.\n3. **Create the mission and write the goal in plain English.** From the Missions tab, start a new mission and describe your objective specifically — include what 'done' looks like (e.g. 'a drafted reminder email for each of the four overdue invoices, firmer tone on the 60-day one'). Specific goals get better plans.\n4. **Read the plan at Plan Pending — and edit it.** When the plan comes back, actually read it against what you know about your business. Change or remove any step that's wrong (the way the consultancy struck off the client who'd already paid). This is the approval gate; treat it as the real checkpoint it is. Then **Approve**.\n5. **Watch the budget while it runs.** As the mission goes Active, open the **cost breakdown by task**. Note roughly what it's costing. Optionally set a **cost alert** in Settings so you're notified past a threshold. Remember what this is: a live meter and a pause button, not a hard cap — if it ran hot you'd **Pause** and decide whether to **Resume with increased budget**.\n6. **Read the report and the activity log.** When it Completes, read the results. Then open the activity **Feed** and find this mission's actions — practise the manager's three questions: what ran, what did it touch, what did it cost. This is the weekly-review habit in miniature.\n7. **Write your delegation decision (the artifact that carries forward).** In two lines, decide deliberately: (a) **one lane you would give standing approval** — a specific, cheap-to-undo task you'd let run without per-item sign-off once it's proven; and (b) **one thing that stays never-alone** — money out, a commitment, anything legal. Save these two lines; they're the seed of the one-page AI policy you'll finish in Module 06.\n\n## Why it matters\n\nEverything in this module is abstract until a real job leaves your desk under a plan you approved. Doing it once — scope set first, plan edited, cost watched, log read — turns the four guardrails and the trust ladder from ideas into a habit you can repeat on the next task, and the next.",
+      "checklist": [
+        "Confirmed Mission mode is on (or completed steps 5–6 as a paper design exercise)",
+        "Set the working agent's tool scope to Read only (or the narrowest that fits the goal) before running",
+        "Wrote a specific, bounded goal with a clear 'done' condition",
+        "Read the plan at Plan Pending, edited at least one step or confirmed it was right, then approved",
+        "Opened the per-task cost breakdown and noted the rough cost (bonus: set a cost alert)",
+        "Read the completed report and found the mission's actions in the activity Feed",
+        "Wrote down one standing-approval lane and one never-alone item to carry into Module 06"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gb-missions",
+      "title": "Automatos docs — Missions",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "official-doc",
+      "annotation": "The load-bearing page for this whole module: the mission lifecycle you delegate through — describe a goal, an agent plans it, you Approve/Reject at Plan Pending, agents run it, it Completes with a report. Also the honest budget picture (cost breakdown by task, Pause, Resume with increased budget) and Save as Routine. Read the lifecycle table and Budget management section.",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gb-assigning",
+      "title": "Automatos docs — Assigning tools to agents",
+      "url": "automatos-gitbook/tools/assigning.md",
+      "kind": "official-doc",
+      "annotation": "Where the scope guardrail actually lives: tools are assigned to specific agents, each with a permission level — Read only, Full access, or Custom actions. The sanctioned safe default is here in the platform's own words: 'Start with read-only for new agents. Expand permissions once you've verified the agent behaves correctly.'",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gb-coordination",
+      "title": "Automatos docs — Agent coordination & delegation",
+      "url": "automatos-gitbook/agents/coordination.md",
+      "kind": "official-doc",
+      "annotation": "The second place approval lives: delegation rules — Auto-delegate, Approval required, or Disabled — govern whether one agent may hand work to another automatically or must wait for your confirmation. Grounds the 'approval shows up in two places' point.",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gb-feed",
+      "title": "Automatos docs — Activity Feed",
+      "url": "automatos-gitbook/activity/feed.md",
+      "kind": "official-doc",
+      "annotation": "The visibility guardrail: a real-time, chronological log of every significant action — tool calls, agent responses — each timestamped, filterable by action type. This is the raw material for the five-minute weekly manager's review (what ran, what it touched, what it cost).",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gb-settings-general",
+      "title": "Automatos docs — General settings & feature flags",
+      "url": "automatos-gitbook/settings/general.md",
+      "kind": "official-doc",
+      "annotation": "Two facts this module needs: Mission mode is a feature flag (may be off on a fresh workspace — enable it here as the admin of your own workspace), and 'Cost alerts — notify on budget thresholds' is the reactive budget control the platform actually offers.",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gb-llm-costs",
+      "title": "Automatos docs — LLM cost analytics",
+      "url": "automatos-gitbook/analytics/llm-costs.md",
+      "kind": "official-doc",
+      "annotation": "Backs the honest budget framing: you can 'Set cost alerts — configure budget thresholds in Settings' and see cost per request / by agent and model. Confirms the budget guardrail is watch-and-alert, not a hard pre-set spend ceiling that blocks a run before it starts.",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-gen-ai-leader",
+      "title": "Google Generative AI Leader — exam guide (business strategy & responsible-AI sections)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "reference",
+      "annotation": "Vendor-light, business-toned source for the delegation-by-mistake-cost and human-oversight ideas behind this module: where to keep a human in the loop, how to escalate autonomy responsibly, and matching oversight to stakes. Use the business-strategy and responsible-AI framing, not any product specifics. (The optional real-credential bridge for this track, per the track brief.)",
+      "domainIds": ["m5-delegation-guardrails"]
+    },
+    {
+      "id": "r-owasp-llm",
+      "title": "OWASP Top 10 for LLM Applications (2025)",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "kind": "reference",
+      "annotation": "The plain reason the guardrails exist. Two entries speak straight to this module: 'Excessive Agency' (an AI agent with more permissions or autonomy than its task needs is a risk in itself — the case for tight scope and a narrow approval lane) and 'Sensitive Information Disclosure' (why scope keeps the supplies agent away from payroll). Skim these two; the rest is background for Module 06.",
+      "domainIds": ["m5-delegation-guardrails"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m5-1",
+      "title": "M5 · Delegating with guardrails — the mission pattern and the four guardrails",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m5-delegation-guardrails"],
+      "sourceNotebook": "ai-business / m5 / delegation-and-guardrails"
+    },
+    {
+      "id": "v-m5-2",
+      "title": "M5 · How much autonomy should a small business give an AI agent? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m5-delegation-guardrails"],
+      "sourceNotebook": "ai-business / m5 / autonomy-debate"
+    }
+  ]
+}
