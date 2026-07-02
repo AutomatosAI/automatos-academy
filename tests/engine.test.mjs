@@ -144,5 +144,68 @@ ok(/preparation/.test(bcFallback.definition) && /not the credential/.test(bcFall
 const bcCcaf = badgeCopy(track);
 ok(/issued only by/.test(bcCcaf.definition), "CCA-F custom badge copy names the real issuer");
 
+// ── all-tracks sweep: universal invariants on every live content track ─
+// The deep assertions above are CCA-F-specific; this sweep is the regression
+// net for the whole catalogue — a broken track.json, a duplicate id, a
+// dangling sourceRef, a scenario with no 'best', weight drift, or a
+// mis-scaled exam gets caught on any vendor, not just Anthropic.
+console.log("\nall-tracks sweep");
+const CONTENT = join(HERE, "..", "public", "content");
+const manifest = JSON.parse(readFileSync(join(CONTENT, "manifest.json"), "utf8"));
+const liveTracks = manifest.vendors.flatMap((v) => (v.tracks || [])
+  .filter((t) => t.status === "live")
+  .map((t) => ({ vendorId: v.id, trackId: t.trackId, code: t.code || t.trackId })));
+ok(liveTracks.length >= 9, `manifest lists ${liveTracks.length} live tracks (≥9)`);
+
+for (const { vendorId, trackId, code } of liveTracks) {
+  const dir = join(CONTENT, vendorId, trackId);
+  let tj;
+  try { tj = JSON.parse(readFileSync(join(dir, "track.json"), "utf8")); }
+  catch (e) { ok(false, `${code}: track.json loads (${e.message})`); continue; }
+  const domains = (tj.domainFiles || [])
+    .map((df) => JSON.parse(readFileSync(join(dir, df), "utf8")))
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const T = { ...tj, vendorId, trackId, domains };
+  const skills = isSkillsTrack(T);
+
+  ok(skills === !(tj.exam && tj.exam.questionCount), `${code}: shape (${skills ? "skills" : "exam"}) matches exam{} presence`);
+
+  const qids = domains.flatMap((d) => (d.questions || []).map((q) => q.id));
+  ok(qids.length > 0 && new Set(qids).size === qids.length, `${code}: ${qids.length} question ids, all unique`);
+
+  // sourceRefs resolve to the domain's own resources OR the track-level
+  // officialResources — exactly the union the engine's allResources() serves.
+  const officialIds = new Set((tj.officialResources || []).map((r) => r.id));
+  let dangling = 0;
+  for (const d of domains) {
+    const valid = new Set([...officialIds, ...(d.resources || []).map((r) => r.id)]);
+    const items = [...(d.questions || []), ...(d.lessons || []).flatMap((l) => l.knowledgeCheck || [])];
+    for (const q of items) for (const s of q.sourceRefs || []) if (!valid.has(s)) dangling++;
+  }
+  ok(dangling === 0, `${code}: all sourceRefs resolve (domain + track resources)`);
+
+  const badScn = domains.flatMap((d) => d.scenarios || [])
+    .filter((s) => (s.steps || []).some((st) => !(st.choices || []).some((c) => c.verdict === "best")));
+  ok(badScn.length === 0, `${code}: every scenario step has a 'best' choice`);
+
+  try {
+    const comp = completion(T, stub, verdict);
+    ok(comp && comp.complete === false, `${code}: fresh completion() → not complete`);
+  } catch (e) { ok(false, `${code}: completion() runs (${e.message})`); }
+
+  if (!skills) {
+    const wsum = domains.reduce((n, d) => n + (d.weight || 0), 0);
+    ok(Math.abs(wsum - 1) < 0.005, `${code}: exam weights sum 1.000 (${wsum.toFixed(3)})`);
+    const m = buildMock(T, stub);
+    ok(m.total > 0, `${code}: buildMock → ${m.total} items`);
+    const right = {}; m.items.forEach((q) => (right[q.id] = q.options.filter((o) => o.correct).map((o) => o.id)));
+    const sc = tj.exam.scoreScale || 1000, floor = tj.exam.scoreFloor || 0;
+    const pf = scoreMock(T, m.items, right);
+    ok(pf.scaled === sc && pf.passed, `${code}: all-correct → ${sc} (scale top), passed`);
+    const bl = scoreMock(T, m.items, {});
+    ok(bl.scaled === floor && !bl.passed, `${code}: blank → ${floor} (floor), failed`);
+  }
+}
+
 console.log(`\n${fail ? "✗" : "✓"} ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
