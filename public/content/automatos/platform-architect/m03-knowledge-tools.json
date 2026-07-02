@@ -1,0 +1,567 @@
+{
+  "id": "m03-knowledge-tools",
+  "order": 3,
+  "code": "03",
+  "name": "Knowledge & tools — RAG, Knowledge Graph, CodeGraph, NL2SQL, Composio",
+  "tagline": "An agent is only as good as what it can read and what it can touch. This module is the practitioner's tour of both halves of that equation: the four knowledge surfaces that ground an agent in YOUR material — documents (RAG), the Knowledge Graph, CodeGraph, and NL2SQL — and the Composio tool layer that lets it act on YOUR systems. You'll learn the ingestion pipeline well enough to debug a bad answer, when graph-enhanced RAG earns its keep over plain vector search, when a symbol graph beats uploading source files, and how to wire up a tool at least privilege so a new agent starts read-only and earns its write scope.",
+  "overview": "If you came from AI Business Foundations, this is the machinery behind module 3 (\"teach the AI your business\") and the first half of module 4 (giving an agent tools) — but at practitioner depth, where you're expected to make the calls, not just admire the outcome. The module splits into two questions a builder faces on every real workspace. First: how do I feed an agent the right knowledge? The platform gives you four surfaces, and they are not interchangeable. Documents run an automatic parse→chunk→embed→index pipeline and answer via retrieval (RAG); understanding each stage is what lets you diagnose why a chunk didn't surface. The Knowledge Graph rides on the same uploads, auto-extracting entities and relationships so an agent can answer questions that span several documents — the thing pure vector search is worst at. CodeGraph indexes a repository as a graph of symbols (classes, functions) and their relationships (calls, imports, inheritance), so an agent can answer \"where is X defined?\" and \"what calls Y?\" — and it re-indexes automatically when new commits land on a connected GitHub repo. NL2SQL turns your structured data into a queryable surface: SQL Explorer for direct queries, a Semantic Layer mapping business terms to columns, Query Templates, and a Training loop where you teach it question→SQL pairs and benchmark against Golden SQL, all read-only by default with a full audit trail. The judgment layer is knowing which surface a question wants — and that a document dump is not the same as a code graph or a semantic layer. Second question: how do I let an agent act? Composio connects 1,000+ apps via OAuth or API key; you connect once at the workspace, then assign per agent with a permission scope. The load-bearing discipline is least privilege: start every new agent read-only, watch it behave, and widen to full or custom only once you trust it — because an assigned write scope is a live capability, and credentials are the crown jewels. Throughout, the practitioner posture is: prefer the cheapest surface that answers the question, scope tools to the minimum, and treat every wrong answer as a pipeline you can inspect rather than a mystery.",
+  "objectives": [
+    "Trace a document from upload through the automatic parse→chunk→embed→index pipeline, and use the Search sub-tab and RAG settings (Top K, similarity threshold, reranking, context window) to diagnose why an agent did or didn't surface a given chunk.",
+    "Decide when graph-enhanced RAG (entities + relationships + multi-document reasoning) earns its keep over plain vector search, and explain how the two combine on a single knowledge search.",
+    "Choose the right knowledge surface for a question — documents vs Knowledge Graph vs CodeGraph vs NL2SQL — instead of dumping everything into one library, and know why CodeGraph's symbol graph beats uploading raw source files for 'what calls this?' questions.",
+    "Set up NL2SQL as a teachable system: use SQL Explorer, define Semantic Layer mappings, add Training question→SQL pairs, benchmark against Golden SQL, and rely on the read-only default plus the query audit trail.",
+    "Connect a Composio tool (OAuth or API key), assign it to a specific agent, and apply least-privilege scoping — start read-only, widen to full or custom only after verifying behaviour — while protecting credentials and reading tool-validation failures in the Activity Feed.",
+    "Reason about cost and safety as a practitioner: pick the cheapest knowledge surface that answers the question, keep tool scopes minimal, and use the audit trails (query audit, tool-call audit) as your control surface."
+  ],
+  "lessons": [
+    {
+      "id": "m03-l1-documents-rag",
+      "title": "Documents and RAG: the pipeline you can debug",
+      "estMinutes": 15,
+      "objective": "Understand the automatic parse→chunk→embed→index pipeline and the RAG retrieval settings well enough to diagnose why an agent surfaced (or missed) a given piece of knowledge.",
+      "body": "## The whole loop in one picture\n\nA grounded agent works because two things happen. **At upload time**, every file you add to a Knowledge Base runs a four-stage pipeline — automatically, no configuration. **At question time**, the agent runs a retrieval against what that pipeline produced, and answers from what it gets back. That two-phase shape — ingest once, retrieve many times — is retrieval-augmented generation (RAG). ABF taught you *that* this happens; here you learn each stage precisely, because knowing the stages is exactly what lets you fix a bad answer instead of shrugging at it.\n\n## The ingestion pipeline, stage by stage\n\nWhen a file lands in **Knowledge Bases → Documents → Upload**, it is queued and the pipeline runs:\n\n1. **Parse** — extract raw text from the file format. Supported types include text (`.md`, `.txt`, `.csv`, `.json`), Office (`.docx`, `.xlsx`, `.pptx`), PDF (`.pdf`, including scanned documents via OCR), code (`.py`, `.js`, `.ts`, `.go`, `.java`, and more), and web (`.html`). A scanned PDF is OCR'd here; a spreadsheet's cells become text here.\n2. **Chunk** — split the parsed text into semantic segments. The platform chunks on semantic boundaries, not fixed byte counts — so a chunk is a coherent passage, not an arbitrary 500 characters. Each document ends up as N chunks; the Library shows that chunk count per file.\n3. **Embed** — generate a vector embedding for each chunk. The default embedding model is `qwen/qwen3-embedding-8b` at 2048 dimensions, configurable in Settings. The embedding is what makes *semantic* search possible: two passages that mean the same thing land near each other in vector space even if they share no words.\n4. **Index** — store the embeddings in the vector database so they're searchable. The stats bar surfaces the totals: Total Documents, Processed, Storage Used, and Vector Chunks.\n\nTwo operational facts fall out of this. **Large files process asynchronously** — you don't block on them; the **Processing** sub-tab shows queue, in-progress, completed, and failed with error detail. And a file's status can be *failed* — a corrupt PDF, an unreadable format — which is why 'the agent can't find it' sometimes just means 'it never finished processing.' Your first debugging move is always: check Processing.\n\n## Retrieval: what the agent actually does at question time\n\nWhen an agent searches your knowledge base during a chat, it runs the same query you can run yourself in the **Search** sub-tab: type a natural-language query, get ranked results with relevance scores, click through to the source document and the exact chunk that matched. The docs are explicit that this is \"exactly what your agents see when they search your knowledge base during chat.\" That sentence is a gift to a practitioner: **the Search tab is your agent's eyes.** If you want to know what an agent will retrieve for a question, ask that question in Search. If the right chunk isn't in the ranked results there, the agent won't get it either — no amount of prompt-tuning will conjure a chunk retrieval didn't return.\n\n## The four RAG dials, and what each one does to an answer\n\nThe **RAG** sub-tab exposes the retrieval configuration. You rarely need to touch it — but knowing what each dial does turns 'the answer was thin' into a specific fix:\n\n- **Top K** — how many chunks are retrieved per query. Too low and the agent starves for context on multi-part questions; too high and you flood the model with marginally-relevant chunks (and spend more tokens). It's the first dial to nudge up when answers are missing obvious detail that you *know* is in the library.\n- **Similarity threshold** — the minimum relevance score a chunk must clear to be included. Raise it to cut noise (only tightly-matching chunks get through); lower it to widen the net when good material is scoring just below the bar and getting dropped.\n- **Reranking** — a second-pass reorder of retrieved chunks by a more careful relevance judgement. On when you want the *best* chunks at the top (the model weights earlier context more); worth the extra step when precision matters.\n- **Context window** — how much surrounding text to include around each matched chunk. Widen it when a matched chunk is correct but the answer needs the sentence before or after it for full meaning.\n\nThe practitioner instinct: **diagnose with Search first, then adjust exactly one dial.** If the chunk simply isn't returned, that's Top K or similarity threshold. If it's returned but ranked below junk, that's reranking. If it's returned and ranked but the answer is missing adjacent context, that's context window. Change one thing, re-run the Search query, compare. Blindly maxing everything just burns tokens and buries good chunks in mediocre ones.\n\n## Multimodal, briefly\n\nDocuments with rich media — images with OCR-extracted text, PDFs with embedded graphics, mixed-content files — surface under the **Multimodal** sub-tab. The point to carry: a scanned contract or an image-heavy PDF isn't a dead end; OCR at the parse stage pulls its text into the same searchable pipeline.\n\n## Worked walkthrough: 'the agent can't find our refund window'\n\nAn agent keeps answering a refund question wrongly, and you *know* the refund policy is uploaded. Here's the practitioner loop, entirely in the docs' surfaces:\n\n1. **Processing sub-tab** — is `refund-policy.pdf` actually *completed*? If it's stuck or *failed* (say the PDF was a flat scan that OCR choked on), the fix is re-upload or re-process, not prompt-tuning. Suppose it's completed with 8 chunks.\n2. **Search sub-tab** — type the real user question: *\"what is our refund window on personalised items?\"* Look at the ranked results. If the correct chunk is there at the top, your knowledge is fine and the problem is elsewhere (the agent's instructions, or it wasn't told to search). If the correct chunk is *absent*, retrieval is the problem.\n3. **If absent** — click a near-miss result to see what *did* match. Often the policy uses different words than the user ('return' vs 'refund', '14 days' buried in a table). Nudge the **similarity threshold** down a notch (good material was scoring just under the bar) or **Top K** up (the chunk was ranked 6th, K was 5), re-run Search, and confirm the chunk now appears.\n4. **If present but the answer is still thin** — the matched chunk is a table row without its header. Widen the **context window** so the surrounding rows come along.\n\nEvery step is an observation you can make in the product, not a guess. That's the whole difference between a practitioner and a hopeful prompter: a wrong RAG answer is a pipeline you inspect, one stage at a time.\n\n## What this buys you\n\nYou can now reason about *why* an agent knows or doesn't know something, and you have a repeatable four-step loop to fix it. Next we add the surface that answers the questions plain retrieval is worst at — the ones that span documents.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m03-l1-1",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What are the four stages of the document ingestion pipeline, in order?",
+          "options": [
+            { "id": "a", "text": "Parse → chunk → embed → index", "correct": true },
+            { "id": "b", "text": "Upload → summarise → translate → publish", "correct": false },
+            { "id": "c", "text": "Embed → parse → rerank → store", "correct": false },
+            { "id": "d", "text": "Chunk → OCR → compress → cache", "correct": false }
+          ],
+          "explanation": "The documented pipeline is parse (extract text from the format), chunk (split into semantic segments), embed (generate vector embeddings), then index (store in the vector database) — in that order. Option b describes a content-publishing flow that has nothing to do with ingestion. Option c lists real-sounding terms but in an impossible order (you can't embed before you've parsed and chunked, and reranking is a retrieval-time step, not ingestion). Option d puts OCR as a separate stage, but OCR happens inside parse for scanned PDFs, and there's no compress/cache stage in the documented pipeline.",
+          "sourceRefs": ["r-documents", "r-knowledge-readme"]
+        },
+        {
+          "id": "kc-m03-l1-2",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An agent gives a wrong answer about a policy you know is uploaded and fully processed. You run the exact user question in the Search sub-tab and the correct chunk does NOT appear in the ranked results. What is the most useful conclusion?",
+          "options": [
+            { "id": "a", "text": "Retrieval isn't returning that chunk, so the agent can't see it either — adjust retrieval (e.g. lower the similarity threshold or raise Top K) and re-check Search, rather than tuning the agent's prompt", "correct": true },
+            { "id": "b", "text": "The agent's system prompt is badly written; rewrite the prompt and the chunk will start appearing in Search", "correct": false },
+            { "id": "c", "text": "The document must have failed processing, even though you already confirmed it completed", "correct": false },
+            { "id": "d", "text": "Search and what the agent sees are unrelated, so the Search result tells you nothing about the agent", "correct": false }
+          ],
+          "explanation": "The docs state Search shows exactly what agents see when they search during chat, so a chunk absent from Search will be absent for the agent — the problem is retrieval, and the levers are Top K, similarity threshold, reranking, and context window. Option b is backwards: the agent's prompt cannot change what the Search sub-tab retrieves, since Search runs retrieval directly with no agent prompt involved. Option c contradicts the premise (you already confirmed it processed) — a completed file can still fail to surface if the query scores below threshold or falls outside Top K. Option d denies the documented equivalence between Search results and agent retrieval, which is the whole reason Search is a debugging tool.",
+          "sourceRefs": ["r-documents"]
+        },
+        {
+          "id": "kc-m03-l1-3",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A retrieved chunk is correct and ranked near the top, but the agent's answer is missing a detail that lives in the sentence immediately after the matched text. Which RAG setting most directly addresses this?",
+          "options": [
+            { "id": "a", "text": "Context window — widen how much surrounding text is included around the matched chunk", "correct": true },
+            { "id": "b", "text": "Top K — the chunk is already retrieved and ranked, so retrieving more chunks won't pull in adjacent text within the same chunk's neighbourhood", "correct": false },
+            { "id": "c", "text": "Similarity threshold — the chunk already cleared the bar, so changing the threshold doesn't add its neighbouring sentence", "correct": false },
+            { "id": "d", "text": "Reranking — reordering already-retrieved chunks does not add missing surrounding text", "correct": false }
+          ],
+          "explanation": "Context window controls how much surrounding text comes along with a matched chunk, which is exactly the fix when the right chunk is found but its neighbouring sentence is needed. Top K changes how many chunks are retrieved, not how much context surrounds each one — the missing detail isn't a separate chunk, it's adjacent text. Similarity threshold governs whether a chunk qualifies at all, and this chunk already qualified. Reranking only reorders what was retrieved, so it can't supply text that wasn't included.",
+          "sourceRefs": ["r-documents"]
+        }
+      ]
+    },
+    {
+      "id": "m03-l2-graph-codegraph",
+      "title": "Knowledge Graph and CodeGraph: when connections and code beat plain retrieval",
+      "estMinutes": 15,
+      "objective": "Explain how graph-enhanced RAG combines with vector search, decide when a Knowledge Graph or CodeGraph earns its keep, and pick the right knowledge surface instead of dumping everything into one library.",
+      "body": "## Where plain vector search falls short\n\nRetrieval is superb at 'find me the passage that answers this.' It is weak at 'connect information that's spread across several documents.' Ask *\"which of our services depend on the payments vendor, and who owns each?\"* and the answer may be scattered across a services doc, a vendor list, and an org chart — three chunks that individually score only so-so, and that vector search has no way to *relate*. That gap is what the Knowledge Graph fills.\n\n## The Knowledge Graph rides on the same uploads\n\nHere's the fact that surprises people: **you don't build the Knowledge Graph separately.** When you upload documents, the system doesn't only chunk and embed them — it also extracts:\n\n- **Entities** — people, concepts, technologies, processes mentioned in your documents.\n- **Relationships** — how entities connect (references, depends on, implements, and so on).\n- **Context** — the surrounding information that gives a relationship its meaning.\n\nThat produces a graph an agent can *traverse* to find connections vector search alone would miss. It builds automatically as you upload — no manual configuration — though you can trigger a **Rebuild** to re-extract after changing the extraction model. You browse it at **Knowledge Bases → Knowledge Graph**: search entities, view an entity's relationships and source documents, explore connections entity-to-entity, visualise the graph, and **find paths** — discover how two concepts connect through intermediate entities.\n\n## Graph-enhanced RAG: how the two combine on one search\n\nThe important design point is that this isn't graph *instead of* vectors — it's both, on a single knowledge search:\n\n1. **Vector search** finds the most relevant document chunks (the direct hits).\n2. **Graph traversal** discovers related entities and their connected documents (the contextual neighbours).\n3. **Combined results** hand the agent both the directly relevant *and* the contextually related information.\n\nSo for the payments-vendor question, vector search finds the vendor mention, and graph traversal walks 'payments vendor → depends-on → services → owned-by → people' to assemble an answer no single chunk contained. That is the concrete meaning of 'answers questions that span multiple documents.'\n\n**When does it earn its keep?** When your questions are about *relationships and multi-hop reasoning* across a corpus — dependencies, ownership, how-does-X-connect-to-Y. When your questions are 'find the passage that states our refund window,' plain retrieval already nails it and the graph is just quietly helping. You don't turn the graph on; it's always there. The judgment is recognising *which kind of question* you're asking, so you know whether to reach for **find paths** in the Knowledge Graph view rather than expecting a single Search hit to carry it.\n\n## Team access control is part of the graph, not bolted on\n\nA governance point a practitioner must internalise: **entity visibility respects team access settings.** If a document is restricted to certain team members, its extracted entities are only visible to those members. So the graph doesn't become a side-channel that leaks restricted knowledge — a Viewer who can't see the salary doc can't see the salary entities it produced either. (This connects to the Admin/Member/Viewer roles you'll govern in module 09.) The graph also takes **daily snapshots and computes diffs**, so you can track how your knowledge evolves over time.\n\n## CodeGraph: a repository as a graph of symbols\n\nCode is a special corpus, and dumping raw source files into Documents is the wrong tool for it. **CodeGraph** parses a repository into a graph of **symbols** (classes, functions, variables) and their **relationships** (calls, imports, inheritance). That structure is what lets an agent answer questions plain text search can't:\n\n- \"Where is the `User` class defined?\"\n- \"What calls the authentication middleware?\"\n- \"Show me all API endpoints.\"\n\nThe difference is categorical. Uploaded as documents, source files are just text — an agent can grep-match a function name but has no model of *what calls what*. As a symbol graph, 'what calls Y?' is a graph edge lookup, and the agent retrieves the actual call sites with their source context. For any codebase past trivial size, that's the difference between a plausible guess and a correct answer.\n\nYou connect a repo at **Knowledge Bases → CodeGraph → + Add Repository**: enter the repository URL (or pick a connected GitHub repo), choose branches to index, click **Index**. Then you can browse files and symbols, see call graphs and dependency trees, and search by symbol name. When you ask a code question in Chat, the agent searches CodeGraph for relevant symbols and files, retrieves the source context, and answers with it alongside the LLM.\n\n## Re-indexing: the 'living' part\n\nCodeGraph stays current two ways: **automatically** when new commits are pushed to a connected GitHub repository (if the GitHub integration is active), and **manually** via **Re-index** for a full rebuild. Indexing runs in the background — you keep working while it processes. The automatic-on-push behaviour is the one worth remembering: point CodeGraph at an active repo and connect GitHub, and the agent's view of the code follows the code without you babysitting it. CodeGraph also extracts semantic entities of its own (API endpoints and their parameters, config keys and their usage, business-logic patterns, error-handling flows) that feed the broader Knowledge Graph — so your code knowledge and document knowledge connect.\n\n## Worked walkthrough: choosing the surface for three real questions\n\nA builder onboarding a workspace has three questions to answer. The practitioner move is matching each to a surface *before* uploading anything:\n\n- *\"What's our stated SLA for enterprise support?\"* — a fact stated in one place. **Documents / RAG.** Upload the SLA doc; a single Search hit carries it. Adding it to a graph or a code index would be overkill.\n- *\"Which internal services depend on the billing module, and who owns them?\"* — multi-hop across services, dependencies, and owners. **Knowledge Graph.** Upload the relevant docs (the graph builds itself), then use **find paths** / entity exploration to walk the relationships. Expecting one vector hit to answer this is the classic mistake.\n- *\"Where is the retry logic for failed charges implemented, and what calls it?\"* — a code-structure question. **CodeGraph.** Add the repository and index the branch; 'what calls it?' becomes a call-graph lookup. Uploading the repo's files into Documents would let the agent find the function name but not reliably trace its callers.\n\nSame workspace, three questions, three surfaces. The unifying skill isn't operating any one tool — it's diagnosing what *kind* of question you have (a stated fact, a relationship, a code structure) and reaching for the surface built for it. That diagnosis is the whole lesson.\n\n## What this buys you\n\nYou can now stop treating 'knowledge' as one undifferentiated document dump and start routing questions to the surface that answers them cheapest and best. Next we take on the fourth surface — structured data — and the discipline that makes it trustworthy.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m03-l2-1",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How does graph-enhanced RAG combine the Knowledge Graph with vector search on a single knowledge search?",
+          "options": [
+            { "id": "a", "text": "Vector search finds the most relevant chunks, graph traversal discovers related entities and their connected documents, and the combined results give the agent both directly relevant and contextually related information", "correct": true },
+            { "id": "b", "text": "It replaces vector search entirely — once a Knowledge Graph exists, the agent only traverses the graph and stops embedding-based retrieval", "correct": false },
+            { "id": "c", "text": "It runs vector search only, and the graph is a separate visualisation that agents never use during retrieval", "correct": false },
+            { "id": "d", "text": "It asks the LLM to guess the relationships between chunks, with no stored entity or relationship data", "correct": false }
+          ],
+          "explanation": "The documented flow is exactly this three-step combination: vectors for the direct hits, graph traversal for the contextual neighbours, merged so the agent gets both — which is what lets it answer questions spanning multiple documents. Option b is wrong because it's additive, not a replacement; the vector step still runs. Option c contradicts the docs, which state the graph enriches results at retrieval time, not just as a visual. Option d ignores that entities and relationships are actually extracted and stored at upload time; the traversal walks real stored edges, it doesn't ask the model to invent them.",
+          "sourceRefs": ["r-knowledge-graph"]
+        },
+        {
+          "id": "kc-m03-l2-2",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why is CodeGraph a better fit than uploading source files into Documents when an agent needs to answer 'what calls the authentication middleware?'",
+          "options": [
+            { "id": "a", "text": "CodeGraph parses the repo into a graph of symbols and their relationships (calls, imports, inheritance), so 'what calls Y?' is a graph lookup; as plain uploaded text, source files have no model of what calls what", "correct": true },
+            { "id": "b", "text": "CodeGraph uploads faster than documents, so the answer arrives sooner", "correct": false },
+            { "id": "c", "text": "Documents cannot store code files at all, so CodeGraph is the only way to get code into the platform", "correct": false },
+            { "id": "d", "text": "CodeGraph rewrites the code to be simpler before answering, which Documents cannot do", "correct": false }
+          ],
+          "explanation": "The categorical difference is structure: CodeGraph models symbols and the calls/imports/inheritance relationships between them, making caller lookups a graph-edge query with real call sites returned. Option b is irrelevant — speed of upload isn't the point; the point is the type of question that becomes answerable. Option c is false: Documents explicitly supports code file types (.py, .js, .ts, .go, .java and more) — it just treats them as text, which is the limitation. Option d invents a capability; CodeGraph indexes and retrieves code, it doesn't rewrite it.",
+          "sourceRefs": ["r-codegraph", "r-documents"]
+        },
+        {
+          "id": "kc-m03-l2-3",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A Viewer on your team cannot access the restricted 'compensation' document. What does the Knowledge Graph's team access control mean for the entities extracted from that document?",
+          "options": [
+            { "id": "a", "text": "Those entities are only visible to members who can see the source document, so the Viewer cannot see them either — the graph is not a side-channel around document restrictions", "correct": true },
+            { "id": "b", "text": "Entities are always public once extracted, so the Viewer can see the compensation entities even though the document is restricted", "correct": false },
+            { "id": "c", "text": "Entity visibility is random and cannot be predicted from document permissions", "correct": false },
+            { "id": "d", "text": "The document's restriction blocks the entire graph for everyone, including Admins", "correct": false }
+          ],
+          "explanation": "The docs state entity visibility respects team access settings: if a document is restricted, its extracted entities are only visible to those with access — so a Viewer who can't open the compensation doc can't see its entities, closing the leak. Option b is the exact failure mode the design prevents; entities are not made public. Option c is wrong because visibility is deterministic — it follows the source document's permissions. Option d over-generalises: the restriction scopes those specific entities to authorised members, it doesn't blank the whole graph for everyone.",
+          "sourceRefs": ["r-knowledge-graph"]
+        }
+      ]
+    },
+    {
+      "id": "m03-l3-nl2sql",
+      "title": "NL2SQL: structured data as a teachable, audited surface",
+      "estMinutes": 14,
+      "objective": "Use the Database tab as a teachable NL2SQL system — SQL Explorer, Semantic Layer, Training with Golden SQL benchmarks — and rely on the read-only default and query audit trail.",
+      "body": "## The fourth surface is different in kind\n\nDocuments, the Knowledge Graph, and CodeGraph all deal in *unstructured* material — prose and code. Your business also runs on *structured* data: rows and columns in databases. Asking 'how many active agents do we have?' isn't a retrieval problem; it's a query problem. The **Database** tab is the surface for it, and its headline capability is **NL2SQL** — natural-language questions turned into SQL — which the platform treats not as a magic trick but as a *system you teach and measure*. That framing is the whole lesson: NL2SQL accuracy is something you own, improve, and benchmark, not something you hope for.\n\n## The six sub-tabs, and what each is for\n\nAt **Knowledge Bases → Database** you get six tools:\n\n- **SQL Explorer** — write and execute SQL directly, with syntax highlighting, results as a table, CSV export, and save-for-reuse. This is the raw surface: when you know the query, you just run it. It's also how you *verify* what NL2SQL should produce.\n- **Semantic Layer** — natural-language-to-SQL *mappings*. You define how business terms map to database columns and tables, so agents can answer data questions without writing SQL. The doc's example: \"How many agents are active?\" maps to `SELECT COUNT(*) FROM agents WHERE status = 'active'`. This is where you encode your business's vocabulary — 'active', 'churned', 'this quarter' — onto the real schema.\n- **Query Templates** — pre-built queries for common operations (agent performance summaries, document-processing stats, workflow-execution history, usage analytics). The platform ships **20+ templates per database type**. Click to run instantly, or customise the SQL first.\n- **Training** — teach the system with examples: enter a natural-language question, provide the correct SQL, and it learns to handle similar questions. More training examples means better accuracy for your agents' data queries.\n- **Schema Browser** — explore tables, columns, types, constraints, relationships, and indexes. This is your map when writing Semantic Layer mappings or debugging a wrong query.\n- **Audit History** — the log of every query executed: the query text, who ran it (user or agent), execution time, and result row count.\n\n## The teach-and-benchmark loop\n\nHere's what 'teachable system' means concretely, and it's the practitioner's core workflow for NL2SQL:\n\n1. **Add Golden SQL examples** — verified-correct question/answer (question/SQL) pairs that represent what *right* looks like for your data.\n2. **Run benchmarks** against the golden set to measure accuracy — how often does NL2SQL produce the correct query?\n3. **View accuracy trends over time** to see whether your training is actually improving results.\n\nSo the loop is: notice a class of question the agent gets wrong → add Training examples for it → add a Golden SQL pair as the ground truth → re-benchmark → watch the accuracy trend. You add training examples and golden pairs at **Knowledge Bases → Database → Training**. This is genuinely different from prompt-tweaking: you have a *measurable* target and a trend line that tells you if you're winning. A practitioner who treats NL2SQL as 'ask and pray' is leaving the whole improvement mechanism on the table.\n\n## Read-only by default — and why that's the right default\n\nThe safety posture is explicit and important: **SQL queries execute with read-only access by default. Write operations require explicit permission in Settings.** Read that as a deliberate least-privilege stance mirroring the tool-scoping discipline in the next lesson. An agent that can *read* your data to answer questions is useful and low-risk; an agent that can *write* to your database is a different risk class entirely. The default keeps you in the safe zone, and widening to write is a conscious, explicit act — not something that happens by accident.\n\n## The audit trail is your control surface\n\nEvery database query — whether a human ran it in SQL Explorer or an agent generated it via NL2SQL — is logged with the natural-language question (if any), the generated SQL, execution time, row count, and who ran it, all visible in **Audit History**. For a practitioner this is not bureaucratic overhead; it's the thing that makes NL2SQL *trustworthy in production*. When an agent gives a surprising number, you don't argue about it — you open Audit History, read the exact SQL it generated, and see immediately whether the query was wrong (fix it with a Training example / Semantic Layer mapping) or the data genuinely says that. Auditability is what lets you deploy a data-answering agent and still sleep.\n\n## Worked walkthrough: making 'how many active enterprise customers?' reliable\n\nAn agent is asked *\"how many active enterprise customers do we have?\"* and returns a number that looks too high. The teachable-system loop, all in the Database tab:\n\n1. **Audit History** — find the query. You see it generated `SELECT COUNT(*) FROM customers WHERE tier = 'enterprise'` — it counted *all* enterprise customers, ignoring 'active'. The bug is now concrete, not mysterious.\n2. **Schema Browser** — confirm the real columns: there's a `status` column where active rows are `status = 'active'`. Now you know the correct query.\n3. **SQL Explorer** — write and run the correct version: `SELECT COUNT(*) FROM customers WHERE tier = 'enterprise' AND status = 'active'`. Confirm it returns the sensible number. You've verified ground truth.\n4. **Semantic Layer + Training** — teach it. Map the business term 'active enterprise customer' to `tier = 'enterprise' AND status = 'active'`, and add a Training pair (question → that SQL). Add the same pair as **Golden SQL**.\n5. **Benchmark** — re-run the benchmark and watch the accuracy trend; this class of question is now covered, and you can prove it improved.\n\nNotice the shape: you *reproduced* the fault (Audit History), *understood* it against the real schema (Schema Browser), *fixed and verified* it (SQL Explorer), then *taught it permanently* (Semantic Layer + Training + Golden SQL) and *measured* the fix (benchmark). That is engineering a data surface, not wishing at it — and every step is a documented sub-tab.\n\n## What this buys you\n\nYou can now bring structured data into an agent's reach as a surface you *improve and audit*, with a read-only default that keeps it safe. That completes the four knowledge surfaces. The final lesson switches from what an agent can *read* to what it can *do*.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m03-l3-1",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "By default, what level of database access do SQL/NL2SQL queries execute with?",
+          "options": [
+            { "id": "a", "text": "Read-only — write operations require explicit permission in Settings", "correct": true },
+            { "id": "b", "text": "Full read and write, so agents can modify data straight away", "correct": false },
+            { "id": "c", "text": "No access at all until an Admin manually approves each individual query", "correct": false },
+            { "id": "d", "text": "Write-only, so queries can update but not read data", "correct": false }
+          ],
+          "explanation": "The documented default is read-only, with writes gated behind explicit permission in Settings — a deliberate least-privilege stance. Option b is the opposite of the safe default and would let an agent alter data without a conscious decision, which is exactly what the default prevents. Option c overstates the friction: the default allows reads freely, it doesn't require per-query approval. Option d is nonsensical for a query surface whose primary job is answering questions, which requires reading.",
+          "sourceRefs": ["r-database-nl2sql"]
+        },
+        {
+          "id": "kc-m03-l3-2",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want to measure whether your NL2SQL training is actually improving accuracy over time. Which mechanism does the platform provide?",
+          "options": [
+            { "id": "a", "text": "Add Golden SQL (verified correct question/SQL pairs), run benchmarks against that golden set, and view accuracy trends over time", "correct": true },
+            { "id": "b", "text": "There is no way to measure NL2SQL accuracy; you judge it by feel from the agent's answers", "correct": false },
+            { "id": "c", "text": "Export every query to a spreadsheet and grade them by hand, since the platform has no benchmarking", "correct": false },
+            { "id": "d", "text": "Turn reranking on in the RAG settings, which measures SQL accuracy", "correct": false }
+          ],
+          "explanation": "The documented benchmarking flow is Golden SQL pairs plus benchmark runs plus an accuracy trend over time — a real measurement loop. Option b denies the exact capability the Database tab provides. Option c describes manual grading as a workaround for a feature that already exists natively. Option d confuses surfaces entirely: reranking is a RAG retrieval setting for documents and has nothing to do with SQL accuracy.",
+          "sourceRefs": ["r-database-nl2sql"]
+        },
+        {
+          "id": "kc-m03-l3-3",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An agent reports a customer count that looks wrong. Which sub-tab lets you see the exact SQL it generated so you can tell whether the query was faulty or the data really says that?",
+          "options": [
+            { "id": "a", "text": "Audit History — it logs the natural-language question, the generated SQL, execution time, row count, and who ran it", "correct": true },
+            { "id": "b", "text": "Query Templates — it stores pre-built queries but not the history of what an agent actually ran", "correct": false },
+            { "id": "c", "text": "Multimodal — it handles image and PDF documents, not SQL query logs", "correct": false },
+            { "id": "d", "text": "Semantic Layer — it defines term-to-column mappings but does not record executed queries", "correct": false }
+          ],
+          "explanation": "Audit History is the query log: it records the question, the generated SQL, timing, row count, and who ran it — precisely what you need to diagnose a surprising result. Query Templates holds reusable queries, not a record of past executions. Multimodal is a Documents sub-tab for rich media, unrelated to SQL. Semantic Layer is where you define mappings (part of the fix), but it isn't where you inspect what was actually executed.",
+          "sourceRefs": ["r-database-nl2sql"]
+        }
+      ]
+    },
+    {
+      "id": "m03-l4-composio-tools",
+      "title": "Composio tools: connecting, assigning, and least-privilege scoping",
+      "estMinutes": 14,
+      "objective": "Connect a Composio tool, assign it to a specific agent, and apply least-privilege scoping — starting read-only and widening only after verifying behaviour — while protecting credentials.",
+      "body": "## From reading to doing\n\nEverything so far gave an agent things to *read*. Tools give it the power to *act* — create a GitHub issue, post to Slack, file a Jira ticket, query a CRM. On Automatos this is powered by **Composio**, which provides **1,000+ pre-built integrations** behind a unified API. If you came from AI Business Foundations, this is the machinery behind giving an agent tools in module 4 — but here you're accountable for the security posture, not just the wiring. The mental model is three moves: **connect** an app to the workspace, **assign** it to an agent, and then the **tool router** calls it automatically when the conversation warrants. Getting those three right — especially the scoping on the second — is what separates a useful automation from a liability.\n\n## Move 1 — Connect (once, at the workspace)\n\nYou connect an app at **Tools & Integrations**: browse or search the Applications tab, click the app card, click **Connect / Add**, authenticate, and confirm permissions. Authentication is one of two kinds:\n\n- **OAuth** — most popular apps (GitHub, Slack, Google, Jira). You're redirected to the app's login, you authorise Automatos AI, you're redirected back, and the connection is live. No API keys to manage; **tokens refresh automatically.** Prefer OAuth when it's offered — it's less to handle and self-healing.\n- **API key** — some services need a manually generated key: create it in the external service, paste it into the connection dialog, save. Keys are stored in **Settings → Credentials**.\n\nConnecting is a *workspace-level* act done once per app. The stats bar shows Connected vs Available counts. You don't connect everything upfront — start with the apps your agents actually need (GitHub, Slack) and add more as you go.\n\n## Move 2 — Assign (per agent, at a permission scope)\n\nConnecting an app does **not** give any agent access to it. **Only agents with an assigned tool can use it** — assignment is a separate, deliberate step, and it's where least privilege lives. You assign either from the Tools page (open the connected app → Assigned Agents → **+ Assign** → pick agents) or from the agent's own **Plugins** tab (**+ Add Tool** → pick from connected tools → Save). When you assign, you set the **permission scope**:\n\n- **Full access** — read *and* write (create GitHub issues, post Slack messages).\n- **Read only** — fetch data but modify nothing.\n- **Custom** — select the specific actions the agent may perform.\n\n## The load-bearing discipline: start read-only\n\nThe single most important habit in this whole module: **start with read-only for new agents; expand permissions once you've verified the agent behaves correctly.** This is least privilege applied to autonomous software, and the reasoning is sharper than it looks. An assigned *write* scope is a live capability the tool router can invoke on its own judgement — you are trusting the agent to decide *when* to create that issue or send that message. Before you extend that trust, you want to have watched the agent operate: read-only lets it demonstrate that it retrieves the right things and reasons sensibly, with zero blast radius, because it *cannot change anything external*. Only once it's earned it do you widen to **Full** — or better, to **Custom** with exactly the actions it needs and nothing more. 'Custom, minimal' beats 'Full' whenever you can enumerate the actions: an agent that only needs to *comment* on issues shouldn't be able to *close* them. Read-only first, then the narrowest scope that does the job — that's the posture.\n\nThis is the same instinct as NL2SQL's read-only default and, downstream, the guardrails you'll formalise in module 09 (\"If you came from AI Business Foundations, this is the machinery behind delegation and guardrails in module 5\"). Reading is safe; acting is a privilege you grant deliberately and minimally.\n\n## Move 3 — The tool router calls it; validation gates it\n\nOnce assigned, you don't script tool calls — the **tool router decides when to call tools based on the conversation context.** But every call is *validated first*. Before an agent uses a tool, the platform checks that the connection is still active, that the agent has the required permission scope, and that rate limits haven't been exceeded. **Validation failures appear in the Activity Feed with clear error messages.** So the Activity Feed is your operational window on tool behaviour: an agent 'not doing the thing' often means a validation failure sitting there — an expired connection, a missing scope, a hit rate limit — that tells you exactly what's wrong. Check it the way you check the Processing tab for documents.\n\n## Credentials are the crown jewels\n\nTool credentials are the keys to your external systems, and the platform treats them accordingly: **encrypted at rest, never exposed in logs or agent responses, rotatable without agent downtime, and scoped to your workspace.** The **Security** tab on the Tools page shows connection health — status (healthy / warning / expired), last validated, OAuth expiry, and the granted scope — and every tool call is logged (which agent, what action, timestamp, response status, input parameters with sensitive data redacted) in **Settings → Audit Logs**. Two practitioner rules follow. First, **re-authenticate an 'expired' connection immediately** — agents get errors until it's restored, and a warning is a pre-failure you can fix on your schedule instead of during an incident. Second, **never paste a credential anywhere but the connection dialog / Settings → Credentials** — the platform's redaction and encryption only protect secrets that live where they belong; a key pasted into a chat or a document defeats the whole model.\n\n## Worked walkthrough: giving a Code Reviewer GitHub, safely\n\nYou want a Code Reviewer agent that can look at pull requests. The least-privilege path, entirely in the docs' surfaces:\n\n1. **Connect GitHub** at Tools & Integrations via **OAuth** — redirect, authorise Automatos AI, back; connection live, tokens self-refreshing. (One workspace-level connection; other agents can share it later.)\n2. **Assign it to the Code Reviewer** — from the agent's **Plugins** tab, **+ Add Tool → GitHub**, and set the scope to **Read only**. Now it can fetch PRs, files, and diffs but cannot create issues, comment, or merge anything. Blast radius: zero.\n3. **Watch it work.** Ask it to review a PR in Chat. Confirm in the **Activity Feed** that its tool calls succeed (and if one fails, read the validation error — wrong scope? expired?). You're verifying it reads the right things and reasons well *before* granting any write power.\n4. **Widen deliberately — and minimally.** Once you trust it, if you want it to leave review comments, don't jump to **Full** (which would also let it close PRs and open issues). Use **Custom** and enable only the comment action. It now does exactly its job and nothing more.\n5. **Mind the connection.** Periodically glance at the **Security** tab; if GitHub shows *expired*, re-authenticate before the next review fails.\n\nEvery decision here is a scope decision, and every scope decision defaults to *less*. That is the entire security philosophy of the tool layer in one workflow: connect once, assign narrowly, verify before you widen, and never widen further than the job requires.\n\n## What this buys you\n\nYou can now give an agent real reach into your systems without handing it the keys to the kingdom. Put this lesson together with the knowledge surfaces and you have the full picture: Documents, the Knowledge Graph, CodeGraph, and NL2SQL are what an agent can *read*; Composio tools are what it can *do* — and least privilege governs both.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m03-l4-1",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What permission scope does the platform explicitly recommend for a newly assigned tool on a new agent?",
+          "options": [
+            { "id": "a", "text": "Read only — then expand permissions once you've verified the agent behaves correctly", "correct": true },
+            { "id": "b", "text": "Full access from the start, so the agent is never blocked while you test it", "correct": false },
+            { "id": "c", "text": "Custom with every available action enabled, which is equivalent to full access", "correct": false },
+            { "id": "d", "text": "No scope at all — leave the tool assigned but with all actions disabled indefinitely", "correct": false }
+          ],
+          "explanation": "The documented guidance is to start read-only and widen only after verifying behaviour — least privilege for a new agent. Option b inverts this and hands write capability to an unproven agent, which is exactly the risk the guidance avoids. Option c defeats the purpose of Custom (whose value is selecting a minimal set) by enabling everything, making it functionally Full. Option d isn't the recommendation and isn't useful — a tool with nothing enabled can't demonstrate the read behaviour you're trying to verify.",
+          "sourceRefs": ["r-assigning-tools"]
+        },
+        {
+          "id": "kc-m03-l4-2",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You connected GitHub to the workspace an hour ago, but your Code Reviewer agent still can't fetch pull requests. What is the most likely cause?",
+          "options": [
+            { "id": "a", "text": "Connecting an app at the workspace doesn't grant any agent access — the tool must be assigned to that specific agent before it can use it", "correct": true },
+            { "id": "b", "text": "Connecting an app automatically gives every agent full access, so the connection itself must have failed", "correct": false },
+            { "id": "c", "text": "Agents can only use tools connected via API key, never OAuth", "correct": false },
+            { "id": "d", "text": "GitHub cannot be used by agents at all; it is only for CodeGraph indexing", "correct": false }
+          ],
+          "explanation": "Connection is workspace-level; usage requires a separate per-agent assignment — only agents with an assigned tool can use it, so an unassigned Code Reviewer stays blocked. Option b is false: connecting never auto-grants access to all agents, so a working connection with no assignment produces exactly this symptom. Option c invents a restriction — both OAuth and API-key connections are usable once assigned, and GitHub is an OAuth app. Option d is wrong: GitHub is a first-class assignable tool (create issues, read PRs), separate from its role in CodeGraph.",
+          "sourceRefs": ["r-assigning-tools", "r-connecting-apps"]
+        },
+        {
+          "id": "kc-m03-l4-3",
+          "domainId": "m03-knowledge-tools",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Where do tool-validation failures (expired connection, missing scope, rate limit exceeded) show up so you can diagnose why an agent's tool call didn't happen?",
+          "options": [
+            { "id": "a", "text": "The Activity Feed, with clear error messages", "correct": true },
+            { "id": "b", "text": "Nowhere — failed tool calls fail silently and cannot be diagnosed", "correct": false },
+            { "id": "c", "text": "Only in the external app's own dashboard, never inside Automatos", "correct": false },
+            { "id": "d", "text": "The RAG sub-tab, alongside document retrieval settings", "correct": false }
+          ],
+          "explanation": "The platform validates connection status, scope, and rate limits before a tool call, and validation failures surface in the Activity Feed with clear messages — making it your operational window on tool behaviour. Option b contradicts the documented behaviour; failures are reported, not silent. Option c is wrong because the failure is Automatos-side validation, shown in-platform. Option d confuses surfaces — the RAG sub-tab governs document retrieval, not tool validation.",
+          "sourceRefs": ["r-assigning-tools"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m03-1",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "When you upload a file to a Knowledge Base, which statement about the ingestion pipeline is correct?",
+      "options": [
+        { "id": "a", "text": "It runs automatically — parse, chunk, embed, index — with no manual configuration needed", "correct": true },
+        { "id": "b", "text": "You must manually define chunk boundaries and choose an embedding for each file", "correct": false },
+        { "id": "c", "text": "Only PDFs are processed; other formats are stored but not searchable", "correct": false },
+        { "id": "d", "text": "Files are indexed instantly and synchronously, so large files block the interface until done", "correct": false }
+      ],
+      "explanation": "The pipeline is automatic and requires no manual configuration; chunking uses semantic boundaries and embeddings are generated for you. Option b is wrong because you don't hand-define chunks or per-file embeddings — that's the point of an automatic pipeline. Option c is false: many types are supported (text, Office, PDF, code, HTML) and all become searchable. Option d contradicts the docs — large files process asynchronously precisely so they don't block you, with status in the Processing sub-tab.",
+      "sourceRefs": ["r-documents", "r-knowledge-readme"]
+    },
+    {
+      "id": "q-m03-2",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the documented relationship between the Search sub-tab and what an agent sees?",
+      "options": [
+        { "id": "a", "text": "The Search sub-tab shows exactly what agents see when they search the knowledge base during chat", "correct": true },
+        { "id": "b", "text": "Search is a marketing preview and returns different results than agents actually get", "correct": false },
+        { "id": "c", "text": "Search only works on documents uploaded in the last 24 hours", "correct": false },
+        { "id": "d", "text": "Search bypasses embeddings and does plain keyword matching, unlike agents", "correct": false }
+      ],
+      "explanation": "The docs state Search returns exactly what agents see during chat, which is what makes it a debugging tool for retrieval. Option b is the opposite of the documented equivalence. Option c invents a recency limit that doesn't exist — Search covers the whole processed library. Option d is wrong: Search is semantic (embedding-based) with relevance scores, the same retrieval agents use.",
+      "sourceRefs": ["r-documents"]
+    },
+    {
+      "id": "q-m03-3",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Answers are consistently missing detail you know exists in a document, and in Search the relevant chunk is ranked just below the cutoff of results being returned. Which single adjustment is the most direct first move?",
+      "options": [
+        { "id": "a", "text": "Raise Top K so more chunks are retrieved per query (and/or lower the similarity threshold), then re-check Search", "correct": true },
+        { "id": "b", "text": "Turn off reranking so the chunk isn't reordered away", "correct": false },
+        { "id": "c", "text": "Delete and re-upload every document in the library", "correct": false },
+        { "id": "d", "text": "Rewrite the agent's system prompt to instruct it to try harder", "correct": false }
+      ],
+      "explanation": "If a good chunk is falling just outside the returned set, raising Top K (more chunks returned) or lowering the similarity threshold (a slightly lower-scoring chunk now qualifies) is the targeted fix. Option b misreads the symptom — the chunk is being excluded from retrieval, not merely reordered, and turning off reranking doesn't increase how many chunks come back. Option c is a heavy, unnecessary action that doesn't address a retrieval-cutoff problem. Option d can't help, because the agent's prompt cannot change which chunks retrieval returns.",
+      "sourceRefs": ["r-documents"]
+    },
+    {
+      "id": "q-m03-4",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which question is graph-enhanced RAG (Knowledge Graph) best suited to, compared with plain vector search?",
+      "options": [
+        { "id": "a", "text": "'Which of our services depend on the payments vendor, and who owns each?' — a multi-hop question spanning several documents", "correct": true },
+        { "id": "b", "text": "'What does our refund policy say about personalised items?' — a single fact stated in one passage", "correct": false },
+        { "id": "c", "text": "'Convert this PDF to a Word document' — a file-format task", "correct": false },
+        { "id": "d", "text": "'What is 15% of last month's revenue?' — an arithmetic calculation", "correct": false }
+      ],
+      "explanation": "Graph-enhanced RAG shines on relationship and multi-hop questions where the answer is assembled across documents by traversing entities — exactly the depend-on/owned-by shape. Option b is a single-passage fact that plain vector search already answers well; the graph adds little. Option c is a format-conversion task, not a knowledge-retrieval question at all. Option d is arithmetic, not something entity traversal addresses — you'd use structured data (NL2SQL) for revenue figures.",
+      "sourceRefs": ["r-knowledge-graph", "r-documents"]
+    },
+    {
+      "id": "q-m03-5",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team member needs the agent to answer 'what calls the checkout service, and where is it defined?' across a 200k-line repository. Which surface is the right choice, and why?",
+      "options": [
+        { "id": "a", "text": "CodeGraph — it indexes the repo as a graph of symbols and their call/import/inheritance relationships, so caller and definition lookups are graph queries", "correct": true },
+        { "id": "b", "text": "Documents — upload the repo's files so the agent can read the code as text", "correct": false },
+        { "id": "c", "text": "NL2SQL — write a SQL query against the source files", "correct": false },
+        { "id": "d", "text": "The Knowledge Graph built from prose documents — it will infer the call relationships from your written docs", "correct": false }
+      ],
+      "explanation": "CodeGraph is purpose-built for this: symbols plus calls/imports/inheritance make 'what calls X?' and 'where is X defined?' direct graph lookups with real source context, which matters most on large codebases. Option b (Documents) treats code as flat text — the agent could match a name but has no model of callers. Option c misuses NL2SQL, which queries structured database tables, not source files. Option d relies on prose-derived entities, which won't reliably capture code call relationships — that's what CodeGraph's parser exists to do.",
+      "sourceRefs": ["r-codegraph", "r-documents"]
+    },
+    {
+      "id": "q-m03-6",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does CodeGraph stay current with an actively developed repository?",
+      "options": [
+        { "id": "a", "text": "It re-indexes automatically when new commits are pushed to a connected GitHub repository (with GitHub integration active), and can also be re-indexed manually", "correct": true },
+        { "id": "b", "text": "It indexes once at connection time and never updates unless you delete and re-add the repo", "correct": false },
+        { "id": "c", "text": "It re-indexes every time any agent asks a question, on every query", "correct": false },
+        { "id": "d", "text": "It requires a paid webhook add-on that must be purchased separately before any re-indexing works", "correct": false }
+      ],
+      "explanation": "The documented behaviour is automatic re-indexing on new commits to a connected GitHub repo (when the integration is active), plus a manual Re-index option — indexing runs in the background. Option b is wrong: it doesn't require delete-and-re-add; pushes trigger updates. Option c is false and would be wasteful — re-indexing is tied to commits, not to each query. Option d invents a paywall that isn't in the docs.",
+      "sourceRefs": ["r-codegraph"]
+    },
+    {
+      "id": "q-m03-7",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the purpose of the Semantic Layer in the Database tab?",
+      "options": [
+        { "id": "a", "text": "It maps business terms to database columns and tables, so agents can answer data questions without writing SQL", "correct": true },
+        { "id": "b", "text": "It stores uploaded PDFs and runs OCR on them", "correct": false },
+        { "id": "c", "text": "It connects external apps like Slack and GitHub via OAuth", "correct": false },
+        { "id": "d", "text": "It is the vector index that holds document embeddings", "correct": false }
+      ],
+      "explanation": "The Semantic Layer defines natural-language-to-SQL mappings — e.g. 'active agents' maps to a specific WHERE clause — so agents answer data questions without hand-writing SQL. Option b describes document ingestion/OCR, a different surface. Option c describes Composio tool connection, unrelated to the Database tab. Option d confuses the Semantic Layer with the vector store used for RAG over documents.",
+      "sourceRefs": ["r-database-nl2sql"]
+    },
+    {
+      "id": "q-m03-8",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An agent's NL2SQL answer is wrong because it omitted a status filter. What is the practitioner loop that both fixes it now and prevents the same class of error later?",
+      "options": [
+        { "id": "a", "text": "Read the generated SQL in Audit History, verify the correct query in SQL Explorer against the real schema, then add a Semantic Layer mapping plus a Training/Golden SQL pair and re-benchmark", "correct": true },
+        { "id": "b", "text": "Lower the RAG similarity threshold so the query retrieves more rows", "correct": false },
+        { "id": "c", "text": "Switch the database connection to write access so the agent can correct the data itself", "correct": false },
+        { "id": "d", "text": "Delete the Audit History so the wrong answer no longer appears", "correct": false }
+      ],
+      "explanation": "The full loop is: reproduce (Audit History shows the exact SQL), verify ground truth (SQL Explorer against the schema), then teach permanently (Semantic Layer mapping + Training pair + Golden SQL) and measure (benchmark) — fixing now and preventing recurrence. Option b applies a RAG document setting to a SQL problem, which is a category error. Option c is dangerous and irrelevant — the data isn't wrong, the query is, and enabling writes solves nothing here. Option d hides evidence instead of fixing the cause and destroys your audit trail.",
+      "sourceRefs": ["r-database-nl2sql"]
+    },
+    {
+      "id": "q-m03-9",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which cloud storage providers are available for Cloud Sync today (as opposed to marked 'coming soon')?",
+      "options": [
+        { "id": "a", "text": "Dropbox and S3 (for custom buckets)", "correct": true },
+        { "id": "b", "text": "Google Drive and OneDrive", "correct": false },
+        { "id": "c", "text": "Every major provider is fully available, including Google Drive and OneDrive", "correct": false },
+        { "id": "d", "text": "None — Cloud Sync is entirely a future feature", "correct": false }
+      ],
+      "explanation": "The docs list Dropbox as Available and S3 as Available (for custom buckets), while Google Drive and OneDrive are marked Coming soon. Option b names precisely the two that are not yet live. Option c overstates availability — it contradicts the 'coming soon' status on Drive and OneDrive. Option d is wrong because Dropbox and S3 sync work today.",
+      "sourceRefs": ["r-cloud-sync"]
+    },
+    {
+      "id": "q-m03-10",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does an incremental Cloud Sync run behave after the initial sync of a Dropbox folder?",
+      "options": [
+        { "id": "a", "text": "Only new or modified files are processed, and each goes through the same parse→chunk→embed→index pipeline as manual uploads", "correct": true },
+        { "id": "b", "text": "Every file in the folder is re-downloaded and re-processed from scratch on every run", "correct": false },
+        { "id": "c", "text": "Files are synced but skip the ingestion pipeline, so they aren't searchable until manually re-uploaded", "correct": false },
+        { "id": "d", "text": "Incremental sync deletes the local copies of unchanged files to save space", "correct": false }
+      ],
+      "explanation": "After the initial full sync, incremental runs process only new or modified files, and synced files go through the identical ingestion pipeline as manual uploads — so they're searchable like any document. Option b describes the initial sync behaviour, not incremental, and would be wasteful. Option c is false: synced files are parsed, chunked, embedded, and indexed, becoming searchable automatically. Option d invents a deletion behaviour; disconnecting doesn't even delete already-processed documents, let alone routine incremental runs.",
+      "sourceRefs": ["r-cloud-sync", "r-documents"]
+    },
+    {
+      "id": "q-m03-11",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "After you connect an app in Tools & Integrations, what must happen before a specific agent can use it?",
+      "options": [
+        { "id": "a", "text": "The tool must be assigned to that agent — only agents with an assigned tool can use it", "correct": true },
+        { "id": "b", "text": "Nothing — connecting an app grants all agents immediate access", "correct": false },
+        { "id": "c", "text": "The workspace Admin must approve each individual tool call the agent makes", "correct": false },
+        { "id": "d", "text": "The agent must be recreated from scratch to pick up the new connection", "correct": false }
+      ],
+      "explanation": "Connection is workspace-level; usage requires per-agent assignment, and only assigned agents can use a tool. Option b is the exact misconception the docs correct — connecting doesn't auto-grant access. Option c overstates governance — validation happens automatically per call, but there's no manual per-call Admin approval step. Option d is unnecessary; you assign the tool via the Tools page or the agent's Plugins tab without rebuilding the agent.",
+      "sourceRefs": ["r-assigning-tools", "r-connecting-apps"]
+    },
+    {
+      "id": "q-m03-12",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A Support agent only ever needs to POST replies in one Slack channel — never delete messages, manage channels, or read other channels. Which scope choice best expresses least privilege?",
+      "options": [
+        { "id": "a", "text": "Custom — enable only the specific action(s) the agent needs, nothing more", "correct": true },
+        { "id": "b", "text": "Full access — it's simpler, and unused permissions do no harm", "correct": false },
+        { "id": "c", "text": "Read only — so it can see messages but, as needed, also post them", "correct": false },
+        { "id": "d", "text": "Whatever scope the last agent used, copied over for consistency", "correct": false }
+      ],
+      "explanation": "When you can enumerate exactly what an agent needs, Custom with only those actions is the tightest fit and the essence of least privilege. Option b is the anti-pattern — unused write/delete permissions are latent risk the tool router could exercise, so 'they do no harm' is false. Option c is self-contradictory: read-only cannot post messages, so it doesn't meet the requirement. Option d abdicates the scope decision to habit rather than to what this agent actually needs, which can over- or under-grant.",
+      "sourceRefs": ["r-assigning-tools"]
+    },
+    {
+      "id": "q-m03-13",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How are tool credentials handled on the platform, and what should you do when a connection shows 'expired'?",
+      "options": [
+        { "id": "a", "text": "Credentials are encrypted at rest, never exposed in logs or agent responses, and workspace-scoped; re-authenticate an expired connection immediately, since agents get errors until it's restored", "correct": true },
+        { "id": "b", "text": "Credentials are stored in plain text so agents can read them when needed; ignore 'expired' warnings until something breaks", "correct": false },
+        { "id": "c", "text": "Credentials are printed into agent responses for transparency; an expired connection fixes itself with no action", "correct": false },
+        { "id": "d", "text": "Credentials live only in the external app; Automatos stores nothing, so 'expired' is meaningless", "correct": false }
+      ],
+      "explanation": "The docs state credentials are encrypted at rest, never exposed in logs or agent responses, rotatable without downtime, and workspace-scoped — and an expired connection should be re-authenticated immediately because agents error until it's restored. Option b is the opposite of the security model and treats a fixable pre-failure as something to ignore. Option c would leak secrets and misstates that expiry self-heals (OAuth tokens refresh automatically, but an 'expired' status specifically needs re-authentication). Option d is false — Automatos does hold the connection/credential securely, which is why it can report health and expiry.",
+      "sourceRefs": ["r-assigning-tools", "r-connecting-apps"]
+    },
+    {
+      "id": "q-m03-14",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You're grounding a new workspace and have four questions to serve: (1) the exact wording of the SLA, (2) which teams own which services and how they depend on each other, (3) where a specific function is defined in the codebase, (4) how many orders shipped last week. What's the correct surface-to-question mapping?",
+      "options": [
+        { "id": "a", "text": "(1) Documents/RAG, (2) Knowledge Graph, (3) CodeGraph, (4) NL2SQL", "correct": true },
+        { "id": "b", "text": "All four via Documents/RAG, since every question is 'just knowledge'", "correct": false },
+        { "id": "c", "text": "(1) NL2SQL, (2) CodeGraph, (3) Documents, (4) Knowledge Graph", "correct": false },
+        { "id": "d", "text": "(1) CodeGraph, (2) Documents, (3) NL2SQL, (4) Knowledge Graph", "correct": false }
+      ],
+      "explanation": "Each question wants a different surface: a stated fact is single-passage retrieval (Documents/RAG); ownership-and-dependency is multi-hop across documents (Knowledge Graph); a code definition is a symbol lookup (CodeGraph); a count from structured records is a query (NL2SQL). Option b collapses everything into RAG, which is the exact dumping-everything-into-one-library mistake — RAG is poor at multi-hop, code structure, and precise counts. Options c and d scramble the mapping (e.g. routing the SLA wording to NL2SQL/CodeGraph, or a code-definition question to Documents/NL2SQL), each mismatching question type to surface.",
+      "sourceRefs": ["r-documents", "r-knowledge-graph", "r-codegraph", "r-database-nl2sql"]
+    },
+    {
+      "id": "q-m03-15",
+      "domainId": "m03-knowledge-tools",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which sequence best embodies the least-privilege discipline when giving an agent a write-capable tool?",
+      "options": [
+        { "id": "a", "text": "Assign read-only first, observe the agent's tool calls in the Activity Feed until you trust it, then widen to Custom with only the needed actions (or Full only if truly required)", "correct": true },
+        { "id": "b", "text": "Assign Full access immediately, then narrow it later only if something goes wrong", "correct": false },
+        { "id": "c", "text": "Assign Custom with all actions enabled on day one, since Custom is inherently safe", "correct": false },
+        { "id": "d", "text": "Skip assignment and rely on the tool router to invent the right permissions per call", "correct": false }
+      ],
+      "explanation": "The disciplined path is read-only first (zero blast radius while you verify behaviour via the Activity Feed), then the narrowest widening that does the job — Custom-minimal preferred over Full. Option b grants maximum capability to an unproven agent and only reacts after harm, the opposite of least privilege. Option c misunderstands Custom: enabling every action makes it functionally Full, so it isn't 'inherently safe.' Option d is impossible — the tool router calls tools within the scope you assign; it can't manufacture permissions that weren't granted, and an unassigned tool can't be used at all.",
+      "sourceRefs": ["r-assigning-tools"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m03-ground-and-tool",
+      "domainId": "m03-knowledge-tools",
+      "title": "Ground an agent and give it a tool — the full read-and-act loop",
+      "goal": "Produce a working, grounded, tool-enabled agent on the free platform, and the evidence that it works: a knowledge base your agent can search (verified in the Search sub-tab), optionally a code repo indexed in CodeGraph, and a GitHub tool assigned at a read-only scope. You'll finish by asking one Chat question that forces the agent to both search your knowledge and call the tool — the exact end-to-end loop this module teaches.",
+      "steps": "## What you'll do\n\nThis is the module's '🛠 Try it now', run as a guided, artifact-producing exercise. Every step maps to a documented surface — nothing here invents a button. You'll ground an agent in your own material, wire it a tool with least-privilege scoping, and prove the whole thing works in one Chat turn.\n\n### Before you start\n- **Sign in** to the free platform; your personal workspace is created on first login and you're its admin, so every step is achievable solo.\n- Have ready: **2–3 real files** (a README, a spec or policy doc, and a CSV are ideal — they exercise text, prose, and structured formats), and optionally a **public GitHub repo URL** if you want to try CodeGraph.\n\n### Part A — Ground it (Documents + RAG)\n1. **Upload.** Go to **Knowledge Bases → Documents → Upload** and drop in your 2–3 files. They're queued and the pipeline runs automatically (parse → chunk → embed → index).\n2. **Confirm processing.** Open the **Processing** sub-tab and wait until your files show **completed** (not pending or failed). Note the **chunk count** each file produced in the Library — that's proof it was chunked and embedded.\n3. **Search — see through the agent's eyes.** Go to the **Search** sub-tab and run a real natural-language question against your files (e.g. something answered by your policy doc). Confirm you get **ranked results with relevance scores** and can click through to the source chunk. This is exactly what your agent will retrieve.\n4. **(If a result is weak)** Try the diagnostic loop from Lesson 1: open the **RAG** sub-tab and nudge **one** dial — raise **Top K** or lower the **similarity threshold** — then re-run the Search query and compare. Change one thing at a time.\n\n### Part B — (Optional) Index code (CodeGraph)\n5. **Add a repo.** Go to **Knowledge Bases → CodeGraph → + Add Repository**, paste a public GitHub repo URL (or pick a connected repo), choose a branch, and click **Index**. Indexing runs in the background — you can carry on.\n6. **Browse.** Once indexed, browse the symbols / call graph, or search a symbol name, to confirm the repo is now a queryable graph rather than a pile of files.\n\n### Part C — Give it a tool, safely (Composio, least privilege)\n7. **Connect GitHub.** Go to **Tools & Integrations**, find GitHub, click **Connect**, and complete the **OAuth** flow (redirect → authorise Automatos AI → back). The connection is now live at the workspace.\n8. **Assign it read-only.** Open your agent (use a Code Reviewer, or any agent) via its **Plugins** tab → **+ Add Tool → GitHub**, and set the scope to **Read only**. It can now fetch data but change nothing — zero blast radius while you verify it.\n\n### Part D — Prove the loop\n9. **One question, both surfaces.** In **Chat**, ask something that forces knowledge search *and* a tool call, e.g. *\"Using our uploaded docs, summarise the auth flow, then check the linked GitHub file for issues.\"*\n10. **Watch it work.** Confirm the agent searches your knowledge (it should reference your documents) and calls the GitHub tool. Open the **Activity Feed**; confirm the tool call succeeded. If it failed, read the validation error (wrong scope? expired connection?) — that's the debugging surface from Lesson 4.\n\n### Why it matters\nYou've now built the complete pattern this whole module is about: an agent that **reads** your knowledge (Documents/RAG, optionally CodeGraph) and **acts** on your systems (a Composio tool), with the tool scoped read-only by least privilege. Keep this workspace — it's the seed for later modules, and the grounding + tooling habits here are exactly what the capstone build relies on.\n\n### A note on cost\nRunning chats and embeddings uses AI models, which cost money per use. The realistic setup for a builder is bring-your-own-key — supply your own provider key in Settings and pay the provider directly. This lab is small and cheap, but the practitioner instinct (covered properly later in the track) is to prefer the cheapest surface that answers the question and to route to a cheaper model where you can.",
+      "checklist": [
+        "Signed in and confirmed you're in your own personal workspace (you're the admin)",
+        "Uploaded 2–3 real files to Knowledge Bases → Documents and confirmed they show 'completed' in the Processing sub-tab, with a chunk count in the Library",
+        "Ran a natural-language query in the Search sub-tab and got ranked results with relevance scores, clicking through to a source chunk",
+        "(If needed) adjusted exactly ONE RAG dial (Top K or similarity threshold) and re-checked Search to see the effect",
+        "(Optional) Added a public repo in CodeGraph → + Add Repository, indexed a branch, and browsed its symbols / call graph",
+        "Connected GitHub in Tools & Integrations via OAuth (connection live at the workspace)",
+        "Assigned GitHub to an agent from its Plugins tab at a READ-ONLY scope (verified it's read-only, not full)",
+        "Asked one Chat question that forced both knowledge search and a tool call, and confirmed in the Activity Feed that the tool call succeeded (or read the validation error if it failed)",
+        "ARTIFACT KEPT: a grounded, read-only-tool-enabled agent in a workspace you'll reuse in later modules"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-knowledge-readme",
+      "title": "Automatos AI — Knowledge Bases (platform docs)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The hub page for everything an agent can read: the Documents / Database / Templates / CodeGraph tabs and the stats bar (Total Documents, Processed, Storage, Vector Chunks). Read it first to see how the four knowledge surfaces sit together, then drill into each. It's the map for the whole first three lessons.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-documents",
+      "title": "Automatos AI — Documents & RAG (platform docs)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "first-party-doc",
+      "annotation": "The core of Lesson 1: the parse→chunk→embed→index pipeline, supported file types, the Processing and Search sub-tabs, and the four RAG dials (Top K, similarity threshold, reranking, context window). The load-bearing sentence for practitioners is that Search shows exactly what agents see during chat — that's what makes it your retrieval debugger. Default embedding is qwen3-embedding-8b (2048-dim), configurable in Settings.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-cloud-sync",
+      "title": "Automatos AI — Cloud Sync (platform docs)",
+      "url": "automatos-gitbook/knowledge/cloud-sync.md",
+      "kind": "first-party-doc",
+      "annotation": "How to keep a knowledge base in step with external storage. Currency caveat to hold: Dropbox and S3 (custom buckets) are Available today; Google Drive and OneDrive are marked 'Coming soon' — teach only the live ones. Synced files run the same ingestion pipeline as manual uploads, and incremental syncs process only new or changed files.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-knowledge-graph",
+      "title": "Automatos AI — Knowledge Graph (platform docs)",
+      "url": "automatos-gitbook/knowledge/knowledge-graph.md",
+      "kind": "first-party-doc",
+      "annotation": "Lesson 2's first half: auto-extracted entities and relationships, graph-enhanced RAG (vector hits + graph traversal combined on one search), find-paths, and the governance point that entity visibility respects team access control. Read it to understand when relationship/multi-hop questions need the graph rather than a single vector hit — the graph builds itself as you upload.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-codegraph",
+      "title": "Automatos AI — CodeGraph (platform docs)",
+      "url": "automatos-gitbook/knowledge/codegraph.md",
+      "kind": "first-party-doc",
+      "annotation": "Lesson 2's second half: indexing a repo as a graph of symbols (classes, functions) and relationships (calls, imports, inheritance), so 'where is X defined?' and 'what calls Y?' become graph lookups. Key practitioner facts: connect at CodeGraph → + Add Repository, and it re-indexes automatically on new commits to a connected GitHub repo (integration active). This is why a symbol graph beats uploading raw source files.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-database-nl2sql",
+      "title": "Automatos AI — Database & NL2SQL (platform docs)",
+      "url": "automatos-gitbook/knowledge/database.md",
+      "kind": "first-party-doc",
+      "annotation": "All of Lesson 3: SQL Explorer, Semantic Layer (business-term-to-column mappings), Query Templates (20+ per DB type), Training with Golden SQL benchmarking and accuracy trends, Schema Browser, and Audit History. Two postures to carry: queries are read-only by default (writes need explicit Settings permission), and every query is audited — that audit trail is how you make an NL2SQL agent trustworthy in production.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-connecting-apps",
+      "title": "Automatos AI — Tools & Integrations: connecting apps (platform docs)",
+      "url": "automatos-gitbook/tools/connecting-apps.md",
+      "kind": "first-party-doc",
+      "annotation": "Lesson 4, move 1: connecting a Composio app (1,000+ integrations) at the workspace via OAuth (tokens self-refresh) or API key (stored in Settings → Credentials), plus the app categories and disconnecting. Pairs with the Tools hub (tools/README.md), which frames the connect → assign → tool-router-calls-it model and the Composio backing. Connecting is workspace-level and done once per app.",
+      "domainIds": ["m03-knowledge-tools"]
+    },
+    {
+      "id": "r-assigning-tools",
+      "title": "Automatos AI — Assigning tools, scopes & tool security (platform docs)",
+      "url": "automatos-gitbook/tools/assigning.md",
+      "kind": "first-party-doc",
+      "annotation": "The heart of Lesson 4's judgment, covering both tools/assigning.md and tools/security.md. Assignment: only assigned agents can use a tool; the three permission scopes (Full / Read only / Custom); the explicit guidance to start read-only and widen only after verifying behaviour; and tool validation (active connection, scope, rate limits) with failures surfacing in the Activity Feed. Security: the credential model — encrypted at rest, never exposed in logs or agent responses, rotatable without downtime, workspace-scoped — connection health (healthy / warning / expired) and the per-call audit log in Settings → Audit Logs. Practitioner rules: re-authenticate an 'expired' connection immediately, and never put a secret anywhere but the connection dialog / Settings → Credentials.",
+      "domainIds": ["m03-knowledge-tools"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-03-1",
+      "title": "03 · Knowledge surfaces — RAG, Knowledge Graph, CodeGraph, and NL2SQL, and which question wants which",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m03-knowledge-tools"],
+      "sourceNotebook": "platform-architect / m03 / knowledge-surfaces-rag-kg-codegraph-nl2sql"
+    },
+    {
+      "id": "v-03-2",
+      "title": "03 · Composio tools — connect, assign, and least-privilege scoping (start read-only)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m03-knowledge-tools"],
+      "sourceNotebook": "platform-architect / m03 / composio-tools-connect-assign-least-privilege"
+    }
+  ]
+}

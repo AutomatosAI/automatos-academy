@@ -1,0 +1,172 @@
+{
+  "vendorName": "Automatos",
+  "name": "Automatos Platform Architect",
+  "code": "APA",
+  "summary": "Master the Automatos platform end to end — agents, skills, knowledge & tools, playbooks, missions, memory, deliverables, surfaces and governance — then prove it by shipping a real reference build. Eleven hands-on modules that take you from the core vocabulary to a running, multi-surface system you architected yourself, each grounded in what the platform can actually do today.",
+  "blueprintNote": "First-party skills track (Practitioner lane) — an 11-module capability curriculum per PRD-S1 and docs/roadmap/automatos-apa/. No external exam, no blueprint weights, no readiness gate. Completion = every module's hands-on work plus the capstone reference build. The platform is mid-evolution — this content was authored against the gitbook as of 2026-07-02, so re-verify every 'Try it now' step against the docs on each release before relying on it in class.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "/Users/gkavanagh/Development/Automatos-AI-Platform/automatos-gitbook (canonical user docs, local repo)",
+      "/Users/gkavanagh/Development/Automatos-AI-Platform/automatos-academy/docs/research/apa-source-survey-2026-07-02.md"
+    ],
+    "notes": "Grounded in the 5-repo source survey of 2026-07-02 (see docs/research/apa-source-survey-2026-07-02.md): the gitbook is the only proof of what's live, and automatos-ai/docs design material is taught only when labelled as architecture direction, never as shipped-proof. Where the two disagree, the gitbook wins for 'what you can do today'. Re-run the survey — or the cert-watch agent's platform-drift check — on each major release; the 'Try it now' steps rot fastest. Currency caveats carried through the whole track: memory is two-tier (short/long) in the docs (five-layer L0–L4 and field memory are design direction); markdown templates and markdown reports are the deliverables baseline (branded PDF/DOCX and block templates are verify-in-product); the marketplace is browse/install + submit-for-review (a paid/contributor economy is 'coming', with zero gitbook language); budgets are per-mission cost-by-task + pause/resume-with-increased-budget + cost alerts, not a standalone hard spend cap; and on Shopify only the storefront Support Agent is confirmed live on production stores (admin agents and multi-widget seeding are in-development)."
+  },
+  "badge": {
+    "completionLabel": "Automatos-ready — Automatos Platform Architect",
+    "definition": "Completed the Automatos Academy APA track — can build and run real work on Automatos end to end (agents, knowledge, playbooks, missions, governance) and shipped the capstone reference build."
+  },
+  "domainFiles": [
+    "m00-what-is-automatos.json",
+    "m01-chat-first-agent.json",
+    "m02-skills.json",
+    "m03-knowledge-tools.json",
+    "m04-playbooks.json",
+    "m05-missions.json",
+    "m06-memory.json",
+    "m07-deliverables.json",
+    "m08-channels-surfaces.json",
+    "m09-governance-ops.json",
+    "m10-marketplace.json"
+  ],
+  "officialResources": [
+    {
+      "id": "gb-readme",
+      "title": "Automatos docs — Welcome & Quick Start",
+      "url": "automatos-gitbook/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Start here. Signing in auto-creates your own workspace where you're the Admin, and new workspaces come seeded with a set of starter agents — so every hands-on step in this track is something you can build and run solo from day one.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-about",
+      "title": "Automatos docs — About Automatos AI (concepts & vocabulary)",
+      "url": "automatos-gitbook/about.md",
+      "kind": "first-party-doc",
+      "annotation": "The platform in its own words and the canonical vocabulary the whole track builds on: agents are workers not chatbots (each has a model, persona, tools and skills), the Universal Router picks the agent per message, and Playbook / Mission / Knowledge Base / Skill / Tool / Channel all mean something specific here. Say 'playbook', never 'recipe'.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-chat",
+      "title": "Automatos docs — Chat (talking to your agents)",
+      "url": "automatos-gitbook/chat/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The chat-first surface behind Modules 00–01: type a message, the Universal Router routes it to the best agent, responses stream, and you can attach files and use voice chat. A good result starts with a good, specific request — that habit is where the whole build begins.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-agents",
+      "title": "Automatos docs — Agents (build & manage your workers)",
+      "url": "automatos-gitbook/agents/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Where you create and configure the AI workers you'll architect across the track — model, persona, tools, skills and safety guidelines per agent, batch creation, and the roster/details/configuration surfaces. This is the home base for Modules 01–02.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-activity",
+      "title": "Automatos docs — Activity (the Command Centre)",
+      "url": "automatos-gitbook/activity/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The Command Centre used in Modules 00, 05 and 06: tabs for Dashboard, Feed, Reports, Memory and Missions. Missions are autonomous objectives the agents plan for you and only run after you approve the plan — the seam between chat and real delegated work.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-knowledge",
+      "title": "Automatos docs — Knowledge Bases (teach the AI your material)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "first-party-doc",
+      "annotation": "How you ground agents in your own material for Module 03: upload documents for RAG, plus the knowledge graph and codegraph. Cloud Sync from Dropbox and S3 is live; Google Drive and OneDrive are marked coming soon — teach the live pair, flag the rest.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-tools",
+      "title": "Automatos docs — Tools & Integrations",
+      "url": "automatos-gitbook/tools/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Connect the outside apps your agents act in (Composio, 1,000+ apps) for Module 03: connect an app, assign it to an agent, choose Full / Read-only / Custom scope. The docs' own habit — start read-only and widen permissions only as you build trust — is the least-privilege discipline this track teaches.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-analytics",
+      "title": "Automatos docs — Analytics (the cost side)",
+      "url": "automatos-gitbook/analytics/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The spend view for Module 09: cost per request, per agent and per model, plus projections and top spenders. Note the honest boundary — cost alerts warn on thresholds, but there is no hard spend cap that blocks a run; budgets on missions are cost-by-task + pause/resume-with-increased-budget.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-team",
+      "title": "Automatos docs — Team Management (roles & access)",
+      "url": "automatos-gitbook/team/README.md",
+      "kind": "first-party-doc",
+      "annotation": "When you bring people in (Module 09): three roles — Admin, Member, Viewer — plus the Context Engineering permission. Only Admins connect tools, manage the team, and open Settings, Analytics-Admin and audit logs. Never 'owner' or 'super_admin' — those aren't user-docs terms.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-settings",
+      "title": "Automatos docs — Settings (Admin controls & BYOK)",
+      "url": "automatos-gitbook/settings/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Admin-only governance for Module 09: bring-your-own-key for LLM providers (OpenRouter, OpenAI, Anthropic, DeepSeek, Google), model choices, feature flags, credentials, cost alerts and audit logs. This is the operational plane the reference build has to be safe to run inside.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-marketplace",
+      "title": "Automatos docs — Marketplace (share & install)",
+      "url": "automatos-gitbook/marketplace/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Community-shared agents, playbooks and apps for Module 10, across the tabs Applications / Agents / Playbooks / LLMs / Capabilities. Installs are free, workspace-scoped copies; publishing is 'submit for review'. There is no paid or revenue-share economy yet — that's 'coming', with no gitbook language behind it.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-api-reference",
+      "title": "Automatos docs — API Reference",
+      "url": "automatos-gitbook/api-reference.md",
+      "kind": "first-party-doc",
+      "annotation": "For when you outgrow the UI (Modules 08–09): the REST surface behind agents, playbooks, missions and the Widgets group, with Clerk bearer auth + X-Workspace-ID and SSE streaming. Proof that everything in the buttons is also scriptable — the backbone of the capstone's programmatic surface.",
+      "domainIds": []
+    },
+    {
+      "id": "skills-guide",
+      "title": "Automatos skills — SKILL.md Author Guide",
+      "url": "automatos-skills/SKILL-GUIDE.md",
+      "kind": "reference",
+      "annotation": "The authoring how-to behind Module 02: the SKILL.md format, the 60–100-line quality bar, and the canonical tool tables (platform_*, workspace_*, composio_execute). One caveat to teach with it — the guide's line that 'the directory name becomes the skill identifier' is superseded by the platform canon that identity comes from the frontmatter name: field (the loader upserts by name).",
+      "domainIds": []
+    },
+    {
+      "id": "widget-embedding",
+      "title": "Automatos Widget SDK — Embedding guide (EMBEDDING.md)",
+      "url": "automatos-widget-sdk/docs/EMBEDDING.md",
+      "kind": "reference",
+      "annotation": "The canonical how-to for Module 08's universal-surface story (the gitbook has only one endpoint table): one script tag + one config call embeds the chat and blog widgets on any site — Shopify, static HTML, React/Next/Vite, WordPress, Webflow. Contract: origin-locked public key (ak_pub_*) → short-lived JWT → SSE chat, with CSS-variable theming.",
+      "domainIds": []
+    },
+    {
+      "id": "apa-survey",
+      "title": "APA source survey — 2026-07-02 (grounding map)",
+      "url": "automatos-academy/docs/research/apa-source-survey-2026-07-02.md",
+      "kind": "reference",
+      "annotation": "The freshness baseline and grounding contract for the whole track: the ground rule (gitbook = live-proof, design docs = why-only and labelled architecture direction), the canonical-vs-drift vocabulary map, the live-vs-roadmap currency traps, and the per-module source map. Re-run this survey on each major release to catch platform drift before the 'Try it now' steps go stale.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "What is APA & the reference build",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "How to use this track",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
+}

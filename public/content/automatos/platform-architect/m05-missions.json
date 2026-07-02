@@ -1,0 +1,616 @@
+{
+  "id": "m05-missions",
+  "order": 5,
+  "code": "05",
+  "name": "Missions — goal → plan → approve → run",
+  "tagline": "A mission is the platform's most autonomous mode: you describe an objective in plain language, an agent writes the plan, you approve or reject it, then the team executes while you watch cost-by-task and keep pause/resume/cancel in your hand. This module teaches you to write objectives an agent can actually plan, to read and gate that plan like a reviewer, to steer a running mission by cost and checkpoints rather than a pre-set spend ceiling, and to know — with judgment, not habit — when a mission earns its keep versus when you should have authored a playbook instead. If you came from AI Business Foundations, this is the machinery behind module 5's 'delegation with guardrails.'",
+  "overview": "In module 04 you authored the steps yourself — a playbook is a workflow you define and an agent executes. A mission inverts that: you hand over a natural-language objective and an agent plans the steps for you. That single inversion is the whole reason missions exist and the whole reason they need a different set of controls. Because you didn't write the plan, the platform makes you approve it — a mission created from your objective sits in Plan Pending until you read the proposed task list and click Approve (or Reject and refine the objective). That approval gate is the human-in-the-loop seam this module drills into, because it is the one moment where a bad plan is cheapest to catch. Once Active, the mission executes task by task using tools and knowledge, and you monitor it through five documented surfaces — the task list with per-task status, the event timeline, the cost breakdown by task, which agents worked on what, and checkpoints (saved state snapshots at milestones) — clicking any task to open its detailed execution log. Steering a running mission is deliberately not a pre-set budget ceiling: the documented levers are visibility (view cost-by-task), Pause (stop if costs run high), and Resume with increased budget (top it up when a plan needs more than first estimated), plus a workspace-level Cost alerts flag that notifies on budget thresholds. You will learn to reach for the right lever, to treat irreversible and externally-visible actions as the things that keep the leash short, and finally to convert a proven one-off into a reusable playbook via Save as Routine — closing the loop back to module 04. The judgment payload is a rule you can defend: prefer a mission when the path is unknown and needs planning; prefer a playbook when you already know the steps and will repeat them.",
+  "objectives": [
+    "Distinguish a mission (agent plans the steps from a natural-language objective) from a playbook (you author the steps and an agent executes), and state a defensible rule for choosing between them.",
+    "Write a mission objective an agent can actually plan — specific scope plus an explicit success criterion — and recognise why a vague objective produces a weak plan.",
+    "Read a proposed plan at the Plan Pending gate as a reviewer: approve a sound plan, or reject and refine the objective, and explain why the approval gate is the cheapest place to catch a bad plan.",
+    "Monitor an active mission through its five documented surfaces — task list, event timeline, cost breakdown by task, agent involvement, and checkpoints — and drill into a task's execution log.",
+    "Steer a running mission with the documented budget levers — view cost-by-task, Pause, Resume with increased budget, and the Cost-alerts flag — rather than assuming a pre-set spend ceiling exists.",
+    "Decide how much autonomy to grant by the shape of the work: keep the leash short for irreversible actions, external side effects, and unclear success criteria; let it run when the work is contained and the success criterion is checkable.",
+    "Convert a proven one-off mission into a reusable playbook with Save as Routine, and explain when that promotion is worth doing."
+  ],
+  "lessons": [
+    {
+      "id": "m05-l1-mission-vs-playbook",
+      "title": "What a mission is — and why it isn't a playbook",
+      "estMinutes": 14,
+      "objective": "Define a mission as an agent-planned objective, contrast it with a playbook you author yourself, and choose between them with a rule you can defend.",
+      "body": "## The one difference that explains everything\n\nIn module 04 you built a **playbook**: a multi-step workflow where *you* define the steps and assign each one to an agent. You are the planner; the agent is the executor. A **mission** inverts exactly that one thing. You describe an objective in natural language and *an agent* creates the execution plan — the tasks and milestones — for you. Then the team executes it.\n\nThat single inversion — who writes the plan — is the whole reason missions exist and the whole reason they carry a different set of controls. Hold onto it, because almost every other difference falls out of it:\n\n- Because *you* wrote a playbook, there's nothing to approve — you already decided the steps. Because *an agent* wrote a mission's plan, the platform makes you **approve it** before anything runs. (Lesson 2.)\n- Because a playbook's steps are fixed, you can schedule it and trust it to repeat. Because a mission is planned fresh from an objective, it's a one-off by nature — until you promote it. (Lesson 4.)\n- Because you don't know in advance exactly what a mission will do, you monitor it by *cost and checkpoints as it runs*, not by a fixed script you wrote up front. (Lesson 3.)\n\nThe gitbook's own definition is worth reading literally: *\"Missions are autonomous, multi-step objectives that your AI agents plan and execute independently. Think of them as giving your AI team a goal and letting them figure out how to achieve it.\"* The operative words are **plan** and **figure out**. A playbook removes the figuring-out; a mission is the figuring-out.\n\n> If you came from AI Business Foundations, this is the machinery behind module 5. There you learned the *idea* of delegating whole workflows with guardrails. Here you'll operate the actual controls — the approval gate, cost-by-task, pause/resume — that make that delegation safe on a real platform.\n\n## The five-beat loop\n\nEvery mission runs the same five beats. Learn them as a shape, because the rest of this module is just each beat in detail:\n\n1. **You describe what you want accomplished** — a natural-language objective.\n2. **An agent creates an execution plan** with tasks and milestones.\n3. **You review and approve (or reject)** the plan — the human-in-the-loop gate.\n4. **Agents execute the plan step by step**, using tools and knowledge as needed.\n5. **You monitor progress**, and can pause, resume, or cancel at any time.\n\nGoal in → plan out → you gate it → work runs → you watch and can intervene. A playbook, by contrast, has no beat 2 and no beat 3 — you supplied the plan, so there's nothing to generate and nothing to approve.\n\n## Enabling the mode\n\nAutonomous mission execution is gated behind a workspace feature flag — **Mission mode**, toggled in **Settings → General → Feature flags**, described as *\"Enable autonomous multi-step mission execution.\"* This matters as judgment, not just as a click: an admin decides, at the workspace level, whether the team is allowed to run in this most-autonomous mode at all. It's the first and coarsest guardrail — before any single mission is approved, someone chose to permit missions in this workspace. (Roles and who can toggle flags are covered in module 09.)\n\n## The judgment: mission or playbook?\n\nThis is the decision the module exists to make you good at. Both run multi-step work across agents; both can end in a report. The axis that separates them is **do you already know the steps?**\n\n**Reach for a playbook when:**\n- You already know the steps and can write them down. The gitbook's canonical example is a *nightly code review*: pull commits → review each → security scan → write summary → post to Slack. Five known steps, five known agents.\n- You will run it **repeatedly** — on a schedule, on demand, or triggered by a webhook (Jira issue, GitHub push, Slack message). Repetition rewards the up-front effort of authoring.\n- You want **determinism** — the same steps every time, so results are comparable run to run.\n\n**Reach for a mission when:**\n- The **path is unknown** and needs planning. You know the *goal* (\"audit all API endpoints for missing rate limiting and file a ticket per finding\") but not the exact task breakdown to get there — how many endpoints, which need tickets, in what order.\n- It's a **one-off** or a first-of-its-kind objective where writing a rigid playbook would be premature.\n- You want the agent to **adapt** the plan to what it finds, rather than march a fixed script.\n\n**The defensible rule:** *if you can already write the steps and you'll repeat them, author a playbook; if you know only the goal and the path needs figuring out, run a mission.* And there's a bridge between them, which is the satisfying part: when a one-off mission turns out to be something you'll repeat, you don't rewrite it as a playbook by hand — you **Save as Routine** and the platform extracts the proven task pattern into a playbook for you (Lesson 4). Missions are how you *discover* a workflow; playbooks are how you *operationalise* one.\n\n## Worked example: same job, two right answers\n\nA consultancy wants a competitive teardown of three named rivals — positioning, pricing, and gaps — as a one-page brief. First time they've done it. They don't know how many sub-tasks it takes or which agent handles what. That's a **mission**: give the objective, let an agent plan the research-and-synthesis steps, approve the plan, watch it run. Correct call — the path is genuinely unknown.\n\nNow it's six months later and they want this teardown *every quarter*, same shape, on new competitors. Re-running a mission each time means re-approving a freshly-planned plan every quarter and getting slightly different structure each time — wasteful and non-comparable. The proven mission should be promoted with **Save as Routine** into a quarterly playbook: fixed steps, scheduled, deterministic. Same underlying job, but the *first* run is a mission (discover the path) and the *repeat* is a playbook (operationalise it). Choosing wrong in either direction — authoring a rigid playbook before you know the steps, or re-running a mission for something you now do on a schedule — is the mistake this lesson trains you to avoid.\n\n## What this buys you\n\nYou can now look at a piece of multi-step work and place it correctly: known-and-repeated → playbook; goal-known-path-unknown → mission; and you know the one-way door between them is Save as Routine. Next you'll learn to write an objective an agent can actually plan, and to gate the plan it hands back.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m05-l1-1",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is the single defining difference between a mission and a playbook?",
+          "options": [
+            { "id": "a", "text": "In a mission an agent plans the steps from your natural-language objective; in a playbook you author the steps yourself and an agent executes them", "correct": true },
+            { "id": "b", "text": "A mission runs on a schedule while a playbook only ever runs manually", "correct": false },
+            { "id": "c", "text": "A mission uses tools and knowledge while a playbook cannot use either", "correct": false },
+            { "id": "d", "text": "A mission is run by a single agent while a playbook always requires a whole team", "correct": false }
+          ],
+          "explanation": "The defining inversion is who writes the plan: a mission has an agent plan the steps from your objective, whereas a playbook is a workflow whose steps you define and assign. Option b is backwards — playbooks are the ones you can schedule with cron triggers; a mission is a one-off until saved as a routine. Option c is false — missions explicitly execute using tools and knowledge, and playbooks assign agents that also use tools. Option d invents an agent-count rule that appears nowhere; both can involve one or many agents.",
+          "sourceRefs": ["r-gitbook-missions", "r-gitbook-playbooks"]
+        },
+        {
+          "id": "kc-m05-l1-2",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need a competitor teardown for the first time and don't yet know how many sub-tasks it will take or which agent handles what. Next quarter you'll want the exact same teardown on new competitors, on a schedule. What's the right sequence?",
+          "options": [
+            { "id": "a", "text": "Run a mission the first time to let an agent plan the path, then Save as Routine to promote the proven pattern into a scheduled playbook for the quarterly repeat", "correct": true },
+            { "id": "b", "text": "Author a fixed playbook now for both the first run and the repeats, since the job is the same either way", "correct": false },
+            { "id": "c", "text": "Run a mission the first time and re-run a fresh mission every quarter, re-approving a newly planned plan each time", "correct": false },
+            { "id": "d", "text": "Do the first one manually in chat and never involve missions or playbooks at all", "correct": false }
+          ],
+          "explanation": "Missions discover an unknown path; playbooks operationalise a known one — so plan it as a mission first, then Save as Routine to get a deterministic scheduled playbook. Option b authors a rigid playbook before the steps are known, which the lesson names as premature. Option c wastes effort re-approving a freshly planned plan every quarter and yields non-comparable structure — the exact anti-pattern for repeated work. Option d abandons the tooling entirely and loses the reusable, scheduled playbook you explicitly need.",
+          "sourceRefs": ["r-gitbook-missions", "r-gitbook-playbooks"]
+        },
+        {
+          "id": "kc-m05-l1-3",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Before any single mission plan is even approved, what is the coarsest guardrail that governs whether a workspace can run missions at all?",
+          "options": [
+            { "id": "a", "text": "The 'Mission mode' feature flag in Settings → General, which an admin toggles to enable autonomous multi-step mission execution for the workspace", "correct": true },
+            { "id": "b", "text": "A per-mission spend ceiling that automatically halts any mission over a fixed dollar amount", "correct": false },
+            { "id": "c", "text": "The Plan Pending approval gate on each individual mission", "correct": false },
+            { "id": "d", "text": "A signed contract clause that must be accepted before the Missions tab appears", "correct": false }
+          ],
+          "explanation": "Mission mode is a workspace-level feature flag described as enabling autonomous multi-step mission execution — the coarsest, earliest guardrail deciding whether missions are permitted here at all. Option b describes a pre-set spend ceiling, which the platform does not have; budgets are managed by cost visibility, pause, and resume-with-increased-budget. Option c is a real gate but it's per-mission and comes after the mode is enabled, so it isn't the coarsest. Option d invents a contractual mechanism with no basis in the docs.",
+          "sourceRefs": ["r-gitbook-missions", "r-gitbook-settings-general"]
+        }
+      ]
+    },
+    {
+      "id": "m05-l2-objective-and-gate",
+      "title": "Writing the objective and gating the plan",
+      "estMinutes": 15,
+      "objective": "Write a mission objective an agent can plan — scoped, with a success criterion — and review the resulting plan at the Plan Pending gate like a responsible approver.",
+      "body": "## The objective is the whole input\n\nA mission's only real input is the sentence you type. An agent plans from it — so the quality of the plan is bounded by the quality of the objective. Get this right and the plan the agent hands back is close to what you wanted; get it wrong and you'll spend your approval budget rejecting and re-writing. Two properties make an objective planner-friendly.\n\n**1. Be specific about scope.** The gitbook's paired example is the whole lesson in two lines:\n\n- Good: *\"Audit all API endpoints for missing rate limiting and create Jira tickets for each finding.\"*\n- Vague: *\"Check the API security.\"*\n\nThe good one names the *what* (all API endpoints), the *criterion* (missing rate limiting), and the *deliverable* (a Jira ticket per finding). An agent can decompose that into concrete tasks. \"Check the API security\" could plan into a hundred different task lists — it under-specifies scope so badly the agent has to guess, and you'll reject whatever it guesses.\n\n**2. Include a success criterion.** State how you'll know it's done. The docs give the pattern:\n\n- *\"Reduce average API response time to under 200ms across all endpoints.\"*\n- *\"Complete Q1 security audit covering authentication, authorisation, and data encryption.\"*\n\nA success criterion does double duty: it shapes a *better plan* (the agent plans toward a target), and it gives *you* a yardstick to judge completion against later. Without one, \"done\" is whatever the agent decides, and you've quietly handed away the definition of success. This is the same instinct AI Business Foundations module 5 calls a clear brief — here it's load-bearing, because the agent, not you, turns it into steps.\n\n**Attach files for context.** When creating a mission you can attach files — PDFs, images, documents, up to 20 MB — and the agent can reference them during execution. If your objective refers to \"the three documents I uploaded\" or \"our current pricing sheet,\" attach them; grounding the objective in real material produces a far more concrete plan than making the agent work from the sentence alone.\n\n## The Plan Pending gate — read it like a reviewer\n\nYou describe the objective; the system generates an execution plan; the mission enters **Plan Pending** — *\"Agent has created a plan, waiting for your review\"* — and your only two options are **Approve** or **Reject**. Nothing executes until you choose. This is the single most important human-in-the-loop moment on the platform, and here's the judgment: **the plan gate is the cheapest place to catch a bad plan.** A flaw you spot in the proposed task list costs one click to reject. The same flaw discovered after the mission has spent tokens, called external tools, and filed tickets costs real money and possibly real cleanup. Reviewing the plan is the highest-leverage thirty seconds in the whole lifecycle.\n\nSo don't rubber-stamp. When you read a proposed plan, check it like a reviewer:\n\n- **Scope match.** Do the tasks actually cover the objective — no more, no less? A plan that quietly widened scope (\"also refactor the auth module\") or narrowed it (audits only *some* endpoints) should be rejected and the objective sharpened.\n- **Irreversible or externally-visible steps.** Does any task send an email, post to a channel, create tickets, delete data, or otherwise act on the outside world? Those are the tasks worth the most scrutiny before you approve — a wrong reversible step is cheap to fix; a wrong email to a customer is not. (This is the autonomy judgment Lesson 3 formalises.)\n- **Plausible task breakdown.** Are the milestones sensible, in a sane order, with no obviously missing step? If the plan to \"file a ticket per finding\" has no step that actually creates tickets, it's incomplete.\n\nIf any check fails, **Reject and refine the objective** — the fix is almost always upstream, in a sharper objective, not in trying to hand-edit the agent's plan. Reject, add the missing scope or criterion to your objective, and let it re-plan. A good objective and a disciplined gate are the two halves of a mission you can trust.\n\n## Worked example: from vague to approvable\n\nYou want the platform to make sense of three research PDFs you've gathered. First attempt at an objective: *\"Summarise these documents.\"* Technically plannable, but weak — summarise how long, for whom, capturing what? The plan comes back thin and generic; you reject it. You sharpen: *\"Review the three documents I uploaded, list every open question they leave unanswered, and write a one-page summary report of the key findings.\"* You attach the three PDFs. Now the objective has scope (the three uploaded docs), a concrete task (list every open question), and a bounded deliverable (a one-page report) — a de facto success criterion.\n\nThe plan comes back in Plan Pending with a sensible breakdown: read and extract from each document, identify unanswered questions across them, synthesise the one-page report. You run your reviewer's checklist: scope matches (exactly the three docs, exactly those outputs); no irreversible or external steps (it reads and writes a report — nothing leaves the workspace, low-stakes to approve); breakdown is plausible and complete. You **Approve**. Notice what earned the clean approval: it wasn't luck, it was the objective. The sharper sentence produced a plan that passed the gate on the first read — which is exactly the payoff for time spent on the objective rather than on rejecting plans.\n\n## What this buys you\n\nYou can now write an objective an agent can actually plan — scoped, with a success criterion, grounded in attached files — and you can stand at the Plan Pending gate and make a real approve/reject decision instead of clicking through. Next: what happens after you approve, and how to steer it while it runs.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m05-l2-1",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which objective is written well enough for an agent to plan a concrete mission from it?",
+          "options": [
+            { "id": "a", "text": "Audit all API endpoints for missing rate limiting and create a Jira ticket for each finding", "correct": true },
+            { "id": "b", "text": "Check the API security", "correct": false },
+            { "id": "c", "text": "Make our API better", "correct": false },
+            { "id": "d", "text": "Look into the backend and see what you can find", "correct": false }
+          ],
+          "explanation": "The winning objective names the scope (all API endpoints), the criterion (missing rate limiting), and the deliverable (a Jira ticket per finding), so an agent can decompose it into concrete tasks. Option b is the gitbook's explicit example of a vague objective — it under-specifies scope so badly the agent must guess. Options c and d are even vaguer, giving no scope, criterion, or deliverable, so any plan they produce is a shot in the dark you'd end up rejecting.",
+          "sourceRefs": ["r-gitbook-missions"]
+        },
+        {
+          "id": "kc-m05-l2-2",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A mission is in Plan Pending. Why is this the cheapest point in the whole lifecycle to catch a bad plan?",
+          "options": [
+            { "id": "a", "text": "A flaw spotted in the proposed task list costs one click to reject, whereas the same flaw found after execution has spent tokens, called external tools, and produced side effects costs real money and cleanup", "correct": true },
+            { "id": "b", "text": "Because the platform automatically fixes any plan you reject and re-runs it for free", "correct": false },
+            { "id": "c", "text": "Because Plan Pending missions have already completed all their tasks, so nothing more can go wrong", "correct": false },
+            { "id": "d", "text": "Because rejecting a plan refunds all tokens the mission would ever have used, regardless of when you reject", "correct": false }
+          ],
+          "explanation": "Nothing has executed yet at Plan Pending, so a flaw costs a single reject click; the identical flaw discovered mid-run has already consumed tokens and possibly caused external side effects, which is expensive to undo — that asymmetry is why the gate is the highest-leverage moment. Option b is false — the platform doesn't auto-fix; you refine the objective and let it re-plan. Option c is backwards: Plan Pending is before execution, not after. Option d invents a blanket refund mechanism; the saving comes from not having spent tokens yet, which only holds before execution.",
+          "sourceRefs": ["r-gitbook-missions"]
+        },
+        {
+          "id": "kc-m05-l2-3",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The plan an agent proposes has quietly widened your objective — it adds a task to refactor an unrelated module you never mentioned. What's the right move?",
+          "options": [
+            { "id": "a", "text": "Reject the plan and refine the objective so the scope is unambiguous, then let it re-plan", "correct": true },
+            { "id": "b", "text": "Approve it — the agent knows best, and extra work is a bonus", "correct": false },
+            { "id": "c", "text": "Approve it and rely on Cancel to stop the refactor task once it starts running", "correct": false },
+            { "id": "d", "text": "Approve it but immediately Pause, then Resume only the tasks you like", "correct": false }
+          ],
+          "explanation": "A scope mismatch is exactly what the plan gate exists to catch, and the fix lives upstream in a sharper objective — so reject and refine, then let it re-plan. Option b abdicates the reviewer role the gate demands and lets unrequested, possibly risky work through. Option c wastes tokens letting a bad plan start before Cancel, when a free reject was available. Option d misuses the controls — Pause and Resume act on the whole mission, not a task-by-task cherry-pick, so you can't selectively resume only some tasks.",
+          "sourceRefs": ["r-gitbook-missions"]
+        }
+      ]
+    },
+    {
+      "id": "m05-l3-monitor-steer-budget",
+      "title": "Monitoring, steering, and the budget levers",
+      "estMinutes": 15,
+      "objective": "Monitor an active mission through its five documented surfaces, drill into a task's execution log, and steer it with cost visibility, pause, and resume-with-budget rather than a pre-set ceiling.",
+      "body": "## After you approve: the mission goes Active\n\nApprove the plan and the mission moves to **Active** — agents execute the plan step by step, using tools and knowledge as needed. Your options shift from approve/reject to **Pause**, **Cancel**, or **monitor**. This is where a lot of new users go passive and just wait for the result. Don't — the monitoring surfaces exist so you can steer, and steering is cheaper than cleaning up.\n\n## The five surfaces you monitor through\n\nEvery active mission exposes exactly five monitoring surfaces. Learn what each is *for*, because they answer different questions:\n\n1. **Task list** — the individual tasks with per-task status: *pending, in progress, completed, failed*. This answers \"where is it up to, and did anything fail?\" A `failed` task is your cue to look closer.\n2. **Event timeline** — a chronological log of everything that happened. This answers \"what did it do, in what order?\" — the narrative of the run.\n3. **Cost breakdown by task** — per-task token usage and estimated cost. This answers \"where are my tokens going?\" and it's the surface that drives every budget decision below.\n4. **Agent involvement** — which agents worked on which tasks. This answers \"who did what?\" — useful when a multi-agent mission delegates work (module 04's coordination in action).\n5. **Checkpoints** — saved state snapshots at key milestones. This answers \"what's the last known-good state?\" and it's your safety net: if a mission goes wrong, the checkpoint is the point you reason from.\n\nAnd beneath all five, the drill-down: **click any task to see its detailed execution log — tool calls, LLM interactions, and intermediate results.** This is where you go when the task list says `failed` and you need to know *why*, or when a task is burning tokens and you want to see what it's actually doing. The five surfaces tell you *what's happening*; the execution log tells you *why*.\n\n## Steering by budget — and what the platform does NOT give you\n\nHere's a point worth being precise about, because it's easy to assume otherwise. The platform does **not** give you a pre-set spend ceiling — you cannot set \"stop this mission at $5\" and walk away. That's not how mission budgets work. Instead you get three documented levers, and the skill is reaching for the right one:\n\n- **View the cost breakdown by task.** Watch where tokens are going *as it runs*. This is the input to every other decision — you steer on what you can see.\n- **Pause** the mission *\"if costs are exceeding expectations.\"* Pause is your emergency brake: a task is chewing through tokens, or the mission is heading somewhere you didn't intend, and you stop it to think. A paused mission is on hold — nothing is running, nothing is spending.\n- **Resume with increased budget** *\"if a mission needs more resources than originally estimated.\"* From Paused, you can top it up and continue. This is deliberate: the platform makes you make a *conscious decision* to spend more, rather than silently blowing through a ceiling. You looked at the cost-by-task, judged the extra spend worth it, and chose to continue.\n\nRead those three together and the design intent is clear: **budget control on a mission is a human decision informed by visibility, not an automated cap.** You watch cost-by-task, you Pause when it worries you, you Resume-with-budget when you've decided it's worth it. That's the loop.\n\nThere's one more, at the workspace level: **Cost alerts**, a feature flag in Settings → General that *notifies on budget thresholds*. It doesn't stop anything — it's a notification, not a brake — but it's the ambient safety net that tells you to go *look* at a mission's cost-by-task before it surprises you. Alert (know) → look (cost-by-task) → decide (Pause / Resume-with-budget). Note it's a workspace setting an admin controls, not a per-mission field (module 09).\n\n## The autonomy judgment: how short to keep the leash\n\nAll the controls above serve one judgment: **how much autonomy should this particular mission have?** The safety rails the platform actually gives you are the plan-approval gate, pause/resume, resume-with-increased-budget, per-task cost visibility, and checkpoints. The question is how tightly to use them, and the answer is set by the *shape of the work*, not by habit.\n\n**Keep the leash short** — small objective, careful plan review, watch cost-by-task closely, be ready to pause — when:\n- The mission takes **irreversible actions** (deleting data, sending money) — you can't take those back.\n- It has **external side effects** — emails, channel posts, tickets, anything customers or third parties see. A mistake here escapes the workspace.\n- The **success criterion is unclear** — if you can't say precisely what \"done right\" looks like, you can't tell whether it's going well, so you must watch it.\n\n**Let it run** — larger objective, lighter touch — when the work is **contained** (it reads, analyses, drafts inside the workspace), the outputs are **reviewable before they matter** (it produces a report *you* read before acting), and the **success criterion is checkable**. A research-and-summarise mission that touches nothing external is the archetype of \"let it run.\"\n\nThe practical rule for a newcomer: **start with the leash short, and lengthen it as a mission type earns your trust.** Run a kind of mission a few times on tight control, watch how it behaves, and once it's proven itself on contained work, you can hand it more autonomy. Trust is earned per mission-type, not granted by default — and the irreversible/external test is the line you don't cross casually.\n\n## Worked example: a mission that spikes\n\nYou approve a mission to analyse a quarter's support tickets and produce a themes report — contained, no external side effects, so you gave it a longish leash. Twenty minutes in, a **Cost alert** fires (you'd set the threshold in Settings). You open the mission and read the **cost breakdown by task**: one task — \"cluster tickets by theme\" — is far over the others. You **click that task's execution log** and see it's re-reading the entire ticket dump on every iteration, burning tokens. You **Pause**. Now you decide: the report is genuinely valuable and it's most of the way there, so you **Resume with increased budget** to let it finish — a conscious call, made because you could *see* the cost and judge it worth it. Had the log instead shown the task looping uselessly with no progress, you'd have **Cancelled** and refined the objective instead. Same tools, opposite decisions — and the thing that let you decide well was the visibility, exactly as designed. No pre-set ceiling would have made that judgment for you; it would only have stopped the mission blindly at a number.\n\n## What this buys you\n\nYou can now run an active mission like an operator, not a spectator: read the five surfaces, drill into a task's log when something's off, and steer with pause / resume-with-budget on the evidence of cost-by-task — while sizing the leash to whether the work is reversible and contained. Last: what to do with a mission once it's proven.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m05-l3-1",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A running mission's cost is climbing faster than you expected. Which documented sequence of levers matches how mission budgets actually work?",
+          "options": [
+            { "id": "a", "text": "Read the cost breakdown by task to see where tokens go, Pause if it's exceeding expectations, then either Resume with increased budget or Cancel based on what you saw", "correct": true },
+            { "id": "b", "text": "Rely on the pre-set spend ceiling you configured to auto-halt the mission at a fixed dollar amount", "correct": false },
+            { "id": "c", "text": "Do nothing — missions cannot be paused once Active, so you must wait for completion", "correct": false },
+            { "id": "d", "text": "Immediately Cancel every time cost rises, since there is no way to add budget and continue", "correct": false }
+          ],
+          "explanation": "Budget control is visibility plus a human decision: view cost-by-task, Pause if costs exceed expectations, then Resume-with-increased-budget or Cancel on the evidence — exactly the documented loop. Option b assumes a pre-set spend ceiling, which the platform doesn't provide. Option c is false — an Active mission's options explicitly include Pause. Option d ignores Resume-with-increased-budget, which exists precisely so you can top up and continue when the spend is judged worthwhile.",
+          "sourceRefs": ["r-gitbook-missions", "r-gitbook-settings-general"]
+        },
+        {
+          "id": "kc-m05-l3-2",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The task list shows one task as 'failed' and you need to know why. Where do you look?",
+          "options": [
+            { "id": "a", "text": "Click the task to open its detailed execution log — tool calls, LLM interactions, and intermediate results", "correct": true },
+            { "id": "b", "text": "The workspace-wide mission statistics in Analytics → Workflows", "correct": false },
+            { "id": "c", "text": "The Cost alerts toggle in Settings → General", "correct": false },
+            { "id": "d", "text": "The archive search, filtering by status", "correct": false }
+          ],
+          "explanation": "The per-task execution log is the drill-down for exactly this: it shows the tool calls, LLM interactions, and intermediate results that explain why a task failed. Option b gives aggregate stats across missions, not the reason a single task failed. Option c is a notification setting about budget thresholds, unrelated to task-level debugging. Option d finds past missions by keyword or status but doesn't expose a live task's execution detail.",
+          "sourceRefs": ["r-gitbook-missions"]
+        },
+        {
+          "id": "kc-m05-l3-3",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Two missions are proposed. Mission A: read this quarter's support tickets and draft a themes report you'll review. Mission B: reconcile the accounts and email corrected invoices to affected customers. Which should get the shorter leash, and why?",
+          "options": [
+            { "id": "a", "text": "Mission B — it takes irreversible, externally-visible actions (emailing customers), so tight plan review and close monitoring matter most", "correct": true },
+            { "id": "b", "text": "Mission A — reading a large ticket dump uses more tokens, and token cost is the only factor in how much autonomy to grant", "correct": false },
+            { "id": "c", "text": "Neither — leash length is fixed by the platform and identical for every mission", "correct": false },
+            { "id": "d", "text": "Mission B — but only because it has more tasks, not because of any external side effects", "correct": false }
+          ],
+          "explanation": "Mission B sends emails to customers — an irreversible, external side effect that escapes the workspace — which is precisely the shape of work that demands the shortest leash. Mission A is contained and its output is reviewed before it matters, so it can run with a lighter touch. Option b makes token cost the sole criterion, but the autonomy judgment turns on reversibility and external impact, not spend. Option c is false — leash length is your judgment, expressed through the approval gate, monitoring, and pause/resume. Option d gets the answer right but the reason wrong: task count isn't the criterion; the external, irreversible action is.",
+          "sourceRefs": ["r-gitbook-missions"]
+        }
+      ]
+    },
+    {
+      "id": "m05-l4-save-as-routine",
+      "title": "Closing the loop: Save as Routine",
+      "estMinutes": 12,
+      "objective": "Walk a completed mission through the rest of the lifecycle and convert a proven one-off into a reusable playbook with Save as Routine, knowing when that promotion is worth doing.",
+      "body": "## The rest of the lifecycle\n\nA mission that finishes its tasks reaches **Completed** — *\"all tasks finished successfully.\"* Your options here are **Archive** or **Save as Routine**. Two other end-states round out the lifecycle table you should know cold:\n\n| Status | What it means | Your options |\n| --- | --- | --- |\n| **Plan Pending** | Agent created a plan, awaiting your review | Approve or Reject |\n| **Active** | Agents are executing the plan | Pause, Cancel, or monitor |\n| **Paused** | Execution is on hold | Resume (optionally with increased budget) |\n| **Completed** | All tasks finished successfully | Archive, or Save as Routine |\n| **Cancelled** | You stopped the mission | Archive for reference |\n| **Archived** | Stored for historical reference | View full snapshot |\n\nTwo things worth internalising from the table. First, **Cancelled and Completed are both terminal but different**: Completed means it did the job; Cancelled means you stopped it (over cost, wrong direction, whatever) — and a Cancelled mission can still be Archived for reference, so the record isn't lost. Second, **Archived is not deletion** — it's a stored full snapshot you can view later, and you can find it again through **archive search** by keyword, status, date range, or agent. Missions leave a durable trail.\n\n## Save as Routine — the loop back to playbooks\n\nThis is the feature that closes the circle opened in Lesson 1. A completed mission can be converted into a reusable playbook template. The steps are short:\n\n1. Open a completed mission.\n2. Click **Save as Routine**.\n3. The system **extracts the task pattern into a playbook**.\n4. Run the playbook on demand or on a schedule.\n\nThink about what just happened conceptually, because it's the elegant part of the whole design. You *discovered* a workflow by giving an agent a goal and letting it plan the path (the mission). Now you *operationalise* that discovered path by freezing it into a playbook you can re-run deterministically — without ever hand-authoring the steps. **The mission was the R&D; the playbook is the production line.** The platform did the translation for you: the proven task pattern from the one-off becomes the fixed steps of the repeatable workflow.\n\nThis is exactly why Lesson 1's rule had a bridge in it. \"Mission for the unknown path, playbook for the known-and-repeated\" isn't two separate worlds — Save as Routine is the documented one-way door from the first to the second. You don't choose mission-*or*-playbook forever; you often go mission-*then*-playbook: run it as a mission until the shape is proven, then promote it.\n\n## When to promote — and when not to\n\nSave as Routine is not automatic and shouldn't be reflexive. Promote a completed mission to a playbook when:\n- **You'll genuinely repeat it.** The teardown you'll run every quarter; the audit you'll run monthly. Repetition is the entire justification for freezing the steps.\n- **The pattern is stable.** The mission's task breakdown is one you'd be happy to run again roughly as-is. If next time's version would be substantially different, the path isn't stable enough to freeze — run it as a fresh mission again.\n- **You want it scheduled or triggered.** Playbooks can run on a cron schedule or fire on a webhook (a Jira issue, a GitHub push). If you want this to happen *automatically* on a rhythm or an event, it has to be a playbook — missions don't schedule.\n\n**Don't** promote a genuine one-off. If you audited a specific incident once and won't do it again, Save as Routine just clutters your playbook list with something you'll never run. Archive it (the snapshot and archive search preserve the record) and move on. The test is simple: *will I run this shape of work again?* Yes → Save as Routine. No → Archive.\n\n## Worked example: the weekly report that started as a mission\n\nA team runs a one-off mission: *\"Pull this week's closed support tickets, group them by theme, and write a short summary of the top three issues for the team channel.\"* It works well — the plan was sound, it ran cheaply, the summary was genuinely useful. Now they realise they want this *every* Friday. The wrong move is to re-run the mission weekly (re-planning and re-approving every time, slightly different each week). The right move: open the completed mission, **Save as Routine**. The platform extracts the pattern — pull closed tickets → group by theme → summarise top three → post to channel — into a playbook. They give it a Friday-afternoon cron schedule. From now on it runs itself, deterministically, no approval gate needed because they authored (via promotion) the steps. The mission discovered the workflow once; the playbook runs it every week. That mission-then-playbook arc — discover, prove, promote, schedule — is the mature way to use the two features together, and it's the note this module ends on.\n\n## What this buys you\n\nYou now know the full mission lifecycle end to end, including the two terminal states and that archiving preserves a searchable snapshot. More importantly, you can make the promotion call: recognise a proven, repeatable mission and turn it into a scheduled playbook with Save as Routine — and leave the genuine one-offs archived. That completes the round trip between the two ways of running multi-step work on Automatos.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m05-l4-1",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What does Save as Routine do to a completed mission?",
+          "options": [
+            { "id": "a", "text": "Extracts the mission's task pattern into a reusable playbook that can be run on demand or on a schedule", "correct": true },
+            { "id": "b", "text": "Permanently deletes the mission to free up space", "correct": false },
+            { "id": "c", "text": "Re-runs the identical mission immediately with the same objective", "correct": false },
+            { "id": "d", "text": "Converts the mission into a static PDF report and nothing else", "correct": false }
+          ],
+          "explanation": "Save as Routine extracts the proven task pattern into a playbook you can re-run on demand or on a schedule — the documented one-way door from a discovered path to an operationalised one. Option b confuses it with archiving/deletion; Save as Routine creates a playbook, it doesn't remove the mission. Option c describes simply re-running a mission, which isn't what promotion does — it produces a reusable workflow, not another one-off. Option d invents a PDF-export behaviour with no basis in the docs.",
+          "sourceRefs": ["r-gitbook-missions", "r-gitbook-playbooks"]
+        },
+        {
+          "id": "kc-m05-l4-2",
+          "domainId": "m05-missions",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You ran a mission once to investigate a specific, never-to-recur incident. It completed successfully. What should you do with it?",
+          "options": [
+            { "id": "a", "text": "Archive it — the snapshot and archive search preserve the record, and there's no repeatable pattern worth freezing into a playbook", "correct": true },
+            { "id": "b", "text": "Save as Routine, because every completed mission should always become a playbook", "correct": false },
+            { "id": "c", "text": "Cancel it, so it doesn't count against your workspace", "correct": false },
+            { "id": "d", "text": "Leave it Active indefinitely so you can refer back to it", "correct": false }
+          ],
+          "explanation": "A genuine one-off has no repeatable pattern to justify a playbook, and archiving keeps a searchable full snapshot for reference — so Archive is correct. Option b over-applies Save as Routine; promoting a one-off just clutters your playbook list with something you'll never run. Option c is nonsensical — the mission already Completed successfully; you can't Cancel a finished mission, and Cancel is for stopping in-progress work. Option d is impossible — a completed mission isn't Active, and missions don't stay Active as a filing method.",
+          "sourceRefs": ["r-gitbook-missions"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m05-1",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the mission five-beat loop, what happens immediately after an agent creates the execution plan?",
+      "options": [
+        { "id": "a", "text": "You review and approve or reject the plan before anything executes", "correct": true },
+        { "id": "b", "text": "Agents begin executing the plan automatically with no review", "correct": false },
+        { "id": "c", "text": "The mission is archived until you schedule it", "correct": false },
+        { "id": "d", "text": "The plan is converted straight into a playbook", "correct": false }
+      ],
+      "explanation": "Beat three is the human-in-the-loop gate: after the agent plans, you review and approve or reject, and nothing runs until you do. Option b skips that gate, which is the defining safety seam of missions — execution never starts unapproved. Option c invents an archive step; archiving is an end-state, not something that happens right after planning. Option d confuses this with Save as Routine, which is an action on a completed mission, not an automatic step after planning.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-2",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the mission lifecycle, which two options are available when a mission is in the Plan Pending state?",
+      "options": [
+        { "id": "a", "text": "Approve or Reject", "correct": true },
+        { "id": "b", "text": "Pause or Cancel", "correct": false },
+        { "id": "c", "text": "Resume or Archive", "correct": false },
+        { "id": "d", "text": "Save as Routine or Delete", "correct": false }
+      ],
+      "explanation": "Plan Pending means the agent has produced a plan awaiting your review, so the two options are Approve or Reject. Option b lists the options for an Active mission, which is a later state after you've approved. Option c mixes a Paused-state option (Resume) with an end-state option (Archive), neither of which applies before approval. Option d combines a Completed-state action with a non-existent one; Save as Routine only appears after a mission completes.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-3",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A colleague says 'set a $10 spend ceiling on this mission and it'll stop itself.' Why is that wrong, and what's the accurate model?",
+      "options": [
+        { "id": "a", "text": "There is no pre-set spend ceiling; budget is managed by viewing cost-by-task, Pausing if costs exceed expectations, and Resuming with increased budget — a human decision informed by visibility", "correct": true },
+        { "id": "b", "text": "It's correct — a hard dollar ceiling is the primary way missions control spend", "correct": false },
+        { "id": "c", "text": "It's wrong because missions are always free and never consume tokens", "correct": false },
+        { "id": "d", "text": "It's wrong because only playbooks, never missions, can incur any cost", "correct": false }
+      ],
+      "explanation": "The documented model is visibility plus human decision — cost-by-task, Pause, and Resume-with-increased-budget — not an automated dollar cap, so the colleague's mental model is the exact trap. Option b restates that trap as fact. Option c is false — missions explicitly consume tokens as agents work. Option d is also false — both missions and playbooks run agents and incur token cost.",
+      "sourceRefs": ["r-gitbook-missions", "r-gitbook-settings-general"]
+    },
+    {
+      "id": "q-m05-4",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You know the exact five steps of a nightly code review and want it to run automatically at 23:00 every night. Mission or playbook, and why?",
+      "options": [
+        { "id": "a", "text": "Playbook — the steps are known and you'll repeat them on a schedule, which is exactly what playbooks with cron triggers are for", "correct": true },
+        { "id": "b", "text": "Mission — because anything that runs on a schedule must be a mission", "correct": false },
+        { "id": "c", "text": "Mission — because it involves multiple agents, and only missions coordinate agents", "correct": false },
+        { "id": "d", "text": "Playbook — but only because playbooks are cheaper to run than missions", "correct": false }
+      ],
+      "explanation": "Known steps plus scheduled repetition is the textbook playbook case — you author the fixed steps and give it a cron trigger. Option b is backwards: missions are one-offs and don't schedule; playbooks are the ones with cron triggers. Option c is false — playbooks explicitly chain multiple agents (the nightly-review example uses five). Option d reaches the right answer for an invented reason; the criterion is known-and-repeated steps, not a cost comparison.",
+      "sourceRefs": ["r-gitbook-playbooks", "r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-5",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pair of monitoring surfaces would you use to answer 'where are my tokens going?' and 'what's the last known-good state I can reason from?'",
+      "options": [
+        { "id": "a", "text": "Cost breakdown by task, and Checkpoints", "correct": true },
+        { "id": "b", "text": "Event timeline, and Agent involvement", "correct": false },
+        { "id": "c", "text": "Task list, and archive search", "correct": false },
+        { "id": "d", "text": "Cost alerts flag, and the mission statistics page", "correct": false }
+      ],
+      "explanation": "Cost-by-task answers where tokens are being spent, and checkpoints are the saved state snapshots that give you a known-good point to reason from — the two surfaces the question describes. Option b covers the run's narrative and who-did-what, not spend or recovery state. Option c gives per-task status and a way to find past missions, neither of which is token spend or a recovery snapshot. Option d names a notification toggle and an aggregate stats page, which are workspace-level, not the two monitoring surfaces asked for.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-6",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What most improves the plan an agent proposes for a mission?",
+      "options": [
+        { "id": "a", "text": "Writing a specific objective with an explicit success criterion (and attaching relevant files for context)", "correct": true },
+        { "id": "b", "text": "Choosing a more expensive model before the plan is generated", "correct": false },
+        { "id": "c", "text": "Approving the first plan quickly so the agent can learn from execution", "correct": false },
+        { "id": "d", "text": "Setting a low budget so the agent plans fewer tasks", "correct": false }
+      ],
+      "explanation": "The plan is bounded by the objective, so specificity plus a success criterion — grounded in attached files — is what produces a strong plan. Option b isn't the documented lever; a vague objective yields a weak plan regardless of model. Option c rushes past the review gate and doesn't improve the plan; it just risks executing a poor one. Option d conflates budget with planning quality — budget levers steer execution spend, not how well the objective is decomposed.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-7",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The docs say a mission that hits a certain state can 'Resume, optionally with increased budget.' Which state is that, and what does resume-with-budget signify?",
+      "options": [
+        { "id": "a", "text": "Paused — resuming with increased budget is a deliberate human decision to fund more work after seeing the cost, not an automatic top-up", "correct": true },
+        { "id": "b", "text": "Completed — you resume a finished mission to make it run again", "correct": false },
+        { "id": "c", "text": "Plan Pending — you resume the plan review with a bigger budget", "correct": false },
+        { "id": "d", "text": "Archived — resuming restores a mission from the archive with new funds", "correct": false }
+      ],
+      "explanation": "Resume applies to a Paused mission, and resuming with increased budget is the conscious choice to fund more work after weighing the cost-by-task — the design deliberately makes extra spend a human decision. Option b is wrong — a Completed mission is terminal; you Archive it or Save as Routine, you don't resume it. Option c is wrong — Plan Pending offers Approve or Reject, not resume. Option d is wrong — Archived offers viewing the snapshot, not resuming with funds.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-8",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which mission most clearly warrants the SHORTEST leash — small objective, careful plan review, close monitoring?",
+      "options": [
+        { "id": "a", "text": "One that deletes stale records and emails account-closure notices to the affected users", "correct": true },
+        { "id": "b", "text": "One that reads internal wiki pages and drafts a glossary you'll review before use", "correct": false },
+        { "id": "c", "text": "One that summarises a folder of PDFs into a one-page internal note", "correct": false },
+        { "id": "d", "text": "One that analyses last month's metrics and writes a private draft report", "correct": false }
+      ],
+      "explanation": "Deleting records is irreversible and emailing users is an external side effect — both escape the workspace and can't be undone, which is exactly the profile that demands the shortest leash. Options b, c, and d are all contained: they read internal material and produce drafts or notes you review before anything matters, so they can run with a lighter touch. The line is reversibility and external impact, not how much data is read.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-9",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where are workspace-wide mission statistics — total count, success rates, average duration — found?",
+      "options": [
+        { "id": "a", "text": "Analytics → Workflows", "correct": true },
+        { "id": "b", "text": "On each mission's individual event timeline", "correct": false },
+        { "id": "c", "text": "In Settings → General under Feature flags", "correct": false },
+        { "id": "d", "text": "In the per-task execution log", "correct": false }
+      ],
+      "explanation": "The docs place aggregate mission statistics in Analytics → Workflows, alongside playbook performance metrics. Option b is a single mission's chronological log, not workspace-wide stats. Option c is where you toggle Mission mode and Cost alerts, not where you read performance figures. Option d drills into one task's tool calls and results — the opposite of aggregate statistics.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-10",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What role does the workspace-level 'Cost alerts' feature flag play in mission budgeting?",
+      "options": [
+        { "id": "a", "text": "It notifies you when budget thresholds are reached so you go look at cost-by-task — a notification, not a brake that stops the mission", "correct": true },
+        { "id": "b", "text": "It hard-stops any mission the instant it crosses the threshold", "correct": false },
+        { "id": "c", "text": "It automatically resumes paused missions once cost drops", "correct": false },
+        { "id": "d", "text": "It sets a per-task token cap that the agent cannot exceed", "correct": false }
+      ],
+      "explanation": "Cost alerts is a Settings feature flag that notifies on budget thresholds — it tells you to go look and decide, but it doesn't stop anything itself. Option b turns a notification into a brake, which it isn't; stopping is done by Pause/Cancel, a human action. Option c invents an auto-resume behaviour with no basis in the docs. Option d describes a per-task cap, which isn't what a threshold notification does.",
+      "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-11",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You've decided to promote a proven, repeatable mission into a scheduled workflow. Which sequence is correct?",
+      "options": [
+        { "id": "a", "text": "Open the completed mission → Save as Routine → the system extracts the task pattern into a playbook → run it on demand or set a cron schedule", "correct": true },
+        { "id": "b", "text": "Open the Active mission → Save as Routine → it schedules itself as another mission", "correct": false },
+        { "id": "c", "text": "Archive the mission → the archive automatically becomes a scheduled playbook", "correct": false },
+        { "id": "d", "text": "Cancel the mission → re-create it as a mission with a cron trigger", "correct": false }
+      ],
+      "explanation": "Save as Routine works on a completed mission, extracts its task pattern into a playbook, and that playbook can then run on demand or on a cron schedule — the correct promotion path. Option b is wrong on two counts: Save as Routine acts on a completed, not Active, mission, and it produces a playbook, not another mission. Option c is false — archiving stores a snapshot; it doesn't create a scheduled playbook. Option d is false — missions don't take cron triggers; scheduling is a playbook capability, which is the whole reason to promote.",
+      "sourceRefs": ["r-gitbook-missions", "r-gitbook-playbooks"]
+    },
+    {
+      "id": "q-m05-12",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A mission was Cancelled halfway through because it was heading in the wrong direction. Is its record lost, and can you find it later?",
+      "options": [
+        { "id": "a", "text": "No — a Cancelled mission can be Archived for reference, and archive search finds it by keyword, status, date range, or agent", "correct": true },
+        { "id": "b", "text": "Yes — cancelling permanently deletes the mission and all trace of it", "correct": false },
+        { "id": "c", "text": "The record survives but is only findable by scrolling the live Missions tab, with no search", "correct": false },
+        { "id": "d", "text": "It's automatically converted to a playbook so the work isn't wasted", "correct": false }
+      ],
+      "explanation": "Cancelled missions can be Archived for reference, and archive search retrieves past missions by keyword, status, date range, or agent — so nothing is lost. Option b is false — cancelling stops the mission but leaves a durable, searchable record. Option c understates the tooling; there is a dedicated archive search, not just manual scrolling. Option d is false — Save as Routine is a deliberate action on a completed mission, not an automatic consequence of cancelling.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-13",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You reject a mission's plan because a task strayed outside the objective's scope. Where is the fix best applied, and why?",
+      "options": [
+        { "id": "a", "text": "Upstream in the objective — sharpen its scope so the re-planned plan stays in bounds, because the plan is only ever as good as the objective it's generated from", "correct": true },
+        { "id": "b", "text": "By hand-editing the agent's proposed plan task by task until it fits", "correct": false },
+        { "id": "c", "text": "By approving it and using Cancel later to kill the out-of-scope task once it runs", "correct": false },
+        { "id": "d", "text": "By lowering the budget so the agent is forced to drop the extra task", "correct": false }
+      ],
+      "explanation": "Because an agent plans from the objective, a scope problem is fixed by tightening the objective and letting it re-plan — that's where the leverage is. Option b assumes a task-by-task plan editor and misplaces the fix; the documented move is reject-and-refine, not hand-editing. Option c wastes tokens executing a known-bad plan before Cancel, when a free reject-and-refine was available. Option d misuses budget as a scoping tool — lowering budget throttles spend, it doesn't reliably surgically remove a specific out-of-scope task.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-14",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A one-off mission completed but its task breakdown was messy and next time's version would look substantially different. Should you Save as Routine?",
+      "options": [
+        { "id": "a", "text": "No — the pattern isn't stable enough to freeze; run it as a fresh mission again next time, and only promote once a repeatable, stable shape emerges", "correct": true },
+        { "id": "b", "text": "Yes — always Save as Routine after any completed mission to avoid re-planning", "correct": false },
+        { "id": "c", "text": "Yes — a messy pattern is exactly what a playbook is for, since playbooks tolerate any structure", "correct": false },
+        { "id": "d", "text": "No — because Save as Routine only works on Cancelled missions, not Completed ones", "correct": false }
+      ],
+      "explanation": "Promotion is worth it only when the pattern is stable enough to re-run roughly as-is; an unstable, would-be-different-next-time shape should stay a mission until it settles. Option b over-applies Save as Routine and would freeze a bad pattern. Option c misunderstands the point — a playbook freezes fixed steps, so a messy, unstable pattern makes a poor playbook, not a natural one. Option d is factually wrong: Save as Routine works on Completed missions, not Cancelled ones.",
+      "sourceRefs": ["r-gitbook-missions", "r-gitbook-playbooks"]
+    },
+    {
+      "id": "q-m05-15",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "When you create a mission, what can you attach to give the planning agent more context, and within what limit?",
+      "options": [
+        { "id": "a", "text": "Files such as PDFs, images, and documents, up to 20 MB, which the agent can reference during execution", "correct": true },
+        { "id": "b", "text": "Only a single plain-text note, with no size limit", "correct": false },
+        { "id": "c", "text": "Nothing — a mission's only input is the objective sentence", "correct": false },
+        { "id": "d", "text": "An existing playbook, which the mission then executes verbatim", "correct": false }
+      ],
+      "explanation": "You can attach files — PDFs, images, documents, up to 20 MB — when creating a mission, and agents reference them during execution, which grounds the plan in real material. Option b understates it — multiple file types are supported, and there is a 20 MB limit, not none. Option c is false — attaching context is explicitly supported and improves the plan. Option d confuses missions with playbook execution; you attach reference files, not a playbook to run verbatim.",
+      "sourceRefs": ["r-gitbook-missions"]
+    },
+    {
+      "id": "q-m05-16",
+      "domainId": "m05-missions",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A newcomer asks for a simple, defensible rule on how much autonomy to give a new type of mission. What's the best advice, grounded in the platform's actual safety rails?",
+      "options": [
+        { "id": "a", "text": "Start with the leash short — small objective, careful plan review, watch cost-by-task, be ready to pause — and lengthen it as that mission type earns trust; never grant long autonomy by default to irreversible or externally-visible work", "correct": true },
+        { "id": "b", "text": "Give every mission maximum autonomy immediately; the approval gate alone makes all missions equally safe", "correct": false },
+        { "id": "c", "text": "Never approve any mission plan, since autonomy is inherently unsafe", "correct": false },
+        { "id": "d", "text": "Autonomy is fixed per workspace and can't be varied by mission, so there's no decision to make", "correct": false }
+      ],
+      "explanation": "The platform's rails — plan approval, pause/resume, resume-with-budget, cost-by-task, checkpoints — are meant to be applied tightly at first and relaxed as a mission type proves itself, with irreversible/external work kept on a short leash; that's the defensible newcomer rule. Option b over-trusts a single gate and ignores that different work carries different risk. Option c is the opposite over-correction — refusing all missions abandons a documented, useful capability. Option d is false — leash length is precisely the judgment you exercise per mission via those rails, not a fixed workspace property.",
+      "sourceRefs": ["r-gitbook-missions"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m05-autonomy-leash",
+      "domainIds": ["m05-missions"],
+      "title": "How long a leash? Steering one live mission",
+      "tagline": "The module's debate made concrete: how much autonomy to hand a single mission that touches the outside world — decided beat by beat, from objective to completion.",
+      "context": "You're the practitioner running Automatos for a small operations team. A colleague wants to fire off a mission: 'Go through last quarter's overdue-invoice accounts, work out who to chase, and email each of them a payment reminder.' It's real work that would save hours — and it emails customers, which means mistakes escape the workspace. Your job is to steer this from objective to completion using only the platform's actual safety rails: the plan-approval gate, cost-by-task visibility, pause/resume, resume-with-increased-budget, and checkpoints. Land the right amount of autonomy — neither reckless nor uselessly timid.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Your colleague types the objective exactly as above and is about to submit. Before the mission is even created, what's your first intervention?",
+          "choices": [
+            { "id": "a", "text": "Tighten the objective and add a success criterion before submitting — scope it to a specific account list and make it draft the reminders for review rather than send them outright, given emails leave the workspace", "verdict": "best", "rationale": "The plan is only as good as the objective, and this one both under-specifies scope and bakes in an irreversible external action (sending) as a default. Sharpening scope and converting 'email each of them' into 'draft reminders for review' is the cheapest, highest-leverage move — it fixes the risk upstream before a single token is spent. This is the objective-quality and short-leash-for-external-work judgment applied at exactly the right moment." },
+            { "id": "b", "text": "Let it submit as written, but plan to scrutinise the sending step carefully at the Plan Pending gate", "verdict": "viable", "rationale": "Catching the send step at the approval gate is a real safety net and far better than rubber-stamping — but it's a beat later and more expensive than fixing the objective. You'll likely end up rejecting and rewriting the objective anyway, so doing it now saves a round trip. Right instinct, slightly late." },
+            { "id": "c", "text": "Submit it as-is and trust the approval gate plus pause/resume to catch anything wrong during execution", "verdict": "wrong", "rationale": "This leans entirely on downstream rails for a problem that's cheapest to fix in the objective. Worse, it treats an irreversible external action (emailing customers) as something to catch mid-run — but a wrong email has already escaped by the time you'd pause. The whole point of the short-leash rule is that external, irreversible work gets tightened before it runs, not monitored after." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "You submit a sharpened objective — draft (not send) reminders for a named account list. The mission reaches Plan Pending. How do you handle the gate?",
+          "choices": [
+            { "id": "a", "text": "Read the proposed task list as a reviewer: confirm scope matches the named accounts, confirm no task actually sends anything externally, and check the breakdown is complete — then Approve, or Reject and refine if any check fails", "verdict": "best", "rationale": "This is the gate used as intended: scope match, a hard look for irreversible/external steps, and a completeness check. Because you scoped it to drafting, the key thing to verify is that no task quietly sends — and if the plan reintroduced sending, you reject and refine. This is the cheapest place to catch a bad plan, and you're spending your thirty seconds exactly where the leverage is." },
+            { "id": "b", "text": "Approve it quickly — you already fixed the objective, so the plan is bound to be fine", "verdict": "viable", "rationale": "A good objective does make a good plan far more likely, so this isn't reckless. But 'bound to be fine' is how a quietly widened scope or a reintroduced send step slips through — the gate exists precisely because the agent's plan can still surprise you. A ten-second reviewer's pass costs almost nothing and is the difference between trusting and verifying." },
+            { "id": "c", "text": "Reject it on principle — any mission that started life wanting to email customers is too risky to approve at all", "verdict": "wrong", "rationale": "This is the timid over-correction the debate rejects. You already neutralised the risk by scoping it to drafting for review; refusing outright now throws away a genuinely useful, contained piece of work. Autonomy judgment is about matching the leash to the work, not banning any task that ever touched something external." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Approved and Active. Twenty minutes in, a Cost alert fires — the spend is higher than you expected. What do you do?",
+          "choices": [
+            { "id": "a", "text": "Open the cost breakdown by task to find the expensive task, click its execution log to see what it's actually doing, and decide from the evidence — Pause first if the spend is alarming", "verdict": "best", "rationale": "This is the documented steering loop exactly: the alert tells you to look, cost-by-task shows where, and the execution log shows why — and Pause is the emergency brake while you assess. You're making a decision on evidence rather than reacting blindly, which is the entire reason the platform gives you visibility instead of a hard ceiling." },
+            { "id": "b", "text": "Pause the mission immediately to stop the spend, then investigate cost-by-task and the execution log before deciding whether to resume", "verdict": "viable", "rationale": "Pausing first is a perfectly safe reflex — nothing spends while paused, and you then investigate properly. It's marginally more conservative than looking before you brake, and on a contained internal drafting task that caution costs little. Slightly heavier-handed than needed, but sound." },
+            { "id": "c", "text": "Cancel the mission right away — a cost alert means it's out of control", "verdict": "wrong", "rationale": "A cost alert is a notification, not a verdict that the mission is broken — it's telling you to look, not to abort. Cancelling blind throws away in-progress work you might well want to finish, and skips the cheap step of reading cost-by-task and the log. You've conflated 'go and check' with 'destroy it.'" }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The execution log shows the pricey task was legitimately thorough, not looping — the drafts are nearly done and genuinely good. The mission is Paused. How do you finish?",
+          "choices": [
+            { "id": "a", "text": "Resume with increased budget to let it complete — a conscious decision to fund the rest now that you've seen the spend is justified — then, when it Completes, if this becomes a recurring month-end job, Save as Routine", "verdict": "best", "rationale": "Resume-with-increased-budget is exactly the deliberate, visibility-informed spend decision the platform is designed around: you looked, judged the cost worthwhile, and chose to continue. And flagging Save as Routine for a recurring month-end version closes the loop correctly — a proven, repeatable draft-reminders workflow is a strong playbook candidate. This lands the whole autonomy arc: tight leash where it mattered, informed spend, promotion when proven." },
+            { "id": "b", "text": "Resume with increased budget to finish it, and leave it there — it was a one-off this quarter", "verdict": "viable", "rationale": "Resuming with budget is the right call to complete valuable, nearly-done work. Treating it as a one-off is defensible if you truly won't repeat it — archiving preserves the record. It's only sub-optimal if chasing overdue invoices is in fact a monthly rhythm, in which case you've left a good playbook on the table. Correct on the resume, a judgment call on the promotion." },
+            { "id": "c", "text": "Cancel now and re-run the whole mission from scratch later with a bigger budget from the start", "verdict": "wrong", "rationale": "Throwing away nearly-finished, good work to re-run identical work later wastes every token already spent and re-incurs the plan-approval round trip — the opposite of steering efficiently. Resume-with-increased-budget exists precisely so you can continue from where you are; cancelling and restarting ignores the lever built for this exact situation." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-gitbook-missions", "r-gitbook-settings-general", "r-gitbook-playbooks"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m05-run-a-mission",
+      "domainId": "m05-missions",
+      "title": "Run your first mission — goal in, plan approved, work done",
+      "goal": "Produce a real deliverable using the platform's most autonomous mode. You'll write a scoped objective, gate the plan the agent proposes, monitor the run through its documented surfaces, and end with a report the mission produced — the full goal → plan → approve → run loop on the free platform.",
+      "steps": "## What you'll do\n\nYou'll create one mission from a natural-language objective, approve its plan, watch it execute, and open the deliverable — practising the reviewer's judgment at the approval gate and the operator's judgment while it runs. Everything here is grounded in `automatos-gitbook/activity/missions.md`.\n\n### Before you start\n\n- **Sign in** to your workspace (created automatically on first login; you're its admin).\n- **Confirm Mission mode is on.** Autonomous mission execution is gated behind the **Mission mode** feature flag in **Settings → General → Feature flags** (*'Enable autonomous multi-step mission execution'*). If the Missions area isn't available, this is why — an admin toggles it. (Optional: while you're there, note the **Cost alerts** flag under Features — it notifies on budget thresholds.)\n\n### Create the mission\n\n1. **Go to Activity → Missions → + New Mission.**\n2. **Write a specific objective with a success criterion.** Use a contained, internal task so there are no external side effects — the right shape for a first run. A good starter: *\"Review the three documents I uploaded, list every open question they leave unanswered, and write a one-page summary report of the key findings.\"* Notice it has scope (the three docs), a concrete task (list open questions), and a bounded deliverable (a one-page report).\n3. **Attach files if useful** — PDFs, images, or documents up to 20 MB. Grounding the objective in real material produces a more concrete plan. (If you don't have three documents handy, pick any small set of notes or PDFs you can share.)\n4. **Submit and wait for Plan Pending** — the system generates an execution plan and the mission enters the state where it's awaiting your review.\n\n### Gate the plan (the judgment step)\n\n5. **Read the proposed task list as a reviewer, not a rubber stamp.** Run three checks: (a) **scope match** — do the tasks cover exactly your objective, no more, no less? (b) **irreversible/external steps** — does any task act on the outside world (send, post, delete)? For this contained objective there should be none; if the plan invented one, that's a red flag. (c) **plausible, complete breakdown** — is there a step for each part of the objective, in a sane order?\n6. **Approve** if all three checks pass. If any fail, **Reject and refine the objective** — add the missing scope or criterion and let it re-plan. (Trying the reject-and-refine path once, even deliberately, teaches you how the gate works.)\n\n### Monitor the run\n\n7. **Watch it go Active.** Follow the **task list** (per-task status: pending / in progress / completed / failed), the **event timeline** (what happened, in order), and the **cost breakdown by task** (where tokens are going).\n8. **Drill into one task.** Click any task to open its **detailed execution log** — tool calls, LLM interactions, intermediate results. This is the muscle you'll use whenever a task fails or spikes.\n9. **(Only if it misbehaves)** Practise the budget loop: if cost climbs unexpectedly, **Pause**, read cost-by-task and the log, then **Resume** (with increased budget if the work is worth finishing) or **Cancel**. On a small internal task this may not trigger — that's fine; know the levers are there.\n\n### Finish and (optionally) promote\n\n10. **When it Completes, open the deliverable** — the one-page report it produced. That report is your artifact for this lab.\n11. **Decide on promotion.** Ask: *will I run this shape of work again?* If yes, click **Save as Routine** to extract the task pattern into a reusable playbook you could schedule. If it's a genuine one-off, **Archive** it instead (the snapshot stays searchable). Either way, make the call consciously — that's the judgment the module trains.\n\n### Why it matters\n\nYou've now operated the platform's most autonomous mode end to end and, more importantly, exercised the two judgments that make it safe: gating a plan you didn't write, and steering a run by cost and evidence rather than a pre-set ceiling. That's the difference between letting a mission loose and *running* one.\n\n### A note on cost\n\nMissions consume tokens as agents work — that's why cost-by-task and the budget levers exist. Keep this first objective small and contained. The realistic model for an operator is bring-your-own-key (Settings), and cost is covered properly in module 09.",
+      "checklist": [
+        "Confirmed Mission mode is enabled in Settings → General → Feature flags (and noted the Cost alerts flag)",
+        "Created a mission from a specific, contained objective that includes a success criterion",
+        "Attached at least one reference file (or a small document set) to ground the plan",
+        "Reached Plan Pending and read the proposed task list as a reviewer — checking scope match, absence of irreversible/external steps, and a complete breakdown",
+        "Made a deliberate Approve (or Reject-and-refine) decision at the gate rather than rubber-stamping",
+        "Monitored the Active run via the task list, event timeline, and cost breakdown by task",
+        "Opened at least one task's detailed execution log (tool calls / LLM interactions / intermediate results)",
+        "ARTIFACT SAVED: opened the deliverable the completed mission produced (e.g. the one-page report)",
+        "Made a conscious promotion decision — Save as Routine (if repeatable) or Archive (if a one-off) — and can say why"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gitbook-missions",
+      "title": "Automatos AI — Missions (platform docs)",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "first-party-doc",
+      "annotation": "The primary source for this entire module. Read the how-missions-work five-beat loop, the writing-good-objectives examples (the 'audit all API endpoints…' vs 'check the API security' pair), the full lifecycle table (Plan Pending → Active → Paused → Completed → Cancelled → Archived), the five monitoring surfaces, budget management, and Save as Routine. Currency note: budget control is cost-by-task visibility plus Pause and Resume-with-increased-budget — there is NO pre-set spend ceiling; don't teach one.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-playbooks",
+      "title": "Automatos AI — Playbooks (platform docs)",
+      "url": "automatos-gitbook/agents/playbooks.md",
+      "kind": "first-party-doc",
+      "annotation": "The other half of the mission-vs-playbook judgment. A playbook is a workflow whose steps YOU author and assign to agents — the nightly-code-review example is the canonical known-steps case, and playbooks are what carry cron schedules and webhook triggers. Read the 'Saving missions as playbooks' section: it's the same Save as Routine door seen from the playbook side. Use 'playbook' throughout — never 'recipe'.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-coordination",
+      "title": "Automatos AI — Coordination (platform docs)",
+      "url": "automatos-gitbook/agents/coordination.md",
+      "kind": "first-party-doc",
+      "annotation": "Background for the 'agent involvement' surface: when a mission spans several agents, this page explains how they hand off work, share context through the workflow pipeline and scratchpad, and delegate. Note the delegation rules (Auto-delegate / Approval required / Disabled) — 'Approval required' is the coordination-level cousin of the mission plan-approval gate. Deepened further in module 04.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-dashboard",
+      "title": "Automatos AI — Activity Dashboard (platform docs)",
+      "url": "automatos-gitbook/activity/dashboard.md",
+      "kind": "first-party-doc",
+      "annotation": "The Command Centre view where active missions appear alongside other workspace activity. Useful for picturing where a running mission lives: the 'Active Now' section shows in-progress tasks with progress bars and step counts, and the dashboard updates live via SSE. Read it to place missions in the wider Activity page rather than as an isolated screen.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-settings-general",
+      "title": "Automatos AI — General Settings (platform docs)",
+      "url": "automatos-gitbook/settings/general.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds two mission controls that live at the workspace level, not on the mission itself. 'Mission mode' (Feature flags) enables autonomous multi-step mission execution — the coarsest guardrail. 'Cost alerts' (Features) notifies on budget thresholds — a notification, NOT a brake that stops a mission. Who can toggle these (Admin) is covered in module 09.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-apiref",
+      "title": "Automatos AI — API Reference: Missions endpoint group (platform docs)",
+      "url": "automatos-gitbook/api-reference.md",
+      "kind": "first-party-doc",
+      "annotation": "The Missions endpoint group is the lifecycle expressed as an API: create, approve, reject, pause, resume (with optional budget increase), cancel, events (paginated timeline), costs (task cost breakdown), archived (with search), save-as-routine, and stats. Read it to see the same controls you click in the UI available programmatically over the REST API (Clerk bearer + X-Workspace-ID). Confirms resume carries the optional budget increase — not a ceiling.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-gitbook-activity-readme",
+      "title": "Automatos AI — Activity command centre (platform docs)",
+      "url": "automatos-gitbook/activity/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Orientation for where the Missions tab sits in the Command Centre (tabs: Dashboard / Feed / Reports / Memory / Missions). Skim it to navigate confidently to Activity → Missions for the lab, and to see that mission monitoring is one facet of a wider real-time activity surface.",
+      "domainIds": ["m05-missions"]
+    },
+    {
+      "id": "r-design-missions-coordination",
+      "title": "Automatos platform — missions & multi-agent coordination (architecture direction)",
+      "url": "automatos-ai/docs (missions-multi-agent-coordination)",
+      "kind": "reference",
+      "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind autonomous multi-step missions and how planning/coordination is intended to work under the hood. Treat anything here that isn't in the gitbook as design intent, not a shipped UI capability; the gitbook remains the only proof of what you can do today.",
+      "domainIds": ["m05-missions"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-05-1",
+      "title": "05 · Missions — goal in, plan approved, work done (the five-beat loop and the approval gate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m05-missions"],
+      "sourceNotebook": "platform-architect / 05 / missions-loop-and-approval-gate"
+    },
+    {
+      "id": "v-05-2",
+      "title": "05 · How long a leash? — mission autonomy, budget levers, and Save as Routine (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m05-missions"],
+      "sourceNotebook": "platform-architect / 05 / debate-autonomy-and-budget"
+    }
+  ]
+}

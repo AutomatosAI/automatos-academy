@@ -1,0 +1,686 @@
+{
+  "id": "m09-governance-ops",
+  "order": 9,
+  "code": "09",
+  "name": "Governance & ops — budgets, roles, analytics, isolation",
+  "tagline": "Running real work on a shared platform is a governance problem before it's a technical one: you have to control spend, control who can do what, and be able to read the numbers that say what your agents cost and how they behave. This module makes you fluent in the four levers Automatos actually gives you — cost visibility (the LLM & Costs tab), the two documented budget controls (workspace Cost alerts and per-mission pause/resume-with-budget), the RBAC matrix (Admin/Member/Viewer plus the Context Engineering permission), and workspace isolation as the tenancy boundary — plus the operational hygiene underneath them: encrypted credentials, an immutable audit trail, BYOK and model settings. The judgment payload is a phrase you can defend to a nervous stakeholder: safety here is policy, not vibes. If you came from AI Business Foundations, this is the machinery behind modules 5 and 6 — the delegation guardrails and the risk-and-safety habits, expressed as real dials on a real platform.",
+  "overview": "Everything in the earlier modules assumed a safe place to run it. This module is that place. It teaches you to operate an Automatos workspace responsibly across four fronts, all grounded in the platform docs. First, cost visibility: every LLM call is tracked with input/output tokens, the model, the agent, and an estimated cost, and the Analytics → LLM & Costs tab surfaces that as four cost cards (Total Cost, Total Tokens, Cost Per Request, Top Spender), a Cost by Model Over Time chart, breakdowns By Model / By Agent / By Time, and Cost Projections with a monthly estimate, a trend direction, and anomaly alerts. That granularity lets you trace a cost back to a specific conversation, playbook, or mission — which is the whole point of measuring. Second, budgets: the platform gives you exactly two documented levers and it is important to teach them honestly — a workspace-wide Cost alerts feature flag (Settings → General → Features) that notifies on budget thresholds, and per-mission budget control (Activity → Missions: cost breakdown by task, Pause if costs run high, Resume with increased budget). There is no pre-set spend ceiling; budget control is visibility plus a human decision. Third, the agent's configuration as its operating blueprint — our teaching term; the user docs simply call it the agent's configuration, so we say that once and then use blueprint deliberately: model/provider, temperature, max tokens, persona, and the tools and skills it may use, all set at creation, bound both what an agent does and what it costs, which is why routing simple tasks to cheaper models is the number-one cost-optimisation lever. Fourth, access and isolation: three roles (Admin, Member, Viewer) with a documented permission matrix, the specialised Context Engineering permission, and full workspace isolation — agents, documents, tools, and settings are workspace-scoped, members only see their own workspace, and cross-workspace access is not supported. Under all of it sits the operational plumbing: credentials encrypted at rest and masked after saving with rotation and no downtime, an immutable audit log that records every significant action and exports to CSV, and BYOK plus model settings so a team can bring its own provider keys. Read the numbers, set the guardrails, scope the access, protect the secrets — that is governance and ops on Automatos.",
+  "objectives": [
+    "Read the Analytics → LLM & Costs tab fluently — the four cost cards (Total Cost, Total Tokens, Cost Per Request, Top Spender), the Cost by Model Over Time chart, the By Model / By Agent / By Time breakdowns, and Cost Projections (monthly estimate, trend, anomaly alerts) — and trace a cost back to a specific conversation, playbook, or mission.",
+    "State the two documented budget levers precisely — workspace Cost alerts (a notification, not a brake) and per-mission cost-by-task with Pause and Resume-with-increased-budget — and explain why there is no pre-set spend ceiling.",
+    "Treat the agent's configuration as its operating blueprint — model/provider, temperature, max tokens, persona, tools and skills set at creation — and apply cheaper-model routing for simple tasks as the number-one cost-optimisation lever.",
+    "Apply the RBAC matrix — what Admin, Member, and Viewer each can and cannot do — and place the specialised Context Engineering permission correctly, using least privilege as the default posture.",
+    "Explain workspace isolation as the tenancy boundary — agents, documents, tools, and settings are workspace-scoped, members see only their own workspace, and cross-workspace access is not supported — and why it is the trust boundary that keeps teams private on a shared instance.",
+    "Operate the security plumbing: manage credentials that are encrypted at rest and masked after saving, rotate a key with no downtime, read the immutable audit log and export it to CSV, and configure BYOK and model/fallback settings.",
+    "Assemble a defensible starter governance policy for a new team — a Cost-alerts threshold, least-privilege roles, Admin-gated tool connections, cheaper-model defaults, and a short leash for irreversible or externally-visible actions — grounded only in the controls the platform actually provides."
+  ],
+  "lessons": [
+    {
+      "id": "m09-l1-cost-visibility",
+      "title": "Reading the numbers: the LLM & Costs tab",
+      "estMinutes": 15,
+      "objective": "Read every element of the Analytics → LLM & Costs tab and trace a cost back to the specific conversation, playbook, or mission that caused it.",
+      "body": "## Governance starts with measurement\n\nYou cannot control spend you cannot see, and you cannot defend an agent's behaviour you cannot count. So governance on Automatos starts here, at the numbers — specifically the **Analytics** page, which gives you visibility into workspace performance, cost, and optimisation across seven tabs. This lesson lives in one of them: **LLM & Costs**, described in the docs as complete visibility into your AI spending. Learn to read it and the rest of the module's budget decisions have something real to stand on.\n\n> If you came from AI Business Foundations, this is the machinery behind the cost-awareness thread in module 5. There you learned to think about what AI work costs; here you read the actual meter.\n\n## What's being tracked, and at what grain\n\nThe reason the cost tab can tell you anything useful is the grain of the data underneath it. **Every LLM call is tracked** with five facts:\n\n- **Input tokens** — the prompt sent to the model.\n- **Output tokens** — the model's response.\n- **Model** — which specific model was used.\n- **Agent** — which agent made the request.\n- **Estimated cost** — calculated from that model's per-token pricing.\n\nHold onto that last pairing — model and agent on *every* call. It's what makes the breakdowns below possible, and it's the thread you'll pull to trace a cost back to its source. Note the word **estimated**: costs are computed from per-token pricing, not billed invoices, so treat them as a close, actionable estimate rather than an accountant's figure.\n\n## The four cost cards\n\nThe top of the tab is four cards — the at-a-glance state of your spend:\n\n| Card | What it tells you |\n| --- | --- |\n| **Total Cost** | Total spend for the selected period |\n| **Total Tokens** | Input + output tokens consumed |\n| **Cost Per Request** | Average cost per API call |\n| **Top Spender** | The agent or model costing the most |\n\n**Total Cost** answers \"what did this cost me?\" for the time window you've selected. **Total Tokens** is the raw fuel consumed. **Cost Per Request** is the one people overlook and shouldn't — a creeping cost-per-request is an early sign an agent's prompts are bloating or it's been pointed at an expensive model. And **Top Spender** is the card you check first when a bill surprises you: it names the single agent or model dominating your costs, which is where an investigation starts. Every card respects the **time range selector** at the top of Analytics — My Workspace scope, and a 24 Hours / 7 Days / 30 Days window, with a Refresh button because analytics data refreshes periodically rather than live.\n\n## The chart and the three breakdowns\n\nBelow the cards, **Cost by Model Over Time** is an interactive line chart: each model gets its own coloured line, you can hover for exact daily costs, toggle models on and off to compare, and switch the range (7D / 30D / 90D). Use it to answer \"is my spend trending up, and which model is driving it?\" — a single line climbing away from the others is a story worth chasing.\n\nThen three tabs slice the same spend three ways, and knowing which to reach for is half the skill:\n\n- **By Model** — each model's total cost, token count (input/output split), request count, and average cost per request. Reach for this to answer *\"which models are eating my budget?\"* — the input to the cheaper-model decision in Lesson 2.\n- **By Agent** — each agent's total cost, its primary model, request count, and cost trend (increasing or decreasing). Reach for this to answer *\"which agents are expensive, and are any getting worse?\"* This is the Top Spender card expanded into the full ranking.\n- **By Time** — daily / weekly / monthly aggregation as a bar chart, with a moving-average trend line and a projected monthly cost. Reach for this to answer *\"how is spend moving over time?\"*\n\n## Cost Projections — and the honesty about them\n\nFrom your recent usage the platform projects forward three things: a **monthly estimate** (projected cost for the current month), a **trend direction** (increasing, stable, or decreasing), and **anomaly alerts** (unusual cost spikes flagged). Projections are genuinely useful for planning — but read the platform's own caveat literally: *projections are estimates based on recent usage; actual costs depend on usage patterns, which can change.* So use the monthly estimate to plan, not to promise. The anomaly alert is the more operationally valuable half: a flagged spike is the system telling you to go *look* — usually at Top Spender and the By Agent breakdown — before a small problem becomes a large bill.\n\n## The skill that ties it together: tracing a cost to its source\n\nHere is the capability that makes the whole tab worth learning. Because every call carries its model *and* its agent, the docs are explicit that this granularity lets you **trace costs back to specific conversations, playbooks, or missions.** That's the move: a number on this tab is never a dead end, it's a thread. The workflow:\n\n1. A card or a chart flags something — Top Spender names an agent you didn't expect, or the model chart shows a line climbing.\n2. Open **By Agent** (or **By Model**) to see the full ranking and the trend, and confirm which agent or model is responsible.\n3. Cross to where that agent's *work* lives to find the specific cause — a runaway mission's **cost breakdown by task** (module 05), a playbook's execution analytics under **Analytics → Workflows**, or a heavy chat thread. The per-mission cost-by-task view is the finest grain of all: per-objective, per-task spend.\n\nThe point is that cost visibility isn't a dashboard you glance at — it's an investigative tool that runs from a whole-workspace total all the way down to the single task that caused a spike.\n\n## Worked example: the Tuesday spike\n\nAn ops lead opens Analytics on Tuesday and the **Total Cost** card is noticeably up on last week; an **anomaly alert** has fired under Cost Projections. She doesn't panic and she doesn't guess. She checks **Top Spender**: it names a research agent she'd expect to be cheap. She opens **By Agent** — that agent's cost trend is *increasing* and its primary model is a large, expensive one. Now she has the who (the research agent) and a strong hypothesis (wrong model, or a runaway job). She crosses to the agent's recent work and finds a mission still Active; its **cost breakdown by task** shows one task re-reading a large document on every iteration. Two minutes, from a red card to the exact task — because every call carried its agent and model, and the breakdowns let her follow the thread down. What she does *about* it — cheaper model, or Pause — is Lesson 2. Reading the meter well enough to find the problem is this lesson.\n\n## What this buys you\n\nYou can now read the LLM & Costs tab as an operator: the four cards for the at-a-glance state, the model chart and the three breakdowns for the story, projections and anomaly alerts for the early warning — and, crucially, you can trace any surprising number back to the conversation, playbook, or mission that caused it. Next: what you actually *do* with that visibility — the budget levers and the cheaper-model decision.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-l1-1",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which four cost cards does the LLM & Costs tab show at the top?",
+          "options": [
+            { "id": "a", "text": "Total Cost, Total Tokens, Cost Per Request, and Top Spender", "correct": true },
+            { "id": "b", "text": "Total Cost, Success Rate, Avg Response Time, and Token Efficiency", "correct": false },
+            { "id": "c", "text": "Monthly Estimate, Trend Direction, Anomaly Count, and Budget Remaining", "correct": false },
+            { "id": "d", "text": "Total Cost, Total Tokens, Active Agents, and Failed Tasks", "correct": false }
+          ],
+          "explanation": "The four documented cost cards are Total Cost, Total Tokens, Cost Per Request, and Top Spender — the at-a-glance state of your spend. Option b lists metrics from the Overview tab (success rate, response time, token efficiency), not the cost cards. Option c mixes up the Cost Projections outputs (monthly estimate, trend, anomalies) with an invented 'Budget Remaining' — and there is no remaining-budget figure because there is no pre-set ceiling. Option d invents 'Active Agents' and 'Failed Tasks', which aren't cost cards.",
+          "sourceRefs": ["r-gitbook-llm-costs"]
+        },
+        {
+          "id": "kc-m09-l1-2",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What single property of the tracked data makes it possible to trace a cost back to a specific conversation, playbook, or mission?",
+          "options": [
+            { "id": "a", "text": "Every LLM call is tracked with both the model and the agent that made it (plus input/output tokens and estimated cost), so any cost can be followed to its source", "correct": true },
+            { "id": "b", "text": "The platform stores a signed invoice from the provider for every individual call", "correct": false },
+            { "id": "c", "text": "Costs are only ever recorded as a single workspace-wide total, which is enough to locate any source", "correct": false },
+            { "id": "d", "text": "Each call is billed to a per-mission spend ceiling, which records the source automatically", "correct": false }
+          ],
+          "explanation": "Because every call carries its model and its agent, the breakdowns can attribute spend and you can follow a number down to the conversation, playbook, or mission that caused it — that per-call attribution is the whole mechanism. Option b is wrong: costs are estimated from per-token pricing, not stored provider invoices. Option c is backwards — a single aggregate total is exactly what would prevent tracing to a source; the grain is per-call. Option d invents a spend ceiling, which the platform doesn't have.",
+          "sourceRefs": ["r-gitbook-llm-costs"]
+        },
+        {
+          "id": "kc-m09-l1-3",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A Cost Projections anomaly alert has fired. How should you read it, and what's the right next move?",
+          "options": [
+            { "id": "a", "text": "As a flag telling you to go look — projections are estimates, so open Top Spender and the By Agent breakdown to find what's driving the spike", "correct": true },
+            { "id": "b", "text": "As a guaranteed final bill for the month that you can commit to a stakeholder", "correct": false },
+            { "id": "c", "text": "As an automatic brake that has already stopped the offending agent", "correct": false },
+            { "id": "d", "text": "As a reason to ignore the cost tab, since anomalies resolve themselves", "correct": false }
+          ],
+          "explanation": "An anomaly alert flags an unusual spike and, since projections are explicitly estimates that depend on changeable usage, the correct response is to investigate — Top Spender and By Agent are where you look. Option b over-trusts a projection the docs call an estimate that can change, so it's not a figure to promise. Option c confuses a notification with a control — anomaly alerts don't stop anything. Option d ignores an early-warning signal that exists precisely to prompt a look.",
+          "sourceRefs": ["r-gitbook-llm-costs"]
+        }
+      ]
+    },
+    {
+      "id": "m09-l2-budgets-and-blueprint",
+      "title": "Budgets and the blueprint: two levers and the cheaper-model dial",
+      "estMinutes": 16,
+      "objective": "Operate the two documented budget levers honestly, treat the agent's configuration as its operating blueprint, and apply cheaper-model routing as the number-one cost lever.",
+      "body": "## The honest version of \"budgets\"\n\nMost platforms let you set a hard spend cap and forget it. Automatos does not, and a good practitioner teaches this honestly rather than implying a ceiling that isn't there. **Budget control on Automatos is exactly two documented levers**, and both are visibility-plus-decision, not an automated cap:\n\n1. **Workspace-wide Cost alerts** — a feature flag in **Settings → General → Features**, described as *\"notify on budget thresholds.\"* It is a **notification, not a brake**: it tells you when spend crosses a threshold you've set, so you go and look. It never stops anything.\n2. **Per-mission budget control** — on the Missions surface (module 05): the **cost breakdown by task**, **Pause** *\"if costs are exceeding expectations,\"* and **Resume with increased budget** *\"if a mission needs more resources than originally estimated.\"*\n\nRead those together and the design intent is clear: **budgets are policy enforced by a human who can see the numbers, not a magic number that halts the system.** You set a Cost-alert threshold so you're told to look; you look at cost-by-task; you Pause if it worries you; you Resume-with-budget when you've consciously decided the extra spend is worth it. There is no field anywhere that says \"stop at \\$50 and walk away\" — and teaching that there is would be the single most common way to get this module wrong.\n\n**Who sets the workspace lever matters:** Cost alerts lives in Settings, and Settings is Admin-only (Lesson 3). So the ambient budget guardrail for the whole team is an Admin decision, while the per-mission levers are available to whoever is running the mission. Keep that split in mind — it's a governance fact, not just a UI location.\n\n> If you came from AI Business Foundations, this is the machinery behind module 5's 'delegation with guardrails.' The guardrail there was conceptual; here it's a threshold toggle and a Pause button.\n\n## The blueprint: an agent's config is its operating policy\n\nNow the other half of controlling spend and behaviour — the agent itself. The user docs simply call it the agent's **configuration**; throughout this track we use a deliberate teaching term for it, **blueprint**, because the word captures what it really is: the fixed specification that governs what an agent does and what it costs. (We'll say *configuration* once, here, so the mapping is clear, then use *blueprint* as the concept.) Set at creation, an agent's blueprint is:\n\n- **Provider and model** — OpenRouter, OpenAI, Anthropic, or DeepSeek, and the specific model ID. This is the single biggest cost dial.\n- **Temperature** — creativity, 0 (deterministic) to 1 (creative).\n- **Max tokens** — the ceiling on response length (and therefore on output-token cost per call).\n- **Persona** — communication style (Professional / Casual / Technical / Custom) and the system prompt.\n- **Tools and skills** — which connected integrations and capability packages it may use.\n\nWhy call it a blueprint and not just \"settings\"? Because it bounds the agent the way a blueprint bounds a building: the model and max-tokens set the cost envelope of every call, the persona and system prompt set the behaviour, and the tool/skill assignment sets what it can *reach*. When you read the **By Agent** cost breakdown from Lesson 1 and see an agent that's too expensive, you are almost always looking at a blueprint problem — usually the model. The blueprint is where governance meets each individual worker: least-privilege tool scoping (only the tools it needs — module 03), a right-sized model, and a bounded max-tokens are all blueprint decisions that are also governance decisions.\n\n## The number-one lever: cheaper models for simple tasks\n\nOf all the cost-optimisation moves, the docs put one first, and it's a blueprint decision: **use cheaper models for simple tasks.** The tip is explicit — *route straightforward queries to Haiku or GPT-3.5* rather than running everything on a large, expensive model. The logic is simple and it's the highest-leverage habit in this whole module: not every task needs a frontier model. A classification, a short summary, a routine reply, a data-extraction step — these run perfectly well on a small, cheap model, and doing so can cut the cost of that work dramatically without a meaningful quality loss. Reserve the expensive models for the work that genuinely needs the reasoning.\n\nThe docs give a four-item optimisation checklist and it's worth learning as a routine:\n\n1. **Use cheaper models for simple tasks** — the number-one lever; route straightforward queries to a small model.\n2. **Monitor the Top Spender card** — investigate if one agent dominates costs (the Lesson 1 thread).\n3. **Check token efficiency** — agents with low efficiency may need prompt optimisation (a bloated system prompt burns input tokens on every call).\n4. **Set cost alerts** — configure budget thresholds in Settings (the workspace lever above).\n\nNotice how the four tie together across this module: you *see* the problem (Top Spender, By Agent), you *fix* it at the blueprint (cheaper model, tighter prompt), and you set the *ambient guardrail* (Cost alerts) so you're told next time. Model settings support this directly — you can also configure a **default model** for the workspace and a **fallback chain**, so new agents inherit a sensible, cost-appropriate default rather than reaching for the most expensive option by habit.\n\n## Worked example: fixing the expensive research agent\n\nBack to Lesson 1's research agent — the Top Spender, running a large frontier model, cost trend increasing. The ops lead looks at what it actually does: most of its work is straightforward web-lookups and short factual summaries, with only occasional genuine synthesis. That's a blueprint mismatch — a frontier model doing mostly simple work. The fix is the number-one lever: she edits the agent's blueprint to a cheaper model for its routine work (Haiku-class), keeping the expensive model only where deep synthesis is needed, and while she's there she trims a bloated system prompt that was spending input tokens on every call (token-efficiency, checklist item 3). Then she sets a **Cost alert** threshold in Settings so the next drift gets flagged early (item 4). A week later the **By Agent** trend for that agent reads *decreasing*. Nothing exotic happened — she read the meter, fixed the blueprint, and set the guardrail. That loop, not a hard cap, is how spend is actually controlled on Automatos.\n\n## What this buys you\n\nYou can now state the two budget levers precisely and honestly — Cost alerts (notify, don't brake) and per-mission Pause / Resume-with-budget — and you know there's no pre-set ceiling. You can read an agent's configuration as its operating blueprint, recognise a too-expensive agent as usually a blueprint problem, and reach for the number-one fix: a cheaper model for simple tasks. Next: who is even allowed to change these things — roles, permissions, and the isolation boundary.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-l2-1",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A teammate says 'just set a workspace spend cap of $200 and it'll cut everything off there.' Why is that wrong, and what are the actual budget levers?",
+          "options": [
+            { "id": "a", "text": "There is no pre-set spend cap; budgets are two levers — workspace Cost alerts that notify on a threshold, and per-mission cost-by-task with Pause and Resume-with-increased-budget — both visibility plus a human decision", "correct": true },
+            { "id": "b", "text": "It's correct — a hard workspace dollar cap is the primary budget control on Automatos", "correct": false },
+            { "id": "c", "text": "It's wrong only because $200 is too low; any higher number would auto-cut-off correctly", "correct": false },
+            { "id": "d", "text": "It's wrong because Automatos has no cost controls at all", "correct": false }
+          ],
+          "explanation": "The documented budget model is Cost alerts (a notification) plus per-mission Pause and Resume-with-increased-budget — visibility informing a human decision, not an automated cap. Option b restates the exact trap; there is no hard cap that cuts things off. Option c keeps the false premise (a working auto-cutoff) and just changes the number — no threshold auto-halts spend. Option d over-corrects: the platform has real cost controls, they're just visibility-and-decision levers rather than a ceiling.",
+          "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-missions", "r-gitbook-llm-costs"]
+        },
+        {
+          "id": "kc-m09-l2-2",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The By Agent breakdown shows one agent is far too expensive. Treating its configuration as its operating 'blueprint', where does the fix most often lie?",
+          "options": [
+            { "id": "a", "text": "In the blueprint — usually the model choice (routing its simple work to a cheaper model), and sometimes a bloated system prompt or an over-high max-tokens", "correct": true },
+            { "id": "b", "text": "In a per-agent hard dollar cap you set on that agent's blueprint", "correct": false },
+            { "id": "c", "text": "Nowhere adjustable — an agent's cost is fixed by the platform and can't be changed", "correct": false },
+            { "id": "d", "text": "In the workspace isolation boundary, which controls per-agent spend", "correct": false }
+          ],
+          "explanation": "An agent's model, system prompt, and max-tokens are set in its configuration (its blueprint) and together set its cost envelope, so an expensive agent is usually a blueprint problem — most often the model. Option b invents a per-agent dollar cap; blueprints hold model/temperature/max-tokens/persona/tools, not a spend ceiling. Option c is false — the blueprint is editable, which is exactly how you optimise cost. Option d confuses isolation (a tenancy boundary) with cost configuration; isolation has nothing to do with an agent's spend.",
+          "sourceRefs": ["r-gitbook-agents-creating", "r-gitbook-llm-costs", "r-gitbook-settings-models"]
+        },
+        {
+          "id": "kc-m09-l2-3",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "According to the cost-optimisation tips, what is the number-one lever for reducing LLM spend?",
+          "options": [
+            { "id": "a", "text": "Use cheaper models for simple tasks — route straightforward queries to a small model like Haiku or GPT-3.5 rather than running everything on a large one", "correct": true },
+            { "id": "b", "text": "Disable analytics so no cost data is collected", "correct": false },
+            { "id": "c", "text": "Set every agent's temperature to 0 to make responses shorter", "correct": false },
+            { "id": "d", "text": "Delete the Top Spender agent whenever it appears", "correct": false }
+          ],
+          "explanation": "The documented top tip is to route simple, straightforward work to a cheaper model and reserve expensive models for tasks that need the reasoning — the single highest-leverage cost move. Option b confuses measurement with cost; turning off analytics hides spend, it doesn't reduce it. Option c misunderstands temperature — it controls creativity/determinism, not length or cost, and setting it to 0 doesn't shorten output. Option d over-reacts — the Top Spender is a diagnostic pointer to investigate, not an agent to delete on sight; the fix is usually a cheaper model.",
+          "sourceRefs": ["r-gitbook-llm-costs"]
+        }
+      ]
+    },
+    {
+      "id": "m09-l3-rbac-isolation",
+      "title": "Who can do what: RBAC and workspace isolation",
+      "estMinutes": 15,
+      "objective": "Apply the Admin/Member/Viewer permission matrix, place the Context Engineering permission, and explain workspace isolation as the tenancy boundary.",
+      "body": "## Access control is the other half of safety\n\nBudgets control *how much*; roles control *who*. A workspace where anyone can connect a tool, change a model default, or read the audit log is not governed, however carefully you watch cost. Automatos gives you a small, legible access model — three roles and one specialised permission — and the practitioner's job is to apply it with **least privilege**: give each person the minimum they need, and no more.\n\n> If you came from AI Business Foundations, this is the machinery behind module 6's risk-and-safety habits — the 'who is allowed to do the risky thing' question, answered as a concrete permission matrix.\n\n## The three roles and the matrix\n\nEvery workspace member has exactly one of three roles: **Admin**, **Member**, or **Viewer**. The documented permission matrix is the thing to know cold, because it's the source of truth for every access decision:\n\n| Permission | Admin | Member | Viewer |\n| --- | --- | --- | --- |\n| Chat with agents | Yes | Yes | Yes |\n| View activity and reports | Yes | Yes | Yes |\n| Create and edit agents | Yes | Yes | No |\n| Upload documents | Yes | Yes | No |\n| Run playbooks | Yes | Yes | No |\n| Install marketplace items | Yes | Yes | No |\n| Connect tools | Yes | No | No |\n| Manage team members | Yes | No | No |\n| Access Settings | Yes | No | No |\n| Access Analytics (Admin tab) | Yes | No | No |\n| Manage credentials | Yes | No | No |\n| View audit logs | Yes | No | No |\n\nRead it as three tiers of trust:\n\n- **Viewer — read and chat.** A Viewer can *chat with agents* and *view activity and reports*, and that's it. They cannot create agents, upload documents, run playbooks, or install anything. This is the role for a stakeholder who needs to see what's happening and interact, but shouldn't change the workspace. It's the natural least-privilege default for anyone whose job is to observe.\n- **Member — build and run.** A Member does everything a Viewer does *plus* the everyday building work: create and edit agents, upload documents, run playbooks, install marketplace items. What a Member notably *cannot* do is the sensitive, workspace-wide stuff — connect tools, manage the team, touch Settings, or see the admin analytics/audit surfaces. This is the role for the people doing the actual work.\n- **Admin — govern.** Only an Admin can do the four things that carry real blast radius: **connect tools** (which grant agents reach into external systems), **manage team members** (who controls access itself), **access Settings** (model defaults, Cost alerts, credentials, audit logs), and **manage credentials** and **view audit logs**. These are gated to Admin precisely because they're the levers that can affect the whole workspace or the outside world.\n\nOne rule protects the model from foot-guns: **a workspace must have at least one Admin — you cannot demote the last remaining Admin.** And changing a role is a deliberate act (Team Management → the member's role dropdown → confirm), which itself is an audited event.\n\n## Why the Admin line sits where it does\n\nThe governance insight isn't the list — it's *why the line falls where it does*. Look at what's Admin-only: connecting tools, managing the team, Settings, credentials, audit logs. Every one of those is either **irreversible/external-facing** (a connected tool lets agents act on outside systems) or **controls the controls** (managing the team is power over who has power; credentials are the keys to everything). Members get the full creative surface — agents, docs, playbooks — because that work is contained within the workspace and reviewable. The Admin boundary is drawn exactly around *the things that reach outside the workspace or govern the workspace itself.* That's the principle to carry into any access decision: gate the reach and the meta-controls, open up the contained building work.\n\n## The Context Engineering permission\n\nBeyond the three roles there's one **specialised permission: Context Engineering.** It's not a fourth tier of general access — it's a targeted grant for team members responsible for *tuning how agents behave across the whole workspace.* Someone with Context Engineering can:\n\n- Edit **global system prompts**,\n- Modify the **orchestrator soul and personality settings**,\n- Configure **heartbeat parameters**,\n- Manage **agent coordination rules**.\n\nTreat this as a high-trust, low-population permission. These aren't per-agent tweaks; they're workspace-wide behavioural controls — changing the global prompts or the orchestrator's personality affects *every* agent's behaviour. So grant it sparingly, to the person or two genuinely responsible for how the workspace's agents behave as a whole, and recognise it as orthogonal to the Admin/Member/Viewer axis: it's about *tuning agent behaviour*, not about the general build/govern/observe split.\n\n## Workspace isolation — the tenancy boundary\n\nRoles decide who can do what *inside* a workspace. **Isolation** is the harder wall — the boundary *between* workspaces — and it's the trust boundary that makes a shared instance safe. The docs are unambiguous: **each workspace is fully isolated.**\n\n- **Agents, documents, tools, and settings are workspace-scoped.** Nothing is global; everything you create lives inside one workspace.\n- **Members only see data within their workspace.** A person in Workspace A cannot see Workspace B's agents, documents, or activity.\n- **Agents from one workspace cannot access another workspace's data**, and **credentials are workspace-scoped — not shared between workspaces.**\n- **Cross-workspace access is not supported.** This is stated as a hard boundary, not a configurable setting.\n\nThe reason this matters for governance is one sentence the docs give you directly: isolation *\"ensures data privacy between teams even on the same Automatos instance.\"* That is the multi-tenancy guarantee. Two teams — or two clients, or two departments — can run on the same platform and be genuinely walled off from each other: separate agents, separate documents, separate connected tools, separate keys. When you reason about \"could team A ever see team B's data?\", the answer the platform gives is no, because the workspace is the isolation boundary and cross-workspace access simply isn't a thing. (For completeness: authentication is handled by Clerk — email/password, social login, MFA, session management — which is how identity is established before the isolation boundary applies.)\n\n## Worked example: onboarding three people correctly\n\nA consultancy is putting its delivery work on Automatos and needs to add three people. The practitioner applies the matrix by least privilege, not by seniority:\n\n- **A delivery consultant** who'll build and run agents and playbooks day-to-day → **Member.** Full building surface, but no ability to connect new tools or touch Settings — which is correct, because tool connections and model defaults are workspace-wide decisions.\n- **A client sponsor** who wants to watch progress and occasionally ask an agent a question → **Viewer.** They can chat and see activity and reports, and can't accidentally change anything. Least privilege exactly fits the need.\n- **The practitioner themselves**, who owns tool connections, credentials, the Cost-alert threshold, and the audit trail → **Admin** (and, being the person who tunes the global prompts and coordination rules for this engagement, also granted **Context Engineering**).\n\nNotice the client sponsor is arguably the most *important* stakeholder but gets the *least* privilege — because importance isn't the axis; what they need to *do* is. And each client engagement is its own **workspace**, so isolation guarantees one client can never see another's agents, documents, or data on the shared instance. That's the model working as designed: minimal roles inside, a hard wall between.\n\n## What this buys you\n\nYou can now apply the RBAC matrix by least privilege — Viewer to observe, Member to build, Admin to govern the reach-and-meta controls — place the Context Engineering permission as a sparing, high-trust behavioural grant, and explain workspace isolation as the tenancy boundary that keeps teams private on a shared instance. Last: the plumbing that sits under all of it — credentials, the audit trail, and model/BYOK settings.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-l3-1",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which capability is available to a Member but NOT to a Viewer?",
+          "options": [
+            { "id": "a", "text": "Creating and editing agents (and uploading documents, running playbooks, installing marketplace items)", "correct": true },
+            { "id": "b", "text": "Chatting with agents", "correct": false },
+            { "id": "c", "text": "Viewing activity and reports", "correct": false },
+            { "id": "d", "text": "Connecting tools and managing team members", "correct": false }
+          ],
+          "explanation": "Members can create/edit agents, upload documents, run playbooks, and install marketplace items — the building work Viewers cannot do. Options b and c are things everyone can do, including Viewers (chat and view activity/reports), so they don't distinguish the roles. Option d is Admin-only, not Member — connecting tools and managing the team sit above the Member tier, so it's not the right contrast either.",
+          "sourceRefs": ["r-gitbook-roles"]
+        },
+        {
+          "id": "kc-m09-l3-2",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Looking at the four Admin-only capabilities — connect tools, manage team members, access Settings, manage credentials/view audit logs — what principle explains why the Admin line falls exactly there?",
+          "options": [
+            { "id": "a", "text": "They either reach outside the workspace (connecting tools lets agents act externally) or control the controls (the team, Settings, and credentials are power over access and keys) — so the reach-and-meta controls are gated", "correct": true },
+            { "id": "b", "text": "They are simply the tasks that happen to be hardest to use, so they're hidden from less-experienced members", "correct": false },
+            { "id": "c", "text": "They are the cheapest actions, so gating them saves money", "correct": false },
+            { "id": "d", "text": "They are randomly assigned to Admin with no underlying principle", "correct": false }
+          ],
+          "explanation": "The Admin-only set is exactly the actions that reach outside the workspace (tool connections) or govern the workspace itself (team, Settings, credentials, audit logs) — reach-and-meta controls with real blast radius, which is why they're gated. Option b substitutes 'difficulty' for the real criterion (blast radius); Members do plenty of complex work like building agents. Option c invents a cost rationale that doesn't apply. Option d denies the clear principle behind the line.",
+          "sourceRefs": ["r-gitbook-roles"]
+        },
+        {
+          "id": "kc-m09-l3-3",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Two consultancy clients run on the same Automatos instance, each in their own workspace. Client A worries Client B's agents could read A's uploaded documents. What's the accurate answer?",
+          "options": [
+            { "id": "a", "text": "They cannot — each workspace is fully isolated: agents, documents, tools, and settings are workspace-scoped, members see only their own workspace, and cross-workspace access is not supported", "correct": true },
+            { "id": "b", "text": "They can, if both workspaces are on the same instance — shared hardware means shared data", "correct": false },
+            { "id": "c", "text": "They can, but only if an Admin forgets to toggle the isolation setting off", "correct": false },
+            { "id": "d", "text": "It depends on the model each workspace uses; same model means shared documents", "correct": false }
+          ],
+          "explanation": "Workspace isolation is a hard boundary: everything is workspace-scoped, members only see their own workspace, and cross-workspace access is not supported — which is precisely what guarantees data privacy between teams on a shared instance. Option b confuses shared infrastructure with shared data; isolation exists so the same instance keeps tenants separate. Option c invents a toggleable isolation setting — isolation isn't a configurable switch you can leave off. Option d is nonsense — the model an agent uses has nothing to do with which workspace's documents it can reach.",
+          "sourceRefs": ["r-gitbook-team-readme", "r-gitbook-roles"]
+        }
+      ]
+    },
+    {
+      "id": "m09-l4-credentials-audit-models",
+      "title": "The plumbing: credentials, audit logs, and model settings",
+      "estMinutes": 13,
+      "objective": "Operate the security plumbing — manage and rotate encrypted, masked credentials; read and export the immutable audit log; and configure BYOK, default model, and fallback.",
+      "body": "## The unglamorous layer that makes the rest trustworthy\n\nCost visibility, budget levers, and roles all sit on top of a layer that rarely gets attention until it fails: the secrets that connect your workspace to the outside world, the record of everything that happened, and the model configuration that decides which provider answers. This lesson is that plumbing. It's less exciting than the cost tab, but a governance story with leaky credentials or no audit trail isn't a governance story at all.\n\n## Credentials: encrypted, masked, rotatable\n\n**Credentials** are the API keys and secrets that connect your workspace to LLM providers and external services — managed under **Settings → API Keys & Credentials** (Admin-only, from Lesson 3). You add one by choosing a type, entering the key, labelling it, and saving. The documented credential types are worth knowing: **OpenRouter** (primary LLM provider, 100+ models), **OpenAI**, **Anthropic**, **Composio** (the tool-integration framework), **Clerk** (auth), **AWS** (S3 storage and vectors), and **Custom** (any key for a custom integration). Channel credentials — Telegram bot tokens, Slack app tokens — live here too, stored with masked display.\n\nThe security properties are the part to internalise, because they're what make it safe to store secrets on a shared platform at all:\n\n- **Encrypted at rest** — credentials aren't stored in plaintext.\n- **Masked after saving** — keys are *never displayed in full* once saved; you can see a connection's status without exposing the secret. (This is why you can't retrieve a key you've stored — you can only replace it.)\n- **All credential access is logged** in the audit log — every use is accountable.\n- **Workspace-scoped** — not shared between workspaces (the isolation boundary from Lesson 3, applied to secrets).\n\n**Rotation** — replacing a key on a schedule or after a suspected exposure — is a first-class, no-downtime operation, and knowing the exact order matters because doing it wrong breaks live agents:\n\n1. Create the **new** key in the external service.\n2. **Edit** the credential in Settings and paste the new key.\n3. **Save** — the new key takes effect immediately, no restart.\n4. **Test** to verify the connection works.\n\nThe critical warning the docs give: **deleting a credential immediately breaks every agent and tool that depends on it** — so you *test the replacement before removing the old key*, and you can use **View usage** to see exactly which agents and tools a credential touches before you change anything. Rotation is edit-then-test, not delete-then-add.\n\n## Audit logs: the immutable record\n\nThe **Audit Logs** page (Settings, Admin-only) is a *complete record of every significant action in your workspace* — and its defining property is that it's **immutable**: the docs state audit logs are *retained for the lifetime of your workspace and cannot be deleted*, which is exactly what makes them trustworthy for compliance. A log you could edit or delete would prove nothing; one you can't is evidence.\n\nWhat gets logged spans the whole governance surface — and notice how it maps onto everything else in this module:\n\n| Category | Examples |\n| --- | --- |\n| **User actions** | Login, logout, settings changes |\n| **Agent operations** | Agent created, edited, deleted |\n| **Tool calls** | External API calls made by agents |\n| **Credential changes** | Keys added, rotated, deleted |\n| **Team changes** | Members invited, roles changed, removed |\n| **Document operations** | Uploads, deletions, sync events |\n| **Security events** | Failed auth attempts, permission denials |\n\nEvery entry carries a **timestamp**, an **actor** (the user *or agent* that acted — agents are first-class actors in the log), an **action**, a **target**, expandable **details**, and a **status** (success or failure). You can **filter** by date range, actor, category, status, or free-text search — so \"show me every credential change last month\" or \"every permission denial by this agent\" is a couple of clicks. And you can **Export** the whole thing as **CSV** for external analysis or compliance reporting. That combination — immutable, richly attributed, filterable, exportable — is what lets you answer an auditor's or an incident's questions after the fact: who did what, to what, when, and did it succeed.\n\n## Model settings and BYOK\n\nThe last piece of plumbing is which model answers, configured under **Settings → Models**. Two governance-relevant capabilities:\n\n- **Provider priority and fallback.** You configure providers (OpenRouter, OpenAI, Anthropic, DeepSeek) and a **fallback chain** — Primary → Fallback 1 → Fallback 2 — for resilience when a model is unavailable or rate-limited. Using **OpenRouter as primary** gives built-in fallback, since it routes to alternative models automatically if one is down. The **default model** (set in General settings) is what new agents and system-level tasks like routing use when no model is specified — so choosing a sensible, cost-appropriate default is a quiet but real governance decision (it ties straight back to Lesson 2's cheaper-model habit).\n- **BYOK — Bring Your Own Key.** Users can provide their *own* API keys for LLM providers instead of using the workspace default, configured via General settings. This matters for teams where individuals (or clients) have their own provider accounts and want to pay the provider directly. For an operator, BYOK is often the realistic cost model: you supply your key, you see your spend on the LLM & Costs tab, and you're billed by the provider — the platform meters, the provider bills.\n\n(One embedding note that's easy to trip over: the default embedding model is `qwen3-embedding-8b` via OpenRouter at 2048 dimensions, and **changing the embedding model requires re-processing all documents** because existing embeddings become incompatible — so it's not a casual toggle. That's a knowledge-base concern from module 03, flagged here only because it lives in Model settings.)\n\n## Worked example: a clean credential rotation\n\nAn Admin gets word that an OpenRouter key may have been exposed in a leaked log. The wrong move — the one that takes the workspace down — is to delete the credential and add a new one, because *deleting immediately breaks every agent and tool that depends on it*. The right move is the documented rotation, in order: she creates a fresh key in OpenRouter, uses **View usage** to note which agents depend on this credential, then in Settings **edits** the credential, pastes the new key, and **saves** — it takes effect immediately with no restart — and finally **tests** to confirm the connection is healthy. Because the whole thing was edit-then-test, nothing broke: the agents that were mid-work kept working on the new key. Afterwards she opens the **audit log**, filters to **Credential changes**, and confirms the rotation is recorded — timestamped, attributed to her, marked success. The exposed key is dead, the workspace never blinked, and there's an immutable record that the right thing was done at the right time. That's the plumbing doing its job.\n\n## What this buys you\n\nYou can now operate the security layer under the governance: manage credentials knowing they're encrypted and masked, rotate a key the no-downtime way (edit-then-test, never delete-then-add), read and export the immutable audit trail to answer after-the-fact questions, and configure default model, fallback, and BYOK. With this and the previous three lessons you have the whole governance-and-ops picture — read the numbers, set the budget guardrails, scope the roles, wall off the tenants, protect the secrets — which is exactly what the scenario and labs put together into a starter policy.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-l4-1",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need to rotate a credential that live agents depend on, with no downtime. What's the correct procedure?",
+          "options": [
+            { "id": "a", "text": "Create the new key externally, then Edit the credential and paste it, Save (takes effect immediately), and Test — do not delete the old one first", "correct": true },
+            { "id": "b", "text": "Delete the old credential first to clear the slot, then Add the new key", "correct": false },
+            { "id": "c", "text": "Retrieve the old key from Settings, compare it to the new one, then overwrite", "correct": false },
+            { "id": "d", "text": "Create a second workspace, move the agents there, and add the key fresh", "correct": false }
+          ],
+          "explanation": "Rotation is edit-then-test: create the new key externally, edit the existing credential and paste it, save (immediate effect, no restart), and test — which keeps dependent agents running. Option b is the documented foot-gun: deleting a credential immediately breaks every agent and tool that depends on it, so delete-first causes an outage. Option c is impossible — keys are masked and never displayed in full after saving, so you can't retrieve the old one to compare. Option d is a needless, disruptive workaround for something rotation handles in place.",
+          "sourceRefs": ["r-gitbook-credentials"]
+        },
+        {
+          "id": "kc-m09-l4-2",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What makes the audit log trustworthy for compliance, and how do you get the data out?",
+          "options": [
+            { "id": "a", "text": "It's immutable — retained for the workspace's lifetime and cannot be deleted — and it exports to CSV for external analysis or compliance reporting", "correct": true },
+            { "id": "b", "text": "Admins can edit entries to correct mistakes, and it exports to PDF only", "correct": false },
+            { "id": "c", "text": "It auto-deletes after 30 days to save space, and cannot be exported", "correct": false },
+            { "id": "d", "text": "It logs only user logins, and is viewable but not exportable", "correct": false }
+          ],
+          "explanation": "The audit log's trustworthiness comes from immutability — it's kept for the workspace's lifetime and can't be deleted — and it exports to CSV for compliance use. Option b breaks the whole premise: an editable log proves nothing, and the export format is CSV, not PDF-only. Option c is the opposite of the documented behaviour, which is permanent retention, and it is exportable. Option d drastically understates the scope — the log covers user actions, agent operations, tool calls, credential and team changes, document operations, and security events, and it does export.",
+          "sourceRefs": ["r-gitbook-audit-logs"]
+        },
+        {
+          "id": "kc-m09-l4-3",
+          "domainId": "m09-governance-ops",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team where several members have their own LLM provider accounts wants each person to pay their provider directly rather than share the workspace default key. Which capability fits, and where is it configured?",
+          "options": [
+            { "id": "a", "text": "BYOK (Bring Your Own Key) — users supply their own provider API keys instead of the workspace default; configured via General settings", "correct": true },
+            { "id": "b", "text": "The Context Engineering permission, configured in Team Management", "correct": false },
+            { "id": "c", "text": "Workspace isolation, configured in the Models tab", "correct": false },
+            { "id": "d", "text": "Cost alerts, configured per member in Analytics", "correct": false }
+          ],
+          "explanation": "BYOK lets individuals provide their own provider keys instead of the workspace default and is configured via General settings — exactly the 'pay your own provider' case. Option b is unrelated: Context Engineering tunes global agent behaviour (prompts, orchestrator soul), not billing keys. Option c confuses the tenancy boundary with key management and misplaces its configuration. Option d misdescribes Cost alerts, which is a single workspace-level budget-threshold notification, not a per-member billing mechanism.",
+          "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-settings-models"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m09-1",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of these is one of the five facts tracked on every single LLM call?",
+      "options": [
+        { "id": "a", "text": "The agent that made the request", "correct": true },
+        { "id": "b", "text": "The workspace member's home timezone", "correct": false },
+        { "id": "c", "text": "The customer's payment method", "correct": false },
+        { "id": "d", "text": "The audit log retention period", "correct": false }
+      ],
+      "explanation": "Every LLM call records input tokens, output tokens, the model, the agent that made it, and an estimated cost — so the agent is one of the five. Option b is a General-settings preference, not per-call telemetry. Option c has nothing to do with LLM-call tracking. Option d is a property of the audit log, not a field on a cost record.",
+      "sourceRefs": ["r-gitbook-llm-costs"]
+    },
+    {
+      "id": "q-m09-2",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which card do you check first when a bill surprises you and you want to know which agent or model is dominating cost?",
+      "options": [
+        { "id": "a", "text": "Top Spender", "correct": true },
+        { "id": "b", "text": "Cost Per Request", "correct": false },
+        { "id": "c", "text": "Total Tokens", "correct": false },
+        { "id": "d", "text": "Success Rate", "correct": false }
+      ],
+      "explanation": "Top Spender names the single agent or model costing the most, so it's where a surprised-by-the-bill investigation starts, and the Agents tab expands it into a full ranking. Cost Per Request is the average across all calls — useful for spotting prompt bloat, but it doesn't name the culprit. Total Tokens is raw fuel consumed, not an attribution. Success Rate isn't a cost card at all; it lives on the Overview tab and measures reliability, not spend.",
+      "sourceRefs": ["r-gitbook-llm-costs", "r-gitbook-analytics-agents"]
+    },
+    {
+      "id": "q-m09-3",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What are the two documented budget levers on Automatos?",
+      "options": [
+        { "id": "a", "text": "Workspace Cost alerts (notify on a threshold) and per-mission cost-by-task with Pause / Resume-with-increased-budget", "correct": true },
+        { "id": "b", "text": "A workspace hard-dollar cap and a per-agent hard-dollar cap", "correct": false },
+        { "id": "c", "text": "A monthly invoice limit and an automatic model downgrade at 80% of budget", "correct": false },
+        { "id": "d", "text": "A prepaid token wallet and an auto-shutoff when it empties", "correct": false }
+      ],
+      "explanation": "The two documented levers are Cost alerts (a workspace notification) and per-mission budget control (cost-by-task, Pause, Resume-with-increased-budget) — both visibility plus a human decision. Option b invents hard caps that don't exist at either level. Option c invents an automatic model-downgrade rule. Option d invents a prepaid wallet and auto-shutoff — none of these mechanisms are in the platform; budgets are managed by a human who can see the numbers.",
+      "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-missions"]
+    },
+    {
+      "id": "q-m09-4",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What role does the workspace 'Cost alerts' feature flag actually play?",
+      "options": [
+        { "id": "a", "text": "It notifies you when spend crosses a threshold you set, prompting you to go look — it does not stop anything", "correct": true },
+        { "id": "b", "text": "It hard-stops all agents the moment the threshold is crossed", "correct": false },
+        { "id": "c", "text": "It automatically switches every agent to a cheaper model at the threshold", "correct": false },
+        { "id": "d", "text": "It refunds spend above the threshold", "correct": false }
+      ],
+      "explanation": "Cost alerts is a Settings feature flag that notifies on budget thresholds — a signal to investigate, not a brake. Option b turns a notification into an enforcement action it doesn't perform; stopping work is a human action (Pause/Cancel). Option c invents an automatic model swap. Option d invents a refund mechanism. The alert's whole job is to make you look, not to act on its own.",
+      "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-llm-costs"]
+    },
+    {
+      "id": "q-m09-5",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Treating an agent's configuration as its 'blueprint', which set of things does that blueprint fix at creation?",
+      "options": [
+        { "id": "a", "text": "Provider/model, temperature, max tokens, persona/system prompt, and the tools and skills it may use", "correct": true },
+        { "id": "b", "text": "The workspace's audit-log retention and export format", "correct": false },
+        { "id": "c", "text": "The RBAC role of whoever runs the agent", "correct": false },
+        { "id": "d", "text": "The isolation boundary between workspaces", "correct": false }
+      ],
+      "explanation": "An agent's configuration sets its model/provider, temperature, max tokens, persona and system prompt, and its assigned tools and skills — the specification that bounds what it does and costs. Option b is a workspace-level audit setting, unrelated to a single agent's config. Option c confuses the agent's blueprint with the human operator's role. Option d is the tenancy boundary, which has nothing to do with an individual agent's settings.",
+      "sourceRefs": ["r-gitbook-agents-creating"]
+    },
+    {
+      "id": "q-m09-6",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which three roles make up the Automatos RBAC model?",
+      "options": [
+        { "id": "a", "text": "Admin, Member, Viewer", "correct": true },
+        { "id": "b", "text": "Owner, Super Admin, Guest", "correct": false },
+        { "id": "c", "text": "Root, Operator, Reader", "correct": false },
+        { "id": "d", "text": "Editor, Contributor, Subscriber", "correct": false }
+      ],
+      "explanation": "The three documented roles are Admin, Member, and Viewer. Option b uses 'Owner' and 'Super Admin', which are not Automatos role names (the platform has no such tiers). Options c and d are role sets borrowed from other systems, not the Automatos matrix. Getting the exact names right matters because every permission decision references this matrix.",
+      "sourceRefs": ["r-gitbook-roles"]
+    },
+    {
+      "id": "q-m09-7",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A stakeholder needs to watch workspace activity and occasionally ask an agent a question, but must not be able to change anything. Which role, and why?",
+      "options": [
+        { "id": "a", "text": "Viewer — it grants chat and view-activity/reports only, with no ability to create agents, upload documents, run playbooks, or connect tools", "correct": true },
+        { "id": "b", "text": "Member — because everyone who uses the workspace needs Member to chat", "correct": false },
+        { "id": "c", "text": "Admin — because watching activity requires the analytics admin tab", "correct": false },
+        { "id": "d", "text": "Context Engineering — because they need read access to prompts", "correct": false }
+      ],
+      "explanation": "Viewer is exactly the read-and-chat tier: it allows chatting with agents and viewing activity and reports, and nothing that changes the workspace — a clean least-privilege fit. Option b over-grants; chatting is available to Viewers too, so Member (which can build and install) exceeds the need. Option c massively over-grants — Admin controls tools, team, Settings, and credentials, far beyond watching. Option d misapplies a specialised behavioural-tuning permission to a passive observer.",
+      "sourceRefs": ["r-gitbook-roles"]
+    },
+    {
+      "id": "q-m09-8",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The Context Engineering permission is best described as which of the following?",
+      "options": [
+        { "id": "a", "text": "A specialised permission to tune how agents behave workspace-wide — edit global system prompts, the orchestrator soul/personality, heartbeat parameters, and coordination rules — granted sparingly", "correct": true },
+        { "id": "b", "text": "A fourth general role that sits above Admin", "correct": false },
+        { "id": "c", "text": "The permission required to view the LLM & Costs tab", "correct": false },
+        { "id": "d", "text": "A per-agent setting for changing one agent's temperature", "correct": false }
+      ],
+      "explanation": "Context Engineering is a specialised, high-trust permission for workspace-wide behavioural tuning — global prompts, orchestrator soul, heartbeat, coordination rules — orthogonal to the Admin/Member/Viewer axis. Option b miscasts it as a super-role above Admin; it's a targeted grant, not a general tier. Option c is wrong — cost visibility is governed by the admin analytics access, not this permission. Option d shrinks it to a single-agent tweak, whereas its whole point is workspace-wide effect.",
+      "sourceRefs": ["r-gitbook-roles"]
+    },
+    {
+      "id": "q-m09-9",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about workspace isolation is accurate?",
+      "options": [
+        { "id": "a", "text": "Agents, documents, tools, and settings are workspace-scoped, members see only their own workspace, and cross-workspace access is not supported", "correct": true },
+        { "id": "b", "text": "Isolation is a toggle an Admin can switch off to share data between workspaces", "correct": false },
+        { "id": "c", "text": "Agents are global and shared across all workspaces on an instance", "correct": false },
+        { "id": "d", "text": "Only documents are isolated; tools and credentials are shared across workspaces", "correct": false }
+      ],
+      "explanation": "Isolation is a hard boundary: everything is workspace-scoped, members see only their workspace, and cross-workspace access simply isn't supported — that's the multi-tenancy guarantee. Option b invents a configurable toggle; isolation isn't a switch. Option c contradicts the scoping — agents belong to a workspace, not the whole instance. Option d is wrong on the specifics: credentials in particular are explicitly workspace-scoped and not shared.",
+      "sourceRefs": ["r-gitbook-team-readme"]
+    },
+    {
+      "id": "q-m09-10",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the documented security posture for stored credentials?",
+      "options": [
+        { "id": "a", "text": "Encrypted at rest, masked (never shown in full) after saving, access logged in audit logs, and workspace-scoped", "correct": true },
+        { "id": "b", "text": "Stored in plaintext so Admins can copy them back out when needed", "correct": false },
+        { "id": "c", "text": "Shared across all workspaces on the instance for convenience", "correct": false },
+        { "id": "d", "text": "Displayed in full on the credentials page so you can verify them at a glance", "correct": false }
+      ],
+      "explanation": "Credentials are encrypted at rest, masked after saving, logged on access, and workspace-scoped — the properties that make storing secrets on a shared platform safe. Option b contradicts encryption-at-rest and masking (you can't copy a key back out). Option c contradicts workspace-scoping — credentials aren't shared between workspaces. Option d contradicts masking, whose whole purpose is that keys are never displayed in full after saving.",
+      "sourceRefs": ["r-gitbook-credentials"]
+    },
+    {
+      "id": "q-m09-11",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want to answer 'which models are eating my budget?' so you can decide where to route work more cheaply. Which view do you open?",
+      "options": [
+        { "id": "a", "text": "The By Model breakdown on the LLM & Costs tab — total cost, token split, request count, and avg cost per request per model", "correct": true },
+        { "id": "b", "text": "The audit log, filtered by model", "correct": false },
+        { "id": "c", "text": "The Team Management member list", "correct": false },
+        { "id": "d", "text": "The Models tab in Settings, which shows per-model spend", "correct": false }
+      ],
+      "explanation": "By Model on the LLM & Costs tab gives each model's total cost, input/output token split, request count, and average cost per request — exactly the input to a cheaper-model routing decision, and it sits among the seven Analytics tabs under a shared time-range selector. Option b confuses the audit trail (who did what) with cost analytics. Option c is about people and roles, not spend. Option d misdescribes the Models settings tab, which configures providers/defaults/fallback but is not the cost-breakdown view.",
+      "sourceRefs": ["r-gitbook-llm-costs", "r-gitbook-settings-models", "r-gitbook-analytics-readme"]
+    },
+    {
+      "id": "q-m09-12",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A brand-new team asks for a defensible starter governance policy. Which set is grounded ONLY in controls Automatos actually provides?",
+      "options": [
+        { "id": "a", "text": "Enable Cost alerts with a threshold, assign least-privilege roles, keep tool connections Admin-only, set a cheaper default model, and keep a short leash (careful plan approval, close monitoring) on irreversible or externally-visible mission work", "correct": true },
+        { "id": "b", "text": "Set a hard $500 workspace spend ceiling, auto-downgrade models at 90% of budget, and enable a per-agent kill-switch that fires at a token cap", "correct": false },
+        { "id": "c", "text": "Turn off the audit log to reduce noise, share one Admin login across the team, and disable isolation so everyone can help", "correct": false },
+        { "id": "d", "text": "Give everyone Admin so nobody is blocked, and rely on the platform to auto-refund any overspend", "correct": false }
+      ],
+      "explanation": "Option a is built entirely from real controls: Cost alerts, the RBAC matrix with least privilege, Admin-gated tool connections, a sensible default model, and the mission plan-approval/monitoring rails for risky work. Option b invents a hard ceiling, auto-downgrade, and kill-switch — none exist. Option c is actively harmful and impossible: the audit log can't be disabled (it's immutable), sharing logins destroys accountability, and isolation isn't a toggle. Option d abandons least privilege and invents an auto-refund. Only a is both real and defensible.",
+      "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-roles", "r-gitbook-missions", "r-gitbook-llm-costs"]
+    },
+    {
+      "id": "q-m09-13",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Who can enable the workspace Cost alerts flag and configure the default model — and why does that matter for governance?",
+      "options": [
+        { "id": "a", "text": "Only an Admin, because both live in Settings, which is Admin-only — so the ambient budget guardrail and the default cost posture are Admin decisions", "correct": true },
+        { "id": "b", "text": "Any Member, since Members run the work that spends money", "correct": false },
+        { "id": "c", "text": "Any Viewer, so observers can tune costs without changing agents", "correct": false },
+        { "id": "d", "text": "Anyone with the Context Engineering permission, since it covers all Settings", "correct": false }
+      ],
+      "explanation": "Cost alerts and the default model both live in Settings, and Settings is Admin-only, so these workspace-wide cost decisions are the Admin's to make. Option b is wrong — Members cannot access Settings, even though they run cost-incurring work. Option c is wrong — Viewers have read-and-chat only, no Settings access. Option d misreads Context Engineering, which grants behavioural-tuning of agents (prompts, coordination), not general Settings access.",
+      "sourceRefs": ["r-gitbook-roles", "r-gitbook-settings-general"]
+    },
+    {
+      "id": "q-m09-14",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A mission's cost is climbing faster than expected. Which sequence matches how per-mission budget control actually works?",
+      "options": [
+        { "id": "a", "text": "Read the cost breakdown by task, Pause if it's exceeding expectations, then Resume with increased budget or Cancel based on what the task log shows", "correct": true },
+        { "id": "b", "text": "Wait for the pre-set mission ceiling to auto-halt it at the configured dollar amount", "correct": false },
+        { "id": "c", "text": "Lower the workspace default model mid-run so the mission gets cheaper automatically", "correct": false },
+        { "id": "d", "text": "Do nothing — an Active mission can't be paused, so you must let it finish", "correct": false }
+      ],
+      "explanation": "Per-mission budget control is visibility plus decision: view cost-by-task, Pause if costs exceed expectations, then Resume-with-increased-budget or Cancel on the evidence. Option b assumes a pre-set ceiling that doesn't exist. Option c misunderstands the levers — changing a workspace default doesn't retroactively re-price a running mission, and it isn't a budget control. Option d is false — an Active mission can be Paused; that's the emergency brake.",
+      "sourceRefs": ["r-gitbook-missions", "r-gitbook-settings-general"]
+    },
+    {
+      "id": "q-m09-15",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An auditor asks: 'Show me every credential change last month, including who did it and whether it succeeded.' Can the platform answer this, and how?",
+      "options": [
+        { "id": "a", "text": "Yes — open Audit Logs, filter by the Credential-changes category and a date range; each entry shows actor, action, target, status, and timestamp, and the result exports to CSV", "correct": true },
+        { "id": "b", "text": "No — the audit log records only agent operations, not credential changes", "correct": false },
+        { "id": "c", "text": "No — audit entries are anonymised, so you can never see who performed an action", "correct": false },
+        { "id": "d", "text": "Only partially — the log has no filters, so you must scroll the entire history manually", "correct": false }
+      ],
+      "explanation": "The audit log logs credential changes as a category, each entry carries actor/action/target/status/timestamp, it's filterable by category and date range, and it exports to CSV — so the auditor's question is fully answerable. Option b is wrong: credential changes are an explicitly logged category. Option c is wrong: entries name the actor (user or agent), so accountability is preserved. Option d is wrong: rich filtering (date, actor, category, status, search) is provided, so no manual scrolling is required.",
+      "sourceRefs": ["r-gitbook-audit-logs"]
+    },
+    {
+      "id": "q-m09-16",
+      "domainId": "m09-governance-ops",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the audit log, who or what can appear as the 'actor' on an entry?",
+      "options": [
+        { "id": "a", "text": "Either a user or an agent — agents are first-class actors, so an entry can attribute an action to the agent that performed it", "correct": true },
+        { "id": "b", "text": "Only human users; agent actions are never recorded", "correct": false },
+        { "id": "c", "text": "Only the workspace Admin, regardless of who acted", "correct": false },
+        { "id": "d", "text": "Only external API providers", "correct": false }
+      ],
+      "explanation": "The actor field records who performed an action — a user or an agent — so agent operations and tool calls are attributed to the agent itself. Option b is wrong: agent operations and tool calls are logged categories with the agent as actor. Option c is wrong: the actor is whoever actually acted, not always the Admin. Option d is wrong: providers aren't the actor; the acting user or agent is.",
+      "sourceRefs": ["r-gitbook-audit-logs"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m09-governance-dial",
+      "domainIds": ["m09-governance-ops"],
+      "title": "The governance dial: how much autonomy and budget before a human must approve?",
+      "tagline": "The module's debate made concrete — set a defensible starter governance policy for a brand-new team using only the controls Automatos actually provides.",
+      "context": "You're the practitioner standing up Automatos for a new five-person operations team. Two voices are pulling at you. One wants velocity: open budgets, broad Member permissions, few bottlenecks — let people move. The other wants safety: tight Cost alerts, careful mission approvals, read-only where possible, Admin-gated tool connections — predictable spend and least privilege. Your job is to land a starter policy that's neither reckless nor uselessly timid, grounded ONLY in the real controls: Cost alerts, per-mission cost-by-task with Pause/Resume-with-budget, the Mission plan-approval gate, the RBAC matrix, tool permission scopes, and workspace isolation. Walk the key decisions.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First decision: default roles for the five people. The velocity voice says 'make everyone Admin so nobody's ever blocked.' What do you do?",
+          "choices": [
+            { "id": "a", "text": "Assign by least privilege: Members for the people who build and run agents/playbooks, Viewer for anyone who only needs to watch, and reserve Admin for the one or two who own tool connections, credentials, and Settings", "verdict": "best", "rationale": "This is least privilege applied to the real matrix. Members get the full building surface (agents, docs, playbooks, marketplace) without the reach-and-meta controls; Viewers observe; Admin is held to the few who own the workspace-wide levers. Nobody is blocked from their actual job, and the dangerous controls stay gated — exactly where the Admin line is drawn." },
+            { "id": "b", "text": "Make everyone Member and keep just yourself as Admin — no Viewers at all", "verdict": "viable", "rationale": "Defensible and reasonably safe: Members can't connect tools or touch Settings, so the biggest risks are still Admin-gated, and a single Admin keeps the meta-controls tight. It only over-grants if some of the five genuinely just need to watch — those people should be Viewers. A sound default, slightly generous." },
+            { "id": "c", "text": "Make everyone Admin so there are no permission bottlenecks", "verdict": "wrong", "rationale": "This throws away the entire access model. Everyone could then connect tools (agents reaching external systems), manage the team, read credentials, and change Settings — the exact reach-and-meta controls the matrix gates for a reason. It maximises blast radius across five people and abandons least privilege completely." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Next: tool connections and the ambient budget guardrail. How do you set these up?",
+          "choices": [
+            { "id": "a", "text": "Keep tool connections Admin-only (as the matrix already enforces) and enable Cost alerts in Settings with a sensible threshold so the team is notified to look when spend climbs", "verdict": "best", "rationale": "Tool connections are inherently reach-outside-the-workspace, so keeping them Admin-gated is correct least privilege — and it's what the platform enforces anyway. Cost alerts is the right ambient guardrail: a notification that prompts a look, honestly framed as a signal rather than a cap. This is the real budget lever used as designed." },
+            { "id": "b", "text": "Keep tool connections Admin-only, but skip Cost alerts because the LLM & Costs tab already shows spend if someone remembers to check", "verdict": "viable", "rationale": "Gating tools is right, and cost visibility does exist on the tab. But relying on someone remembering to check is weaker than enabling the alert that actively tells you to look — the notification is cheap and turns a passive dashboard into an early warning. Right on tools, a missed easy win on budgets." },
+            { "id": "c", "text": "Let Members connect tools too (to remove a bottleneck) and set a hard workspace spend cap that auto-stops everything at a dollar figure", "verdict": "wrong", "rationale": "Both halves are wrong. Members connecting tools opens external reach to more people than least privilege allows, widening blast radius. And the 'hard spend cap that auto-stops' doesn't exist — budgets are Cost alerts plus per-mission Pause/Resume, not an automated ceiling. This policy rests on a control the platform doesn't provide." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now the autonomy line for missions. Where do you draw it between 'let it run' and 'human must approve/watch closely'?",
+          "choices": [
+            { "id": "a", "text": "Draw it by the shape of the work: contained, internal, reviewable-before-it-matters missions can run with a lighter touch; anything irreversible or externally-visible (sends, payments, deletions) gets careful plan approval and close cost-by-task monitoring", "verdict": "best", "rationale": "This is the autonomy judgment grounded in the real rails. The Mission plan-approval gate is the cheapest place to catch a bad plan, and reserving the short leash for irreversible/external side effects targets scrutiny where a mistake escapes the workspace. Contained internal work runs lighter. It's proportionate, not blanket." },
+            { "id": "b", "text": "Require plan approval on absolutely every mission regardless of how trivial or contained, to be safe", "verdict": "viable", "rationale": "Approving every plan is safe and the gate is always available — no mission runs unapproved anyway. It's just heavier than necessary: a contained, internal read-and-summarise mission barely needs the same scrutiny as one that emails customers. Not wrong, but it spends attention uniformly instead of where the risk is." },
+            { "id": "c", "text": "Let all missions run fully autonomously without review, and rely on Cancel to stop anything that goes wrong after it starts", "verdict": "wrong", "rationale": "This skips the single most important human-in-the-loop moment. For irreversible or external work, by the time you'd Cancel, the email has sent or the data is deleted — the damage has already escaped. Relying on after-the-fact Cancel for actions that can't be taken back is exactly the over-reach the debate rejects." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Finally, write down the one-paragraph starter policy the team will adopt. Which is the honest, defensible version?",
+          "choices": [
+            { "id": "a", "text": "'Roles by least privilege (Viewer to observe, Member to build, Admin for tools/credentials/Settings). Cost alerts on with a threshold. Tool connections Admin-only. Default to a cheaper model, reserve expensive models for genuine reasoning. Missions: approve every plan, short leash on anything irreversible or external, steer by cost-by-task and Pause/Resume. Each client in its own isolated workspace.'", "verdict": "best", "rationale": "Every clause maps to a real control and to least privilege: the RBAC matrix, Cost alerts, Admin-gated tools, the cheaper-model lever, the mission approval/monitoring rails, and workspace isolation as the tenancy wall. It's proportionate, honest about what the platform does (no invented caps), and something a new team can actually adopt and defend. This is the note the module lands on." },
+            { "id": "b", "text": "'Least-privilege roles, Cost alerts on, tools Admin-only, approve missions, isolate clients' — but leave out the cheaper-model default and the irreversible/external distinction", "verdict": "viable", "rationale": "This is genuinely safe and all-real — it just leaves value on the table. Omitting the cheaper-model default forgoes the number-one cost lever, and dropping the irreversible/external nuance means missions are all treated the same. A solid policy that's slightly less complete than it could be." },
+            { "id": "c", "text": "'Everyone Admin, hard $X auto-cap on spend, missions fully autonomous, isolation off so the team can collaborate freely across workspaces'", "verdict": "wrong", "rationale": "This fails on every axis and cites controls that don't exist. Everyone-Admin abandons least privilege; the hard auto-cap isn't a real feature; fully-autonomous missions skip the approval gate; and 'isolation off' misunderstands isolation as a toggle when it's a hard, non-configurable boundary. It's neither safe nor grounded in the platform." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-gitbook-roles", "r-gitbook-settings-general", "r-gitbook-missions", "r-gitbook-llm-costs", "r-gitbook-team-readme"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m09-guardrails",
+      "domainId": "m09-governance-ops",
+      "title": "Put guardrails on your workspace — set a cost alert and read the meter",
+      "goal": "Produce your first governance artifact: a workspace with a Cost alert enabled and a short written read-out of your cost picture — the four cost cards, the model chart, and your Top Spender agent — captured from the real LLM & Costs tab. You'll turn the ambient budget guardrail on and prove you can read the meter well enough to spot a problem.",
+      "steps": "## What you'll do\n\nYou'll enable the workspace-wide budget notification, then read the LLM & Costs tab and write down what it tells you. Everything here is grounded in `automatos-gitbook/settings/general.md` and `automatos-gitbook/analytics/llm-costs.md`. This is an Admin task — on your own personal workspace you're the Admin, so it's fully achievable solo.\n\n### Before you start\n\n- **Sign in** to your workspace (created automatically on first login; you're its Admin).\n- **Have done some work first.** The cost tab only has something to show once agents have run. If your workspace is brand new, run a few chats or a small mission first (modules 01 and 05) so there's real cost data to read.\n\n### Set the budget guardrail\n\n1. **Go to Settings → General.** (Settings is Admin-only — this is why it's an Admin task.)\n2. **Find the Features section and enable Cost alerts** — described as *'notify on budget thresholds.'* Set a threshold that makes sense for your usage. Remember the honest framing from the module: this is a **notification, not a brake** — it tells you to go look, it does not stop anything.\n3. **(Optional) Note the default model** under Defaults. If it's an expensive model, consider setting a cheaper default so new agents inherit a cost-appropriate starting point (the module's number-one lever).\n\n### Read the meter\n\n4. **Go to Analytics → LLM & Costs.** Set the time range (start with 30 Days) and click Refresh.\n5. **Read the four cost cards** and write down each: **Total Cost**, **Total Tokens**, **Cost Per Request**, and **Top Spender**.\n6. **Read the Cost by Model Over Time chart.** Note which model has the highest line, and whether any line is trending up.\n7. **Open the By Agent breakdown.** Find your **Top Spender** agent in the ranking, note its primary model and whether its cost trend is increasing or decreasing.\n8. **Glance at Cost Projections.** Note the monthly estimate, the trend direction, and whether any anomaly alert has fired — remembering projections are estimates that can change.\n\n### Trace one thread (the real skill)\n\n9. **Pick your Top Spender agent and ask: is this cost justified?** Look at what that agent actually does. If it's running an expensive model on simple work, you've found a blueprint problem — note it as a candidate for the cheaper-model fix (you don't have to change it now; spotting it is the exercise). If you have a recent mission, open its **cost breakdown by task** to see the finest grain of cost attribution.\n\n### Capture the artifact\n\n10. **Write a short read-out** (a few lines in a note): the four card values, your Top Spender agent and its model, one observation about the trend, and one sentence on whether your costs look healthy or need a cheaper-model fix. Save it. That read-out plus the enabled Cost alert is your artifact.\n\n### Why it matters\n\nYou've now done the two things that make cost governable: turned on the ambient guardrail that tells you when to look, and proven you can read the meter from whole-workspace total down to the agent driving spend. That's the difference between hoping costs are fine and knowing.\n\n### A note on honesty\n\nDon't record a 'budget remaining' or a 'spend cap' — there isn't one. What you're capturing is visibility (the cards and breakdowns) and the notification threshold (Cost alerts). Teaching or expecting a hard ceiling is the most common way to get this wrong.",
+      "checklist": [
+        "Signed in as Admin to your own workspace and confirmed there's real cost data to read (ran some work first if needed)",
+        "Enabled Cost alerts in Settings → General → Features and set a threshold — and can state that it notifies rather than stops",
+        "Read and wrote down the four cost cards: Total Cost, Total Tokens, Cost Per Request, Top Spender",
+        "Read the Cost by Model Over Time chart and noted the highest / rising model line",
+        "Opened the By Agent breakdown and identified the Top Spender agent, its primary model, and its cost trend",
+        "Glanced at Cost Projections (monthly estimate, trend, anomaly alerts) and treated them as estimates",
+        "Judged whether the Top Spender's cost is justified — flagged a cheaper-model candidate if it's an expensive model on simple work",
+        "ARTIFACT SAVED: a short cost read-out (card values, Top Spender + model, one trend observation, health verdict) plus the enabled Cost alert"
+      ]
+    },
+    {
+      "id": "lab-m09-roles-isolation",
+      "domainId": "m09-governance-ops",
+      "title": "Invite a Viewer and verify the permission matrix",
+      "goal": "Produce a second governance artifact: proof that the RBAC matrix behaves as documented. You'll invite someone (or a test address) as a Viewer, then check their access against the matrix — confirming a Viewer can chat and view but cannot create agents or connect tools — and read a mission's cost breakdown by task as per-objective spend visibility.",
+      "steps": "## What you'll do\n\nYou'll exercise the access model directly: invite a Viewer, verify what that role can and can't do against the documented matrix, and read per-mission cost attribution. Grounded in `automatos-gitbook/team/roles.md`, `automatos-gitbook/team/inviting.md`, and `automatos-gitbook/activity/missions.md`. This is an Admin task (managing the team is Admin-only) — you're the Admin of your own workspace, so it's achievable solo with a test email.\n\n### Before you start\n\n- **Sign in** as Admin to your workspace.\n- **Have a second email address ready** — a colleague's, or a test/alias address you control — to receive the invitation. (New members get a fresh workspace context with default agents; they don't inherit your chat history or data.)\n\n### Invite a Viewer\n\n1. **Go to Team Management → + Invite Member.** (This page is Admin-only, which is itself a demonstration of the matrix — a Member or Viewer would never see it.)\n2. **Enter the email address and select the Viewer role**, then Send Invitation. The invitee gets an email with a workspace invitation link; until accepted, they show with 'Invited' status (you can Resend or Revoke).\n\n### Verify the matrix\n\n3. **Open team/roles.md (the matrix) and predict, before checking, what a Viewer can do.** From the docs: a Viewer can **chat with agents** and **view activity and reports** — and cannot create/edit agents, upload documents, run playbooks, install marketplace items, connect tools, manage the team, access Settings, or view audit logs.\n4. **Confirm the prediction.** If a colleague accepted, have them (or use a second session) sign in as the Viewer and check: they can chat and see activity, but the create-agent, connect-tools, and Settings surfaces are unavailable to them. If you can't do a live second session, verify against the matrix and note that the Admin-only pages (Team Management, Settings) are exactly the ones gated — you already proved this by being the only one who can see the invite page.\n5. **Note the least-privilege point.** A Viewer is the right role for someone who must observe without changing anything — record why that's the correct least-privilege choice for an observer.\n\n### Read per-mission cost (per-objective spend)\n\n6. **Go to Activity → Missions and open a running or past mission** (run a small one first if you have none — module 05).\n7. **Read its cost breakdown by task.** This is per-objective, per-task spend visibility — the finest grain of cost attribution on the platform, and the thing that lets you trace a cost to a specific task. Note which task cost the most.\n8. **(If one is live and pricey) try Pause**, then Resume — practising the per-mission budget levers. On a small mission this may be unnecessary; knowing the levers exist is the point.\n\n### Capture the artifact\n\n9. **Write a short verification note**: the role you invited (Viewer), three things the matrix says that role can/can't do that you confirmed, and the most expensive task from a mission's cost-by-task view. Save it. That note is your artifact.\n\n### Why it matters\n\nYou've now operated both halves of access governance: granting the right role by least privilege, and confirming the matrix actually gates what it says it gates. Plus you've seen per-mission cost attribution — the finest grain of the cost visibility from lab 1. Together with lab 1 you've touched budgets, roles, and per-objective cost in your own workspace.\n\n### A note on isolation\n\nEverything you did stayed inside your one workspace, because that's the boundary — agents, documents, and the invited member are all workspace-scoped, and cross-workspace access isn't supported. If you were doing this for two separate clients, each would get its own isolated workspace.",
+      "checklist": [
+        "Signed in as Admin and confirmed the Team Management page is visible to you (a demonstration that it's Admin-only)",
+        "Invited a second address as a Viewer via Team Management → + Invite Member (status shows Invited until accepted)",
+        "Predicted the Viewer's permissions from the matrix before checking: can chat and view activity/reports; cannot create agents, connect tools, or access Settings",
+        "Confirmed the prediction against the matrix (and via a live Viewer session if available)",
+        "Recorded why Viewer is the correct least-privilege role for an observer",
+        "Opened a mission and read its cost breakdown by task as per-objective spend visibility; noted the most expensive task",
+        "ARTIFACT SAVED: a verification note (role invited, three confirmed matrix behaviours, most-expensive mission task)"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gitbook-llm-costs",
+      "title": "Automatos AI — Analytics: LLM & Costs (platform docs)",
+      "url": "automatos-gitbook/analytics/llm-costs.md",
+      "kind": "first-party-doc",
+      "annotation": "The primary source for lesson 1 and the cost half of the module. Read the four cost cards (Total Cost, Total Tokens, Cost Per Request, Top Spender), the Cost by Model Over Time chart, the By Model / By Agent / By Time breakdowns, Cost Projections (monthly estimate, trend, anomaly alerts), and the four cost-optimisation tips — the first of which, 'use cheaper models for simple tasks', is the number-one cost lever. Key fact: every LLM call is tracked with model + agent, which is what lets you trace a cost back to a specific conversation, playbook, or mission. Currency note: costs are estimates from per-token pricing, and projections are estimates that can change — there is no 'budget remaining' figure because there is no pre-set spend ceiling.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-analytics-readme",
+      "title": "Automatos AI — Analytics overview (platform docs)",
+      "url": "automatos-gitbook/analytics/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Orientation for where the LLM & Costs tab sits among the seven Analytics tabs (Overview, Agents, Workflows, Documents, LLM & Costs, Tools & Integrations). Read it for the time-range selector (My Workspace scope; 24 Hours / 7 Days / 30 Days; Refresh) that governs every cost view, and for the enhanced real-time metrics (cost-per-execution from actual usage, predictive capacity alerts, bottleneck detection). Skim it to navigate confidently to the cost tab for the lab.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-analytics-agents",
+      "title": "Automatos AI — Analytics: Agents tab (platform docs)",
+      "url": "automatos-gitbook/analytics/agents.md",
+      "kind": "first-party-doc",
+      "annotation": "The per-agent view that expands the Top Spender card into a full ranking. Read the agent comparison table (Tasks, Success Rate, Avg Time, Tokens, Cost) and the drill-down (time-series performance, task-type breakdown, error log, model usage history). Use it alongside the By Agent cost breakdown to answer 'which agents are expensive, and is any getting worse?' — the input to a blueprint (cheaper-model) fix.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-settings-general",
+      "title": "Automatos AI — Settings: General (platform docs)",
+      "url": "automatos-gitbook/settings/general.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds the workspace-level budget lever and the defaults. Read the Defaults (Default Model, Max Tokens, Temperature) and the Features flags — including Cost alerts ('notify on budget thresholds'), which is a NOTIFICATION, not a brake that stops spend. Also where BYOK preferences and Mission mode live. Currency note: Cost alerts is the only workspace budget control and it does not enforce a ceiling; teach it as 'tells you to look', never 'stops the workspace at $X'. Access is Admin-only.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-missions",
+      "title": "Automatos AI — Missions (platform docs)",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "first-party-doc",
+      "annotation": "The source for the per-mission budget lever and the plan-approval gate the scenario leans on. Read the Budget management section: view the cost breakdown by task, Pause 'if costs are exceeding expectations', and Resume with increased budget 'if a mission needs more resources than originally estimated'. The cost-by-task view is the finest grain of cost attribution — per-objective, per-task spend. Currency note (repeat because it's the module's core trap): budget control here is visibility plus a human decision, NOT a pre-set ceiling. Deepened in module 05.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-roles",
+      "title": "Automatos AI — Team: Roles & Permissions (platform docs)",
+      "url": "automatos-gitbook/team/roles.md",
+      "kind": "first-party-doc",
+      "annotation": "The primary source for lesson 3's RBAC. Read the full permission matrix (Admin / Member / Viewer across chat, view, create/edit agents, upload docs, run playbooks, install marketplace items, connect tools, manage team, Settings, admin analytics, credentials, audit logs), the 'at least one Admin' rule, and the specialised Context Engineering permission (edit global system prompts, orchestrator soul, heartbeat parameters, coordination rules). The governance insight: the Admin line falls exactly around the reach-outside-the-workspace and control-the-controls actions. Roles are Admin/Member/Viewer — never 'owner' or 'super_admin'.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-team-readme",
+      "title": "Automatos AI — Team Management & workspace isolation (platform docs)",
+      "url": "automatos-gitbook/team/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds workspace isolation as the tenancy boundary and the Team Management surface for the lab. Read the isolation statements literally: agents, documents, tools, and settings are workspace-scoped; members only see their own workspace; agents from one workspace cannot access another's data; credentials are workspace-scoped; cross-workspace access is not supported — which 'ensures data privacy between teams even on the same Automatos instance'. Also covers the member list columns, quick actions (Invite / Change Role / Remove), and that authentication is via Clerk (email/password, social, MFA). See team/inviting.md for the invite flow.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-credentials",
+      "title": "Automatos AI — Settings: API Keys & Credentials (platform docs)",
+      "url": "automatos-gitbook/settings/credentials.md",
+      "kind": "first-party-doc",
+      "annotation": "The source for lesson 4's credential security and rotation. Read the credential types (OpenRouter, OpenAI, Anthropic, Composio, Clerk, AWS, Custom), the security properties (encrypted at rest; masked / never shown in full after saving; all access logged; workspace-scoped), and the no-downtime rotation procedure (create new key → Edit → paste → Save → Test). Critical warning to teach: deleting a credential immediately breaks every agent and tool that depends on it, so rotation is edit-then-test, never delete-then-add; use View usage to see dependents first. Admin-only.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-audit-logs",
+      "title": "Automatos AI — Settings: Audit Logs (platform docs)",
+      "url": "automatos-gitbook/settings/audit-logs.md",
+      "kind": "first-party-doc",
+      "annotation": "The source for the immutable audit trail. Read what gets logged (user actions, agent operations, tool calls, credential changes, team changes, document operations, security events), the entry format (timestamp, actor — user OR agent, action, target, details, status), the filters (date range, actor, category, status, search), and the CSV export. Defining property to teach: audit logs are retained for the workspace's lifetime and CANNOT be deleted — that immutability is what makes them trustworthy for compliance. Admin-only.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-settings-models",
+      "title": "Automatos AI — Settings: Models (platform docs)",
+      "url": "automatos-gitbook/settings/models.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds BYOK, the default model, and the fallback chain for lesson 4. Read the provider configuration (OpenRouter primary with 100+ models; OpenAI; Anthropic; DeepSeek), the default-model behaviour (used when an agent doesn't specify one, and for system tasks like routing), and the fallback chain (Primary → Fallback 1 → Fallback 2; OpenRouter gives built-in fallback). Note the embedding default (qwen3-embedding-8b, 2048 dims) and the warning that changing it requires re-processing all documents. Currency note: OpenRouter is the documented primary; the cheaper-model routing decision is expressed through per-agent model choice and this default.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-gitbook-agents-creating",
+      "title": "Automatos AI — Agents: Creating an Agent (platform docs)",
+      "url": "automatos-gitbook/agents/creating.md",
+      "kind": "first-party-doc",
+      "annotation": "The source for the agent's configuration — our teaching term 'blueprint'. Read the creation steps that set what an agent does and costs: provider and model (OpenRouter/OpenAI/Anthropic/DeepSeek + specific model ID), temperature, max tokens, persona and system prompt, and assigned tools/skills. This is where least-privilege tool scoping and the right-sized model are decided per agent. Teaching-term note: the docs call this the agent's 'configuration'; APA uses 'blueprint' as a labelled metaphor for the same thing — say 'configuration' once, then use 'blueprint' as the concept.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-design-auth-multitenancy",
+      "title": "Automatos platform — authentication & multi-tenancy (architecture direction)",
+      "url": "automatos-ai/docs (authentication-multi-tenancy)",
+      "kind": "reference",
+      "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind workspace isolation and how tenancy/identity are intended to work under the hood. Treat anything here that isn't in the gitbook (team/README.md and team/roles.md are the live proof) as design intent, not shipped UI. Useful for understanding the reasoning behind 'cross-workspace access is not supported' as a hard boundary, but cite the gitbook for anything you claim is available today.",
+      "domainIds": ["m09-governance-ops"]
+    },
+    {
+      "id": "r-design-analytics-monitoring",
+      "title": "Automatos platform — analytics & monitoring (architecture direction)",
+      "url": "automatos-ai/docs (analytics-monitoring)",
+      "kind": "reference",
+      "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind cost tracking and observability: why every LLM call is metered by model and agent, and how the platform reasons about cost attribution and optimisation. The gitbook analytics/ pages remain the only proof of what the tabs actually show today; treat design-doc capabilities beyond the gitbook as intent, not a shipped feature you can teach as live.",
+      "domainIds": ["m09-governance-ops"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-09-1",
+      "title": "09 · Governance & ops — reading the cost tab, the two budget levers, and the blueprint",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m09-governance-ops"],
+      "sourceNotebook": "platform-architect / 09 / cost-visibility-budgets-and-blueprint"
+    },
+    {
+      "id": "v-09-2",
+      "title": "09 · The governance dial — how much autonomy and budget before a human must approve? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m09-governance-ops"],
+      "sourceNotebook": "platform-architect / 09 / debate-governance-dial"
+    }
+  ]
+}
