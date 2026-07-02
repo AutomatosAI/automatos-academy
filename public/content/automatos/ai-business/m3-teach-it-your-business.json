@@ -1,0 +1,373 @@
+{
+  "id": "m3-teach-it-your-business",
+  "order": 3,
+  "code": "M3",
+  "name": "Teach the AI your business",
+  "tagline": "Stop pasting the same price list and returns policy into every chat. Upload your documents once, and from then on the AI looks things up in YOUR material before it answers — and shows you where it read what it claims. The plain-English name for that is RAG, and you can forget the name the moment you've got it.",
+  "overview": "The question this module answers is the one every owner eventually asks: \"How does it know MY products, MY policies?\" Out of the box, a general AI knows the internet, not your shipping table or your refund window — so it guesses, and in Module 00 you watched it invent a returns policy with total confidence. The fix is not a cleverer prompt. It is giving the AI a permanent, private library of your own true documents to read from. You upload them once — price list, main policy, product or service sheet, your best past proposal — and from then on the AI retrieves the relevant passage and answers from it, and can point you at the source so you can check. That behaviour is called retrieval-augmented generation, RAG; now you can drop the term. This module teaches the three things that make it work or fail: what belongs in the library (the documents behind your ten most-repeated questions), the curation discipline (garbage in, garbage out — a stale price list makes a confidently wrong assistant, so it needs an owner and an update rhythm), and the privacy line (upload what a trusted employee could see; keep out what even they shouldn't; Module 06 covers the rules). The artifact you leave with is a grounded assistant that answers your ten most common questions correctly, with a source you can verify — and Modules 04 and 05 put it to work.",
+  "objectives": [
+    "Explain, in plain English, why a general AI doesn't know your business by default and what \"grounded answering\" (RAG) changes — you upload once, it retrieves from your material, and it can show you the source.",
+    "Decide what belongs in the knowledge base first: the documents behind your ten most-repeated questions — policies, prices, product and service facts, processes, and tone examples like a strong past proposal.",
+    "Apply the curation discipline that keeps a grounded assistant honest: garbage in, garbage out — assign one owner, set an update rhythm, and version out the stale so the AI never reads last year's prices.",
+    "Draw the privacy line at owner level (upload what a trusted employee could see; hold the rest for Module 06) and know the difference between a document you uploaded and a memory the AI formed on its own."
+  ],
+  "lessons": [
+    {
+      "id": "l1-grounded-answers",
+      "title": "Why it doesn't know your business — and the fix",
+      "estMinutes": 12,
+      "objective": "Explain why a general AI can't answer questions about your specific business by default, and what changes once you give it your own documents to read from — grounded answering, with a source you can check.",
+      "body": "## The problem you already saw\n\nAsk a general AI \"what's our returns window on personalised items?\" and it will answer. Confidently. In complete sentences. And it will be making it up — because it has never seen your policy. It was trained on a huge slice of the public internet, not on your shipping table, your price list, or the refund terms you email customers every week. When it doesn't know, it doesn't stop; it produces the most plausible-sounding answer, which for your specific business is often wrong. Module 00 called this behaviour hallucination, and framed it correctly: it's not a scandal or a bug to be outraged about, it's a known property of these tools that you design around. This module is how you design around it.\n\n## The fix, in one sentence\n\nGive the AI its own private library of your true documents, and tell it to read from that library before it answers.\n\nThat's the whole idea. You upload your documents **once** — price list, main policy, product or service sheet, a strong past proposal — into a knowledge base. From then on, when someone asks a question, the AI first looks up the relevant passage in **your** material, then answers from what it found, and can point you back at the exact document it read. You stop pasting the same three PDFs into every chat, and the answers stop being invented.\n\n> **Plain English first:** the industry calls this *retrieval-augmented generation* — RAG. Unpack it and it's obvious: **retrieval** (it looks things up), **augmented** (it adds what it found to the question), **generation** (then it writes the answer). Upload once, grounded answers with a source. You can forget the acronym now; you'll never need to say it to a customer.\n\n## Why the source matters more than the answer\n\nHere's the part that turns a party trick into a business tool: a grounded assistant can show you **where** it got the answer. On the platform, the Search view over your knowledge base returns ranked results and lets you click through to the exact source document and the specific chunk of text it matched — the docs note this is \"exactly what your agents see when they search your knowledge base during chat.\" So you're never asked to just trust it. You check.\n\nThat verifiability is the trust mechanism. An answer with a source you can open is worth ten confident answers you can't. It connects straight back to Module 00: the cure for a machine that can sound certain while being wrong is a machine that can **show its work** — and only a grounded assistant, reading from documents you control, can do that.\n\n## The worked example: the e-commerce shop\n\nTake an online shop that sells personalised mugs. Left to a general AI, \"customer wants to return a personalised mug after 40 days — what do we say?\" gets a smooth, invented answer: maybe it cheerfully offers a 30-day refund that the shop doesn't actually give, or waves through a return on a custom item the policy explicitly excludes. Either way the owner now has a promise on record that the business never made.\n\nNow give the shop a knowledge base. Upload three documents: the **returns policy**, the **shipping table**, and the **product sheet** for the personalised range. Ask the same question. This time the AI retrieves the clause that says personalised items are non-returnable after 14 days unless faulty, answers from it, and cites the returns policy so the owner can open it and confirm in five seconds. Same question, same AI — the only thing that changed is that it now has the shop's own truth to read from instead of the internet's average guess.\n\nThat is the entire promise of this module in one before-and-after. Everything else — what to upload, how to keep it current, what to keep out — is detail on top of it.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-1",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Out of the box, why does a general AI give wrong answers about your specific returns policy or prices?",
+          "options": [
+            { "id": "a", "text": "It was trained on the public internet, not on your documents — so when it doesn't know your specifics, it produces a plausible-sounding guess", "correct": true },
+            { "id": "b", "text": "It is deliberately lying to protect the AI company" },
+            { "id": "c", "text": "It knows the right answer but withholds it until you pay more" },
+            { "id": "d", "text": "The internet connection is too slow for it to look things up" }
+          ],
+          "explanation": "The model learned from a broad slice of the public internet, which never included your private price list or policy; lacking your specifics, it fills the gap with the most plausible-sounding answer, which is often wrong for your business. It isn't lying (that implies knowing the truth and hiding it), it isn't withholding a correct answer behind a paywall, and this has nothing to do with connection speed — it simply doesn't have your material until you give it some.",
+          "sourceRefs": ["r-knowledge-readme", "r-documents"]
+        },
+        {
+          "id": "kc-m3-2",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Someone tells you \"grounded answering (RAG) just means the AI is more confident.\" What's the better description?",
+          "options": [
+            { "id": "a", "text": "It looks up the relevant passage in your uploaded documents, answers from what it found, and can show you the source so you can check", "correct": true },
+            { "id": "b", "text": "It makes the AI sound more certain, whether or not it has your documents" },
+            { "id": "c", "text": "It stops the AI from ever making a mistake again" },
+            { "id": "d", "text": "It replaces your documents with the AI's own general knowledge" }
+          ],
+          "explanation": "Grounded answering means retrieving from YOUR material first and answering from it — with a source you can open and verify. Confidence is exactly the wrong lens: the Module 00 failure was an AI that was *already* confident while wrong. It doesn't make the AI infallible (you still check, and stale documents still mislead it), and it does the opposite of replacing your documents with general knowledge — it puts your documents in charge.",
+          "sourceRefs": ["r-knowledge-readme", "r-documents"]
+        }
+      ]
+    },
+    {
+      "id": "l2-what-belongs",
+      "title": "What belongs in the library — and what to leave out",
+      "estMinutes": 13,
+      "objective": "Choose the first documents to upload (the ones behind your most-repeated questions), including the tacit knowledge you've never written down, and draw the privacy line at owner level.",
+      "body": "## Start with your ten most-repeated questions\n\nDon't upload everything you own. Start with a list of the ten questions customers and staff ask you over and over, and pull the document that answers each. That list is your knowledge base's first table of contents, and it's almost always the same shape:\n\n- **Policies** — returns, refunds, cancellations, terms, delivery, guarantees.\n- **Prices** — your current price list, rate card, or package sheet.\n- **Product and service facts** — spec sheets, what's included, what isn't, sizes, lead times.\n- **Processes** — how you onboard a client, how you handle a complaint, the steps in a booking.\n- **Tone examples** — a proposal you were proud of, your two or three best customer emails. These teach the AI not just *what* you know but *how you sound* — invaluable when you later ask it to draft in your voice.\n\nThe marketing agency's version looks different from the shop's — for the agency, \"tone examples\" means winning proposals and the emails that turned a lead into a client; for the café it's the allergen sheet, opening hours, and booking rules. The principle is identical: **the documents behind the questions you're tired of answering.** Three to five of these beats a hundred random files. As the module puts it: one folder of true documents beats a thousand clever prompts.\n\n## Writing down what's only in your head\n\nHere's the trap that catches every owner: you expect the AI to know things you've never actually written down. The consultancy is the classic case — the real value is in the founder's head. *How do we scope a fixed-price engagement? When do we walk away from a bad-fit client? What's our actual position on discounting?* None of that lives in a document, so no amount of uploading will surface it. This is **tacit knowledge** — the stuff you know so well you've never spelled it out — and the AI can't read your mind.\n\nThe fix is to write it down, and the AI can help you do exactly that. Sit in a chat and have it interview you: \"Ask me questions until you understand how we price a project.\" Answer in plain speech, let it draft the page, correct it, and upload the result. You've just converted something that lived only in your head into a document the assistant — and any new hire — can read. Do it one page at a time; you don't have to empty your head in a weekend.\n\n## The privacy line, at owner level\n\nOne rule keeps you out of trouble without needing a lawyer today: **upload what a trusted employee could reasonably see; keep out what even they shouldn't.**\n\nYour returns policy, price list, and product sheet? A trusted employee sees those daily — upload them. Payroll records, customers' personal data, anything you're legally required to protect? A trusted employee wouldn't have that lying around either — so it doesn't belong in a general knowledge base, especially not just to answer a question that a cleaner document could answer. And don't upload rough drafts and half-baked versions; the AI can't tell your final policy from a superseded draft, so give it the finished, true version and nothing else.\n\n> **Say it plainly:** this is the owner-level instinct, not the full rulebook. The actual data-handling rules — who can see what, where personal data can live, what you're obliged to protect — are Module 06's job. For now: trusted-employee test in, final versions only, and hold the edge cases for the risk module.\n\n## One honest distinction: documents vs. memory\n\nWorth clearing up so you're not surprised later. The knowledge base is the library **you** stock — the documents you deliberately upload. Separately, the platform has a **memory** system where agents automatically hold onto useful facts and corrections from your conversations over time. They're different things: the knowledge base is your curated source of truth that you control; memory is what the assistant picks up as you work. This module is entirely about the library you stock on purpose. Memory is a later topic — just don't confuse \"I uploaded it\" with \"it happened to remember it.\"",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-3",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You're choosing the first documents to upload for a café. Which set is the right place to start?",
+          "options": [
+            { "id": "a", "text": "The documents behind your most-repeated questions — allergen sheet, opening hours, booking rules, price list", "correct": true },
+            { "id": "b", "text": "Every file the business has ever produced, including old drafts, so nothing is missed" },
+            { "id": "c", "text": "Only marketing brochures, because they read the best" },
+            { "id": "d", "text": "Nothing yet — wait until you have a hundred documents to make it worthwhile" }
+          ],
+          "explanation": "Start with the three-to-five documents that answer the questions you're tired of repeating — for a café, allergens, hours, bookings, prices. Uploading *everything including old drafts* is the classic mistake: the AI can't tell a final policy from a superseded one, so junk in means confident junk out. Brochures alone miss the operational questions people actually ask, and waiting for a hundred documents just delays the value — a small folder of true documents beats a thousand clever prompts.",
+          "sourceRefs": ["r-documents", "r-module-design"]
+        },
+        {
+          "id": "kc-m3-4",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A consultancy owner is frustrated: the assistant can't explain how they scope a fixed-price project, even after uploading their brochures. What's the actual gap?",
+          "options": [
+            { "id": "a", "text": "That knowledge is tacit — it lives in the owner's head and was never written down, so there's no document to retrieve; write it down (the AI can interview you) and upload it", "correct": true },
+            { "id": "b", "text": "The AI is broken and should be replaced", "correct": false },
+            { "id": "c", "text": "The AI can read minds but is choosing not to", "correct": false },
+            { "id": "d", "text": "Brochures always contain scoping methodology, so it must be a search bug", "correct": false }
+          ],
+          "explanation": "You can't retrieve what was never written. Scoping judgement is tacit knowledge — real, valuable, and only in the founder's head — so the fix is to capture it as a document (have the AI interview you one page at a time) and upload that. The tool isn't broken and can't read minds, and a marketing brochure almost never contains the internal scoping method, so it's not a search bug either.",
+          "sourceRefs": ["r-module-design", "r-documents"]
+        }
+      ]
+    },
+    {
+      "id": "l3-keeping-it-true",
+      "title": "Garbage in, garbage out — keeping it true over time",
+      "estMinutes": 11,
+      "objective": "Apply the curation discipline that keeps a grounded assistant trustworthy: one owner, an update rhythm, and versioning out the stale — because an assistant reading last year's prices is worse than no assistant.",
+      "body": "## The rule that decides whether this lasts\n\nA grounded assistant is only ever as good as the documents it reads. Feed it your current, correct policy and it answers correctly, with a source. Feed it last year's price list and it will quote last year's prices — **confidently, and with a citation**, which is worse than a shrug, because now it looks trustworthy while being wrong. This is **garbage in, garbage out**, and for a knowledge base it's the difference between an asset and a liability.\n\nSay it as bluntly as the module does: an AI reading last year's prices is worse than no AI. No AI makes a human go check the real number. A confidently-wrong AI gets believed.\n\n## Three habits that keep it honest\n\nYou don't need a document management department. You need three small disciplines:\n\n1. **One owner.** Someone is responsible for the knowledge base being true. In a small business that's often you. The point isn't bureaucracy — it's that \"everyone's job\" is nobody's job, and a knowledge base with no owner rots.\n2. **An update rhythm.** Prices change, policies change, products change. Decide when you'll check — when the price list changes, at the start of each quarter, whenever a policy is revised — and actually do it. A grounded assistant is a living thing, not a one-time upload you forget.\n3. **Version out the stale.** When a document is superseded, remove or replace the old one. Leaving the old returns policy sitting next to the new one means the AI might retrieve either — and you've reintroduced exactly the confusion you built the knowledge base to end. The platform's Library lists every document with its status and lets you delete or re-process files; use it to keep one true version of each thing, not three competing ones.\n\n## Keeping the source current, not just the file\n\nIf your documents live in a folder you already maintain, you can point the platform at it instead of re-uploading by hand. Dropbox connects today (S3 too, for the technical) — the platform does an initial sync of everything in the folder, then on later runs only processes what changed, so your knowledge base tracks the folder as you update it. (Google Drive and OneDrive are on the roadmap, listed as coming soon — so for now, direct upload or Dropbox is the reliable path; don't build your rhythm around a connector that isn't live yet.) Either way, the discipline is the same: the folder has to hold the *current truth*, because a synced stale file is just as wrong as an uploaded one.\n\n## The worked example: the marketing agency's rate card\n\nThe agency uploads its rate card, its service descriptions, and three winning proposals, and for a quarter the assistant is brilliant — new enquiries get accurate quotes drafted in the house voice, citing the rate card. Then rates go up 15% and nobody updates the document. Now every quote the assistant drafts is 15% low, cited confidently against the old rate card, and the owner only notices when a client happily accepts a number the agency can't afford to honour. Nothing about the AI failed. The **curation** failed: no owner on the rate card, no rhythm, the stale version never versioned out.\n\nContrast the disciplined version: the moment rates change, the owner replaces the rate card in the Library (or updates the synced folder), deletes the old one, and re-runs the same handful of test questions to confirm the new number comes back. Five minutes, and the assistant is true again. That five-minute habit — owner, rhythm, version out the stale, re-test — is what separates a knowledge base that compounds in value from one that quietly starts lying.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-5",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why is \"garbage in, garbage out\" more dangerous for a grounded assistant than for a general chatbot?",
+          "options": [
+            { "id": "a", "text": "It answers from your stale document confidently and with a citation, so a wrong answer now looks trustworthy — worse than an obvious guess a human would double-check", "correct": true },
+            { "id": "b", "text": "It isn't more dangerous — a grounded assistant can never be wrong once documents are uploaded", "correct": false },
+            { "id": "c", "text": "The AI physically deletes your correct documents when you upload an old one", "correct": false },
+            { "id": "d", "text": "Grounded assistants ignore their documents, so the documents don't matter", "correct": false }
+          ],
+          "explanation": "A citation is a trust signal — so a confidently-cited answer drawn from last year's price list gets believed, where a bare guess might have prompted a human to verify. That's why stale input is especially costly here. Uploading documents doesn't make it infallible (the whole lesson is that bad documents produce bad answers), uploading an old file doesn't delete your other files, and a grounded assistant does the opposite of ignoring its documents — it answers straight from them, which is exactly why they must be current.",
+          "sourceRefs": ["r-documents", "r-module-design"]
+        },
+        {
+          "id": "kc-m3-6",
+          "domainId": "m3-teach-it-your-business",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which three habits keep a knowledge base trustworthy over time?",
+          "options": [
+            { "id": "a", "text": "Assign one owner, set an update rhythm, and version out (remove/replace) stale documents", "correct": true },
+            { "id": "b", "text": "Upload once and never touch it again — set and forget", "correct": false },
+            { "id": "c", "text": "Add as many documents as possible, including every old version, and let the AI sort it out", "correct": false },
+            { "id": "d", "text": "Rewrite every document in the AI's preferred wording each week", "correct": false }
+          ],
+          "explanation": "One owner (so it's someone's job), a rhythm (so it's checked when things change), and versioning out the stale (so old prices can't be retrieved) are the three disciplines. Set-and-forget is precisely how a knowledge base rots; piling in every old version reintroduces the confusion you were trying to end; and rewriting everything weekly in some \"AI wording\" is busywork — the AI reads your true documents fine, it just needs them to be current, not reworded.",
+          "sourceRefs": ["r-documents", "r-cloud-sync"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m3-1",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In one plain sentence, what does giving an AI a knowledge base actually do?",
+      "options": [
+        { "id": "a", "text": "It lets the AI look things up in your own uploaded documents and answer from them, instead of guessing from general knowledge", "correct": true },
+        { "id": "b", "text": "It makes the AI type faster", "correct": false },
+        { "id": "c", "text": "It connects the AI to every other business's private files", "correct": false },
+        { "id": "d", "text": "It replaces your staff entirely", "correct": false }
+      ],
+      "explanation": "A knowledge base is the AI's private library of your true documents; it retrieves the relevant passage and answers from it rather than guessing. It has nothing to do with typing speed; it does not connect you to anyone else's private files (your material stays yours); and this module is about grounding answers, not replacing people — the assistant helps staff answer faster, it isn't a headcount plan.",
+      "sourceRefs": ["r-knowledge-readme", "r-documents"]
+    },
+    {
+      "id": "q-m3-2",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The e-commerce shop uploads its returns policy, then asks the assistant about a 40-day return on a personalised mug. What is the sign it's genuinely working?",
+      "options": [
+        { "id": "a", "text": "It answers from the policy and points you at the source document, so you can open it and confirm in seconds", "correct": true },
+        { "id": "b", "text": "It answers instantly and very confidently, with no source", "correct": false },
+        { "id": "c", "text": "It gives a longer answer than before", "correct": false },
+        { "id": "d", "text": "It refuses to answer any returns question at all", "correct": false }
+      ],
+      "explanation": "The proof of grounding is a correct answer *with a checkable source* — you open the cited returns policy and confirm it. Confidence with no source is exactly the Module 00 failure you're trying to escape; answer length proves nothing; and a blanket refusal means it isn't using the policy you uploaded. The verifiable source is the whole point.",
+      "sourceRefs": ["r-documents", "r-module-design"]
+    },
+    {
+      "id": "q-m3-3",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which set of documents is the strongest first upload for a grounded assistant?",
+      "options": [
+        { "id": "a", "text": "The documents behind your ten most-repeated questions — policies, prices, product/service facts, key processes, and a couple of strong tone examples", "correct": true },
+        { "id": "b", "text": "Every internal file you own, including drafts and superseded versions", "correct": false },
+        { "id": "c", "text": "Only a single company mission statement", "correct": false },
+        { "id": "d", "text": "Screenshots of your competitors' websites", "correct": false }
+      ],
+      "explanation": "Anchor the first upload on the questions you're tired of answering — that's where a grounded assistant pays off immediately, and tone examples also teach it your voice. Dumping every file including drafts is the headline mistake (the AI can't tell final from superseded); a lone mission statement answers almost none of the real questions; and competitor screenshots are neither yours nor authoritative for *your* policies and prices.",
+      "sourceRefs": ["r-documents", "r-module-design"]
+    },
+    {
+      "id": "q-m3-4",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why do citations (being shown the source) matter so much for trusting an AI's answer?",
+      "options": [
+        { "id": "a", "text": "You can open the source and verify the claim — trust through verifiability, which is the direct fix for a machine that can sound certain while being wrong", "correct": true },
+        { "id": "b", "text": "Citations make the answer look more professional in an email", "correct": false },
+        { "id": "c", "text": "Citations guarantee the underlying document is up to date", "correct": false },
+        { "id": "d", "text": "Citations let the AI answer without needing any documents", "correct": false }
+      ],
+      "explanation": "A source you can open replaces blind trust with a five-second check — the antidote to Module 00's confidently-wrong machine. Looking professional is cosmetic and beside the point. A citation proves *where* the answer came from, not that the document is current — that's what your update rhythm is for. And a citation is the opposite of answering without documents; it exists precisely because the answer came from one.",
+      "sourceRefs": ["r-documents", "r-module-design"]
+    },
+    {
+      "id": "q-m3-5",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A consultancy's most valuable know-how — how it scopes and prices engagements — lives only in the founder's head. How do you get it into the knowledge base?",
+      "options": [
+        { "id": "a", "text": "It's tacit knowledge; write it down — you can have the AI interview you and draft the page one at a time — then upload it", "correct": true },
+        { "id": "b", "text": "You can't; the AI will infer it from the brochures automatically", "correct": false },
+        { "id": "c", "text": "Upload the founder's calendar and the AI will work it out", "correct": false },
+        { "id": "d", "text": "Wait for the AI to read the founder's mind after enough conversations", "correct": false }
+      ],
+      "explanation": "Knowledge that was never written down can't be retrieved, so you capture it as a document first — letting the AI interview you is the fastest way to draft it. Brochures don't contain the internal scoping method, so nothing gets inferred; a calendar shows *when* things happened, not *how* you decide; and the AI cannot read minds no matter how many conversations pass. The move is always: write the tacit thing down, then upload.",
+      "sourceRefs": ["r-module-design", "r-documents"]
+    },
+    {
+      "id": "q-m3-6",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The marketing agency raises its rates 15% but nobody updates the rate card in the knowledge base. What happens, and whose failure is it?",
+      "options": [
+        { "id": "a", "text": "The assistant drafts quotes 15% too low, cited confidently against the stale card — a curation failure (no owner, no update rhythm), not an AI failure", "correct": true },
+        { "id": "b", "text": "The assistant automatically detects the new rates and corrects itself", "correct": false },
+        { "id": "c", "text": "The assistant refuses to quote until someone fixes it", "correct": false },
+        { "id": "d", "text": "Nothing — old prices in a document have no effect on answers", "correct": false }
+      ],
+      "explanation": "Garbage in, garbage out: the assistant faithfully quotes the old number and cites it, so the error looks trustworthy — the fault is human curation, fixed by an owner, a rhythm, and versioning out the old card. It can't auto-detect rates it was never given; it won't refuse (it has a document to cite, it just happens to be wrong); and stale prices very much affect answers — that's the entire risk the lesson warns about.",
+      "sourceRefs": ["r-documents", "r-module-design"]
+    },
+    {
+      "id": "q-m3-7",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where's the owner-level privacy line for what to upload to a general knowledge base?",
+      "options": [
+        { "id": "a", "text": "Upload what a trusted employee could reasonably see; keep out what even they shouldn't (payroll, customers' personal data) — and hold the detailed rules for Module 06", "correct": true },
+        { "id": "b", "text": "Upload absolutely everything; privacy is only a concern for large companies", "correct": false },
+        { "id": "c", "text": "Upload nothing that contains any words at all, to be safe", "correct": false },
+        { "id": "d", "text": "Only upload documents older than five years", "correct": false }
+      ],
+      "explanation": "The trusted-employee test is the practical owner-level line, with the formal data-handling rules deferred to Module 06 — this course won't fake being legal advice. \"Upload everything\" ignores real obligations around personal data; \"upload nothing with words\" would defeat the entire purpose of a document knowledge base; and document age is irrelevant to sensitivity — a five-year-old file can be highly sensitive and a today's file perfectly fine to share.",
+      "sourceRefs": ["r-module-design", "r-documents"]
+    },
+    {
+      "id": "q-m3-8",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want your knowledge base to stay current as you edit a folder of documents you already maintain. What's the realistic path today?",
+      "options": [
+        { "id": "a", "text": "Sync a Dropbox folder (initial sync, then only changed files after) — or just re-upload directly; both keep one true version as you update", "correct": true },
+        { "id": "b", "text": "Connect Google Drive, which is the primary supported way to keep it in sync", "correct": false },
+        { "id": "c", "text": "It's impossible to keep a knowledge base current; you must rebuild it from scratch every time", "correct": false },
+        { "id": "d", "text": "Once uploaded, documents update themselves whenever you edit the original file anywhere", "correct": false }
+      ],
+      "explanation": "Dropbox sync is live (S3 too) and does incremental updates after the first run, and direct re-upload always works — either keeps the current truth in place. Google Drive and OneDrive are listed as *coming soon*, so building your rhythm around Drive today would be premature. You never have to rebuild from scratch, and files don't magically update themselves — that self-updating illusion is exactly why an owner and a rhythm matter.",
+      "sourceRefs": ["r-cloud-sync", "r-documents"]
+    },
+    {
+      "id": "q-m3-9",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What's the difference between a document in your knowledge base and something in the AI's memory?",
+      "options": [
+        { "id": "a", "text": "The knowledge base is the library you deliberately stock and control; memory is what the assistant automatically holds onto from your conversations over time", "correct": true },
+        { "id": "b", "text": "They're the same feature with two names", "correct": false },
+        { "id": "c", "text": "Memory is where you upload PDFs; the knowledge base is only for chat history", "correct": false },
+        { "id": "d", "text": "Neither has anything to do with grounding answers", "correct": false }
+      ],
+      "explanation": "You curate the knowledge base on purpose; memory forms on its own as agents note useful facts and corrections during work — two distinct systems. They aren't the same feature; the roles in option C are reversed (you upload PDFs to the *knowledge base*, not memory); and the knowledge base is precisely what grounds answers, so \"neither relates to grounding\" is wrong. For this module, only the deliberately-stocked library matters.",
+      "sourceRefs": ["r-memory", "r-knowledge-readme"]
+    },
+    {
+      "id": "q-m3-10",
+      "domainId": "m3-teach-it-your-business",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "After uploading, a file needs to be searchable before the assistant can use it. What happens to an uploaded document first?",
+      "options": [
+        { "id": "a", "text": "It's automatically processed — parsed, split into chunks, and embedded for search — no manual configuration needed", "correct": true },
+        { "id": "b", "text": "You must hand-write search tags for every paragraph before it works", "correct": false },
+        { "id": "c", "text": "Nothing happens until you email support to enable the file", "correct": false },
+        { "id": "d", "text": "The document is posted publicly so the AI can find it online", "correct": false }
+      ],
+      "explanation": "The platform runs an automatic pipeline — parse, chunk, embed, index — so a supported file becomes searchable on its own; the docs stress there's no manual configuration. You don't hand-tag paragraphs, you don't need to email anyone to switch a file on, and nothing is ever posted publicly — your documents stay in your private knowledge base, which is the whole point of grounding on *your* material.",
+      "sourceRefs": ["r-documents", "r-knowledge-readme"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m3-grounded-assistant",
+      "domainId": "m3-teach-it-your-business",
+      "title": "Do it now: build your grounded assistant and pass the ten-question test",
+      "goal": "Turn 3–5 of your real business documents into a grounded assistant, then prove it by running the ten questions your customers and staff actually ask — checking each answer against the source it cites, and closing the gaps you find.",
+      "steps": "## What you'll build\n\nA private knowledge base holding your own true documents, and an assistant that answers your ten most common questions from them — with a source you can open and verify. Everything here works on the free platform, on your own personal workspace (a personal workspace is created for you when you first sign in, and you're its admin, so you can upload and test on your own — no team setup needed). If a step names a UI area you can't see, the platform's layout may differ slightly by version; use the described goal to find the equivalent, and never force a document somewhere it doesn't belong.\n\n## Before you start\n\nWrite your **ten questions** — the ones you answer over and over for customers and staff (\"what's the return window?\", \"do you deliver to X?\", \"what's included in the standard package?\"). This list is your test, and it also tells you which documents to gather.\n\n## Steps\n\n1. **Gather 3–5 core documents.** Pull the files that answer those questions: your price list, your main policy (returns/terms/cancellation), a product or service sheet, and one strong past proposal or your best customer email (for tone). Use the finished, current versions only — no drafts, no superseded copies.\n2. **Check the privacy line.** Before anything goes in, apply the trusted-employee test: would a trusted employee reasonably see this? Prices, policies, product facts — yes. Payroll, customers' personal data — no; leave those out and hold Module 06's rules for the edge cases.\n3. **Upload them.** Go to **Knowledge Bases → Documents** and use **Upload** (drag and drop, or the Upload button). Supported types include PDF, MD, DOCX, TXT, CSV and more. If your documents already live in a Dropbox folder you maintain, you can connect **Dropbox** under Cloud Sync instead of uploading by hand (Google Drive and OneDrive are marked coming soon, so use direct upload or Dropbox today).\n4. **Wait for processing.** The platform automatically parses, chunks, and embeds each file. Watch the **Processing** sub-tab (or the Library status column) until every document shows completed — an unprocessed file can't be searched yet.\n5. **Run the ten-question test.** Use the **Search** sub-tab to ask each of your ten questions — this returns ranked results and is \"exactly what your agents see\" when they search during chat. For each answer, click through to the **source document and chunk** it matched and confirm the answer is actually in your material, not invented.\n6. **Find the gaps.** Some questions will come back wrong or blank. Almost always the gap is a document that doesn't exist yet — a policy you've never written down, tacit knowledge that's only in your head.\n7. **Close each gap.** Write the missing document (or open a chat and have the AI interview you — \"ask me questions until you can write our X policy\" — then edit its draft). Upload it, wait for processing, and re-run just that question until it answers correctly from the source.\n8. **Do one curation pass.** Name the **owner** of this knowledge base (probably you), decide an **update rhythm** (e.g. \"whenever the price list changes\"), and delete any stale or duplicate file from the Library so only one true version of each thing remains.\n9. **Keep it.** This grounded assistant is a signature artifact of the track — Modules 04 and 05 put it to work automating real tasks, so don't tear it down.\n\n## Self-verify checklist\n\nYou're done when the boxes below are ticked. The artifact you've produced is **a grounded assistant that answers your ten most common questions correctly, each with a source you can open and verify.**",
+      "checklist": [
+        "Your ten real customer/staff questions are written down as the test",
+        "3–5 current, final documents uploaded (no drafts/superseded versions), privacy line applied via the trusted-employee test",
+        "Every document shows completed processing in the Library/Processing view",
+        "All ten questions run through Search, each answer checked against the source document and chunk it cites",
+        "Every wrong-or-blank answer traced to a missing document, which was written (AI-interviewed if needed), uploaded, and re-tested to a correct, sourced answer",
+        "One owner named and an update rhythm decided; stale/duplicate files removed so one true version of each remains",
+        "The grounded assistant is kept in place for Modules 04–05"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-knowledge-readme",
+      "title": "Automatos docs — Knowledge Bases (overview)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "official-doc",
+      "annotation": "The home base for this module: what a Knowledge Base is, the Documents/Database/Templates/CodeGraph/Knowledge-Graph tabs, and the quick-start (Upload → drag files → wait for processing → test in Search → agents can now reference them in chat). This is where you upload once so the AI can retrieve from your material — the plain-English job behind the term RAG.",
+      "domainIds": ["m3-teach-it-your-business"]
+    },
+    {
+      "id": "r-documents",
+      "title": "Automatos docs — Documents (upload, search, RAG)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "official-doc",
+      "annotation": "The detailed how-to for the hands-on step: supported file types (PDF, MD, DOCX, TXT, CSV, and more), the automatic Upload → Parse → Chunk → Embed → Index pipeline, the Processing view, and the Search sub-tab that returns ranked results with the source document/chunk — \"exactly what your agents see\" — which is how you run and verify the ten-question test.",
+      "domainIds": ["m3-teach-it-your-business"]
+    },
+    {
+      "id": "r-cloud-sync",
+      "title": "Automatos docs — Cloud Sync (Dropbox / S3)",
+      "url": "automatos-gitbook/knowledge/cloud-sync.md",
+      "kind": "official-doc",
+      "annotation": "For keeping the knowledge base current without re-uploading by hand: connect a Dropbox folder (S3 too) for an initial sync then incremental updates of only changed files. Note the status table — Google Drive and OneDrive are \"Coming soon\" — so today's reliable paths are direct upload or Dropbox. Supports the update-rhythm discipline in Lesson 3.",
+      "domainIds": ["m3-teach-it-your-business"]
+    },
+    {
+      "id": "r-memory",
+      "title": "Automatos docs — Memory (vs. the knowledge base)",
+      "url": "automatos-gitbook/activity/memory.md",
+      "kind": "official-doc",
+      "annotation": "Read only to keep two things straight: the knowledge base is the library YOU deliberately stock and control; memory is what agents automatically hold onto from conversations over time. This module is about the curated library — this page is the honest boundary so you don't confuse \"I uploaded it\" with \"it remembered it.\"",
+      "domainIds": ["m3-teach-it-your-business"]
+    },
+    {
+      "id": "r-module-design",
+      "title": "ABF Module 03 design notes — grounded-assistant framing and the ten-question test",
+      "url": "automatos-academy/docs/roadmap/ai-business/03-teach-it-your-business.md",
+      "kind": "reference",
+      "annotation": "The module's own advisor-voice brief: the e-commerce returns example, garbage-in-garbage-out with an owner and update rhythm, writing down tacit knowledge, the owner-level privacy line, and the artifact — a grounded assistant that answers your ten most common questions correctly, with citations. The source of this lane's tone and worked cast.",
+      "domainIds": ["m3-teach-it-your-business"]
+    },
+    {
+      "id": "r-genai-leader-guide",
+      "title": "Google Gen-AI-Leader exam guide — grounding & improving output sections (business-toned)",
+      "url": "https://services.google.com/fh/files/misc/genai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "Optional deeper reading if you want the vendor-neutral concepts behind this module: the guide's \"improving model output\" material covers grounding an AI in your own trusted data and why it reduces made-up answers — the same idea as RAG, in plain business language. Vendor-light and audience-appropriate; not required to complete the module.",
+      "domainIds": ["m3-teach-it-your-business"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m3-1",
+      "title": "M3 · Teach the AI your business — upload once, grounded answers with a source (the e-commerce returns example)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m3-teach-it-your-business"],
+      "sourceNotebook": "ai-business / m3 / grounded-assistant-and-citations"
+    },
+    {
+      "id": "v-m3-2",
+      "title": "M3 · Deep Dive — what belongs in the library, garbage-in-garbage-out, and the ten-question test",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m3-teach-it-your-business"],
+      "sourceNotebook": "ai-business / m3 / knowledge-base-curation-deep-dive"
+    }
+  ]
+}

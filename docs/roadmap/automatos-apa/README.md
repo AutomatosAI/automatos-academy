@@ -20,7 +20,7 @@ with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-
 | 03 | Knowledge & tools — RAG, Knowledge Graph, CodeGraph, NL2SQL, connect Composio tools | `knowledge/*`, `tools/*` | [`03-knowledge-tools.md`](./03-knowledge-tools.md) |
 | 04 | Playbooks & workflows — build, schedule, trigger | `agents/playbooks`, `tools` | [`04-recipes-playbooks.md`](./04-recipes-playbooks.md) |
 | 05 | Missions — goal → plan → approve → run | `activity/missions` | [`05-missions.md`](./05-missions.md) |
-| 06 | Memory — the five layers + field memory | `activity/memory` | [`06-memory.md`](./06-memory.md) |
+| 06 | Memory — what agents remember (+ the deeper architecture) | `activity/memory` | [`06-memory.md`](./06-memory.md) |
 | 07 | Deliverables & templates — branded PDF / DOCX / XLSX | `knowledge/templates`, `activity/reports` | [`07-deliverables-templates.md`](./07-deliverables-templates.md) |
 | 08 | Channels & surfaces — Slack/Telegram, the widget SDK, Shopify, IDE | `tools/channels`, `api-reference` | [`08-channels-surfaces.md`](./08-channels-surfaces.md) |
 | 09 | Governance & ops — budgets, blueprints, RBAC, analytics/cost, workspace isolation | `team/*`, `analytics/*`, `activity/missions` | [`09-governance-ops.md`](./09-governance-ops.md) |

@@ -1,7 +1,12 @@
-# Automatos · Module 06 — Memory: the five layers + field memory
+# Automatos · Module 06 — Memory: what agents remember (+ the deeper architecture)
 
 **Type:** Free training (no exam)  ·  **Goal:** understand how agents remember, browse/search/manage
 stored memories, and know what the deeper memory architecture buys you.
+
+> **Currency note (2026-07-02):** the user docs document a **two-tier** model (short-term /
+> long-term) plus scope + consolidation — teach that as live. The five-layer L0–L4 model and field
+> memory are **architecture direction** from the design docs — teach them labelled as such, never
+> as UI features.
 
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/activity/memory.md` — the Memory tab: how agent memory works, browsing, searching, managing, per-agent scope, the tiers, consolidation, augmentation
@@ -25,14 +30,17 @@ Cover ONLY, in order:
 3. Per-agent scope: each agent has its own memory scope PLUS access to workspace-level shared
    memories — so Sentinel's security findings don't clutter Code Reviewer's memory, but shared
    project context is available to all.
-4. The tiers, made concrete (from the gitbook memory doc AND the five-layer architecture doc): L0 the
-   current context window (ephemeral); L1 working memory (Redis sessions, ~24h); L2 short-term memory
-   (Postgres, decays over time); L3 long-term memory (fact-extracted, persistent); L4 organisational
-   knowledge (RAG / NL2SQL — the tools you set up in Module 03). Memory is CONSOLIDATED periodically —
-   merging related facts, removing duplicates, strengthening frequently-recalled ones.
-5. Field memory (PRD-166): the newest layer — a workspace-persistent "field" that compounds across
-   Missions (patterns carry provenance and are scored by similarity × stability × recency). Frame it
-   as the platform's long-horizon memory that grows as you run more work.
+4. The tiers — label the two sources honestly. WHAT THE USER DOCS DOCUMENT (teach as live): TWO
+   tiers — short-term memory (session-scoped) and long-term memory (persistent) — plus per-agent
+   scope, workspace-shared memory, and periodic CONSOLIDATION (merging related facts, removing
+   duplicates, strengthening frequently-recalled ones). WHAT THE ARCHITECTURE DOCS ADD (label
+   explicitly as "the deeper architecture direction"): the five-layer model — L0 context window →
+   L1 working (Redis, ~24h) → L2 short-term → L3 long-term → L4 organisational knowledge
+   (RAG/NL2SQL from Module 03).
+5. Field memory (PRD-166) — architecture direction, same labelling: a workspace-persistent "field"
+   that compounds across Missions (patterns carry provenance, scored by similarity × stability ×
+   recency). Frame it as where the platform's long-horizon memory is headed — not a UI surface the
+   learner will find today.
 
 ~8 minutes: open with "your agents build context over time," show browse + search + pin on the Memory
 tab, then explain the tiers as retention windows and close on consolidation + field memory. Stay
@@ -45,14 +53,16 @@ architecture doc.
 Two hosts, practical, teaching a user how memory actually behaves. Go deep on: how memories are
 created (automatic extraction of decisions, preferences, outcomes, shared knowledge); per-agent vs
 workspace-shared scope; searching by vector similarity; and managing memory (delete/edit/pin) with
-the "delete is permanent" warning. Then the layered model from the five-layer architecture doc — L0
-focus (context window) → L1 working (Redis, ~24h TTL) → L2 short-term (Postgres, Ebbinghaus-style
-decay) → L3 long-term (fact extraction, indefinite) → L4 org knowledge (RAG/NL2SQL tools) — and the
-consolidation/promotion flow between them. Introduce field memory (PRD-166) as workspace-persistent
-memory that merges across Missions with provenance and honest scoring (similarity × stability ×
-recency) and compaction to stay bounded. Distinguish clearly what a user manages in the UI (the
-Memory tab) from what the platform manages automatically (tiering, consolidation, the field). Ground
-strictly in activity/memory.md, the five-layer doc, and PRD-166.
+the "delete is permanent" warning. Teach the DOCUMENTED model as live: short-term + long-term tiers,
+per-agent vs workspace-shared scope, consolidation. THEN, clearly labelled "the deeper architecture
+direction" (design docs, not the user manual): the five-layer model — L0 focus (context window) →
+L1 working (Redis, ~24h TTL) → L2 short-term (Postgres, Ebbinghaus-style decay) → L3 long-term
+(fact extraction, indefinite) → L4 org knowledge (RAG/NL2SQL tools) — the consolidation/promotion
+flow, and field memory (PRD-166): workspace-persistent memory that merges across Missions with
+provenance and honest scoring (similarity × stability × recency) and compaction to stay bounded.
+Distinguish clearly what a user manages in the UI (the Memory tab) from what the platform manages
+automatically — and never present an architecture-doc layer as a UI feature. Ground strictly in
+activity/memory.md, the five-layer doc, and PRD-166.
 ```
 
 ## 🛠 Try it now (on the free platform)

@@ -4,11 +4,174 @@
   "code": "ABF",
   "summary": "Run your business with AI — plain English, no exam, no jargon. Nine modules from “what actually is AI?” to one real automation shipped in your own business, each ending in a hands-on step on the free Automatos platform.",
   "blueprintNote": "First-party skills track (Operator lane) — no external exam, no weights, no readiness gate. Curriculum per PRD-B1-AI-BUSINESS; module prompts in docs/roadmap/ai-business/. Completion = every module's hands-on work plus the capstone (one running automation + a one-page AI operating plan).",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "/Users/gkavanagh/Development/Automatos-AI-Platform/automatos-gitbook (canonical user docs, local repo)"
+    ],
+    "notes": "First-party track grounded in the Automatos gitbook (the canonical user documentation) at authoring time; every 'Do it now' hands-on step maps to a documented surface, and platform features the docs don't back (opportunity-map wizards, ROI dashboards, hard spend caps, one-page-policy generators, business-ops templates) are taught honestly as learner-authored artifacts or as goals rather than invented click-paths. The platform is mid-evolution — feature flags, Cloud Sync providers, budgets/approvals and role surfaces are all moving — so re-check each 'Do it now' step against the docs on every platform release before relying on it in class."
+  },
   "badge": {
     "completionLabel": "AI-operational — AI Business Foundations",
     "definition": "Completed the Automatos Academy AI Business Foundations track: shipped one real automation with guardrails, wrote a one-page AI policy and operating plan, and can explain what AI can and can't do for a business."
   },
-  "domainFiles": [],
-  "officialResources": [],
-  "videos": []
+  "domainFiles": [
+    "m0-what-ai-is.json",
+    "m1-where-ai-fits.json",
+    "m2-working-with-ai.json",
+    "m3-teach-it-your-business.json",
+    "m4-chats-to-systems.json",
+    "m5-delegation-guardrails.json",
+    "m6-risk-safety.json",
+    "m7-cost-roi.json",
+    "m8-capstone-operating-plan.json"
+  ],
+  "officialResources": [
+    {
+      "id": "gb-welcome",
+      "title": "Automatos docs — Welcome & Quick Start",
+      "url": "automatos-gitbook/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Start here. Signing in auto-creates your own personal workspace, and on your own workspace you are the Admin — so every hands-on step in this track is something you can do solo.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-about",
+      "title": "Automatos docs — About Automatos AI",
+      "url": "automatos-gitbook/about.md",
+      "kind": "first-party-doc",
+      "annotation": "The platform in its own words: agents are workers, not chatbots — each has a model, a persona, tools and skills. The plain-English vocabulary the whole track uses lives here.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-chat",
+      "title": "Automatos docs — Chat",
+      "url": "automatos-gitbook/chat/README.md",
+      "kind": "first-party-doc",
+      "annotation": "How you actually talk to your agents. The Universal Router (Auto mode) picks the right agent for each message, so a good result starts with a good, specific request.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-agents",
+      "title": "Automatos docs — Agents",
+      "url": "automatos-gitbook/agents/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Where you build and manage your AI workers. A Playbook is the platform's name for a saved multi-step workflow across one or more agents — the thing you build once your chats are worth repeating.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-activity",
+      "title": "Automatos docs — Activity",
+      "url": "automatos-gitbook/activity/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The command centre: the live feed of what your agents did, plus Missions — an autonomous objective the agents plan for you and only run after you approve the plan.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-tools",
+      "title": "Automatos docs — Tools & Integrations",
+      "url": "automatos-gitbook/tools/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Connect the outside apps your agents can act in. The docs' own advice is to start an agent read-only and widen its tool permissions only as you build trust.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-knowledge",
+      "title": "Automatos docs — Knowledge Bases",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "first-party-doc",
+      "annotation": "How you teach the AI your business: upload documents for RAG so answers are grounded in your own material. Cloud Sync from Dropbox and S3 is live; Google Drive and OneDrive are marked coming soon.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-marketplace",
+      "title": "Automatos docs — Marketplace",
+      "url": "automatos-gitbook/marketplace/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Community-shared agents, playbooks and apps — free, workspace-scoped copies you install into your own workspace. There is no paid or revenue-share economy here; publishing is 'submit for review'.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-team",
+      "title": "Automatos docs — Team Management",
+      "url": "automatos-gitbook/team/README.md",
+      "kind": "first-party-doc",
+      "annotation": "When you bring people in: three roles — Admin, Member, Viewer. Only Admins connect tools, manage the team, and open Settings, Analytics-Admin and audit logs.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-analytics",
+      "title": "Automatos docs — Analytics",
+      "url": "automatos-gitbook/analytics/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The cost side of the story: spend per request, per agent and per model, plus projections and top spenders. Note the honest gap — there is no time-saved or ROI number; that half of the ROI sum is yours to estimate.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-settings",
+      "title": "Automatos docs — Settings",
+      "url": "automatos-gitbook/settings/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Admin-only. Bring-your-own-key for the LLM providers (OpenRouter, OpenAI, Anthropic, DeepSeek, Google), model choices, feature flags, credentials and audit logs. Cost alerts on thresholds live here — but there is no hard spend cap that blocks a run.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-api-reference",
+      "title": "Automatos docs — API Reference",
+      "url": "automatos-gitbook/api-reference.md",
+      "kind": "first-party-doc",
+      "annotation": "For when you outgrow the UI: the REST surface behind agents, playbooks and missions. Operators rarely need it, but it's the proof that everything in the buttons is also scriptable.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-genai-leader-guide",
+      "title": "Google — Generative AI Leader exam guide",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The business-toned external the modules lean on for AI fundamentals, techniques to improve output, and the honest 'prove it' framing — vendor-neutral and pitched at leaders, not engineers.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-owasp-llm-top-10",
+      "title": "OWASP Top 10 for LLM Applications (2025)",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "kind": "reference",
+      "annotation": "The plain-language risk checklist behind the delegation and safety modules — prompt injection, oversharing, over-reliance — used to explain why guardrails exist, not as compliance dogma.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-nist-ai-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "reference",
+      "annotation": "A stable, widely-cited frame for thinking about AI risk in an organisation. Used for orientation in the safety module — the vocabulary of managing risk, not a checklist to certify against.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-eu-ai-act-timeline",
+      "title": "EU AI Act — implementation timeline",
+      "url": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "kind": "reference",
+      "annotation": "Orientation only: how a major AI regulation phases in over time. Taught as a stable frame in the risk module — no specific compliance dates are asserted as fact, since the timeline keeps moving.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "Welcome — what you'll ship in this track",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "How to use this track",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
 }

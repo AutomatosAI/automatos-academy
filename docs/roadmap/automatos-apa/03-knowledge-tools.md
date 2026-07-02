@@ -6,6 +6,7 @@ and connect the external tools they act with.
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/knowledge/README.md` — the Knowledge Bases page (Documents / Database / Templates / CodeGraph tabs + stats)
 - `automatos-gitbook/knowledge/documents.md` — upload → parse → chunk → embed → index; Search, RAG settings, Multimodal
+- `automatos-gitbook/knowledge/cloud-sync.md` — syncing sources *(currency: Dropbox + S3 "Available"; Google Drive / OneDrive "Coming soon" — teach only the available ones as live)*
 - `automatos-gitbook/knowledge/knowledge-graph.md` — auto-extracted entities/relationships; graph-enhanced RAG
 - `automatos-gitbook/knowledge/codegraph.md` — indexing repos as a symbol graph; how agents use it
 - `automatos-gitbook/knowledge/database.md` — SQL Explorer, Semantic Layer, NL2SQL Training, benchmarks, audit

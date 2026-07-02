@@ -1,11 +1,17 @@
-# Automatos · Module 07 — Deliverables & templates: branded PDF / DOCX / XLSX
+# Automatos · Module 07 — Deliverables & templates: consistent, templated documents
 
-**Type:** Free training (no exam)  ·  **Goal:** get agents to produce consistent, branded documents —
+**Type:** Free training (no exam)  ·  **Goal:** get agents to produce consistent documents —
 reports, audits, summaries — from templates, and find them in your workspace.
 
 > **Vocabulary:** the file an agent produces is a **Deliverable** (not "output" / "artifact" in
 > user-facing terms). Agents build deliverables via the `generate_document` tool, usually from a
 > **Template**.
+
+> **Currency note (2026-07-02):** the user docs document **markdown templates** ({{placeholder}}
+> variables) and markdown reports; DOCX/XLSX/PDF appear in the docs as *upload* formats. The
+> **branded rich-format generation** (block templates, brand kit, PDF/DOCX output — PRD-167) is
+> recent build work with no gitbook page yet — **verify it in the product before demoing**, and
+> teach markdown templates as the live baseline.
 
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/knowledge/templates.md` — what templates are, example templates, using them, creating them (structure + placeholder variables)
@@ -29,9 +35,11 @@ Cover ONLY, in order:
 3. Creating a template (templates.md): + New Template → name + description → write the structure in
    markdown (headings, tables) → set placeholder variables like {{agent_name}} and {{date}} that get
    filled at generation time → Save.
-4. Deliverables: agents build the actual file with the generate_document tool — the platform supports
-   PDF, DOCX, XLSX and markdown. Frame this as "template = the shape, generate_document = produces the
-   branded file."
+4. Deliverables: agents build the actual document with the generate_document tool — markdown
+   deliverables from your templates are the documented baseline. Frame this as "template = the shape,
+   generate_document = produces the file." If richer branded formats (PDF/DOCX) appear in your
+   product build, show them — but only claim what you can see working; the docs' file-format list
+   (DOCX/XLSX/PDF/MD) describes what you can UPLOAD, not what generation promises.
 5. Where deliverables live: agent reports show up in Activity → Reports as cards (agent, title,
    timestamp, status, preview); open one in the viewer (full markdown render + linked artifacts) and
    grade it 1–5 stars, which feeds Analytics → Agents. Reports are stored in the workspace filesystem
@@ -39,15 +47,17 @@ Cover ONLY, in order:
 
 ~8 minutes: open with "agents should hand you a document," create a small template on screen, ask an
 agent to generate from it, then find and grade the result in Reports. Stay strictly in the sources;
-do not invent template fields or file formats beyond PDF/DOCX/XLSX/markdown.
+do not invent template fields, and do not promise generated file formats beyond what you verified
+in the product (markdown is the documented baseline).
 ```
 
 ## 🎧 Deep Dive (learn) — NotebookLM → Audio → Customize
 ```
 Two hosts, practical, teaching a user to standardise agent output. Go deep on: designing a good
 template (sections, tables, placeholder variables filled at generation time); the difference between
-a template (structure) and a generated deliverable (the branded PDF/DOCX/XLSX file the agent produces
-via generate_document); requesting a specific template from chat; and how reports flow into Activity →
+a template (structure) and a generated deliverable (the document the agent produces via
+generate_document — markdown per the docs; richer branded formats only as verified in-product);
+requesting a specific template from chat; and how reports flow into Activity →
 Reports — the card fields, the viewer, grading for quality, and where they're stored (workspace
 filesystem + database). Connect to earlier modules: a Playbook or Mission can end by generating a
 templated deliverable. Ground strictly in knowledge/templates.md, activity/reports.md, and the

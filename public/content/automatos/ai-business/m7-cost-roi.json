@@ -1,0 +1,381 @@
+{
+  "id": "m7-cost-roi",
+  "order": 7,
+  "code": "M7",
+  "name": "Cost & ROI",
+  "tagline": "The money conversation, given straight: what AI actually costs (a subscription plus pay-per-work usage plus your review time), what it actually earns (minutes freed on tasks you do weekly, valued at what the person costs), and the honest list of tasks where it loses money. Weigh what it earns against what it costs — the return on the money — read the cost tab like a utility bill, then make the scale / keep / kill call on every automation without guilt.",
+  "overview": "This is the module that answers the only question a business owner really has: is this worth money to me? You'll learn the two-sided sum every AI purchase comes down to. The cost side is more than the monthly fee — it's the subscription, the usage (you pay per work done, so long documents and big jobs cost more than short questions), and the ongoing time you spend checking the output, which most calculations quietly skip. The value side is minutes freed on a task, times how often you do it, times what the person doing it costs — and it only counts on tasks you do weekly or more, because a task you do twice a year never earns back the time it took to set up. You'll read the platform's cost tab the way you read a utility bill (what ran, what each automation cost this month, cost per run — five minutes, monthly), run the value sum on a real automation, and give it a verdict: scale it, keep it, or kill it. The anti-hype segment names, plainly, the tasks where AI loses money — rare jobs, jobs where checking takes as long as doing, mistake-expensive jobs, and tool-hopping every month. Weighing what an automation earns against what it costs is what people mean by return on investment — ROI for short — and the artifact here is a one-page cost/ROI sheet per running automation. Nothing here is about faith in AI; it's about running the numbers like any other purchase decision. Note up front: the platform shows you the cost half honestly, but there is no built-in 'time saved' or return-on-investment number anywhere — the value half is yours to estimate, and this module teaches you how.",
+  "objectives": [
+    "Add up the true cost of an AI automation: the subscription, the usage (you pay per work done — bigger jobs cost more), and the ongoing human review time most calculations leave out.",
+    "Run the value sum honestly — minutes freed times how often the task runs times the loaded cost of the person — counting only tasks done weekly or more, and naming the harder-to-price wins as judgment calls, not numbers.",
+    "Read the platform's cost tab like a utility bill: what ran this month, what each automation cost, and the cost per run — and know that the platform supplies the cost half only, never a time-saved or ROI figure.",
+    "Recognise the tasks where AI loses money — rare jobs, jobs where checking takes as long as doing, mistake-expensive jobs, and monthly tool-hopping — and treat the 'don't automate' list as a deliberate business decision.",
+    "Make the scale / keep / kill call on each automation on a one-page ROI sheet, and run a quarterly kill-list so a few automations that clearly pay beat a dozen half-used experiments."
+  ],
+  "lessons": [
+    {
+      "id": "l1-what-ai-costs",
+      "title": "What AI actually costs — and reading the cost tab like a utility bill",
+      "estMinutes": 12,
+      "objective": "Add up the three real costs of an AI automation (subscription, usage, review time) and read the platform's cost tab the way you read a monthly bill.",
+      "body": "## Three costs, not one\n\nMost people price AI as a single monthly fee. That's the number that gets you sold. The honest cost of an automation has **three** parts, and you have to add all three:\n\n1. **The subscription** — a flat monthly fee for the tools you use. Predictable. Easy. This is the part everyone quotes.\n2. **The usage** — here's the mental model that matters: **you pay per work done.** Every time the AI reads or writes something, that's a small charge. Long documents and big jobs cost more than short questions, because there's more text to process. On the platform this is measured in **tokens** — just a unit for 'how much text got processed.' You don't need to count tokens; you need to know the shape of it: *a monthly automation that chews through big documents every day has a real, visible price tag, and a quick chat costs almost nothing.*\n3. **The review time** — the cost almost every calculation skips. If a person still checks the AI's output before it goes out (and in the early weeks they should), **that checking time is a cost.** Ten minutes of a manager's attention per run is not free just because no invoice arrives for it.\n\nMiss any one of these and your sum is wrong. The subscription-only view makes AI look cheaper than it is; ignoring review time makes it look like magic.\n\n## Bring your own key: the cost model you'll actually hit\n\nOn Automatos, the usage cost is driven by an **LLM** — the 'large language model,' the AI engine that does the reading and writing. You connect your own account with the model provider and bring your own key (the docs call this **BYOK**), so the usage charges land on *your* provider bill, not a markup. The platform's job is to show you exactly what that usage was. Providers you can connect include OpenRouter (the default, a single key that reaches most models), OpenAI, Anthropic, DeepSeek, and Google — you compare and pick in **Settings → Models** and the **Marketplace → LLMs** catalogue, which lists each model's price per million units of text. Cheaper models for simple work, better models where it matters — that choice is the biggest lever you have on the usage bill.\n\n## The cost tab is a utility bill\n\nYou don't guess at any of this. The platform tracks every charge and shows it to you in one place: **Analytics → LLM & Costs**. Treat it exactly like the electricity bill — five minutes, once a month:\n\n- **Total Cost** for the period — the whole bill.\n- **Cost Per Request** — the average price of one job. This is your 'cost per run.'\n- **Cost by Agent** and **Cost by Model** — which worker and which engine ran up the meter, so a runaway cost has a name.\n- **Top Spender** — the single agent or model costing the most, flagged for you.\n- **Cost Projections** — a projected monthly estimate from your recent usage, so a bill doesn't surprise you.\n\nEvery charge traces back to a specific chat, playbook, or mission, so 'why was this month higher?' always has an answer. One honest caveat the docs state plainly: projections are **estimates** based on recent use — they move when your usage moves.\n\n> **The plain rule:** the cost tab tells you what your AI *spent*. It never tells you what it *saved* — there is no 'time saved' or ROI number anywhere on the platform. That half is yours to work out, and the next lesson is how.\n\n## Worked example — the café reads its bill\n\nThe café built one automation back in Module 04: every Friday at 4pm, a scheduled **playbook** (a saved multi-step routine) reads the week's supplier emails and drafts the weekly order sheet. A month in, the owner opens **Analytics → LLM & Costs** and reads it like the electricity bill. Total cost for the month on that playbook: a few pounds. Cost Per Request: pennies a run, four runs a month. The subscription is a flat fee she already pays. And the review time — she still skims the draft order for ten minutes each Friday before sending — is the third cost, the one that isn't on any screen. Three numbers, five minutes: subscription + a few pounds of usage + forty minutes a month of her time. That's the true cost. She hasn't worked out whether it's *worth* it yet — that needs the other side of the sum — but she now knows, to the penny, what it costs. That's the discipline: never argue about whether AI is worth it until you can see the real bill.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m7-1-1",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Why does a long document cost more to process than a short question?",
+          "options": [
+            { "id": "a", "text": "You pay per work done, measured in units of text processed — more text means more units, so bigger jobs cost more", "correct": true },
+            { "id": "b", "text": "Long documents are always sent to a more expensive model automatically" },
+            { "id": "c", "text": "The subscription fee rises with each document you upload" },
+            { "id": "d", "text": "It doesn't — every request costs exactly the same flat amount" }
+          ],
+          "explanation": "Usage is pay-per-work: the charge scales with how much text gets read and written (measured in tokens), so a long document costs more than a short question — that's the whole mental model. It isn't about the document forcing a pricier model (you choose the model), the subscription is a separate flat fee that doesn't rise per upload, and requests are emphatically not all the same price — if they were, there'd be no reason to watch the meter.",
+          "sourceRefs": ["r-gb-llm-costs", "r-gb-marketplace-llms"]
+        },
+        {
+          "id": "kc-m7-1-2",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You open Analytics → LLM & Costs to price your automation. Which cost will the tab NOT show you?",
+          "options": [
+            { "id": "a", "text": "The time a person spends reviewing the AI's output before it goes out", "correct": true },
+            { "id": "b", "text": "The total cost for the month" },
+            { "id": "c", "text": "The average cost per request (your cost per run)" },
+            { "id": "d", "text": "Which agent or model is your Top Spender" }
+          ],
+          "explanation": "Review time is a real cost, but no invoice is raised for it, so it never appears on the cost tab — you have to add it yourself. Total cost, cost per request, and the Top Spender card are all things the LLM & Costs tab does show. Pricing an automation honestly means reading the tab for the machine costs and then adding your own human review time on top.",
+          "sourceRefs": ["r-gb-llm-costs"]
+        }
+      ]
+    },
+    {
+      "id": "l2-what-it-earns-and-loses",
+      "title": "What it earns — and the honest list of when AI loses money",
+      "estMinutes": 13,
+      "objective": "Run the value sum (minutes freed × frequency × loaded rate) on weekly-plus tasks, and recognise the tasks where AI reliably loses money.",
+      "body": "## The value sum\n\nThe cost side has three parts; the value side has one honest formula:\n\n> **minutes freed per run × how often you run it × the loaded cost of the person doing it**\n\n'Loaded cost' means what the person actually costs per hour — not just their wage, but the real cost of their time to the business. Free up thirty minutes of a person who costs £40 an hour, twice a week, and you've freed roughly £40 a week. That's a number you can put on a page.\n\nThree rules keep this honest, and every one of them is a place owners fool themselves:\n\n1. **Count only tasks you do weekly or more.** This is the hard gate. A task you do twice a year can't free enough hours to earn back the time it took to set up. The value lives in *frequency*. Rare tasks are the number-one way AI quietly loses money — the setup never pays back.\n2. **Count net minutes, not gross.** If the automation frees forty minutes but you spend ten checking it, you freed *thirty*, not forty. Subtract the review time from Lesson 1 — always. Counting gross time saved is the most common way an owner overstates the win.\n3. **Freed time only pays when it's re-spent on something that matters.** Thirty minutes back is worth £40 only if that half-hour goes to work that earns or matters. If it evaporates into inbox-scrolling, the value was theoretical. Be honest about where the time actually goes.\n\nAnd some wins genuinely don't fit the formula — faster replies to customers, fewer dropped follow-ups, your evenings back. These are real. Name them **honestly as judgment calls**, in words, sitting *beside* the number — never dressed up as a number they aren't. 'The team feels more productive' is not a measurement. 'We stopped losing two enquiries a week to slow replies' is closer to one.\n\n## When AI loses money — the anti-hype segment, straight\n\nThis is the part the sales pitch skips. Four kinds of task where AI reliably costs more than it earns, no matter how good the demo looked:\n\n- **Rare tasks.** Do it twice a year and the setup and maintenance never pay back. Frequency is the whole game.\n- **Tasks where checking takes as long as doing.** If verifying the AI's output takes as long as just doing the task yourself, you've automated nothing — you've added a step.\n- **Mistake-expensive tasks.** If a wrong answer is costly, legal, or embarrassing, you'll double-check *everything* the AI produces, forever. That permanent review cost usually swamps the saving. (This is the same 'don't automate' instinct from Module 01, now with a price tag on it.)\n- **Tool-hopping.** Switching tools every month means you pay the setup cost over and over and never reach the point where the habit — and the saving — compounds.\n\nNone of this means AI is bad. It means AI is a tool with a cost, and some jobs aren't worth the tool. Knowing which is worth more than any single automation.\n\n## Worked example — the agency runs two sums\n\nThe marketing agency has a **playbook** that drafts client proposals — the exact repeatable task from Module 04. The owner runs the value sum on it. It frees about 45 minutes per proposal; they draft roughly 12 proposals a month; the person who'd otherwise write them costs about £50 an hour loaded. That's 45 minutes × 12 × £50/hour ≈ **£450 a month of freed time**. Against it: the subscription, a modest usage bill on the cost tab, and the owner's review time — call it 10 minutes a proposal, which they subtract from the gross. Net, it **clears comfortably**. Verdict: scale it.\n\nThen they run the *same* maths on their once-a-quarter industry award submission. It's a big, fiddly document — the AI helps a lot on any single one. But it runs **four times a year**, and each one still needs heavy owner review because the wording matters and a weak entry is embarrassing. Minutes freed times *frequency* collapses the moment frequency is 'quarterly,' and the mistake-expensive review time is high. It **doesn't clear**. Same tool, same firm — one task earns, one loses. That's the discipline the number gives you: it stops you automating the award submission just because the proposal automation worked.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m7-2-1",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An automation frees 40 minutes per run, but you spend 10 minutes reviewing each result. What figure goes into the value sum?",
+          "options": [
+            { "id": "a", "text": "30 minutes — the net time freed, after subtracting review", "correct": true },
+            { "id": "b", "text": "40 minutes — the gross time freed, because review is a separate cost" },
+            { "id": "c", "text": "50 minutes — the freed time plus the review time added together" },
+            { "id": "d", "text": "0 minutes — any review at all means the automation freed nothing" }
+          ],
+          "explanation": "You freed 30 net minutes: 40 gross minus the 10 you spent checking. Counting the gross 40 is the classic overstatement — it double-benefits from time you actually spent working. Adding the two (50) is nonsense; review costs time, it doesn't create it. And 30 minutes is a real saving, so 'zero' is too harsh — the point is to net review out, not to assume review kills all value.",
+          "sourceRefs": ["r-genai-leader-guide", "r-gb-llm-costs"]
+        },
+        {
+          "id": "kc-m7-2-2",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which task is the clearest case of AI likely LOSING money?",
+          "options": [
+            { "id": "a", "text": "A once-a-quarter award submission that still needs heavy human review", "correct": true },
+            { "id": "b", "text": "A weekly proposal draft that frees 40 net minutes each time" },
+            { "id": "c", "text": "A daily first-pass reply to routine customer enquiries" },
+            { "id": "d", "text": "A twice-weekly summary of orders into a status note" }
+          ],
+          "explanation": "The award submission hits two loss triggers at once: it runs only four times a year (frequency too low to earn back setup) and it's mistake-expensive, so it needs heavy review every time. The other three all run weekly or more with modest review — exactly the profile where the value sum tends to clear. Frequency and review cost are what decide it, not how impressive the task looks.",
+          "sourceRefs": ["r-genai-leader-guide"]
+        }
+      ]
+    },
+    {
+      "id": "l3-scale-keep-kill",
+      "title": "Scale, keep, or kill — the portfolio view and the ROI one-pager",
+      "estMinutes": 11,
+      "objective": "Give each automation a scale/keep/kill verdict on a one-page ROI sheet, run a quarterly kill-list, and treat the 'don't automate' list as a business asset.",
+      "body": "## From one sum to a portfolio\n\nOnce you can price the cost side (Lesson 1) and the value side (Lesson 2), every running automation gets a one-line verdict:\n\n- **Scale** — it clears comfortably. Do more of this: pick the next candidate from your Module 01 map and build it the same way.\n- **Keep** — it roughly breaks even, or its value is real but hard to price (faster replies, evenings back). Leave it running, watch it.\n- **Kill** — it doesn't clear. Turn it off **without guilt** and put the freed attention on a better task.\n\nHold these on a **one-page ROI sheet** — one row per automation: what it costs a month, the hours it frees, and the verdict. That page is your artifact for this module, and it's the operator's version of a P&L for AI.\n\n## The portfolio discipline: a few that pay beat a dozen half-used\n\nHere's the pattern that separates owners who get value from AI from owners who just spend on it: **a few automations that clearly pay beat a dozen half-used experiments.** Two playbooks earning £450 a month each is a real result. Twelve half-configured agents nobody trusts is a cost with no return and a maintenance burden on top.\n\nSo run a **kill-list quarterly.** Every three months, open the cost tab, re-read your ROI sheet, and ask of each automation: *does this still clear?* Kill the ones that don't. This is the same money-hygiene as pruning subscriptions you stopped using — and it's exactly what the anti-hype list from Lesson 2 protects against: the slow drift into paying for tools that no longer earn.\n\n## The 'don't automate' list is a strategic asset\n\nCounter-intuitively, the *most* valuable page you'll write in this module might be the list of things you deliberately keep human. Three reasons a task stays off the automation list, on purpose:\n\n- **Mistakes are expensive** — the review cost would never be worth it (pricing, contracts, hiring calls).\n- **Volume is trivial** — you do it rarely; the setup never pays back.\n- **The human touch IS the product** — the personal note, the judgment call your customers pay *you* for. Automating it wouldn't save money, it would erode the thing you sell.\n\nWriting this list down is not admitting defeat. It's the mark of an owner who understands the tool well enough to aim it — and it stops you wasting money automating the wrong things.\n\n## Worked example — the consultancy's portfolio after six months\n\nThe consultancy has been building for six months and now has four automations. The owner puts them on one page. Two clear easily: the weekly timesheet-to-status-note **playbook** (frequent, low review, from Module 04) and a first-draft meeting-summary routine — both get **scale**. One roughly breaks even: an enquiry-triage helper whose real win is *fewer dropped follow-ups* — hard to price, so it gets **keep**, with that judgment-call value written in words beside it. And one loses: a bespoke, once-a-project report generator that needs so much correction each time that checking takes nearly as long as writing — **kill.** On the same page, the owner keeps the 'don't automate' list: final client recommendations stay human, because that judgment is what the client actually pays for. Six months, four automations, one honest page: two scaled, one kept, one killed, and a deliberate line nobody automates. That page — not any single automation — is the real return on this module.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m7-3-1",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "An automation frees real value that's genuinely hard to put a number on (fewer dropped follow-ups) and roughly breaks even on the priceable maths. What's the right verdict?",
+          "options": [
+            { "id": "a", "text": "Keep — leave it running and write the hard-to-price value in words beside it", "correct": true },
+            { "id": "b", "text": "Kill — if you can't put a clean number on it, it doesn't count" },
+            { "id": "c", "text": "Scale immediately — unmeasured value is usually the biggest value" },
+            { "id": "d", "text": "Ignore it — automations that only break even aren't worth tracking" }
+          ],
+          "explanation": "'Keep' is exactly for this: break-even maths plus real-but-unpriceable value, recorded honestly as a judgment call beside the number. Killing it discards a genuine win just because it's hard to measure. Scaling on the strength of unmeasured value is how owners get sold junk — the whole discipline is to weight the unmeasurable modestly. And a break-even automation is worth tracking precisely so you can catch it if it drifts into losing.",
+          "sourceRefs": ["r-genai-leader-guide", "r-gb-llm-costs"]
+        },
+        {
+          "id": "kc-m7-3-2",
+          "domainId": "m7-cost-roi",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why is the quarterly kill-list worth more than any single automation you build?",
+          "options": [
+            { "id": "a", "text": "It stops the slow drift into paying for automations that no longer clear, keeping the portfolio to a few that genuinely pay", "correct": true },
+            { "id": "b", "text": "It automatically deletes the highest-cost agent every quarter regardless of value" },
+            { "id": "c", "text": "It proves AI is working by showing the total number of automations always going up" },
+            { "id": "d", "text": "It replaces the need to read the cost tab, since killing things is enough on its own" }
+          ],
+          "explanation": "The kill-list is money hygiene: reviewing every automation quarterly and cutting the ones that no longer clear keeps you with a few that pay instead of a dozen half-used experiments. It's a judgement each quarter, not a blind delete of the priciest agent (that one might be your best earner). More automations is not the goal — value is; a rising count can just be rising cost. And it works *with* the cost tab, not instead of it — you re-read the real bill to make the call.",
+          "sourceRefs": ["r-gb-llm-costs", "r-genai-leader-guide"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m7-1",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What are the three parts of the true cost of an AI automation?",
+      "options": [
+        { "id": "a", "text": "The subscription, the usage (pay-per-work), and the human review time", "correct": true },
+        { "id": "b", "text": "The subscription, the hardware, and the training course" },
+        { "id": "c", "text": "Only the monthly subscription fee — everything else is included" },
+        { "id": "d", "text": "The usage, the electricity, and the office rent" }
+      ],
+      "explanation": "The honest cost is subscription (flat fee) + usage (you pay per work done) + review time (the human checking the output). Hardware and a training course aren't the recurring cost of running an automation. The subscription-only view is precisely the understatement this module warns against. And electricity/rent are general overheads, not the per-automation costs you weigh in an ROI call.",
+      "sourceRefs": ["r-gb-llm-costs"]
+    },
+    {
+      "id": "q-m7-2",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which tab on the platform shows what your AI spent this month, the cost per request, and the Top Spender?",
+      "options": [
+        { "id": "a", "text": "Analytics → LLM & Costs", "correct": true },
+        { "id": "b", "text": "Settings → Credentials" },
+        { "id": "c", "text": "Activity → Feed" },
+        { "id": "d", "text": "Marketplace → LLMs" }
+      ],
+      "explanation": "Analytics → LLM & Costs is the cost tab — total cost, cost per request, cost by agent/model, Top Spender, and projections. Settings → Credentials is where you store your provider key, not where you read spend. Activity → Feed is the live log of what agents did. Marketplace → LLMs shows list pricing to help you compare models before choosing — it's not your actual bill.",
+      "sourceRefs": ["r-gb-llm-costs", "r-gb-marketplace-llms"]
+    },
+    {
+      "id": "q-m7-3",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The value sum for an automation is:",
+      "options": [
+        { "id": "a", "text": "Minutes freed per run × how often you run it × the loaded cost of the person", "correct": true },
+        { "id": "b", "text": "The monthly subscription fee × the number of team members" },
+        { "id": "c", "text": "Total tokens used × the price per token" },
+        { "id": "d", "text": "Minutes freed per run × the number of automations you own" }
+      ],
+      "explanation": "Value is minutes freed × frequency × the loaded (real) hourly cost of the person whose time you freed. The subscription × headcount is a cost, not a value. Tokens × price is the *usage cost* — the other side of the ledger. And multiplying by how many automations you own is meaningless — value is earned per task, by freeing time on work you actually repeat.",
+      "sourceRefs": ["r-genai-leader-guide", "r-gb-llm-costs"]
+    },
+    {
+      "id": "q-m7-4",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why does the value sum count only tasks you do weekly or more?",
+      "options": [
+        { "id": "a", "text": "Value comes from frequency — a rare task can't free enough hours over time to earn back its setup cost", "correct": true },
+        { "id": "b", "text": "The platform technically refuses to automate anything done less than weekly" },
+        { "id": "c", "text": "Rare tasks are always harder for AI to do well" },
+        { "id": "d", "text": "Weekly tasks are the only ones that cost money to run" }
+      ],
+      "explanation": "Frequency is the engine of value: minutes freed only add up to real money when the task recurs often, so a twice-a-year task never earns back the time spent building and maintaining it. The platform has no such frequency rule — this is a judgement you apply. Rarity isn't about difficulty (AI may do a rare task fine — it just won't pay). And rare tasks still cost money to run; the point is they don't earn enough to justify it.",
+      "sourceRefs": ["r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m7-5",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A task where verifying the AI's output takes about as long as just doing the task yourself. What does the module say about automating it?",
+      "options": [
+        { "id": "a", "text": "It's one of the tasks where AI loses money — you've added a checking step, not saved time", "correct": true },
+        { "id": "b", "text": "Automate it anyway — any automation is a net win once it's set up" },
+        { "id": "c", "text": "Automate it, because review time never counts as a real cost" },
+        { "id": "d", "text": "It's the ideal automation candidate because the AI is involved" }
+      ],
+      "explanation": "If checking takes as long as doing, the automation frees roughly zero net time — you've replaced 'do it' with 'wait for it, then check it,' which is a loss. 'Any automation is a win' ignores that setup and review both cost. Review time is a real, recurring cost (Lesson 1's whole point). And AI being involved is not a reason to automate — worth-it is decided by the net sum, not by whether the tech is present.",
+      "sourceRefs": ["r-genai-leader-guide", "r-gb-llm-costs"]
+    },
+    {
+      "id": "q-m7-6",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The platform's Cost Projections card says next month will cost roughly £120. How should you treat that figure?",
+      "options": [
+        { "id": "a", "text": "As an estimate based on recent usage that moves when your usage moves — useful for planning, not a guarantee", "correct": true },
+        { "id": "b", "text": "As a fixed cap the platform will not let you exceed" },
+        { "id": "c", "text": "As the exact amount you'll be charged, locked in for the month" },
+        { "id": "d", "text": "As a bill you must pay to Automatos directly for the projection" }
+      ],
+      "explanation": "The docs are explicit: projections are estimates from recent usage and change as usage changes — good for a heads-up, not a promise. It is not a spend cap; the platform surfaces cost alerts on thresholds and lets you pause a mission and resume it with a higher budget, but it doesn't hard-stop a run at a projected number. It's not a locked-in exact charge. And it isn't a bill payable to Automatos — with bring-your-own-key, usage lands on your own provider account.",
+      "sourceRefs": ["r-gb-llm-costs", "r-gb-settings-general", "r-gb-missions"]
+    },
+    {
+      "id": "q-m7-7",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You run the ROI sheet on a portfolio of automations. What does 'a few that clearly pay beat a dozen half-used' mean in practice?",
+      "options": [
+        { "id": "a", "text": "Concentrate on the automations that clear the sum and kill the rest quarterly, rather than accumulating experiments that cost and don't return", "correct": true },
+        { "id": "b", "text": "Always aim to have as many automations running as possible to look productive" },
+        { "id": "c", "text": "Never kill an automation once built, because the setup cost is already spent" },
+        { "id": "d", "text": "Only the single cheapest automation should ever be kept" }
+      ],
+      "explanation": "The discipline is focus: keep and scale the ones that clear, cut the rest on a quarterly kill-list, because half-used automations are pure cost plus maintenance. A high count is not the goal — value is. 'Never kill it, the setup is sunk' is the sunk-cost trap; the ongoing cost keeps running whether or not it earns. And 'keep only the cheapest' confuses cheap with valuable — the best automation is the one that clears by the most, not the one that costs the least.",
+      "sourceRefs": ["r-gb-llm-costs", "r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m7-8",
+      "domainId": "m7-cost-roi",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which item belongs on the 'don't automate' list as a deliberate business decision — NOT because the AI can't do it?",
+      "options": [
+        { "id": "a", "text": "The final personal recommendation to a client, where the human judgment is the thing they pay you for", "correct": true },
+        { "id": "b", "text": "Drafting routine weekly customer replies that a person still checks" },
+        { "id": "c", "text": "Summarising this week's orders into a status note every Friday" },
+        { "id": "d", "text": "Producing a first-pass draft of a frequently-written proposal" }
+      ],
+      "explanation": "The final client recommendation stays human on purpose: the human touch IS the product, so automating it wouldn't save money — it would erode what you sell. The other three are textbook good candidates: frequent, pattern-following, words-in/words-out, with a human check. The 'don't automate' list isn't about AI's ability; it's a strategic choice to keep expensive-mistake, trivial-volume, or human-touch work in human hands.",
+      "sourceRefs": ["r-genai-leader-guide"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m7-tasks-or-habit",
+      "domainIds": ["m7-cost-roi"],
+      "title": "Tasks or habit? — the consultancy reviews six months of AI",
+      "tagline": "Where does the ROI actually live — the spreadsheet lines, or the capability you've built? Make the calls the debate forces.",
+      "context": "You advise the consultancy from the worked examples. Six months in, they have a portfolio of automations and a decision to make: what justified the spend, what to cut, and how much weight to give the value that never fits a spreadsheet line. The honest answer sits between two camps — measure only what's on the ROI sheet, versus credit the compounding capability the sheet can't see. Walk it, and make the call at each turn. Each choice is graded; pick the best.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Leadership asks: 'Did our six months of AI pay off?' You have the cost tab and an ROI sheet with four automations. How do you answer first?",
+          "choices": [
+            { "id": "a", "text": "Start from the sheet: name which automations clear the value sum on weekly tasks (net of review), then flag the real-but-unpriceable wins separately as judgment calls", "verdict": "best", "rationale": "This is the honest order — measure the measurable first so the answer stands on numbers, then name the unpriceable value beside it without dressing it up as a number. It's exactly the balance the debate lands on: count weekly tasks, credit the intangibles honestly but modestly." },
+            { "id": "b", "text": "Answer purely on the spreadsheet: only line-item time saved counts; anything you can't put a clean number on is dismissed as vibes", "verdict": "viable", "rationale": "Rigorous and sell-proof, and it correctly anchors on measured value — but it systematically undercounts. Freed Friday afternoons that turned into new supplier negotiations are real value the strict view erases. A defensible start, not the full picture." },
+            { "id": "c", "text": "Answer on the capability story alone: the team is now fluent with AI, so the spend was obviously worth it — no need to open the cost tab", "verdict": "wrong", "rationale": "This is how owners get sold junk — 'we feel more capable' with no numbers is unfalsifiable. The unmeasurable deserves weight, but never instead of the sheet. Skipping the cost tab abandons the one honest anchor you have." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "One automation — a once-a-project bespoke report generator — needs so much correction that checking nearly equals writing. A manager argues 'keep it; the team's getting better at prompting it.' Your call?",
+          "choices": [
+            { "id": "a", "text": "Kill it. It fails on both frequency (per-project, not weekly) and review cost (checking ≈ doing); the capability argument doesn't rescue a task the numbers clearly reject", "verdict": "best", "rationale": "This is the discipline working. Two loss triggers at once — low frequency and review that swamps the saving — and no amount of 'getting better at it' fixes a task that structurally can't clear. Kill without guilt and redirect the attention." },
+            { "id": "b", "text": "Keep it one more quarter and re-measure on the next kill-list, watching whether review time actually falls", "verdict": "viable", "rationale": "Not unreasonable — the quarterly kill-list exists precisely to re-test — but the frequency problem is structural and won't improve with practice, so you're likely paying another quarter to reach the same verdict. Defensible caution, weaker than acting on a clear signal." },
+            { "id": "c", "text": "Scale it — invest more setup so it eventually becomes a habit and pays off", "verdict": "wrong", "rationale": "This is the tool-hopping/sunk-cost trap inverted: pouring more setup into a per-project, mistake-expensive task compounds the loss. Habit only pays on *frequent* tasks; a per-project job never reaches that flywheel." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The café owner (a peer you compare notes with) reclaimed Friday afternoons and now does supplier negotiation she never had time for — no line on her ROI sheet shows it. How much should that shape the consultancy's verdict?",
+          "choices": [
+            { "id": "a", "text": "Credit it honestly as a real judgment-call win, named in words beside the numbers — and still let the weekly-task sums and the quarterly kill-list drive the actual scale/keep/kill decisions", "verdict": "best", "rationale": "This is exactly where the debate lands: agree to measure weekly tasks and kill losers quarterly, disagree only on how much weight the unmeasurable gets — and give it real but bounded weight. Reclaimed time that got re-spent on work that matters is genuine value; it informs the story without overriding the maths." },
+            { "id": "b", "text": "Ignore it entirely — if it's not on the ROI sheet, it didn't happen", "verdict": "viable", "rationale": "Keeps you sell-proof and correctly refuses to be swayed by vibes, but it erases the compounding win the capability view rightly insists on. Re-spent freed time on higher-value work is the whole point of freeing it. Too austere to be the best call." },
+            { "id": "c", "text": "Treat it as the main justification and scale every automation on the strength of unmeasured, compounding upside", "verdict": "wrong", "rationale": "Letting the unmeasurable become the *primary* case is precisely the overhyped reasoning this track exists to inoculate against. One person's reclaimed Friday is not a portfolio-wide mandate to scale on faith." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-gb-llm-costs", "r-genai-leader-guide", "r-gb-analytics-overview"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m7-roi-one-pager",
+      "domainId": "m7-cost-roi",
+      "title": "Fill the ROI one-pager for your running automation",
+      "goal": "Put real numbers on the Module 04 automation you built — what it costs, what it frees — and make the scale / keep / kill call on a single page you'll reuse every quarter. Works on the free platform with your own workspace (a personal workspace is created for you on first sign-in, and you're its Admin, so every step here is yours to do solo).",
+      "steps": "## What you'll do\n\nYou'll produce a one-page cost/ROI sheet for the automation you built in Module 04 (a playbook or a supervised agent doing a weekly task). Read the cost half off the platform; supply the value half yourself.\n\n### 1. Read the cost half off the cost tab\nOpen **Analytics → LLM & Costs** and set the time range to the last **30 days**. Write down, for your automation:\n- **Total Cost** for the month (use **Cost by Agent** or **Cost by Model** to isolate the one automation if you run several).\n- **Cost Per Request** — this is your cost per run.\n- The **projected monthly** figure, and note it's an *estimate* that moves with usage.\nIf the numbers are near-zero because you've only just built it, run the automation a few times first, then refresh — the cost tab updates from actual usage.\n\n### 2. Add the two costs the tab can't show\n- **Subscription** — the flat monthly fee for the tools you use (if any).\n- **Review time** — honestly, how many minutes do you spend per run checking the output before it's used? Multiply by runs per month. This is the cost most people skip.\n\n### 3. Work out the value half yourself (the platform won't)\nThe cost tab shows spend, never savings — so estimate the value:\n- **Minutes freed per run** — how long the task took you *before* the automation, minus how long it takes now (including your review). Be honest: this is net minutes.\n- **× frequency** — runs per week or month. If the task isn't at least weekly, note that as a red flag.\n- **× loaded hourly cost** of whoever used to do it — what their time really costs the business.\nAlso jot, in plain words, any real-but-unpriceable wins (faster replies, fewer dropped follow-ups) as judgment calls beside the number — not as numbers.\n\n### 4. Fill the one-pager and make the call\nOn a single page, one row for this automation: **cost per month** | **hours freed per month** | **verdict**. Give it a verdict:\n- **Scale** — clears comfortably → pick your next candidate from your Module 01 map and build it the same way.\n- **Keep** — breaks even or the value is real-but-unpriceable → leave it running, watch it.\n- **Kill** — doesn't clear → turn it off without guilt and pick a better task.\n\n### 5. Start the 'don't automate' list and set a quarterly reminder\nOn the same page, add a short 'don't automate' list — tasks you keep human on purpose (expensive mistakes, trivial volume, human-touch-is-the-product). Then, optionally, enable **Cost alerts** under **Settings → General** feature flags so a rising bill nudges you, and put a quarterly reminder in your calendar to re-read this page and run the kill-list.\n\n> If any control isn't where you expect, don't invent a path — the goal is the *sheet*: cost + hours freed + verdict, backed by the real cost-tab numbers and your own honest value estimate. Where the platform stops (the value half) is exactly where your judgment starts.\n\n## Why it matters\nThis one page is the artifact for the whole module — the operator's P&L for AI. It turns 'is AI worth it?' from a feeling into a number you can defend, and the quarterly re-read is what keeps you with a few automations that pay instead of a drawer full of half-used experiments.",
+      "checklist": [
+        "Cost half read off Analytics → LLM & Costs: total cost, cost per request, and the projected monthly (noted as an estimate)",
+        "The two off-tab costs added: subscription (if any) and honest review-time per run × runs per month",
+        "Value half estimated yourself: net minutes freed × frequency × loaded hourly cost, with any unpriceable wins written as judgment calls beside the number",
+        "One-page ROI sheet completed — cost per month | hours freed | verdict — with a scale / keep / kill call made",
+        "A 'don't automate' list started and a quarterly kill-list reminder set (Cost alerts optionally enabled in Settings → General)"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gb-llm-costs",
+      "title": "Automatos docs — LLM & Costs (the cost tab)",
+      "url": "automatos-gitbook/analytics/llm-costs.md",
+      "kind": "official-doc",
+      "annotation": "The cost tab you read like a utility bill: Total Cost, Cost Per Request, Cost by Model and by Agent, Top Spender, and Cost Projections (stated as estimates that move with usage). Also the source for 'every charge traces back to a chat, playbook, or mission' and the cost-alerts tip. This is the platform's cost half — note it never shows time saved or ROI.",
+      "domainIds": ["m7-cost-roi"]
+    },
+    {
+      "id": "r-gb-analytics-overview",
+      "title": "Automatos docs — Analytics Overview",
+      "url": "automatos-gitbook/analytics/overview.md",
+      "kind": "official-doc",
+      "annotation": "The workspace-level summary: Total Executions, Success Rate, Cost for the period, and Token Efficiency, plus quick insights (unusual cost spikes, low-utilisation agents worth reassigning or removing). Useful for the portfolio view and spotting which automations are barely used before the quarterly kill-list.",
+      "domainIds": ["m7-cost-roi"]
+    },
+    {
+      "id": "r-gb-marketplace-llms",
+      "title": "Automatos docs — LLMs (models & pricing)",
+      "url": "automatos-gitbook/marketplace/llms.md",
+      "kind": "official-doc",
+      "annotation": "Where you compare models before choosing — each card shows price per million units of text (input/output), context window, and speed. Grounds the 'cheaper models for simple work' cost lever and the bring-your-own-key model (OpenRouter default; OpenAI, Anthropic, DeepSeek, Google). List pricing here; actual spend is on the cost tab.",
+      "domainIds": ["m7-cost-roi"]
+    },
+    {
+      "id": "r-gb-settings-general",
+      "title": "Automatos docs — General settings & feature flags",
+      "url": "automatos-gitbook/settings/general.md",
+      "kind": "official-doc",
+      "annotation": "Home of the Default Model setting and the Cost alerts feature flag ('notify on budget thresholds'). Grounds the lab's optional cost-alert step and the honest caveat that alerts are reactive nudges — there is no hard spend cap that blocks a run.",
+      "domainIds": ["m7-cost-roi"]
+    },
+    {
+      "id": "r-gb-missions",
+      "title": "Automatos docs — Missions (cost breakdown & budget)",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "official-doc",
+      "annotation": "For automations run as missions: the per-task cost breakdown, and budget management (view cost breakdown by task, pause if costs exceed expectations, resume with increased budget). The honest picture of what 'budget' means on the platform — reactive pause/resume and alerts, not a pre-set spend ceiling.",
+      "domainIds": ["m7-cost-roi"]
+    },
+    {
+      "id": "r-genai-leader-guide",
+      "title": "Google — Generative AI Leader exam guide (business-strategy / measuring-value sections)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "external-guide",
+      "annotation": "The vendor-light business-strategy material behind the value sum and the 'measure what matters' discipline — sizing value, weighing cost against benefit, and being honest about what's measurable versus a judgment call. Orientation for running AI as a purchase decision; verified reachable at authoring time, and not load-bearing for any platform claim.",
+      "domainIds": ["m7-cost-roi"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m7-1",
+      "title": "M7 · The money conversation — what AI costs, what it earns, and when it loses money",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m7-cost-roi"],
+      "sourceNotebook": "ai-business / m7 / cost-earn-and-when-ai-loses-money"
+    },
+    {
+      "id": "v-m7-2",
+      "title": "M7 · Reading the cost tab & making the scale / keep / kill call (the ROI one-pager)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m7-cost-roi"],
+      "sourceNotebook": "ai-business / m7 / cost-tab-and-roi-one-pager"
+    }
+  ]
+}

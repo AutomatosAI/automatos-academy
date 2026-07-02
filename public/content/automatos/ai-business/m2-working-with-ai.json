@@ -1,0 +1,334 @@
+{
+  "id": "m2-working-with-ai",
+  "order": 2,
+  "code": "M2",
+  "name": "Working with AI day to day",
+  "tagline": "The difference between AI garbage and AI gold is the brief. Stop thinking of it as 'prompting' and start treating it as delegation — brief the AI like a capable new hire on day one: role, task, raw material, shape, example. Then send the first draft back once.",
+  "overview": "This is the module that answers the question every operator actually has: 'how do I get good results, not garbage?' The reframe that fixes almost everything is that you are not 'prompting' — you are delegating, exactly the way you'd brief a smart new hire on their first morning. Give a new hire a one-line instruction and no context and you'll get a shrug and a guess; give the AI the same and you'll get a confident-sounding guess, which is worse. So this module teaches one repeatable habit — the five-part brief (role, task, raw material, shape, example) — plus two working disciplines that turn a clever demo into a reliable daily tool: treating the first answer as a first draft you manage, not a verdict you accept; and verifying the output at a depth that matches the stakes. In Automatos you'll practise all of this in Chat, where you type a request and the platform routes it to the right AI worker (an 'agent') for you. You finish the module with a real, reusable asset — a small library of the five briefs for your five most-repeated tasks — which is the seed of the automation you'll build in Module 04. None of it needs technical skill. It needs the clarity you'd owe a human assistant, and most people discover their briefs were the problem all along.",
+  "objectives": [
+    "Reframe 'prompting' as delegation — brief the AI the way you'd brief a capable new hire, and understand why a vague one-line request produces garbage from a person and from an AI alike.",
+    "Write the five-part brief for any task: who the AI should act as (role), what exactly you want (task), the raw material it needs (context), the shape of the answer (format and tone), and an example to match.",
+    "Manage iteration as a normal part of the work — critique and refine the first draft instead of restarting, and know when to give a better example versus tighter instructions.",
+    "Scale your verification to the stakes — a glance for a throwaway note, a line-by-line read for a customer email, and a full check plus a demand for sources on anything with numbers, dates, or promises in it.",
+    "Build and reuse a personal delegation library — the saved five-part briefs for your most-repeated tasks — as reusable business assets that later become automations."
+  ],
+  "lessons": [
+    {
+      "id": "l1-delegation-not-prompting",
+      "title": "You're delegating, not 'prompting'",
+      "estMinutes": 10,
+      "objective": "Replace the 'prompting' mindset with delegation — treat the AI like a capable new hire you're briefing — and get oriented in Automatos Chat, where your message is routed to the right AI worker for you.",
+      "body": "## The one reframe that fixes most of it\n\nThe word 'prompting' makes people write like they're typing into a search box: a few keywords, hit go, hope. Then the answer comes back generic or wrong and they conclude the tool is overhyped.\n\nHere is the reframe that changes everything: **you are not prompting, you are delegating.** Talking to an AI is far more like briefing a capable new hire on their first morning than like running a search. The new hire is bright, fast, and eager — but they have never seen your business, your customers, or your standards, and they will not admit when they're unsure. Hand a new hire a one-line instruction with no context — *'write me a proposal'* — and you'll get a polite guess. Hand the AI the same one line and you'll get a confident, fluent guess that *looks* finished, which is more dangerous, because it's easy to accept without reading.\n\nSo the quality of what you get out is set almost entirely by the quality of the brief you put in. Good managers already know this. You wouldn't drop *'sort the client thing'* on a new starter and walk off; you'd tell them who to be, what you want, hand them the file, and show them a good one from last time. That instinct — the clarity you'd owe a human assistant — is the entire skill. It is not technical.\n\n## Where you'll practise this in Automatos\n\nIn Automatos you do this in **Chat**. You type a message in the input bar, and the platform's **Universal Router** reads it and automatically sends it to the best AI worker for the job. Automatos calls those workers **agents** — an agent is a configured AI worker with its own model, personality, tools and knowledge; think of it as a specialist member of staff, not a generic chatbot. You don't have to know which agent to pick. The router handles it, and you can always override it and choose a specific agent from the **Auto** dropdown if you want to.\n\nFor everything in this module you can simply leave it on **Auto**, type your brief, and read the reply as it streams in. That's it. The skill this module teaches — writing a good brief — is the same whether one agent or ten are behind the curtain.\n\n## Worked example — the café\n\nMaya runs a neighbourhood café. She opens Chat and, in a hurry, types:\n\n> *'write a post about our new autumn menu'*\n\nBack comes a chirpy paragraph full of 'cozy vibes' and 'perfect for the season' — buzzwords, no mention of her actual coffee roaster, her actual pastries, or the fact that her regulars are tradespeople who'd wince at 'cozy vibes.' It isn't wrong, exactly. It's just generic, because she briefed it generically. She gave a bright new starter one line and no context and got precisely what that earns.\n\nWatch what happens across the next two lessons when Maya learns to brief properly. Nothing about the tool changes. Only the brief does — and that turns out to be the whole game.\n\n## The habit to build\n\nBefore you type anything into Chat, pause for the two seconds you'd give a real handover and ask: *if a sharp new hire were doing this, what would they need from me to do it well?* That single question is the seed of everything that follows.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-1",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What's the core reframe this module is built on?",
+          "options": [
+            { "id": "a", "text": "You're not 'prompting' the AI — you're delegating to it, the way you'd brief a capable new hire", "correct": true },
+            { "id": "b", "text": "AI works best when you use as few words as possible, like a search engine" },
+            { "id": "c", "text": "You need to learn technical prompt syntax before AI is useful for a business" },
+            { "id": "d", "text": "The tool decides the quality of the output, so the wording of your request barely matters" }
+          ],
+          "explanation": "The reframe is delegation, not prompting (a) — briefing the AI like a new hire is exactly the mindset the module builds on. A search-engine, keyword mindset (b) is the habit that produces garbage. There's no technical syntax to learn first (c) — the skill is managerial clarity, not code. And (d) is backwards: the quality of your brief sets the quality of the output almost entirely.",
+          "sourceRefs": ["r-chat", "r-genai-leader"]
+        },
+        {
+          "id": "kc-m2-2",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In Automatos Chat, what does the Universal Router do when you send a message on Auto mode?",
+          "options": [
+            { "id": "a", "text": "It reads your message and automatically sends it to the best AI worker (agent) for the job, though you can override and pick a specific agent yourself", "correct": true },
+            { "id": "b", "text": "It blocks your message until you manually choose which agent should answer" },
+            { "id": "c", "text": "It rewrites your message into technical prompt syntax before anyone sees it" },
+            { "id": "d", "text": "It sends your message to every agent at once and shows you all their replies" }
+          ],
+          "explanation": "On Auto, the router analyses your message and routes it to the best-suited agent, and you retain the option to override via the Auto dropdown (a). It doesn't force you to choose first (b) — the whole point is you don't have to. It doesn't rewrite your wording into syntax (c); how well you brief is still on you. And it routes to one chosen agent, not a broadcast to all of them (d).",
+          "sourceRefs": ["r-chat", "r-routing"]
+        }
+      ]
+    },
+    {
+      "id": "l2-five-part-brief",
+      "title": "The five-part brief",
+      "estMinutes": 14,
+      "objective": "Write the five-part delegation brief — role, task, raw material, shape, example — and see the same real request go from garbage to gold as each part is added.",
+      "body": "## Five things a good handover always includes\n\nWhen you brief a capable person on a task, a good handover always carries the same five things. Miss one and the work drifts. The five-part brief just makes them explicit:\n\n1. **Role** — who you want the AI to act as. *'You're our senior account manager.'* This sets the expertise, judgement and voice it writes from. A senior account manager and a summer intern would write the same proposal very differently; you get to choose which one shows up.\n2. **Task** — what exactly you want, in one clear sentence. Not 'help with the proposal' but *'write a one-page proposal for a café client who wants local social-media marketing.'* Vague verbs ('help', 'look at', 'do something with') are where quality leaks out.\n3. **Raw material** — the actual facts it should work from: the discovery-call notes, the numbers, the customer's email, the product details. This is the single biggest lever most people never pull. Without your raw material the AI has no choice but to invent plausible-sounding filler. **With** it, the AI is working from *your* reality instead of a generic average of the internet. (This is why Module 00 hammered on giving AI real context — an AI with no facts will confidently make some up.)\n4. **Shape** — the format and tone of the answer. *'Three sections: goals, plan, price. Friendly but direct. No buzzwords. Under a page.'* If you don't specify the shape, you get the AI's default shape, which is rarely yours.\n5. **Example** — one sample of 'good', when you have one. *'Here's a past proposal this client loved — match its feel.'* An example does in one paste what three paragraphs of instructions can't: it shows, rather than tells.\n\nYou will not need all five every time — a quick tweet needs role, task and shape and little else — but for anything that matters, running down the list takes fifteen seconds and saves you a bad draft.\n\n## Worked example — the agency, one request, upgraded live\n\nDevi runs a small marketing agency. A café client wants a proposal for local social-media marketing. Watch the same request improve as each part of the brief goes in.\n\n**Briefed lazily** — what most people type:\n\n> *'write a proposal for a café that wants social media marketing'*\n\nResult: a generic, templated wall of marketing-speak. Could be for any café, anywhere. Devi would be embarrassed to send it, and the client would smell the boilerplate instantly.\n\n**Briefed properly** — the five parts, stacked:\n\n> ***Role:*** *You're our senior account manager — experienced, warm, straight-talking.*\n>\n> ***Task:*** *Write a one-page proposal for a café client who wants local social-media marketing to bring in more weekday footfall.*\n>\n> ***Raw material:*** *Here are my notes from the discovery call — [pastes the notes: the café's location, that mornings are dead, the owner hates jargon, budget is about £400/month, they already have an under-used Instagram].*\n>\n> ***Shape:*** *Three sections — Goals, Plan, Price. Friendly but direct. Plain English, no buzzwords. Keep it under one page.*\n>\n> ***Example:*** *Here's a proposal this same client loved last year — match its feel and level of detail. [pastes it]*\n\nResult: a proposal that names the café's real situation, speaks in the owner's own no-jargon register, proposes a plan that fits a £400 budget, and reads like Devi's agency wrote it — because, in effect, it did. Devi tweaks two lines and sends it. Same tool as the lazy version. Only the brief changed.\n\n## Getting the raw material in\n\nRaw material is the part people skip, so make it easy on yourself. In Automatos Chat you can **paste** the notes, numbers or draft straight into your message — that's the fastest way. For longer or file-based material — a PDF, an image, a document — use the **attachment button** in the input bar to upload it into the conversation, and the agent can read and reference it in its reply. Pasting the discovery-call notes or attaching the client brief *is* the 'raw material' step; it's the difference between an answer about *a* café and an answer about *this* café.\n\n## The platform agrees with you\n\nThis isn't a trick unique to this course. Automatos's own guidance for building an agent tells you to do the same five things when you write that agent's standing instructions: be specific about the role, define the output format, set boundaries on what not to do, and include one or two examples of a good answer. The five-part brief is simply that same proven recipe, applied to a single request in Chat instead of baked into an agent. Learn it once here and you already know how to configure a good agent later.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-3",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What are the five parts of the delegation brief?",
+          "options": [
+            { "id": "a", "text": "Role, task, raw material, shape, and example", "correct": true },
+            { "id": "b", "text": "Greeting, keywords, urgency, budget, and deadline" },
+            { "id": "c", "text": "Model, temperature, tokens, provider, and persona" },
+            { "id": "d", "text": "Question, follow-up, correction, retry, and accept" }
+          ],
+          "explanation": "The five parts are role (who to act as), task (what exactly), raw material (the facts), shape (format and tone), and example (a 'good' sample) — (a). Option (c) lists agent model settings, which live in agent configuration, not in a chat brief. Options (b) and (d) are invented sequences that don't match the brief the module teaches.",
+          "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+        },
+        {
+          "id": "kc-m2-4",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Devi's café proposal came out generic on the first try. Which single part of the brief, added, most directly turns 'a proposal for any café' into 'a proposal for THIS café'?",
+          "options": [
+            { "id": "a", "text": "Raw material — pasting the discovery-call notes so the AI works from the café's real situation instead of inventing filler", "correct": true },
+            { "id": "b", "text": "A more urgent tone in the request, so the AI tries harder" },
+            { "id": "c", "text": "Asking the same question several more times until a better version appears by luck" },
+            { "id": "d", "text": "Making the request shorter so the AI isn't distracted by detail" }
+          ],
+          "explanation": "Raw material is the biggest lever (a): with the real notes, the AI writes from this café's facts; without them it has no choice but to invent plausible filler. Urgency (b) does nothing — the AI isn't motivated by tone. Re-asking blindly (c) is not a fix; it's the accept-and-retry-by-luck trap the next lesson warns against. And making it shorter (d) removes the very context that makes the answer specific.",
+          "sourceRefs": ["r-genai-leader", "r-chat"]
+        }
+      ]
+    },
+    {
+      "id": "l3-iterate-and-verify",
+      "title": "Iterate like a manager, verify by the stakes",
+      "estMinutes": 12,
+      "objective": "Treat the first answer as a first draft to be managed — critique, don't restart — and verify every output at a depth that matches what's riding on it.",
+      "body": "## The first answer is a first draft, not a verdict\n\nHere's where most people go wrong after they've written a decent brief: the first answer comes back, it's 80% there, and they either accept it as-is or throw it out and start over. Both are mistakes. A good manager does neither.\n\nTreat the first answer exactly like a first draft from a promising intern. You wouldn't fire the intern over a first draft, and you wouldn't ship it unread either. You'd say what's wrong and ask for the next version:\n\n> *'Good start. The tone's a touch too formal — loosen it. Cut the third paragraph, it repeats the second. And add a line about our weekday opening hours.'*\n\nThat's **iteration**, and it's management, not failure. Two rounds of clear feedback beats ten minutes of fiddling with the original wording almost every time. A few rules of thumb:\n\n- **Critique the draft; don't restart the brief.** Point at what to change and keep the good parts. Starting from scratch throws away the 80% that was fine.\n- **When the problem is *tone or feel*, give a better example.** Showing beats telling — one 'more like this' sample fixes what five adjectives can't.\n- **When the problem is *facts or structure*, give tighter instructions.** 'Use these three sections', 'this number is wrong, it's 12%, not 20%', 'drop the pricing paragraph.'\n\nIn Chat you just keep talking in the same conversation — the agent holds the context of what came before, so your correction lands on the draft you already have rather than starting cold.\n\n## Verify at a depth that matches the stakes\n\nThe AI sounds equally confident whether it's right or wrong. That's the trap Module 00 named: it can produce fluent, plausible statements that are simply false — an invented statistic, a wrong date, a policy you don't actually have. (The term of art for this is a 'hallucination', but the practical point is all that matters: never assume a confident tone means a correct fact.) The fix is not paranoia; it's a habit of **checking in proportion to what's riding on the answer.** Three tiers cover almost everything:\n\n| Stakes | What it is | How hard you check |\n| --- | --- | --- |\n| **Low** | A social caption, a brainstorm, a rough internal note | **Glance.** Skim it reads right, ship it. If it's wrong, no harm done. |\n| **Medium** | A customer email, a reply to a review, external-facing copy | **Line-check.** Read every line as if you're about to say it to the customer's face — because you are. |\n| **High** | Anything with numbers, dates, prices, promises, legal or safety claims | **Full check + demand sources.** Verify every fact against your real records, and ask the AI to show where each figure came from. Assume nothing. |\n\nThe rule in one line: **the more it costs to be wrong, the harder you check.**\n\n## Worked example — the e-commerce shop and the consultancy\n\nSam runs an online shop and gets a scathing product review. He briefs a reply (role: calm support lead; task: reply to this review; raw material: the review text and the order details; shape: apologetic but not grovelling, offer a fix, under 80 words; example: a past reply that defused a similar one). The first draft is close but a shade defensive. Sam doesn't restart — he says *'warmer, and lead with the apology'*, gets a better version, and because this is going out in public with the shop's name on it, he **line-checks** every word before posting. Medium stakes, medium check.\n\nPriya, a consultant, asks the AI to draft the summary page of a client report that includes cost-savings figures. Same disciplined brief, same one-round iteration — but this output has **numbers and promises** in it, so she does the full treatment: she checks every figure against her own spreadsheet, and where the AI cites a saving she makes it point to the source. Sure enough, one percentage is subtly off. She'd have sent it. The stakes-scaled check caught it. High stakes, hard check.\n\n## Build your delegation library\n\nHere's the compounding payoff. Once you've written a five-part brief that produces gold for a task you do every week — the quote follow-up, the review reply, the weekly update — **don't throw it away.** Save it. Keep the winning briefs somewhere you'll find them again — a notes doc, a pinned file, whatever you already use — so next week you paste the brief, swap in the new details, and skip straight to a good draft.\n\nThat growing set is your **delegation library**: the five briefs for your five most-repeated tasks. It's a genuine business asset — the operator equivalent of documented standard operating procedures, except these run themselves. And it's the on-ramp to the next module: in Module 04 you'll take the single best brief in your library and turn it into a **playbook** — a saved, multi-step workflow that runs the task for you without you re-typing anything. The brief you perfect today is the automation you ship next.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-5",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The AI's first answer is 80% right but the tone is a bit off and one paragraph repeats. What's the manager's move?",
+          "options": [
+            { "id": "a", "text": "Stay in the same conversation and critique the draft — 'loosen the tone, cut the repeated paragraph' — keeping the good 80%", "correct": true },
+            { "id": "b", "text": "Throw it out and rewrite the whole brief from scratch to start clean" },
+            { "id": "c", "text": "Accept it as-is — 80% is good enough and refining is a waste of time" },
+            { "id": "d", "text": "Re-send the exact same brief unchanged and hope the next attempt is better" }
+          ],
+          "explanation": "Iteration is management: point at what to change and keep the good parts, in the same conversation so the agent holds the context (a). Restarting from scratch (b) throws away the 80% that was already fine. Accepting an 80% draft unread (c) ships known problems. And re-sending the identical brief (d) is the accept-by-luck trap — with no new feedback, there's no reason for a better result.",
+          "sourceRefs": ["r-chat", "r-genai-leader"]
+        },
+        {
+          "id": "kc-m2-6",
+          "domainId": "m2-working-with-ai",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Priya is drafting a client report page that contains cost-savings figures. How hard should she verify it, and why?",
+          "options": [
+            { "id": "a", "text": "Full check plus demand sources — it has numbers and promises in it, so she verifies every figure against her own records and asks where each came from", "correct": true },
+            { "id": "b", "text": "A quick glance — the AI wrote it confidently, so the figures are almost certainly right" },
+            { "id": "c", "text": "No check at all — verification is only for legal documents" },
+            { "id": "d", "text": "She should ask the AI to confirm its own numbers are correct and trust that confirmation" }
+          ],
+          "explanation": "Numbers, dates and promises are high-stakes, so the check is the hardest tier: verify every figure against real records and demand sources (a). A confident tone is no evidence of correctness — that's exactly the hallucination trap, so a glance (b) is reckless here. Verification isn't reserved for legal documents (c); anything with figures or promises qualifies. And asking the AI to vouch for itself (d) is worthless — it will confirm a wrong number just as fluently as a right one; the check has to be against *your* reality.",
+          "sourceRefs": ["r-genai-leader", "r-chat"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m2-1",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Why is a vague one-line request to an AI often described as worse than the same request to a human?",
+      "options": [
+        { "id": "a", "text": "The AI returns a confident, fluent guess that looks finished, so it's easy to accept without reading — whereas a person would signal uncertainty", "correct": true },
+        { "id": "b", "text": "The AI refuses to answer vague requests, wasting your time" },
+        { "id": "c", "text": "The AI is slower than a person at producing a first draft" },
+        { "id": "d", "text": "There is no difference — both give equally useful results from a one-liner" }
+      ],
+      "explanation": "The danger is that the AI dresses a guess in fluent, finished-looking prose and won't flag its own uncertainty, so a weak answer sails through unchecked (a). It doesn't refuse vague requests (b) — it happily answers them, which is the problem. Speed (c) isn't the issue; quality is. And (d) is the mistake the whole module corrects — the brief absolutely changes the result.",
+      "sourceRefs": ["r-genai-leader", "r-chat"]
+    },
+    {
+      "id": "q-m2-2",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the five-part brief, what does the 'role' part do?",
+      "options": [
+        { "id": "a", "text": "Tells the AI who to act as — the expertise, judgement and voice to write from, e.g. 'you're our senior account manager'", "correct": true },
+        { "id": "b", "text": "Sets which human on your team is responsible for the task" },
+        { "id": "c", "text": "Chooses which AI model and provider the agent uses" },
+        { "id": "d", "text": "Decides how many times you're allowed to iterate on the answer" }
+      ],
+      "explanation": "Role sets the persona the AI writes from — its expertise and voice (a); a senior account manager and an intern produce very different work from the same task. It's not about assigning a human owner (b), it's not the model/provider setting (c) — that's agent configuration, not a chat brief — and it has nothing to do with iteration limits (d).",
+      "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+    },
+    {
+      "id": "q-m2-3",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which part of the brief is the one most people skip, and the one with the biggest effect on whether the answer is specific to your business?",
+      "options": [
+        { "id": "a", "text": "Raw material — the actual notes, numbers, or documents the AI should work from", "correct": true },
+        { "id": "b", "text": "Role — telling the AI who to be" },
+        { "id": "c", "text": "Shape — the format and tone" },
+        { "id": "d", "text": "Task — the one-sentence description of what you want" }
+      ],
+      "explanation": "Raw material is the most-skipped, highest-leverage part (a): with your real facts the AI writes from your reality; without them it invents plausible filler. Role, shape and task all matter and all belong in a good brief, but each is usually at least attempted — it's the raw material (the discovery notes, the numbers, the customer's email) that people leave out, and that omission is what makes answers generic.",
+      "sourceRefs": ["r-genai-leader", "r-chat"]
+    },
+    {
+      "id": "q-m2-4",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In Automatos Chat, how do you get a long PDF brief in front of the agent as raw material?",
+      "options": [
+        { "id": "a", "text": "Use the attachment button in the input bar to upload the file into the conversation, where the agent can read and reference it", "correct": true },
+        { "id": "b", "text": "Email the PDF to the agent and wait for it to import" },
+        { "id": "c", "text": "You can't — agents can only work from text you type by hand" },
+        { "id": "d", "text": "Convert the PDF to code first, then paste the code" }
+      ],
+      "explanation": "The attachment button in the chat input bar uploads files (PDFs, images, documents) into the conversation for the agent to read and reference (a). There's no email-to-agent import for this (b); agents are not limited to hand-typed text (c) — attachments and pasting both work; and nothing needs converting to code (d), which isn't a real step.",
+      "sourceRefs": ["r-chat"]
+    },
+    {
+      "id": "q-m2-5",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The first draft's problem is that the tone and feel are wrong. According to the module, what's the most effective fix?",
+      "options": [
+        { "id": "a", "text": "Give a better example — one 'more like this' sample shows the feel you want better than more adjectives", "correct": true },
+        { "id": "b", "text": "Restart with a completely new brief" },
+        { "id": "c", "text": "Add tighter factual instructions and a rigid section structure" },
+        { "id": "d", "text": "Lower your expectations — tone can't really be steered" }
+      ],
+      "explanation": "For a tone-or-feel problem, an example beats instructions — showing outperforms telling (a). Restarting (b) discards the parts that were already fine. Tighter factual instructions and structure (c) are the right fix for a *facts-or-structure* problem, not a feel problem. And tone is very steerable (d) — an example or a clear tone note both move it.",
+      "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+    },
+    {
+      "id": "q-m2-6",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team member wants to post the AI's draft of a public reply to a customer review. What's the right verification depth?",
+      "options": [
+        { "id": "a", "text": "A line-by-line read of every word before posting, because it's external-facing and carries the business's name", "correct": true },
+        { "id": "b", "text": "A quick glance is enough — review replies are low-stakes internal notes" },
+        { "id": "c", "text": "A full source-audit of every claim, the same as a document full of financial figures" },
+        { "id": "d", "text": "No check — the AI wrote it, so it's ready to publish" }
+      ],
+      "explanation": "A public, external-facing reply is medium stakes: read every line as if you're saying it to the customer's face (a). It's not a low-stakes internal note (b) — it's public and branded. A full financial-grade source audit (c) is more than a plain-text review reply needs (reserve that for numbers, dates and promises). And publishing unread (d) is exactly the accept-it-unchecked failure the module warns against.",
+      "sourceRefs": ["r-genai-leader", "r-chat"]
+    },
+    {
+      "id": "q-m2-7",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the 'delegation library' this module has you build, and why does it matter for the next module?",
+      "options": [
+        { "id": "a", "text": "Your saved set of winning five-part briefs for your most-repeated tasks — reusable assets, and the best one becomes a playbook (an automated workflow) in Module 04", "correct": true },
+        { "id": "b", "text": "A folder of AI-written articles you can republish as your own content" },
+        { "id": "c", "text": "A list of every agent on the platform and which model each one uses" },
+        { "id": "d", "text": "A log of every chat you've ever had, kept for compliance reasons" }
+      ],
+      "explanation": "The delegation library is your saved, reusable five-part briefs for repeated tasks, and it feeds Module 04, where the best brief becomes an automated playbook (a). It's not a content mill of republishable articles (b), not a roster of agents and their models (c), and not a compliance chat log (d) — it's the small set of proven briefs you reuse and eventually automate.",
+      "sourceRefs": ["r-chat", "r-agent-prompting"]
+    },
+    {
+      "id": "q-m2-8",
+      "domainId": "m2-working-with-ai",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Someone says: 'I don't need to learn briefs — if the first answer is bad I'll just keep re-sending the same request until the AI gets it right.' What's the best correction?",
+      "options": [
+        { "id": "a", "text": "Re-sending the same request gives the AI no new information, so there's no reason for a better result; quality comes from a better brief and from critiquing the draft, not from repetition", "correct": true },
+        { "id": "b", "text": "They're right — enough repeats will eventually force a correct answer out of any AI" },
+        { "id": "c", "text": "Repetition works, but only if you send the request to several different agents at once" },
+        { "id": "d", "text": "The real fix is to use a more expensive model; the brief makes no difference" }
+      ],
+      "explanation": "An identical re-send carries no new signal, so the AI has nothing to work with differently — improvement comes from a stronger brief and from specific critique of the draft (a). Blind repetition doesn't 'force' correctness (b); you can get the same weak answer ten times. Fanning the same vague request out to more agents (c) just multiplies the same weak input. And reaching for a pricier model (d) can't rescue a brief with no role, no raw material and no shape — the brief is the lever.",
+      "sourceRefs": ["r-genai-leader", "r-chat"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m2-delegation-library",
+      "domainId": "m2-working-with-ai",
+      "title": "Build your delegation library — your five reusable briefs",
+      "goal": "Turn the five-part brief from an idea into a working, reusable asset: five briefs for your five most-repeated writing tasks, each tested in Automatos Chat, iterated once, and saved. This is Artifact 2 of the track, and the raw material for the automation you'll build in Module 04.",
+      "steps": "## What you'll produce\n\nA short document you keep — call it your **delegation library** — containing five polished, reusable briefs, each with a note on what good output looked like. You'll write it in whatever you already use for notes; Automatos Chat is where you test and refine each brief.\n\n## Before you start\n\nYou need a free Automatos workspace. Signing in creates your own personal workspace automatically, and in it you are the admin of everything — so every step here is achievable solo. Open **Chat** from the sidebar and leave the mode selector on **Auto**; you don't need to create or choose an agent for this exercise.\n\n## Steps\n\n1. **Pick your five tasks.** From your Module 01 opportunity map (or just from memory), list the five writing tasks you repeat most — e.g. quote follow-up email, review reply, weekly update, proposal, social post. These five are your targets.\n2. **Write the first brief, all five parts.** For task one, write out **role** (who the AI should act as), **task** (one clear sentence), **raw material** (paste the real notes/numbers, or use the attachment button to upload a file), **shape** (format, length, tone — say 'no buzzwords' if you mean it), and **example** (paste one 'good' past version if you have one).\n3. **Run it in Chat.** Paste the brief into the input bar on Auto and send it. Read the reply as it streams in.\n4. **Iterate exactly once.** Treat the reply as a first draft. In the *same* conversation, give one round of specific feedback — critique the draft, don't restart the brief. If the problem is tone or feel, add a better example; if it's facts or structure, tighten the instructions.\n5. **Verify to the stakes.** Glance at a low-stakes post; line-check anything customer-facing; for anything with numbers or promises, check the facts against your real records and ask the AI where each figure came from. Only keep output you'd actually be willing to use.\n6. **Save the winning brief.** Once a brief produces usable output, copy the *brief* (not just the answer) into your delegation-library document, and jot one line on what made the output good. That saved brief is the reusable asset.\n7. **Repeat for the other four tasks.** You now have five tested briefs. Notice how much faster tasks four and five are than task one — that speed-up is the whole point.\n8. **Flag your best one.** Mark the single brief that produced the most reliably useful output. That's the candidate you'll turn into an automated playbook in Module 04.\n\n## A note on saving\n\nAutomatos keeps your past conversations in the chat history sidebar, so you can always reopen a chat and reuse a brief from it. But your delegation library is *your* asset — keep the master copy of the five briefs in a document you control, so it's easy to paste, edit and reuse next week regardless of which conversation it came from.\n\n## Why it matters\n\nYou've just converted a skill into inventory. Anyone can write one good brief in a moment of focus; a saved library means you get a good draft every time, on your worst day, without re-thinking the task — and it's the seed of real automation in the next module.",
+      "checklist": [
+        "Five most-repeated writing tasks identified (from the Module 01 opportunity map or memory)",
+        "For each task, a five-part brief written — role, task, raw material, shape, example — and run in Automatos Chat on Auto",
+        "Each brief iterated exactly once (draft critiqued, not restarted) and verified to a depth matching its stakes",
+        "The winning brief for each task saved into a delegation-library document you control, with a one-line note on what made the output good",
+        "The single strongest brief flagged as the Module 04 automation candidate"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-chat",
+      "title": "Automatos user docs — Chat",
+      "url": "automatos-gitbook/chat/README.md",
+      "kind": "official-doc",
+      "annotation": "The primary surface for this whole module: type a message and the Universal Router sends it to the best AI worker (agent) for the job, responses stream in real time, and you can paste text or use the attachment button to add files (up to 20 MB) as raw material. Grounds where and how the learner practises the five-part brief.",
+      "domainIds": ["m2-working-with-ai"]
+    },
+    {
+      "id": "r-routing",
+      "title": "Automatos user docs — Routing & Auto Mode",
+      "url": "automatos-gitbook/chat/routing.md",
+      "kind": "official-doc",
+      "annotation": "How Auto mode picks the agent for you (and how to override it and select a specific agent). Confirms the operator can leave everything on Auto for this module — the skill is the brief, not knowing which agent to choose.",
+      "domainIds": ["m2-working-with-ai"]
+    },
+    {
+      "id": "r-agent-prompting",
+      "title": "Automatos user docs — Creating an Agent (prompt-engineering tips)",
+      "url": "automatos-gitbook/agents/creating.md",
+      "kind": "official-doc",
+      "annotation": "The platform's own guidance for writing an agent's standing instructions — be specific about the role, define the output format, set boundaries, and include one or two examples. It's the same five-part recipe as the delegation brief, which is why learning the brief in Chat also teaches how to configure a good agent later.",
+      "domainIds": ["m2-working-with-ai"]
+    },
+    {
+      "id": "r-genai-leader",
+      "title": "Google — Generative AI Leader exam guide (PDF): 'Techniques to improve gen AI model output'",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "Vendor-light, business-toned source behind the module's craft: the 'Techniques to improve gen AI model output' section covers giving the model clear instructions, context, a defined format, and examples — the same levers as role/task/raw-material/shape/example. Use it to reinforce that briefing well is a recognised technique, not a course invention.",
+      "domainIds": ["m2-working-with-ai"]
+    },
+    {
+      "id": "r-history",
+      "title": "Automatos user docs — Chat History",
+      "url": "automatos-gitbook/chat/history.md",
+      "kind": "official-doc",
+      "annotation": "Past conversations are saved in the chat-history sidebar (auto-titled, workspace-scoped) and can be reopened to continue or reuse a brief. Grounds the honest version of the 'save your briefs' step — the platform keeps your chats, but your delegation library is a document you keep for yourself.",
+      "domainIds": ["m2-working-with-ai"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m2-1",
+      "title": "M2 · Delegation, not prompting — brief the AI like a capable new hire",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m2-working-with-ai"],
+      "sourceNotebook": "ai-business / m2 / delegation-and-the-five-part-brief"
+    },
+    {
+      "id": "v-m2-2",
+      "title": "M2 · Iterate like a manager, verify by the stakes, and build your delegation library",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m2-working-with-ai"],
+      "sourceNotebook": "ai-business / m2 / iteration-verification-and-library"
+    }
+  ]
+}
