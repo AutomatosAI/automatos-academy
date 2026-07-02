@@ -1,0 +1,95 @@
+{
+  "vendorName": "Cross-Domain",
+  "name": "AI Security — LLM & Agent Security",
+  "code": "AIS",
+  "summary": "Defensive-security skills for the people who build and run LLM apps and agents. Six teaching modules take you from the LLM threat model to red-teaming your own app: OWASP Top 10 for LLM Applications (2025) as the risk backbone, MITRE ATLAS as the shared adversary map, and NIST AI 600-1 as the governance overlay — every risk grounded in an official primary source and taught for defence, not attack.",
+  "blueprintNote": "Skills track (Practitioner lane) — no external exam, no weights, no readiness gate. It consolidates the GIAC GAIPS (AI Platform Security) 8-domain skeleton into six teaching modules organized around the OWASP Top 10 for LLM Applications (2025), MITRE ATLAS, and NIST AI 600-1. There is NO exam anchor yet: GAIPS is not GA — general purchase opens 2026-07-28 (currently bundled with SANS SEC545 only), and GIAC has not published its exam mechanics (question count, duration, passing score) pre-GA. Per PRD-S2 §2 the upgrade trigger is when GAIPS reaches GA and publishes those mechanics; only then does this track gain an exam{} block, weights, and an A+ gate. Framing throughout is defensive education: you learn the attacks in order to build the controls, and GAIPS is used only as a descriptive domain skeleton, never as an exam to prep.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://www.giac.org/certifications/ai-security-platform-security-gaips"
+    ],
+    "notes": "Live-checked 2026-07-02 against the authoring team's verified source facts. OWASP Top 10 for LLM Applications 2025 confirmed current with all ten risk titles as written (LLM01 Prompt Injection … LLM10 Unbounded Consumption); each per-risk root page grounds the module that teaches it. MITRE ATLAS: the live atlas.mitre.org site is a JS-rendered SPA that WebFetch cannot read (homepage returns only a title; technique/matrix subpages 404), so all ATLAS tactic/technique names and IDs (e.g. LLM Prompt Injection AML.T0051, RAG Poisoning AML.T0070, Retrieval Content Crafting AML.T0066) were verified from the authoritative machine-readable dist/ATLAS.yaml in the official mitre-atlas/atlas-data repo, and the ATLAS-is-modelled-on-ATT&CK relationship from the official atlas-navigator-data README; the resource still links learners to the human-browsable atlas.mitre.org matrix, which is correct even though it is not machine-fetchable. NIST AI 600-1: the DOI/HTML landing pages expose only the abstract, so the exact title 'Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile (NIST AI 600-1)', the July 2024 publication date, and the 12 GenAI risk-area names (including the verbatim 'Harmful Bias and Homogenization') were verified by parsing the official nvlpubs.nist.gov PDF locally. GAIPS status: not yet GA; general purchase opens 2026-07-28 (currently bundled with SANS SEC545 only); exam mechanics (count/duration/passing) are NOT published by GIAC pre-GA — so GAIPS carries no exam{} and is used only as an 8-domain descriptive skeleton, never as claimed exam facts. ATLAS RAG techniques were verified against dist/ATLAS.yaml: 'False RAG Entry Injection' IS a canonical ATLAS technique — AML.T0071 (tactic AML.TA0007 Defense Evasion; created 2025-03-12, modified 2025-12-24, maturity 'demonstrated', ATLAS.yaml ~line 2442) — distinct from RAG Poisoning AML.T0070 (tactic AML.TA0006 Persistence) and Retrieval Content Crafting AML.T0066 (tactic AML.TA0003 Resource Development). M2 and M3 correctly teach AML.T0071 as a real technique (its ATLAS definition — a false document entry, hidden inside a legitimate ingested entry, that the LLM treats as a retrieved RAG result, bypassing data-monitoring and resisting direct deletion — is reproduced essentially verbatim in m3-l3); M6 was corrected to match (an earlier draft wrongly asserted T0071 was not canonical, and mislabelled T0070's tactic as Resource Development — both fixed). One PRD-drift item was genuinely corrected in content: the '200+ NIST suggested actions' headline count is not stated in the primary PDF (the action-ID structure GV-/MP-/MS-/MG- is taught instead of any round total). No factual corrections to the OWASP risk set were needed."
+  },
+  "badge": {
+    "completionLabel": "Completed — AI Security (LLM & Agent Security)",
+    "definition": "Completed the Automatos Academy AI Security (LLM & Agent Security) track, including the gateway-hardening lab and the red-team-your-own-app lab: can threat-model an LLM application against the OWASP Top 10 for LLM Applications (2025), map attacks to MITRE ATLAS, and reason about them with NIST AI 600-1. These are defensive engineering skills — no vendor credential is implied, and this track carries no exam anchor."
+  },
+  "domainFiles": [
+    "m1-threat-model-owasp.json",
+    "m2-prompt-injection-output.json",
+    "m3-poisoning-supply-chain.json",
+    "m4-excessive-agency-agents.json",
+    "m5-red-team-gateway.json",
+    "m6-atlas-nist.json"
+  ],
+  "officialResources": [
+    {
+      "id": "off-owasp-llm-top10",
+      "title": "OWASP Top 10 for LLM Applications (2025)",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "kind": "spec",
+      "annotation": "The risk backbone of the whole track: the ten LLM-application risks (LLM01 Prompt Injection through LLM10 Unbounded Consumption) with definitions, example attacks, and mitigations. Every module maps its content to one or more of these risks by name and number.",
+      "domainIds": []
+    },
+    {
+      "id": "off-owasp-llm01",
+      "title": "OWASP LLM01 — Prompt Injection (per-risk root)",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "kind": "spec",
+      "annotation": "The per-risk pages are the source of truth for each risk's definition and mitigations. Start at LLM01 and follow the sidebar to LLM02–LLM10; the modules cite the specific per-risk page behind every claim (M2 leans on LLM01/LLM05/LLM07, M3 on LLM03/LLM04/LLM08, M4 on LLM06/LLM08/LLM10).",
+      "domainIds": []
+    },
+    {
+      "id": "off-mitre-atlas",
+      "title": "MITRE ATLAS — Adversarial Threat Landscape for AI Systems",
+      "url": "https://atlas.mitre.org/",
+      "kind": "reference",
+      "annotation": "The shared adversary map: an ATT&CK-style knowledge base of real-world tactics and techniques against AI systems (e.g. LLM Prompt Injection AML.T0051, RAG Poisoning AML.T0070). Browse the matrix here; the authoritative, machine-readable technique IDs the modules cite live in the official mitre-atlas/atlas-data repository (the site is a JS app the fetcher cannot render, so verify IDs against the data, not blogs).",
+      "domainIds": []
+    },
+    {
+      "id": "off-nist-ai-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "reference",
+      "annotation": "The parent governance frame the profile hangs off: the GOVERN / MAP / MEASURE / MANAGE functions used to organise how an enterprise manages AI risk. Used for orientation and vocabulary, not as a checklist to certify against.",
+      "domainIds": []
+    },
+    {
+      "id": "off-nist-ai-600-1",
+      "title": "NIST AI 600-1 — Generative AI Profile (July 2024)",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "kind": "reference",
+      "annotation": "The governance overlay for generative AI specifically: twelve GenAI risk areas (including the verbatim 'Harmful Bias and Homogenization') and suggested actions keyed by ID (GV-/MP-/MS-/MG-). Cite specific action IDs rather than any round total — the headline '200+ actions' number is not stated in the PDF itself.",
+      "domainIds": []
+    },
+    {
+      "id": "off-giac-gaips",
+      "title": "GIAC GAIPS (AI Platform Security) — certification objectives",
+      "url": "https://www.giac.org/certifications/ai-security-platform-security-gaips",
+      "kind": "reference",
+      "annotation": "Skeleton reference only. GAIPS's published objectives are the 8-domain scaffold this track consolidates into six teaching modules. GAIPS is NOT GA (general purchase opens 2026-07-28; currently bundled with SANS SEC545 only) and GIAC has not published its exam mechanics — so it is used here as a descriptive domain map, not as an exam to prep. When GAIPS reaches GA and publishes count/duration/passing score, this track gains an exam{} anchor per PRD-S2 §2.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "The LLM threat model — why AppSec assumptions break, and how to defend",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "OWASP LLM Top 10, MITRE ATLAS & NIST AI 600-1 — how the three frameworks fit together",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
+}

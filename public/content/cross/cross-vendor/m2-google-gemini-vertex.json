@@ -1,0 +1,438 @@
+{
+  "id": "m2-google-gemini-vertex",
+  "order": 2,
+  "code": "M2",
+  "name": "Google — Gemini & Vertex AI",
+  "tagline": "The one thing that surprises people about Google's enterprise stack: the platform is not 'Gemini only.' It is a managed platform — mid-rebrand from Vertex AI to Gemini Enterprise Agent Platform — whose Model Garden serves Anthropic's Claude, Meta's Llama, and Mistral right next to Google's own Gemini, all behind one API with one set of IAM/VPC/logging controls. This module teaches the architect judgment: Pro vs Flash vs Flash-Lite by workload; grounded vs ungrounded (and why an ungrounded enterprise answer is a liability); the managed Google-platform layer (Studio, Model Garden, grounding/RAG, the agent-building tier) vs calling a provider API direct; and the current names, because the branding moved and half the field is still saying the old ones.",
+  "overview": "This is the Google module of the cross-vendor track, and it is written for someone who already knows how to call an LLM API and now has to reason about Google's enterprise offering like an architect — not memorise SDK calls. Four judgment threads run through it. First, the model family: Gemini ships in tiers — Pro (the most capable, for genuinely hard reasoning, deep multimodal understanding, and complex code), Flash (the best price-performance all-rounder, tuned for high-throughput work like large-scale summarisation and responsive chat), and Flash-Lite (lowest latency and cost, for massive scale) — and the skill is matching the tier to the workload, not defaulting to the biggest model because it 'feels safer.' Second, the platform mental model that trips people up: 'on Vertex' has never meant 'Gemini only.' Model Garden is a catalogue that serves Google's Gemini alongside partner models — Anthropic's Claude, Meta's Llama, Mistral, and more — as a managed, serverless Model-as-a-Service, so you can run Claude or Llama THROUGH Google's platform and inherit its IAM, VPC controls, data governance, and billing. Third, grounding: an enterprise answer with no source is a liability, and Google's grounding and RAG features anchor a model's output to Google Search or to your own data and return citations, grounding chunks, and confidence scores so a claim can be traced. Ungrounded-and-confident is the failure mode; grounded-with-provenance is the enterprise posture. Fourth — and this is the currency warning the whole module is built around — Google is mid-rebrand. Vertex AI is becoming the Gemini Enterprise Agent Platform; Vertex AI Studio is Agent Studio; Vertex AI Search is Agent Search; Agent Engine is Agent Runtime. Old URLs and SDKs still resolve during the transition, but the field is full of stale names, so you learn the current ones and the mapping. The overarching decision — the one the module's debate turns on — is standardise on this managed Google platform (governance, grounding, multi-vendor Model Garden) versus call model providers directly (fewer layers, latest features first, easier multi-cloud portability). The honest rule: if you are already on Google Cloud and need governance plus grounding, the platform earns its keep — but keep the model call behind an interface so a workload can move.",
+  "objectives": [
+    "Choose between Gemini Pro, Flash, and Flash-Lite by workload — capability-first for hard reasoning and deep multimodal, price-performance for high-throughput, lowest-latency/cost for massive scale — instead of defaulting to the largest model.",
+    "Explain the platform mental model that 'on Vertex / on the Agent Platform' does NOT mean 'Gemini only': Model Garden serves Google's Gemini plus partner models (Anthropic Claude, Meta Llama, Mistral) as managed Model-as-a-Service behind one API and one governance plane.",
+    "Decide grounded vs ungrounded for a given task, and justify why an enterprise answer needs grounding — Google Search grounding for world knowledge, grounding on your own data / RAG for private facts — returning citations and confidence so claims are traceable.",
+    "Map the current Gemini Enterprise Agent Platform names to their former Vertex AI names (Agent Studio ← Vertex AI Studio, Agent Search ← Vertex AI Search, Agent Runtime ← Agent Engine) and teach the current names despite stale material in the wild.",
+    "Situate the agent-building tier — Agent Studio (low-code), Agent Development Kit (code-first, multi-agent), Agent Runtime (deploy/scale), Agent Garden (templates), with MCP and A2A for interoperability — as the layer above raw model calls.",
+    "Apply the build-vs-buy rule for the platform: standardise on the managed Google platform when you are on Google Cloud and need governance + grounding, but keep the model call behind an interface so you are not wedded to one platform or one vendor."
+  ],
+  "lessons": [
+    {
+      "id": "m2-l1-gemini-family",
+      "title": "The Gemini family: Pro, Flash, and Flash-Lite by workload",
+      "estMinutes": 14,
+      "objective": "Choose the right Gemini tier for a given job by matching capability, latency, and cost to the workload — and know why defaulting to the biggest model is usually the wrong instinct.",
+      "body": "## One family, three tiers — and the decision is which, not whether\n\nGemini is not a single model; it is a family shipped in tiers, and picking the tier is the first real judgement call on Google's stack. The tiers are stable even as the version number rolls forward — at the time of writing the generally-available family on the platform is **Gemini 2.5**, and the tier logic below is what carries from one version to the next:\n\n- **Gemini Pro** — the most capable tier. Google positions it for *the most demanding enterprise AI challenges*: highly complex reasoning, advanced code generation, and deep multimodal understanding — the kind of work where the model has to extract insight from a dense contract or reason across a long, mixed document. It carries a very large context window (on the 2.5 family, **one million tokens**).\n- **Gemini Flash** — the *best model in terms of price and performance*, a well-rounded all-rounder. Google engineers it for **high-throughput enterprise tasks**: large-scale summarisation, responsive chat applications, efficient data extraction. This is the default workhorse for most production traffic.\n- **Gemini Flash-Lite** — optimised for **low latency** and lowest cost, built for **massive scale**. Critically, it keeps the same core capabilities as the rest of the family — multimodal input and the one-million-token context — so 'lite' means cheaper and faster, not crippled.\n\nAll three are **multimodal**: they take text and code plus images, audio, video, and documents (PDFs) as input. So the choice between them is almost never about *what kind of input* — it is about how hard the reasoning is, how fast you need the answer, and what you can afford per call at your volume.\n\n## The instinct to resist: 'just use the biggest model'\n\nThe most common mistake here is picking Pro for everything because it 'feels safer.' It is the wrong instinct for three reasons. Pro costs more per call and generally answers slower, so on a high-volume path — classifying thousands of support tickets, summarising every incoming document — Pro burns budget and latency on work Flash handles perfectly well. And 'most capable' is only an advantage when the task actually needs that capability; on a routine extraction, a bigger model does not produce a meaningfully better answer, it just produces the same answer more expensively. The architect's move is to **match the tier to the workload**: reach for Pro when the reasoning is genuinely hard or the document is genuinely deep; run Flash for the broad middle of production traffic; drop to Flash-Lite when the job is simple and the volume is enormous and every millisecond and cent counts.\n\n## A worked example: three jobs, three tiers\n\nPicture one company with three AI jobs:\n\n1. **Analyse a 200-page master services agreement and flag unusual liability clauses.** Hard reasoning over a long, dense document where a miss is expensive. This is a **Pro** job — capability and the long context window are exactly what it is for.\n2. **Summarise every support email into a two-line ticket note, all day, at high volume.** Patterned, repetitive, high-throughput, low stakes per item. This is **Flash** — the price-performance all-rounder built for exactly this.\n3. **Tag millions of product images with a category label as they are uploaded.** Simple, latency-sensitive, staggering volume. This is **Flash-Lite** — lowest cost and latency, same multimodal input, at massive scale.\n\nSame platform, same family, same API shape — three different tiers because three different workloads. Notice the choice was driven by the *shape of the work* (reasoning depth, throughput, latency, unit cost), never by 'which model is newest' or 'which is biggest.'\n\n## Why this matters before anything else\n\nEverything later in the module — grounding, Model Garden, the agent layer — sits on top of a model call, and the tier you pick is the cost and latency floor of that call. Get the tier wrong and no amount of platform cleverness rescues the unit economics. In the next lesson we widen out from 'which Gemini' to the bigger surprise: on Google's platform, the model you run does not even have to be a Gemini.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-l1-1",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "How does Google position the three Gemini tiers?",
+          "options": [
+            { "id": "a", "text": "Pro is the most capable (complex reasoning, deep multimodal, hardest tasks); Flash is the best price-performance all-rounder for high-throughput work; Flash-Lite is lowest latency and cost for massive scale", "correct": true },
+            { "id": "b", "text": "Pro is text-only, Flash is images-only, and Flash-Lite is audio-only — they split the work by input type", "correct": false },
+            { "id": "c", "text": "Pro is the cheapest and fastest, Flash is mid-range, and Flash-Lite is the most capable premium tier", "correct": false },
+            { "id": "d", "text": "They are three unrelated models from different vendors that Google happens to resell together", "correct": false }
+          ],
+          "explanation": "The tiers split by capability/latency/cost, not by input type: Pro for the hardest reasoning, Flash for price-performant high throughput, Flash-Lite for lowest cost/latency at scale. Option b is wrong because all three are multimodal — they take text, images, audio, video, and documents; the tiers do not divide by modality. Option c inverts the naming — Pro is the capable premium tier and Flash-Lite is the cheap/fast one, not the reverse. Option d is false: they are one Gemini family from Google, not resold third-party models (that is Model Garden's partner models, a different thing covered in the next lesson).",
+          "sourceRefs": ["r-vertex-models", "r-vertex-genai-overview"]
+        },
+        {
+          "id": "kc-m2-l1-2",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team needs to summarise a very high volume of incoming support emails into short ticket notes — patterned, repetitive, low stakes per item. Their instinct is to use Pro 'to be safe.' What is the better call and why?",
+          "options": [
+            { "id": "a", "text": "Use Flash — it is the price-performance tier built for high-throughput tasks like large-scale summarisation, so Pro would add cost and latency without a meaningfully better answer on this work", "correct": true },
+            { "id": "b", "text": "Use Pro exactly as they planned — the most capable model always produces a better result, so it is never the wrong choice", "correct": false },
+            { "id": "c", "text": "Use Flash-Lite because summarisation is impossible on any other tier", "correct": false },
+            { "id": "d", "text": "Do not use Gemini at all — summarisation requires a partner model from Model Garden", "correct": false }
+          ],
+          "explanation": "High-volume, patterned summarisation is the textbook Flash workload — best price-performance for high-throughput tasks — so Flash gives the same quality far cheaper and faster than Pro here. Option b is the exact 'just use the biggest model' trap the lesson warns against: on routine work Pro costs more and answers slower without a better result. Option c overstates Flash-Lite's necessity — Flash-Lite is a valid low-cost option, but summarisation is not 'impossible' elsewhere; the claim is false. Option d is wrong: Gemini Flash handles summarisation natively; nothing about the task requires a partner model.",
+          "sourceRefs": ["r-vertex-models"]
+        }
+      ]
+    },
+    {
+      "id": "m2-l2-vertex-platform-model-garden",
+      "title": "The managed platform: Model Garden serves Claude and Llama too — plus grounding",
+      "estMinutes": 16,
+      "objective": "Explain why Google's platform is a managed, multi-vendor model host — not 'Gemini only' — and why grounding is the enterprise posture, so you can reason about it as an architect.",
+      "body": "## The surprise: 'on the platform' does not mean 'Gemini only'\n\nHere is the single fact that reframes Google's enterprise offering. The platform — historically **Vertex AI**, now becoming the **Gemini Enterprise Agent Platform** (more on the rename in Lesson 3) — is a *managed platform for generative AI*, not merely a way to call Gemini. Its model catalogue, **Model Garden**, is organised into three collections:\n\n- **Google models** — Gemini and Google's other first-party models.\n- **Partner models** — third-party foundation models served on Google's platform. The headline names are **Anthropic's Claude**, **Meta's Llama**, and **Mistral AI** (with others such as AI21 in the catalogue).\n- **Open models** — open-weight models you can discover and deploy.\n\nSo you can run **Claude or Llama *through* Google's platform**. That is the part that surprises people who assume a cloud's AI product only serves that cloud's own model. It does not — Model Garden is a multi-vendor host.\n\n## How partner models are served: managed, serverless, one API\n\nThe partner models are offered as **Model-as-a-Service (MaaS)**: a **fully managed, serverless API** where — in Google's words — *there's no need to provision or manage infrastructure*. You call Claude on the platform much as you call Gemini, pay **as you go** (or via **provisioned throughput** for guaranteed capacity), and — this is the architect's point — the call runs inside **Google Cloud's governance plane**: the same **IAM** access control, **VPC** networking controls, **data-access audit logging**, and data-governance posture you use for everything else. (Beyond MaaS, some models can also be **self-deployed** to your own endpoint if you need to run the weights yourself.)\n\nWhy does this matter for judgement? Because it changes the build-vs-buy maths. If your organisation is already standardised on Google Cloud and needs one governance model across every AI call, running Claude via Model Garden lets you use a best-in-class partner model **without** bolting on a second vendor relationship, a second set of keys, and a second audit surface. You trade a little immediacy (a brand-new model or feature may reach the provider's own API before it reaches Model Garden) for one consistent, governed control plane. That is a real, defensible trade — and it is the crux of the module's debate.\n\n## Grounding: an ungrounded enterprise answer is a liability\n\nThe second half of the platform's enterprise value is **grounding**. A raw model answers from what it learned in training; it will state something plausible with total confidence and no source — and in an enterprise setting, *confident-and-unsourced* is exactly the failure you cannot ship. Grounding anchors the model's response to real information and returns **citations** so a claim can be traced. Google offers grounding against different sources, and the distinction is the decision you make per task:\n\n- **Grounding with Google Search** — anchors the answer to current, public world knowledge from Google Search. Use it when the question is about the outside world and freshness matters (recent events, public facts).\n- **Grounding on your own data (RAG)** — anchors the answer to *your* private corpus. On this platform that is the job of **grounding with Agent Search** (the enterprise search product, formerly *Vertex AI Search*) and the **RAG Engine**, which *securely connects private enterprise data to LLMs to improve answer accuracy and reduce hallucinations.* Use it when the answer must come from your documents, policies, or knowledge base.\n\nGrounded responses come back with **grounding metadata**: **grounding chunks** (the source passages that support the answer), **grounding supports** (which segment of the answer each chunk backs, so you can render inline citations), and **confidence scores** (0 to 1, how well a claim is supported). You can ground on multiple sources at once, each indexed so its provenance is traceable. This is the difference between 'the model said so' and 'the model said so, here is the passage it came from, and here is how confident the grounding is.'\n\n## The judgement: grounded vs ungrounded, and which source\n\nPut the two decisions together and you have the enterprise posture:\n\n- Is the task **fact-bearing** — does a wrong answer mislead someone? If yes, **ground it**. Ungrounded is only acceptable for genuinely creative or low-stakes generation.\n- If grounded, is the truth **public and current** (use Google Search grounding) or **private to you** (use grounding on your own data / RAG)? A question like 'what is our refund policy for enterprise customers' must ground on *your* data — Google Search cannot answer it and would hallucinate; a question like 'what changed in this week's regulation' wants Google Search grounding.\n\n## What this buys you\n\nYou can now reason about the platform as what it actually is: a **managed, multi-vendor model host with grounding built in**, not a Gemini vending machine. That reframing — plus the grounded-vs-ungrounded decision — is most of what an architect needs before touching the agent layer. The last piece is getting the *names* right, because Google moved them all at once, and that is Lesson 3.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-l2-1",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A colleague says: 'We're on Google's platform, so we can only run Gemini.' Why is that wrong?",
+          "options": [
+            { "id": "a", "text": "Model Garden serves partner models — Anthropic's Claude, Meta's Llama, Mistral — as managed Model-as-a-Service alongside Gemini, so you can run a partner model through Google's platform and inherit its IAM/VPC/logging governance", "correct": true },
+            { "id": "b", "text": "It is correct — Google's platform only ever serves Google's own Gemini models", "correct": false },
+            { "id": "c", "text": "It is wrong only because you can copy prompts out and paste them into a competitor's website by hand", "correct": false },
+            { "id": "d", "text": "It is wrong because Gemini is secretly the same model as Claude under a different name", "correct": false }
+          ],
+          "explanation": "Model Garden is a multi-vendor catalogue: Google models, partner models (Claude/Llama/Mistral, and more), and open models — partner models are served as managed MaaS behind the same API and governance plane, so 'Gemini only' is false. Option b restates the misconception the lesson exists to correct. Option c describes a manual workaround, not the actual point — the platform natively hosts partner models, no copy-paste needed. Option d is nonsense: Gemini and Claude are different models from different vendors; Model Garden hosts both, it does not merge them.",
+          "sourceRefs": ["r-vertex-model-garden", "r-vertex-partner-models"]
+        },
+        {
+          "id": "kc-m2-l2-2",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You are building an internal assistant that must answer 'what is our company's refund policy for enterprise customers?' Which grounding choice is correct, and why?",
+          "options": [
+            { "id": "a", "text": "Ground on your own data (RAG / grounding with Agent Search) — the answer lives only in your private documents, so Google Search grounding cannot supply it and an ungrounded model would hallucinate a plausible-but-wrong policy", "correct": true },
+            { "id": "b", "text": "Ground with Google Search — it can find your internal, unpublished refund policy on the public web", "correct": false },
+            { "id": "c", "text": "Leave it ungrounded — the model already knows every company's internal policies from training", "correct": false },
+            { "id": "d", "text": "Grounding is irrelevant here; just pick Gemini Pro and the answer will always be correct", "correct": false }
+          ],
+          "explanation": "A private, company-specific fact must be grounded on your own corpus (RAG / grounding with Agent Search) so the answer is traced to your actual policy document. Option b is wrong because an internal, unpublished policy is not on the public web, so Google Search grounding cannot retrieve it. Option c is the exact liability the lesson warns about — an ungrounded model will confidently invent a plausible policy it does not actually know. Option d confuses tier with grounding: a bigger model does not know your private data, so Pro alone still needs grounding to answer correctly.",
+          "sourceRefs": ["r-vertex-grounding", "r-vertex-rag-grounding-blog"]
+        },
+        {
+          "id": "kc-m2-l2-3",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "How are partner models like Claude billed and operated when consumed as Model-as-a-Service on Google's platform?",
+          "options": [
+            { "id": "a", "text": "As a fully managed, serverless API — no infrastructure to provision — billed pay-as-you-go or via provisioned throughput, running inside Google Cloud's IAM/VPC/logging governance", "correct": true },
+            { "id": "b", "text": "You must rent and manage your own GPU cluster before you can send a single request", "correct": false },
+            { "id": "c", "text": "They are free and unmetered because they are not Google's own models", "correct": false },
+            { "id": "d", "text": "They can only be used offline, disconnected from any Google Cloud controls", "correct": false }
+          ],
+          "explanation": "MaaS is a managed, serverless API — Google states there is no infrastructure to provision — with pay-as-you-go or provisioned-throughput billing, all under the platform's governance controls. Option b describes self-hosting, which is the opposite of MaaS; the whole point is you do not manage infrastructure. Option c is false — partner models are metered and billed; nothing here is free. Option d inverts reality: the value of MaaS is precisely that partner models run inside Google Cloud's IAM, VPC, and audit-logging controls, not disconnected from them.",
+          "sourceRefs": ["r-vertex-partner-models", "r-vertex-model-garden"]
+        }
+      ]
+    },
+    {
+      "id": "m2-l3-rebrand-agent-layer-buildvsbuy",
+      "title": "The rebrand, the agent tier, and the build-vs-buy call",
+      "estMinutes": 15,
+      "objective": "Use the current Gemini Enterprise Agent Platform names (and their former Vertex AI names), place the agent-building tier, and apply the standardise-vs-call-direct rule.",
+      "body": "## Currency warning: Google moved all the names at once\n\nIf you read one blog from last year and one doc from this week, you will see two different vocabularies for the same product — and getting this wrong makes you sound out of date in a design review. Google is **mid-rebrand**: **Vertex AI** is becoming the **Gemini Enterprise Agent Platform** (Google's own product pages now read *'Gemini Enterprise Agent Platform (formerly Vertex AI)'*). There is an official name-changes page that maps the old names to the new; the ones worth memorising:\n\n| Former (Vertex AI era) | Current (Gemini Enterprise Agent Platform) |\n|---|---|\n| Vertex AI (the platform) | **Gemini Enterprise Agent Platform** |\n| Vertex AI Studio | **Agent Studio** |\n| Vertex AI Search | **Agent Search** |\n| Grounding with Vertex AI Search | **Grounding with Agent Search** |\n| (Vertex AI) Agent Engine | **Agent Runtime** |\n| Agent Builder Sessions | **Agent Platform Sessions** |\n| Memory Bank | **Agent Platform Memory Bank** |\n\nTwo practical notes. First, **existing Vertex AI URLs and SDKs still resolve during the transition** — Google has not broken the old paths, so your working code keeps working; this is a naming migration, not a rip-and-replace. Second, the **Gemini models themselves keep their names** (Gemini 2.5 Pro/Flash/Flash-Lite) — it is the *platform and its surrounding services* that were renamed, not the model family. The rule for this module: **teach and use the current names, recognise the old ones**, because the field is saturated with the former vocabulary and you need to translate on the fly.\n\n## The agent-building tier: above the raw model call\n\nEverything so far has been about *calling a model* (which Gemini, grounded how, Gemini or a partner). The platform also has a layer *above* that for building **agents** — systems that use a model plus tools, memory, and multi-step logic. You do not need to build one here, but you should be able to name the pieces and say what each is for:\n\n- **Agent Studio** — the **low-code, visual** entry point. Design, test, and manage prompts for Gemini using natural language, code, images, or video; iterate in a chat interface; even deploy a prompt as a small web app (hosted on Cloud Run) with a couple of clicks. This is where non-specialists and rapid prototyping live. (It is the renamed *Vertex AI Studio*.)\n- **Agent Development Kit (ADK)** — the **code-first** framework: an open-source kit to build, debug, and deploy agents, with native support for **multi-agent** architectures (teams of specialised agents that delegate to each other). This is where serious engineering lives.\n- **Agent Runtime** — the **deploy-and-scale** layer (the renamed *Agent Engine*): run agents in production with fast cold starts, and support long-running, stateful agents backed by **Agent Platform Memory Bank** for persistent context.\n- **Agent Garden** — a curated set of **agent templates** (code modernisation, financial analysis, invoice processing, and more) to start from rather than from a blank file.\n- **Interoperability** — agents talk to tools and to each other through open protocols: **Model Context Protocol (MCP)** for tool/context access and the **Agent2Agent (A2A)** protocol so agents built on different frameworks or vendors can discover and delegate to one another.\n\nThe shape to remember: **low-code (Agent Studio) → code-first (ADK) → run at scale (Agent Runtime), with templates (Agent Garden) and open protocols (MCP, A2A) tying it together.**\n\n## The build-vs-buy call: standardise on the platform, or call providers direct?\n\nThis is the judgement the whole module builds toward, and it is a genuine trade with no universal winner:\n\n**Standardise on the managed Google platform** buys you: one governance model (IAM/VPC/audit) across every model including partner ones; grounding and RAG built in; the multi-vendor Model Garden so you can switch engines without leaving the platform; and managed ops (no infrastructure to run). The cost: an extra layer between you and the model, and sometimes a lag before the very newest model or feature is available through the platform versus the provider's own API.\n\n**Call model providers directly** buys you: the fewest layers, the latest features first (providers ship on their own API before partners mirror it), and easier multi-cloud portability with no single-platform dependency. The cost: you own the governance, key management, logging, and grounding/RAG plumbing yourself, per provider, and you multiply that work with every vendor you add.\n\n**The rule to converge on:** if you are **already on Google Cloud and need governance plus grounding**, the platform earns its keep — the consistent control plane and built-in grounding are worth the extra layer. But whichever way you go, **keep the model call behind an interface** (an adapter your app talks to, not the raw SDK) so a workload can move — to a different Gemini tier, to a partner model in Model Garden, or off Google entirely — when price, capability, or policy shifts. That portability discipline is the spine of this whole cross-vendor track, and it is exactly what the capstone module has you build.\n\n## What this buys you\n\nYou can now speak Google's *current* vocabulary, place the agent tier above the model call, and make the platform-vs-direct decision like an architect instead of a partisan. Combined with tier selection (Lesson 1) and the multi-vendor-plus-grounding reframing (Lesson 2), that is the full judgement set for reasoning about Google's stack — and it plugs straight into the cross-provider comparison and the portability capstone later in the track.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m2-l3-1",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In a design review someone refers to 'Vertex AI Studio' and 'Vertex AI Search.' What are these called now, and what changed?",
+          "options": [
+            { "id": "a", "text": "Agent Studio and Agent Search — Google is rebranding Vertex AI to the Gemini Enterprise Agent Platform; the services were renamed, though existing URLs and SDKs still resolve during the transition", "correct": true },
+            { "id": "b", "text": "Nothing changed — those are still the only correct current names and any other term is wrong", "correct": false },
+            { "id": "c", "text": "They were both renamed to 'Gemini Pro' — the model and the services now share one name", "correct": false },
+            { "id": "d", "text": "They were discontinued entirely, and there is no current equivalent on the platform", "correct": false }
+          ],
+          "explanation": "The rebrand maps Vertex AI Studio to Agent Studio and Vertex AI Search to Agent Search under the Gemini Enterprise Agent Platform, and Google kept old URLs/SDKs working through the transition. Option b denies the rebrand the lesson documents from Google's own name-changes page. Option c confuses services with the model family — Gemini Pro is a model tier, not the new name for Studio or Search. Option d is false: the services were renamed, not removed; they have direct current equivalents.",
+          "sourceRefs": ["r-vertex-name-changes"]
+        },
+        {
+          "id": "kc-m2-l3-2",
+          "domainId": "m2-google-gemini-vertex",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "An architect concludes: 'We're all-in on Google Cloud and need one governance and grounding story, so we'll standardise on the Gemini Enterprise Agent Platform — but every model call goes through our own adapter interface.' Why is the adapter clause the smart part?",
+          "options": [
+            { "id": "a", "text": "It preserves portability — the workload can later move to a different Gemini tier, to a partner model in Model Garden, or off Google entirely when price, capability, or policy shifts — so standardising on the platform does not harden into lock-in", "correct": true },
+            { "id": "b", "text": "It makes the platform's grounding and IAM controls unnecessary, so they can be switched off to save money", "correct": false },
+            { "id": "c", "text": "It is pointless overhead — once you choose a platform you can never move, so the interface adds nothing", "correct": false },
+            { "id": "d", "text": "It forces every call to use Gemini Pro, which is the only safe model to standardise on", "correct": false }
+          ],
+          "explanation": "The adapter is the portability discipline the whole track teaches: standardising on the platform is fine, but routing calls through your own interface means a workload can be re-pointed — different tier, partner model, or another provider — without a rewrite, so 'standardise' does not become 'locked in.' Option b is wrong and dangerous: the adapter is orthogonal to grounding and IAM, which remain essential and are not something to switch off. Option c denies the point — the interface exists precisely because you MIGHT move, and it makes moving cheap. Option d invents a constraint; the adapter enables any tier or model, and it certainly does not mandate Pro.",
+          "sourceRefs": ["r-vertex-genai-overview", "r-vertex-partner-models"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m2-1",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which Gemini tier is positioned as the best price-performance all-rounder for high-throughput enterprise tasks like large-scale summarisation and responsive chat?",
+      "options": [
+        { "id": "a", "text": "Gemini Flash", "correct": true },
+        { "id": "b", "text": "Gemini Pro", "correct": false },
+        { "id": "c", "text": "Gemini Flash-Lite", "correct": false },
+        { "id": "d", "text": "Gemini Nano-Ultra", "correct": false }
+      ],
+      "explanation": "Google positions Flash as the best model for price and performance, engineered for high-throughput work such as large-scale summarisation and responsive chat. Pro is the most capable tier for the hardest reasoning, not the price-performance pick. Flash-Lite is the lowest-latency/cost tier for massive scale, a step below Flash on capability. 'Gemini Nano-Ultra' is not a real tier in this family — a distractor.",
+      "sourceRefs": ["r-vertex-models"]
+    },
+    {
+      "id": "q-m2-2",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A workload analyses long, dense legal contracts and must reason across the whole document to flag unusual clauses. Which tier fits, and what capability makes it fit?",
+      "options": [
+        { "id": "a", "text": "Gemini Pro — it is the most capable tier for complex reasoning and deep multimodal understanding, with a very large (one-million-token on the 2.5 family) context window for long documents", "correct": true },
+        { "id": "b", "text": "Gemini Flash-Lite — because the lowest-cost tier is always the right default regardless of task difficulty", "correct": false },
+        { "id": "c", "text": "Gemini Flash — because it is the only tier that can read a PDF", "correct": false },
+        { "id": "d", "text": "None — Gemini cannot process documents, only short chat messages", "correct": false }
+      ],
+      "explanation": "Hard reasoning over a long, dense document is the Pro workload — most-capable tier plus the large context window that lets it hold the whole contract. Option b misapplies the cost-first instinct: Flash-Lite is for simple high-volume work, and defaulting to it on genuinely hard reasoning trades away the capability the task needs. Option c is factually wrong — all three tiers are multimodal and can read PDFs, so 'only Flash' is false. Option d is false: Gemini is multimodal and handles documents natively, including very long ones.",
+      "sourceRefs": ["r-vertex-models", "r-vertex-genai-overview"]
+    },
+    {
+      "id": "q-m2-3",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What are the three model collections in Model Garden?",
+      "options": [
+        { "id": "a", "text": "Google models, partner models (e.g. Anthropic Claude, Meta Llama, Mistral), and open models", "correct": true },
+        { "id": "b", "text": "Free models, trial models, and enterprise models", "correct": false },
+        { "id": "c", "text": "Chat models, image models, and audio models", "correct": false },
+        { "id": "d", "text": "Only Gemini models, in three size tiers", "correct": false }
+      ],
+      "explanation": "Model Garden is organised into Google models, partner models (third-party foundation models like Claude, Llama, and Mistral), and open models — a multi-vendor catalogue. Option b invents a pricing-based grouping that is not how the catalogue is structured. Option c is a modality split, not the collection structure Google uses. Option d is the 'Gemini only' misconception — Model Garden's whole point is that it serves partner and open models too.",
+      "sourceRefs": ["r-vertex-model-garden"]
+    },
+    {
+      "id": "q-m2-4",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Your company is standardised on Google Cloud and wants to use Anthropic's Claude while keeping one governance and audit story. What does Model Garden let you do?",
+      "options": [
+        { "id": "a", "text": "Consume Claude as managed Model-as-a-Service on the platform — serverless, no infrastructure to run — so the call inherits Google Cloud's IAM, VPC, and audit-logging controls like any Gemini call", "correct": true },
+        { "id": "b", "text": "Nothing — to use Claude you must leave Google entirely and sign a separate contract with Anthropic, running it outside any Google controls", "correct": false },
+        { "id": "c", "text": "Only download Claude's weights and host them yourself on your own hardware, with no managed option", "correct": false },
+        { "id": "d", "text": "Rename Gemini to 'Claude' in the console — they are the same model", "correct": false }
+      ],
+      "explanation": "Partner models like Claude are available as managed MaaS on the platform, so you get a best-in-class partner model under the same Google Cloud governance plane without a separate vendor stack. Option b describes the very thing MaaS avoids — you do not have to leave Google or forfeit its controls to use Claude. Option c is only one option (self-deploy) and wrongly claims there is no managed path; MaaS is the managed path. Option d is nonsense — Claude and Gemini are different models from different vendors.",
+      "sourceRefs": ["r-vertex-partner-models", "r-vertex-model-garden"]
+    },
+    {
+      "id": "q-m2-5",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why is grounding described as the enterprise posture, and what is the failure mode it addresses?",
+      "options": [
+        { "id": "a", "text": "An ungrounded model answers confidently from training with no source and can hallucinate; grounding anchors the answer to real data (Google Search or your own corpus) and returns citations so a claim is traceable", "correct": true },
+        { "id": "b", "text": "Grounding makes the model faster, which is the only enterprise concern", "correct": false },
+        { "id": "c", "text": "Grounding lets you skip choosing a model tier, because grounded answers ignore the model", "correct": false },
+        { "id": "d", "text": "Grounding is a billing feature with no effect on answer quality or traceability", "correct": false }
+      ],
+      "explanation": "The failure mode is confident-but-unsourced output; grounding fixes it by anchoring responses to real sources and returning citations, which is exactly what an enterprise needs to trust and trace an answer. Option b confuses grounding with latency — grounding is about factual anchoring and provenance, not speed. Option c is wrong: grounding still runs through a chosen model; it supplements the model with sources, it does not replace tier selection. Option d is false — grounding materially improves accuracy and adds traceable citations; it is not merely a billing construct.",
+      "sourceRefs": ["r-vertex-grounding", "r-vertex-rag-grounding-blog"]
+    },
+    {
+      "id": "q-m2-6",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A question needs a current PUBLIC fact ('what did the regulator announce this week?'). Which grounding source fits?",
+      "options": [
+        { "id": "a", "text": "Grounding with Google Search — it anchors the answer to current public world knowledge", "correct": true },
+        { "id": "b", "text": "Grounding on your own private data (RAG), because private data is the only valid grounding source", "correct": false },
+        { "id": "c", "text": "No grounding — public facts are safe to answer from training memory, which is always current", "correct": false },
+        { "id": "d", "text": "Grounding with Google Search is impossible; the platform can only ground on uploaded files", "correct": false }
+      ],
+      "explanation": "A fresh, public fact is exactly what Google Search grounding is for — current world knowledge with citations. Option b misroutes it: your private corpus will not contain this week's public regulatory news, so RAG on your own data is the wrong source here. Option c is the liability the module warns against — training data has a cutoff and will not reliably know this week's news, so ungrounded is unsafe for a freshness-sensitive fact. Option d is false: the platform explicitly supports grounding with Google Search, not only uploaded files.",
+      "sourceRefs": ["r-vertex-grounding"]
+    },
+    {
+      "id": "q-m2-7",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A grounded response comes back with metadata. Which items does grounding return to make a claim traceable?",
+      "options": [
+        { "id": "a", "text": "Grounding chunks (the supporting source passages), grounding supports (which answer segment each chunk backs, for inline citations), and confidence scores (0–1)", "correct": true },
+        { "id": "b", "text": "Only a single yes/no flag saying whether the answer was grounded, with no sources", "correct": false },
+        { "id": "c", "text": "The model's full training dataset, so you can audit everything it ever learned", "correct": false },
+        { "id": "d", "text": "Nothing — grounding changes the answer text but returns no metadata at all", "correct": false }
+      ],
+      "explanation": "Grounding metadata includes grounding chunks (source passages), grounding supports (mapping answer segments to chunks so you can render citations), and confidence scores from 0 to 1 — the machinery of traceability. Option b understates it: grounding returns rich, per-claim provenance, not a single flag. Option c is impossible and not what is returned — you get the retrieved supporting passages, not the entire training corpus. Option d is false: returning traceable metadata is the whole point of grounding.",
+      "sourceRefs": ["r-vertex-grounding", "r-vertex-rag-grounding-blog"]
+    },
+    {
+      "id": "q-m2-8",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Google is mid-rebrand. Which mapping of former Vertex AI names to current Gemini Enterprise Agent Platform names is correct?",
+      "options": [
+        { "id": "a", "text": "Vertex AI → Gemini Enterprise Agent Platform; Vertex AI Studio → Agent Studio; Vertex AI Search → Agent Search; Agent Engine → Agent Runtime", "correct": true },
+        { "id": "b", "text": "Vertex AI → Gemini Pro; Vertex AI Studio → Gemini Flash; Vertex AI Search → Gemini Flash-Lite", "correct": false },
+        { "id": "c", "text": "The names are unchanged; 'Gemini Enterprise Agent Platform' is a competitor product, not a rename of Vertex AI", "correct": false },
+        { "id": "d", "text": "Everything was renamed to 'Model Garden', which now refers to the whole platform and all its services", "correct": false }
+      ],
+      "explanation": "The verified mapping renames the platform to Gemini Enterprise Agent Platform, Vertex AI Studio to Agent Studio, Vertex AI Search to Agent Search, and Agent Engine to Agent Runtime. Option b confuses platform/service names with model tiers — Gemini Pro/Flash/Flash-Lite are models, not the renamed platform or Studio. Option c denies the documented rebrand; Google's own pages read 'Gemini Enterprise Agent Platform (formerly Vertex AI).' Option d overreaches — Model Garden is the model catalogue, one component, not the new name for the entire platform.",
+      "sourceRefs": ["r-vertex-name-changes"]
+    },
+    {
+      "id": "q-m2-9",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "During the rebrand, a team worries their working integration will break the moment names change. What is the accurate reassurance, and its limit?",
+      "options": [
+        { "id": "a", "text": "Existing Vertex AI URLs and SDKs still resolve during the transition, and the Gemini model names are unchanged — so code keeps working; the limit is that surrounding SERVICE names (Studio, Search, Agent Engine) were renamed, so docs and consoles will show the new terms", "correct": true },
+        { "id": "b", "text": "Nothing will work until every reference is rewritten to the new names in a single hard cutover", "correct": false },
+        { "id": "c", "text": "The Gemini models were renamed too, so all model IDs in the code must change immediately", "correct": false },
+        { "id": "d", "text": "The rebrand deletes the old APIs, so the integration must be rebuilt from scratch on a new platform", "correct": false }
+      ],
+      "explanation": "It is a naming migration, not a rip-and-replace: old URLs/SDKs keep resolving and the Gemini model names are stable, so running code is safe; the practical catch is that the platform and service names (Studio→Agent Studio, Search→Agent Search, Agent Engine→Agent Runtime) changed, so documentation and the console use the new vocabulary. Option b overstates the disruption — there is no forced hard cutover. Option c is wrong on a key detail: the model family names did NOT change, only the platform/services. Option d is false — the old APIs are not deleted during the transition; no from-scratch rebuild is required.",
+      "sourceRefs": ["r-vertex-name-changes", "r-vertex-models"]
+    },
+    {
+      "id": "q-m2-10",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Within the agent-building tier, which description best separates Agent Studio from the Agent Development Kit (ADK)?",
+      "options": [
+        { "id": "a", "text": "Agent Studio is the low-code, visual entry point for designing and testing prompts; ADK is the open-source, code-first framework for building agents, including multi-agent architectures", "correct": true },
+        { "id": "b", "text": "Agent Studio is a partner model from Anthropic; ADK is a Google model tier", "correct": false },
+        { "id": "c", "text": "They are two names for the same tool with no difference between them", "correct": false },
+        { "id": "d", "text": "Agent Studio runs the models and ADK stores your billing information", "correct": false }
+      ],
+      "explanation": "The split is low-code vs code-first: Agent Studio is the visual, prompt-design surface (the renamed Vertex AI Studio), while ADK is the open-source, code-first kit that natively supports multi-agent systems. Option b miscategorises both — neither is a partner model or a model tier; they are building tools. Option c is wrong: they occupy different rungs (visual prototyping vs engineering) and are not interchangeable. Option d invents unrelated roles; ADK is a development framework, not a billing store, and 'runs the models' is not what distinguishes Studio.",
+      "sourceRefs": ["r-vertex-agent-platform-overview", "r-vertex-name-changes"]
+    },
+    {
+      "id": "q-m2-11",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "In the 'standardise on the Google platform vs call providers directly' debate, which statement most fairly captures the trade-off?",
+      "options": [
+        { "id": "a", "text": "The platform gives one governance model, built-in grounding, and a multi-vendor Model Garden at the cost of an extra layer and sometimes-later access to the newest features; direct provider APIs give fewer layers, latest features first, and easier multi-cloud portability at the cost of owning governance and grounding yourself per vendor", "correct": true },
+        { "id": "b", "text": "The platform is always better because managed services have no downsides", "correct": false },
+        { "id": "c", "text": "Calling providers directly is always better because layers are always bad", "correct": false },
+        { "id": "d", "text": "There is no real difference; the two approaches are identical in cost, governance, and feature timing", "correct": false }
+      ],
+      "explanation": "The honest framing names both sides: the managed platform trades an extra layer and occasional feature lag for one governance plane, built-in grounding, and multi-vendor Model Garden, while direct APIs trade self-owned governance/grounding for fewer layers, earliest features, and portability. Options b and c are the partisan positions the debate explicitly rejects — each approach has real costs, so neither is universally best. Option d is false: the approaches differ materially on governance ownership, layering, and how soon new features arrive.",
+      "sourceRefs": ["r-vertex-genai-overview", "r-vertex-partner-models"]
+    },
+    {
+      "id": "q-m2-12",
+      "domainId": "m2-google-gemini-vertex",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team standardises on the Gemini Enterprise Agent Platform for governance and grounding, but hardcodes the raw Gemini SDK call throughout the app with no abstraction. From the track's portability lens, what is the risk?",
+      "options": [
+        { "id": "a", "text": "They lose cheap portability — moving a workload to another Gemini tier, a Model Garden partner model, or off Google later becomes a costly rewrite, so a fine platform choice quietly hardens into lock-in", "correct": true },
+        { "id": "b", "text": "No risk — hardcoding the SDK everywhere is the recommended way to guarantee portability", "correct": false },
+        { "id": "c", "text": "The only risk is that grounding stops working, which hardcoding always disables", "correct": false },
+        { "id": "d", "text": "The risk is that partner models become free, distorting the budget", "correct": false }
+      ],
+      "explanation": "The track's rule is to keep the model call behind an interface precisely so a workload can move; hardcoding the raw SDK everywhere removes that seam, turning any future move (tier, partner model, or another provider) into an expensive rewrite — lock-in by omission. Option b inverts the guidance — scattering the raw SDK is what DESTROYS portability, not what guarantees it. Option c invents a false coupling: hardcoding the call does not disable grounding, and grounding is not the issue here. Option d is nonsensical — partner models are billed, not free, and this has nothing to do with the portability risk described.",
+      "sourceRefs": ["r-vertex-genai-overview", "r-vertex-partner-models"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m2-grounded-gemini-call",
+      "domainId": "m2-google-gemini-vertex",
+      "title": "Make a grounded Gemini call on Google's platform — and prove the grounding",
+      "goal": "Produce this module's artifact: a side-by-side of the SAME question answered by Gemini ungrounded versus grounded, plus the grounding metadata (citations / grounding chunks / confidence) that makes the grounded answer traceable. You will do it in Agent Studio (the renamed Vertex AI Studio) with no code, so the point of the module — grounded beats confident-and-unsourced — becomes something you have seen with your own eyes.",
+      "steps": "## What you'll do\n\nYou'll pick a Gemini tier, ask it a fact-bearing question twice — once ungrounded, once grounded with Google Search — and capture the difference, including the citations the grounded call returns. Everything happens in the browser console; you do not write code. (This lab uses Google's own platform, not Automatos; the 'wire it into Automatos' step is the Apply-it section below.)\n\n### Before you start\n\n- **A Google Cloud project with billing enabled and the Vertex AI / Agent Platform API turned on.** Model calls and grounding are metered — this lab is a handful of calls and costs pennies, but you are paying the provider directly. If you do not already have a project, that setup is the one prerequisite.\n- **Open Agent Studio** (formerly *Vertex AI Studio*) in the Google Cloud console. If a doc or menu still says 'Vertex AI Studio', that is the same place — Google is mid-rebrand and old names and URLs still resolve.\n\n### Run the ungrounded call (the baseline)\n\n1. **Pick a tier deliberately.** Choose **Gemini Flash** for this — it is the price-performance all-rounder and plenty for a single Q&A. Note WHY you picked it (not Pro): this is a simple question, not hard reasoning, so the capable-but-pricier tier would be waste. Write that reason down; tier-justification is half the module.\n2. **Ask a fact-bearing, freshness-sensitive question** — something whose answer has a real source and might have changed recently (a recent public event, a current version or figure, a this-year fact). Send it with grounding OFF.\n3. **Capture the ungrounded answer verbatim.** Note whether it gives any source. It will not — it answers from training memory, confidently, with no citation. That confident-but-unsourced answer is the failure mode the module names.\n\n### Run the grounded call (the enterprise posture)\n\n4. **Turn on Grounding with Google Search** and ask the EXACT same question again, same tier.\n5. **Capture the grounded answer AND its grounding metadata.** The grounded response comes back with citations / grounding chunks (the source passages) and confidence signals. Note the sources it cites and whether the answer changed or got more specific/current.\n6. **(Optional, the 'your own data' half)** If you have any private document to hand, create a small data source and try **grounding on your own data (RAG / Agent Search)** with a question only that document can answer — and watch it cite your document. This is the private-facts pattern (a company policy, an internal figure) that Google Search grounding cannot serve.\n\n### Write the one-paragraph verdict\n\n7. **Compare and conclude in ~5 sentences:** Did grounding change or sharpen the answer? Did it add traceable sources the ungrounded call lacked? For a real enterprise assistant, which would you ship, and why is confident-and-unsourced a liability? State the rule in your own words: fact-bearing task → ground it; public/current fact → Google Search grounding; private fact → ground on your own data.\n\n### Save the result\n\n8. **Save the artifact:** a short doc with the question, the two answers side by side, the grounding sources/metadata from the grounded call, your tier-choice justification, and your verdict paragraph. Keep it — it feeds the cross-provider comparison later in the track.\n\n## Why it matters\n\nThis is the module's whole thesis made concrete: on Google's platform you pick a tier by workload, and you ground fact-bearing answers so they are traceable instead of merely confident. Seeing the ungrounded answer stand there with no source next to the grounded one with citations is the lesson that sticks.\n\n## Apply it in Automatos\n\nOnce you have seen grounding work, the Automatos parallel is direct: an Automatos agent can use **Gemini on the platform as its model provider** with grounding pointed at a workspace knowledge source — the same RAG shape Automatos already uses, now backed by Google's grounding. And because Automatos selects the provider per agent, one agent can run on Gemini while a sibling runs on OpenAI or an open-weight endpoint — same platform, different engines per job. That is the multi-vendor, keep-the-call-behind-an-interface point of this whole track, in your own stack.",
+      "checklist": [
+        "A Google Cloud project with billing and the Vertex AI / Agent Platform API enabled, and Agent Studio (formerly Vertex AI Studio) open",
+        "Chose a Gemini tier deliberately and wrote down WHY (Flash for a simple Q&A, not Pro) — tier-by-workload justification recorded",
+        "Asked a fact-bearing, freshness-sensitive question UNGROUNDED and captured the answer, noting it gave no source",
+        "Asked the EXACT same question with Grounding with Google Search ON and captured the grounded answer",
+        "Captured the grounding metadata — citations / grounding chunks / confidence — that makes the grounded answer traceable",
+        "(Optional) Tried grounding on your own data / RAG with a private document and saw it cite that document",
+        "Wrote a ~5-sentence verdict stating the grounded-vs-ungrounded rule and which you'd ship for an enterprise assistant",
+        "ARTIFACT SAVED: question + both answers side by side + grounding sources + tier justification + verdict, kept for the cross-provider comparison module"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-vertex-genai-overview",
+      "title": "Generative AI on Vertex AI — overview (Gemini Enterprise Agent Platform)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "The canonical entry point to Google's generative-AI platform and the map for this whole module: Gemini models, Vertex AI Studio / Agent Studio, Model Garden (including partner models), grounding/RAG, and the agent-building tier. Read it to see the platform as ONE managed surface hosting many models — and note the page already carries the Gemini Enterprise Agent Platform naming, evidence of the live rebrand. Fetched 2026-07-02 (this is the URL the PRD pins).",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-models",
+      "title": "Google models / Gemini model list — Vertex AI (Pro, Flash, Flash-Lite)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models",
+      "kind": "official-doc",
+      "annotation": "The model list behind Lesson 1's tier decision. Use it to confirm the durable positioning — Pro (most capable, complex reasoning, deep multimodal, ~1M-token context on the 2.5 family), Flash (best price-performance, high throughput), Flash-Lite (lowest latency/cost, same multimodal + context) — rather than memorising a version integer, since the family version rolls forward. Verified via this page plus Google's Gemini 2.5 GA announcement, 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-model-garden",
+      "title": "Model Garden on Gemini Enterprise Agent Platform",
+      "url": "https://cloud.google.com/model-garden",
+      "kind": "official-doc",
+      "annotation": "The proof that 'on Google's platform' is not 'Gemini only.' Model Garden is a multi-vendor catalogue — Google models, partner models (Anthropic Claude, Meta Llama, Mistral, and more), and open models — discoverable and deployable in one place. This is the reframing at the heart of Lesson 2; skim the collections and the partner list. Fetched 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-partner-models",
+      "title": "Vertex AI / Agent Platform partner models for MaaS (Claude, Llama, Mistral)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-partner-models",
+      "kind": "official-doc",
+      "annotation": "How partner models are actually consumed: as Model-as-a-Service — a fully managed, serverless API (Google states there's no infrastructure to provision), billed pay-as-you-go or via provisioned throughput, running under Google Cloud IAM/VPC/audit governance. This is the mechanism that makes 'run Claude THROUGH Google's platform' a real build-vs-buy option. Fetched 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-grounding",
+      "title": "Grounding overview — Vertex AI / Agent Platform (Google Search, your data, RAG)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
+      "kind": "official-doc",
+      "annotation": "The grounding decision, from the source. Covers grounding with Google Search (public/current facts), grounding on your own data via Agent Search / RAG (private facts), the grounded-vs-ungrounded contrast, and the returned grounding metadata — grounding chunks, grounding supports, and confidence scores — that makes an answer traceable. Read it for the per-task 'ground it, and with which source' judgement in Lesson 2. Fetched 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-rag-grounding-blog",
+      "title": "RAG and grounding on Vertex AI (Google Cloud blog) + GroundingMetadata reference",
+      "url": "https://cloud.google.com/blog/products/ai-machine-learning/rag-and-grounding-on-vertex-ai",
+      "kind": "official-doc",
+      "annotation": "Google's own explainer on why grounding and RAG matter — anchoring LLM output to public and private data to raise accuracy and cut hallucinations — and how provenance is returned (grounding chunks that support the answer, per-claim supports for inline citations, confidence 0–1, indexed sources for tracing). Pairs with the grounding overview; the GroundingMetadata API reference corroborates the exact fields. Verified 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-name-changes",
+      "title": "Gemini Enterprise Agent Platform — name changes (the rebrand mapping)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes",
+      "kind": "official-doc",
+      "annotation": "The single source of truth for the currency problem in Lesson 3: the official old-name → new-name map. Vertex AI → Gemini Enterprise Agent Platform; Vertex AI Studio → Agent Studio; Vertex AI Search → Agent Search; Agent Engine → Agent Runtime; Memory Bank → Agent Platform Memory Bank — with old URLs/SDKs still resolving during the transition. Google's product page corroborates the rename in its own voice ('Gemini Enterprise Agent Platform (formerly Vertex AI)'). Teach current names, recognise the old ones. Verified 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    },
+    {
+      "id": "r-vertex-agent-platform-overview",
+      "title": "Agent-building tier — Agent Studio, Agent Development Kit (ADK), Agent Runtime, Agent Garden",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/overview",
+      "kind": "official-doc",
+      "annotation": "The layer above the model call, for Lesson 3: Agent Studio (low-code visual prompt design), the Agent Development Kit (open-source, code-first, multi-agent), Agent Runtime (deploy and scale, long-running stateful agents with Memory Bank), Agent Garden (templates), and interop via MCP and the Agent2Agent (A2A) protocol. Skim to place the pieces; you do not build an agent in this module. Verified 2026-07-02.",
+      "domainIds": ["m2-google-gemini-vertex"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m2-1",
+      "title": "M2 · Google's stack, plainly — Gemini tiers, and why Vertex/Agent Platform is a multi-vendor host with grounding built in",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m2-google-gemini-vertex"],
+      "sourceNotebook": "cross-vendor / m2 / gemini-vertex-tiers-model-garden-grounding"
+    },
+    {
+      "id": "v-m2-2",
+      "title": "M2 · Standardise on the managed Google platform, or call providers direct? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m2-google-gemini-vertex"],
+      "sourceNotebook": "cross-vendor / m2 / debate-platform-vs-direct"
+    }
+  ]
+}

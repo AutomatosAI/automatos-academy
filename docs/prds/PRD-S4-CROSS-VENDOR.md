@@ -125,8 +125,12 @@ The offline "doesn't exist" claim is **refuted**.
   | d4 | Business strategies for a successful gen AI solution | 0.15 | `d4-business-strategy` |
 
   Sum = 1.00 ✓. `track.exam{}`: `questionCount 60, durationMinutes 90, proctored true, passingScore null (unverified)`.
-  Note: guide states it was **"recently updated to reflect branding changes"** (e.g. *Agent Platform /
-  Gemini Enterprise Agent Platform*, *Agent Studio*) — teach current names.
+  Note *(corrected by the 2026-07-02 re-verify)*: the guide carries **no "recently updated to reflect
+  branding changes" statement** — current branding is simply present in the domain text, and
+  **"Vertex AI"/"Agent Builder" appear nowhere** in the guide or cert page. Logistics
+  ($99/90 min/50–60 Q/3-yr) live on the **cert page**; the PDF carries only the weighted blueprint.
+  Teach current names (*Agent Platform / Gemini Enterprise Agent Platform*, *Agent Studio*).
+  Passing score still unpublished → the Academy mock uses its own 70/100 training bar, labelled as such.
 
 ## 8. Acceptance
 

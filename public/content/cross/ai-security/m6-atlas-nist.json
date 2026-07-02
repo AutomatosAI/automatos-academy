@@ -1,0 +1,594 @@
+{
+  "id": "m6-atlas-nist",
+  "order": 6,
+  "code": "M6",
+  "name": "MITRE ATLAS & NIST — the adversary map and the governance overlay",
+  "tagline": "You now know the OWASP LLM risks. This module gives you the two frameworks that turn them into shared language: MITRE ATLAS names how an adversary actually does it (tactics and techniques, including the current GenAI entries like RAG Poisoning and LLM Prompt Injection), and NIST AI 600-1 is the governance overlay that sits above your technical controls and hands cleanly to the AI governance track. You leave with a lightweight, framework-tagged threat model for one real agent.",
+  "overview": "This is the capstone of the defensive AI-security track's threat-modeling strand. The earlier modules named the risks (OWASP) and built the controls (input/output validation, least-privilege tools, approval gates, the LLM gateway). This module gives you the two things that make those controls composable and accountable: a shared ADVERSARY LANGUAGE and a GOVERNANCE OVERLAY.\n\nThe honest framing to hold throughout: OWASP tells you WHAT can go wrong, MITRE ATLAS tells you HOW an adversary does it, and NIST tells you HOW the organisation governs it. None of the three is a silver bullet, and none replaces engineering. Injection is mitigable, not solved — a framework map does not stop a single prompt injection on its own; it makes your defenses describable, prioritisable, and testable.\n\nYou will learn MITRE ATLAS as the ATT&CK-style knowledge base for attacks on AI systems: its tactics (the adversary's goals, from Reconnaissance through Impact) and the techniques under them, including the current generative-AI additions — LLM Prompt Injection with its Direct and Indirect sub-techniques, RAG Poisoning, LLM Prompt Crafting, Retrieval Content Crafting, and Gather RAG-Indexed Targets. You will use ATLAS the way it is meant to be used — as a vocabulary for describing and planning defense (and for writing an authorised red-team plan against your OWN test agent), not as a compliance checklist. You will learn STRIDE-for-LLM as a lighter, structured way to enumerate threats when you do not need the full matrix. Then NIST AI 600-1, the Generative AI Profile of the AI RMF: its twelve GAI risk areas and the four functions — GOVERN, MAP, MEASURE, MANAGE — with their suggested actions, framed as the organisational layer that governs the technical controls and hands directly to the Academy's AI governance (AIGP) track.\n\nThe signature artifact is a threat model for one real Automatos agent: take the attack-surface map, and for each realistic attack tag the ATLAS technique that names it and the NIST function/action that governs the response. That is the deliverable that turns scattered controls into an accountable, framework-anchored risk picture — and it is exactly what hands into governance work.\n\nCurrency note (verified July 2026): OWASP LLM Top 10 2025 is the current list; MITRE ATLAS is a living knowledge base whose Spring-2025 release added the GenAI techniques used here; NIST AI 600-1 was published July 2024 as a cross-sectoral profile of the AI RMF. All framework IDs in this module were taken from the official data, not recalled.",
+  "objectives": [
+    "Explain MITRE ATLAS as an ATT&CK-modelled, continuously-updated knowledge base of adversary tactics and techniques against AI systems, and place its tactics in adversary-goal order (Reconnaissance → Resource Development → Initial Access → AI Model Access → Execution → … → Exfiltration → Impact).",
+    "Use ATLAS as a shared LANGUAGE rather than a checklist: name a real LLM attack with its correct technique — LLM Prompt Injection (AML.T0051, Direct .000 / Indirect .001), RAG Poisoning (AML.T0070), LLM Prompt Crafting (AML.T0065) — and land each on its OWASP-aligned defense.",
+    "Distinguish where a lightweight STRIDE-for-LLM threat enumeration is enough from where the full ATLAS matrix earns its keep, and produce a threat-model artifact for one agent that tags each realistic attack with an ATLAS technique.",
+    "Describe NIST AI 600-1 as the Generative AI Profile of the AI RMF — a cross-sectoral companion resource — organised around GOVERN, MAP, MEASURE, MANAGE, with suggested actions carrying stable action IDs (GV-/MP-/MS-/MG-), and name its twelve GAI risk areas at a high level.",
+    "Build one worked cross-map — an OWASP risk → an ATLAS technique → a NIST function/action — and use it to explain why the three frameworks are complementary, not redundant (WHAT / HOW / GOVERNANCE).",
+    "Judge when framework-mapping delivers value (shared language, prioritisation, testable coverage, a clean hand-off to governance) versus when it degrades into compliance theatre, and state the honest posture: the map guides the defense, the engineering IS the defense, and injection stays mitigable, not solved."
+  ],
+  "lessons": [
+    {
+      "id": "m6-l1-atlas-language",
+      "title": "MITRE ATLAS: the adversary's language, not a checklist",
+      "estMinutes": 15,
+      "objective": "Read MITRE ATLAS as an ATT&CK-style knowledge base — tactics as adversary goals, techniques as the how — and use it to name real LLM attacks and pair each with its defense.",
+      "body": "## Why you need an adversary language\n\nBy now you can name the OWASP LLM risks: prompt injection, data and model poisoning, excessive agency, and the rest. OWASP tells you *what* can go wrong. What it does not give you is a precise, shared way to describe *how* an adversary actually gets there — the sequence of moves — so that your red team, your detections, and your threat model all speak the same words. That is what **MITRE ATLAS** is for.\n\n**ATLAS** (Adversarial Threat Landscape for Artificial-Intelligence Systems) is a knowledge base of adversary **tactics and techniques against AI-enabled systems**, maintained by MITRE and explicitly **modelled on MITRE ATT&CK**. If you have seen ATT&CK for enterprise IT, ATLAS is its counterpart for machine-learning and generative-AI systems, and it reuses the same structure so the two compose. Critically, ATLAS is a **living knowledge base** — it is updated as new attacks are documented, and its Spring-2025 release added a wave of generative-AI techniques (covered in Lesson 2).\n\n## Tactics = the adversary's goals, in order\n\nA **tactic** answers *\"what is the adversary trying to achieve at this step?\"* ATLAS lays its tactics out as columns, left to right, roughly following an attack's life. The tactics (with their ATLAS IDs) are:\n\n- **Reconnaissance** (AML.TA0002) — gather information to plan the attack\n- **Resource Development** (AML.TA0003) — build or acquire what the attack needs (including crafting malicious content or poisoned documents)\n- **Initial Access** (AML.TA0004) — get a first foothold into the target system\n- **AI Model Access** (AML.TA0000) — reach the model itself, via an API, an application, or the weights\n- **Execution** (AML.TA0005) — run adversary-controlled behaviour (this is where a prompt injection *fires*)\n- **Persistence** (AML.TA0006), **Privilege Escalation** (AML.TA0012), **Defense Evasion** (AML.TA0007), **Credential Access** (AML.TA0013), **Discovery** (AML.TA0008), **Lateral Movement** (AML.TA0015), **Collection** (AML.TA0009)\n- **AI Attack Staging** (AML.TA0001) — prepare the model-specific attack (e.g. build a proxy, craft adversarial data)\n- **Command and Control** (AML.TA0014), **Exfiltration** (AML.TA0010) — extract data or model artefacts\n- **Impact** (AML.TA0011) — the payoff: manipulate, degrade, or disrupt the system\n\nYou do not memorise all sixteen. The point is the *shape*: an adversary moves from learning about your system, to preparing, to getting in, to acting, to getting the payoff. Naming the stage makes the whole attack describable.\n\n> **Common mistake — treating ATLAS as a checklist.** ATLAS is not a list of boxes to tick until you are \"ATLAS-compliant.\" There is no such thing. It is a *vocabulary*. You use it to say, precisely and in words everyone shares, \"this attack is an Indirect LLM Prompt Injection (AML.T0051.001) that follows RAG Poisoning (AML.T0070).\" That sentence is worth more than a hundred ticked boxes because it makes the attack testable and the defense assignable.\n\n## Techniques = the how, and each one lands on a defense\n\nUnder each tactic sit **techniques** — the concrete methods. ATLAS gives every technique a stable ID (AML.Txxxx) and, where relevant, sub-techniques (AML.Txxxx.00n). The technique you will meet most is **LLM Prompt Injection (AML.T0051)**, which sits under the **Execution** tactic and is defined in ATLAS as an adversary crafting \"malicious prompts as inputs to an LLM that cause the LLM to act in unintended ways.\" It has two sub-techniques that map exactly onto the OWASP direct/indirect split:\n\n- **Direct (AML.T0051.000)** — the adversary injects prompts *directly as a user* of the LLM.\n- **Indirect (AML.T0051.001)** — the adversary injects prompts *indirectly, via a separate data channel* the LLM ingests (a web page, a document, a retrieved record).\n\nHere is the discipline that makes this defensive: **every technique you name lands on a defense in the same breath.** ATLAS names the technique; OWASP LLM01 names the mitigations. For LLM Prompt Injection, OWASP's controls are: constrain model behaviour with clear role and limits in the system prompt; define and validate expected output formats; apply input and output filtering; enforce least-privilege access so the model can do little damage even if steered; require human approval for high-risk actions; segregate and clearly label untrusted external content; and conduct adversarial testing. Naming the technique without naming the defense is just trivia. Naming both is a threat model.\n\n## The honest posture\n\nATLAS does not make you safe. It makes your defense *describable and testable*. Prompt injection remains **mitigable, not solved** — no entry in ATLAS or OWASP claims a complete defense, and neither should you. What the language buys you is leverage: when your red team reports \"we achieved AML.T0051.001,\" everyone knows exactly what happened, which OWASP control failed, and what to test after the fix. That is the whole value, and it is real.\n\n## What this buys you\n\nYou can now describe an attack on an AI system in the same words a red team, a detection engineer, and a governance lead all share — and reflexively pair each named technique with its OWASP defense. Next you will meet the specific GenAI techniques ATLAS added for retrieval-augmented systems, because RAG is where indirect injection lives.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m6-l1-1",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is MITRE ATLAS, and how does it relate to MITRE ATT&CK?",
+          "options": [
+            { "id": "a", "text": "A living knowledge base of adversary tactics and techniques against AI-enabled systems, explicitly modelled on MITRE ATT&CK", "correct": true },
+            { "id": "b", "text": "A certification exam that grades an organisation as 'ATLAS-compliant' once all techniques are mitigated", "correct": false },
+            { "id": "c", "text": "A replacement for ATT&CK that deprecates it for all enterprise IT threat modelling", "correct": false },
+            { "id": "d", "text": "A vendor product that automatically blocks prompt injection at runtime", "correct": false }
+          ],
+          "explanation": "ATLAS is a continuously-updated knowledge base of tactics and techniques for attacks on AI systems, built on the same structure as ATT&CK so the two compose. Option b invents a compliance status — ATLAS is a vocabulary, not a pass/fail checklist, and 'ATLAS-compliant' is not a thing. Option c is wrong because ATLAS complements ATT&CK for AI-specific threats; it does not deprecate it for enterprise IT. Option d confuses a knowledge base with a runtime control — ATLAS describes attacks, it does not block them.",
+          "sourceRefs": ["r-mitre-atlas", "r-atlas-data"]
+        },
+        {
+          "id": "kc-m6-l1-2",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A red-team report says an attacker planted a malicious instruction in a web page that your agent later fetched and summarised, and the agent then followed that instruction. Which ATLAS technique names this most precisely?",
+          "options": [
+            { "id": "a", "text": "LLM Prompt Injection, Indirect sub-technique (AML.T0051.001) — prompts injected via a separate data channel the LLM ingests", "correct": true },
+            { "id": "b", "text": "LLM Prompt Injection, Direct sub-technique (AML.T0051.000) — prompts injected directly as a user of the LLM", "correct": false },
+            { "id": "c", "text": "Reconnaissance (AML.TA0002) — because the attacker had to find the web page first", "correct": false },
+            { "id": "d", "text": "Impact (AML.TA0011) — because the agent did something unintended", "correct": false }
+          ],
+          "explanation": "The instruction arrived through content the model ingested (a fetched web page), which is exactly the Indirect sub-technique (AML.T0051.001). Option b is the Direct sub-technique, which is injection by someone acting as a direct user — not the case here, where the payload rode in on retrieved data. Options c and d name tactics (adversary goals), not the technique; Reconnaissance and Impact may be present elsewhere in the attack, but the precise name for *this* step is Indirect LLM Prompt Injection.",
+          "sourceRefs": ["r-atlas-data", "r-owasp-llm01"]
+        },
+        {
+          "id": "kc-m6-l1-3",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your teammate says: 'We've mapped every attack to an ATLAS technique ID, so injection is handled.' What is the correct defensive response?",
+          "options": [
+            { "id": "a", "text": "Mapping names the attack but does not stop it — each named technique must land on an actual control (e.g. OWASP LLM01 mitigations), and injection stays mitigable, not solved", "correct": true },
+            { "id": "b", "text": "Agree — once every attack has an ATLAS ID, the system is provably secure against those techniques", "correct": false },
+            { "id": "c", "text": "Agree — ATLAS IDs are runtime signatures, so mapping deploys the defense automatically", "correct": false },
+            { "id": "d", "text": "Disagree, because ATLAS IDs are only for enterprise IT and cannot describe LLM attacks", "correct": false }
+          ],
+          "explanation": "ATLAS gives you the language to describe an attack; the defense is the engineering that follows — filtering, least privilege, output validation, approval gates. Option b overclaims: a map is not a mitigation, and no source claims a complete defense against injection. Option c misunderstands ATLAS — technique IDs are a taxonomy, not deployable detections. Option d is factually wrong: ATLAS exists specifically to describe attacks on AI systems, including LLM Prompt Injection (AML.T0051).",
+          "sourceRefs": ["r-atlas-data", "r-owasp-llm01"]
+        }
+      ]
+    },
+    {
+      "id": "m6-l2-genai-techniques-rag",
+      "title": "The GenAI techniques: RAG poisoning and the retrieval attack chain",
+      "estMinutes": 15,
+      "objective": "Name the current ATLAS GenAI/RAG techniques, understand the retrieval attack chain at mechanism level, and pair each with its OWASP-aligned defense.",
+      "body": "## Why RAG got its own techniques\n\nRetrieval-augmented generation (RAG) — where your app fetches documents from a store and feeds them to the model as context — is the single richest surface for **indirect** prompt injection, because the model treats retrieved text as trusted context even though an adversary may control it. MITRE ATLAS recognised this: its Spring-2025 release added generative-AI techniques that describe the RAG attack chain specifically. These are current, real technique IDs taken from the official ATLAS data — not invented.\n\n## The retrieval attack chain, technique by technique\n\nThink of the chain in the order an adversary works, and notice how the tactics line up with the goals from Lesson 1:\n\n1. **Gather RAG-Indexed Targets (AML.T0064)** — tactic: **Reconnaissance**. ATLAS: adversaries \"may identify data sources used in retrieval augmented generation (RAG) systems for targeting purposes.\" The adversary first works out *what* your system retrieves from.\n2. **Retrieval Content Crafting (AML.T0066)** — tactic: **Resource Development**. ATLAS: adversaries \"may write content designed to be retrieved by user queries and influence a user of the system in some way.\" They author content shaped to be pulled back by real queries.\n3. **RAG Poisoning (AML.T0070)** — tactic: **Persistence** (AML.TA0006). ATLAS: adversaries \"may inject malicious content into data indexed by a retrieval augmented generation (RAG) system to contaminate a future thread through RAG-based search results.\" This is the act of getting the crafted content *into* the indexed corpus so it will be retrieved later — it persists in the store to influence future threads.\n4. **LLM Prompt Crafting (AML.T0065)** — tactic: **Resource Development**. ATLAS: adversaries \"may use their acquired knowledge of the target generative AI system to craft prompts that bypass its defenses.\" Knowledge gathered earlier is turned into an effective prompt.\n5. **LLM Prompt Injection — Indirect (AML.T0051.001)** — tactic: **Execution**. The poisoned document is retrieved into context and its embedded instruction *fires* when the model processes it.\n\nThat is the whole chain in ATLAS's own words: find the source, craft the content, poison the index, craft the prompt, and the injection executes indirectly through retrieval. Notice this is taught at the level of *mechanism and technique names* — there are no payload strings here, and you do not need any to understand or defend against it.\n\n> **A note on naming (verified).** RAG Poisoning (AML.T0070) and **False RAG Entry Injection (AML.T0071)** are two *distinct, both-canonical* ATLAS techniques, and it is worth keeping them apart. AML.T0070 (tactic **Persistence**) is contaminating the indexed corpus so a manipulated document surfaces later. AML.T0071 (tactic **Defense Evasion**) is the sharper variant: injecting a *false document entry* — content the LLM is tricked into treating as a retrieved RAG result — hidden inside a legitimate ingested entry, which lets it bypass data-monitoring tools and resist direct deletion. The discipline still stands: always take technique names and IDs from the official ATLAS data, never from a blog or from memory, and verify an ID before you assert it — but here both names resolve to real entries (T0070 and T0071), so cite each correctly.\n\n## Where this maps in OWASP — and how you defend it\n\nThe RAG chain sits across three OWASP 2025 risks, and each carries the defense:\n\n- **LLM04 Data and Model Poisoning** covers the poisoning act itself. OWASP is explicit that poisoning can occur at \"pre-training, fine-tuning, or embedding\" stages — the embedding/RAG stage is named. Defenses: track **data provenance and lineage** (OWASP suggests an ML-BOM via CycloneDX), vet and authenticate data sources, validate and version data (DVC), sandbox untrusted sources, run anomaly detection, and red-team the pipeline.\n- **LLM08 Vector and Embedding Weaknesses** covers the retrieval store itself — including the platform-relevant risk of **cross-context / cross-tenant leakage** from a shared vector store. Defenses: permission-aware, access-controlled retrieval so a query only ever reaches data the caller is entitled to; source authentication and validation of knowledge added to the store; and logging/monitoring of retrieval.\n- **LLM01 Prompt Injection (Indirect)** covers the firing step. Defenses: segregate and clearly label retrieved/untrusted content so the model treats it as data not instructions; validate outputs; and keep the model on least privilege so a successful injection can do little.\n\n## The defensive through-line\n\nA poisoned retrieval corpus is defeated in depth, not by one trick: **provenance** at ingest (you know where every indexed document came from), **access control** at retrieval (a query cannot reach another tenant's data — the platform's own KG/RAG access-control work is exactly this control), **segregation** at prompt-assembly (retrieved text is fenced as untrusted data), and **least privilege** at the tool layer (even a steered model cannot take a damaging action). No single layer is complete; together they make RAG poisoning expensive and low-yield. That is the honest goal — raise the cost, shrink the blast radius — not a promise of immunity.\n\n## What this buys you\n\nYou can now describe the full RAG poisoning chain in current ATLAS technique names, place it across OWASP LLM04/LLM08/LLM01, and state the layered defense for each step. Next: STRIDE-for-LLM, the lighter enumeration you reach for when the full matrix is more than you need.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m6-l2-1",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In ATLAS, which technique names the act of injecting malicious content into the data indexed by a RAG system so it contaminates a future retrieval?",
+          "options": [
+            { "id": "a", "text": "RAG Poisoning (AML.T0070)", "correct": true },
+            { "id": "b", "text": "Gather RAG-Indexed Targets (AML.T0064)", "correct": false },
+            { "id": "c", "text": "LLM Jailbreak (AML.T0054)", "correct": false },
+            { "id": "d", "text": "Extract LLM System Prompt (AML.T0056)", "correct": false }
+          ],
+          "explanation": "RAG Poisoning (AML.T0070) is defined in ATLAS as injecting malicious content into RAG-indexed data to contaminate a future thread via search results. Option b, Gather RAG-Indexed Targets (AML.T0064), is the earlier reconnaissance step of identifying what the system retrieves from — not the poisoning itself. Option c, LLM Jailbreak, is about subverting model safety constraints, a different technique. Option d, Extract LLM System Prompt, is about disclosing the system prompt, unrelated to corpus poisoning.",
+          "sourceRefs": ["r-atlas-data", "r-owasp-llm04"]
+        },
+        {
+          "id": "kc-m6-l2-2",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "OWASP LLM04 states data poisoning can occur at which stages of the LLM lifecycle?",
+          "options": [
+            { "id": "a", "text": "Pre-training, fine-tuning, or embedding (including the RAG/vector-store stage)", "correct": true },
+            { "id": "b", "text": "Only during pre-training of the foundation model", "correct": false },
+            { "id": "c", "text": "Only at inference time, never in stored data", "correct": false },
+            { "id": "d", "text": "Only when the model weights are downloaded from a public registry", "correct": false }
+          ],
+          "explanation": "OWASP LLM04 explicitly names pre-training, fine-tuning, AND embedding data — which is why RAG/vector-store poisoning falls under it. Option b is too narrow: fine-tuning and embedding data are equally in scope. Option c is wrong because poisoning targets stored/ingested data, not the inference step itself. Option d describes a supply-chain concern (closer to LLM03) and misses that poisoning is about the data, not the weights download.",
+          "sourceRefs": ["r-owasp-llm04", "r-owasp-top10"]
+        },
+        {
+          "id": "kc-m6-l2-3",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A shared vector store serves several customers. A query from customer A returns a chunk that belongs to customer B. Which OWASP risk is this, and what is the primary defense?",
+          "options": [
+            { "id": "a", "text": "LLM08 Vector and Embedding Weaknesses — cross-context leakage; the primary defense is permission-aware, access-controlled retrieval so a query only reaches data the caller is entitled to", "correct": true },
+            { "id": "b", "text": "LLM06 Excessive Agency — the fix is to remove all tools from the agent", "correct": false },
+            { "id": "c", "text": "LLM07 System Prompt Leakage — the fix is to hide the system prompt", "correct": false },
+            { "id": "d", "text": "It is not a security issue; vector stores are expected to share data across tenants", "correct": false }
+          ],
+          "explanation": "Cross-context / cross-tenant retrieval from a shared store is squarely LLM08, and the control is access-controlled retrieval (permission-aware filtering) so entitlement is enforced before data is returned. Option b misidentifies the risk — excessive agency is about tools and actions, not retrieval scoping, and stripping tools would not stop the leak. Option c is unrelated: system-prompt leakage is about exposing instructions, not returning another tenant's data. Option d is dangerous and false — cross-tenant leakage is a serious confidentiality failure, not expected behaviour.",
+          "sourceRefs": ["r-owasp-top10", "r-owasp-llm04"]
+        }
+      ]
+    },
+    {
+      "id": "m6-l3-stride-and-nist",
+      "title": "STRIDE-for-LLM and the NIST governance overlay",
+      "estMinutes": 16,
+      "objective": "Use STRIDE-for-LLM as a lightweight threat enumeration, then place NIST AI 600-1 (GOVERN/MAP/MEASURE/MANAGE and its twelve risk areas) as the governance overlay above your technical controls.",
+      "body": "## When the full matrix is more than you need: STRIDE-for-LLM\n\nATLAS is powerful, but sometimes you just need to enumerate threats against one component quickly, in a way a mixed team can follow. **STRIDE** — the long-standing threat-modelling mnemonic — adapts cleanly to LLM systems as a lighter complement to ATLAS. Walk each letter and ask \"how does this show up for my agent?\":\n\n- **S — Spoofing:** can someone impersonate a user, an agent, or a trusted data source? (A poisoned retrieved document *spoofs* a trusted source.)\n- **T — Tampering:** can inputs, retrieved context, tool outputs, or the prompt be altered? (RAG Poisoning is tampering with the corpus.)\n- **R — Repudiation:** can an action happen with no reliable log of who or what did it? (This is why an audit trail of every tool call matters.)\n- **I — Information disclosure:** can the system leak secrets, other tenants' data, or the system prompt? (Maps to OWASP LLM02, LLM07, LLM08.)\n- **D — Denial of service / cost:** can the system be driven to exhaustion or runaway cost? (OWASP LLM10 Unbounded Consumption.)\n- **E — Elevation of privilege:** can the model be induced to act beyond its authority? (OWASP LLM06 Excessive Agency — the antidote is least privilege and approval gates.)\n\nSTRIDE gives you a fast, structured first pass; ATLAS gives you the precise, shared technique names and the adversary sequence when you need depth or when you are writing a red-team plan. Use STRIDE to *enumerate*, ATLAS to *name and chain*. They are complements, not rivals.\n\n## NIST AI 600-1: the governance overlay\n\nSTRIDE and ATLAS describe threats; the technical controls from the earlier modules mitigate them. But who decides which risks the organisation accepts, how they are measured, and who is accountable when something goes wrong? That is **governance**, and NIST provides the frame.\n\n**NIST AI 600-1** is the **Generative AI Profile** of the NIST AI Risk Management Framework (AI RMF). In NIST's own words it is a **\"cross-sectoral profile of and companion resource for\"** the AI RMF — it applies the general framework to the specific setting of generative AI. It sits *above* your controls: it does not tell you how to write an output filter; it tells the organisation how to govern, map, measure, and manage the risks that filter is one response to.\n\n## The four functions\n\nThe AI RMF — and therefore this profile — is organised around four functions. Learn them as a governance loop:\n\n- **GOVERN** — the culture, policies, roles, and accountability that run across everything. (Who owns AI risk? What is the policy? Action IDs begin **GV-**.)\n- **MAP** — establish and understand context: what is the system, where is it used, what could go wrong, who is affected. (Action IDs begin **MP-**.)\n- **MEASURE** — analyse, assess, and track the risks with appropriate methods, including test, evaluation, and **red-teaming**. (Action IDs begin **MS-**.)\n- **MANAGE** — act on the prioritised risks: allocate resources, apply controls, respond to incidents, and monitor over time. (Action IDs begin **MG-**.)\n\nUnder these functions, the profile provides **suggested actions**, each with a stable ID tied to an AI RMF subcategory — for example **MS-2.8-002**, \"Document the instructions given to data annotators or AI red-teamers,\" or a MANAGE action to \"monitor the robustness and effectiveness of risk controls and mitigation plans.\" Those IDs are the hooks your threat model will cite. (The profile does not advertise a single headline count of actions; cite the specific action IDs you use, not a round number.)\n\n## The twelve GAI risk areas\n\nSection 2 of the profile defines twelve risks **\"unique to or exacerbated by\"** generative AI. You do not memorise the definitions, but you should recognise the set, because they are the risk vocabulary governance uses. Verbatim from the profile, they are: **CBRN Information or Capabilities; Confabulation; Dangerous, Violent, or Hateful Content; Data Privacy; Environmental Impacts; Harmful Bias or Homogenization; Human-AI Configuration; Information Integrity; Information Security; Intellectual Property; Obscene, Degrading, and/or Abusive Content; and Value Chain and Component Integration.** Note how several map straight onto things you already defend: *Information Security* covers the injection and exfiltration threats; *Data Privacy* covers the cross-tenant leakage of LLM08; *Confabulation* is the NIST term for the hallucination/misinformation risk (OWASP LLM09); *Value Chain and Component Integration* is the supply-chain risk (OWASP LLM03).\n\n## The hand-off to governance\n\nThis is the seam where AI security meets AI governance. Your ATLAS-plus-NIST threat model — a technical artifact — plugs directly into the organisation's GOVERN/MAP/MEASURE/MANAGE loop and, from there, into formal AI governance work (the Academy's AIGP track). Security produces the map and the measurements; governance owns the accountability, the policy, and the risk-acceptance decisions. NIST is the shared frame that lets the two talk.\n\n## The honest posture\n\nNIST is a **control map, not paperwork** — but only if you use it that way. The failure mode is compliance theatre: mapping to action IDs that never change a single control while the real defense (the gateway, the access-controlled retrieval, the approval gates) is what actually holds. The value of NIST is prioritisation and accountability — deciding *which* risks matter here, *who* owns them, and *how* you will measure them. Used for that, it is indispensable. Used as a box-ticking ritual, it is exactly the theatre its critics warn about.\n\n## What this buys you\n\nYou can now enumerate threats fast with STRIDE-for-LLM, reach for ATLAS when you need precise names and chains, and place both under NIST's GOVERN/MAP/MEASURE/MANAGE so your technical work becomes accountable, governable risk management — the artifact you build next, and the one that hands into governance.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m6-l3-1",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What are the four functions of the NIST AI Risk Management Framework that the Generative AI Profile (AI 600-1) is organised around?",
+          "options": [
+            { "id": "a", "text": "Govern, Map, Measure, Manage", "correct": true },
+            { "id": "b", "text": "Identify, Protect, Detect, Respond", "correct": false },
+            { "id": "c", "text": "Plan, Do, Check, Act", "correct": false },
+            { "id": "d", "text": "Reconnaissance, Execution, Exfiltration, Impact", "correct": false }
+          ],
+          "explanation": "The AI RMF's four functions are Govern, Map, Measure, and Manage, and the Generative AI Profile provides suggested actions under each. Option b is the NIST Cybersecurity Framework's functions (a different framework). Option c is the generic PDCA quality cycle, not the AI RMF. Option d lists MITRE ATLAS tactics — the adversary side — not the NIST governance functions.",
+          "sourceRefs": ["r-nist-airmf", "r-nist-600-1"]
+        },
+        {
+          "id": "kc-m6-l3-2",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Under which NIST AI RMF function does documented AI red-teaming (e.g. action MS-2.8-002, documenting instructions given to red-teamers) primarily sit?",
+          "options": [
+            { "id": "a", "text": "MEASURE — analysing, assessing, and tracking risk through test, evaluation, and red-teaming (action IDs begin MS-)", "correct": true },
+            { "id": "b", "text": "GOVERN — because red-teaming is a policy statement", "correct": false },
+            { "id": "c", "text": "MAP — because red-teaming establishes the system's context", "correct": false },
+            { "id": "d", "text": "MANAGE — because red-teaming is the act of fixing the vulnerability", "correct": false }
+          ],
+          "explanation": "Red-teaming is how you MEASURE risk — it assesses and tracks how the system fails — and its action IDs carry the MS- prefix (e.g. MS-2.8-002). Option b confuses the function: GOVERN sets the policy that red-teaming should happen, but performing and documenting the exercise is measurement. Option c is close but wrong — MAP establishes context and scope; the empirical assessment is MEASURE. Option d misplaces it — acting on and remediating the findings is MANAGE; the assessment itself is MEASURE.",
+          "sourceRefs": ["r-nist-600-1", "r-nist-airmf"]
+        },
+        {
+          "id": "kc-m6-l3-3",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need a quick, structured first pass at the threats against a single new agent for a mixed engineering/product team. Which tool fits, and how does it relate to ATLAS?",
+          "options": [
+            { "id": "a", "text": "STRIDE-for-LLM to enumerate threats quickly; reach for ATLAS when you need precise shared technique names and the adversary chain — they are complements", "correct": true },
+            { "id": "b", "text": "ATLAS only; STRIDE cannot be applied to LLM systems", "correct": false },
+            { "id": "c", "text": "NIST AI 600-1 action tables, used as the enumeration checklist for technical threats", "correct": false },
+            { "id": "d", "text": "Neither; threat enumeration is unnecessary once OWASP risks are known", "correct": false }
+          ],
+          "explanation": "STRIDE-for-LLM gives a fast, structured enumeration a mixed team can follow, and ATLAS supplies precise technique names and chains when you need depth — the two complement each other. Option b is wrong: STRIDE adapts well to LLM systems (spoofing a trusted source, tampering with retrieved context, etc.). Option c misuses NIST — it is a governance overlay, not a technical enumeration checklist. Option d is wrong because knowing the OWASP risk categories is not the same as enumerating the specific threats to your particular agent.",
+          "sourceRefs": ["r-owasp-top10", "r-atlas-data"]
+        }
+      ]
+    },
+    {
+      "id": "m6-l4-crossmap-artifact",
+      "title": "The cross-map: OWASP → ATLAS → NIST as one threat model",
+      "estMinutes": 13,
+      "objective": "Build the worked cross-map that unifies the three frameworks, and use it to judge when framework-mapping adds value versus becomes theatre.",
+      "body": "## One worked cross-map\n\nEverything in this module comes together in a single move: take one realistic attack and describe it in all three frameworks. **OWASP names the risk, ATLAS names the technique, NIST names the governance response.** Here is the flagship example — a planted document in a retrieval store that steers your agent:\n\n| Layer | Framework | Entry |\n|---|---|---|\n| **WHAT can go wrong** | OWASP LLM 2025 | **LLM04 Data and Model Poisoning** (the poisoning), plus **LLM01 Prompt Injection – Indirect** (it firing) and **LLM08 Vector and Embedding Weaknesses** (the store) |\n| **HOW they do it** | MITRE ATLAS | **RAG Poisoning (AML.T0070)** → **LLM Prompt Injection, Indirect (AML.T0051.001)**, with **Gather RAG-Indexed Targets (AML.T0064)** and **Retrieval Content Crafting (AML.T0066)** upstream |\n| **HOW the org governs it** | NIST AI 600-1 | **MAP** the risk (it is *Information Security* + *Data Privacy* on the profile's list); **MEASURE** it with red-teaming (e.g. MS-2.8-002, documenting the red-team instructions); **MANAGE** it with provenance, access-controlled retrieval, least-privilege tools, and monitoring of control effectiveness |\n\nRead the row across and you have a complete, shareable account of one threat: the OWASP risk your auditor recognises, the ATLAS technique your red team reproduces, and the NIST function your governance lead owns — all pointing at the *same* underlying defense (provenance at ingest, access control at retrieval, segregation at prompt-assembly, least privilege at the tool layer). That is what the three frameworks are *for*: not three separate piles of work, but three views of one risk that let three different roles collaborate.\n\n## A second cross-map: the over-agentic tool call\n\nTo see it is not a one-off, run the pattern on a different attack — a jailbreak that pushes an agent to misuse a connected tool:\n\n- **OWASP:** **LLM06 Excessive Agency** (the damaging action), reached via **LLM01 Prompt Injection**.\n- **ATLAS:** **LLM Jailbreak (AML.T0054)** and/or **LLM Prompt Crafting (AML.T0065)** leading to **LLM Prompt Injection (AML.T0051)** under Execution.\n- **NIST:** **MANAGE** via least-privilege tool scoping and human-in-the-loop approval for high-impact actions; **MEASURE** via red-teaming the agent's tool use; governed under the *Information Security* risk area.\n\nSame shape, different attack. The mapping is a repeatable habit, not a lookup you do once.\n\n## When mapping adds value — and when it is theatre\n\nThis is the judgment the module's debate turns on. Framework-mapping earns its keep when it delivers:\n\n- **Shared language** — a red-teamer, a detection engineer, and a governance lead describe the same attack the same way.\n- **Prioritisation** — you can see which risks and techniques matter most for *your* system and spend there first.\n- **Testable coverage** — every named technique has an owner, a control, and a red-team test.\n- **A clean hand-off** — the artifact plugs straight into governance (the AIGP track).\n\nIt degrades into **compliance theatre** when the mapping becomes the deliverable and nothing downstream changes: hours spent assigning ATLAS IDs and NIST action numbers that never alter a single control, while the real defense — the gateway, the access-controlled retrieval, the approval gates — is what actually holds the line. The tell is simple: **if the map changed no control and prompted no test, it was theatre.**\n\n## The honest close\n\nHold the whole module in one sentence: **OWASP = what can go wrong, ATLAS = how they'll do it, NIST = how the org governs it** — and none of the three is the defense. The frameworks make your defense *describable, prioritised, testable, and accountable*; the engineering from the earlier modules is what actually stops the attack. Injection stays **mitigable, not solved**. Used with that honesty, the maps are leverage. Used as ritual, they are theatre. The threat model you build next is the proof you are using them for leverage.\n\n## What this buys you\n\nYou can now take any realistic attack and describe it across all three frameworks in one row, run that pattern repeatedly, and tell the difference between mapping that sharpens your defense and mapping that just generates documents — which is exactly the artifact and the judgment the lab and the scenario put to work.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m6-l4-1",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the module's one-sentence summary, which framework plays which role?",
+          "options": [
+            { "id": "a", "text": "OWASP = what can go wrong; MITRE ATLAS = how the adversary does it; NIST AI 600-1 = how the organisation governs it", "correct": true },
+            { "id": "b", "text": "OWASP = how the adversary does it; ATLAS = governance; NIST = the list of risks", "correct": false },
+            { "id": "c", "text": "All three are interchangeable catalogues of the same techniques", "correct": false },
+            { "id": "d", "text": "OWASP = governance; ATLAS = what can go wrong; NIST = the attack sequence", "correct": false }
+          ],
+          "explanation": "The clean division is: OWASP names the risk (what), ATLAS names the technique (how), NIST governs (organisational overlay). Option b scrambles the roles — ATLAS is the adversary language, not governance, and NIST is more than a risk list. Option c is the mistake the module rejects: they are complementary views, not interchangeable. Option d inverts the mapping entirely.",
+          "sourceRefs": ["r-owasp-top10", "r-mitre-atlas", "r-nist-600-1"]
+        },
+        {
+          "id": "kc-m6-l4-2",
+          "domainId": "m6-atlas-nist",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "What is the honest test for whether a framework-mapping exercise added value or was compliance theatre?",
+          "options": [
+            { "id": "a", "text": "Whether the mapping changed at least one control or prompted at least one red-team test — if it changed no control and prompted no test, it was theatre", "correct": true },
+            { "id": "b", "text": "Whether every attack received both an ATLAS technique ID and a NIST action ID, regardless of any downstream change", "correct": false },
+            { "id": "c", "text": "Whether the resulting document is long and formatted to a template", "correct": false },
+            { "id": "d", "text": "Whether the mapping proves the system is now immune to the mapped techniques", "correct": false }
+          ],
+          "explanation": "The value test is downstream effect: a good map changes a control or triggers a test; if nothing changed, the exercise was theatre. Option b is precisely the theatre trap — assigning IDs with no downstream change is the failure mode, not the success criterion. Option c mistakes volume and formatting for value. Option d overclaims — mapping never proves immunity, and injection remains mitigable, not solved.",
+          "sourceRefs": ["r-nist-600-1", "r-atlas-data"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m6-1",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How is MITRE ATLAS best described?",
+      "options": [
+        { "id": "a", "text": "An ATT&CK-modelled, continuously-updated knowledge base of adversary tactics and techniques against AI-enabled systems", "correct": true },
+        { "id": "b", "text": "A prescriptive compliance standard an organisation is audited against for a pass/fail grade", "correct": false },
+        { "id": "c", "text": "A runtime tool that detects and blocks LLM attacks automatically", "correct": false },
+        { "id": "d", "text": "A regulation that legally mandates specific AI security controls", "correct": false }
+      ],
+      "explanation": "ATLAS is a living knowledge base of tactics and techniques for attacks on AI systems, built on the ATT&CK structure — a vocabulary, not a control that acts. Option b is wrong: there is no 'ATLAS-compliant' grade; it is descriptive, not a pass/fail standard. Option c confuses a knowledge base with a runtime defense. Option d is wrong — ATLAS is a knowledge base maintained by MITRE, not law.",
+      "sourceRefs": ["r-mitre-atlas", "r-atlas-data"]
+    },
+    {
+      "id": "q-m6-2",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In MITRE ATLAS, what is the difference between a 'tactic' and a 'technique'?",
+      "options": [
+        { "id": "a", "text": "A tactic is the adversary's goal at a step (e.g. Execution, Exfiltration); a technique is the concrete method used to achieve it (e.g. LLM Prompt Injection)", "correct": true },
+        { "id": "b", "text": "A tactic is a specific tool; a technique is the vendor that sells it", "correct": false },
+        { "id": "c", "text": "A tactic is a defensive control; a technique is a test of that control", "correct": false },
+        { "id": "d", "text": "They are two words for the same thing", "correct": false }
+      ],
+      "explanation": "Tactics are the adversary's goals (the matrix columns); techniques are the specific methods listed under them. Option b is wrong — ATLAS describes adversary behaviour, not products and vendors. Option c inverts the concept — ATLAS catalogues offense (for defensive use), not controls. Option d is wrong: the tactic/technique distinction is fundamental to the ATT&CK-style structure ATLAS uses.",
+      "sourceRefs": ["r-atlas-data", "r-mitre-atlas"]
+    },
+    {
+      "id": "q-m6-3",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An adversary posts content on a public wiki specifically so your agent will retrieve it and be steered by an embedded instruction. Which ATLAS technique names the poisoning of the indexed corpus?",
+      "options": [
+        { "id": "a", "text": "RAG Poisoning (AML.T0070)", "correct": true },
+        { "id": "b", "text": "LLM Prompt Injection – Direct (AML.T0051.000)", "correct": false },
+        { "id": "c", "text": "LLM Prompt Self-Replication (AML.T0061)", "correct": false },
+        { "id": "d", "text": "Extract LLM System Prompt (AML.T0056)", "correct": false }
+      ],
+      "explanation": "Getting malicious content into the RAG-indexed corpus so it is retrieved later is RAG Poisoning (AML.T0070). Option b is Direct injection — an attacker acting as a direct user — whereas here the payload arrives via retrieved content (that firing step would be the Indirect sub-technique, AML.T0051.001, not Direct). Option c, Prompt Self-Replication, describes a self-propagating prompt (worm-style), a different technique. Option d is about disclosing the system prompt, unrelated to corpus poisoning.",
+      "sourceRefs": ["r-atlas-data", "r-owasp-llm04"]
+    },
+    {
+      "id": "q-m6-4",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing of an ATLAS technique to its correct OWASP-aligned defense is right?",
+      "options": [
+        { "id": "a", "text": "LLM Prompt Injection (AML.T0051) → segregate/label untrusted content, validate outputs, enforce least privilege, and require human approval for high-risk actions", "correct": true },
+        { "id": "b", "text": "LLM Prompt Injection (AML.T0051) → increase the model's temperature so it is less predictable to attackers", "correct": false },
+        { "id": "c", "text": "RAG Poisoning (AML.T0070) → embed the database password in the system prompt so only the model can use it", "correct": false },
+        { "id": "d", "text": "Excessive Agency → grant the agent broad tool permissions so it can self-correct", "correct": false }
+      ],
+      "explanation": "OWASP LLM01's mitigations for prompt injection are exactly content segregation, output validation, least privilege, and human approval for high-risk actions. Option b is nonsense as a defense — raising temperature does not counter injection. Option c is an anti-pattern: OWASP LLM07 is explicit that the system prompt is not a secret and must never hold credentials. Option d inverts the fix for excessive agency, which is least privilege and gates, not broad permissions.",
+      "sourceRefs": ["r-owasp-llm01", "r-owasp-llm06"]
+    },
+    {
+      "id": "q-m6-5",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is NIST AI 600-1?",
+      "options": [
+        { "id": "a", "text": "The Generative AI Profile — a cross-sectoral companion resource to the AI RMF, applying it to generative-AI risks", "correct": true },
+        { "id": "b", "text": "A standalone framework that replaces the NIST AI RMF for all AI systems", "correct": false },
+        { "id": "c", "text": "A catalogue of adversary techniques equivalent to MITRE ATLAS", "correct": false },
+        { "id": "d", "text": "A binding federal law governing commercial AI deployments", "correct": false }
+      ],
+      "explanation": "AI 600-1 is the Generative AI Profile: NIST describes it as a cross-sectoral profile of and companion resource for the AI RMF. Option b is wrong — it complements (profiles) the AI RMF rather than replacing it. Option c confuses governance with the adversary catalogue (that is ATLAS). Option d is wrong — the AI RMF and its profiles are intended for voluntary use, not law.",
+      "sourceRefs": ["r-nist-600-1", "r-nist-airmf"]
+    },
+    {
+      "id": "q-m6-6",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the NIST AI RMF, which function is chiefly about analysing and tracking risk through test, evaluation, and red-teaming?",
+      "options": [
+        { "id": "a", "text": "MEASURE", "correct": true },
+        { "id": "b", "text": "GOVERN", "correct": false },
+        { "id": "c", "text": "MAP", "correct": false },
+        { "id": "d", "text": "MANAGE", "correct": false }
+      ],
+      "explanation": "MEASURE is the function for assessing and tracking risk with appropriate methods, including red-teaming (its action IDs use the MS- prefix). GOVERN sets culture, policy, and accountability; MAP establishes context and identifies what could go wrong; MANAGE acts on prioritised risks and responds to incidents. The empirical assessment work belongs to MEASURE.",
+      "sourceRefs": ["r-nist-600-1", "r-nist-airmf"]
+    },
+    {
+      "id": "q-m6-7",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You are drafting an authorised red-team plan against a test agent in your OWN workspace. Which framing is correct and responsible?",
+      "options": [
+        { "id": "a", "text": "Use ATLAS techniques to structure the plan against a system you own or have written authorisation to test; never test systems you do not own or lack authorisation for", "correct": true },
+        { "id": "b", "text": "Use ATLAS to plan tests against any public production LLM to see if it is vulnerable", "correct": false },
+        { "id": "c", "text": "Skip authorisation because red-teaming your own understanding of attacks is always legal anywhere", "correct": false },
+        { "id": "d", "text": "Only red-teams at large companies may use ATLAS; individuals may not model attacks at all", "correct": false }
+      ],
+      "explanation": "ATLAS is legitimately used to structure red-team plans, but only against systems you own or are explicitly authorised to test — that authorisation boundary is the whole point of responsible red-teaming. Option b describes testing third-party systems without permission, which is out of bounds. Option c is false — authorisation is required regardless of intent. Option d is wrong — anyone can use ATLAS to model and defend their own system; the constraint is authorisation, not organisation size.",
+      "sourceRefs": ["r-atlas-data", "r-owasp-llm01"]
+    },
+    {
+      "id": "q-m6-8",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about STRIDE-for-LLM versus MITRE ATLAS is correct?",
+      "options": [
+        { "id": "a", "text": "STRIDE-for-LLM is a lightweight, structured enumeration for a fast first pass; ATLAS gives precise shared technique names and adversary chains for depth — they complement each other", "correct": true },
+        { "id": "b", "text": "STRIDE and ATLAS are competitors; using one forbids using the other", "correct": false },
+        { "id": "c", "text": "STRIDE cannot be applied to LLM systems at all", "correct": false },
+        { "id": "d", "text": "ATLAS is lighter-weight than STRIDE and should always be used instead", "correct": false }
+      ],
+      "explanation": "STRIDE-for-LLM is the quick, mnemonic-driven enumeration; ATLAS is the richer, precisely-named catalogue and chain — you use STRIDE to enumerate and ATLAS to name and sequence. Option b is wrong — they are complementary and often used together. Option c is false — STRIDE maps cleanly onto LLM concerns (spoofed sources, tampered context, etc.). Option d inverts the weights — ATLAS is the heavier, more detailed framework, not the lighter one.",
+      "sourceRefs": ["r-atlas-data", "r-owasp-top10"]
+    },
+    {
+      "id": "q-m6-9",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is one of the twelve GAI risk areas named in NIST AI 600-1?",
+      "options": [
+        { "id": "a", "text": "Confabulation", "correct": true },
+        { "id": "b", "text": "Excessive Agency", "correct": false },
+        { "id": "c", "text": "Prompt Injection", "correct": false },
+        { "id": "d", "text": "Unbounded Consumption", "correct": false }
+      ],
+      "explanation": "Confabulation — NIST's term for confidently-stated but false output — is one of the twelve GAI risk areas in the profile. Options b, c, and d are OWASP LLM Top 10 entries (Excessive Agency = LLM06, Prompt Injection = LLM01, Unbounded Consumption = LLM10), not NIST 600-1 risk-area names. The frameworks use different vocabularies; the module maps between them, but the names are not interchangeable.",
+      "sourceRefs": ["r-nist-600-1", "r-owasp-top10"]
+    },
+    {
+      "id": "q-m6-10",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Complete the flagship cross-map for a poisoned retrieval document that steers your agent: OWASP → ATLAS → NIST.",
+      "options": [
+        { "id": "a", "text": "OWASP LLM04/LLM01(Indirect)/LLM08 → ATLAS RAG Poisoning (AML.T0070) then Indirect Prompt Injection (AML.T0051.001) → NIST MAP/MEASURE(red-team)/MANAGE(provenance, access-controlled retrieval, least privilege, monitoring)", "correct": true },
+        { "id": "b", "text": "OWASP LLM06 → ATLAS LLM Jailbreak (AML.T0054) → NIST GOVERN only, with no controls", "correct": false },
+        { "id": "c", "text": "OWASP LLM07 → ATLAS Extract LLM System Prompt (AML.T0056) → NIST 'hide the prompt' action", "correct": false },
+        { "id": "d", "text": "There is no valid cross-map; the frameworks describe unrelated things", "correct": false }
+      ],
+      "explanation": "The poisoned-retrieval attack maps to OWASP LLM04 (poisoning) with LLM01-Indirect (firing) and LLM08 (the store); to ATLAS RAG Poisoning (AML.T0070) leading to Indirect Prompt Injection (AML.T0051.001); and is governed via NIST MAP (identify the Information Security/Data Privacy risk), MEASURE (red-team it), and MANAGE (provenance, access-controlled retrieval, least privilege, monitoring). Option b describes a different attack (jailbreak → excessive agency) and wrongly drops all controls. Option c is the system-prompt-leakage attack, not retrieval poisoning. Option d is exactly the misconception the module refutes — the three frameworks are complementary views of one risk.",
+      "sourceRefs": ["r-atlas-data", "r-owasp-llm04", "r-nist-600-1"]
+    },
+    {
+      "id": "q-m6-11",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A stakeholder argues frameworks are 'just documentation that stops nothing.' What is the honest, defensible reply?",
+      "options": [
+        { "id": "a", "text": "Frameworks add value as shared language, prioritisation, testable coverage, and a clean hand-off to governance — but the engineering is the actual defense, and mapping that changes no control is theatre", "correct": true },
+        { "id": "b", "text": "Agree fully — mapping is pointless and should be abandoned entirely", "correct": false },
+        { "id": "c", "text": "Disagree fully — once mapped, the system is secure and no further engineering is needed", "correct": false },
+        { "id": "d", "text": "The frameworks themselves block attacks at runtime, so the objection is moot", "correct": false }
+      ],
+      "explanation": "The honest position holds both truths: mapping delivers shared language, prioritisation, testability, and a governance hand-off, while the engineering (gateway, access control, gates) is what actually stops attacks — and a map that changes no control is indeed theatre. Option b throws out real value. Option c overclaims — a map is never a substitute for controls. Option d is false — frameworks are knowledge/governance artifacts, not runtime defenses.",
+      "sourceRefs": ["r-mitre-atlas", "r-nist-600-1"]
+    },
+    {
+      "id": "q-m6-12",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A blog lists an ATLAS technique called 'False RAG Entry Injection' with a confident-looking ID. You are about to cite it in a threat model. What is the correct action?",
+      "options": [
+        { "id": "a", "text": "Verify against the official ATLAS data first; it IS canonical — False RAG Entry Injection (AML.T0071), a Defense Evasion technique — so cite it with its verified ID, distinct from RAG Poisoning (AML.T0070)", "correct": true },
+        { "id": "b", "text": "Cite the blog's name and ID directly without checking, since it reads authoritatively", "correct": false },
+        { "id": "c", "text": "Invent a plausible AML.T ID for it so the threat model looks complete", "correct": false },
+        { "id": "d", "text": "Drop RAG from the threat model entirely to avoid the naming problem", "correct": false }
+      ],
+      "explanation": "The discipline is: verify a technique name and ID against the official ATLAS data before citing it — and when you check, False RAG Entry Injection resolves to a real canonical entry, AML.T0071 (a Defense Evasion technique), distinct from RAG Poisoning (AML.T0070). So you cite it with its verified ID. Option b is the trap the verification rule exists to catch — even when a blog name happens to be correct, you confirm it against the source of record rather than trusting the blog. Option c fabricates an ID — never acceptable. Option d over-corrects by removing a genuine, well-documented risk instead of citing it correctly.",
+      "sourceRefs": ["r-atlas-data", "r-mitre-atlas"]
+    },
+    {
+      "id": "q-m6-13",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which NIST 600-1 risk area most directly corresponds to the cross-tenant retrieval leakage described by OWASP LLM08?",
+      "options": [
+        { "id": "a", "text": "Data Privacy (leakage and unauthorized disclosure of data)", "correct": true },
+        { "id": "b", "text": "Environmental Impacts", "correct": false },
+        { "id": "c", "text": "Intellectual Property", "correct": false },
+        { "id": "d", "text": "CBRN Information or Capabilities", "correct": false }
+      ],
+      "explanation": "Returning one tenant's data to another is a leakage/unauthorized-disclosure problem, which is precisely NIST's Data Privacy risk area (and Information Security also applies). Option b, Environmental Impacts, concerns compute resource use. Option c, Intellectual Property, concerns copyrighted/trademarked material reproduction, not tenant data leakage. Option d, CBRN, concerns weapons information — unrelated to retrieval confidentiality.",
+      "sourceRefs": ["r-nist-600-1", "r-owasp-top10"]
+    },
+    {
+      "id": "q-m6-14",
+      "domainId": "m6-atlas-nist",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Your ATLAS-plus-NIST threat model is complete. What is its most valuable downstream use?",
+      "options": [
+        { "id": "a", "text": "It hands cleanly into AI governance work: MAP/MEASURE/MANAGE actions give governance owners, measurements, and controls to track, connecting technical security to accountable risk management (the AIGP track)", "correct": true },
+        { "id": "b", "text": "It certifies the agent as compliant and exempts it from further review", "correct": false },
+        { "id": "c", "text": "It proves the agent is immune to every mapped technique", "correct": false },
+        { "id": "d", "text": "It replaces the need for the technical controls it references", "correct": false }
+      ],
+      "explanation": "The artifact's payoff is the governance hand-off: framed in NIST's functions, it gives governance a mapped, measurable, owned risk picture — the bridge from security engineering to accountable risk management. Option b invents a compliance certificate that does not exist. Option c overclaims immunity, which no threat model provides. Option d is backwards — the model references and prioritises controls; it never replaces them.",
+      "sourceRefs": ["r-nist-600-1", "r-nist-airmf"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m6-defense-decision-drill",
+      "domainIds": ["m6-atlas-nist"],
+      "title": "The poisoned knowledge base: a defense-decision drill",
+      "tagline": "You own a customer-facing support agent with a RAG knowledge base. A red-team finding lands. Walk the defense decision using all three frameworks — and choose the response that actually reduces risk, not the one that just produces documents.",
+      "context": "You run a support agent in your own Automatos workspace. It answers customer questions using a retrieval knowledge base built from your public help-centre articles and some internal docs, and it has a connected tool that can issue account credits. Your authorised red-team exercise (against your own system) has just reported: a crafted help-centre article, once indexed, caused the agent to follow an embedded instruction and, in one run, to attempt an unwarranted credit. You must steer the response. Ground every decision in OWASP → ATLAS → NIST, and prefer engineering over paperwork.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First, name the finding precisely so the team shares one description. How do you record it?",
+          "choices": [
+            { "id": "a", "text": "OWASP: LLM04 Data and Model Poisoning + LLM01 Indirect Prompt Injection (and LLM08 for the store). ATLAS: RAG Poisoning (AML.T0070) leading to Indirect LLM Prompt Injection (AML.T0051.001). NIST risk areas: Information Security and Data Privacy.", "verdict": "best", "rationale": "This is exactly the cross-map discipline: the OWASP risk your auditor knows, the ATLAS technique your red team reproduced, and the NIST risk areas governance owns — one shared, precise description that every role can act on. It also correctly separates the poisoning (LLM04/AML.T0070) from the firing (LLM01-Indirect/AML.T0051.001)." },
+            { "id": "b", "text": "Record it loosely as 'the AI got hacked' and move straight to fixing, since precise names are just bureaucracy.", "verdict": "wrong", "rationale": "Skipping precise naming is a false economy. Without a shared technique name, the fix has no owner, the retest has no target, and governance cannot track it. The module's whole point is that ATLAS/NIST naming is leverage, not bureaucracy — provided it changes a control, which it will here." },
+            { "id": "c", "text": "Record only the ATLAS technique ID (AML.T0051.001) and consider the analysis finished at that point.", "verdict": "viable", "rationale": "Naming the technique is a good start and better than a vague label, but stopping there misses the OWASP defense mapping and the NIST governance framing. The technique ID tells you what happened; you still need the OWASP control set to fix it and the NIST function to govern it. Necessary, not sufficient." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The agent can issue credits. Under NIST MANAGE, what is the highest-leverage control to apply first, given the finding?",
+          "choices": [
+            { "id": "a", "text": "Apply least privilege plus a human-in-the-loop approval gate on the credit tool, so even a successfully-injected agent cannot issue a credit without explicit human approval.", "verdict": "best", "rationale": "This is the OWASP LLM06 / LLM01 control that most directly shrinks the blast radius: it decouples 'the model was steered' from 'money moved.' Least privilege and human approval for high-impact actions is precisely the mitigation both risks prescribe, and it is a real control change (not paperwork) — the top MANAGE move here." },
+            { "id": "b", "text": "Leave the tool fully autonomous but add a note to the system prompt telling the model to 'never issue fraudulent credits.'", "verdict": "wrong", "rationale": "A system-prompt instruction is not a security control — the very injection you are defending against overrides prompt-level guidance, and OWASP is explicit that behaviour must be enforced outside the prompt. This leaves the high-impact action ungated and is the classic false sense of safety." },
+            { "id": "c", "text": "Add rate-limiting and monitoring on the credit tool so misuse is capped and logged, and plan the approval gate as the next step.", "verdict": "viable", "rationale": "Rate-limiting and monitoring are genuine, useful controls (they cap and surface abuse) and are worth doing — but on their own they still let an unapproved credit through before anyone notices. They are a strong complement to the approval gate, not a substitute for it; sequencing the gate next is the right instinct." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now address the poisoned corpus itself. Which control set best defends the retrieval layer?",
+          "choices": [
+            { "id": "a", "text": "Provenance/lineage at ingest (know the source of every indexed doc, vet and validate it), access-controlled retrieval so queries only reach entitled data, and segregation of retrieved content as untrusted at prompt-assembly.", "verdict": "best", "rationale": "This is the layered LLM04/LLM08/LLM01 defense: provenance stops unvetted content entering the index, access control prevents cross-context exposure, and segregation stops the model treating retrieved text as instructions. Defense-in-depth that raises the cost of poisoning and shrinks its yield — the honest goal." },
+            { "id": "b", "text": "Delete the entire knowledge base and stop using RAG, since retrieval can always be poisoned.", "verdict": "wrong", "rationale": "This throws out a core capability to avoid a mitigable risk — the over-correction the track warns against. RAG poisoning is defensible in depth (provenance, access control, segregation); abandoning retrieval sacrifices the agent's usefulness for a threat you can manage." },
+            { "id": "c", "text": "Add an output filter that scans the agent's final answer for obviously malicious phrasing, and consider the retrieval layer covered.", "verdict": "viable", "rationale": "Output filtering is a legitimate layer and can catch some bad outcomes, but it treats the symptom at the very end while leaving the poisoned corpus and unscoped retrieval untouched. It should sit on top of ingest-time provenance and access-controlled retrieval, not replace them — partial coverage, wrong primary layer." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Under NIST MEASURE, how do you confirm the fixes worked and keep them honest over time?",
+          "choices": [
+            { "id": "a", "text": "Re-run the authorised red-team against your own system to reproduce AML.T0051.001, verify the approval gate and retrieval controls now hold, and document the red-team instructions and results (e.g. an MS- action) so the test is repeatable.", "verdict": "best", "rationale": "MEASURE is about assessment and tracking: reproducing the exact technique against a system you own, confirming the controls hold, and documenting the exercise (an MS-prefixed action such as documenting red-team instructions) makes the fix verifiable and repeatable — closing the loop the right way." },
+            { "id": "b", "text": "Mark the finding resolved because the controls were configured, and skip re-testing to save time.", "verdict": "wrong", "rationale": "Configuring a control is not evidence it works. Without re-testing you have assumption, not measurement — and the finding could silently persist. NIST MEASURE exists precisely to replace 'we think it's fixed' with 'we reproduced the attack and it failed.'" },
+            { "id": "c", "text": "Add continuous monitoring/alerting on credit-tool calls and retrieval anomalies, and rely on that in place of a targeted re-test.", "verdict": "viable", "rationale": "Continuous monitoring is a valuable MANAGE/MEASURE control and absolutely worth adding — but as the sole verification it only tells you about future live incidents, not whether this specific fix defeats this specific technique. Pair it with a targeted red-team re-test; monitoring watches, the re-test proves." }
+          ]
+        },
+        {
+          "id": "st5",
+          "prompt": "Leadership asks for the one-paragraph write-up. What framing keeps it honest and useful — and hands cleanly to governance?",
+          "choices": [
+            { "id": "a", "text": "State the risk in all three frameworks, the controls applied (gate, provenance, access control, segregation, monitoring), the red-team re-test result, and the residual position: injection is mitigated, not solved — then map the actions to NIST GOVERN/MAP/MEASURE/MANAGE for the governance owners.", "verdict": "best", "rationale": "This is the artifact the module is building toward: shared-language description, real controls, verified test, honest residual risk, and a clean NIST hand-off so governance can own and track it. It is leverage, not theatre — every framework reference points at a control or a test that actually changed." },
+            { "id": "b", "text": "Report that the system is now certified secure and immune to prompt injection thanks to the framework mapping.", "verdict": "wrong", "rationale": "This is the dishonest overclaim the module explicitly rejects. Mapping certifies nothing and immunity does not exist — injection stays mitigable, not solved. Claiming otherwise misleads leadership and erodes trust the moment the next finding lands." },
+            { "id": "c", "text": "Attach the full ATLAS technique list and NIST action catalogue with every ID mapped, as the deliverable in itself.", "verdict": "viable", "rationale": "Thorough mapping has value and shows diligence, but a wall of IDs is not the point — if it does not foreground the controls that changed and the test that verified them, it drifts toward the compliance-theatre failure mode. Lead with what changed and what you proved; keep the full mapping as an appendix." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-atlas-data", "r-owasp-llm01", "r-owasp-llm04", "r-owasp-llm06", "r-nist-600-1"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m6-threat-model-artifact",
+      "domainId": "m6-atlas-nist",
+      "title": "Build an ATLAS-plus-NIST threat model for one Automatos agent",
+      "goal": "Produce your signature artifact for this module: a lightweight, framework-tagged threat model for ONE real agent in your own Automatos workspace. For each realistic attack you will tag the MITRE ATLAS technique that names it and the NIST AI 600-1 function/action that governs the response — an artifact that hands cleanly into the AI governance (AIGP) track.",
+      "steps": "## What you'll do\n\nYou'll take one agent you actually run (or create a small test one), enumerate its realistic attacks, and describe each in all three frameworks — OWASP risk, ATLAS technique, NIST function/action — landing every attack on a concrete defense. This is a defensive threat-modelling exercise: everything targets your OWN system.\n\n> **Authorisation, first and non-negotiable.** You may red-team and threat-model only a system you own or have explicit written authorisation to test. Everything in this lab is against your own workspace and your own agent. Never test systems you do not own or lack authorisation for.\n\n### Before you start\n\n- **Sign in** to your Automatos workspace (a personal workspace is created for you on first login; you are its admin).\n- **Pick or create one agent.** Ideally one with (a) a knowledge base / retrieval and (b) at least one connected tool, so the threat model has real surface. If you don't have one, create a simple test agent from a template and give it a small knowledge base and one low-impact tool. (See the platform docs on creating an agent and on missions/tools.)\n- **Open the official sources** in tabs: the MITRE ATLAS matrix (for technique names and IDs), and NIST AI 600-1 (for the four functions and action IDs). Take every technique ID from the official ATLAS data — never from memory or a blog.\n\n### Step 1 — Map the attack surface (five stages)\n\nSketch your agent as five stages and note what flows through each: **input** (who/what can send it messages), **context/retrieval** (what it retrieves and from where — is the corpus attacker-influenceable?), **model** (the LLM and its system prompt), **tools** (what actions it can take, and how much authority each has), and **output** (where its output goes and what consumes it). This is your surface.\n\n### Step 2 — Enumerate threats with STRIDE-for-LLM\n\nFor a fast first pass, walk STRIDE against the surface: Spoofing (a spoofed trusted source?), Tampering (poisoned retrieval / altered tool output?), Repudiation (is every tool call logged?), Information disclosure (secrets / other tenants' data / system prompt?), Denial/cost (runaway consumption?), Elevation of privilege (can it be pushed beyond its authority?). Write down each realistic threat you find.\n\n### Step 3 — Name each threat in ATLAS (verify every ID)\n\nFor each realistic threat, find the matching ATLAS technique and record its exact name and AML.T ID from the official data. Expect to use entries such as: LLM Prompt Injection (AML.T0051, Direct .000 / Indirect .001), RAG Poisoning (AML.T0070), Retrieval Content Crafting (AML.T0066), Gather RAG-Indexed Targets (AML.T0064), LLM Jailbreak (AML.T0054), Extract LLM System Prompt (AML.T0056). If a name you saw elsewhere isn't in the official data, use the canonical entry instead and note the discrepancy — do not cite an unverified ID.\n\n### Step 4 — Land each on its OWASP defense\n\nBeside each technique, write the concrete control(s) that mitigate it, drawn from the OWASP risk it maps to: e.g. content segregation + output validation + least privilege + human approval (LLM01/LLM06); provenance/lineage + source vetting (LLM04); access-controlled retrieval (LLM08); rate/cost limits (LLM10); keep secrets out of the prompt (LLM07). Every technique must have at least one real control — a technique with no control is an open risk to flag.\n\n### Step 5 — Add the NIST governance overlay\n\nFor each row, tag the NIST function that governs the response and, where you can, a specific action prefix: **MAP** the risk (which of the twelve GAI risk areas is it — usually Information Security and/or Data Privacy for these), **MEASURE** it (a red-team re-test, an MS- action), **MANAGE** it (the control you applied plus monitoring, an MG- action), all under **GOVERN** (who owns it, what policy applies). Cite the specific action IDs you use rather than a round total.\n\n### Step 6 — Assemble and pressure-test the artifact\n\nPut it in one table: one row per realistic attack, columns = [attack | OWASP risk | ATLAS technique+ID | control(s) | NIST function/action | owner]. Then apply the honesty test to the whole thing: does every framework reference point at a control that changed or a test you will run? Delete any row that is pure mapping with no downstream effect — that row was theatre. Add a one-line residual-risk statement: which risks are mitigated-not-solved, and what you will monitor.\n\n### Step 7 — Save it for the governance hand-off\n\nSave the table somewhere durable (a doc, or upload it to a Knowledge Base). This is the artifact that hands into the AI governance (AIGP) track: a mapped, measurable, owned risk picture for a real agent.\n\n### Why it matters\n\nThis is where the whole track's threat-modelling strand pays off: you can now describe a real agent's threats in language a red-teamer, a detection engineer, and a governance lead all share, with every attack landed on a control and every control owned. That is the difference between knowing the frameworks and using them — and it is exactly the artifact governance work begins from.\n\n### A note on honesty\n\nKeep the posture the module taught: the frameworks make your defense describable, prioritised, testable, and accountable — the engineering is the defense, and injection stays mitigable, not solved. A threat model that claims immunity is worse than none.",
+      "checklist": [
+        "AUTHORISATION confirmed: the agent and workspace are your own (or you have explicit written authorisation); no third-party systems are targeted",
+        "One real (or test) agent chosen, with its five-stage attack surface mapped (input, context/retrieval, model, tools, output)",
+        "Threats enumerated with STRIDE-for-LLM across the surface",
+        "Each realistic threat tagged with its exact MITRE ATLAS technique name and AML.T ID, taken from the official ATLAS data (no unverified IDs; canonical entry used where a blog name didn't resolve)",
+        "Every technique landed on at least one concrete OWASP-aligned control (segregation/output validation/least privilege/human approval/provenance/access-controlled retrieval/rate limits/secrets-out-of-prompt)",
+        "Each row tagged with a NIST function (GOVERN/MAP/MEASURE/MANAGE) and, where possible, a specific action prefix (GV-/MP-/MS-/MG-)",
+        "Honesty test applied: any pure-mapping row that changed no control and prompted no test was removed as theatre",
+        "A one-line residual-risk statement added (what is mitigated-not-solved, and what will be monitored)",
+        "ARTIFACT SAVED: the one-table threat model, kept for the AI governance (AIGP) hand-off"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-mitre-atlas",
+      "title": "MITRE ATLAS — Adversarial Threat Landscape for AI Systems (matrix)",
+      "url": "https://atlas.mitre.org/",
+      "kind": "official-doc",
+      "annotation": "The living knowledge base of adversary tactics and techniques against AI systems, modelled on MITRE ATT&CK and maintained by MITRE. Use the interactive matrix to browse tactics (adversary goals, left to right) and the techniques under each. This is the adversary LANGUAGE for the module — the source you name attacks with. Its Spring-2025 release added the generative-AI techniques (RAG Poisoning, LLM Prompt Injection sub-techniques, LLM Prompt Crafting) used throughout.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-atlas-data",
+      "title": "MITRE ATLAS — official data (ATLAS.yaml, source of record for technique IDs)",
+      "url": "https://github.com/mitre-atlas/atlas-data",
+      "kind": "official-doc",
+      "annotation": "The canonical machine-readable ATLAS data: every tactic (AML.TAxxxx) and technique (AML.Txxxx) with exact names and descriptions. This is where you verify a technique ID rather than trusting a blog or memory — the module's own rule. It is the authority behind the verified IDs used here: LLM Prompt Injection AML.T0051 (Direct .000 / Indirect .001), RAG Poisoning AML.T0070, LLM Prompt Crafting AML.T0065, Retrieval Content Crafting AML.T0066, Gather RAG-Indexed Targets AML.T0064.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-nist-airmf",
+      "title": "NIST AI Risk Management Framework — overview (Govern/Map/Measure/Manage)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "official-doc",
+      "annotation": "The landing page for the NIST AI RMF (AI 100-1), intended for voluntary use to build trustworthiness into AI. Read it for the four core functions — GOVERN, MAP, MEASURE, MANAGE — that structure the whole governance overlay, and for the pointer to the Generative AI Profile (AI 600-1) released July 2024. This is the frame that turns scattered technical controls into accountable risk management.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-nist-600-1",
+      "title": "NIST AI 600-1 — Generative AI Profile (the governance overlay)",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "kind": "official-doc",
+      "annotation": "The Generative AI Profile: a cross-sectoral companion resource to the AI RMF. Section 2 defines the twelve GAI risk areas (CBRN Information or Capabilities; Confabulation; Dangerous, Violent, or Hateful Content; Data Privacy; Environmental Impacts; Harmful Bias or Homogenization; Human-AI Configuration; Information Integrity; Information Security; Intellectual Property; Obscene, Degrading, and/or Abusive Content; Value Chain and Component Integration). Section 3 gives suggested actions under GOVERN/MAP/MEASURE/MANAGE, each with a stable action ID (GV-/MP-/MS-/MG-) you cite in a threat model. This is the direct hand-off to AI governance work.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-owasp-top10",
+      "title": "OWASP Top 10 for LLM Applications (2025) — overview",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "kind": "official-doc",
+      "annotation": "The current (2025) list from the OWASP Gen AI Security Project, and the risk vocabulary this module cross-maps into ATLAS and NIST. The ten: LLM01 Prompt Injection, LLM02 Sensitive Information Disclosure, LLM03 Supply Chain, LLM04 Data and Model Poisoning, LLM05 Improper Output Handling, LLM06 Excessive Agency, LLM07 System Prompt Leakage, LLM08 Vector and Embedding Weaknesses, LLM09 Misinformation, LLM10 Unbounded Consumption. Use it to see WHAT can go wrong before ATLAS names HOW.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-owasp-llm01",
+      "title": "OWASP LLM01:2025 Prompt Injection (mechanism + mitigations)",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "kind": "official-doc",
+      "annotation": "The per-risk page for prompt injection: the direct vs indirect distinction that maps exactly onto ATLAS's Direct (AML.T0051.000) and Indirect (AML.T0051.001) sub-techniques, and OWASP's mitigation list — constrain model behaviour, validate output formats, input/output filtering, least privilege, human approval for high-risk actions, segregate untrusted content, and adversarial testing. This is where each named ATLAS technique lands on a defense.",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-owasp-llm04",
+      "title": "OWASP LLM04:2025 Data and Model Poisoning (incl. RAG/embedding)",
+      "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/",
+      "kind": "official-doc",
+      "annotation": "The OWASP risk that covers the poisoning step of the RAG attack chain. Key point for this module: poisoning can occur at pre-training, fine-tuning, OR embedding data — so RAG/vector-store poisoning falls here. Read its defenses (data provenance/lineage via an ML-BOM/CycloneDX, source vetting and validation, versioning, sandboxing, anomaly detection, red-teaming) — they are the controls your threat model attaches to ATLAS RAG Poisoning (AML.T0070).",
+      "domainIds": ["m6-atlas-nist"]
+    },
+    {
+      "id": "r-owasp-llm06",
+      "title": "OWASP LLM06:2025 Excessive Agency (least privilege + gates)",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "kind": "official-doc",
+      "annotation": "The OWASP risk behind the 'over-agentic tool call' cross-map. Its three root causes — excessive functionality, excessive permissions, excessive autonomy — and its mitigations (minimise tools, least privilege, human-in-the-loop approval for high-impact actions, complete mediation in downstream systems, monitoring and rate-limiting) are exactly the controls that shrink the blast radius when a jailbreak or injection steers an agent. This is the defense the scenario's credit-tool gate applies.",
+      "domainIds": ["m6-atlas-nist"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m6-1",
+      "title": "M6 · The adversary map and the governance overlay — MITRE ATLAS and NIST AI 600-1 over the OWASP LLM Top 10",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m6-atlas-nist"],
+      "sourceNotebook": "ai-security / m6 / atlas-nist-language-and-governance"
+    },
+    {
+      "id": "v-m6-2",
+      "title": "M6 · Do frameworks make LLM systems safer, or just more documented? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m6-atlas-nist"],
+      "sourceNotebook": "ai-security / m6 / debate-frameworks-safer-or-documented"
+    }
+  ]
+}

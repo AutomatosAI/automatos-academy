@@ -37,15 +37,21 @@ buried in a combined document.
 
 | # | Vendor | Track folder | Type | Status | Modules |
 |---|---|---|---|---|---|
-| — | Anthropic | [`cca-f/`](./cca-f/) | external exam | **LIVE** (extend) | 5 |
-| — | GitHub | [`gh-300/`](./gh-300/) | external exam | built | 6 |
-| S0 | GitHub | [`gh-500/`](./gh-500/) | external exam | planned | 6 |
-| S1 | Automatos | [`automatos-apa/`](./automatos-apa/) | **free training** | planned | 11 |
-| S2 | (cross) | [`ai-security/`](./ai-security/) | skills | planned | 6 |
-| S3 | IAPP | [`aigp/`](./aigp/) | external exam | planned | 4 |
-| S4 | (cross) | [`cross-vendor/`](./cross-vendor/) | skills + Gen-AI-Leader exam | planned | 5 |
-| **B1** | Automatos | [`ai-business/`](./ai-business/) | **free training (Operator lane)** | **prompts authored** | 9 |
+| — | Anthropic | [`cca-f/`](./cca-f/) | external exam | **LIVE** (videos in) | 5 |
+| — | GitHub | [`gh-300/`](./gh-300/) | external exam | **LIVE** (videos in) | 6 |
+| S0 | GitHub | [`gh-500/`](./gh-500/) | external exam | **DONE** | 6 |
+| S1 | Automatos | [`automatos-apa/`](./automatos-apa/) | **free training** | **DONE** | 11 |
+| S2 | (cross) | [`ai-security/`](./ai-security/) | skills | **DONE** | 6 |
+| S3 | IAPP | [`aigp/`](./aigp/) | external exam | **DONE** | 4 |
+| S4 | (cross) | [`cross-vendor/`](./cross-vendor/) | skills | **DONE** | 4 |
+| S4b | Google | [`gen-ai-leader/`](./gen-ai-leader/) | external exam | **DONE** | 4 |
+| **B1** | Automatos | [`ai-business/`](./ai-business/) | **free training (Operator lane)** | **DONE** | 9 |
 | S5 | Cloud | _deferred_ | external exam | later | — |
+
+> **All planned tracks are BUILT** (2026-07-02). "DONE" = track content live on the engine; videos
+> flow per module via the NotebookLM prompts in each folder (name files by slot id → CDN →
+> `register-videos.mjs --publish`). S4's Gen-AI-Leader exam sub-track ships as its own track
+> (`google/gen-ai-leader`); cross-vendor's comparison+portability folded into m4.
 
 PRDs (the "why + blueprint" behind each track) live in [`../prds/`](../prds/). The reusable prompt
 framework is [`../NOTEBOOKLM_PROMPTS.md`](../NOTEBOOKLM_PROMPTS.md).

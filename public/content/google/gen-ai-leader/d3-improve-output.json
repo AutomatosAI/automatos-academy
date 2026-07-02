@@ -1,0 +1,1331 @@
+{
+  "id": "d3-improve-output",
+  "order": 3,
+  "code": "D3",
+  "name": "Techniques to improve gen AI model output",
+  "weight": 0.2,
+  "tagline": "The ~20% domain of levers: how a leader makes a capable-but-unreliable model good enough for the business — prompt engineering, grounding and RAG, fine-tuning, evaluation, human feedback and responsible-AI guardrails — and which one fits which problem.",
+  "overview": "Section 3 (~20% of the exam) is the 'make it better' domain. A foundation model out of the box is fluent but unreliable for enterprise use — it has a knowledge cutoff, can hallucinate, can amplify bias, and struggles on edge cases and niche domains. This domain tests whether a business leader can name those limitations and choose the right technique to fix each, at a decision level (never implementation). The exam guide's three task groups are: 3.1 proactively overcoming limitations (grounding, retrieval-augmented generation [RAG], prompt engineering, fine-tuning, human-in-the-loop, plus continuous monitoring and evaluation — KPIs, versioning, drift monitoring, Agent Platform Feature Store); 3.2 prompt engineering techniques (zero-/one-/few-shot, role prompting, prompt chaining, and the advanced chain-of-thought and ReAct); and 3.3 grounding techniques (differentiating world vs first-party enterprise vs third-party data, how RAG affects output, Google Cloud's grounding offerings — Pre-built RAG with Agent Search, RAG APIs, Grounding with Google Search — and the sampling parameters that shape behaviour: temperature, top-p, token count, safety settings, output length). The organising idea is a ladder of effort: start with prompting (cheapest), ground for factuality and current data, fine-tune only when prompting genuinely can't reach the behaviour, and keep a human in the loop on high-stakes decisions. Currency matters: the guide uses current Google branding — Agent Platform, Agent Search, Gemini Enterprise Agent Platform — not the retired 'Vertex AI' or 'Agent Builder' labels, which appear in neither the guide nor the certification page. Teach the current names.",
+  "objectives": [
+    "Name the common limitations of a foundation model — data dependency, knowledge cutoff, bias/fairness, hallucinations, edge cases, limited domain expertise — and map each to the Google-recommended fix.",
+    "Define prompt design vs prompt engineering and tell zero-shot, one-shot, few-shot, role prompting, prompt chaining, chain-of-thought, and ReAct apart at a decision level.",
+    "Explain grounding plainly, differentiate world / first-party / third-party data, describe how RAG changes output without retraining, and match Google's grounding offerings (Google Search, Agent Search/RAG) to a need.",
+    "Choose among prompting, grounding/RAG, and fine-tuning by cost and fit, and distinguish supervised fine-tuning, RLHF (human feedback), and distillation.",
+    "Place responsible-AI guardrails — safety filters/settings and human-in-the-loop — and use the Gen AI evaluation service and continuous monitoring to prove output actually improved."
+  ],
+  "lessons": [
+    {
+      "id": "l1-overcome-limitations",
+      "title": "Why output needs improving: model limits and the four fixes",
+      "estMinutes": 13,
+      "objective": "Name the built-in limitations of a foundation model and match each to the Google-recommended fix — grounding, RAG, prompt engineering, fine-tuning, and human-in-the-loop.",
+      "body": "## The domain in one sentence\n\nA foundation model straight out of the box is capable but *unreliable for your business*, and Section 3 (~20% of the exam) is about the **techniques a leader chooses to make its output better**. You are not asked to implement any of them. You are asked to know **what each limitation is, which technique fixes it, and roughly what that technique costs** so you can steer a team.\n\n## The limitations you must be able to name\n\nGoogle's exam guide lists the common limitations of foundation models, and the Responsible AI page expands them. Learn these six as a checklist:\n\n- **Data dependency** — the model only knows what it was trained on; garbage or biased training data yields garbage or biased output.\n- **Knowledge cutoff** — training stopped on a certain date, so the model has *no knowledge of anything after it* (yesterday's news, this quarter's numbers, your internal wiki).\n- **Bias and fairness** — models can *amplify* biases present in their training data, producing unequal treatment across groups.\n- **Hallucinations** — the model can state things that are *fluent and confident but simply not factual*. This is the single most important limitation to fix for enterprise use.\n- **Edge cases** — \"unusual, rare, or exceptional situations that are not well-represented in the training data,\" where the model may be overconfident or misread the context.\n- **Limited domain expertise** — on highly specialised or technical topics the model can be shallow or wrong.\n\n> **Exam framing:** if a scenario says \"the model gave a confident answer that turned out to be made up\" that is a **hallucination**; \"the model doesn't know about our new product launched last month\" is the **knowledge cutoff**; \"the model was unfair to one group\" is **bias**. Naming the limitation is half of every D3 question — the other half is picking its fix.\n\n## The five Google-recommended fixes (memorise the mapping)\n\nGoogle's recommended practices to address limitations are a short, fixed list. This is the spine of the whole domain:\n\n| Technique | Plain meaning | Fixes, mainly |\n|---|---|---|\n| **Prompt engineering** | Write better instructions/examples | Vague, poorly-formatted, or off-task output |\n| **Grounding** | Connect the model to verifiable sources | Hallucinations; missing facts |\n| **Retrieval-augmented generation (RAG)** | The main *way* to do grounding on *your* data | Knowledge cutoff; \"doesn't know our data\" |\n| **Fine-tuning** | Retrain the model on your labelled data | A specialised behaviour/format prompting can't reach |\n| **Human in the loop (HITL)** | A person reviews/approves output | High-stakes decisions; residual risk from all of the above |\n\nRead the table as a **ladder of effort**. Prompt engineering is cheapest and where you always start. Grounding/RAG is the standard answer to *factuality* and *stale knowledge*. Fine-tuning is the heaviest lever — real cost, needs data — reserved for when prompting genuinely can't get there. And **HITL sits across all of them**: no technique makes a model safe enough to remove human oversight from decisions that materially affect people.\n\n## Keeping it good over time: monitoring and evaluation\n\nImproving output is not a one-off. The guide's task 3.1 also expects you to recognise Google-recommended practices for **continuous monitoring and evaluation**: **automatic model upgrades**, **key performance indicators (KPIs)**, **security patches and updates**, **versioning**, **performance tracking**, **drift monitoring** (watching for the model's quality sliding as the world changes), and the **Agent Platform Feature Store** (a managed place to serve the data features a model uses). A leader's takeaway: you *measure* a gen AI solution like any other product, continuously — you don't ship it and walk away.\n\n## Why the exam cares\n\nEverything else in D3 — prompting, grounding, RAG, tuning, evaluation, responsible-AI guardrails — is just *detail on this one table*. Get the limitation-to-fix mapping cold and the rest of the domain is elaboration.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-1",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A model confidently gives a detailed answer that turns out to be entirely made up. Which limitation is this, and what is the primary Google-recommended fix?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Hallucination — fixed primarily by grounding (connecting the model to verifiable sources)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Knowledge cutoff — fixed by waiting for the next model release"
+            },
+            {
+              "id": "c",
+              "text": "Bias — fixed by fine-tuning on more data"
+            },
+            {
+              "id": "d",
+              "text": "Edge case — fixed by raising the temperature"
+            }
+          ],
+          "explanation": "A fluent-but-false answer is a **hallucination**, and Google's overview says grounding 'reduces the chances of inventing content' by tethering output to verifiable sources. The knowledge cutoff is about *missing recent* facts (not inventing them), bias is unequal treatment across groups, and an edge case is a rare unrepresented input — none is the best label here, and raising temperature would make invention *more* likely, not less.",
+          "sourceRefs": [
+            "r-grounding",
+            "r-exam-guide"
+          ]
+        },
+        {
+          "id": "kc-d3-2",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement best captures the relationship between prompt engineering and fine-tuning per Google's guidance?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Start with prompting to find the optimal prompt; move on to fine-tuning only if required, because tuning needs labelled data and more effort",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Always fine-tune first because it is cheaper and faster than prompting"
+            },
+            {
+              "id": "c",
+              "text": "They are the same technique under two names"
+            },
+            {
+              "id": "d",
+              "text": "Fine-tuning replaces the need for any prompt at all"
+            }
+          ],
+          "explanation": "Google explicitly recommends 'starting with prompting to find the optimal prompt' and moving to fine-tuning '(if required).' Tuning is the heavier lever (labelled data, cost), so it is not cheaper or faster to try first; it is a distinct technique from prompting, not a synonym; and a tuned model still receives prompts at inference — tuning changes *how it responds*, it does not remove the prompt.",
+          "sourceRefs": [
+            "r-tuning",
+            "r-exam-guide"
+          ]
+        },
+        {
+          "id": "kc-d3-3",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The exam guide's task 3.1 mentions 'drift monitoring' and 'Agent Platform Feature Store' under which theme?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Continuous monitoring and evaluation of a deployed gen AI model",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Prompt engineering techniques"
+            },
+            {
+              "id": "c",
+              "text": "Choosing a foundation model's modality"
+            },
+            {
+              "id": "d",
+              "text": "Writing few-shot examples"
+            }
+          ],
+          "explanation": "Drift monitoring, KPIs, versioning, performance tracking, and the Agent Platform Feature Store are listed under **continuous monitoring and evaluation** — keeping a live model good over time. They are not prompting techniques, not about modality choice (a Section 1 topic), and not few-shot examples.",
+          "sourceRefs": [
+            "r-exam-guide"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l2-prompt-engineering",
+      "title": "Prompt engineering at a leader's level",
+      "estMinutes": 12,
+      "objective": "Define prompt design vs prompt engineering, tell zero-/one-/few-shot apart, recognise role prompting, prompt chaining, chain-of-thought and ReAct, and know what sampling parameters do.",
+      "body": "## Prompt design vs prompt engineering\n\nGoogle draws a clean line the exam expects you to know:\n\n- **Prompt design** is \"the process of creating prompts that elicit the desired response from language models.\"\n- **Prompt engineering** is \"the iterative process of repeatedly updating prompts and assessing the model's responses.\"\n\nSo *design* is writing a good prompt; *engineering* is the disciplined loop of write → check → refine. It is the **cheapest technique to improve output** and the one a leader should insist teams exhaust before spending on anything heavier. Note the honest caveat: \"Gemini models often perform well without the need for prompt engineering, especially for straightforward tasks\" — you engineer prompts hardest for *complex* tasks.\n\n## The parts of a prompt\n\nA prompt can contain four components; only the first is required:\n\n- **Task** (required) — the question or instruction.\n- **System instructions** (optional) — guidance \"passed to the model before any user input\" (e.g. \"You are a formal legal assistant; answer only from the provided document\"). This is how you set tone, role, and rules.\n- **Few-shot examples** (optional) — worked input/output examples.\n- **Contextual information** (optional) — reference facts the model should use.\n\n## Shot-based prompting: the definitions to lock in\n\nThis is the most testable part of 3.2. Google's wording:\n\n- **Zero-shot** — a prompt that \"provides no examples.\" You just ask.\n- **One-shot** — you give **one** worked example.\n- **Few-shot** — a prompt that \"contains examples\" (a handful). Few-shot prompts \"regulate the output formatting, phrasing, scoping, or general patterning of model responses.\"\n\nThe leader-level nuance Google states outright: **too few examples are ineffective at changing behaviour; too many can cause the model to overfit** — and you should \"always accompany few-shot examples with clear instructions,\" or the model may latch onto an unintended pattern.\n\n## The named techniques the guide lists\n\nBeyond shots, task 3.2 names a few techniques by name. Know them at a definitional level:\n\n- **Role prompting** — tell the model *who to be* (\"Act as a financial analyst\"), which shapes tone and framing. Usually set via system instructions.\n- **Prompt chaining** — break a big task into a **sequence of prompts**, feeding each step's output into the next, instead of one giant prompt.\n- **Chain-of-thought (CoT) prompting** — ask the model to \"think step by step\" and show its reasoning before the final answer; it improves accuracy on multi-step reasoning problems.\n- **ReAct** (Reason + Act) — the model interleaves *reasoning* with *actions* such as calling a tool or search, then reasons over the result. It underpins how **agents** use tools.\n\n> **Exam framing:** map the verb. \"Show your working step by step\" → **chain-of-thought**. \"Do it as a series of smaller prompts\" → **prompt chaining**. \"Act as a…\" → **role prompting**. \"Reason, then call a tool, then reason again\" → **ReAct**. \"Here are three examples, now do the fourth\" → **few-shot**.\n\n## Sampling parameters: the dials, in plain terms\n\nTask 3.3 also asks you to recognise how **sampling parameters** control model behaviour. You will not tune them by hand on the job, but you must know what they do:\n\n- **Temperature** — \"controls the degree of randomness in token selection.\" **Low** = focused, less creative, more deterministic (a temperature of 0 nearly always picks the highest-probability token); **high** = more diverse or creative. Gemini's range is 0.0–2.0, default 1.0.\n- **Top-P (nucleus sampling)** — the model considers tokens \"from the most probable to least probable until the sum of their probabilities equals the top-P value.\" Lower = less random.\n- **Top-K** — restrict selection to the K most probable tokens (top-K of 1 = greedy, always the single most probable). Lower = less random.\n- **Max output tokens / output length** — caps the response length (a token is ~4 characters; 100 tokens ≈ 60–80 words).\n- **Safety settings** — thresholds that filter harmful content (covered in the responsible-AI lesson).\n\nThe leader takeaway: for **factual, consistent** tasks (a policy summary) you want **low** temperature; for **creative** tasks (marketing copy) you can afford **higher** temperature. That single trade-off is the shape of any parameter question on this exam.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-4",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You give the model three worked input/output examples inside the prompt and then ask it to handle a fourth case the same way. This is:",
+          "options": [
+            {
+              "id": "a",
+              "text": "Few-shot prompting",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Zero-shot prompting"
+            },
+            {
+              "id": "c",
+              "text": "Fine-tuning"
+            },
+            {
+              "id": "d",
+              "text": "Grounding"
+            }
+          ],
+          "explanation": "Providing a handful of examples in the prompt is **few-shot** prompting — Google: 'prompts that contain examples are called few-shot prompts.' Zero-shot provides *no* examples; fine-tuning trains the model on a labelled dataset (not examples placed in a single prompt); and grounding connects the model to external sources, which is unrelated to in-prompt examples.",
+          "sourceRefs": [
+            "r-prompt-intro",
+            "r-exam-guide"
+          ]
+        },
+        {
+          "id": "kc-d3-5",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team needs consistent, factual summaries of legal policies with as little creative variation as possible. Which sampling setting fits best?",
+          "options": [
+            {
+              "id": "a",
+              "text": "A low temperature (near 0)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A high temperature (near 2.0)"
+            },
+            {
+              "id": "c",
+              "text": "The maximum possible top-K"
+            },
+            {
+              "id": "d",
+              "text": "Turning safety settings off"
+            }
+          ],
+          "explanation": "Low temperature makes token selection more deterministic and 'less open-ended or creative' — exactly what factual, consistent summaries need. High temperature increases diversity/creativity (the opposite of the goal), a very high top-K widens the candidate pool (more randomness), and safety settings are content filters, not a determinism control — and you would not disable them.",
+          "sourceRefs": [
+            "r-parameters",
+            "r-exam-guide"
+          ]
+        },
+        {
+          "id": "kc-d3-6",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which description matches 'chain-of-thought' prompting rather than 'prompt chaining'?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Asking the model to show its step-by-step reasoning before giving the final answer",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Splitting a task into a sequence of separate prompts, each feeding the next"
+            },
+            {
+              "id": "c",
+              "text": "Providing one example so the model mimics a format"
+            },
+            {
+              "id": "d",
+              "text": "Connecting the model to Google Search for current facts"
+            }
+          ],
+          "explanation": "**Chain-of-thought** asks the model to reason step by step *within one response* to improve multi-step accuracy. **Prompt chaining** is the different technique of splitting work across a *sequence* of prompts. One example is one-shot prompting, and connecting to Google Search is grounding — neither is chain-of-thought.",
+          "sourceRefs": [
+            "r-exam-guide",
+            "r-prompt-intro"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l3-grounding-and-rag",
+      "title": "Grounding and RAG, explained plainly",
+      "estMinutes": 13,
+      "objective": "Define grounding, distinguish world / first-party / third-party data, explain how RAG works and affects output, and match Google's grounding offerings to a need.",
+      "body": "## What grounding is\n\nGoogle's definition, worth memorising: **\"grounding is the ability to connect model output to verifiable sources of information. If you provide models with access to specific data sources, then grounding tethers their output to these data and reduces the chances of inventing content.\"**\n\nIn a sentence a leader can repeat: **grounding stops the model making things up by tying its answers to real sources.** Its three benefits, per Google:\n\n- **Reduces hallucinations** (fewer non-factual inventions).\n- **Anchors responses to your data sources** (answers reflect *your* facts, not just training data).\n- **Provides auditability** via **grounding support** — actual links to the sources, so a human can check.\n\nThat last point matters for enterprise: a grounded answer *shows its receipts*.\n\n## Three kinds of data you can ground on\n\nThe exam guide asks you to differentiate grounding by **data source**:\n\n- **World data** — public information from the open web. On Google Cloud this is **Grounding with Google Search**: \"connect your model to world knowledge and a wide possible range of topics using results from Google's search engine.\" Use it for current events, general facts.\n- **First-party (enterprise) data** — *your own* documents, websites, databases. This is what makes a model useful about *your* business (policies, product catalogue, support tickets).\n- **Third-party data** — data from another organisation you license or connect to (a partner's dataset, an industry database).\n\n> **Exam framing:** \"answer about the latest news\" → **world data / Google Search**. \"answer from our internal HR handbook\" → **first-party enterprise data**. The distinction between *world* and *your own* data is the most common grounding question.\n\n## RAG: the standard way to ground on your own data\n\n**Retrieval-augmented generation (RAG)** is how grounding on your data is actually done. Google: \"To implement grounding, you must retrieve relevant source data. The recommended best practice is to use the retrieval-augmented generation (RAG) technique.\"\n\nThe plain mechanics (a leader needs the shape, not the code):\n\n1. **Retrieve** — when a question comes in, a search step finds the most relevant chunks from your documents (usually via an index that captures *meaning*, not just keywords).\n2. **Augment** — those chunks are added to the prompt as context.\n3. **Generate** — the model answers **using that supplied context**, so the answer reflects your data and can cite it.\n\n**How RAG affects the output:** answers become more **current** (they include data added after the model's knowledge cutoff), more **factual and specific to you**, and **auditable** (they can point back to the source document). RAG does **not** retrain the model — the model's weights are unchanged; you are feeding it better *context at question time*. That is the key contrast with fine-tuning, and a favourite exam distractor.\n\n## Google Cloud's grounding offerings (know these three by name)\n\nTask 3.3 lists Google Cloud's grounding offerings. Learn the current names:\n\n- **Pre-built RAG with Agent Search** — \"use RAG to connect your model to your website data or your sets of documents stored in **Agent Search**.\" The fastest path to grounding on enterprise data. (*Agent Search* is the current name for what was Vertex AI Search.)\n- **RAG APIs / RAG Engine on Gemini Enterprise Agent Platform** — \"a configurable managed RAG service\" for teams that want to build and tune their own RAG pipeline.\n- **Grounding with Google Search** — ground on **world** knowledge from Google's search engine.\n\n> **Currency trap:** the exam uses **Agent Search** and **Agent Platform**, *not* the older \"Vertex AI Search\" or \"Agent Builder\" (those terms are in neither the exam guide nor the certification page). If an option leans on a retired name, be suspicious.\n\n## Grounding vs fine-tuning — the line the exam tests\n\nThey solve *different* problems:\n\n- **Grounding/RAG** gives the model **new facts to read** at question time (fixes *knowledge cutoff* and *hallucination*). It does not change the model.\n- **Fine-tuning** teaches the model a **new skill or style** by adjusting its weights on labelled data (fixes *behaviour/format* prompting can't reach). It does not, by itself, keep facts current.\n\nIf the business problem is \"the model doesn't know our data / is out of date / makes things up,\" the answer is almost always **grounding/RAG**, not fine-tuning.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-7",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A support assistant must answer strictly from the company's own internal knowledge base and cite where each answer came from. Which technique fits?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Grounding with the company's data using RAG (e.g. pre-built RAG with Agent Search)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Grounding with Google Search"
+            },
+            {
+              "id": "c",
+              "text": "Raising the temperature for more creative answers"
+            },
+            {
+              "id": "d",
+              "text": "Fine-tuning on a public web crawl"
+            }
+          ],
+          "explanation": "Answering from *your own* documents with citations is **grounding on first-party data via RAG** — Agent Search stores your documents and returns grounding support (source links). Google Search grounds on *world* data, not your internal base; higher temperature adds creative variation (bad for support accuracy); and fine-tuning on a public crawl neither uses your knowledge base nor provides citations.",
+          "sourceRefs": [
+            "r-grounding",
+            "r-rag"
+          ]
+        },
+        {
+          "id": "kc-d3-8",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How does RAG change a model's output compared with the base model, and what does it NOT do?",
+          "options": [
+            {
+              "id": "a",
+              "text": "It supplies relevant retrieved context so answers are more current, factual, and citable — without retraining or changing the model's weights",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It permanently retrains the model's weights on your documents"
+            },
+            {
+              "id": "c",
+              "text": "It removes the need for any prompt"
+            },
+            {
+              "id": "d",
+              "text": "It guarantees the model can never be wrong"
+            }
+          ],
+          "explanation": "RAG retrieves relevant source data and adds it to the prompt so the model answers from *that context* — improving currency, factuality, and auditability **without changing the model's weights** (that is fine-tuning). It still needs a prompt, and while it reduces hallucinations it cannot *guarantee* correctness.",
+          "sourceRefs": [
+            "r-rag",
+            "r-grounding"
+          ]
+        },
+        {
+          "id": "kc-d3-9",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which pairing of need → Google Cloud grounding offering is correct?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Answer general questions about current world events → Grounding with Google Search",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Answer general world-events questions → Pre-built RAG with Agent Search on internal docs"
+            },
+            {
+              "id": "c",
+              "text": "Answer from your private document set → Grounding with Google Search"
+            },
+            {
+              "id": "d",
+              "text": "Keep the model's facts current → fine-tuning the model weekly"
+            }
+          ],
+          "explanation": "World-knowledge questions map to **Grounding with Google Search**. Answering from your *private* documents is **Agent Search / RAG**, not Google Search (so both the crossed pairings are wrong), and keeping facts current is a job for grounding/RAG, not repeated fine-tuning — tuning changes behaviour, not live knowledge.",
+          "sourceRefs": [
+            "r-grounding",
+            "r-exam-guide"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l4-tuning-eval-responsible",
+      "title": "Fine-tuning trade-offs, evaluation, human feedback and guardrails",
+      "estMinutes": 14,
+      "objective": "Decide when fine-tuning beats prompting or RAG, tell supervised / RLHF / distillation apart, use the Gen AI evaluation service and human feedback, and place responsible-AI guardrails.",
+      "body": "## Fine-tuning: what it is and when it's worth it\n\n**Model tuning** \"works by providing a model with a training dataset that contains a set of examples of specific downstream tasks.\" **Supervised fine-tuning** \"adapts model behaviour with a labelled dataset\" and \"adjusts the model's weights.\" In plain terms: you *retrain* the base model on your own labelled examples so it internalises a behaviour or format.\n\nGoogle is explicit about the decision:\n\n- **Prompting** is best for **limited labelled data** and **rapid prototyping** — minimal setup, no training.\n- **Fine-tuning** is worth it when you **have labelled data** (\"think 100 examples or more\") and the task is **complex or unique**, where \"advanced prompting strategies are not sufficient.\"\n- The order: **\"start with prompting… then move on to fine-tuning (if required).\"**\n\nWhat tuning buys you over prompting: **deeper customization**, **more consistent/reliable results**, and — usefully — **lower inference cost**, because a tuned model \"saves cost at inference by removing few-shot examples, long instructions in the prompts.\" What it costs you: a **labelled dataset**, **time/compute**, and ongoing ownership. That trade — capability and consistency *versus* data and effort — is the heart of every tuning question.\n\n## The three tuning flavours to recognise\n\nYou don't configure these, but the exam names them:\n\n- **Supervised fine-tuning (SFT)** — learn from **labelled input→output examples**. Best for classification, summarization in a set format, extractive Q&A, chat persona. The default tuning method.\n- **Reinforcement learning fine-tuning / RLHF** — the model \"maximise[s] feedback rewards provided by a user-defined reward function\"; it \"explores many possible answers, observes a numeric reward for each,\" and shifts toward high-reward behaviour. Used where **alignment with human preferences** matters and there is no simple labelled answer. This is the mechanism behind *human feedback* shaping a model.\n- **Distillation** — train a smaller, cheaper **\"student\" model** to mimic a larger **\"teacher\" model**, for \"production-grade efficiency (lower latency and cost).\" Chosen when you need a big model's quality but a small model's speed/price.\n\n## Human feedback and human-in-the-loop\n\nTwo different ideas share the word \"human\":\n\n- **Human feedback** as a *training signal* — people rate or rank outputs, and that preference data drives **RLHF** to align the model. This is how a model is taught what \"good\" looks like when it can't be labelled precisely.\n- **Human in the loop (HITL)** as an *operational control* — a person reviews or approves the model's output **before it acts**, especially for high-stakes decisions. Google's responsible-AI guidance is blunt: for specialised or consequential use, \"there must be meaningful human supervision in contexts with the potential to materially impact individual rights.\" HITL is a guardrail, not a training method.\n\n## Evaluation: measuring 'better'\n\nYou can't manage what you don't measure. The **Gen AI evaluation service** \"provides enterprise-grade tools for objective, data-driven assessment of generative AI models\" and \"supports… model migrations, prompt editing, and fine-tuning.\" Its methods, plainly:\n\n- **Adaptive rubrics** (recommended) — a tailored set of pass/fail tests generated **for each prompt**, \"similar to unit tests in software development.\"\n- **Static rubrics** — one fixed scoring set applied to all prompts.\n- **Computation-based metrics** — deterministic scores like **ROUGE** or **BLEU** when a ground-truth answer exists.\n- **Custom functions** — your own logic in code.\n\nThe leader point: evaluation gives you \"insights which cannot be derived from public leaderboards and general benchmarks\" — you test on *your* tasks and *your* criteria. Re-running an evaluation after each prompt or tuning change creates a tight feedback loop — that *is* prompt engineering and tuning done responsibly.\n\n## Responsible-AI guardrails\n\nFinally, D3 ties into responsible AI. The output-improvement techniques above also *reduce risk*, but Google adds explicit safeguards:\n\n- **Safety filters and safety settings** — built-in content filtering plus **safety attribute scoring**, so you can \"test Google's safety filters and define confidence thresholds\" appropriate to your use case.\n- **Recommended practices** — \"assess your application's security risks,\" \"perform safety testing appropriate to your use case,\" \"configure safety filters if required,\" and \"solicit user feedback and monitor content.\"\n- **Human oversight** — HITL for anything consequential (above).\n\n> **Exam framing:** if the problem is *factual accuracy* → grounding/RAG; *a specialised behaviour/format* → fine-tuning; *harmful or unsafe content* → safety filters/settings; *a high-stakes decision* → human-in-the-loop; *knowing whether any change actually helped* → the Gen AI evaluation service. Those five mappings answer the large majority of D3 scenario questions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-10",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A prompt-only approach keeps failing to produce a very specific, unusual output format, and the team has 500 labelled examples of the exact behaviour they want. What does Google's guidance suggest?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Fine-tune the model on the labelled dataset, since prompting has proven insufficient and sufficient labelled data exists",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Keep adding more few-shot examples forever; never fine-tune"
+            },
+            {
+              "id": "c",
+              "text": "Switch to grounding with Google Search"
+            },
+            {
+              "id": "d",
+              "text": "Raise the temperature to 2.0"
+            }
+          ],
+          "explanation": "Google says fine-tuning is warranted when 'advanced prompting strategies are not sufficient' and you have labelled data ('100 examples or more') — 500 examples of the exact behaviour fits. Endless few-shot examples risk overfitting and bloated prompts; Google Search grounding adds world facts (irrelevant to a *format* problem); and a high temperature adds randomness, worsening format consistency.",
+          "sourceRefs": [
+            "r-tuning"
+          ]
+        },
+        {
+          "id": "kc-d3-11",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Which technique adapts a model using a numeric reward from a user-defined reward function so its behaviour aligns with human preferences, rather than learning from fixed labelled input→output pairs?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Reinforcement learning fine-tuning (RLHF)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Supervised fine-tuning"
+            },
+            {
+              "id": "c",
+              "text": "Distillation"
+            },
+            {
+              "id": "d",
+              "text": "Zero-shot prompting"
+            }
+          ],
+          "explanation": "Reinforcement learning fine-tuning 'maximise[s] feedback rewards provided by a user-defined reward function' and suits cases where 'alignment with human preferences is crucial' — the reward-based, preference-aligning method. Supervised fine-tuning learns from *labelled input→output* pairs; distillation trains a small student to mimic a large teacher; zero-shot prompting is not tuning at all.",
+          "sourceRefs": [
+            "r-tuning",
+            "r-exam-guide"
+          ]
+        },
+        {
+          "id": "kc-d3-12",
+          "domainId": "d3-improve-output",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "After changing a prompt, a leader wants objective, repeatable proof that output quality on the company's own tasks actually improved. Which Google Cloud capability is designed for this?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The Gen AI evaluation service (e.g. adaptive rubrics)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A public model leaderboard"
+            },
+            {
+              "id": "c",
+              "text": "The Agent Platform Feature Store"
+            },
+            {
+              "id": "d",
+              "text": "Grounding with Google Maps"
+            }
+          ],
+          "explanation": "The **Gen AI evaluation service** gives 'objective, data-driven assessment' on *your* tasks and explicitly supports 'prompt editing' — re-running it creates a measurable before/after. Public leaderboards give exactly the general-benchmark view Google says this replaces; the Feature Store serves data features (not quality scores); and Google Maps grounding is a data source, not an evaluation tool.",
+          "sourceRefs": [
+            "r-evaluation",
+            "r-exam-guide"
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d3-2",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Google defines 'grounding' as:",
+      "options": [
+        {
+          "id": "a",
+          "text": "The ability to connect model output to verifiable sources of information, reducing the chance of invented content",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Retraining the model's weights on a labelled dataset"
+        },
+        {
+          "id": "c",
+          "text": "Lowering the temperature parameter to zero"
+        },
+        {
+          "id": "d",
+          "text": "Deleting a model's knowledge cutoff"
+        }
+      ],
+      "explanation": "Google's definition is connecting output to **verifiable sources** so the model is less likely to invent content. Retraining weights is fine-tuning; lowering temperature controls randomness (not sourcing); and no technique 'deletes' a knowledge cutoff — grounding works *around* it by supplying current sources.",
+      "sourceRefs": [
+        "r-grounding"
+      ]
+    },
+    {
+      "id": "q-d3-3",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A model gives fluent answers about your company's newest product, launched last month, but the details are wrong because the model was trained before the launch. Which limitation is this, and the best fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Knowledge cutoff — fix with grounding/RAG on your current product data",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Bias — fix by removing the product from training data"
+        },
+        {
+          "id": "c",
+          "text": "Edge case — fix by raising max output tokens"
+        },
+        {
+          "id": "d",
+          "text": "Hallucination that only fine-tuning can solve"
+        }
+      ],
+      "explanation": "The model lacks post-training information: that is the **knowledge cutoff**, and grounding/RAG supplies the current data at question time. It is not bias (unequal treatment) or an edge case (a rare input); and while wrong details resemble hallucination, the *root cause* is stale knowledge, which grounding fixes more directly and cheaply than fine-tuning.",
+      "sourceRefs": [
+        "r-grounding",
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-4",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A prompt that contains no examples at all is called:",
+      "options": [
+        {
+          "id": "a",
+          "text": "A zero-shot prompt",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A few-shot prompt"
+        },
+        {
+          "id": "c",
+          "text": "A chain-of-thought prompt"
+        },
+        {
+          "id": "d",
+          "text": "A grounded prompt"
+        }
+      ],
+      "explanation": "Google: 'prompts that provide no examples are called zero-shot prompts.' A few-shot prompt *contains* examples; chain-of-thought asks for step-by-step reasoning; and 'grounded' refers to connecting to external sources — none describes an example-free prompt.",
+      "sourceRefs": [
+        "r-prompt-intro"
+      ]
+    },
+    {
+      "id": "q-d3-5",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does Google say about how MANY few-shot examples to include?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Too few are ineffective at changing behaviour; too many can cause the model to overfit — experiment to find the right number",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Always include exactly one example"
+        },
+        {
+          "id": "c",
+          "text": "More is always better; include as many as the context allows"
+        },
+        {
+          "id": "d",
+          "text": "Examples never affect the output, so the count is irrelevant"
+        }
+      ],
+      "explanation": "Google warns 'too few examples are ineffective… Too many examples can cause the model to overfit,' and advises experimenting. Exactly one is *one-shot* (not a rule for few-shot); 'more is always better' is precisely the overfitting trap Google flags; and examples clearly *do* affect output, which is why they are used.",
+      "sourceRefs": [
+        "r-prompt-intro"
+      ]
+    },
+    {
+      "id": "q-d3-6",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which sampling parameter most directly controls how random versus deterministic a model's output is?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Temperature",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Max output tokens"
+        },
+        {
+          "id": "c",
+          "text": "Seed"
+        },
+        {
+          "id": "d",
+          "text": "Safety settings"
+        }
+      ],
+      "explanation": "**Temperature** 'controls the degree of randomness in token selection' — low is focused/deterministic, high is creative. Max output tokens caps *length*, not randomness; seed aims for *repeatable* output but is a best-effort determinism helper rather than the randomness dial itself; and safety settings filter *content*.",
+      "sourceRefs": [
+        "r-parameters"
+      ]
+    },
+    {
+      "id": "q-d3-7",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader wants marketing taglines that are varied and creative. Compared with a factual-summary task, how should temperature differ?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Use a higher temperature for the creative taglines and a lower temperature for factual summaries",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Use a lower temperature for the creative taglines and a higher one for summaries"
+        },
+        {
+          "id": "c",
+          "text": "Use temperature 0 for both"
+        },
+        {
+          "id": "d",
+          "text": "Temperature has no effect on creativity"
+        }
+      ],
+      "explanation": "Higher temperature yields 'more diverse or creative results,' ideal for taglines; lower temperature yields focused, consistent output, ideal for factual summaries. The reversed pairing is wrong; temperature 0 for both would kill the creativity the taglines need; and temperature demonstrably affects creativity.",
+      "sourceRefs": [
+        "r-parameters"
+      ]
+    },
+    {
+      "id": "q-d3-8",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Retrieval-augmented generation (RAG) improves output primarily by:",
+      "options": [
+        {
+          "id": "a",
+          "text": "Retrieving relevant source data and adding it to the prompt so the model answers from that context",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Permanently changing the model's internal weights"
+        },
+        {
+          "id": "c",
+          "text": "Increasing the model's temperature automatically"
+        },
+        {
+          "id": "d",
+          "text": "Removing the need for any human review"
+        }
+      ],
+      "explanation": "RAG **retrieves** relevant data and **augments** the prompt so the model **generates** from that context — Google calls RAG the 'recommended best practice' to implement grounding. It does *not* change weights (that is fine-tuning), does not touch temperature, and does not remove the need for human oversight on consequential outputs.",
+      "sourceRefs": [
+        "r-rag",
+        "r-grounding"
+      ]
+    },
+    {
+      "id": "q-d3-9",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is the clearest reason to choose grounding/RAG over fine-tuning?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The model must answer using up-to-date, verifiable facts from your documents and cite its sources",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You need the model to permanently learn a new, hard-to-describe output format from 1,000 labelled examples"
+        },
+        {
+          "id": "c",
+          "text": "You want to shrink a large model into a cheaper, faster one"
+        },
+        {
+          "id": "d",
+          "text": "You want to reduce inference cost by removing long instructions from prompts"
+        }
+      ],
+      "explanation": "Grounding/RAG shines when the need is **current, verifiable, citable facts** from your data — it feeds context at question time without retraining. Learning a hard-to-describe format from labelled data is **fine-tuning**; shrinking a model is **distillation**; and cutting prompt length to save inference cost is a benefit of **tuning**, not RAG.",
+      "sourceRefs": [
+        "r-grounding",
+        "r-tuning"
+      ]
+    },
+    {
+      "id": "q-d3-10",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Grounding on 'world data' versus 'first-party enterprise data' maps to which Google Cloud offerings, respectively?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Grounding with Google Search (world) and pre-built RAG with Agent Search (your documents)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Agent Search (world) and Google Search (your documents)"
+        },
+        {
+          "id": "c",
+          "text": "Fine-tuning (world) and distillation (your documents)"
+        },
+        {
+          "id": "d",
+          "text": "Temperature (world) and top-P (your documents)"
+        }
+      ],
+      "explanation": "**Google Search** grounds on public **world** knowledge; **Agent Search** (pre-built RAG) grounds on **your own** website/documents. Option b reverses them; tuning/distillation are not grounding offerings; and temperature/top-P are sampling parameters, not data sources.",
+      "sourceRefs": [
+        "r-grounding",
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-12",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which technique breaks a complex task into a SEQUENCE of prompts, each feeding its output into the next?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Prompt chaining",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Few-shot prompting"
+        },
+        {
+          "id": "c",
+          "text": "Chain-of-thought prompting"
+        },
+        {
+          "id": "d",
+          "text": "Grounding"
+        }
+      ],
+      "explanation": "**Prompt chaining** splits work across a *sequence* of prompts. Few-shot prompting adds examples to a *single* prompt; chain-of-thought elicits step-by-step reasoning *within one* response; and grounding connects to external sources — none is a multi-prompt pipeline.",
+      "sourceRefs": [
+        "r-exam-guide",
+        "r-prompt-intro"
+      ]
+    },
+    {
+      "id": "q-d3-13",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which technique interleaves reasoning with actions (such as calling a tool or search) and underpins how agents operate?",
+      "options": [
+        {
+          "id": "a",
+          "text": "ReAct prompting",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Zero-shot prompting"
+        },
+        {
+          "id": "c",
+          "text": "Distillation"
+        },
+        {
+          "id": "d",
+          "text": "Static rubric evaluation"
+        }
+      ],
+      "explanation": "**ReAct** (Reason + Act) alternates reasoning and actions like tool/search calls, which is how tool-using agents work. Zero-shot is simply asking without examples; distillation is a tuning method; and static rubrics are an evaluation method — none describes reason-act interleaving.",
+      "sourceRefs": [
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-15",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An enterprise needs a Pro-tier model's reasoning quality but must meet a strict low-latency, low-cost budget in production. Which technique fits best?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Distillation — train a smaller 'student' model to mimic the larger 'teacher' for lower latency and cost",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Grounding with Google Search"
+        },
+        {
+          "id": "c",
+          "text": "Adding more few-shot examples to every prompt"
+        },
+        {
+          "id": "d",
+          "text": "Raising the temperature"
+        }
+      ],
+      "explanation": "**Distillation** produces 'a smaller, more efficient student model' with 'production-grade efficiency (lower latency and cost)' while retaining much of the teacher's quality — exactly this need. Google Search grounding adds world facts (unrelated to latency/cost); more few-shot examples *increase* prompt size and cost; and temperature does not affect speed or price.",
+      "sourceRefs": [
+        "r-tuning",
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-16",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "'Human in the loop' (HITL) is best described as:",
+      "options": [
+        {
+          "id": "a",
+          "text": "A person reviewing or approving model output before it is acted on, especially for high-stakes decisions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A method of retraining the model on human-written text"
+        },
+        {
+          "id": "c",
+          "text": "A sampling parameter that controls randomness"
+        },
+        {
+          "id": "d",
+          "text": "A synonym for the knowledge cutoff"
+        }
+      ],
+      "explanation": "HITL is an **operational guardrail** — human review/approval of output, which Google stresses for consequential use ('meaningful human supervision… to materially impact individual rights'). It is not a training method, not a sampling parameter, and not related to the knowledge cutoff.",
+      "sourceRefs": [
+        "r-responsible-ai",
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-17",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which best distinguishes 'human feedback' as used in RLHF from 'human in the loop'?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Human feedback is a training signal that shapes the model via rewards; HITL is a person reviewing live output before it acts",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They are identical and interchangeable"
+        },
+        {
+          "id": "c",
+          "text": "Human feedback happens after deployment; HITL happens only during training"
+        },
+        {
+          "id": "d",
+          "text": "Human feedback is a sampling parameter; HITL is a grounding source"
+        }
+      ],
+      "explanation": "In **RLHF**, human preferences become a **reward signal** that adjusts the model during *training*; **HITL** is a human checking or approving output at *run time*. They are distinct (not interchangeable), and the roles are the reverse of option c; neither is a sampling parameter or grounding source.",
+      "sourceRefs": [
+        "r-tuning",
+        "r-responsible-ai"
+      ]
+    },
+    {
+      "id": "q-d3-18",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The Gen AI evaluation service's 'adaptive rubrics' are best described as:",
+      "options": [
+        {
+          "id": "a",
+          "text": "A tailored set of pass/fail tests generated for each individual prompt, like unit tests for model output",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A single fixed scoring scheme applied identically to every prompt"
+        },
+        {
+          "id": "c",
+          "text": "A public leaderboard ranking of all models"
+        },
+        {
+          "id": "d",
+          "text": "A tool that automatically fine-tunes the model"
+        }
+      ],
+      "explanation": "Google describes adaptive rubrics as per-prompt pass/fail tests 'similar to unit tests in software development.' A single fixed scheme is a **static** rubric; a public leaderboard is exactly the general benchmark this replaces; and evaluation *measures* quality — it does not perform tuning.",
+      "sourceRefs": [
+        "r-evaluation"
+      ]
+    },
+    {
+      "id": "q-d3-19",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When are deterministic 'computation-based metrics' like ROUGE or BLEU appropriate in Gen AI evaluation?",
+      "options": [
+        {
+          "id": "a",
+          "text": "When a ground-truth reference answer exists to compare against",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Only when no reference answer is available"
+        },
+        {
+          "id": "c",
+          "text": "Only for image generation"
+        },
+        {
+          "id": "d",
+          "text": "Never — Google does not support them"
+        }
+      ],
+      "explanation": "Google lists computation-based metrics (ROUGE, BLEU) for use 'when a ground truth is available' — i.e. there is a reference answer to score against. They are not for the no-reference case (adaptive rubrics or custom functions suit that better), are not image-only, and are explicitly supported by the service.",
+      "sourceRefs": [
+        "r-evaluation"
+      ]
+    },
+    {
+      "id": "q-d3-20",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which built-in Google Cloud safeguard lets a business filter harmful content and set its own confidence thresholds?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Safety filters and safety attribute scoring (safety settings)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The knowledge cutoff"
+        },
+        {
+          "id": "c",
+          "text": "Distillation"
+        },
+        {
+          "id": "d",
+          "text": "Top-K sampling"
+        }
+      ],
+      "explanation": "Google provides 'built-in content filtering' and 'safety attribute scoring' so customers can 'test Google's safety filters and define confidence thresholds.' The knowledge cutoff is a limitation, not a safeguard; distillation is a tuning method; and top-K controls token selection, not content safety.",
+      "sourceRefs": [
+        "r-responsible-ai",
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-21",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team insists on fine-tuning to keep their assistant's facts current, retraining weekly on fresh documents. What is the flaw in this plan?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Keeping facts current is a grounding/RAG problem; fine-tuning changes behaviour, not live knowledge, and weekly retraining is costly and still lags reality",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "There is no flaw — fine-tuning is the correct way to keep facts current"
+        },
+        {
+          "id": "c",
+          "text": "Fine-tuning is free and instant, so the only flaw is doing it too rarely"
+        },
+        {
+          "id": "d",
+          "text": "Grounding cannot use a company's own documents"
+        }
+      ],
+      "explanation": "Fine-tuning teaches **behaviour/format** by adjusting weights; it does not give the model a live feed of new facts, so using it for currency is the classic mismatch — **grounding/RAG** supplies current, citable data at question time. Fine-tuning is neither free nor instant, and grounding *can* use a company's own documents (via Agent Search/RAG).",
+      "sourceRefs": [
+        "r-tuning",
+        "r-grounding"
+      ]
+    },
+    {
+      "id": "q-d3-22",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Match the business problem to the best technique: 'The model produces unsafe or policy-violating text.' The best lever is:",
+      "options": [
+        {
+          "id": "a",
+          "text": "Safety filters/settings (and, for consequential cases, human-in-the-loop)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Grounding with Google Search"
+        },
+        {
+          "id": "c",
+          "text": "Raising the temperature"
+        },
+        {
+          "id": "d",
+          "text": "Distillation"
+        }
+      ],
+      "explanation": "Unsafe content is addressed by **safety filters/settings**, backed by HITL for high-stakes cases. Grounding fixes *factuality*, not safety; raising temperature would likely make risky output *more* varied; and distillation is about efficiency, not content safety.",
+      "sourceRefs": [
+        "r-responsible-ai"
+      ]
+    },
+    {
+      "id": "q-d3-23",
+      "domainId": "d3-improve-output",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "According to the exam guide, which set of practices belongs to 'continuous monitoring and evaluation' of a deployed gen AI model?",
+      "options": [
+        {
+          "id": "a",
+          "text": "KPIs, versioning, performance tracking, drift monitoring, and the Agent Platform Feature Store",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Zero-shot, one-shot, and few-shot prompting"
+        },
+        {
+          "id": "c",
+          "text": "Temperature, top-P, and top-K"
+        },
+        {
+          "id": "d",
+          "text": "Supervised fine-tuning, RLHF, and distillation"
+        }
+      ],
+      "explanation": "The guide lists KPIs, versioning, performance tracking, drift monitoring, and the Agent Platform Feature Store under **continuous monitoring and evaluation**. The other options are, respectively, prompting techniques, sampling parameters, and tuning methods — each a different task in Section 3, not the monitoring set.",
+      "sourceRefs": [
+        "r-exam-guide"
+      ]
+    },
+    {
+      "id": "q-d3-24",
+      "domainId": "d3-improve-output",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about improving gen AI output are correct? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Grounding/RAG reduces hallucinations by connecting output to verifiable sources, without changing the model's weights",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Google recommends starting with prompting and fine-tuning only if required",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Fine-tuning adjusts the model's weights using a labelled dataset",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Raising temperature is the recommended way to make factual answers more reliable"
+        }
+      ],
+      "explanation": "A, B, and C are all correct and are core D3 facts: grounding tethers output to sources without retraining; Google advises prompting first, tuning if needed; and supervised fine-tuning adjusts weights on labelled data. D is wrong — higher temperature adds randomness/creativity, which *reduces* reliability for factual tasks; you would use a *low* temperature instead.",
+      "sourceRefs": [
+        "r-grounding",
+        "r-tuning"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d3-choose-technique",
+      "domainIds": [
+        "d3-improve-output"
+      ],
+      "title": "A leader's technique-selection walkthrough",
+      "tagline": "One business problem at a time — pick the cheapest technique that actually solves it.",
+      "context": "You lead a customer-support transformation. You have a capable Gemini model but its raw output isn't good enough yet. Work through the problems in order and choose the single best technique for each — spending effort only when the cheaper option genuinely can't do the job. Teach current Google names (Agent Platform, Agent Search).",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First problem: the assistant's answers are rambling and inconsistently formatted, though factually fine. What do you try FIRST?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Prompt engineering — tighten the instructions, add a system instruction for tone/format, and a few-shot example of an ideal answer",
+              "verdict": "best",
+              "rationale": "Formatting and tone are exactly what prompting fixes, and Google says to start with prompting before anything heavier. Cheapest lever, no data or training needed."
+            },
+            {
+              "id": "b",
+              "text": "Fine-tune the model on thousands of labelled answers",
+              "verdict": "viable",
+              "rationale": "Tuning *could* enforce a format, but it needs a labelled dataset and effort you haven't shown you need yet — Google says try prompting first."
+            },
+            {
+              "id": "c",
+              "text": "Add grounding with Google Search",
+              "verdict": "wrong",
+              "rationale": "Google Search grounding adds world facts; it does nothing for rambling or formatting, which are prompting problems."
+            }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Next: the assistant must answer from your company's private knowledge base and cite its sources — and it currently invents details. Best technique?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Grounding on your own data via RAG (pre-built RAG with Agent Search), which returns answers with source links",
+              "verdict": "best",
+              "rationale": "Answering from first-party documents with citations is grounding-on-your-data via RAG; Agent Search stores your documents and provides grounding support (source links), reducing hallucinations."
+            },
+            {
+              "id": "b",
+              "text": "Grounding with Google Search",
+              "verdict": "wrong",
+              "rationale": "Google Search grounds on *world* data, not your private knowledge base — wrong data source for internal answers."
+            },
+            {
+              "id": "c",
+              "text": "Lower the temperature to 0 and hope it stops inventing",
+              "verdict": "wrong",
+              "rationale": "Low temperature reduces randomness but does not give the model your facts; it can still confidently state wrong things. Grounding is the real fix."
+            }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now a niche need: the assistant must apply a complex, hard-to-describe internal triage format that prompting keeps getting slightly wrong. You have 800 labelled examples of it. Best technique?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Supervised fine-tuning on the 800 labelled examples to teach the specialised behaviour",
+              "verdict": "best",
+              "rationale": "A complex behaviour that prompting can't reach, plus a sizeable labelled dataset (Google: '100 examples or more'), is the textbook case for supervised fine-tuning."
+            },
+            {
+              "id": "b",
+              "text": "Add even more few-shot examples to every prompt",
+              "verdict": "viable",
+              "rationale": "More examples might help a little, but too many risks overfitting and bloats every prompt; when prompting has proven insufficient and labelled data exists, tuning is the stronger call."
+            },
+            {
+              "id": "c",
+              "text": "Grounding with RAG on the triage documents",
+              "verdict": "wrong",
+              "rationale": "RAG supplies *facts to read*, but the problem is a *behaviour/format* the model must internalise — that's tuning, not grounding."
+            }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The assistant now handles refund approvals that can affect customers financially. How do you manage the residual risk?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Keep a human in the loop to review/approve high-value refund decisions before they execute",
+              "verdict": "best",
+              "rationale": "For consequential decisions, Google calls for 'meaningful human supervision' — HITL is the right guardrail regardless of how good the model is."
+            },
+            {
+              "id": "b",
+              "text": "Trust the model fully and remove all human review to move faster",
+              "verdict": "wrong",
+              "rationale": "Removing oversight from decisions that materially affect people is exactly what responsible-AI guidance warns against."
+            },
+            {
+              "id": "c",
+              "text": "Only monitor aggregate metrics monthly, with no per-decision review",
+              "verdict": "viable",
+              "rationale": "Monitoring is necessary but not sufficient for high-stakes individual decisions; it doesn't catch a bad refund *before* it happens the way HITL does."
+            }
+          ]
+        },
+        {
+          "id": "st5",
+          "prompt": "Finally, after every change you've made, leadership wants objective proof that quality improved on YOUR support tasks. What do you use?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "The Gen AI evaluation service — define adaptive rubrics on your own tasks and re-run after each change to compare",
+              "verdict": "best",
+              "rationale": "It gives objective, data-driven assessment on *your* tasks and criteria, supporting prompt editing and fine-tuning — a repeatable before/after."
+            },
+            {
+              "id": "b",
+              "text": "Cite a public model leaderboard's ranking",
+              "verdict": "wrong",
+              "rationale": "Leaderboards measure general benchmarks, not your specific tasks — precisely the gap the evaluation service is meant to fill."
+            },
+            {
+              "id": "c",
+              "text": "Ask a few colleagues whether it 'feels' better",
+              "verdict": "viable",
+              "rationale": "Informal impressions are a weak, unrepeatable signal; a structured evaluation gives the objective evidence leadership asked for."
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "r-tuning",
+        "r-grounding",
+        "r-rag",
+        "r-evaluation",
+        "r-responsible-ai"
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d3-technique-memo",
+      "domainId": "d3-improve-output",
+      "title": "Write a one-page 'technique-selection' decision memo",
+      "goal": "Turn D3's limitation-to-fix mapping into a reusable artifact: a memo that, for a real use case, names the model's limitations and recommends the cheapest technique that solves each — the exact judgement the exam tests.",
+      "steps": "## What you'll produce\n\nA single page a non-technical executive could read and act on. No code. Pick one real or realistic use case (e.g. an internal HR assistant, a support bot, a marketing-copy helper) and write the memo with these sections.\n\n1. **Use case & desired output** (2–3 sentences). What should the model produce, for whom, and what does 'good' look like?\n2. **Limitations table.** List the limitations that threaten this use case, drawn from D3's checklist — data dependency, knowledge cutoff, bias/fairness, hallucinations, edge cases, limited domain expertise. For each, one line on how it would show up here.\n3. **Technique recommendation per limitation.** For each limitation, name the Google-recommended fix and *why it's the cheapest sufficient one*: prompt engineering, grounding/RAG, fine-tuning, or human-in-the-loop. Apply the rule 'start with prompting; ground for facts; fine-tune only if prompting can't reach it; keep a human on high-stakes decisions.'\n4. **Grounding source decision.** State whether you need **world data** (Grounding with Google Search), **first-party data** (pre-built RAG with Agent Search on your documents), or **third-party data** — and one sentence why.\n5. **Guardrails.** Name the safety filters/settings you'd enable and where a human-in-the-loop checkpoint sits.\n6. **How you'll measure success.** State the KPI(s) and that you'll use the **Gen AI evaluation service** (adaptive rubrics on your tasks) to prove before/after improvement, plus drift monitoring once live.\n\n## Why it matters\n\nEvery D3 exam question is a compressed version of this memo: name the limitation, pick the fix, justify the trade-off, and know how you'd prove it worked. Writing it once — in current Google product names — makes the whole domain automatic.",
+      "checklist": [
+        "Use case and 'what good looks like' stated in plain business language",
+        "Each relevant limitation named and mapped to the cheapest sufficient technique, with justification",
+        "Grounding source chosen (world vs first-party vs third-party) and named to the current offering (Google Search / Agent Search / RAG)",
+        "Guardrails (safety filters/settings) and a human-in-the-loop checkpoint identified for any high-stakes step",
+        "A measurement plan citing the Gen AI evaluation service and drift monitoring"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-exam-guide",
+      "title": "Generative AI Leader — official certification exam guide (PDF)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The source of truth for Section 3 (~20%). Extract the task statements verbatim: 3.1 overcome foundation-model limitations (data dependency, knowledge cutoff, bias/fairness, hallucinations, edge cases) with grounding, RAG, prompt engineering, fine-tuning, HITL, plus continuous monitoring/evaluation (KPIs, versioning, drift monitoring, Agent Platform Feature Store); 3.2 prompt engineering (zero-/one-/few-shot, role prompting, prompt chaining, chain-of-thought, ReAct); 3.3 grounding (world vs first-party vs third-party data, RAG, Pre-built RAG with Agent Search, RAG APIs, Grounding with Google Search) and sampling parameters (token count, temperature, top-p, safety settings, output length). Uses current Google branding.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-prompt-intro",
+      "title": "Introduction to prompting & few-shot examples (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/prompts/introduction-prompt-design",
+      "kind": "official-doc",
+      "annotation": "Defines prompt design ('creating prompts that elicit the desired response') vs prompt engineering (the 'iterative process of repeatedly updating prompts and assessing the model's responses'), and the four prompt components — Task (required), System instructions, Few-shot examples, Contextual information. Its companion page (/models/prompts/few-shot-examples) gives the verbatim zero-shot vs few-shot definitions ('prompts that contain examples are called few-shot prompts, while prompts that provide no examples are called zero-shot prompts'), what few-shot regulates, and the count guidance ('too few… ineffective; too many… overfit'). Grounds lesson 2 and the prompt-engineering questions.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-parameters",
+      "title": "Experiment with parameter values (sampling parameters — Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/prompts/adjust-parameter-values",
+      "kind": "official-doc",
+      "annotation": "The sampling-parameter definitions the exam names: temperature (randomness; low = focused/deterministic, high = creative; range 0.0–2.0, default 1.0), top-P (nucleus sampling), top-K (greedy at 1), max output tokens (~4 chars/token; 100 tokens ≈ 60–80 words), and seed. Grounds the parameter questions.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-grounding",
+      "title": "Grounding overview (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/overview",
+      "kind": "official-doc",
+      "annotation": "Defines grounding ('connect model output to verifiable sources of information… reduces the chances of inventing content'), its benefits (reduces hallucinations, anchors to your data, auditability via source links), and the offerings by current name: Grounding with Google Search (world knowledge), Grounding with Agent Search (RAG over your website/documents), Grounding with RAG Engine (managed RAG service). Grounds lesson 3.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-rag",
+      "title": "Ground responses using RAG (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/ground-responses-using-rag",
+      "kind": "official-doc",
+      "annotation": "States RAG is the 'recommended best practice' to implement grounding: retrieve relevant source data (via a semantic search index), add it to the prompt, and generate from it — producing 'more trustworthy, helpful, and factual' responses without retraining. The basis for how RAG affects output vs fine-tuning.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-tuning",
+      "title": "Introduction to tuning & supervised fine-tuning (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning",
+      "kind": "official-doc",
+      "annotation": "Model tuning 'works by providing a model with a training dataset' and the prompting-vs-fine-tuning decision: prompting for limited data / rapid prototyping; fine-tuning (retraining weights on your labelled dataset, '100 examples or more') for complex/unique tasks; 'start with prompting… then move on to fine-tuning (if required)'; tuning benefits — deep customization, consistency, and lower inference cost by removing few-shot examples/long instructions. Its supervised-tuning page (/models/tuning/supervised-tuning) confirms SFT 'adapts model behaviour with a labelled dataset' and 'adjusts the model's weights', and the sibling pages distinguish reinforcement learning fine-tuning (RLHF: reward function, human preferences) and distillation (small student mimics large teacher for lower latency/cost).",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-evaluation",
+      "title": "Gen AI evaluation service overview (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/evaluation-overview",
+      "kind": "official-doc",
+      "annotation": "The Gen AI evaluation service for 'objective, data-driven assessment' supporting model migrations, prompt editing, and fine-tuning. Methods: adaptive rubrics (recommended; per-prompt pass/fail, 'like unit tests'), static rubrics, computation-based metrics (ROUGE/BLEU when ground truth exists), and custom functions — giving insights 'public leaderboards and general benchmarks' cannot.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    },
+    {
+      "id": "r-responsible-ai",
+      "title": "Responsible AI (Gemini Enterprise Agent Platform docs)",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/responsible-ai",
+      "kind": "official-doc",
+      "annotation": "The limitations (edge cases; hallucinations/grounding/factuality; data quality; bias amplification; fairness; limited domain expertise needing 'meaningful human supervision… to materially impact individual rights') and the safeguards: built-in content filtering plus safety attribute scoring to test safety filters and set confidence thresholds; recommended practices (assess risks, safety testing, configure safety filters, solicit feedback and monitor content). Grounds the guardrails/HITL material.",
+      "domainIds": [
+        "d3-improve-output"
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d3-1",
+      "title": "D3 · Overcoming model limits — prompting, grounding/RAG, fine-tuning & HITL",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d3-improve-output"
+      ],
+      "sourceNotebook": "gen-ai-leader / d3 / limitations-and-the-four-fixes"
+    },
+    {
+      "id": "v-d3-2",
+      "title": "D3 · Grounding vs fine-tuning, evaluation & responsible-AI guardrails",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d3-improve-output"
+      ],
+      "sourceNotebook": "gen-ai-leader / d3 / grounding-vs-tuning-and-guardrails"
+    }
+  ]
+}

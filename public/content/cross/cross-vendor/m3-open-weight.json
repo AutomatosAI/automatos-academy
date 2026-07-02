@@ -1,0 +1,459 @@
+{
+  "id": "m3-open-weight",
+  "order": 3,
+  "code": "M3",
+  "name": "Open-weight literacy — Llama, Ollama, Hugging Face",
+  "tagline": "A hosted API is a rental; open weights are ownership — and ownership is a trade, not a free lunch. This module gives you the four reasons to reach for open weights (control, data residency, cost-at-scale, offline), the licensing reality that 'open' rarely means 'unconditional' (read the actual Llama license — the 700-million-user clause is right there), and the one practical trick that makes it portable: Ollama serves a local model behind an OpenAI-compatible endpoint, so your existing OpenAI-style code calls it with a single base-URL swap.",
+  "overview": "Every provider module before this one rents you a model: you send tokens to someone else's servers, they bill you, and the weights stay theirs. This module is about the other option — running models whose weights you can download and host yourself — and, more importantly, about knowing WHEN that is the right call rather than reflexively self-hosting because it feels cheaper or safer. The judgement is the whole point. Lesson 1 builds the decision frame: the four situations where open weights genuinely win (you need to control the model and pin its behaviour; data cannot leave your boundary for residency or compliance reasons; you run enough volume that a fixed GPU bill beats an unbounded per-token one; or you need it to work with no internet at all) — set honestly against the hidden costs self-hosting drags in (GPUs, MLOps, evaluation, on-call). Lesson 2 confronts the trap that sinks teams: 'open weights' is not the same as 'open source,' and 'free to download' is not 'free to do anything with.' You will read the actual Meta Llama community licence — not a summary of it — and find the clause that says if your product crosses 700 million monthly active users you must go and ask Meta for a separate licence, plus the rules that you must display 'Built with Llama' and prepend 'Llama' to any model you derive and redistribute. That is a permissive licence with conditions, and an architect has to know the conditions before betting a product on them. Lesson 3 is the hands-on reality: Ollama pulls and runs a model on your own machine and — the trick that ties this whole track together — exposes it behind an OpenAI-compatible endpoint at http://localhost:11434/v1, so the exact same OpenAI client code reaches a local model by changing one line. Then the wider ecosystem: Hugging Face as the Hub where you find and version models, Transformers as the library that runs them in Python, and Inference Providers as the hosted way to call open-weight models without owning a GPU — itself a drop-in OpenAI-compatible endpoint. The honest posture runs throughout: local is not automatically cheaper, a laptop is not production, model size is gated by the memory you have, and the same base-URL-swap that makes a local model portable is exactly what Module 04 exploits to move one Automatos agent across OpenAI, Vertex, and a local Ollama endpoint by config alone.",
+  "objectives": [
+    "Decide when open weights beat a hosted API for a given workload using four concrete triggers — model control, data residency, cost-at-scale, and offline operation — and name the hidden self-hosting costs (GPUs, MLOps, eval, on-call) that argue the other way.",
+    "Distinguish 'open weights' from 'open source' and read the actual Llama community licence rather than a summary of it — locating the 700-million-monthly-active-user threshold, the 'Built with Llama' attribution and 'Llama' naming rules, and the incorporated Acceptable Use Policy.",
+    "Serve an open model locally with Ollama (pull, run, serve) and reach it through its OpenAI-compatible endpoint at http://localhost:11434/v1, calling it from unchanged OpenAI-style code via a single base-URL swap.",
+    "Place the three parts of the Hugging Face ecosystem — the Hub (find and version models, read the model card), Transformers (run models in Python with pipeline / from_pretrained), and Inference Providers (a hosted, OpenAI-compatible way to call open-weight models) — and pick the right one for a task.",
+    "Match model size to available memory as a first-order constraint, and explain why 'runs on my laptop' is a proof of concept, not a production deployment.",
+    "Connect the base-URL-swap trick to portability: the same OpenAI-compatible surface that Ollama and Hugging Face Inference expose is what lets one application move between hosted and open-weight providers by configuration rather than a rewrite."
+  ],
+  "lessons": [
+    {
+      "id": "m3-l1-why-open-weight",
+      "title": "Why open weights — control, residency, cost-at-scale, offline",
+      "estMinutes": 14,
+      "objective": "Decide when open weights beat a hosted API for a workload, using four concrete triggers set honestly against the hidden costs of self-hosting.",
+      "body": "## Rental versus ownership\n\nEvery hosted model you have used so far is a **rental**. You send your text to the provider's servers, their model answers, and they bill you per token. It is a superb deal when you want frontier quality with zero operations — someone else buys the GPUs, patches the model, and autoscales it for you. **Open weights** are the other side of the trade: models whose parameters you can download from a place like the Hugging Face Hub and run on hardware *you* control. Ownership, not rental.\n\nThe mistake this lesson exists to prevent is treating that as an obvious upgrade. It is not. Ownership is a *trade* — you take on real costs to buy real benefits — and an architect's job is to know which workloads make the trade worth it. There are four triggers.\n\n## Trigger 1 — control\n\nA hosted model is a moving target. The provider can update it, deprecate the version you built on, change its safety behaviour, or retire it entirely, and your application's behaviour shifts underneath you. With open weights you hold the exact parameter file. It does not change unless *you* change it; you can pin a version forever, fine-tune it on your own data, and know that the model behaves identically next year. When behavioural stability, reproducibility, or deep customisation matters more than having the newest frontier capability, control is the argument for open weights.\n\n## Trigger 2 — data residency\n\nSome data legally or contractually **cannot leave your boundary**. Patient records under health-privacy rules, government data with residency requirements, a client contract that forbids sending their information to a third party. A hosted API, by definition, sends your prompt to someone else's servers — often in another jurisdiction. An open-weight model running inside your own network or region never emits the data at all. When the binding constraint is *where the data is allowed to go*, self-hosting an open-weight model can be the only compliant option, regardless of cost.\n\n## Trigger 3 — cost-at-scale\n\nPer-token pricing is wonderful at low volume and brutal at high volume. It is a variable cost with no ceiling: ten million calls a day cost a hundred times what a hundred thousand do. Self-hosting inverts the shape — you pay a largely **fixed** cost for the GPUs whether they run one request or a million, so past some break-even volume the per-request cost of an open-weight model falls below the hosted bill. High, steady, predictable volume is the classic cost-at-scale case for open weights. Note the qualifier: *steady*. Spiky, unpredictable traffic wastes idle GPUs and often costs more self-hosted, not less.\n\n## Trigger 4 — offline / air-gapped\n\nSome environments have no reliable internet by design — a secure facility, a factory floor, a ship, an edge device, a disaster zone. A hosted API is useless there; it needs a network round-trip to a data centre. An open-weight model can run fully **offline**, on local hardware, with no external call. When the deployment must work air-gapped, hosted is simply off the table.\n\n## The other side of the ledger — hidden costs\n\nHere is the honesty this module insists on: none of those benefits is free, and 'local is cheaper' is the seductive half-truth that wrecks projects. Self-hosting an open-weight model drags in costs that a hosted bill quietly absorbs for you:\n\n- **GPUs.** Capable models need capable, expensive accelerators — to buy or to rent — and they cost you whether busy or idle.\n- **MLOps.** Someone has to serve the model, scale it, monitor it, and keep it up. That is a standing engineering capability, not a one-off.\n- **Evaluation.** No provider is quietly improving your model for you. You own quality: building the evals that tell you whether the model is good enough and whether an update made it better or worse.\n- **On-call.** When inference falls over at 3am, it is *your* pager. The hosted provider's reliability team is now your team.\n\nWeigh these against the hidden costs of hosted — unbounded per-token spend at scale, data leaving your boundary, and lock-in to one vendor's catalogue and pricing — and you have an honest comparison rather than a slogan.\n\n## The workload rule\n\nPut the triggers and the costs together and a clean heuristic falls out, and it is the sentence to carry out of this lesson: **high-volume, residency-bound, control-hungry, or offline workloads lean open-weight; spiky, frontier-quality, small-team workloads lean hosted.** A four-person startup shipping a feature that needs the best possible reasoning on unpredictable traffic should almost certainly rent. A bank running millions of steady, sensitive classifications a day inside its own region should seriously look at owning. Most real organisations end up doing *both* — hosted for some workloads, open-weight for others — which is exactly why the portability skills in Module 04 and 05 matter.\n\n## What this buys you\n\nYou now have a decision frame, not a preference. Before anyone says 'let's self-host to save money,' you can ask the four questions — do we need control, is data pinned in place, is volume high and steady, must it run offline? — and price the answer against GPUs, MLOps, eval and on-call. The next lesson tackles the trap that catches teams *after* they have decided to go open-weight: the licence.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-l1-1",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The module frames the choice as 'rental versus ownership.' Which four triggers push a workload toward OWNING (open weights) rather than renting a hosted API?",
+          "options": [
+            { "id": "a", "text": "Control over the model, data residency, cost-at-scale, and offline/air-gapped operation", "correct": true },
+            { "id": "b", "text": "Frontier quality, autoscaling, zero operations, and someone else patching the model", "correct": false },
+            { "id": "c", "text": "Lowest possible latency, the newest model version, a small team, and spiky traffic", "correct": false },
+            { "id": "d", "text": "Marketing appeal, avoiding all vendor bills, never writing evals, and finishing fastest", "correct": false }
+          ],
+          "explanation": "The four open-weight triggers are control (pin and customise the exact weights), data residency (data never leaves your boundary), cost-at-scale (fixed GPU cost beats unbounded per-token at high steady volume), and offline operation. Option b lists the advantages of HOSTED APIs — the reasons to rent, not own. Option c describes the profile the module says should lean hosted (frontier-quality, small-team, spiky), which is the opposite of the open-weight case. Option d is a caricature: 'avoid all vendor bills' ignores GPU/MLOps costs, and open weights make evals more your job, not less.",
+          "sourceRefs": ["r-hf-hub-index", "r-ollama-openai"]
+        },
+        {
+          "id": "kc-m3-l1-2",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A four-person startup ships a feature needing the best available reasoning, on traffic that spikes unpredictably. Using the module's workload rule, what should they most likely do — and why?",
+          "options": [
+            { "id": "a", "text": "Rent a hosted API: frontier quality out of the box, no GPU ops for a tiny team, and autoscaling suits spiky traffic — the hidden self-hosting costs (GPUs, MLOps, eval, on-call) aren't justified here", "correct": true },
+            { "id": "b", "text": "Self-host an open-weight model, because self-hosting is always cheaper than paying per token", "correct": false },
+            { "id": "c", "text": "Self-host, because a small team has the most spare capacity to run GPUs and be on-call", "correct": false },
+            { "id": "d", "text": "Self-host, because spiky, unpredictable traffic is the ideal case for a fixed GPU bill", "correct": false }
+          ],
+          "explanation": "The rule says spiky, frontier-quality, small-team workloads lean hosted: renting gets them top capability with no MLOps burden, and autoscaling absorbs the spikes. Option b is the 'local is cheaper' half-truth the module explicitly rejects — self-hosting carries GPU, MLOps, eval, and on-call costs a hosted bill absorbs. Option c is backwards: a four-person team has the LEAST capacity to run and staff GPU infrastructure. Option d inverts the cost-at-scale logic — a fixed GPU bill pays off on HIGH, STEADY volume; spiky traffic wastes idle GPUs.",
+          "sourceRefs": ["r-hf-hub-index"]
+        },
+        {
+          "id": "kc-m3-l1-3",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A hospital must run millions of clinical-note classifications per day, and patient data legally cannot leave its jurisdiction. Which triggers make this a strong open-weight case?",
+          "options": [
+            { "id": "a", "text": "Data residency (the data can't leave the boundary) and cost-at-scale (high, steady volume favours a fixed GPU cost over unbounded per-token pricing)", "correct": true },
+            { "id": "b", "text": "Offline operation and frontier quality, because hospitals never have internet and always need the newest model", "correct": false },
+            { "id": "c", "text": "None — high-stakes data always means you must use a hosted API for its reliability team", "correct": false },
+            { "id": "d", "text": "Only cost-at-scale; where the data is allowed to go is never a technical consideration", "correct": false }
+          ],
+          "explanation": "Two triggers fire: residency (an open-weight model inside the hospital's own region never emits the data to a third party) and cost-at-scale (millions of steady daily calls favour a fixed GPU cost over unbounded per-token pricing). Option b misapplies triggers — the case isn't about being offline or needing frontier capability. Option c is backwards: sending regulated patient data to a hosted third-party API is often what residency rules forbid, so 'always hosted' fails the constraint. Option d ignores residency, which the module treats as a first-class, often binding, reason to self-host.",
+          "sourceRefs": ["r-hf-hub-index"]
+        }
+      ]
+    },
+    {
+      "id": "m3-l2-licensing-reality",
+      "title": "The licensing reality: open weights is not open source",
+      "estMinutes": 14,
+      "objective": "Distinguish open weights from open source and read the actual Llama community licence — the 700-million-user threshold, the attribution and naming rules, and the Acceptable Use Policy — before betting a product on it.",
+      "body": "## Two words people use as if they were one\n\n'Open' is doing a lot of undeserved work in casual conversation. Teams say 'Llama is open' and quietly assume it means what MIT or Apache-2.0 means — take it, use it for anything, commercial or not, no strings. That assumption is wrong, and betting a product on it is a genuine business risk. Two distinctions matter.\n\nFirst, **open weights is not open source.** 'Open source' in its strict sense (the kind an OSI-approved licence grants) means broad, largely unconditional freedom to use, modify, and redistribute. 'Open weights' means only that the trained parameter file is *available to download*. What you may then *do* with it is set by whatever licence ships alongside — and that licence can attach conditions an OSI licence never would.\n\nSecond, **'free to download' is not 'free to do anything with.'** The weights costing nothing to fetch tells you nothing about the terms of use. The terms live in the licence, and — this is the binding rule of this lesson — **you read the actual licence, not a blog's summary of it,** before you build on a model.\n\n## Read the actual Llama licence\n\nThe Meta Llama models are the canonical example, because they are enormously popular *and* they ship under a custom **community licence**, not a standard open-source one. Go to the model on the Hugging Face Hub (for instance the `meta-llama` organisation) and you will first hit a gate: these are **gated models**. As the org page puts it, to access them you must 'visit a repo of one of the three families and accept the license terms and acceptable use policy.' You cannot even download the weights without accepting terms — the first signal that this is conditional, not unconditional.\n\nOpen the licence text itself and three conditions stand out that an architect must know:\n\n### 1. The 700-million-monthly-active-user clause\n\nThis is the famous one, and it is worth quoting close to verbatim. The Llama community licence states that if, on the version's release date, the monthly active users of the products or services made available by or for you (or your affiliates) is **greater than 700 million monthly active users** in the preceding calendar month, you **must request a license from Meta**, which Meta 'may grant to you in its sole discretion,' and you are not authorised to exercise the rights under the agreement unless or until Meta grants them. In plain terms: Llama is free for the overwhelming majority of users, but the very largest platforms cannot simply help themselves — they have to go and ask. That is a commercial gate no MIT-licensed project contains, and it is right there in the licence. (WebSearch confirmed this same 700-million clause recurs across Llama 2, 3, 3.1, 3.2, 3.3 and 4.)\n\n### 2. Attribution and naming\n\nThe licence also imposes branding obligations. If you distribute or make Llama available, you must **prominently display 'Built with Llama'**, and if you use Llama to create, train, or fine-tune another AI model that you then distribute, its **name must begin with 'Llama.'** Redistribution also requires including a copy of the licence and the notice: 'Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.' These are not onerous, but they are *obligations*, and shipping without them is a licence violation.\n\n### 3. The Acceptable Use Policy\n\nThe community licence incorporates a separate **Acceptable Use Policy** by reference — a list of things you may not use the model for. Accepting the licence means accepting the AUP too. So 'can I use Llama for this?' has two parts: does my scale trip the 700-million clause, and does my use case fall foul of the acceptable-use terms.\n\n## Permissive, with conditions — and it varies\n\nThe honest characterisation is: the Llama community licence is **permissive for most users but conditional**, and those conditions (a large-platform gate, attribution, naming, acceptable use) are real terms you accept, not fine print you can wave away. And critically, **every open-weight model has its own licence.** Some genuinely are Apache-2.0 or MIT (do-anything). Some are 'open weights, non-commercial only.' Some, like Llama, are custom community licences with their own conditions. There is no shortcut: the licence is per-model, it lives on the model card, and you read it before you commit. An architect who says 'it's open, we're fine' without having read the specific licence is guessing — and guessing about the legal basis of a product is exactly the kind of mistake this track exists to prevent.\n\n## What this buys you\n\nYou can now tell open weights from open source, you know that 'free to download' says nothing about terms of use, and you have read the specific conditions in the most widely-used open-weight licence — the 700-million gate, the 'Built with Llama' and naming rules, the incorporated AUP. With the decision (Lesson 1) and the legal reality (this lesson) settled, the final lesson is the mechanics: actually running one of these models locally and calling it with code you already have.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-l2-1",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What does the module mean when it insists 'open weights is not open source'?",
+          "options": [
+            { "id": "a", "text": "'Open weights' means only that the trained parameter file is available to download; what you may do with it is set by a licence that can attach conditions a standard open-source (MIT/Apache) licence never would", "correct": true },
+            { "id": "b", "text": "Open-weight models have no licence at all, so you can legally do anything you like with them", "correct": false },
+            { "id": "c", "text": "Open weights and open source are exact synonyms, so any open-weight model can be used unconditionally for commercial purposes", "correct": false },
+            { "id": "d", "text": "'Open weights' means the source code is public but the parameter file is secret", "correct": false }
+          ],
+          "explanation": "Open weights just means the parameters are downloadable; the terms of use live in whatever licence ships with them, which can be far more conditional than MIT/Apache. Option b is the dangerous misconception the lesson corrects — the weights come WITH a licence, and you must read it. Option c is exactly the false equivalence the module warns against; a community licence like Llama's is not unconditional. Option d has it backwards — 'weights' refers to the downloadable parameter file, not hidden source code.",
+          "sourceRefs": ["r-llama-license", "r-hf-hub-index"]
+        },
+        {
+          "id": "kc-m3-l2-2",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Under the Llama community licence, what is the significance of the '700 million monthly active users' threshold?",
+          "options": [
+            { "id": "a", "text": "If your products/services exceed 700 million monthly active users, you must request a separate licence from Meta, which Meta may grant in its sole discretion — so the very largest platforms cannot rely on the community licence alone", "correct": true },
+            { "id": "b", "text": "It is the maximum number of tokens you may generate per month before Meta charges you a fee", "correct": false },
+            { "id": "c", "text": "It is the minimum audience you must have before you are allowed to download Llama at all", "correct": false },
+            { "id": "d", "text": "It is a suggestion with no legal force, identical to what any MIT-licensed project contains", "correct": false }
+          ],
+          "explanation": "The clause gates the very largest platforms: cross 700M monthly active users and you must go ask Meta for a licence it may grant at its discretion — a commercial condition absent from standard open-source licences. Option b invents a token cap; the threshold is about user scale, not usage volume. Option c inverts it — it is a ceiling that triggers an extra requirement for the biggest players, not a minimum-audience entry gate. Option d is wrong on two counts: it is a binding licence term, and MIT licences contain no such user-scale clause.",
+          "sourceRefs": ["r-llama-license"]
+        },
+        {
+          "id": "kc-m3-l2-3",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team fine-tunes Llama on your own data and plans to distribute the resulting model. Which licence obligations apply?",
+          "options": [
+            { "id": "a", "text": "You must prominently display 'Built with Llama', the distributed model's name must begin with 'Llama', and you must include the licence copy and the required 'Llama … is licensed under the Llama … Community License' notice", "correct": true },
+            { "id": "b", "text": "None — once you fine-tune a model on your own data it becomes entirely yours with no obligations to Meta", "correct": false },
+            { "id": "c", "text": "You must pay Meta a royalty on every inference call the fine-tuned model serves", "correct": false },
+            { "id": "d", "text": "You may rename the model anything you like and remove all references to Llama, provided it is non-commercial", "correct": false }
+          ],
+          "explanation": "The community licence attaches concrete obligations to redistribution of a Llama-derived model: display 'Built with Llama', prepend 'Llama' to the derived model's name, and include the licence copy plus the required attribution notice. Option b is the misconception that fine-tuning launders away the licence — it does not; the terms follow the derivative. Option c invents a royalty the licence does not impose. Option d contradicts the naming and attribution rules, which apply regardless of commercial status.",
+          "sourceRefs": ["r-llama-license"]
+        }
+      ]
+    },
+    {
+      "id": "m3-l3-serve-and-ecosystem",
+      "title": "Serving locally & the Hugging Face ecosystem — the base-URL swap",
+      "estMinutes": 15,
+      "objective": "Serve an open model locally with Ollama behind an OpenAI-compatible endpoint, call it from unchanged OpenAI-style code via a base-URL swap, and place the three parts of the Hugging Face ecosystem.",
+      "body": "## Ollama: pull, run, serve\n\nDeciding to go open-weight (Lesson 1) and clearing the licence (Lesson 2) leaves the practical question: how do you actually run one? **Ollama** is the easiest on-ramp. Per its own docs it is 'the easiest way to build with open models' — a tool that downloads a model and runs it on your own machine with a few commands:\n\n- `ollama pull <model>` — download a model's weights to your machine without running it.\n- `ollama run <model>` — run and chat with a model interactively (pulling it first if needed).\n- `ollama serve` — start the Ollama server, which exposes the model over a local HTTP API.\n- `ollama ls` — list the models you have downloaded; `ollama ps` — show which are currently running.\n\nBy default the server listens on **`http://localhost:11434`** — everything is on your own machine, no external call, which is precisely what makes the offline and residency cases from Lesson 1 real.\n\n## The trick that ties this track together: the OpenAI-compatible endpoint\n\nHere is the single most useful fact in this module. Ollama does not only expose its own native API — it also, per its docs, 'provides compatibility with parts of the OpenAI API to help connect existing applications to Ollama.' It stands up an **OpenAI-compatible endpoint** at `http://localhost:11434/v1`, supporting the familiar routes: `/v1/chat/completions`, `/v1/completions`, `/v1/models`, `/v1/embeddings`, and more.\n\nWhat that means in practice is worth stating slowly, because it is the whole payoff. If you already have code written against the OpenAI SDK, you point it at a local model by changing **one line** — the base URL:\n\n```python\nfrom openai import OpenAI\n\nclient = OpenAI(\n    base_url='http://localhost:11434/v1/',\n    api_key='ollama',  # required but ignored\n)\n```\n\nThe `api_key` is 'required but ignored' — the OpenAI client insists on a value, but a local Ollama server does not check it, so any placeholder works. Everything else — the `client.chat.completions.create(...)` call, the message format, the response shape — is unchanged. Your OpenAI-style application is now talking to a model running entirely on your own machine, and it does not know the difference. That base-URL swap is the concrete mechanism behind provider portability, and it is exactly what Module 04 generalises to move one application across OpenAI, Vertex, and a local endpoint by configuration alone.\n\n## Hugging Face: the ecosystem around the models\n\nOllama runs a model; **Hugging Face** is where the open-model world actually lives. Three parts, three jobs.\n\n### The Hub — find and version models\n\nThe Hugging Face Hub is, in its own words, 'the reference AI platform for open ML,' hosting over two million models (plus datasets and Spaces), all version-controlled like Git repositories. It is where you *discover* an open model and *read its model card* — the documentation that, per the docs, informs users of 'each model's limitations and biases' and carries metadata including its **licence**. This is the Lesson 2 connection made concrete: the licence you must read lives on the model card. The Hub is your catalogue and your due-diligence surface.\n\n### Transformers — run models in Python\n\n**Transformers** is the Hugging Face library for running models in code. The docs describe it as 'the model-definition framework for state-of-the-art machine learning models in text, computer vision, audio … for both inference and training,' with over a million model checkpoints available. In practice you reach for its `pipeline()` — 'a simple and optimized inference class' — or load a specific model with `from_pretrained`, and Transformers downloads the weights from the Hub and runs them (on your GPU or CPU). Where Ollama is a turnkey local server, Transformers is the programmatic, code-level way to run and customise models.\n\n### Inference Providers — hosted, and also OpenAI-compatible\n\nNot every open-weight call has to run on hardware you own. Hugging Face **Inference Providers** gives, per the docs, 'access to hundreds of machine learning models, powered by world-class inference providers' through a single unified API — a hosted way to call open-weight models without buying a GPU. And notably it too is 'a drop-in OpenAI replacement': point the OpenAI client at `https://router.huggingface.co/v1` with a Hugging Face token and you reach open models over the same OpenAI-compatible surface. So the base-URL-swap trick is not unique to Ollama — it is becoming the *lingua franca* that makes providers interchangeable.\n\n## The honesty: local is not production\n\nOne guardrail before you get excited. Running a model on your laptop with Ollama is a **proof of concept**, not a production deployment. Two realities bite. First, **memory gates model size**: a model's parameters have to fit in the memory you have, so bigger, more capable models need more RAM or GPU VRAM than a laptop holds — which is why open-weight teams lean on *quantization* (compressing weights to smaller number formats) and on GPUs. Ollama supports NVIDIA, AMD, and Apple-Metal GPUs, but the hardware is a hard constraint, not a detail. Second, **a laptop is not an SLA**: production self-hosting means the GPUs, autoscaling, monitoring, and on-call from Lesson 1's hidden-cost list. 'It works on my machine' proves the model is capable; it does not prove you can serve it reliably to real users. Keep the two questions separate.\n\n## What this buys you\n\nYou can now run an open model locally, and — the load-bearing skill — reach it from OpenAI-style code by changing a single base URL. You know the three jobs Hugging Face does (find and vet on the Hub, run in code with Transformers, call hosted via OpenAI-compatible Inference Providers), and you know the two honesty checks: memory gates size, and local is not production. That base-URL-swap is the thread Module 04 pulls to make an application provider-portable — the same Automatos agent on OpenAI, Vertex, or this local endpoint, by config alone.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m3-l3-1",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You have working code written against the OpenAI SDK. According to the module, what is the ONE change that makes it call a local model served by Ollama instead?",
+          "options": [
+            { "id": "a", "text": "Point the client's base_url at Ollama's OpenAI-compatible endpoint (http://localhost:11434/v1); the api_key is required but ignored, and the rest of the code is unchanged", "correct": true },
+            { "id": "b", "text": "Rewrite every request to Ollama's proprietary message format, because it shares nothing with the OpenAI API", "correct": false },
+            { "id": "c", "text": "Obtain a paid Ollama API key and send your prompts to Ollama's cloud servers", "correct": false },
+            { "id": "d", "text": "Retrain the model from scratch so it understands OpenAI-style requests", "correct": false }
+          ],
+          "explanation": "Ollama exposes an OpenAI-compatible endpoint at http://localhost:11434/v1, so swapping the base_url (with any placeholder api_key, which is 'required but ignored') redirects unchanged OpenAI-style code to a local model. Option b is false — the whole point is that the OpenAI message and response formats are supported, so no rewrite is needed. Option c misunderstands the architecture: the model runs locally on your machine, not on Ollama's cloud, and no paid key is involved. Option d is nonsense — compatibility is provided by Ollama's server, not by retraining the model.",
+          "sourceRefs": ["r-ollama-openai", "r-ollama-cli"]
+        },
+        {
+          "id": "kc-m3-l3-2",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A colleague wants to (1) discover an open model and check its licence, (2) run a model directly in Python, and (3) call an open model without owning a GPU. Which Hugging Face part fits each need?",
+          "options": [
+            { "id": "a", "text": "(1) the Hub and its model card, (2) Transformers, (3) Inference Providers", "correct": true },
+            { "id": "b", "text": "(1) Transformers, (2) the Hub, (3) the model card", "correct": false },
+            { "id": "c", "text": "(1) Inference Providers, (2) the Hub, (3) Transformers", "correct": false },
+            { "id": "d", "text": "All three needs are served only by Transformers; the Hub and Inference Providers do not exist for this", "correct": false }
+          ],
+          "explanation": "The Hub is the catalogue where you discover models and read the model card (limitations, biases, licence); Transformers is the library that runs models in Python; Inference Providers is the hosted, OpenAI-compatible way to call open models without owning a GPU. Options b and c scramble the three jobs onto the wrong parts. Option d is false — the Hub (discovery/model cards) and Inference Providers (hosted calls) are distinct products with distinct jobs, not subsumed by Transformers.",
+          "sourceRefs": ["r-hf-hub-index", "r-hf-transformers", "r-hf-inference-providers"]
+        },
+        {
+          "id": "kc-m3-l3-3",
+          "domainId": "m3-open-weight",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You demo a model running under Ollama on your laptop and declare it 'ready for production.' What does the module say is wrong with that leap?",
+          "options": [
+            { "id": "a", "text": "A laptop demo is a proof of concept, not a deployment: model size is gated by available memory, and production means the GPUs, autoscaling, monitoring and on-call that a laptop cannot provide", "correct": true },
+            { "id": "b", "text": "Nothing — if a model runs on a laptop it is by definition production-ready and will scale to any load", "correct": false },
+            { "id": "c", "text": "The problem is only that laptops lack an OpenAI-compatible endpoint, which production servers add", "correct": false },
+            { "id": "d", "text": "Laptops can never run any open-weight model, so the demo must have been faked", "correct": false }
+          ],
+          "explanation": "The module separates two questions: 'is the model capable?' (a laptop demo can show this) versus 'can I serve it reliably at scale?' (needs GPUs, autoscaling, monitoring, on-call, and enough memory for the model size). Option b is exactly the false leap being corrected — 'works on my machine' is not an SLA. Option c misidentifies the gap; the OpenAI-compatible endpoint is present locally (that is the base-URL trick), so it isn't the missing piece. Option d overstates the constraint — laptops CAN run smaller/quantized models; the point is that capability on a laptop doesn't equal production readiness.",
+          "sourceRefs": ["r-ollama-gpu", "r-hf-hub-index"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m3-1",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The module frames hosted APIs versus open weights as an analogy. Which analogy does it use?",
+      "options": [
+        { "id": "a", "text": "Rental (hosted) versus ownership (open weights) — and ownership is a trade with real costs, not a free upgrade", "correct": true },
+        { "id": "b", "text": "Open weights are always strictly better than hosted APIs in every dimension", "correct": false },
+        { "id": "c", "text": "Hosted APIs and open weights are identical; the choice is purely cosmetic", "correct": false },
+        { "id": "d", "text": "Hosted APIs are for hobbyists and open weights are for real companies", "correct": false }
+      ],
+      "explanation": "The framing is rental versus ownership: a hosted API rents you someone else's model, while open weights let you own and run the parameter file — a trade of costs for benefits, not a free win. Option b overstates it — the module is explicit that open weights carry hidden costs (GPUs, MLOps, eval, on-call). Option c is wrong; the two differ sharply on control, residency, cost shape, and offline capability. Option d is a false hierarchy — the module says most organisations use both, matched to the workload.",
+      "sourceRefs": ["r-hf-hub-index"]
+    },
+    {
+      "id": "q-m3-2",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is a HIDDEN COST of self-hosting an open-weight model that a hosted per-token bill quietly absorbs for you?",
+      "options": [
+        { "id": "a", "text": "Standing MLOps, evaluation, and on-call — you must serve, scale, monitor, evaluate and keep the model up yourself", "correct": true },
+        { "id": "b", "text": "Per-token charges that rise without limit as your call volume grows", "correct": false },
+        { "id": "c", "text": "Your prompt data being sent to a third-party provider's servers", "correct": false },
+        { "id": "d", "text": "Being locked into a single vendor's model catalogue and pricing", "correct": false }
+      ],
+      "explanation": "MLOps, evaluation, and on-call are the standing costs self-hosting adds — the hosted provider's serving, scaling, monitoring and reliability team become your job. Options b, c, and d are all hidden costs of the HOSTED side of the ledger (unbounded per-token spend, data leaving your boundary, and vendor lock-in), which is why they argue FOR open weights, not against.",
+      "sourceRefs": ["r-hf-hub-index"]
+    },
+    {
+      "id": "q-m3-3",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The module's workload rule summarises when to lean which way. Which statement matches it?",
+      "options": [
+        { "id": "a", "text": "High-volume, residency-bound, control-hungry, or offline workloads lean open-weight; spiky, frontier-quality, small-team workloads lean hosted", "correct": true },
+        { "id": "b", "text": "Every workload should be self-hosted, because owning always beats renting", "correct": false },
+        { "id": "c", "text": "Every workload should use a hosted API, because operations are always too hard to run in-house", "correct": false },
+        { "id": "d", "text": "The choice should be made by model size alone, ignoring volume, residency, and team size", "correct": false }
+      ],
+      "explanation": "The rule maps triggers to a lean: steady high volume, data residency, deep control needs, or offline operation favour open-weight; unpredictable spikes, a need for frontier quality, and a small team favour hosted. Options b and c are absolutist positions the module rejects — it says most organisations do both, matched to the workload. Option d fixates on one variable; the decision weighs volume, residency, control, offline needs, and team capacity together.",
+      "sourceRefs": ["r-hf-hub-index"]
+    },
+    {
+      "id": "q-m3-4",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Why does the module insist you must READ THE ACTUAL LICENCE of an open-weight model rather than assume it is unconditionally free?",
+      "options": [
+        { "id": "a", "text": "'Open weights' means only that the parameters are downloadable; the terms of use live in a per-model licence that can attach real conditions (as the Llama community licence does)", "correct": true },
+        { "id": "b", "text": "Because all open-weight models are licensed under MIT, so reading confirms the same terms every time", "correct": false },
+        { "id": "c", "text": "Because open-weight models carry no licence and reading proves this", "correct": false },
+        { "id": "d", "text": "Because the licence sets the model's accuracy, which you need before choosing it", "correct": false }
+      ],
+      "explanation": "Availability of the weights says nothing about the terms — those are set by a licence that is per-model and can be conditional (Llama's community licence has a large-platform gate, attribution and naming rules, and an AUP). Option b is false: open-weight licences vary widely, from Apache/MIT to non-commercial to custom community licences. Option c is wrong — the weights ship WITH a licence, which is exactly why you must read it. Option d confuses a legal document with a performance benchmark.",
+      "sourceRefs": ["r-llama-license", "r-hf-hub-index"]
+    },
+    {
+      "id": "q-m3-5",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the Llama community licence, what happens if a company's products exceed 700 million monthly active users?",
+      "options": [
+        { "id": "a", "text": "It must request a separate licence from Meta, which Meta may grant in its sole discretion — the community licence alone no longer authorises use at that scale", "correct": true },
+        { "id": "b", "text": "It automatically gets a discount on Meta's hosted API pricing", "correct": false },
+        { "id": "c", "text": "It is permanently and unconditionally banned from ever using any Llama model", "correct": false },
+        { "id": "d", "text": "Nothing changes; the number is informational and carries no obligation", "correct": false }
+      ],
+      "explanation": "Crossing 700M monthly active users triggers a requirement to request a licence from Meta, grantable at Meta's sole discretion — so the largest platforms cannot rely on the community licence by itself. Option b invents a pricing perk the licence does not mention. Option c overstates it — it is a request-a-licence gate, not a permanent ban. Option d is wrong: it is a binding term with a concrete obligation for the biggest users.",
+      "sourceRefs": ["r-llama-license"]
+    },
+    {
+      "id": "q-m3-6",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The Llama models on the Hugging Face Hub are described as 'gated.' What does that mean in practice?",
+      "options": [
+        { "id": "a", "text": "You must visit the repo and accept the licence terms and acceptable use policy before you can download the weights — a signal the terms are conditional, not unconditional", "correct": true },
+        { "id": "b", "text": "The weights are permanently private and can never be downloaded by anyone outside Meta", "correct": false },
+        { "id": "c", "text": "You must pay a subscription fee to Hugging Face before downloading any model", "correct": false },
+        { "id": "d", "text": "The model only works behind a paywall at inference time and cannot be run locally", "correct": false }
+      ],
+      "explanation": "A gated model requires you to accept the licence and acceptable use policy on the repo before download — you cannot even fetch the weights without agreeing to terms, underlining that this is conditional access. Option b is wrong: gated models are downloadable after acceptance, not permanently private. Option c invents a Hugging Face subscription fee that gating does not impose. Option d confuses gating (a download-time acceptance step) with a runtime paywall — once accepted, the weights run wherever you like, subject to the licence.",
+      "sourceRefs": ["r-llama-license", "r-hf-hub-index"]
+    },
+    {
+      "id": "q-m3-7",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On what local address does Ollama's server expose its API by default, and what is the OpenAI-compatible base URL you point OpenAI-style code at?",
+      "options": [
+        { "id": "a", "text": "The server listens on http://localhost:11434, and the OpenAI-compatible base URL is http://localhost:11434/v1", "correct": true },
+        { "id": "b", "text": "It listens on https://api.ollama.com, and there is no OpenAI-compatible endpoint", "correct": false },
+        { "id": "c", "text": "It listens on http://localhost:8080, and you must use a proprietary Ollama-only client", "correct": false },
+        { "id": "d", "text": "It has no network address; Ollama models are only reachable through a desktop GUI", "correct": false }
+      ],
+      "explanation": "Ollama's server binds to http://localhost:11434 by default and exposes an OpenAI-compatible surface at http://localhost:11434/v1, which is what makes the base-URL swap work. Option b is wrong on both counts — it runs locally, not on an ollama.com API, and it DOES provide OpenAI compatibility. Option c has the wrong port and denies the OpenAI-compatible endpoint that is central to the module. Option d is false — the whole point is a local HTTP API you can call from code.",
+      "sourceRefs": ["r-ollama-openai", "r-ollama-cli"]
+    },
+    {
+      "id": "q-m3-8",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When you point the OpenAI client at a local Ollama server, the docs show api_key='ollama' with a comment 'required but ignored.' Why?",
+      "options": [
+        { "id": "a", "text": "The OpenAI client library requires some api_key value to be set, but a local Ollama server does not authenticate it — so any placeholder string works", "correct": true },
+        { "id": "b", "text": "'ollama' is a secret paid key you must purchase from Ollama to unlock the endpoint", "correct": false },
+        { "id": "c", "text": "The key is validated against Meta's servers to check your Llama licence status", "correct": false },
+        { "id": "d", "text": "Omitting the key entirely is required; setting any value will cause the request to fail", "correct": false }
+      ],
+      "explanation": "The OpenAI SDK insists on an api_key argument, but a local Ollama instance doesn't check it, so the value is a required-but-ignored placeholder — 'ollama' is just a convention. Option b is wrong — it is not a purchased secret; the local server needs no paid key. Option c invents a licence check against Meta that does not happen for a local call. Option d contradicts the docs, which set a placeholder value precisely because the client requires one.",
+      "sourceRefs": ["r-ollama-openai"]
+    },
+    {
+      "id": "q-m3-9",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which command DOWNLOADS a model's weights to your machine WITHOUT starting an interactive chat session?",
+      "options": [
+        { "id": "a", "text": "ollama pull <model>", "correct": true },
+        { "id": "b", "text": "ollama run <model>", "correct": false },
+        { "id": "c", "text": "ollama ps", "correct": false },
+        { "id": "d", "text": "ollama serve", "correct": false }
+      ],
+      "explanation": "'ollama pull <model>' downloads the weights without running the model. Option b, 'ollama run', runs and chats with the model interactively (pulling first if needed) — it does start a session. Option c, 'ollama ps', shows which models are currently running; it downloads nothing. Option d, 'ollama serve', starts the server process that exposes the HTTP API; it is not a per-model download.",
+      "sourceRefs": ["r-ollama-cli"]
+    },
+    {
+      "id": "q-m3-10",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The Hugging Face model card matters for the licensing lesson because it is where you find what?",
+      "options": [
+        { "id": "a", "text": "The documentation of the model's limitations and biases plus metadata including its licence — the per-model terms you must read before building on it", "correct": true },
+        { "id": "b", "text": "The current spot price of GPUs needed to run the model", "correct": false },
+        { "id": "c", "text": "A guarantee, signed by Hugging Face, that the model is safe for any use", "correct": false },
+        { "id": "d", "text": "The private API key required to download the weights", "correct": false }
+      ],
+      "explanation": "A model card documents the model's limitations and biases and carries metadata including its licence — making it the concrete place the Lesson 2 rule ('read the actual licence') is enacted. Option b is unrelated — model cards describe the model, not GPU market prices. Option c overstates it — a card informs about limitations; it is not a blanket safety guarantee. Option d is wrong: the card is documentation, not a credential store, and gated downloads use your own account token, not a key printed on the card.",
+      "sourceRefs": ["r-hf-hub-index", "r-llama-license"]
+    },
+    {
+      "id": "q-m3-11",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Hugging Face Inference Providers is relevant to open-weight literacy because it lets you do what?",
+      "options": [
+        { "id": "a", "text": "Call hosted open-weight models through a unified, OpenAI-compatible API (a 'drop-in OpenAI replacement' at https://router.huggingface.co/v1) without owning a GPU", "correct": true },
+        { "id": "b", "text": "Download model weights faster, but only for closed proprietary models", "correct": false },
+        { "id": "c", "text": "Automatically remove the licence conditions from any model you call", "correct": false },
+        { "id": "d", "text": "Run models with no API and no network, purely on the local CPU", "correct": false }
+      ],
+      "explanation": "Inference Providers offers hosted access to open models through one unified API that is a drop-in OpenAI replacement (base URL https://router.huggingface.co/v1), so you can call open-weight models without running your own GPU. Option b is wrong on both counts — it is about hosted inference of open models, not faster downloads of closed ones. Option c is nonsense — a calling API cannot strip a model's licence terms. Option d describes local offline execution (Ollama/Transformers territory), which is the opposite of a hosted provider API.",
+      "sourceRefs": ["r-hf-inference-providers", "r-ollama-openai"]
+    },
+    {
+      "id": "q-m3-12",
+      "domainId": "m3-open-weight",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Why does the module treat 'the same OpenAI-compatible base-URL swap' as the strategic thread into Module 04 (portability), not just a local-serving convenience?",
+      "options": [
+        { "id": "a", "text": "Because if Ollama and Hugging Face Inference both expose the same OpenAI-compatible surface, an application can move between hosted and open-weight providers by changing configuration (the base URL) rather than rewriting code", "correct": true },
+        { "id": "b", "text": "Because the base-URL swap permanently converts an open-weight model into an OpenAI model", "correct": false },
+        { "id": "c", "text": "Because it removes the need to ever evaluate models, since all providers behave identically", "correct": false },
+        { "id": "d", "text": "Because it forces every provider to charge the same per-token price", "correct": false }
+      ],
+      "explanation": "A shared OpenAI-compatible surface means the provider becomes a configuration value: swap the base URL (local Ollama, HF Inference, OpenAI) and the same code runs against a different provider — exactly the config-driven portability Module 04 builds on. Option b misunderstands it — the model stays whatever it is; only the endpoint the client targets changes. Option c is false and dangerous — providers and models still behave differently, which is precisely why Module 05 adds an eval harness to catch drift on swap. Option d is wrong — a common API surface does not equalise pricing, which still varies by provider.",
+      "sourceRefs": ["r-ollama-openai", "r-hf-inference-providers"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m3-local-openai-endpoint",
+      "domainId": "m3-open-weight",
+      "title": "Run an open model locally and call it behind an OpenAI-compatible endpoint",
+      "goal": "Produce this module's signature artifact: a working local open-weight setup and a short proof that the SAME OpenAI-style code reaches both a hosted model and your local Ollama model by changing only the base URL. You will pull and run a model with Ollama, call it through its OpenAI-compatible endpoint at http://localhost:11434/v1, and capture a before/after showing the one-line swap — the exact portability move Module 04 generalises.",
+      "steps": "## What you'll do\n\nYou'll install Ollama, run an open-weight model entirely on your own machine, and prove that OpenAI-style code talks to it with a single base-URL change. Everything runs locally — no data leaves your machine, which is the residency/offline point from Lesson 1 made real.\n\n### Before you start — a reality check on hardware\n\nModel size is gated by the memory you have (Lesson 3). **Pick a small model first** — a 1B–3B parameter model (for example a small Llama 3.2 or Gemma variant) will run on a typical laptop; large models will not. If a model is slow or fails to load, drop to a smaller one. This is the 'memory gates size' lesson in practice, not a failure.\n\n### Part A — get a model running with Ollama\n\n1. **Install Ollama** from the official site (ollama.com) for your OS.\n2. **Pull a small model** without running it: `ollama pull llama3.2:1b` (or another small model from Ollama's library). Watch it download the weights to your machine.\n3. **Run it interactively** to confirm it works: `ollama run llama3.2:1b`, then type a question and read the reply. You are now talking to a model with no internet involved. Type `/bye` to exit.\n4. **Confirm the server and your models.** Ollama's server exposes the API on `http://localhost:11434`. Use `ollama ls` to list what you've downloaded and `ollama ps` to see what's running. (If the server isn't already running, `ollama serve` starts it.)\n\n### Part B — call it from OpenAI-style code (the whole point)\n\n5. **Note your hosted baseline (optional but instructive).** If you have any working OpenAI-SDK snippet — the standard `client.chat.completions.create(...)` call — keep it in front of you. That is the 'before.'\n6. **Point the SAME client at your local model.** Install the OpenAI SDK (`pip install openai`) and change only the client setup:\n\n```python\nfrom openai import OpenAI\n\nclient = OpenAI(\n    base_url='http://localhost:11434/v1/',\n    api_key='ollama',  # required but ignored by local Ollama\n)\n\nresp = client.chat.completions.create(\n    model='llama3.2:1b',\n    messages=[{'role': 'user', 'content': 'In one sentence, what is an open-weight model?'}],\n)\nprint(resp.choices[0].message.content)\n```\n\n7. **Run it and read the reply.** The response came from a model on your own machine, through code that is identical to hosted OpenAI code except for the `base_url` (and the ignored `api_key`). That single line IS provider portability.\n8. **Prove the swap both ways.** Change `base_url` back to the hosted OpenAI URL (or to Hugging Face Inference at `https://router.huggingface.co/v1` with an HF token) and a hosted model id, and run the same script. Same code, different provider, just by changing the base URL. Capture both outputs side by side — that comparison is your artifact.\n\n### Part C — wire it into Automatos (connect it to the platform)\n\n9. **Point an Automatos agent at your local endpoint.** In the platform, configure an agent's model provider to use an OpenAI-compatible base URL of `http://localhost:11434/v1` (see the platform's model/provider settings). The agent config just points at the local base URL — the same trick, one layer up. Send the agent a message and confirm the local model answers. (If the platform can't reach `localhost` from where it runs, note that as a networking constraint — the concept still holds, and Module 04 revisits provider config properly.)\n\n### Why it matters\n\nYou have now done, by hand, the exact thing Module 04 builds into a pattern: made one application talk to a hosted model OR a local open-weight model by configuration alone. You have also felt the honesty checks — you chose a small model because memory gates size, and you ran it on a laptop knowing that is a proof of concept, not production. Keep the two-provider comparison: it is your evidence that provider portability is real and cheap when everyone speaks the OpenAI-compatible dialect.\n\n### A note on cost and licence\n\nRunning locally with Ollama has no per-token bill — that is the cost-at-scale point in miniature. But remember Lesson 2: the model you pulled has a licence. If it is a Llama model, you accepted the community licence (including the acceptable use policy) when you obtained it, and the 700-million-user and 'Built with Llama' conditions apply if you ever build and distribute on it. Free to run is not free of terms.",
+      "checklist": [
+        "Installed Ollama and pulled a SMALL open-weight model (1B–3B) sized to your machine's memory",
+        "Ran the model interactively with `ollama run` and confirmed it answers with no internet involved",
+        "Confirmed the local server on http://localhost:11434 and listed models with `ollama ls` / `ollama ps`",
+        "Called the local model from OpenAI-SDK code by setting base_url to http://localhost:11434/v1 with a placeholder api_key",
+        "Proved the swap both ways: ran the SAME code against a hosted endpoint (OpenAI or HF Inference at https://router.huggingface.co/v1) by changing only the base URL",
+        "Pointed an Automatos agent's provider at the local OpenAI-compatible base URL (or noted the localhost networking constraint) and got a reply",
+        "ARTIFACT SAVED: a side-by-side capture of the same code answering from a LOCAL model and a HOSTED model, proving config-only provider portability"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-ollama-openai",
+      "title": "Ollama — OpenAI compatibility (official docs)",
+      "url": "https://docs.ollama.com/openai",
+      "kind": "official-doc",
+      "annotation": "The single most load-bearing page in this module. States that Ollama 'provides compatibility with parts of the OpenAI API to help connect existing applications to Ollama,' and shows the exact swap: OpenAI client with base_url='http://localhost:11434/v1/' and api_key='ollama' ('required but ignored'). Lists the supported routes (/v1/chat/completions, /v1/completions, /v1/models, /v1/embeddings, and more). This is the base-URL-swap trick that makes a local model callable from unchanged OpenAI code — and the thread into Module 04's portability.",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-ollama-cli",
+      "title": "Ollama — CLI reference (official docs)",
+      "url": "https://docs.ollama.com/cli",
+      "kind": "official-doc",
+      "annotation": "The command vocabulary for the lab: `ollama pull` (download weights without running), `ollama run` (run and chat interactively), `ollama serve` (start the local server), `ollama ls` (list downloaded models), `ollama ps` (show running models). The server binds to http://localhost:11434 by default, so everything runs on your own machine — the concrete basis for the offline and data-residency cases from Lesson 1.",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-ollama-gpu",
+      "title": "Ollama — GPU / hardware support (official docs)",
+      "url": "https://docs.ollama.com/gpu",
+      "kind": "official-doc",
+      "annotation": "Grounds the 'memory gates model size' honesty check. Documents supported accelerators — NVIDIA (compute capability 5.0+, driver 550+), AMD via ROCm, and Apple Metal — reinforcing that capable models need capable hardware and that a laptop demo is a proof of concept, not a production deployment. Read it to set realistic expectations before pulling a large model.",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-llama-license",
+      "title": "Llama Community License Agreement (Meta, via the Hugging Face model repo)",
+      "url": "https://huggingface.co/meta-llama/Llama-3.1-8B/blob/main/LICENSE",
+      "kind": "official-doc",
+      "annotation": "Read this ACTUAL licence, not a summary — the whole point of Lesson 2. The clause that matters most: if your products/services exceed 'greater than 700 million monthly active users' you 'must request a license from Meta,' grantable at Meta's sole discretion. Plus the redistribution obligations — prominently display 'Built with Llama', prepend 'Llama' to any derived model's name, include the licence copy and the required copyright notice — and the incorporated Acceptable Use Policy. The proof that 'open weights' is permissive-with-conditions, not unconditional open source. (WebSearch confirmed the 700M clause recurs across Llama 2/3/3.1/3.2/3.3/4.)",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-hf-hub-index",
+      "title": "Hugging Face Hub — documentation index (official docs)",
+      "url": "https://huggingface.co/docs/hub/index",
+      "kind": "official-doc",
+      "annotation": "The Hub is 'the reference AI platform for open ML,' hosting over two million models plus datasets and Spaces as version-controlled repositories. Two things for this module: it is where you DISCOVER open models, and it is where you READ THE MODEL CARD — the documentation of each model's 'limitations and biases' and its metadata including the licence. This is where the Lesson 2 rule ('read the actual licence') is enacted, and it names Inference Providers as the serverless way to call hosted models.",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-hf-transformers",
+      "title": "Hugging Face Transformers — documentation index (official docs)",
+      "url": "https://huggingface.co/docs/transformers/index",
+      "kind": "official-doc",
+      "annotation": "Transformers is described as 'the model-definition framework for state-of-the-art machine learning models in text, computer vision, audio … for both inference and training,' with over a million model checkpoints on the Hub. It is the CODE-LEVEL way to run open models in Python — reach for its pipeline() ('a simple and optimized inference class') or load a model with from_pretrained, and it pulls the weights from the Hub. The programmatic counterpart to Ollama's turnkey local server.",
+      "domainIds": ["m3-open-weight"]
+    },
+    {
+      "id": "r-hf-inference-providers",
+      "title": "Hugging Face Inference Providers — documentation (official docs)",
+      "url": "https://huggingface.co/docs/inference-providers/index",
+      "kind": "official-doc",
+      "annotation": "The HOSTED way to call open-weight models without owning a GPU — 'access to hundreds of machine learning models, powered by world-class inference providers' behind one unified API across many serverless partners. Crucially it is 'a drop-in OpenAI replacement': point the OpenAI client at base_url 'https://router.huggingface.co/v1' with a Hugging Face token. Proves the base-URL-swap trick is not Ollama-only — a common OpenAI-compatible surface is what makes providers interchangeable, the strategic setup for Module 04.",
+      "domainIds": ["m3-open-weight"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m3-1",
+      "title": "M3 · Open weights explained — why control/residency/cost/offline, and the Ollama OpenAI-compatible base-URL swap",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m3-open-weight"],
+      "sourceNotebook": "cross-vendor / m3 / open-weight-why-and-ollama-swap"
+    },
+    {
+      "id": "v-m3-2",
+      "title": "M3 · Self-host an open-weight model or just call a hosted API? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m3-open-weight"],
+      "sourceNotebook": "cross-vendor / m3 / debate-self-host-vs-hosted-api"
+    }
+  ]
+}

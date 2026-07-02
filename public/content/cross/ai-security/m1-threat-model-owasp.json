@@ -1,0 +1,593 @@
+{
+  "id": "m1-threat-model-owasp",
+  "order": 1,
+  "code": "M1",
+  "name": "The LLM threat model & the OWASP Top 10",
+  "tagline": "Classic AppSec assumes code is trusted and data is untrusted. An LLM breaks that: the prompt is data AND control at once, so text a model merely reads can steer what it does. This module gives you the trust-boundary shift, a five-stage attack-surface map (input → context → model → tools → output), and the OWASP Top 10 for LLM Applications (2025) as the shared vocabulary that hangs off it — all ten, current titles, mechanism then defence.",
+  "overview": "This is the spine of the whole AI-Security track. Before you can defend an LLM application you need a mental model of what its attack surface even is, and a shared vocabulary for the ways it fails — otherwise you are patching symptoms in the dark. The module builds that in four moves. First, the one idea everything else rests on: the trust-boundary shift. In a classic web app the code is trusted and the data flowing through it is untrusted, and the two never blur. An LLM erases that line — the prompt is simultaneously the data the model reads and the control that steers it, and the model cannot reliably tell an instruction apart from content, so text it merely retrieves or is handed can hijack its behaviour. Second, you get a map: the five stages where that surface lives — input, context/retrieval, model & lineage, tools/actions, and output — so the failure modes stop looking like a random list and start looking like a pipeline you can reason about. Third, the OWASP Top 10 for LLM Applications (2025) as the industry's shared reference, all ten identifiers (LLM01 through LLM10) with their current titles, each introduced at mechanism level and — this is the binding rule of this track — landed on its defence in the same breath. Fourth, how this differs from classic AppSec (the boundary moved; injection here is mitigable, not solved) and the wider frames you will meet in the field: MITRE ATLAS as the adversary's language, NIST AI 600-1 as the governance overlay, and the GIAC GAIPS eight-domain skeleton that this six-module track consolidates. The honest posture runs through all of it: these attacks are taught so you can defend against them, defence is layered rather than a single silver bullet, and no control here is claimed to be complete. What you build in the lab — a ten-line OWASP coverage checklist against one real Automatos agent, marking each risk control / partial / gap — becomes the backlog you close across the rest of the track.",
+  "objectives": [
+    "Explain the trust-boundary shift — that in an LLM the prompt is data and control at once and the model cannot reliably separate instructions from content — and why that is the root cause behind most of the OWASP LLM Top 10.",
+    "Map the LLM attack surface across its five stages (input → context/retrieval → model & lineage → tools/actions → output) and place a given failure mode on the correct stage.",
+    "Recall all ten OWASP Top 10 for LLM Applications (2025) identifiers with their CURRENT titles (LLM01 Prompt Injection … LLM10 Unbounded Consumption) and give the one-line mechanism and the headline defence for each.",
+    "Distinguish direct from indirect prompt injection, and articulate why indirect injection (via retrieved or tool-returned content) is the mechanism that ties the input, context, and output stages together.",
+    "Contrast LLM application security with classic AppSec — what carries over (least privilege, output encoding, supply-chain hygiene) and what is genuinely new (the moved trust boundary; injection as mitigable-not-solved).",
+    "Situate the OWASP list against the wider industry frames — MITRE ATLAS (adversary techniques), NIST AI 600-1 (governance risk areas), and the GIAC GAIPS eight-domain skeleton — and use them without treating any list as a compliance checkbox."
+  ],
+  "lessons": [
+    {
+      "id": "m1-l1-trust-boundary",
+      "title": "The trust-boundary shift: prompt as data and control",
+      "estMinutes": 14,
+      "objective": "Explain why an LLM erases the classic data/code trust boundary, and why that single shift is the root cause behind most LLM-specific risks — then name the defensive posture it forces.",
+      "body": "## The boundary that classic security depends on\n\nEvery defence you learned in classic application security rests on one line: **code is trusted, data is untrusted, and they never blur.** Your program is the control — it decides what happens. The data flowing through it (a form field, an uploaded file, an API response) is inert; it is *acted upon*, never *obeyed*. When that line holds, the whole discipline of input validation makes sense: you sanitise the untrusted data so it can never escape its lane and become an instruction. SQL injection, XSS, command injection — every one of them is a case of untrusted data crossing into the control plane, and every fix pushes it back out.\n\n## An LLM erases the line\n\nA large language model breaks this at the most fundamental level. To an LLM there is no separate control plane. **The prompt is the data it reads and the control that steers it, at the same time, in the same channel.** The model is a next-token predictor over one undifferentiated stream of text, and — in OWASP's own framing of prompt injection — it *cannot distinguish between instructions and data within prompts.* Your system instructions, the user's message, a document you retrieved, the text a tool returned: it is all one river of tokens, and the model will happily treat any of it as a directive.\n\nThat is the trust-boundary shift, and it is the sentence to carry out of this module: **in an LLM, data can become control.** Text the model merely *reads* can change what the model *does*. Nothing in classic AppSec prepares you for an input that is also, potentially, an instruction.\n\nA sharp corollary from the OWASP prompt-injection guidance: the malicious input **need not even be human-readable** — the model only has to parse it. So \"it looks like harmless content to a human reviewer\" is not a defence. The reviewer and the model are reading different things.\n\n## Why this is the root cause, not just one bug\n\nHold this shift in mind and a striking amount of the OWASP LLM Top 10 stops looking like ten separate problems and starts looking like one root cause expressed in different places:\n\n- **Prompt Injection (LLM01)** *is* the boundary breaking directly — hostile text steering the model.\n- **Improper Output Handling (LLM05)** is the same broken trust one step downstream: if you cannot trust what goes *into* the model, you certainly cannot trust what comes *out*, yet apps routinely pipe model output straight into a browser, a shell, or a database as if it were safe.\n- **Excessive Agency (LLM06)** is what turns a boundary break into real-world damage: if the model can be steered *and* it holds tools and permissions, the injected instruction becomes an action.\n- **Vector & Embedding Weaknesses (LLM08)** and **Data & Model Poisoning (LLM04)** are the boundary breaking through content the model was *trained on* or *retrieved*, rather than typed at it.\n\nOne moved line, many symptoms. That is why we spend a whole lesson on it before touching the list.\n\n## The posture the shift forces\n\nIf data can become control, three defensive commitments follow — and they run through every later module of this track:\n\n1. **Never rely on the prompt as a security boundary.** Instructions in a system prompt are guidance the model *usually* follows, not a wall it *cannot* cross. Real authorization, privilege separation, and access control must live in deterministic systems **outside** the LLM — a point OWASP makes explicitly under System Prompt Leakage (LLM07): the security risk lies in the underlying elements, not the prompt text, and critical controls must execute outside the model.\n2. **Treat the model as an untrusted user of everything it touches.** OWASP's headline guidance for output handling is exactly this — adopt a *zero-trust* approach and *treat the model as any other user*, validating and encoding everything it produces before it reaches another system.\n3. **Contain the blast radius.** Because you cannot guarantee the model is never steered, you assume it sometimes will be, and you make sure a steered model can do little harm — least-privilege tools, human approval on high-impact actions, output validation. This is **defence-in-depth**, and it is the honest alternative to a silver bullet that does not exist.\n\n## The honest posture (binding for this track)\n\nWrite this down, because everything after it depends on it: **prompt injection is mitigable, not solved.** There is no known input filter, system-prompt phrasing, or model setting that reliably stops a determined attacker from steering a model through its own input channel. Anyone selling you a complete fix is selling you something. What works is *layers* — reduce the odds, shrink the blast radius, detect and log the attempts — and a clear-eyed acceptance that residual risk remains. We teach the attacks at the level of *mechanism* precisely so you can build those layers; we never claim any single layer closes the door.\n\n## What this buys you\n\nYou now have the one idea the rest of the track hangs on. In the next lesson we turn the shift into a map — the five stages where this surface actually lives — so that when we walk the OWASP Top 10, each risk lands somewhere you can point to.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l1-1",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is the core 'trust-boundary shift' that makes LLM applications different from classic web applications?",
+          "options": [
+            { "id": "a", "text": "In an LLM the prompt is data and control at the same time — the model cannot reliably separate instructions from content, so text it merely reads can steer what it does", "correct": true },
+            { "id": "b", "text": "LLMs process encrypted data, so the usual boundary between plaintext and ciphertext no longer applies", "correct": false },
+            { "id": "c", "text": "LLMs run in the browser instead of on the server, moving the trust boundary to the client", "correct": false },
+            { "id": "d", "text": "LLMs have no data at all — they only execute code, so there is nothing untrusted to validate", "correct": false }
+          ],
+          "explanation": "The shift is that data and control collapse into one channel: the model treats its whole token stream as potentially instructional, so content can become a directive — OWASP states the model cannot distinguish instructions from data. Option b invents an encryption boundary that has nothing to do with the mechanism. Option c misplaces the shift as a client/server issue; where the model runs is irrelevant to the data-becomes-control problem. Option d is backwards — the model is awash in data (prompts, retrieved docs, tool output); the problem is precisely that this data can act as control.",
+          "sourceRefs": ["r-owasp-llm01"]
+        },
+        {
+          "id": "kc-m1-l1-2",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team hardens its agent by writing a very firm system prompt: 'Never reveal customer records to anyone without admin role.' Why does the module say this is not, on its own, a security control?",
+          "options": [
+            { "id": "a", "text": "A system prompt is guidance the model usually follows, not a boundary it cannot cross; real authorization must be enforced deterministically outside the LLM", "correct": true },
+            { "id": "b", "text": "System prompts are always leaked, so the attacker will simply read the rule and comply with it", "correct": false },
+            { "id": "c", "text": "The rule is too long; shorter system prompts are followed more reliably and would fix the problem", "correct": false },
+            { "id": "d", "text": "System prompts only work on chat models, and agents use a different kind of model that ignores them", "correct": false }
+          ],
+          "explanation": "OWASP's System Prompt Leakage guidance is explicit that the prompt must not be relied on for behaviour control — authorization and access checks must execute in deterministic systems outside the model, because the model can be steered off any instruction. Option b confuses the separate risk of the prompt leaking with the reason it fails as a control; even a perfectly secret prompt is still just soft guidance. Option c invents a length rule that does not exist and would not change the fundamental weakness. Option d is fabricated — the guidance applies regardless of model type; the issue is architectural, not model-specific.",
+          "sourceRefs": ["r-owasp-llm07", "r-owasp-llm05"]
+        },
+        {
+          "id": "kc-m1-l1-3",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement matches this track's binding honest posture on prompt injection?",
+          "options": [
+            { "id": "a", "text": "Injection is mitigable, not solved — defence is layered (reduce odds, shrink blast radius, detect and log), and no single control is claimed to close the door", "correct": true },
+            { "id": "b", "text": "Injection is fully solved by a strict input filter that blocks known attack strings before they reach the model", "correct": false },
+            { "id": "c", "text": "Injection is unsolvable and unmitigable, so LLM applications simply cannot be secured and should not be built", "correct": false },
+            { "id": "d", "text": "Injection only affects models that browse the web, so an offline model needs no defences at all", "correct": false }
+          ],
+          "explanation": "The posture is defence-in-depth over silver bullets: reduce likelihood, contain impact, and monitor, while honestly acknowledging residual risk. Option b claims a complete fix, which the module explicitly rejects — no input filter reliably stops a determined attacker steering the model through its own input channel. Option c over-corrects into fatalism; mitigable-not-solved means layered defence genuinely helps, not that the problem is hopeless. Option d is false — even an offline model is exposed via indirect injection through documents or tool output it processes, not just live web browsing.",
+          "sourceRefs": ["r-owasp-llm01"]
+        }
+      ]
+    },
+    {
+      "id": "m1-l2-attack-surface-map",
+      "title": "The attack-surface map: input → context → model → tools → output",
+      "estMinutes": 13,
+      "objective": "Trace the five stages of an LLM application's attack surface and place each failure mode on the stage where it lives, so the OWASP list becomes a pipeline you can reason about rather than a flat catalogue.",
+      "body": "## From one idea to a map\n\nThe trust-boundary shift tells you *why* LLM apps are exposed. A map tells you *where*. Picture a request flowing through a real LLM application as a pipeline of five stages. At each stage, ask the same question — *whose text enters here, and can it be trusted?* — and the attack surface reveals itself.\n\n### Stage 1 — Input\nThe text that reaches the model directly: the user's message, and anything the app concatenates around it. This is where **direct prompt injection** lives — a user (or anyone who can reach the input) crafting text that overrides the intended behaviour. It is the most obvious stage and the one people wrongly assume is the *only* stage.\n\n### Stage 2 — Context / retrieval\nMost real systems do not just pass the raw user message. They enrich it: retrieved documents (RAG), past conversation, database rows, files, the output of a previous tool call. Every one of these is text the model will read as if it were part of the prompt — which makes this the home of **indirect prompt injection**: hostile instructions hidden inside content the model *fetches* rather than content the user *types*. A poisoned document in a knowledge base, a booby-trapped web page the agent summarises, a malicious record returned from a lookup — all land here. This stage is also where **vector and embedding weaknesses** and **retrieval poisoning** live, because the retrieval store is the gate through which external content enters.\n\n### Stage 3 — Model & lineage\nThe model itself, and everything that shaped it: its training data, fine-tuning data, the base weights you downloaded, the adapters and plugins bolted on. Attacks here are *upstream* of any single request — **data and model poisoning** (manipulating training/fine-tuning/embedding data to plant backdoors or bias) and **supply-chain** compromise (a tampered base model, an unverified checkpoint from a model hub, a malicious fine-tune). You cannot filter your way out of these at request time; they are baked in before the request arrives.\n\n### Stage 4 — Tools / actions (agency)\nThe moment the model stops talking and starts *doing*: calling functions, hitting APIs, sending mail, running code, moving money. This is the **agency** stage, and it is where a steered model turns into a real-world incident. The danger scales with what the model is allowed to touch — its functionality, its permissions, and how much it can do without a human saying yes.\n\n### Stage 5 — Output\nWhat the model produces, and — critically — where that output *goes next*. If the app renders it in a browser, feeds it to a shell, interpolates it into SQL, or hands it to another system, then unvalidated output becomes a classic injection in the *receiving* system. This is the **improper output handling** stage: the model is untrusted, so its output is untrusted, and it must be validated and encoded before anything downstream consumes it.\n\n## The map is a loop, not a line\n\nHere is the insight that makes indirect injection so dangerous: **the stages feed each other.** A tool call at Stage 4 returns text that re-enters at Stage 2 as context for the next model turn. Output from Stage 5 gets stored and later retrieved at Stage 2. So a single injected instruction can ride the loop — enter through a retrieved document, cause a tool call, and have that tool's output carry the payload forward. When you see security people say prompt injection *underlies half the list*, this is why: it is not confined to Stage 1, it threads through input, context, tools, and output together.\n\n## Cross-cutting risks sit beside the pipeline\n\nA few OWASP risks are not about a single stage but about the system as a whole, so keep them in a side column:\n\n- **Sensitive Information Disclosure (LLM02)** — the wrong data leaving through *any* stage (in output, in a leaked prompt, via an inverted embedding).\n- **System Prompt Leakage (LLM07)** — secrets or security logic that should never have been in the prompt, exposed.\n- **Misinformation (LLM09)** — confidently wrong output, whichever stage produced it, and the human overreliance that lets it through.\n- **Unbounded Consumption (LLM10)** — cost, denial of service, and model theft driven by uncontrolled use of the whole system.\n\n## Worked example: an agent that answers from a knowledge base\n\nTrace a support agent that retrieves help-desk articles and can issue refunds. A user asks a normal question (Stage 1, input). The system retrieves three articles, one of which an attacker previously seeded with hidden instructions (Stage 2, context — indirect injection, and a vector-store weakness because the poisoned doc was allowed in). The model, unable to separate the article's *content* from its *instructions*, follows the hidden directive to issue a refund (Stage 4, tools — excessive agency, because the refund tool was available with no human check). It then emits a confirmation that the app renders verbatim in an admin console (Stage 5, output — improper output handling if that text is not encoded). One attack, four stages, and — read it back — at least four distinct OWASP risks, all downstream of the same trust-boundary shift. **The map is what lets you see them as one chain instead of four unrelated tickets.**\n\n## What this buys you\n\nYou can now place any LLM failure mode on a stage and ask the right defensive question there. In the next lesson we walk the OWASP Top 10 in full, and every risk will drop onto a stage you have already mapped.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l2-1",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An attacker plants hidden instructions inside a web page. Later, an agent is asked to summarise that page and follows the hidden instructions. At which stage of the attack-surface map does this occur, and what is it called?",
+          "options": [
+            { "id": "a", "text": "The context/retrieval stage — this is indirect prompt injection, hostile instructions inside content the model fetches rather than content the user types", "correct": true },
+            { "id": "b", "text": "The input stage — this is direct prompt injection, because the user asked the question that triggered it", "correct": false },
+            { "id": "c", "text": "The model & lineage stage — this is data poisoning, because the web page changed the model's training", "correct": false },
+            { "id": "d", "text": "The output stage — this is improper output handling, because the summary was displayed to the user", "correct": false }
+          ],
+          "explanation": "The payload arrives through fetched content (the retrieved page), which is the context/retrieval stage and the definition of indirect prompt injection. Option b is wrong because the hostile text was not typed by the user; the user's benign question merely triggered retrieval — direct injection is when the attacker controls the input text itself. Option c confuses runtime retrieval with training: summarising a page at request time does not alter the model's weights, so it is not poisoning. Option d misplaces it at output; the compromise happened when the page's content was read as instructions, before any summary was produced.",
+          "sourceRefs": ["r-owasp-llm01", "r-owasp-llm08"]
+        },
+        {
+          "id": "kc-m1-l2-2",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which stage of the map is where a steered model turns into real-world damage, because it is the point at which the model stops talking and starts acting on other systems?",
+          "options": [
+            { "id": "a", "text": "The tools/actions (agency) stage", "correct": true },
+            { "id": "b", "text": "The input stage", "correct": false },
+            { "id": "c", "text": "The context/retrieval stage", "correct": false },
+            { "id": "d", "text": "The model & lineage stage", "correct": false }
+          ],
+          "explanation": "The tools/actions stage is where the model calls functions, hits APIs, and takes actions — so a steered model here produces a real incident, and the damage scales with its functionality, permissions, and autonomy (OWASP Excessive Agency). Input is where hostile text can enter, but entering is not yet acting. Context/retrieval is where external content is pulled in, again a source of steering rather than the action itself. Model & lineage concerns how the model was built and trained, upstream of any single request's actions.",
+          "sourceRefs": ["r-owasp-llm06"]
+        },
+        {
+          "id": "kc-m1-l2-3",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Why does the module describe the attack-surface map as 'a loop, not a line', and why does that matter for prompt injection specifically?",
+          "options": [
+            { "id": "a", "text": "Tool output re-enters as context and stored output is later retrieved, so a single injected instruction can ride the pipeline across input, context, tools, and output — which is why injection threads through much of the list rather than sitting only at input", "correct": true },
+            { "id": "b", "text": "Because the model calls itself recursively forever, creating an infinite loop that is the real security risk", "correct": false },
+            { "id": "c", "text": "Because every LLM request must be sent in a circle to at least five different models before it is answered", "correct": false },
+            { "id": "d", "text": "Because output is always identical to input, so the map folds back to a single stage with no distinct risks", "correct": false }
+          ],
+          "explanation": "The stages feed each other — a tool's returned text becomes context for the next turn, and stored output can be retrieved later — so one injected instruction can propagate around the loop, which is exactly why prompt injection is not confined to the input stage. Option b describes runaway recursion, a different (availability) concern, not the reason the map loops. Option c invents a multi-model routing requirement that is not part of the map. Option d is false — output is not identical to input, and collapsing the stages would erase precisely the distinct defensive questions each stage raises.",
+          "sourceRefs": ["r-owasp-llm01", "r-owasp-llm05"]
+        }
+      ]
+    },
+    {
+      "id": "m1-l3-owasp-top10",
+      "title": "The OWASP LLM Top 10 (2025): the shared vocabulary, mechanism to defence",
+      "estMinutes": 17,
+      "objective": "Introduce all ten OWASP Top 10 for LLM Applications (2025) identifiers with their current titles, giving each a one-line mechanism, its place on the attack-surface map, and its headline defence — and flag the renames people trip on.",
+      "body": "## Why a shared list at all\n\nBefore the mechanics: why does a numbered list matter? Because security is a team sport, and a team needs a shared language. \"We have an LLM06 gap on the refund tool\" travels between a developer, a reviewer, and an auditor in a way that \"the agent can do too much\" never will. The OWASP Top 10 for LLM Applications, maintained by the OWASP Gen AI Security Project, is that shared reference — a stable, versioned vocabulary the whole industry can cite. Use it as a *common language and a coverage checklist*, not as a ranked to-do list you work top to bottom; attackers do not, and the risks overlap heavily (as the last lesson showed, injection alone threads through several).\n\nWhat follows is the **current 2025 list** — all ten, in order, with the mechanism, the map stage, and the headline defence. These are the titles to use; stale terms mark you as out of date.\n\n## The ten (2025)\n\n**LLM01 — Prompt Injection.** *Mechanism:* user or external input alters the model's behaviour because the model cannot separate instructions from data; direct (attacker controls the input) or indirect (payload hidden in retrieved/fetched content). *Stage:* input + context. *Defence (layered):* constrain model behaviour via system instructions, define and validate expected output formats, filter input and output, enforce least-privilege on what the model can reach, require human approval for high-risk actions, and segregate and clearly identify external/untrusted content. None of these alone is complete — they stack.\n\n**LLM02 — Sensitive Information Disclosure.** *Mechanism:* the model reveals data it should not — PII, credentials, financial or health records, proprietary business data — through its output or context. *Stage:* cross-cutting. *Defence:* sanitise and scrub training data, apply strict input/output validation, enforce least-privilege access to data sources, and use privacy-enhancing techniques (e.g. differential-privacy noise) so individual records cannot be reconstructed.\n\n**LLM03 — Supply Chain.** *Mechanism:* compromise in the components the app is built from — a tampered or backdoored pre-trained model, a poisoned dataset, a malicious fine-tune or adapter, an unverified checkpoint from a model hub, unclear licensing/provenance. The LLM supply chain adds *models, training data, and adapters* to the usual code dependencies. *Stage:* model & lineage. *Defence:* vet and audit suppliers, maintain an SBOM/AI-BOM with signed inventories, verify model provenance with signing and hashes, red-team third-party models before deploying, and scan and patch components.\n\n**LLM04 — Data and Model Poisoning.** *Mechanism:* manipulating pre-training, fine-tuning, or embedding data to introduce vulnerabilities, backdoors, or biases — an integrity attack on the model's ability to behave correctly. (This broadened the older *Training Data Poisoning* to cover fine-tuning and RAG/embedding data too.) *Stage:* model & lineage. *Defence:* track data provenance and lineage (e.g. ML-BOM/CycloneDX), vet data sources, sandbox and validate unverified data, version data to detect tampering, red-team, and monitor for anomalous behaviour and training-loss shifts.\n\n**LLM05 — Improper Output Handling.** *Mechanism:* insufficient validation/sanitisation of model output before it is passed downstream, so the output triggers a classic vulnerability in the *receiving* system — XSS, CSRF, SSRF, SQL injection, path traversal, or RCE. (Previously *Insecure Output Handling*; distinct from Misinformation, which is about the output being *wrong* rather than *dangerous downstream*.) *Stage:* output. *Defence:* adopt a zero-trust stance and treat the model as any other user, apply context-aware output encoding, use parameterised queries/prepared statements, and deploy a strict Content Security Policy for browser-rendered output.\n\n**LLM06 — Excessive Agency.** *Mechanism:* damaging actions become possible because the model is granted too much — driven by *excessive functionality* (tools it does not need), *excessive permissions* (more access than the task requires), and *excessive autonomy* (high-impact actions with no human check). A hallucination, injection, or compromised extension then triggers real harm. *Stage:* tools/actions. *Defence:* minimise the tools and their functionality, avoid open-ended tools (arbitrary shell/URL fetch), apply least-privilege permissions, execute in the individual user's context rather than a privileged account, require human-in-the-loop approval for significant actions, and enforce authorization in the downstream systems rather than trusting the LLM. Logging and rate-limiting *limit damage* but do not prevent it.\n\n**LLM07 — System Prompt Leakage.** *Mechanism:* the system prompt is discoverable through interaction — but the *real* risk is not the leak, it is that sensitive data (credentials, connection strings) was placed in the prompt at all, and that the app relied on the prompt to enforce security. *Stage:* cross-cutting. *Defence:* keep sensitive data and security logic out of the system prompt entirely, do not rely on the prompt for behaviour control, and enforce guardrails and authorization independently in external systems. (New in 2025.)\n\n**LLM08 — Vector and Embedding Weaknesses.** *Mechanism:* weaknesses in how vectors/embeddings are generated, stored, or retrieved in RAG systems — cross-context leakage between tenants sharing a vector store, embedding-inversion recovering source text, knowledge-base poisoning, and indirect injection via retrieved content. *Stage:* context/retrieval. *Defence:* fine-grained, permission-aware access control on the vector store, strict logical/tenant partitioning, robust data validation accepting only trusted/verified sources, classification-tagging of content, and immutable retrieval logs.\n\n**LLM09 — Misinformation.** *Mechanism:* the model produces false or misleading content that *appears credible* — driven by hallucination (confident fabrication filling gaps) and amplified by human overreliance. Harms range from wrong factual claims to insecure code suggestions and hallucinated package names attackers then squat on. *Stage:* output (+ the human in the loop). *Defence:* ground answers with retrieval-augmented generation, require cross-verification and human oversight for high-stakes output, follow secure-coding practices for model-suggested code, communicate limitations to users, and design the UI to encourage verification rather than blind trust.\n\n**LLM10 — Unbounded Consumption.** *Mechanism:* uncontrolled or excessive inference leads to denial of service, economic loss (*denial of wallet* on pay-per-use models), model theft/extraction via mass API querying, and resource exhaustion. (This expanded the older *Model Denial of Service* to include cost and model theft.) *Stage:* cross-cutting/system. *Defence:* validate and cap input size, apply rate-limiting and per-user quotas, cap and throttle resource use with timeouts and graceful degradation, restrict access, and monitor for anomalies; watermarking helps detect extracted models.\n\n## The renames people trip on\n\nSay the 2025 title, but know the old name once so you never use a stale term in a review:\n\n- **\"Improper Output Handling\"** was **\"Insecure Output Handling.\"**\n- **\"Unbounded Consumption\"** *absorbed* **\"Model Denial of Service\"** and widened it to include cost (denial of wallet) and model theft.\n- **\"Data and Model Poisoning\"** *broadened* the old **\"Training Data Poisoning\"** to cover fine-tuning and embedding/RAG data.\n- **Misinformation (LLM09)** *absorbed* the earlier standalone **\"Overreliance\"** concept — overreliance is now framed as the human factor that amplifies misinformation.\n- **System Prompt Leakage (LLM07)** and **Vector & Embedding Weaknesses (LLM08)** are **new** entries in 2025.\n\n## What this buys you\n\nYou now hold the whole list as a working vocabulary, each item pinned to a map stage and a defence. The next lesson steps back to ask how all this differs from classic AppSec and how the wider industry frames — MITRE ATLAS, NIST, GAIPS — fit around the OWASP list.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l3-1",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In the OWASP Top 10 for LLM Applications (2025), which identifier is 'Excessive Agency'?",
+          "options": [
+            { "id": "a", "text": "LLM06", "correct": true },
+            { "id": "b", "text": "LLM01", "correct": false },
+            { "id": "c", "text": "LLM08", "correct": false },
+            { "id": "d", "text": "LLM10", "correct": false }
+          ],
+          "explanation": "Excessive Agency is LLM06:2025 — the risk that a model granted too much functionality, permission, or autonomy can take damaging actions. LLM01 is Prompt Injection. LLM08 is Vector and Embedding Weaknesses. LLM10 is Unbounded Consumption. Knowing the numbers cold is the point of a shared vocabulary — the identifier travels between developer, reviewer, and auditor unambiguously.",
+          "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm06"]
+        },
+        {
+          "id": "kc-m1-l3-2",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A model returns text that an app interpolates directly into a SQL statement, causing SQL injection in the database. Which OWASP LLM risk is this, and what is its headline defence?",
+          "options": [
+            { "id": "a", "text": "LLM05 Improper Output Handling — treat the model as untrusted and use parameterised queries / context-aware encoding before output reaches downstream systems", "correct": true },
+            { "id": "b", "text": "LLM09 Misinformation — fact-check the output with a human before it is used", "correct": false },
+            { "id": "c", "text": "LLM01 Prompt Injection — constrain the model with a firmer system prompt", "correct": false },
+            { "id": "d", "text": "LLM02 Sensitive Information Disclosure — scrub PII from the training data", "correct": false }
+          ],
+          "explanation": "Unvalidated model output triggering SQL injection downstream is the defining case of LLM05 Improper Output Handling, and OWASP's headline defence is a zero-trust stance plus parameterised queries and context-aware encoding. Option b is the wrong risk — Misinformation is about output being false, not about it being a dangerous payload for a downstream system. Option c addresses how hostile text might enter, not the failure to sanitise output going out; a firmer prompt does not stop SQL injection. Option d targets data leakage, a different concern entirely from an injection payload reaching the database.",
+          "sourceRefs": ["r-owasp-llm05"]
+        },
+        {
+          "id": "kc-m1-l3-3",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which pairing of a 2025 OWASP title with the term it replaced or absorbed is correct?",
+          "options": [
+            { "id": "a", "text": "'Unbounded Consumption' (LLM10) absorbed and widened the older 'Model Denial of Service' to include cost and model theft", "correct": true },
+            { "id": "b", "text": "'Prompt Injection' (LLM01) was renamed from 'Improper Output Handling'", "correct": false },
+            { "id": "c", "text": "'Supply Chain' (LLM03) was renamed from 'Excessive Agency'", "correct": false },
+            { "id": "d", "text": "'Misinformation' (LLM09) was renamed from 'Sensitive Information Disclosure'", "correct": false }
+          ],
+          "explanation": "LLM10 Unbounded Consumption expanded the earlier Model Denial of Service entry to cover denial of wallet (economic cost) and model extraction/theft, not just availability. Option b is wrong on both counts — Prompt Injection kept its name, and Improper Output Handling was the rename of Insecure Output Handling, a separate risk. Option c pairs two unrelated risks; Supply Chain and Excessive Agency are distinct 2025 entries with no rename relationship. Option d is false — Misinformation absorbed the old Overreliance concept, not Sensitive Information Disclosure, which remains its own entry (LLM02).",
+          "sourceRefs": ["r-owasp-llm-top10"]
+        }
+      ]
+    },
+    {
+      "id": "m1-l4-vs-appsec-and-frames",
+      "title": "How this differs from classic AppSec — and the industry frames around OWASP",
+      "estMinutes": 12,
+      "objective": "Contrast LLM application security with classic AppSec (what carries over, what is genuinely new), and situate the OWASP list against MITRE ATLAS, NIST AI 600-1, and the GIAC GAIPS skeleton without treating any list as a checkbox.",
+      "body": "## What carries over from classic AppSec\n\nLLM security is not a repudiation of everything you knew — a lot of hard-won AppSec discipline transfers directly, and the OWASP LLM list leans on it:\n\n- **Least privilege** is central to Excessive Agency (LLM06): give the model the fewest tools, permissions, and autonomy the task needs.\n- **Output encoding and parameterised queries** are the exact classic defences that Improper Output Handling (LLM05) prescribes — the receiving system is still a web app or a database, and it still needs the same hygiene.\n- **Supply-chain security** (SBOMs, provenance, signing, component scanning) is the backbone of LLM03; it just now extends to *models and datasets*, not only code.\n- **Rate-limiting, quotas, and monitoring** are ordinary availability and cost controls, applied under Unbounded Consumption (LLM10).\n\nIf you are strong at AppSec, you are already halfway. The point of this track is the *other* half.\n\n## What is genuinely new\n\nThree things do not have a classic analogue, and they are what make this a distinct discipline:\n\n1. **The trust boundary moved.** Classic AppSec assumes untrusted data can be sanitised so it never becomes control. In an LLM the input channel *is* the control channel, and there is no known sanitiser that reliably separates them. That is the shift from Lesson 1, and it is the thing traditional certs simply do not cover.\n2. **Injection is mitigable, not solved.** In classic AppSec, injection classes have complete fixes — parameterise the query and SQL injection is *gone*. Prompt injection has no such fix. You reduce likelihood and contain blast radius; you do not close the hole. Designing under permanent residual risk is a new muscle.\n3. **The model is probabilistic and can be *wrong* as a failure mode.** Misinformation (LLM09) has no real AppSec equivalent — a correctly functioning database does not confidently invent rows. An LLM does, which is why human oversight and grounding are security controls here, not just quality controls.\n\n## The frames around the OWASP list\n\nOWASP is the spine, but it is one lens. Three other official frames sit around it, and you will meet all of them in the field — each answers a different question:\n\n**MITRE ATLAS — the adversary's language.** ATLAS (Adversarial Threat Landscape for Artificial-Intelligence Systems) is a living knowledge base of real-world adversary tactics and techniques against AI systems, modelled directly on MITRE ATT&CK and structured the same way — tactics as the *why* (goals like Reconnaissance, Initial Access, ML/AI Model Access, Execution, Defense Evasion, Exfiltration, Impact) and techniques as the *how*. Where OWASP catalogues *risks to defend*, ATLAS catalogues *techniques attackers use*, with named entries such as LLM Prompt Injection (AML.T0051), LLM Jailbreak (AML.T0054), Extract LLM System Prompt (AML.T0056), and RAG Poisoning (AML.T0070). Use ATLAS when you are threat-modelling or red-teaming and need to reason as the adversary; it complements the OWASP list rather than competing with it. (This track goes deep on ATLAS in its red-teaming module.)\n\n**NIST AI 600-1 — the governance overlay.** The NIST AI Risk Management Framework (AI RMF 1.0, 2023) is a voluntary, non-sector-specific, rights-preserving framework organised around four functions — **Govern, Map, Measure, Manage** — and seven characteristics of trustworthy AI (valid & reliable; safe; secure & resilient; accountable & transparent; explainable & interpretable; privacy-enhanced; fair with harmful bias managed). Its companion, **NIST AI 600-1, the Generative AI Profile (July 2024)**, enumerates **12 GenAI risk areas** — including Confabulation (NIST's term for confident hallucination), Data Privacy, Information Integrity, Information Security, Intellectual Property, Value Chain and Component Integration, Harmful Bias and Homogenization, and CBRN Information or Capabilities — and maps *suggested actions* to the four RMF functions. Where OWASP is engineering-level and technical, NIST is organisational and governance-level: it answers *how does an organisation manage this risk*, and it hands off to the AIGP governance track.\n\n**GIAC GAIPS — the industry skeleton this track consolidates.** GIAC's AI Security & Platform Security certification (GAIPS) publishes an eight-domain skeleton — AI & LLM Foundations; LLM application threat modelling; App architecture & dev frameworks; Knowledge augmentation & retrieval (RAG); Agentic systems & AI integrations; Infrastructure & deployment / gateway; Development pipelines & MLOps security; and AI risk management, threat modelling & red-teaming. This AI-Security track uses those eight domains as its industry frame and consolidates them into **six teaching modules**. An honesty note per this track's sourcing rule: **GAIPS is not generally available yet** — as of authoring it is available only bundled with the SANS SEC545 course, with general purchase opening 2026-07-28, it is a hands-on CyberLive exam rather than multiple-choice, and its exam mechanics (question count, duration, passing score) are **not published**. So we treat it as a descriptive skeleton, not an exam we prep you to pass.\n\n## Using lists without checkbox security\n\nThe closing judgment, and the honest one: a Top 10 — or any framework — is a *shared language and a coverage aid*, not a compliance checkbox. The risks overlap (injection threads through several), attackers do not work top to bottom, and a system can tick every box on paper and still be systemically weak. Use the OWASP list to make sure you have *thought about* each area against a real system; use ATLAS to reason as the adversary; use NIST to govern the risk at the organisational level; and keep the honest posture throughout — layered defence, no complete fixes, residual risk named rather than hidden. That is exactly what the lab has you do next: run the ten against one real agent and mark, honestly, where you have a control, a partial, or a gap.\n\n## What this buys you\n\nYou can now place LLM security in the wider landscape — what it inherits from AppSec, what is new, and which frame to reach for depending on whether you are engineering, threat-modelling, or governing. You are ready to apply the list to a real system.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l4-1",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which is a genuine difference between LLM application security and classic AppSec, rather than something that carries over unchanged?",
+          "options": [
+            { "id": "a", "text": "Prompt injection is mitigable but not solved — unlike classic injection classes (e.g. SQL injection) which have complete fixes such as parameterised queries", "correct": true },
+            { "id": "b", "text": "Least privilege no longer applies, because LLMs need full access to every tool to function", "correct": false },
+            { "id": "c", "text": "Output encoding is obsolete, because model output is always safe to render directly", "correct": false },
+            { "id": "d", "text": "Supply-chain security is irrelevant, because models have no dependencies", "correct": false }
+          ],
+          "explanation": "The defining new problem is that prompt injection has no complete fix — you reduce likelihood and contain blast radius, whereas classic SQL injection is eliminated by parameterised queries. Options b, c, and d each name something that actually carries over and is central to the LLM list: least privilege is the heart of Excessive Agency (LLM06); output encoding is exactly the LLM05 defence; and supply-chain security is LLM03, extended to models and datasets. Each option inverts a control the module says transfers directly.",
+          "sourceRefs": ["r-owasp-llm01", "r-owasp-llm05", "r-owasp-llm06"]
+        },
+        {
+          "id": "kc-m1-l4-2",
+          "domainId": "m1-threat-model-owasp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You are threat-modelling an agent and want to reason in terms of concrete adversary techniques (e.g. LLM Prompt Injection, RAG Poisoning, Extract LLM System Prompt) organised like MITRE ATT&CK. Which framework fits, and how does it relate to the OWASP LLM Top 10?",
+          "options": [
+            { "id": "a", "text": "MITRE ATLAS — a knowledge base of adversary tactics and techniques against AI systems, modelled on ATT&CK; it complements the OWASP list (risks to defend) by describing techniques attackers use", "correct": true },
+            { "id": "b", "text": "NIST AI 600-1 — a list of exploit strings you run against the agent to test it", "correct": false },
+            { "id": "c", "text": "The GIAC GAIPS exam blueprint — a weighted multiple-choice question bank that replaces the OWASP list", "correct": false },
+            { "id": "d", "text": "The EU AI Act — a technique matrix that supersedes both OWASP and ATT&CK", "correct": false }
+          ],
+          "explanation": "MITRE ATLAS is the adversary-technique frame, modelled on ATT&CK, with named entries like LLM Prompt Injection and RAG Poisoning; it complements rather than replaces OWASP (defence-oriented risks). Option b mischaracterises NIST AI 600-1, which is a governance profile of risk areas and suggested actions, not a set of exploit strings. Option c is wrong on multiple counts — GAIPS is a hands-on CyberLive certification, not a published MCQ blueprint, and it does not replace the OWASP list. Option d misdescribes the EU AI Act, which is legislation, not a technique matrix, and does not supersede these frameworks.",
+          "sourceRefs": ["r-mitre-atlas", "r-owasp-llm-top10"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m1-1",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which statement best captures why an LLM's trust boundary differs from a classic web application's?",
+      "options": [
+        { "id": "a", "text": "The model reads instructions and data in one undifferentiated channel and cannot reliably tell them apart, so content it reads can steer what it does", "correct": true },
+        { "id": "b", "text": "The model encrypts all inputs, so the trust boundary sits between encrypted and decrypted data", "correct": false },
+        { "id": "c", "text": "The model only ever sees data the user typed, so retrieved documents are automatically trusted", "correct": false },
+        { "id": "d", "text": "The model has a separate, hardware-enforced control plane that untrusted data can never reach", "correct": false }
+      ],
+      "explanation": "The whole shift is that data and control share one channel — the model treats its token stream as potentially instructional, so content can become a directive. Option b invents an encryption boundary unrelated to the mechanism. Option c is false and dangerous — retrieved documents are a major source of indirect injection precisely because they are not automatically trustworthy. Option d describes the classic separation the LLM lacks; there is no hardware control plane keeping data out of the instruction path.",
+      "sourceRefs": ["r-owasp-llm01"]
+    },
+    {
+      "id": "q-m1-2",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the correct 2025 OWASP identifier and title for the risk where a model reveals PII, credentials, or proprietary business data?",
+      "options": [
+        { "id": "a", "text": "LLM02 Sensitive Information Disclosure", "correct": true },
+        { "id": "b", "text": "LLM07 System Prompt Leakage", "correct": false },
+        { "id": "c", "text": "LLM05 Improper Output Handling", "correct": false },
+        { "id": "d", "text": "LLM09 Misinformation", "correct": false }
+      ],
+      "explanation": "Revealing sensitive data such as PII, credentials, financial or health records is LLM02 Sensitive Information Disclosure. LLM07 System Prompt Leakage is specifically about the system prompt being exposed (and secrets wrongly placed in it), a narrower case. LLM05 is about output triggering downstream vulnerabilities, not about the sensitivity of the data revealed. LLM09 is about false-but-credible output, unrelated to disclosure of real sensitive data.",
+      "sourceRefs": ["r-owasp-llm-top10"]
+    },
+    {
+      "id": "q-m1-3",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An agent summarises PDFs a user uploads. An uploaded PDF contains hidden text instructing the agent to email its conversation history to an external address, and the agent — which has an email tool — does so. Which single control would most directly have prevented the damaging ACTION, given you cannot guarantee the model is never steered?",
+      "options": [
+        { "id": "a", "text": "Require human-in-the-loop approval before the email tool sends, and scope the tool to least privilege (LLM06 Excessive Agency)", "correct": true },
+        { "id": "b", "text": "Add a line to the system prompt telling the model to ignore instructions found in documents (LLM01)", "correct": false },
+        { "id": "c", "text": "Encode the model's output as HTML before displaying it (LLM05)", "correct": false },
+        { "id": "d", "text": "Add differential-privacy noise to the training data (LLM02)", "correct": false }
+      ],
+      "explanation": "The harmful step was an action (sending mail), so the most direct prevention is at the agency stage: a human approval gate plus least-privilege tool scope means a steered model cannot exfiltrate autonomously — this is LLM06's core guidance, and it holds even when injection succeeds. Option b is a real LLM01 mitigation but it relies on the prompt to resist steering, which the honest posture says is not reliable on its own; it reduces odds but would not dependably stop the action. Option c protects a downstream renderer from dangerous output, not this exfiltration action. Option d addresses training-data privacy, irrelevant to an agent emailing live conversation history via a tool.",
+      "sourceRefs": ["r-owasp-llm06", "r-owasp-llm01"]
+    },
+    {
+      "id": "q-m1-4",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Two SaaS customers' documents are indexed into the same vector store with no tenant partitioning, and one customer's query retrieves the other's confidential text. Which OWASP LLM risk is this, and what is the headline defence?",
+      "options": [
+        { "id": "a", "text": "LLM08 Vector and Embedding Weaknesses — apply strict logical/tenant partitioning and permission-aware access control on the vector store", "correct": true },
+        { "id": "b", "text": "LLM03 Supply Chain — verify the provenance of the embedding model", "correct": false },
+        { "id": "c", "text": "LLM10 Unbounded Consumption — apply rate limits to the retrieval endpoint", "correct": false },
+        { "id": "d", "text": "LLM04 Data and Model Poisoning — validate the training data lineage", "correct": false }
+      ],
+      "explanation": "Cross-tenant leakage from a shared vector store is the textbook LLM08 case, and OWASP's headline defence is strict tenant partitioning plus fine-grained, permission-aware access control on the store. Option b targets the model's origin, not the multi-tenant isolation failure in retrieval. Option c addresses volume/cost, not a confidentiality boundary between tenants. Option d concerns manipulated training/embedding data corrupting behaviour, which is a different failure from one tenant reading another's stored content.",
+      "sourceRefs": ["r-owasp-llm08"]
+    },
+    {
+      "id": "q-m1-5",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A developer stores a database connection string inside the system prompt so the agent 'knows how to reach the database', and reassures the team that the prompt is hidden from users. Per OWASP LLM07, what is the honest problem here?",
+      "options": [
+        { "id": "a", "text": "The real risk is not whether the prompt leaks — it is that a secret was placed in the prompt at all; sensitive data and security logic must live outside the model where the prompt cannot expose them", "correct": true },
+        { "id": "b", "text": "There is no problem, because system prompts are cryptographically sealed and can never be revealed", "correct": false },
+        { "id": "c", "text": "The only fix is to make the system prompt shorter so it is less likely to be extracted", "correct": false },
+        { "id": "d", "text": "The problem is purely one of Misinformation (LLM09), because the model might state the connection string incorrectly", "correct": false }
+      ],
+      "explanation": "LLM07's core insight is that the leak itself is not the true risk — the true risk is the sensitive data being in the prompt and the app relying on the prompt for security; the fix is to keep secrets and authorization out of the prompt entirely, in external systems. Option b is false — system prompts are discoverable through interaction, not cryptographically sealed. Option c misunderstands the risk; a shorter prompt still exposes the secret and still leans on the prompt as a boundary. Option d misclassifies the issue; this is about a leaked secret and misplaced trust, not about the model producing false content.",
+      "sourceRefs": ["r-owasp-llm07"]
+    },
+    {
+      "id": "q-m1-6",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On the five-stage attack-surface map, where does 'Improper Output Handling' (LLM05) sit, and why?",
+      "options": [
+        { "id": "a", "text": "The output stage — the model is untrusted, so its output must be validated and encoded before any downstream system (browser, shell, database) consumes it", "correct": true },
+        { "id": "b", "text": "The input stage — because it is about the text the user types into the model", "correct": false },
+        { "id": "c", "text": "The model & lineage stage — because it is about how the model was trained", "correct": false },
+        { "id": "d", "text": "The context/retrieval stage — because it is about documents the model retrieves", "correct": false }
+      ],
+      "explanation": "LLM05 is squarely the output stage: unvalidated model output becomes a classic injection (XSS, SQLi, SSRF, RCE) in whatever system receives it, so it must be treated as untrusted and encoded/parameterised on the way out. Option b describes the input stage (where injection enters), not output handling. Option c is the lineage stage, about training and supply chain. Option d is the retrieval stage, about content pulled in — none of these is where output is handed downstream.",
+      "sourceRefs": ["r-owasp-llm05"]
+    },
+    {
+      "id": "q-m1-7",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the difference between direct and indirect prompt injection under OWASP LLM01?",
+      "options": [
+        { "id": "a", "text": "Direct injection is when the attacker controls the input text sent to the model; indirect injection is when the payload is hidden in external content the model fetches or is handed (a document, a web page, a tool's output)", "correct": true },
+        { "id": "b", "text": "Direct injection targets the training data; indirect injection targets the system prompt", "correct": false },
+        { "id": "c", "text": "Direct injection only works online; indirect injection only works offline", "correct": false },
+        { "id": "d", "text": "Direct injection is always malicious; indirect injection is always accidental", "correct": false }
+      ],
+      "explanation": "OWASP defines direct injection as input directly changing model behaviour (the attacker controls the injection point) and indirect injection as malicious instructions embedded in external sources like websites or files that the model processes. Option b confuses injection with poisoning and prompt leakage — neither direct nor indirect injection is defined by targeting training data. Option c invents an online/offline split; indirect injection works through any fetched content, including local files. Option d is false — direct injection can be unintentional user input, and indirect injection is typically deliberately planted.",
+      "sourceRefs": ["r-owasp-llm01"]
+    },
+    {
+      "id": "q-m1-8",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A coding assistant confidently suggests installing an npm package that does not exist; an attacker notices the hallucinated name and publishes a malicious package under it. Which OWASP LLM risk is the root, and what is a headline defence?",
+      "options": [
+        { "id": "a", "text": "LLM09 Misinformation — ground suggestions with retrieval, apply secure-coding practices, and design for human verification rather than blind trust", "correct": true },
+        { "id": "b", "text": "LLM06 Excessive Agency — remove all tools from the assistant", "correct": false },
+        { "id": "c", "text": "LLM10 Unbounded Consumption — add a rate limit to the assistant", "correct": false },
+        { "id": "d", "text": "LLM08 Vector and Embedding Weaknesses — partition the vector store by tenant", "correct": false }
+      ],
+      "explanation": "A confidently fabricated package name that users trust is exactly the LLM09 Misinformation pattern (hallucinated dependencies attackers then squat on), and OWASP's defences include grounding with retrieval, secure-coding practices, and UI that encourages verification. Option b misdiagnoses it as an agency problem; the harm came from a false suggestion a human acted on, not from the model taking an autonomous action. Option c targets volume/cost, irrelevant to a fabricated name. Option d addresses multi-tenant retrieval isolation, which has nothing to do with a hallucinated package.",
+      "sourceRefs": ["r-owasp-llm-top10"]
+    },
+    {
+      "id": "q-m1-9",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A vendor claims their input-filtering product 'completely eliminates prompt injection.' Applying this track's honest posture, what is the correct assessment?",
+      "options": [
+        { "id": "a", "text": "Reject the completeness claim: injection is mitigable, not solved, so an input filter is one useful layer that reduces likelihood — but it cannot be relied on alone, and blast-radius controls (least privilege, human approval, output validation) remain necessary", "correct": true },
+        { "id": "b", "text": "Accept it and remove all other controls, since a complete fix makes defence-in-depth redundant", "correct": false },
+        { "id": "c", "text": "Reject LLMs entirely, since any residual injection risk means the system cannot be used", "correct": false },
+        { "id": "d", "text": "Accept it only for indirect injection, since input filters are known to fully stop direct injection", "correct": false }
+      ],
+      "explanation": "The binding posture is that no single control closes the injection hole; a filter is a helpful layer that lowers the odds, but you still need least privilege, human gates, and output validation to contain a successful bypass. Option b is the exact trap — treating a claimed silver bullet as licence to drop other layers is how a single bypass becomes a full compromise. Option c over-corrects into fatalism; mitigable-not-solved means layered defence is worthwhile, not that LLMs are unusable. Option d is false — input filters do not fully stop direct injection either, and indirect injection (via fetched content) is if anything harder for an input filter to catch.",
+      "sourceRefs": ["r-owasp-llm01", "r-owasp-llm06"]
+    },
+    {
+      "id": "q-m1-10",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A company downloads a fine-tuned base model from a public model hub and deploys it without verifying who produced it or whether it was tampered with. Which OWASP LLM risk does this most directly represent?",
+      "options": [
+        { "id": "a", "text": "LLM03 Supply Chain — an unverified third-party model with weak provenance, defended by provenance verification, signing/hashes, red-teaming, and an AI-BOM", "correct": true },
+        { "id": "b", "text": "LLM05 Improper Output Handling — because the model's output is not encoded", "correct": false },
+        { "id": "c", "text": "LLM10 Unbounded Consumption — because deploying a model uses compute", "correct": false },
+        { "id": "d", "text": "LLM01 Prompt Injection — because the model reads prompts", "correct": false }
+      ],
+      "explanation": "Deploying an unverified third-party model with unknown provenance is the defining LLM03 Supply Chain risk, and OWASP's defences are provenance verification, signing and integrity checks, red-teaming before deployment, and maintaining an AI-BOM. Option b concerns output sanitisation, a runtime output-stage issue, not the origin of the model. Option c trivialises compute cost, which is not the supply-chain concern. Option d states a truism (all models read prompts) that does not describe the specific risk of an untrusted model artefact.",
+      "sourceRefs": ["r-owasp-llm-top10"]
+    },
+    {
+      "id": "q-m1-11",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing correctly matches an industry frame to the question it primarily answers?",
+      "options": [
+        { "id": "a", "text": "MITRE ATLAS → 'what techniques would an adversary use against this AI system?'; NIST AI 600-1 → 'how does our organisation govern and manage GenAI risk?'", "correct": true },
+        { "id": "b", "text": "MITRE ATLAS → 'how do we write the system prompt?'; NIST AI 600-1 → 'which exploit strings do we run?'", "correct": false },
+        { "id": "c", "text": "OWASP LLM Top 10 → 'what is the legal penalty for a breach?'; GIAC GAIPS → 'what encryption cipher should we use?'", "correct": false },
+        { "id": "d", "text": "NIST AI 600-1 → 'what is the adversary technique matrix?'; MITRE ATLAS → 'what are the organisation's governance functions?'", "correct": false }
+      ],
+      "explanation": "ATLAS is the adversary-technique frame (tactics and techniques, modelled on ATT&CK), while NIST AI 600-1 is the governance overlay (12 GenAI risk areas with suggested actions mapped to Govern/Map/Measure/Manage). Option b mischaracterises both — ATLAS is not about prompt authoring, and NIST is not a set of exploit strings. Option c misassigns OWASP (an engineering risk catalogue, not legal penalties) and GAIPS (a skills domain skeleton, not a cipher recommendation). Option d swaps the two frames' roles outright.",
+      "sourceRefs": ["r-mitre-atlas", "r-nist-ai-600-1", "r-giac-gaips"]
+    },
+    {
+      "id": "q-m1-12",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How should a security team use the OWASP LLM Top 10, according to the module?",
+      "options": [
+        { "id": "a", "text": "As a shared vocabulary and a coverage aid — check you have thought about each area against a real system — not as a ranked to-do list worked strictly top to bottom", "correct": true },
+        { "id": "b", "text": "As a strict compliance checklist where ticking all ten boxes guarantees the system is secure", "correct": false },
+        { "id": "c", "text": "As a work order to fix LLM01 first, then LLM02, then LLM03, in that exact priority for every system", "correct": false },
+        { "id": "d", "text": "As a list to ignore, since frameworks never help real security", "correct": false }
+      ],
+      "explanation": "The module's judgment is that the list is a shared language and coverage aid: use it to ensure each area has been considered against a specific system. Option b is checkbox security, which the module explicitly warns against — a system can tick every box and still be systemically weak, and the risks overlap. Option c imposes a fixed priority order that ignores that attackers do not work top to bottom and that risk depends on the specific system. Option d over-corrects into dismissing frameworks entirely; the honest position is to use the list well, not to reject it.",
+      "sourceRefs": ["r-owasp-llm-top10"]
+    },
+    {
+      "id": "q-m1-13",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A pay-per-token chatbot is hit by automated clients sending huge volumes of expensive requests, running up the owner's model bill. Which OWASP LLM risk names this, including the cost dimension?",
+      "options": [
+        { "id": "a", "text": "LLM10 Unbounded Consumption — including 'denial of wallet' economic loss — defended by input-size caps, rate limits and per-user quotas, throttling, and anomaly monitoring", "correct": true },
+        { "id": "b", "text": "LLM02 Sensitive Information Disclosure — because the requests reveal usage data", "correct": false },
+        { "id": "c", "text": "LLM04 Data and Model Poisoning — because high volume corrupts the model", "correct": false },
+        { "id": "d", "text": "LLM07 System Prompt Leakage — because the requests might extract the prompt", "correct": false }
+      ],
+      "explanation": "Uncontrolled, costly inference — including denial of wallet on pay-per-use models — is LLM10 Unbounded Consumption, defended by input validation and size caps, rate limiting and quotas, throttling with graceful degradation, and monitoring. Option b is about data leaving the system, not runaway cost/volume. Option c is wrong — request volume does not alter the model's weights; poisoning is about manipulated training/embedding data. Option d concerns extracting the system prompt, a different objective from exhausting resources and inflating the bill.",
+      "sourceRefs": ["r-owasp-llm-top10"]
+    },
+    {
+      "id": "q-m1-14",
+      "domainId": "m1-threat-model-owasp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Why does the module say that treating the LLM's OUTPUT with zero trust follows logically from the trust-boundary shift discussed for its INPUT?",
+      "options": [
+        { "id": "a", "text": "If the model's input channel can be steered by untrusted content, then its output can carry the effect of that steering, so the output is exactly as untrusted as the input and must be validated/encoded before anything downstream consumes it", "correct": true },
+        { "id": "b", "text": "Because the model's output is always encrypted and therefore automatically trusted downstream", "correct": false },
+        { "id": "c", "text": "Because output handling only matters for chat interfaces, never for agents", "correct": false },
+        { "id": "d", "text": "Because zero trust means blocking the model from producing any output at all", "correct": false }
+      ],
+      "explanation": "The reasoning chains directly: a steerable input means the output can reflect an attacker's influence, so the output inherits the input's untrustworthiness and must be sanitised before a browser, shell, or database consumes it — OWASP's 'treat the model as any other user.' Option b is false; output is not encrypted-and-trusted, and encryption would not make its content safe to interpolate downstream anyway. Option c is wrong — improper output handling is arguably more dangerous for agents wiring output into other systems. Option d misreads zero trust; it means validate and constrain what the model produces, not suppress output entirely.",
+      "sourceRefs": ["r-owasp-llm05", "r-owasp-llm01"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m1-defend-support-agent",
+      "domainIds": ["m1-threat-model-owasp"],
+      "title": "Hardening a support agent: a defence-decision drill",
+      "tagline": "You own a customer-support agent in your own workspace. Walk the threat model from Module 1 to decide, at each fork, the strongest defensive move — grounded in the OWASP LLM Top 10.",
+      "context": "AUTHORIZATION NOTE: this drill is about YOUR OWN test agent in YOUR OWN workspace. Everything here is defensive — you are hardening a system you own. Never test, probe, or apply these techniques against systems you do not own or lack written authorization to test. With that settled: you run a support agent that answers customer questions by retrieving help-desk articles from a knowledge base, and it holds a tool that can issue small refunds. You are reviewing its security before wider rollout. Reason through the OWASP threat model — trust boundary, attack-surface map, Top 10 — and make the strongest defensive call at each step. Each choice is graded; there is one best move per step.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "A teammate says: 'The knowledge base is our own content, so retrieved articles are trusted — we only need to worry about what customers type.' How do you respond?",
+          "choices": [
+            { "id": "a", "text": "Push back: retrieved content is a Stage-2 (context) injection vector regardless of who authored it — an article can be poisoned, or contain text the model reads as instructions — so 'our own content' is not automatically safe; treat retrieved content as untrusted and segregate/identify it in the prompt", "verdict": "best", "rationale": "This is the indirect-injection insight (LLM01) applied to the attack-surface map: the context/retrieval stage is a real entry point, and provenance ('it's ours') does not equal trust — a knowledge base can be poisoned (LLM08) or simply contain instruction-like text. OWASP's guidance to segregate and identify external content applies to retrieved articles, not just typed input." },
+            { "id": "b", "text": "Agree that customer input is the main risk, but add output encoding on the agent's replies as a sensible extra layer", "verdict": "viable", "rationale": "Output encoding (LLM05) is a genuinely good control, so this is not wrong-headed — but it concedes the flawed premise that retrieved content is trusted. The teammate's core mistake is ignoring the context/retrieval stage as an injection vector; adding an output-stage control does not correct that blind spot." },
+            { "id": "c", "text": "Agree fully — since the knowledge base is first-party, indirect injection through it is impossible, so focus only on filtering customer input", "verdict": "wrong", "rationale": "This accepts the false premise outright. First-party content can still be poisoned or contain instruction-like text, and indirect injection via retrieval is one of the most important LLM risks. Treating the knowledge base as inherently safe leaves the context stage wide open." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "You accept that a retrieved article could steer the model. The agent can issue refunds autonomously. Given you cannot guarantee the model is never steered, what is the strongest control on the refund capability?",
+          "choices": [
+            { "id": "a", "text": "Apply least privilege and a human-in-the-loop gate: cap the refund tool tightly (small amounts, scoped accounts) and require human approval before any refund executes, so a steered model cannot autonomously move money — and enforce the authorization in the refund system, not in the LLM", "verdict": "best", "rationale": "This is LLM06 Excessive Agency done right: minimise functionality and permissions, require human approval for the significant action, and enforce authorization downstream rather than trusting the model. It contains the blast radius even when injection succeeds — the honest defence-in-depth posture." },
+            { "id": "b", "text": "Keep refunds autonomous but add a stronger system-prompt instruction: 'Only issue refunds you are certain are legitimate,' plus logging of every refund", "verdict": "viable", "rationale": "Logging (LLM06 damage-limitation) is worth having, but the plan leans on the system prompt to constrain a high-impact action — exactly the reliance the trust-boundary lesson warns against. A steered model can ignore the instruction, and logging tells you after the money has already gone. It reduces detection time, not the risk of the action." },
+            { "id": "c", "text": "Keep refunds fully autonomous with no gate, because adding human approval slows the agent down and the refunds are small", "verdict": "wrong", "rationale": "This is textbook excessive autonomy: a high-impact action (moving money) with no human check, on an agent you have already agreed can be steered via retrieval. 'Small refunds' still adds up and still normalises autonomous financial action from a steerable model — the exact anti-pattern LLM06 names." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The agent posts confirmation text into an internal admin dashboard that renders it as HTML, and logs interactions. What is the strongest defensive move for the OUTPUT path?",
+          "choices": [
+            { "id": "a", "text": "Treat the model's output as untrusted and apply context-aware output encoding before it reaches the dashboard (and a strict CSP there), so model-produced text cannot execute as script or markup downstream", "verdict": "best", "rationale": "This is LLM05 Improper Output Handling: the model is untrusted, so its output must be encoded for the receiving context (HTML) and backed by a CSP, preventing an XSS in the admin console. It follows directly from the trust boundary — untrusted input implies untrusted output." },
+            { "id": "b", "text": "Rely on the model being instructed to 'never produce HTML or scripts', and spot-check the dashboard occasionally", "verdict": "viable", "rationale": "It is not nothing, but it again delegates a security control to the model's compliance and to manual spot-checks. A steered or simply mistaken model can emit markup, and occasional review will miss it. The deterministic fix — encode on output, enforce CSP — belongs in the receiving system, not in a prompt instruction." },
+            { "id": "c", "text": "Render the output as raw HTML for richer formatting, trusting it because it came from your own agent", "verdict": "wrong", "rationale": "This repeats the Step-1 mistake at the output stage: 'it came from our own agent' is not a trust guarantee, especially once you have accepted the agent can be steered. Rendering unencoded model output as HTML is precisely how improper output handling becomes an XSS in the admin dashboard." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Leadership asks for one honest sentence on the agent's security posture after these fixes. Which framing is right?",
+          "choices": [
+            { "id": "a", "text": "'We have layered defences that reduce the likelihood and contain the blast radius of prompt injection — least privilege, a human gate on refunds, output encoding, and logging — but injection is mitigable, not solved, so residual risk remains and we monitor for it.'", "verdict": "best", "rationale": "This is the binding honest posture: name the layers, claim reduced likelihood and contained impact, and explicitly state that injection is not solved and residual risk remains. It is accurate, defensible, and sets correct expectations with leadership." },
+            { "id": "b", "text": "'The agent is significantly more resilient than before; the main remaining exposure is prompt injection, which we mitigate in depth and monitor, and we will keep reassessing as the system grows.'", "verdict": "viable", "rationale": "This is honest and broadly correct — it avoids over-claiming and flags injection as the residual risk. It is slightly softer on the specific mitigations and the 'not solved' point than the best answer, but it does not mislead. A reasonable executive summary, just less precise." },
+            { "id": "c", "text": "'The agent is now fully secure against prompt injection and cannot be manipulated.'", "verdict": "wrong", "rationale": "This is the false-completeness claim the whole track forbids. No set of controls makes an LLM 'fully secure against prompt injection'; asserting it to leadership creates dangerous overconfidence and would be the first thing an incident review holds against you." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-owasp-llm01", "r-owasp-llm05", "r-owasp-llm06", "r-owasp-llm08"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m1-owasp-coverage-checklist",
+      "domainId": "m1-threat-model-owasp",
+      "title": "Run the OWASP LLM Top 10 as a coverage checklist against one Automatos agent",
+      "goal": "Produce your signature artifact for this module: a ten-line OWASP LLM Top 10 (2025) coverage assessment of ONE real agent in your own Automatos workspace, marking each risk control / partial / gap with a one-line justification. The gaps you find become the backlog you close across the rest of the track. This is a defensive, read-and-reason exercise on a system you own — no exploitation, no attack strings.",
+      "steps": "## What you'll do\n\nYou will take a single agent you own, walk all ten OWASP LLM risks against it using the map from this module, and honestly mark where you have a real control, a partial control, or a gap. This is assessment, not attack: you are reading configuration and reasoning about design, not trying to break anything. It happens in your own free Automatos workspace.\n\n### Authorization and scope (read first)\n\n- **You own this system.** Everything here targets YOUR agent in YOUR workspace. Never run any part of this against a system you do not own or lack written authorization to assess. This is the standing rule for every hands-on step in the AI-Security track.\n- **No exploitation.** You are not writing injection payloads or trying to make the agent misbehave. You are inspecting how it is configured and reasoning about the ten risks. Keep it to observation and design review.\n\n### Set up\n\n1. **Sign in to Automatos.** A personal workspace is created for you automatically on first login and you are its admin, so every step here is doable solo. (See the platform Welcome / Quick start.)\n2. **Pick ONE agent to assess.** Either use an existing agent or create a simple one (an agent needs only a name to exist). Choose something with a bit of surface — ideally one that can use at least one tool and/or reference a knowledge base — so the assessment is meaningful. Note what it does, what tools it holds, and what data it can reach.\n\n### Walk the ten (control / partial / gap)\n\nFor each risk below, write one line: **the identifier, your verdict (control / partial / gap), and a one-sentence reason.** Prime the pump with what the platform already gives you — tool allow-lists and blueprints touch LLM06; knowledge-base/RAG access controls touch LLM08; per-request cost tracking and limits touch LLM10; output validation touches LLM05.\n\n3. **LLM01 Prompt Injection** — Is untrusted/external content segregated and identified? Is there any input/output filtering? Do NOT test with payloads — just assess whether the design assumes the model can be steered.\n4. **LLM02 Sensitive Information Disclosure** — What sensitive data can this agent reach, and is access least-privilege? Could it surface data a user should not see?\n5. **LLM03 Supply Chain** — Do you know the provenance of the model(s) and any components behind this agent? Is anything unverified?\n6. **LLM04 Data and Model Poisoning** — Is the data feeding this agent (knowledge base, any fine-tune) from trusted, validated sources?\n7. **LLM05 Improper Output Handling** — Where does this agent's output go next (a UI, a tool, another system), and is it validated/encoded before it lands there?\n8. **LLM06 Excessive Agency** — List its tools and permissions. Is each one necessary (least functionality/permission)? Is there a human gate on any high-impact action? Is authorization enforced downstream, not just in the prompt?\n9. **LLM07 System Prompt Leakage** — Does the system prompt contain any secret or security logic that should live outside the model? (If yes, that's a gap regardless of whether it has ever leaked.)\n10. **LLM08 Vector and Embedding Weaknesses** — If it uses retrieval, is the store access-controlled and partitioned so it cannot surface another workspace's/tenant's data?\n11. **LLM09 Misinformation** — For any high-stakes output, is there grounding (retrieval) and/or human verification, or does the design invite blind trust?\n12. **LLM10 Unbounded Consumption** — Are there cost/rate controls so uncontrolled use can't run up the bill or exhaust resources?\n\n### Turn gaps into a backlog\n\n13. **Summarise.** Count your controls, partials, and gaps. For every 'gap' and 'partial', write the one defensive change that would move it up a level (e.g. 'add a human gate before the refund tool' for an LLM06 partial). This ranked list is your track backlog — Modules 2 to 6 go deep on these clusters.\n14. **Save the artifact off-platform.** Copy the ten-line table plus your backlog into a document you keep (a note, doc, or spreadsheet). Keep it; you will revisit it as you close gaps through the track.\n\n### Honest posture (do not skip)\n\nWhen you write your summary, resist the urge to mark everything 'control'. The point of the exercise is an honest map, and 'partial' or 'gap' is a normal, expected verdict — most real systems have several. Also remember the binding rule: even where you have a control on LLM01, it is a *mitigation*, not a solved problem — mark it 'control' only if you have a real layered defence, and never write 'fully solved' anywhere on the sheet.",
+      "checklist": [
+        "Signed in and confirmed you are assessing an agent in your OWN personal workspace (authorization understood: you own this system)",
+        "Selected ONE agent and noted what it does, which tools it holds, and what data it can reach",
+        "Wrote a verdict line (control / partial / gap) with a one-sentence reason for ALL TEN risks LLM01 through LLM10, using the current 2025 titles",
+        "Did the assessment by inspection and design review only — no injection payloads, no attempt to make the agent misbehave",
+        "For LLM06, listed the agent's tools/permissions and judged least-privilege plus whether any high-impact action has a human gate",
+        "For LLM07, checked the system prompt holds no secrets or security logic that belong outside the model",
+        "Converted every 'gap' and 'partial' into a one-line defensive change, producing a ranked backlog for Modules 2 to 6",
+        "Kept the honest posture: no line marked 'fully solved'; LLM01 marked 'control' only where a real layered defence exists",
+        "ARTIFACT SAVED: the ten-line OWASP coverage table plus the gap backlog, stored in a document for later modules"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-owasp-llm-top10",
+      "title": "OWASP Top 10 for LLM Applications 2025 (the list)",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "kind": "official-doc",
+      "annotation": "The canonical list from the OWASP Gen AI Security Project and the spine of this module: all ten identifiers LLM01–LLM10 with their current 2025 titles. Use it as the authoritative reference for the numbers and names, and as your coverage checklist in the lab. Treat it as a shared vocabulary, not a top-to-bottom to-do list — the risks overlap heavily.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-owasp-llm01",
+      "title": "OWASP LLM01:2025 Prompt Injection",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "kind": "official-doc",
+      "annotation": "The primary source for the trust-boundary shift: OWASP states the model cannot distinguish instructions from data, defines direct vs indirect injection, and notes the input need not be human-readable. Its layered mitigations (constrain behaviour, validate output formats, filter I/O, least privilege, human approval, segregate external content, adversarial testing) are the backbone of the module's defensive posture. Read for mechanism AND defence — it never claims a complete fix.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-owasp-llm05",
+      "title": "OWASP LLM05:2025 Improper Output Handling",
+      "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+      "kind": "official-doc",
+      "annotation": "The output-stage source: insufficient validation of model output before it reaches downstream systems, causing XSS, CSRF, SSRF, SQL injection, path traversal, or RCE in the RECEIVING system. Its headline guidance — adopt zero trust, 'treat the model as any other user', use context-aware output encoding, parameterised queries, and a strict CSP — is the direct corollary of the trust boundary. Previously named Insecure Output Handling.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-owasp-llm06",
+      "title": "OWASP LLM06:2025 Excessive Agency",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "kind": "official-doc",
+      "annotation": "The agency-stage source and the module's blast-radius control. Names the three drivers — excessive functionality, excessive permissions, excessive autonomy — and the defences that contain a steered model: minimise tools and their functionality, avoid open-ended tools, apply least privilege, execute in the user's context, require human-in-the-loop approval for significant actions, and enforce authorization downstream rather than trusting the LLM. Logging and rate-limiting limit damage but do not prevent it.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-owasp-llm08",
+      "title": "OWASP LLM08:2025 Vector and Embedding Weaknesses",
+      "url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
+      "kind": "official-doc",
+      "annotation": "The context/retrieval-stage source for RAG systems: weaknesses in how vectors/embeddings are generated, stored, or retrieved — cross-context leakage between tenants sharing a store, embedding inversion, knowledge-base poisoning, and indirect injection via retrieved content. Defences: permission-aware access control on the vector store, strict logical/tenant partitioning, validation accepting only trusted sources, classification tagging, and immutable retrieval logs. New in 2025.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-owasp-llm07",
+      "title": "OWASP LLM07:2025 System Prompt Leakage",
+      "url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
+      "kind": "official-doc",
+      "annotation": "The source for the 'never rely on the prompt as a security control' rule. Its core insight: the leak itself is not the real risk — the risk is that sensitive data (credentials, connection strings) was in the prompt at all, and that the app leaned on the prompt to enforce security. Fix by keeping secrets and security logic out of the prompt and enforcing guardrails and authorization deterministically in external systems. New in 2025.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-mitre-atlas",
+      "title": "MITRE ATLAS — adversarial threat landscape for AI systems",
+      "url": "https://atlas.mitre.org/",
+      "kind": "reference",
+      "annotation": "The adversary's language for AI systems: a living knowledge base of tactics and techniques modelled on MITRE ATT&CK and structured identically (tactics as goals, techniques as methods), with named LLM entries such as LLM Prompt Injection (AML.T0051), LLM Jailbreak (AML.T0054), Extract LLM System Prompt (AML.T0056), and RAG Poisoning (AML.T0070). Use it when threat-modelling or red-teaming to reason as the attacker; it complements the OWASP defence catalogue. This track's red-teaming module goes deep.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-nist-ai-600-1",
+      "title": "NIST AI 600-1 — Generative AI Profile (AI RMF)",
+      "url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "kind": "official-doc",
+      "annotation": "The governance overlay. A July 2024 companion to the NIST AI Risk Management Framework (voluntary, non-sector-specific; four functions Govern/Map/Measure/Manage; seven trustworthiness characteristics). This profile enumerates 12 GenAI risk areas — including Confabulation (confident hallucination), Data Privacy, Information Integrity, Information Security, Intellectual Property, and Value Chain and Component Integration — and maps suggested actions to the RMF functions. Where OWASP is engineering-level, NIST is organisational; it hands off to the AIGP governance track.",
+      "domainIds": ["m1-threat-model-owasp"]
+    },
+    {
+      "id": "r-giac-gaips",
+      "title": "GIAC GAIPS — AI Security & Platform Security (8-domain skeleton)",
+      "url": "https://www.giac.org/certifications/ai-security-platform-security-gaips",
+      "kind": "reference",
+      "annotation": "The industry skeleton this track consolidates: GIAC's GAIPS publishes eight domains (LLM foundations, application threat model, app architecture/frameworks, RAG/knowledge augmentation, agentic systems, infrastructure/deployment, MLOps pipelines, and risk management/red-teaming) that this AI-Security track folds into six teaching modules. Honesty note: GAIPS is NOT generally available yet (general purchase opens 2026-07-28; currently bundled with SANS SEC545), it is a hands-on CyberLive exam, and its mechanics (question count, duration, passing score) are unpublished — so it is used as a descriptive frame, not an exam we prep for.",
+      "domainIds": ["m1-threat-model-owasp"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m1-1",
+      "title": "M1 · The OWASP LLM Top 10 (2025) — a grouped tour on the attack-surface map",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m1-threat-model-owasp"],
+      "sourceNotebook": "ai-security / m1 / owasp-llm-top10-grouped-tour"
+    },
+    {
+      "id": "v-m1-2",
+      "title": "M1 · Is prompt injection solvable, or only mitigable? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m1-threat-model-owasp"],
+      "sourceNotebook": "ai-security / m1 / debate-injection-solvable-or-mitigable"
+    }
+  ]
+}
