@@ -83,6 +83,20 @@ export function buildMock(track, store) {
   };
 }
 
+// Scoring is scale-aware: real exams differ (CCA-F/GH-x are 0–1000, IAPP AIGP
+// is 100–500). scoreFloor defaults to 0; scaled maps the raw fraction onto
+// [floor, scale] so the mock reads like the real score report.
+export function examScale(spec) {
+  const scale = (spec && spec.scoreScale) || 1000;
+  const floor = (spec && spec.scoreFloor) || 0;
+  const passing = (spec && spec.passingScore) || 720;
+  // A+ requires a pass WITH MARGIN. Tracks on a non-1000 scale must set
+  // exam.aPlusScore explicitly (validator warns); 800 preserves the historic
+  // 1000-scale bar.
+  const aPlus = (spec && spec.aPlusScore) || (scale === 1000 ? 800 : Math.round(passing + 0.1 * (scale - passing)));
+  return { scale, floor, passing, aPlus };
+}
+
 export function scoreMock(track, items, answers) {
   let correct = 0;
   const perDomain = {};
@@ -96,7 +110,8 @@ export function scoreMock(track, items, answers) {
     if (ok) d.correct++;
   }
   const total = items.length || 1;
-  const scaled = Math.round((correct / total) * 1000);
-  const passed = scaled >= (track.exam.passingScore || 720);
+  const { scale, floor, passing } = examScale(track.exam);
+  const scaled = Math.round(floor + (correct / total) * (scale - floor));
+  const passed = scaled >= passing;
   return { correct, total, scaled, passed, perDomain };
 }

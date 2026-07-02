@@ -1,0 +1,987 @@
+{
+  "id": "d4-govern-deployment",
+  "order": 4,
+  "code": "D4",
+  "name": "Understanding how to govern AI deployment and use",
+  "weight": 0.27,
+  "tagline": "The model in the world: choosing to build or buy, deploying with the right controls, then keeping it answerable through continuous monitoring, incident management, transparency disclosures, notification duties, and vendor governance — with the EU AI Act's deployer obligations as the spine.",
+  "overview": "One of the two heaviest AIGP domains (blueprint 21–25 questions), Domain IV governs the AI system once it is live. It maps to Body-of-Knowledge sub-domains IV.A (evaluate the factors and risks in the decision to deploy — own vs third-party, model type, deployment option), IV.B (assess the model — impact assessment, applicable law, vendor/open-source agreement terms, the extra obligations of running your own model), and IV.C (govern the deployment and use — apply policies, run continuous monitoring plus a maintenance/retraining schedule, do periodic audits/red-teaming, document incidents and a post-market monitoring plan, forecast downstream harms, set external communication plans, and be able to deactivate the model). The exam tests judgment: given a scenario, decide whether to build or buy, spot the monitoring signal that was missing, triage and escalate an incident, work out which disclosure is owed to whom, and place accountability when a vendor supplies the model. The load-bearing legal frame is the EU AI Act's split between the provider (who builds and places on the market) and the deployer (who uses under its own authority) — Articles 26, 27, 50, 72 and 73 — read against the NIST AI RMF MANAGE function and (folded from D2) ISO/IEC 42001 as the management-system backbone. The recurring trap: assuming procurement offloads deployer accountability. It does not.",
+  "objectives": [
+    "Distinguish the EU AI Act roles of provider and deployer, and identify when a deployer legally becomes a provider (Article 25) by rebranding, substantially modifying, or repurposing a system into high-risk.",
+    "Weigh the build-vs-buy (own vs third-party) model decision using IV.A factors — use-case context, model type (classic vs generative, proprietary vs open source, small vs large, language vs multimodal), and deployment option (cloud/on-prem/edge, as-is vs fine-tuning/RAG) — and state the governance consequence of each.",
+    "Apply the deployer's operational obligations (Article 26): use per instructions, human oversight by competent persons, input-data relevance where controlled, monitoring, log-keeping, worker notification, and informing affected persons.",
+    "Set up continuous monitoring, a maintenance/retraining schedule, and periodic assurance (audits, red teaming, threat modeling) — treating monitoring as ongoing post-market surveillance, not a one-time launch gate (Article 72; NIST MANAGE).",
+    "Separate proactive transparency disclosure (Article 50 — telling people they are interacting with AI, labelling deep fakes/synthetic content) from reactive notification duties (Article 73 — reporting serious incidents to authorities on a 15/10/2-day clock).",
+    "Assign accountability across the organisation and govern third-party AI through procurement — vendor and open-source agreement terms, upstream provider documentation (Article 53), and the fundamental rights impact assessment (Article 27) — while keeping deployer accountability that cannot be contracted away."
+  ],
+  "lessons": [
+    {
+      "id": "l1-select-and-deploy",
+      "title": "Build or buy: selecting a model and deploying it responsibly",
+      "estMinutes": 18,
+      "objective": "Weigh own-vs-third-party model selection with the IV.A factors, and know which EU AI Act role (provider vs deployer) you take on — including when a deployer legally becomes a provider.",
+      "body": "## The decision the exam opens with\n\nDomain IV starts before the system is live: **should you build your own model or use a third party's?** The Body of Knowledge (IV.A) frames the decision around three axes you must be able to reason over:\n\n- **Use-case context** — business objectives, performance requirements, data availability, ethical considerations, and workforce readiness.\n- **Model type** — classic (deterministic/statistical) vs generative; proprietary vs open source; small vs large; language-only vs multimodal.\n- **Deployment option** — cloud vs on-premise vs edge; and using the model **as-is** vs adapting it with **fine-tuning**, **retrieval-augmented generation (RAG)**, or other techniques to improve performance and fit.\n\nEach axis has a governance consequence. Generative + large + multimodal widens the risk surface (hallucination, provenance, broader misuse). On-premise/edge gives you data control but pushes more security and maintenance onto you. Fine-tuning on your own data creates data-governance and IP exposure that using a model as-is does not.\n\n## The role you take: provider vs deployer\n\nThe EU AI Act allocates obligations by **role**, and this is the single most-tested distinction in D4. Article 3 defines them precisely:\n\n- A **provider** is the person or body that **develops** an AI system (or has one developed) and **places it on the market or puts it into service under its own name or trademark**, for payment or free.\n- A **deployer** is the person or body **using an AI system under its authority** — except purely personal, non-professional use.\n\nSo if you procure a third-party model and run it in your product, the vendor is (typically) the **provider** and you are the **deployer**. That does not make you obligation-free — the deployer carries its own duties (next lesson). And crucially, buying does **not** offload your accountability for *use*.\n\n> **Exam tip:** the top distractor in this domain is \"we bought the model from a vendor, so the vendor is accountable.\" Wrong. The **deployer remains accountable for how the system is used** — monitoring, human oversight, transparency to users, and incident handling all stay with you. Procurement shifts *some* provider duties to the vendor; it never transfers deployer accountability.\n\n## When a deployer becomes a provider (Article 25)\n\nThe roles are not fixed. Under **Article 25(1)**, a distributor, importer, **deployer**, or other third party is treated as a **provider** of a high-risk system — and inherits provider obligations (Article 16) — if it:\n\n- **(a)** puts its **own name or trademark** on a high-risk system already on the market;\n- **(b)** makes a **substantial modification** to a high-risk system already on the market such that it remains high-risk; or\n- **(c)** **modifies the intended purpose** of an AI system — *including a general-purpose AI system* — that was **not** classified as high-risk, in a way that makes it high-risk.\n\nThis is the exam's favourite \"gotcha\": you thought you were a deployer, but by re-badging or repurposing the model you stepped into the provider's (much heavier) shoes. Fine-tuning a general-purpose model to make a hiring-decision tool, then branding it as yours, is exactly the kind of move that flips the role.\n\n## The proprietary-model penalty (IV.B)\n\nThe Body of Knowledge explicitly flags that a company **deploying its own proprietary model** faces **increased obligations and higher potential liability** than one using a third party's. When you build, you own the full provider stack — technical documentation, conformity, post-market monitoring, incident reporting — on top of any deployer duties for how you use it. That is the honest cost side of \"build\" that build-vs-buy scenarios test.\n\n## Deploying responsibly\n\nOnce selected, IV.C says deployment must **apply the org's policies, procedures, best practices and ethical considerations** — data governance, risk management, issue management, and **user training**. And Article 4 adds a legal floor that applies from **2 February 2025**: providers **and** deployers must ensure a **sufficient level of AI literacy** among staff and others operating the system on their behalf. Responsible deployment is therefore as much about the people and process around the model as the model itself.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-1",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Under the EU AI Act, an organisation procures a third-party model and runs it in its customer-facing product under its own authority. What role does that organisation hold?",
+          "options": [
+            { "id": "a", "text": "Deployer — it uses the AI system under its authority", "correct": true },
+            { "id": "b", "text": "Provider — because it operates the system in production" },
+            { "id": "c", "text": "Neither role applies once a vendor is involved" },
+            { "id": "d", "text": "Importer only, with no further obligations" }
+          ],
+          "explanation": "Article 3 defines a **deployer** as one **using an AI system under its authority** (outside personal use) — exactly this. It is not a **provider**, because it neither developed the system nor placed it on the market under its own name (the vendor did). 'Neither role applies' is false — using the system in production is the definition of deploying — and 'importer only' understates the deployer duties (monitoring, oversight, transparency) that attach.",
+          "sourceRefs": ["r-euaiact-art3", "r-euaiact-art26"]
+        },
+        {
+          "id": "kc-d4-2",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A company fine-tunes a general-purpose AI model into a CV-screening tool, brands it under its own name, and puts it on the market. Under Article 25, what is the consequence?",
+          "options": [
+            { "id": "a", "text": "It is treated as a provider of a high-risk system and inherits provider obligations, because it repurposed a non-high-risk system into a high-risk one (and put its own name on it)", "correct": true },
+            { "id": "b", "text": "It stays a pure deployer because it only fine-tuned an existing model" },
+            { "id": "c", "text": "It has no obligations because the base model came from a third party" },
+            { "id": "d", "text": "It is exempt because general-purpose models are never high-risk" }
+          ],
+          "explanation": "Article 25(1)(c) treats a party that **modifies the intended purpose** of a system (including a GPAI system) so it **becomes high-risk** as a **provider** — and (a) also bites because it put its own name on it. CV-screening is Annex III employment high-risk. So it does not stay a mere deployer, it is not obligation-free, and the GPAI exemption is irrelevant once the purpose is changed to a high-risk use.",
+          "sourceRefs": ["r-euaiact-art25", "r-euaiact-annex3"]
+        },
+        {
+          "id": "kc-d4-3",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "According to the Body of Knowledge, which is a true governance consequence of a company deploying ITS OWN proprietary model rather than a third party's?",
+          "options": [
+            { "id": "a", "text": "Increased obligations and higher potential liability, because it also owns the provider-side responsibilities", "correct": true },
+            { "id": "b", "text": "Fewer obligations, because there is no vendor contract to manage" },
+            { "id": "c", "text": "Identical obligations either way — the source of the model is irrelevant" },
+            { "id": "d", "text": "It is automatically exempt from monitoring duties" }
+          ],
+          "explanation": "The BoK (IV.B) explicitly notes that deploying your own proprietary model brings **increased obligations and higher potential liability** — you carry the provider stack (documentation, conformity, post-market monitoring, incident reporting) on top of deployer duties. It is not fewer obligations, the model source very much changes who owes what, and no one is auto-exempt from monitoring.",
+          "sourceRefs": ["r-aigp-bok", "r-euaiact-art72"]
+        }
+      ]
+    },
+    {
+      "id": "l2-deployer-obligations-monitoring",
+      "title": "Running it: deployer obligations, monitoring, maintenance and incident management",
+      "estMinutes": 19,
+      "objective": "Apply the Article 26 deployer obligations, set up continuous post-market monitoring and a maintenance/retraining cadence, and triage incidents against Article 72/73 and NIST MANAGE.",
+      "body": "## The deployer's operating obligations (Article 26)\n\nFor **high-risk** systems, the EU AI Act places concrete, testable duties on the **deployer** in Article 26. You should be able to recognise each:\n\n- **Use per instructions (¶1)** — take appropriate technical and organisational measures to use the system **in accordance with the instructions for use** the provider supplied.\n- **Human oversight (¶2)** — assign oversight to **natural persons who have the necessary competence, training and authority**. Oversight is a *named-person* responsibility, not a checkbox.\n- **Input data (¶4)** — where the deployer controls input data, ensure it is **relevant and sufficiently representative** for the intended purpose.\n- **Monitor + escalate (¶5)** — **monitor operation**; where use may present a risk or you detect a **serious incident**, **inform the provider and the market surveillance authority** and, where relevant, **suspend use**.\n- **Keep logs (¶6)** — retain the system's **automatically generated logs** for a period appropriate to the purpose — **at least six months** unless other law says otherwise.\n- **Worker notification (¶7)** — before using a high-risk system in the workplace, **inform workers' representatives and affected workers** that they will be subject to it.\n- **Inform affected persons (¶11)** — where the system makes or assists **decisions about natural persons**, inform those persons that they are subject to its use.\n\n> **Exam tip:** notice that several of these are *deployer* duties even though people instinctively assign them to the builder. Human oversight, input-data quality (when you control the inputs), log retention, and telling affected people are **yours** as the deployer. Providers build the capability; deployers must actually *operate it responsibly*.\n\n## Monitoring is continuous, not a launch check\n\nThe second big trap: treating monitoring as a one-time go-live gate. The Act's model is **post-market monitoring** — Article 72 requires the **provider** to establish a documented **post-market monitoring system** that **actively and systematically collects, documents and analyses relevant data on performance throughout the system's lifetime**, based on a **post-market monitoring plan** in the technical documentation. The deployer's Article 26(5) monitoring feeds that loop. The BoK (IV.C) reinforces it from the deployer side: **conduct continuous monitoring** and set a **regular schedule for maintenance, updates and retraining**, plus **periodic** audits, red teaming, threat modeling and security testing.\n\nThis maps cleanly onto the **NIST AI RMF MANAGE** function, which is about **allocating resources to mapped and measured risks on a regular basis** and planning to **respond to, recover from, and communicate about incidents**. NIST MANAGE 4 in particular calls for risk treatments and response/recovery plans to be **documented and monitored regularly** — the ongoing loop, not a snapshot.\n\nWhat do you monitor? Model **drift** and degrading accuracy, data-distribution shift, fairness metrics over time, security signals, and near-miss/harm reports. A drifting model that silently loses accuracy is the classic scenario: the failure is not that the model changed — models change — it is that **no monitoring signal caught it**.\n\n## Incident and issue management ≠ retraining\n\nThe third trap the exam plants: **confusing incident management with model retraining**. Retraining is a *maintenance* activity on a schedule; **incident management** is the process that triggers when something goes wrong in production — detect, triage, contain (possibly **suspend use** per Article 26(5)), notify, remediate, and record. The BoK (IV.C) tells you to **document incidents, issues, risks and post-market monitoring plans**. Retraining might be *one* remediation, but it is not the incident process, and reaching for \"retrain the model\" when a scenario asks how to *handle* an incident is a wrong answer.\n\n## The kill switch\n\nOne more IV.C duty that surprises candidates: you must be able to **turn the system off**. The BoK requires a **policy and controls to deactivate or localise an AI model as necessary** — e.g. because a regulator requires it or performance has degraded. Responsible deployment includes the ability to **stop** deployment, not just start it.\n\n## Putting the run-phase together\n\n1. Deploy per the provider's instructions, with a **named, competent human overseer** (Art 26 ¶1–2).\n2. Run **continuous monitoring** for drift, fairness, and security; keep **logs ≥ 6 months** (Art 26 ¶6; Art 72).\n3. On a signal, run **incident management** — triage, **suspend if needed**, and **notify** the provider and authority (Art 26 ¶5; Art 73, next lesson).\n4. On a **schedule**, do maintenance, updates, retraining, and periodic **audits/red-teaming** (IV.C).\n5. Keep the **deactivation** control ready (IV.C).",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-4",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Under Article 26, a deployer of a high-risk AI system detects a serious incident in production. What does the Act require it to do?",
+          "options": [
+            { "id": "a", "text": "Inform the provider and the relevant market surveillance authority, and suspend use where appropriate", "correct": true },
+            { "id": "b", "text": "Immediately retrain the model and say nothing until retraining is complete" },
+            { "id": "c", "text": "Do nothing — incident reporting is solely the provider's job, never the deployer's" },
+            { "id": "d", "text": "Delete the system logs to limit liability" }
+          ],
+          "explanation": "Article 26(5) requires the deployer to **monitor**, and on a risk or serious incident to **inform the provider and the market surveillance authority** and **suspend use** where relevant. Retraining is not the incident process (and silence is wrong). The Act pulls the deployer into reporting, so 'solely the provider's job' is false. Deleting logs violates the ≥6-month retention duty (¶6) and is exactly backwards.",
+          "sourceRefs": ["r-euaiact-art26", "r-euaiact-art73"]
+        },
+        {
+          "id": "kc-d4-5",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement best reflects how the EU AI Act and NIST AI RMF treat monitoring of a deployed AI system?",
+          "options": [
+            { "id": "a", "text": "It is continuous post-market surveillance — actively and systematically collecting performance data throughout the system's lifetime", "correct": true },
+            { "id": "b", "text": "It is a one-time validation performed at launch and then complete" },
+            { "id": "c", "text": "It is only required after a serious incident has already occurred" },
+            { "id": "d", "text": "It is optional as long as a vendor supplied the model" }
+          ],
+          "explanation": "Article 72 frames monitoring as an ongoing **post-market monitoring system** that collects data **throughout the lifetime**, and NIST **MANAGE** treats risk treatment and monitoring as a **regular**, documented loop. It is therefore not a launch-only check, not merely post-incident, and not waived by procurement — the deployer's own monitoring duty (Art 26 ¶5) stands regardless of the model's source.",
+          "sourceRefs": ["r-euaiact-art72", "r-nist-rmf-core"]
+        },
+        {
+          "id": "kc-d4-6",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The Body of Knowledge (IV.C) requires deployers to create a policy and controls to do what, so a live model can be stopped when necessary?",
+          "options": [
+            { "id": "a", "text": "Deactivate or localise the AI model (e.g. for regulatory or performance reasons)", "correct": true },
+            { "id": "b", "text": "Permanently delete all model weights after every inference" },
+            { "id": "c", "text": "Publish the model's full source code" },
+            { "id": "d", "text": "Transfer ownership of the model to the regulator" }
+          ],
+          "explanation": "IV.C calls for a policy and controls to **deactivate or localise** the model as necessary — the ability to stop or contain a deployment. Deleting weights after each inference is nonsensical operationally, publishing source is not what a kill-switch requires, and ownership never transfers to a regulator.",
+          "sourceRefs": ["r-aigp-bok"]
+        }
+      ]
+    },
+    {
+      "id": "l3-transparency-and-notification",
+      "title": "Telling people vs telling authorities: transparency disclosure and notification duties",
+      "estMinutes": 17,
+      "objective": "Separate proactive Article 50 transparency disclosures (who is told they're dealing with AI) from reactive Article 73 serious-incident notification, and know which role owes which.",
+      "body": "## Two different duties the exam deliberately conflates\n\nCandidates lose marks by treating these as one thing. They are distinct:\n\n- **Transparency disclosure** = **proactive**, ongoing, aimed at **people** (users, affected persons, the public). *You are interacting with AI; this content is AI-generated.*\n- **Notification** = **reactive**, event-driven, aimed at **authorities**. *A serious incident happened; here is our report.*\n\n> **Exam tip:** if a stem says \"tell users/affected people,\" it is **transparency** (Article 50). If it says \"report to the authority within N days,\" it is **notification** (Article 73). One deployment can owe **both** at once — that is a favourite scenario.\n\n## Transparency: Article 50\n\nArticle 50 splits its duties between **providers** and **deployers** — know which is which:\n\n**Provider duties:**\n- **AI interaction (¶1)** — design systems that **interact directly with natural persons** so those persons are **informed they are interacting with an AI system**, *unless it is obvious* to a reasonably well-informed person.\n- **Synthetic content marking (¶2)** — mark AI-generated **audio, image, video or text** in a **machine-readable format, detectable as artificially generated** (with narrow exceptions such as standard editing).\n\n**Deployer duties:**\n- **Emotion recognition / biometric categorisation (¶3)** — **inform the natural persons exposed** to such a system.\n- **Deep fakes (¶4)** — **disclose** that image/audio/video content has been **artificially generated or manipulated** (exception for evidently artistic/creative/satirical/fictional work, with appropriate disclosure).\n- **AI-generated text on matters of public interest (¶4)** — where AI-generated text is **published to inform the public on matters of public interest**, disclose it is artificially generated (exception where a human reviewed it and holds editorial responsibility).\n\nLaw-enforcement carve-outs apply throughout. Disclosures must be **clear and distinguishable, at the latest at the first interaction**.\n\nSeparately, the **deployer** of a **high-risk** system must, under **Article 26(11)**, **inform natural persons that they are subject to** the high-risk system when it makes or assists decisions about them — a transparency duty that lives in the deployer-obligations article rather than Article 50.\n\n## The \"internal AI needs no disclosure\" trap\n\nA common wrong assumption: *if the AI is internal-facing, no disclosure is owed.* Not necessarily. Article 26(7) requires **informing workers and their representatives** before a high-risk system is used in the workplace — an *internal* deployment that still owes disclosure. And an internal chatbot your staff interact with can still fall under Article 50(1). \"Internal\" does not automatically mean \"silent.\"\n\n## Notification: Article 73 serious-incident reporting\n\nWhen something goes seriously wrong, the Act imposes **reporting to authorities** — a different duty from transparency. Article 73 requires **providers of high-risk systems** (and, where applicable, the deployer) to report a **serious incident** to the **market surveillance authority of the Member State where it occurred**, on a tiered clock:\n\n| Trigger | Deadline after becoming aware |\n|---|---|\n| General serious incident | **15 days** |\n| Death of a person | **10 days** |\n| Widespread infringement, or serious/irreversible disruption of critical infrastructure | **2 days** |\n\nA **serious incident** (Article 3(49)) is one that leads to: **death or serious harm to health**; **serious and irreversible disruption of critical infrastructure**; **infringement of fundamental-rights obligations under Union law**; or **serious harm to property or the environment**.\n\n> **Exam tip:** memorise the ladder — **2 / 10 / 15 days**. The shortest (2 days) is for the most systemic harms (critical-infrastructure disruption / widespread infringement); death is 10; the general default is 15. Getting the direction of the ladder right — most-severe = shortest window — is exactly the discrimination the exam wants.\n\n## Don't confuse the report with the disclosure\n\nReporting a serious incident to a market surveillance authority (notification, Art 73) is **not** the same as telling your users the system is AI (transparency, Art 50), and neither is the same as the **post-market monitoring plan** (Art 72) that documents how you watch for problems in the first place. Three related-but-separate mechanisms — keep them straight.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-7",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A deployer publishes AI-generated deep-fake video for a marketing campaign. Under Article 50, what must it do?",
+          "options": [
+            { "id": "a", "text": "Disclose that the content has been artificially generated or manipulated", "correct": true },
+            { "id": "b", "text": "Report the video to the market surveillance authority within 15 days" },
+            { "id": "c", "text": "Nothing — deep fakes are exempt from all transparency duties" },
+            { "id": "d", "text": "Only mark it in a machine-readable format; no human-visible disclosure is ever required" }
+          ],
+          "explanation": "Article 50(4) makes the **deployer** of a deep fake **disclose it is artificially generated or manipulated**. Option B confuses transparency with **notification** (Art 73 serious-incident reporting) — a different duty for a different trigger. Deep fakes are not exempt (a narrow artistic-works carve-out exists but still requires appropriate disclosure), and the machine-readable **marking** duty (¶2, on providers) does not remove the deployer's disclosure duty here.",
+          "sourceRefs": ["r-euaiact-art50", "r-euaiact-art73"]
+        },
+        {
+          "id": "kc-d4-8",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A high-risk AI system's malfunction leads to the death of a person. Under Article 73, within how long must the serious incident be reported to the market surveillance authority after the responsible party becomes aware?",
+          "options": [
+            { "id": "a", "text": "10 days", "correct": true },
+            { "id": "b", "text": "2 days" },
+            { "id": "c", "text": "15 days" },
+            { "id": "d", "text": "72 hours" }
+          ],
+          "explanation": "Article 73(4) sets **10 days** for a serious incident involving the **death of a person**. **2 days** (¶3) is for widespread infringement or serious disruption of critical infrastructure; **15 days** (¶2) is the general default; and **72 hours** is the GDPR personal-data-breach clock — a deliberate cross-framework distractor, not the AI Act incident deadline.",
+          "sourceRefs": ["r-euaiact-art73", "r-euaiact-art3"]
+        },
+        {
+          "id": "kc-d4-9",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which pairing correctly separates transparency from notification?",
+          "options": [
+            { "id": "a", "text": "Transparency = proactively telling users/affected people they're dealing with AI (Art 50); Notification = reporting a serious incident to an authority (Art 73)", "correct": true },
+            { "id": "b", "text": "Transparency = reporting incidents to regulators; Notification = telling users the system uses AI" },
+            { "id": "c", "text": "They are the same obligation with two names" },
+            { "id": "d", "text": "Both are owed only by the provider, never the deployer" }
+          ],
+          "explanation": "Transparency (Art 50) is **proactive disclosure to people**; notification (Art 73) is **reactive reporting to authorities**. Option B reverses them; they are **not** the same duty; and both articles place duties on **deployers** as well as providers (e.g. deployer deep-fake disclosure; deployer incident reporting where applicable), so 'provider only' is wrong.",
+          "sourceRefs": ["r-euaiact-art50", "r-euaiact-art73"]
+        }
+      ]
+    },
+    {
+      "id": "l4-accountability-and-vendor-governance",
+      "title": "Keeping it answerable: accountability structures and vendor/procurement governance",
+      "estMinutes": 16,
+      "objective": "Define where accountability sits across the org, govern third-party AI through procurement and the vendor/open-source agreement, and use the FRIA — while recognising which duties a contract cannot transfer.",
+      "body": "## Accountability is a structure, not a slogan\n\nThe governance frameworks agree that someone must **own** the live system. The **OECD** accountability principle (1.5) states that **AI actors should be accountable for the proper functioning of AI systems and for the respect of the principles, based on their roles, the context, and consistent with the state of the art.** NIST's **GOVERN** function builds this in — **GOVERN 2** is explicitly about **accountability structures for teams and individuals** — and treats third-party risk as a first-class concern (**GOVERN 6**, **MANAGE 3**). ISO/IEC 42001 provides the **management-system** wrapper (an AIMS with defined roles, controls and continual improvement) into which these accountabilities slot.\n\nIn practice, D4 wants **named owners**: a risk owner, a human-oversight owner (Article 26(2) demands a *competent* natural person), an incident owner, and an executive accountable for the system as a whole. \"The AI is responsible\" and \"everyone is responsible\" are both governance failures.\n\n## Procurement and vendor governance (IV.B)\n\nMost organisations **buy** rather than build, so vendor governance is where a lot of D4's real work lives. The BoK (IV.B) requires you to **identify and evaluate key terms and risks in the vendor or open-source agreement**. That means the contract has to carry the governance you need:\n\n- **Documentation and transparency from the vendor** — you must be able to understand the model's **capabilities and limitations**. The Act supports this from the supply side: **Article 53** obliges **GPAI-model providers** to keep **technical documentation** and to **give downstream providers the information** they need to integrate the model responsibly. When you procure, insist that flows to you.\n- **Rights to monitor, audit, and be informed of changes** — so your continuous-monitoring and incident duties are actually satisfiable.\n- **Incident cooperation and notification** — the vendor must tell you fast enough that you can meet your own Article 73 clock.\n- **Data handling, IP, and use restrictions** — especially if you fine-tune or send data (prompts) to the model.\n- **Liability and indemnities** — allocate risk, but see the limit below.\n\nFor **open-source** models, the \"agreement\" is the licence: check permitted uses, redistribution, and the total **absence of a support/indemnity counterparty** — the flip side of the freedom.\n\n## The line a contract cannot cross\n\nHere is the domain's central rule, stated plainly: **a vendor contract does not transfer away your deployer accountability.** You can push provider-side duties (conformity, model documentation, post-market monitoring of the model) onto the vendor, and you *should* allocate liability — but the duties tied to **how you use the system** stay with you: **human oversight, use per instructions, monitoring in your context, transparency to your users, informing affected persons, and handling incidents.** If a scenario says \"our contract makes the vendor responsible for everything, so we're covered,\" that is the wrong answer.\n\n## Impact assessment on the deployment side (Article 27)\n\nBefore deploying certain high-risk systems, some **deployers** must run a **fundamental rights impact assessment (FRIA)** under **Article 27** — specifically **bodies governed by public law, private entities providing public services**, and deployers of the **creditworthiness/credit-scoring** and **life/health-insurance risk** Annex III systems. The FRIA must describe the **processes and period/frequency of use**, the **categories of persons affected**, the **specific risks of harm**, the **human-oversight measures**, and the **measures if risks materialise** (including internal governance and complaint mechanisms) — and the deployer must **notify the market surveillance authority of the results**. This is the deployer-side companion to the provider's development-phase impact work, and IV.B asks you to **perform or review an impact assessment on the selected model**.\n\n## External communication (IV.C)\n\nFinally, IV.C requires deployers to **establish external communication plans** — how you talk to users, affected people, regulators, and the public when something happens. That closes the accountability loop: a system is only truly answerable if there is a defined way to *answer*.\n\n> **Exam tip:** the three vendor-governance traps to reject — (1) *procurement offloads deployer accountability* (it does not); (2) *a strong contract removes the need to monitor* (your Art 26(5) duty stands); (3) *open-source means no governance* (the licence terms and the lack of a support counterparty are themselves risks to govern).",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-10",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An organisation signs a contract making its AI vendor 'fully responsible for the model.' A regulator later questions how the system is being used in production. Where does accountability for use sit?",
+          "options": [
+            { "id": "a", "text": "With the deployer — human oversight, monitoring, transparency and incident handling for the deployment cannot be contracted away", "correct": true },
+            { "id": "b", "text": "Entirely with the vendor, because the contract transferred all responsibility" },
+            { "id": "c", "text": "With the regulator, since it approved the market" },
+            { "id": "d", "text": "Nowhere — a signed contract extinguishes accountability for both parties" }
+          ],
+          "explanation": "Deployer accountability for **use** — oversight, monitoring, transparency, incidents — **stays with the deployer** regardless of contract terms; procurement shifts some provider duties, not deployer accountability. The vendor is not solely accountable for how you operate the system, regulators authorise rather than assume operator accountability, and a contract never extinguishes accountability.",
+          "sourceRefs": ["r-euaiact-art26", "r-oecd-principles"]
+        },
+        {
+          "id": "kc-d4-11",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "When procuring a general-purpose AI model to integrate into your product, which upstream obligation helps you meet your own governance duties?",
+          "options": [
+            { "id": "a", "text": "Article 53 requires the GPAI provider to give downstream providers the information and documentation needed to understand the model's capabilities and limitations", "correct": true },
+            { "id": "b", "text": "Article 53 requires the vendor to assume all of your deployer obligations" },
+            { "id": "c", "text": "Article 53 forbids any documentation from being shared, to protect trade secrets" },
+            { "id": "d", "text": "There is no upstream documentation duty; you must reverse-engineer the model" }
+          ],
+          "explanation": "Article 53 obliges **GPAI-model providers** to maintain technical documentation and to **supply downstream integrators** with information about capabilities and limitations (while protecting IP). It does not make the vendor assume your deployer duties, it does not forbid sharing (it mandates a controlled form of it), and the duty exists — no reverse-engineering required.",
+          "sourceRefs": ["r-euaiact-art53", "r-aigp-bok"]
+        },
+        {
+          "id": "kc-d4-12",
+          "domainId": "d4-govern-deployment",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Which deployer is explicitly required by Article 27 to carry out a fundamental rights impact assessment (FRIA) before deploying a high-risk system?",
+          "options": [
+            { "id": "a", "text": "A private entity providing a public service, deploying an eligible Annex III high-risk system", "correct": true },
+            { "id": "b", "text": "Any company deploying any AI system of any risk level" },
+            { "id": "c", "text": "Only the provider that built the system, never a deployer" },
+            { "id": "d", "text": "No one — the FRIA was removed from the final Act" }
+          ],
+          "explanation": "Article 27(1) names **bodies governed by public law, private entities providing public services**, and deployers of the credit-scoring and life/health-insurance Annex III systems. It is **not** every deployer of every system (only specified high-risk cases), it is a **deployer** duty (not the provider's), and the FRIA is very much in the final Act.",
+          "sourceRefs": ["r-euaiact-art27", "r-euaiact-annex3"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d4-1",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How does the EU AI Act define a 'provider'?",
+      "options": [
+        { "id": "a", "text": "A party that develops an AI system (or has it developed) and places it on the market or puts it into service under its own name or trademark", "correct": true },
+        { "id": "b", "text": "Any party that uses an AI system under its own authority" },
+        { "id": "c", "text": "The end user who interacts with the AI system's outputs" },
+        { "id": "d", "text": "The cloud host that provides the compute for the model" }
+      ],
+      "explanation": "Article 3(3) defines a **provider** as one that **develops or has developed** an AI system and **places it on the market / puts it into service under its own name or trademark**. Option B is the definition of a **deployer** (Art 3(4)); the end user is neither role; and the compute host is not, by that fact alone, the provider.",
+      "sourceRefs": ["r-euaiact-art3"]
+    },
+    {
+      "id": "q-d4-2",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of the following is the clearest example of a 'deployer' under the EU AI Act?",
+      "options": [
+        { "id": "a", "text": "A bank that runs a third-party fraud-detection model in its operations under its own authority", "correct": true },
+        { "id": "b", "text": "A vendor that builds a model and sells it under its own brand" },
+        { "id": "c", "text": "An individual using a chatbot for a purely personal, non-professional task" },
+        { "id": "d", "text": "A researcher who only writes an academic paper about a model" }
+      ],
+      "explanation": "A **deployer** uses an AI system **under its authority** in a professional context — the bank running the model fits exactly. The vendor selling under its brand is a **provider**; purely **personal, non-professional** use is expressly **excluded** from the deployer definition; and writing a paper is neither developing nor operating the system.",
+      "sourceRefs": ["r-euaiact-art3"]
+    },
+    {
+      "id": "q-d4-3",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer buys a third-party AI system, keeps the vendor's branding, and deploys it unchanged. It later claims it has 'no obligations' because it did not build the model. What is the correct governance position?",
+      "options": [
+        { "id": "a", "text": "It is a deployer and still carries deployer obligations — human oversight, monitoring, transparency, and incident handling", "correct": true },
+        { "id": "b", "text": "It is correct — buying a model removes all obligations" },
+        { "id": "c", "text": "It automatically becomes a provider merely by deploying the system" },
+        { "id": "d", "text": "Only the cloud host has any obligations" }
+      ],
+      "explanation": "Using a system under your authority makes you a **deployer** with real duties (Art 26): oversight, monitoring, transparency, incidents. Buying does **not** erase obligations. It does **not** automatically become a provider (that needs an Art 25 trigger like rebranding or substantial modification — here it kept the vendor's branding and made no changes). And the cloud host is not the sole obligation-holder.",
+      "sourceRefs": ["r-euaiact-art3", "r-euaiact-art25", "r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-4",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under Article 25, a deployer becomes subject to PROVIDER obligations for a high-risk system when it does which of the following?",
+      "options": [
+        { "id": "a", "text": "Makes a substantial modification to a high-risk system already on the market such that it remains high-risk", "correct": true },
+        { "id": "b", "text": "Uses the system exactly per the provider's instructions" },
+        { "id": "c", "text": "Keeps the vendor's name on the system and changes nothing" },
+        { "id": "d", "text": "Assigns a human overseer to the system" }
+      ],
+      "explanation": "Article 25(1)(b) flips a party into a **provider** if it makes a **substantial modification** to a high-risk system that stays high-risk (also triggered by rebranding under (a) or repurposing-to-high-risk under (c)). Using it per instructions, leaving the vendor's name in place with no change, and assigning oversight are all ordinary **deployer** activities that do not trigger the role change.",
+      "sourceRefs": ["r-euaiact-art25"]
+    },
+    {
+      "id": "q-d4-5",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The AIGP Body of Knowledge (IV.A) lists factors relevant to the decision to deploy a model. Which is one of the model-type distinctions it names?",
+      "options": [
+        { "id": "a", "text": "Classic vs generative, proprietary vs open source, small vs large, language vs multimodal", "correct": true },
+        { "id": "b", "text": "The colour of the vendor's logo and its marketing budget" },
+        { "id": "c", "text": "Whether the CEO personally prefers the model" },
+        { "id": "d", "text": "The number of social-media followers the model has" }
+      ],
+      "explanation": "IV.A explicitly names **classic vs generative, proprietary vs open source, small vs large, and language vs multimodal** as the model-type differences to weigh. The other options are not governance-relevant selection factors and appear nowhere in the Body of Knowledge.",
+      "sourceRefs": ["r-aigp-bok"]
+    },
+    {
+      "id": "q-d4-6",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is a deployment-option distinction the Body of Knowledge (IV.A) asks you to consider?",
+      "options": [
+        { "id": "a", "text": "Cloud vs on-premise vs edge, and using the model as-is vs fine-tuning or retrieval-augmented generation", "correct": true },
+        { "id": "b", "text": "Whether to deploy on a Tuesday or a Friday" },
+        { "id": "c", "text": "The font used in the model's documentation" },
+        { "id": "d", "text": "Whether the model has a memorable name" }
+      ],
+      "explanation": "IV.A names **cloud vs on-premise vs edge** and **as-is vs fine-tuning / RAG** as deployment options — each with different data-control, security and maintenance consequences. The remaining choices are irrelevant to a governance deployment decision.",
+      "sourceRefs": ["r-aigp-bok"]
+    },
+    {
+      "id": "q-d4-7",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Article 26 requires a deployer of a high-risk system to assign human oversight to whom?",
+      "options": [
+        { "id": "a", "text": "Natural persons who have the necessary competence, training and authority", "correct": true },
+        { "id": "b", "text": "Any available employee, regardless of training" },
+        { "id": "c", "text": "An automated secondary AI system that reviews the first" },
+        { "id": "d", "text": "The provider's staff only" }
+      ],
+      "explanation": "Article 26(2) requires oversight by **natural persons with the necessary competence, training and authority** — a named, capable human. 'Any employee regardless of training' fails the competence bar, an **automated** overseer is not human oversight, and the duty is the **deployer's** to staff, not something delegated back to the provider.",
+      "sourceRefs": ["r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-8",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "For how long must a deployer keep the logs automatically generated by a high-risk AI system, per Article 26, absent other legal requirements?",
+      "options": [
+        { "id": "a", "text": "At least six months", "correct": true },
+        { "id": "b", "text": "At least 24 hours" },
+        { "id": "c", "text": "No retention is required" },
+        { "id": "d", "text": "Exactly seven years, with no shorter period permitted" }
+      ],
+      "explanation": "Article 26(6) sets a floor of **at least six months** (unless other Union or national law requires otherwise), appropriate to the intended purpose. 24 hours is far too short, 'no retention' contradicts the duty, and 'exactly seven years with no flexibility' misstates it — six months is the minimum, not a fixed maximum.",
+      "sourceRefs": ["r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-9",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Before an employer deploys a high-risk AI system in the workplace, Article 26 requires it to do what?",
+      "options": [
+        { "id": "a", "text": "Inform workers' representatives and the affected workers that they will be subject to the system", "correct": true },
+        { "id": "b", "text": "Nothing — internal workplace use is exempt from all disclosure" },
+        { "id": "c", "text": "Publish the system's full source code to the workforce" },
+        { "id": "d", "text": "Obtain the market surveillance authority's prior written approval for each worker" }
+      ],
+      "explanation": "Article 26(7) requires employers to **inform workers' representatives and affected workers** before workplace use — a clear counter to the 'internal AI needs no disclosure' myth. It does not require publishing source code, and there is no per-worker prior-approval regime from the authority.",
+      "sourceRefs": ["r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-10",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under Article 72, who must establish a post-market monitoring system for a high-risk AI system, and what must it do?",
+      "options": [
+        { "id": "a", "text": "The provider, establishing a documented system that actively and systematically collects and analyses performance data over the system's lifetime", "correct": true },
+        { "id": "b", "text": "The deployer only, as a one-time check at launch" },
+        { "id": "c", "text": "The market surveillance authority, on the provider's behalf" },
+        { "id": "d", "text": "No one — monitoring is optional under the Act" }
+      ],
+      "explanation": "Article 72 puts the **post-market monitoring system** on the **provider**, based on a documented plan, collecting and analysing performance data **throughout the lifetime** — not a one-off. The deployer has its own monitoring duty (Art 26(5)) but does not replace the provider's system; authorities receive reports, they do not run the provider's monitoring; and it is mandatory, not optional.",
+      "sourceRefs": ["r-euaiact-art72"]
+    },
+    {
+      "id": "q-d4-11",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A deployed high-risk model gradually loses accuracy over months as real-world data shifts, and no one notices until customers complain. Which governance gap best explains the failure?",
+      "options": [
+        { "id": "a", "text": "Missing continuous monitoring for drift — monitoring was treated as a launch check, not ongoing post-market surveillance", "correct": true },
+        { "id": "b", "text": "The model was never trained in the first place" },
+        { "id": "c", "text": "The provider failed to publish the model's source code" },
+        { "id": "d", "text": "Transparency disclosure to users was omitted" }
+      ],
+      "explanation": "Silent accuracy decay from data shift is **drift**, and catching it is the job of **continuous monitoring** (Art 72 lifetime surveillance; NIST MANAGE's regular loop; BoK IV.C). The model clearly was trained (it worked at launch), source-code publication is unrelated to drift detection, and a missing **transparency** disclosure would not cause or reveal accuracy loss.",
+      "sourceRefs": ["r-euaiact-art72", "r-nist-rmf-core", "r-aigp-bok"]
+    },
+    {
+      "id": "q-d4-12",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A scenario asks how a deployer should HANDLE a production incident where a high-risk model caused harm. Which answer reflects incident management rather than routine maintenance?",
+      "options": [
+        { "id": "a", "text": "Triage and contain (suspend use if needed), notify the provider and the authority, remediate, and document the incident", "correct": true },
+        { "id": "b", "text": "Schedule the next quarterly retraining and take no other action" },
+        { "id": "c", "text": "Wait for the annual audit to record it" },
+        { "id": "d", "text": "Delete the logs so the incident cannot be traced" }
+      ],
+      "explanation": "Incident management is **detect → triage → contain (possibly suspend, Art 26(5)) → notify → remediate → document** (BoK IV.C). **Retraining** is scheduled maintenance, not the incident response; waiting for an annual audit ignores the duty to act now; and deleting logs breaches the ≥6-month retention rule and destroys traceability.",
+      "sourceRefs": ["r-aigp-bok", "r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-13",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Under Article 50, which transparency duty falls on the PROVIDER (rather than the deployer)?",
+      "options": [
+        { "id": "a", "text": "Designing an AI system that interacts with people so they are informed they are dealing with AI, and marking synthetic content as machine-readable/artificially generated", "correct": true },
+        { "id": "b", "text": "Disclosing that a published deep fake was artificially generated" },
+        { "id": "c", "text": "Informing people exposed to an emotion-recognition system" },
+        { "id": "d", "text": "Disclosing AI-generated text published to inform the public on matters of public interest" }
+      ],
+      "explanation": "Article 50(1)–(2) place the **AI-interaction disclosure** and **synthetic-content marking** duties on the **provider**. The deep-fake disclosure (¶4), emotion-recognition notice (¶3), and public-interest text disclosure (¶4) are all **deployer** duties. Knowing which paragraph binds which role is the discrimination being tested.",
+      "sourceRefs": ["r-euaiact-art50"]
+    },
+    {
+      "id": "q-d4-14",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the general deadline under Article 73 to report a serious incident to the market surveillance authority after becoming aware of it?",
+      "options": [
+        { "id": "a", "text": "15 days", "correct": true },
+        { "id": "b", "text": "72 hours" },
+        { "id": "c", "text": "30 days" },
+        { "id": "d", "text": "6 months" }
+      ],
+      "explanation": "Article 73(2) sets the **general** deadline at **15 days** after awareness. **72 hours** is the GDPR breach-notification clock (a cross-framework distractor), and 30 days / 6 months are simply wrong — note that shorter windows apply for death (10 days) and critical-infrastructure/widespread cases (2 days).",
+      "sourceRefs": ["r-euaiact-art73"]
+    },
+    {
+      "id": "q-d4-15",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A serious incident causes a serious and irreversible disruption to the operation of critical infrastructure. What is the reporting deadline under Article 73?",
+      "options": [
+        { "id": "a", "text": "2 days after becoming aware", "correct": true },
+        { "id": "b", "text": "10 days after becoming aware" },
+        { "id": "c", "text": "15 days after becoming aware" },
+        { "id": "d", "text": "There is no deadline for infrastructure incidents" }
+      ],
+      "explanation": "Article 73(3) sets **2 days** for a **widespread infringement** or a **serious disruption of critical infrastructure** — the shortest window, for the most systemic harm. **10 days** is for death of a person, **15 days** is the general default, and there is certainly a deadline (the whole ladder is 2/10/15).",
+      "sourceRefs": ["r-euaiact-art73"]
+    },
+    {
+      "id": "q-d4-16",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of these is a 'serious incident' as defined in Article 3(49)?",
+      "options": [
+        { "id": "a", "text": "A malfunction that leads to serious and irreversible disruption of critical infrastructure", "correct": true },
+        { "id": "b", "text": "A minor UI typo in the model's chat window" },
+        { "id": "c", "text": "A user disagreeing with the model's tone" },
+        { "id": "d", "text": "The vendor raising its subscription price" }
+      ],
+      "explanation": "Article 3(49) defines a serious incident by its outcomes: **death/serious harm to health, serious and irreversible disruption of critical infrastructure, infringement of fundamental-rights obligations, or serious harm to property/environment** — (a) fits. A typo, a tone complaint, and a price change are none of these.",
+      "sourceRefs": ["r-euaiact-art3"]
+    },
+    {
+      "id": "q-d4-17",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An org insists that because its vendor contract makes the supplier 'responsible for the model,' the org owes nothing further. Which duty does this overlook?",
+      "options": [
+        { "id": "a", "text": "The deployer's own duties — human oversight, monitoring in context, transparency to users, and incident handling — which a contract cannot transfer away", "correct": true },
+        { "id": "b", "text": "None — a contract can transfer every governance duty" },
+        { "id": "c", "text": "Only the duty to pay the invoice on time" },
+        { "id": "d", "text": "Only the vendor's marketing obligations" }
+      ],
+      "explanation": "Deployer accountability for **use** persists regardless of contract wording (Art 26; OECD accountability principle). A contract can allocate liability and push some provider duties to the supplier, but it cannot transfer **every** governance duty. The invoice and vendor marketing are irrelevant to the overlooked governance duties.",
+      "sourceRefs": ["r-euaiact-art26", "r-oecd-principles"]
+    },
+    {
+      "id": "q-d4-18",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When procuring a third-party model, the Body of Knowledge (IV.B) asks you specifically to do what?",
+      "options": [
+        { "id": "a", "text": "Identify and evaluate key terms and risks in the vendor or open-source agreement", "correct": true },
+        { "id": "b", "text": "Rely solely on the vendor's marketing claims without reading the agreement" },
+        { "id": "c", "text": "Assume open-source models carry zero governance risk" },
+        { "id": "d", "text": "Skip the agreement because the provider handles all governance" }
+      ],
+      "explanation": "IV.B requires you to **identify and evaluate key terms and risks in the vendor or open-source agreement** — the contract/licence is a governance instrument. Relying on marketing, assuming open source is risk-free, and skipping the agreement all abdicate that duty.",
+      "sourceRefs": ["r-aigp-bok"]
+    },
+    {
+      "id": "q-d4-19",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under Article 53, what must a provider of a general-purpose AI model make available to downstream providers who integrate the model?",
+      "options": [
+        { "id": "a", "text": "Information and documentation enabling them to understand the model's capabilities and limitations (while protecting IP/trade secrets)", "correct": true },
+        { "id": "b", "text": "Nothing — GPAI providers owe no documentation to integrators" },
+        { "id": "c", "text": "A full transfer of the downstream provider's legal liability" },
+        { "id": "d", "text": "The integrator's own customer list" }
+      ],
+      "explanation": "Article 53(1)(b) obliges GPAI-model providers to give **downstream integrators** the **information/documentation** needed to understand **capabilities and limitations** (balancing IP protection). They do owe documentation, they do not assume the integrator's liability, and customer lists are unrelated.",
+      "sourceRefs": ["r-euaiact-art53"]
+    },
+    {
+      "id": "q-d4-20",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which deployers must perform a fundamental rights impact assessment (FRIA) under Article 27 before deploying an eligible high-risk system?",
+      "options": [
+        { "id": "a", "text": "Bodies governed by public law, private entities providing public services, and deployers of certain Annex III credit-scoring and life/health-insurance systems", "correct": true },
+        { "id": "b", "text": "Every deployer of every AI system, regardless of risk" },
+        { "id": "c", "text": "Only providers, never deployers" },
+        { "id": "d", "text": "Only individuals using AI for personal purposes" }
+      ],
+      "explanation": "Article 27(1) names **public-law bodies, private entities providing public services**, and deployers of the specified **creditworthiness** and **life/health-insurance** Annex III systems. It is not universal, it is a **deployer** duty (not provider-only), and personal use is outside the Act's deployer scope entirely.",
+      "sourceRefs": ["r-euaiact-art27"]
+    },
+    {
+      "id": "q-d4-21",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The AI RMF 'MANAGE' function is best summarised as:",
+      "options": [
+        { "id": "a", "text": "Allocating resources to mapped and measured risks on a regular basis, with plans to respond to, recover from, and communicate about incidents", "correct": true },
+        { "id": "b", "text": "Establishing the context to frame risks related to an AI system" },
+        { "id": "c", "text": "Cultivating a risk-management culture and accountability structures" },
+        { "id": "d", "text": "Analysing and benchmarking AI risk with quantitative and qualitative methods" }
+      ],
+      "explanation": "**MANAGE** is about **acting on** risks — allocating resources regularly and planning incident response/recovery/communication. Option B describes **MAP**, option C describes **GOVERN**, and option D describes **MEASURE**. MANAGE is the function most aligned with D4's monitoring-and-incident phase.",
+      "sourceRefs": ["r-nist-rmf-core"]
+    },
+    {
+      "id": "q-d4-22",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An AI system is a safety component of a product already covered by EU harmonisation legislation (Annex I) that requires third-party conformity assessment. Under Article 6, how is it classified?",
+      "options": [
+        { "id": "a", "text": "High-risk — via the product-safety-component path (Article 6(1))", "correct": true },
+        { "id": "b", "text": "Minimal-risk, because it is embedded in a product" },
+        { "id": "c", "text": "Prohibited, because it touches physical safety" },
+        { "id": "d", "text": "Out of scope, because product law already covers it" }
+      ],
+      "explanation": "Article 6(1) makes an AI system **high-risk** when it is a **safety component of (or is) a product** under Annex I harmonisation legislation requiring **third-party conformity assessment**. It is not minimal-risk, not automatically prohibited, and not out of scope — the AI Act layers on top of the product legislation.",
+      "sourceRefs": ["r-euaiact-art6"]
+    },
+    {
+      "id": "q-d4-23",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is one of the eight Annex III high-risk areas relevant to a deployment decision?",
+      "options": [
+        { "id": "a", "text": "Employment, workers management and access to self-employment", "correct": true },
+        { "id": "b", "text": "Recreational video-game difficulty tuning" },
+        { "id": "c", "text": "Restaurant menu design" },
+        { "id": "d", "text": "Choosing office wall colours" }
+      ],
+      "explanation": "Annex III lists eight areas including **employment/worker management** (e.g. recruitment and performance monitoring). Game difficulty, menu design, and office decor are not Annex III high-risk areas — the list targets domains with significant impact on rights, safety, or access to essential services.",
+      "sourceRefs": ["r-euaiact-annex3"]
+    },
+    {
+      "id": "q-d4-24",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An Annex III-listed system performs only a narrow procedural task and does not profile natural persons. Under Article 6(3), what is the effect?",
+      "options": [
+        { "id": "a", "text": "It may be assessed as NOT high-risk if it does not pose a significant risk of harm — but profiling of natural persons is always high-risk", "correct": true },
+        { "id": "b", "text": "It is automatically high-risk with no possible exception" },
+        { "id": "c", "text": "It is automatically prohibited" },
+        { "id": "d", "text": "The exception applies to every Annex III system, including profiling" }
+      ],
+      "explanation": "Article 6(3) provides a **narrow exception**: an Annex III system that **does not pose a significant risk** (e.g. a narrow procedural task) may fall outside high-risk — but **profiling of natural persons is always high-risk**. So it is neither automatically high-risk in every case nor prohibited, and the exception explicitly does **not** cover profiling.",
+      "sourceRefs": ["r-euaiact-art6"]
+    },
+    {
+      "id": "q-d4-25",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Article 4 (AI literacy) places a duty on whom, and from when did it start to apply?",
+      "options": [
+        { "id": "a", "text": "Both providers and deployers — to ensure sufficient AI literacy of staff operating the systems — applying from 2 February 2025", "correct": true },
+        { "id": "b", "text": "Providers only, applying from 2 August 2027" },
+        { "id": "c", "text": "Deployers only, with no start date yet set" },
+        { "id": "d", "text": "Neither — AI literacy is a voluntary recommendation" }
+      ],
+      "explanation": "Article 4 binds **both providers and deployers** to ensure a sufficient level of **AI literacy** among staff and others operating the systems on their behalf, and it **applies from 2 February 2025** (alongside the prohibitions). It is not provider-only, not deployer-only-with-no-date, and not merely voluntary — it is a legal obligation now in force.",
+      "sourceRefs": ["r-euaiact-art4", "r-euaiact-timeline"]
+    },
+    {
+      "id": "q-d4-26",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "On the EU AI Act phase-in, what is the correct ORDER in which these obligation sets start to apply (earliest first)?",
+      "options": [
+        { "id": "a", "text": "Prohibitions + AI literacy → GPAI-model obligations → stand-alone (Annex III) high-risk obligations → product-embedded (Annex I / Article 6(1)) high-risk obligations", "correct": true },
+        { "id": "b", "text": "All high-risk obligations (Annex I and Annex III together) → GPAI-model obligations → prohibitions" },
+        { "id": "c", "text": "GPAI-model obligations → prohibitions → Annex I high-risk → Annex III high-risk" },
+        { "id": "d", "text": "Everything applies simultaneously on entry into force" },
+        { "id": "e", "text": "Product-embedded (Annex I) high-risk → stand-alone (Annex III) high-risk → GPAI → prohibitions" }
+      ],
+      "explanation": "The phase-in **structure** is the durable, examinable fact: **prohibitions + AI-literacy first** (2 Feb 2025), then **GPAI-model obligations** (2 Aug 2025), then the **stand-alone Annex III high-risk** obligations, and finally the **product-embedded Annex I / Article 6(1) high-risk** obligations. Nothing applies on entry into force (1 Aug 2024), and the obligations deliberately do **not** all start at once.\n\n> **Currency note (as of 2 July 2026):** the two high-risk application dates were **deferred by the Digital Omnibus on AI** (provisional political agreement 6–7 May 2026, confirmed by the Council 13 May 2026, endorsed by the European Parliament 16 June 2026; publication in the Official Journal expected shortly, before the original 2 Aug 2026 deadline). Under the Omnibus, **stand-alone Annex III high-risk obligations move from 2 Aug 2026 → 2 December 2027**, and **product-embedded Annex I high-risk obligations move from 2 Aug 2027 → 2 August 2028**. **Prohibitions (2 Feb 2025)** and **GPAI (2 Aug 2025)** are unchanged. This item tests the ordering, which the deferral does not change; re-verify the exact dates against EUR-Lex once the Omnibus is published in the Official Journal.",
+      "sourceRefs": ["r-euaiact-timeline"]
+    },
+    {
+      "id": "q-d4-27",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which OECD AI Principle most directly underpins the requirement that a named owner answers for a live AI system?",
+      "options": [
+        { "id": "a", "text": "Accountability — AI actors should be accountable for proper functioning and respect for the principles, based on their roles and context", "correct": true },
+        { "id": "b", "text": "Inclusive growth, sustainable development and well-being" },
+        { "id": "c", "text": "Robustness, security and safety" },
+        { "id": "d", "text": "Transparency and explainability" }
+      ],
+      "explanation": "The **Accountability** principle (1.5) puts responsibility for proper functioning and principle-compliance on **AI actors by role/context** — the basis for named ownership. Inclusive growth is a societal-benefit principle, robustness is about resilient/secure operation, and transparency is about disclosure/explainability — related but not the accountability anchor.",
+      "sourceRefs": ["r-oecd-principles"]
+    },
+    {
+      "id": "q-d4-28",
+      "domainId": "d4-govern-deployment",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which of the following are DEPLOYER obligations under Article 26 for a high-risk AI system? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Assign human oversight to competent natural persons", "correct": true },
+        { "id": "b", "text": "Monitor operation and inform the provider/authority of a serious incident", "correct": true },
+        { "id": "c", "text": "Keep the system's automatically generated logs for at least six months", "correct": true },
+        { "id": "d", "text": "Draw up the system's technical documentation and CE-mark it" }
+      ],
+      "explanation": "A, B, and C are all **deployer** duties in Article 26 (¶2 oversight, ¶5 monitor/inform, ¶6 log retention). D is a **provider** obligation — drawing up technical documentation and affixing the CE marking are development/conformity duties, not deployer duties. Watch for provider tasks smuggled into a deployer list.",
+      "sourceRefs": ["r-euaiact-art26"]
+    },
+    {
+      "id": "q-d4-29",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A deployer runs a customer-facing chatbot. A user is not obviously aware they are talking to a machine. What does the AI Act's transparency regime require?",
+      "options": [
+        { "id": "a", "text": "The system must be designed so the person is informed they are interacting with an AI system, unless that is obvious", "correct": true },
+        { "id": "b", "text": "Nothing, because chatbots are exempt from transparency" },
+        { "id": "c", "text": "A serious-incident report to the market surveillance authority" },
+        { "id": "d", "text": "The user must sign a liability waiver before chatting" }
+      ],
+      "explanation": "Article 50(1) requires that people be **informed they are interacting with AI** unless it is obvious to a reasonably well-informed person — the provider designs for this and the deployer surfaces it. Chatbots are not exempt, an incident **report** (Art 73) is the wrong instrument for routine disclosure, and no liability waiver is contemplated.",
+      "sourceRefs": ["r-euaiact-art50"]
+    },
+    {
+      "id": "q-d4-30",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which activity does the Body of Knowledge (IV.C) list as PERIODIC assurance for a deployed model, distinct from continuous monitoring?",
+      "options": [
+        { "id": "a", "text": "Audits, red teaming, threat modeling and security testing", "correct": true },
+        { "id": "b", "text": "Deleting the model at random intervals" },
+        { "id": "c", "text": "Ignoring the model between quarterly reports" },
+        { "id": "d", "text": "Publicly livestreaming all inferences in real time" }
+      ],
+      "explanation": "IV.C names **audits, red teaming, threat modeling and security testing** as periodic activities to assess performance, reliability and safety — complementing (not replacing) continuous monitoring. Random deletion, deliberate neglect, and livestreaming inferences are not governance assurance activities.",
+      "sourceRefs": ["r-aigp-bok"]
+    },
+    {
+      "id": "q-d4-31",
+      "domainId": "d4-govern-deployment",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A deployer notices a serious risk in a high-risk system but keeps operating it, saying it will 'wait for the vendor to push a fix.' Under Article 26(5), what should it have done?",
+      "options": [
+        { "id": "a", "text": "Inform the provider and the market surveillance authority, and suspend use where the risk warrants it", "correct": true },
+        { "id": "b", "text": "Continue operating unchanged until the vendor acts" },
+        { "id": "c", "text": "Quietly disable logging to avoid scrutiny" },
+        { "id": "d", "text": "Escalate only internally and never contact any authority" }
+      ],
+      "explanation": "Article 26(5) requires the deployer to **inform the provider and the market surveillance authority** and **suspend use** where a risk is present — it cannot passively wait. Continuing unchanged ignores the duty, disabling logging breaches Art 26(6) and obstructs oversight, and 'never contact any authority' contradicts the explicit reporting requirement.",
+      "sourceRefs": ["r-euaiact-art26", "r-euaiact-art73"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d4-build-vs-buy",
+      "domainIds": ["d4-govern-deployment"],
+      "title": "Build or buy — and who is accountable when it's live",
+      "tagline": "Pick the model path, take on the right EU AI Act role, and place accountability.",
+      "context": "A UK bank wants to deploy an AI system that helps assess loan applications (creditworthiness). Leadership is deciding whether to fine-tune a third-party general-purpose model under the bank's own brand or buy a purpose-built vendor system and run it unchanged. Work through the selection, the role it creates under the EU AI Act, and where accountability lands once the system is live.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First, classify the use case. Credit assessment for loans — how should the bank treat it under the EU AI Act before choosing any model?",
+          "choices": [
+            { "id": "a", "text": "As a high-risk use (creditworthiness is Annex III), so the deployment must carry high-risk obligations and likely a fundamental rights impact assessment", "verdict": "best", "rationale": "Creditworthiness/credit-scoring is an Annex III high-risk area (essential services), which drives the whole obligation set — and Article 27 pulls in a FRIA for credit-scoring deployers. Classifying first is exactly right." },
+            { "id": "b", "text": "As minimal-risk, because it is just an internal decision-support tool", "verdict": "wrong", "rationale": "'Internal decision support' does not downgrade an Annex III high-risk use. Credit assessment affects access to an essential service and is high-risk regardless of framing." },
+            { "id": "c", "text": "As prohibited, because any AI touching finance is banned", "verdict": "wrong", "rationale": "Credit AI is not a prohibited practice — it is high-risk and permitted subject to obligations. Prohibited practices are a distinct, narrow list." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The bank chooses to fine-tune a third-party general-purpose model into its own credit tool and brand it as the bank's. Under Article 25, what role does the bank take on?",
+          "choices": [
+            { "id": "a", "text": "Provider of a high-risk system — it repurposed a GPAI system into a high-risk use and put its own name on it, so it inherits provider obligations", "verdict": "best", "rationale": "Article 25(1)(c) (repurposing a GPAI system into high-risk) and (a) (own branding) both trigger provider status. The bank now owns the heavy provider stack on top of deployer duties." },
+            { "id": "b", "text": "Pure deployer — fine-tuning and rebranding change nothing about its role", "verdict": "wrong", "rationale": "This is the classic trap. Rebranding and repurposing-to-high-risk are exactly the Article 25 triggers that flip a party into a provider." },
+            { "id": "c", "text": "Neither provider nor deployer, because a third-party base model was used", "verdict": "wrong", "rationale": "Using a third-party base does not remove roles; by modifying purpose and branding, the bank squarely becomes a provider." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Reconsidering, the bank instead buys a purpose-built vendor credit system and runs it UNCHANGED under the vendor's branding. What role and what should the contract secure?",
+          "choices": [
+            { "id": "a", "text": "Deployer — and the vendor agreement must secure model documentation (capabilities/limitations), monitoring/audit rights, and fast incident notification so the bank can meet its own duties", "verdict": "best", "rationale": "Unchanged + vendor branding keeps the bank a deployer; IV.B and Article 53 mean the contract must carry documentation, monitoring rights, and incident cooperation so the bank's Article 26/73 duties are satisfiable." },
+            { "id": "b", "text": "Deployer — but no contract terms are needed because the vendor handles all governance", "verdict": "wrong", "rationale": "Deployer duties (oversight, monitoring, transparency, incidents) stay with the bank; the contract must actively secure the information and rights to meet them." },
+            { "id": "c", "text": "Provider — buying a system always makes the purchaser the provider", "verdict": "wrong", "rationale": "Buying and running unchanged under the vendor's brand does not make the bank a provider; without an Article 25 trigger it remains the deployer." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The system is live and a regulator asks who is accountable for how loan decisions are being made. What is the correct position?",
+          "choices": [
+            { "id": "a", "text": "The bank, as deployer, remains accountable for use — human oversight, monitoring, transparency to applicants, and incident handling — even though a vendor supplied the model", "verdict": "best", "rationale": "Deployer accountability for use cannot be contracted away (Art 26; OECD accountability). The vendor's provider duties don't absorb the bank's operational accountability." },
+            { "id": "b", "text": "The vendor alone, because the procurement contract made it 'responsible for the model'", "verdict": "wrong", "rationale": "A contract can allocate liability and shift some provider duties, but it cannot transfer the deployer's accountability for how the system is used." },
+            { "id": "c", "text": "No one, since responsibility is shared between bank and vendor and therefore diffuse", "verdict": "wrong", "rationale": "Shared supply chains do not dissolve accountability. The deployer is answerable for use; 'diffuse, therefore nobody' is a governance failure." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-euaiact-art25", "r-euaiact-art26", "r-euaiact-art27", "r-euaiact-annex3", "r-oecd-principles"]
+    },
+    {
+      "id": "s-d4-incident-and-disclosure",
+      "domainIds": ["d4-govern-deployment"],
+      "title": "The model misfires — monitor, disclose, notify",
+      "tagline": "Separate continuous monitoring, transparency disclosure, and serious-incident notification under pressure.",
+      "context": "A media company deploys a high-risk AI system that also auto-generates and publishes news summaries (AI-generated text on matters of public interest). Over time the model drifts; eventually a malfunction produces outputs that cause serious, irreversible disruption to a piece of critical infrastructure the summaries feed into. Handle the run-phase governance correctly at each turn.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Before any incident: what should have been in place to catch the model's slow drift?",
+          "choices": [
+            { "id": "a", "text": "Continuous post-market monitoring for drift and performance, feeding the provider's monitoring plan and the deployer's own Article 26(5) monitoring", "verdict": "best", "rationale": "Drift is caught by ongoing monitoring (Art 72 lifetime surveillance; NIST MANAGE; BoK IV.C continuous monitoring), not a launch check. This is the missing signal in most drift scenarios." },
+            { "id": "b", "text": "A single accuracy test at go-live, then no further checks", "verdict": "wrong", "rationale": "Monitoring is continuous, not a one-time gate. A launch-only test is exactly what lets drift go unnoticed." },
+            { "id": "c", "text": "Occasional user complaints as the only feedback channel", "verdict": "viable", "rationale": "Complaints are a weak backstop and better than nothing, but they are lagging and unsystematic — the Act expects proactive, systematic monitoring, not waiting for users to notice." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Separately, for the auto-published AI news summaries on matters of public interest, what transparency duty applies?",
+          "choices": [
+            { "id": "a", "text": "The deployer must disclose the text is artificially generated (unless a human reviewed it and holds editorial responsibility)", "verdict": "best", "rationale": "Article 50(4) requires disclosure for AI-generated text published to inform the public on matters of public interest, with the human-editorial-review carve-out. This is a deployer transparency duty." },
+            { "id": "b", "text": "No disclosure is needed because it is 'just text'", "verdict": "wrong", "rationale": "Public-interest AI-generated text is specifically covered by Article 50(4); 'just text' is not an exemption." },
+            { "id": "c", "text": "File a serious-incident report to the authority for each summary", "verdict": "wrong", "rationale": "That confuses proactive transparency (Art 50) with reactive incident notification (Art 73). Routine publication is not a serious incident." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now the malfunction causes serious, irreversible disruption to critical infrastructure. What is the immediate obligation and its deadline?",
+          "choices": [
+            { "id": "a", "text": "Report the serious incident to the market surveillance authority within 2 days, and suspend use as appropriate", "verdict": "best", "rationale": "Article 73(3): widespread infringement or serious disruption of critical infrastructure carries the shortest window — 2 days — and Article 26(5) supports suspending use." },
+            { "id": "b", "text": "Report within 15 days, since 15 days is always the deadline", "verdict": "wrong", "rationale": "15 days is the general default, but critical-infrastructure disruption triggers the accelerated 2-day deadline. Using the wrong rung of the ladder is the trap." },
+            { "id": "c", "text": "Only publish a transparency notice to users; no authority report is required", "verdict": "wrong", "rationale": "A serious incident triggers notification to the authority (Art 73). Transparency to users is a separate duty and does not discharge the reporting obligation." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Post-incident, leadership asks what 'fixing it' means. What is the correct governance framing?",
+          "choices": [
+            { "id": "a", "text": "Run incident management — contain/suspend, notify, remediate, and document — then decide whether retraining or a config change is the remediation, and update the monitoring/communication plans", "verdict": "best", "rationale": "Incident management is the process (detect→triage→contain→notify→remediate→document, IV.C); retraining is at most one remediation, chosen within that process, not a substitute for it." },
+            { "id": "b", "text": "Immediately schedule the next quarterly retraining and consider the matter closed", "verdict": "wrong", "rationale": "Retraining on a schedule is maintenance, not incident handling. Treating it as the whole response skips containment, notification, and documentation." },
+            { "id": "c", "text": "Log it internally and revisit at the annual audit", "verdict": "wrong", "rationale": "A serious incident demands action now — notification within days and immediate remediation — not deferral to an annual audit." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-euaiact-art50", "r-euaiact-art72", "r-euaiact-art73", "r-euaiact-art26", "r-aigp-bok"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d4-classify-and-map",
+      "domainId": "d4-govern-deployment",
+      "title": "Risk-tier a deployment and map its EU AI Act obligations",
+      "goal": "Take one real (or realistic) AI deployment, classify it under the EU AI Act, decide the provider/deployer role, and produce an obligation map you could hand to a compliance lead.",
+      "steps": "## What you'll produce\n\nA one-page **deployment governance map** for a single AI system you choose (e.g. a CV-screener, a customer chatbot, a credit-scoring tool, or an internal document-summariser).\n\n## Steps\n\n1. **Describe the deployment** in three lines: what the system does, who it affects, and how it's sourced (your own model vs a third-party/GPAI model; as-is vs fine-tuned).\n2. **Classify the risk tier.** Walk Article 6 and Annex III: is it a safety component under Annex I (6(1)), or an Annex III area (6(2))? If Annex III, check the Article 6(3) 'not significant risk' exception — and remember profiling is always high-risk. Write the tier and the one-line justification, citing the Annex III category if applicable (`r-euaiact-annex3`).\n3. **Fix the role.** Are you the **provider** or the **deployer** (Art 3)? Then test Article 25 — does anything you're doing (rebranding, substantial modification, repurposing a GPAI system into high-risk) flip you into a provider? Record the role and the trigger (or 'no trigger').\n4. **Map the obligations.** For a high-risk deployment, list the deployer duties that apply from Article 26 (use per instructions; named competent overseer; input-data relevance if you control it; monitoring + escalation; logs ≥6 months; worker notice; informing affected persons). Add Article 27 **FRIA** if you're a public body, a public-service provider, or a credit-scoring/insurance deployer.\n5. **Add transparency + notification.** Note any Article 50 transparency duty (AI-interaction disclosure; deep-fake/synthetic-content; public-interest text) and confirm you know the Article 73 incident deadlines (2/10/15 days) even if none has occurred.\n6. **Self-check against sources.** Verify each mapped obligation against `r-euaiact-art26`, `r-euaiact-art27`, `r-euaiact-art50`, and `r-euaiact-art73`.\n\n## Why it matters\n\nThe exam hands you a scenario and asks 'what does the Act require here?' Doing the classification → role → obligation chain on a concrete system builds the exact reflex D4 tests — and exposes whether you'd wrongly downgrade an Annex III use or miss an Article 25 role flip.",
+      "checklist": [
+        "Deployment described with its sourcing (own vs third-party, as-is vs fine-tuned)",
+        "Risk tier assigned with an Article 6 / Annex III justification (and the 6(3) exception considered)",
+        "Provider-vs-deployer role fixed, with any Article 25 trigger explicitly checked",
+        "Applicable Article 26 deployer obligations listed (and Article 27 FRIA if triggered)",
+        "Any Article 50 transparency duty noted and the Article 73 incident deadlines recorded",
+        "Every mapped obligation verified against the cited EU AI Act source"
+      ]
+    },
+    {
+      "id": "lab-d4-vendor-and-monitoring",
+      "domainId": "d4-govern-deployment",
+      "title": "Critique a vendor agreement and design a monitoring + incident plan",
+      "goal": "Draft the governance an org must add around a third-party model: the contract terms that keep deployer duties satisfiable, and a monitoring/incident plan that treats surveillance as continuous.",
+      "steps": "## What you'll produce\n\nTwo short artefacts for a **procured** (third-party) AI model: a **vendor-agreement checklist** and a **monitoring + incident plan**.\n\n## Part A — Vendor agreement critique\n\n1. Take a real or sample AI vendor/open-source agreement (a model's terms of service or licence works).\n2. Check it carries the governance you need as a **deployer**, marking each present/absent:\n   - **Documentation of capabilities and limitations** (the Article 53 downstream-documentation your integration relies on — `r-euaiact-art53`).\n   - **Monitoring / audit rights** and notice of material model changes.\n   - **Incident cooperation and notification** fast enough to meet your Article 73 clock.\n   - **Data handling, IP, and use restrictions** (critical if you fine-tune or send prompts).\n   - **Liability / indemnity** allocation.\n3. Write the single most important sentence in your own words: **which duties this contract does NOT transfer** — i.e. your deployer accountability for use (oversight, monitoring, transparency, incidents) stays with you no matter what the contract says.\n\n## Part B — Monitoring + incident plan\n\n4. Define **continuous** monitoring signals (drift/accuracy, fairness over time, security, near-misses) — not a launch-only check — and map them to the provider's post-market monitoring loop (`r-euaiact-art72`) and NIST **MANAGE** (`r-nist-rmf-core`).\n5. Write the **incident runbook**: detect → triage → contain (suspend per Art 26(5) if needed) → notify (provider + authority, with the 2/10/15-day deadlines) → remediate → document. State explicitly that **retraining is a possible remediation, not the incident process**.\n6. Add the **deactivation control** (IV.C) — how you'd localise or switch the system off — and an **external communication plan** for users/affected people/regulators.\n\n## Self-verify\n\nIf your checklist would let a colleague say 'the contract makes the vendor responsible, so we're done' — rewrite it until Part A step 3 makes clear that deployer accountability cannot be contracted away.",
+      "checklist": [
+        "Vendor/open-source agreement assessed against documentation, monitoring/audit, incident, data/IP, and liability terms",
+        "One clear statement of which deployer duties the contract does NOT transfer",
+        "Continuous monitoring signals defined and mapped to Article 72 and NIST MANAGE (not a launch-only check)",
+        "Incident runbook written with the 2/10/15-day notification deadlines and containment/suspension step",
+        "Retraining explicitly framed as a remediation option, not the incident process",
+        "Deactivation control and external communication plan included"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-aigp-bok",
+      "title": "IAPP AIGP Body of Knowledge & Exam Blueprint (Domain IV)",
+      "url": "https://iapp.org/certify/aigp/",
+      "kind": "official-doc",
+      "annotation": "The authoritative competency outline for Domain IV — 'Understanding how to govern AI deployment and use' (21–25 questions). Extract the exact IV.A/IV.B/IV.C performance indicators: model-selection factors (classic vs generative, proprietary vs open source, small vs large, language vs multimodal; cloud/on-prem/edge; as-is vs fine-tuning/RAG), impact assessment and vendor/open-source agreement risks, the proprietary-model liability point, and the govern-the-deployment duties (continuous monitoring + maintenance/retraining schedule, periodic audits/red-teaming, document incidents and post-market monitoring plans, forecast downstream harms, external communication plans, deactivate/localise). Access the current BoK PDF via the cert page. NOTE: the BoK version linked from the cert page is v2.1 (effective 2 Feb 2026, supersedes 2.0.1); the Domain IV title, question range, and IV.A–IV.C structure are identical to v2.0.1.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-timeline",
+      "title": "EU AI Act — Implementation Timeline",
+      "url": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "kind": "official-doc",
+      "annotation": "The phased application dates: entry into force 1 Aug 2024 (nothing applies yet); prohibitions + AI literacy 2 Feb 2025; GPAI-model rules 2 Aug 2025; stand-alone Annex III high-risk obligations 2 December 2027; Article 6(1) / Annex I product-embedded high-risk obligations 2 August 2028. Extract the exact dates and which obligation attaches to each — the timeline is a frequent exam anchor and is legally time-sensitive. CURRENCY CAVEAT (as of 2026-07-02): the EU AI Act timeline is in legislative flux — the Digital Omnibus on AI (provisional agreement 6–7 May 2026; publication in the Official Journal expected shortly) DEFERS the two high-risk dates from the original 2 Aug 2026 (Annex III) / 2 Aug 2027 (Annex I) to 2 Dec 2027 / 2 Aug 2028; prohibitions (2 Feb 2025) and GPAI (2 Aug 2025) are unchanged. Re-verify the current timeline and legislative status against live EUR-Lex / European Commission sources before asserting any specific phase-in date.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art3",
+      "title": "EU AI Act — Article 3 (Definitions)",
+      "url": "https://artificialintelligenceact.eu/article/3/",
+      "kind": "official-doc",
+      "annotation": "The load-bearing definitions for D4: (3) 'provider' (develops/has developed and places on market or puts into service under its own name/trademark) vs (4) 'deployer' (uses under its authority, except personal non-professional use); and (49) 'serious incident' (death/serious health harm; serious/irreversible disruption of critical infrastructure; infringement of fundamental-rights obligations; serious harm to property/environment). Extract the exact wording to keep the provider/deployer distinction sharp.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art4",
+      "title": "EU AI Act — Article 4 (AI literacy)",
+      "url": "https://artificialintelligenceact.eu/article/4/",
+      "kind": "official-doc",
+      "annotation": "Both providers AND deployers must ensure, to their best extent, a sufficient level of AI literacy of staff and others operating the systems on their behalf, accounting for their knowledge/training and the deployment context. Applies from 2 Feb 2025. Grounds the 'responsible deployment includes people/process' point and the who-owes-it exam trap.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art6",
+      "title": "EU AI Act — Article 6 (Classification rules for high-risk AI systems)",
+      "url": "https://artificialintelligenceact.eu/article/6/",
+      "kind": "official-doc",
+      "annotation": "The two high-risk paths — 6(1) safety component of / product under Annex I harmonisation legislation requiring third-party conformity assessment; 6(2) systems listed in Annex III — plus the 6(3) exception (an Annex III system may not be high-risk if it poses no significant risk, e.g. a narrow procedural or preparatory task, BUT profiling of natural persons is always high-risk). Extract the classification logic that decides which obligations a deployment carries.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-annex3",
+      "title": "EU AI Act — Annex III (High-risk AI systems)",
+      "url": "https://artificialintelligenceact.eu/annex/3/",
+      "kind": "official-doc",
+      "annotation": "The eight high-risk areas: (1) biometrics; (2) critical infrastructure; (3) education and vocational training; (4) employment and worker management; (5) access to essential private/public services and benefits (incl. creditworthiness/credit scoring and life/health-insurance risk assessment); (6) law enforcement; (7) migration, asylum and border control; (8) administration of justice and democratic processes. Extract the category list to justify a deployment's risk tier and to identify FRIA-triggering Annex III uses (5(b)/(c)).",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art25",
+      "title": "EU AI Act — Article 25 (Responsibilities along the AI value chain)",
+      "url": "https://artificialintelligenceact.eu/article/25/",
+      "kind": "official-doc",
+      "annotation": "When a distributor/importer/deployer/third party becomes a PROVIDER of a high-risk system (Art 25(1)): (a) putting its own name/trademark on a high-risk system already on the market; (b) making a substantial modification that keeps it high-risk; (c) modifying the intended purpose of a system (including a GPAI system) so it becomes high-risk. Extract the three triggers — the 'you thought you were a deployer' role-flip the exam loves.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art26",
+      "title": "EU AI Act — Article 26 (Obligations of deployers of high-risk AI systems)",
+      "url": "https://artificialintelligenceact.eu/article/26/",
+      "kind": "official-doc",
+      "annotation": "The core deployer duty list: use per instructions for use (¶1); assign human oversight to competent, trained, authorised natural persons (¶2); ensure input-data relevance/representativeness where the deployer controls it (¶4); monitor operation and inform the provider/market surveillance authority and suspend use on a risk/serious incident (¶5); keep automatically generated logs for at least six months (¶6); inform workers' representatives and affected workers before workplace use (¶7); use provider info for the DPIA (¶9); inform natural persons subject to the system's decisions (¶11); cooperate with authorities (¶12). Extract each paragraph — this is D4's operational spine.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art27",
+      "title": "EU AI Act — Article 27 (Fundamental rights impact assessment)",
+      "url": "https://artificialintelligenceact.eu/article/27/",
+      "kind": "official-doc",
+      "annotation": "Which DEPLOYERS must run a FRIA before deploying eligible high-risk systems — bodies governed by public law, private entities providing public services, and deployers of the Annex III creditworthiness/credit-scoring and life/health-insurance systems — and what it contains (processes; period/frequency of use; categories of affected persons; specific risks of harm; human-oversight measures; measures if risks materialise, incl. governance/complaint mechanisms), plus the duty to notify the market surveillance authority of the results. The deployer-side impact assessment (IV.B).",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art50",
+      "title": "EU AI Act — Article 50 (Transparency obligations)",
+      "url": "https://artificialintelligenceact.eu/article/50/",
+      "kind": "official-doc",
+      "annotation": "Splits transparency between providers and deployers: providers design AI-interaction disclosure (¶1, unless obvious) and mark synthetic audio/image/video/text as machine-readable/artificially generated (¶2); deployers inform people exposed to emotion-recognition/biometric-categorisation (¶3), disclose deep fakes (¶4, artistic-works carve-out), and disclose AI-generated text published on matters of public interest (¶4, human-editorial carve-out). Extract which paragraph binds which role — the proactive-disclosure side of D4, distinct from Article 73 notification.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art53",
+      "title": "EU AI Act — Article 53 (Obligations for providers of general-purpose AI models)",
+      "url": "https://artificialintelligenceact.eu/article/53/",
+      "kind": "official-doc",
+      "annotation": "Upstream GPAI-provider duties that matter to a procuring deployer: keep technical documentation (¶1(a)); make information/documentation available to DOWNSTREAM providers so they understand the model's capabilities and limitations (¶1(b)); a copyright-compliance policy (¶1(c)); a public training-content summary per AI Office template (¶1(d)); with a carve-out for free/open-source models without systemic risk. Grounds the procurement point — insist the upstream documentation flows to you, but keep your own deployer duties.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art72",
+      "title": "EU AI Act — Article 72 (Post-market monitoring by providers)",
+      "url": "https://artificialintelligenceact.eu/article/72/",
+      "kind": "official-doc",
+      "annotation": "Providers of high-risk systems must establish and document a post-market monitoring system, proportionate to risk, that actively and systematically collects, documents and analyses performance data throughout the system's lifetime, based on a post-market monitoring plan in the technical documentation (Commission template due 2 Feb 2026). Extract the 'monitoring is continuous, lifetime surveillance' framing that anchors D4's monitoring lesson and the drift scenario.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-art73",
+      "title": "EU AI Act — Article 73 (Reporting of serious incidents)",
+      "url": "https://artificialintelligenceact.eu/article/73/",
+      "kind": "official-doc",
+      "annotation": "Serious-incident notification to the market surveillance authority of the Member State where the incident occurred, on a tiered clock after becoming aware: 15 days general (¶2); 10 days if a person died (¶4); 2 days for widespread infringement or serious/irreversible disruption of critical infrastructure (¶3). Extract the 2/10/15-day ladder (most-severe = shortest window) and that it is distinct from Article 50 transparency — the notification side of D4.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-nist-rmf-core",
+      "title": "NIST AI Risk Management Framework — Core (GOVERN, MAP, MEASURE, MANAGE)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "official-doc",
+      "annotation": "The voluntary AI RMF 1.0 core functions: GOVERN (culture + accountability structures; GOVERN 2 accountability, GOVERN 6 third-party risk), MAP (frame context), MEASURE (analyse/benchmark/monitor risk), and MANAGE (allocate resources to mapped/measured risks regularly; respond to, recover from and communicate about incidents; MANAGE 3 third-party risk; MANAGE 4 documented, regularly monitored response/recovery). For D4, MANAGE is the monitoring/incident function; GOVERN 2 anchors accountability. Also note the AI RMF Playbook and the Generative AI Profile (NIST-AI-600-1).",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-oecd-principles",
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "official-doc",
+      "annotation": "The five values-based OECD AI Principles: inclusive growth/sustainable development/well-being; human rights and democratic values (incl. fairness and privacy); transparency and explainability; robustness, security and safety; and accountability. Extract the Accountability principle (1.5) — 'AI actors should be accountable for the proper functioning of AI systems and for the respect of the principles, based on their roles, the context, and consistent with the state of the art' — which underpins D4's named-owner accountability structures.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-euaiact-text",
+      "title": "EU AI Act — Regulation (EU) 2024/1689 (official text, EUR-Lex)",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "official-doc",
+      "annotation": "The authoritative consolidated legal text of the EU AI Act on EUR-Lex — the primary source of record for every Article cited in this domain (3, 4, 6, 25, 26, 27, 50, 53, 72, 73) and Annex III. Use it to confirm exact legal wording of any deployer obligation, transparency duty, or incident-reporting deadline before asserting it as fact.",
+      "domainIds": ["d4-govern-deployment"]
+    },
+    {
+      "id": "r-iso-42001",
+      "title": "ISO/IEC 42001 — Artificial intelligence — Management system (AIMS)",
+      "url": "https://www.iso.org/standard/81230.html",
+      "kind": "official-doc",
+      "annotation": "The AI management-system standard (AIMS) that provides the organisational wrapper for D4's accountability and operational controls — establishing, implementing, maintaining and continually improving governance of AI across the lifecycle, including supplier/third-party management. Folds in from D2 as the management-system backbone into which named accountabilities, monitoring, and incident processes slot. (Verify the exact scope wording directly on the ISO page — iso.org restricts automated fetching, so confirm at authoring time.)",
+      "domainIds": ["d4-govern-deployment"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d4-1",
+      "title": "D4 · Build or buy, deploy responsibly, and monitor — selection to post-market surveillance",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d4-govern-deployment"],
+      "sourceNotebook": "aigp / d4 / model-selection-deployment-monitoring"
+    },
+    {
+      "id": "v-d4-2",
+      "title": "D4 · Transparency vs notification, accountability & vendor governance",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d4-govern-deployment"],
+      "sourceNotebook": "aigp / d4 / transparency-notification-accountability-vendor"
+    }
+  ]
+}

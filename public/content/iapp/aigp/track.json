@@ -1,0 +1,140 @@
+{
+  "vendorName": "IAPP",
+  "name": "AI Governance Professional — AIGP",
+  "code": "AIGP",
+  "summary": "The IAPP's credential for governing AI across its entire lifecycle. Validates that you understand the foundations of AI governance (what AI/ML is, the core risks and trustworthiness characteristics, the actors and their roles), the laws, standards and frameworks that apply to AI (the EU AI Act and GDPR, the NIST AI Risk Management Framework, ISO/IEC 42001 and 22989, and the OECD AI Principles), and — the enterprise/regulated differentiator — how to govern AI in practice on both sides of the deployment line: governing development (risk and impact assessments, data governance, testing and documentation) and governing deployment and use (obligations mapping, human oversight, post-market monitoring, incident response, and third-party/procurement controls).",
+  "exam": {
+    "questionCount": 100,
+    "durationMinutes": 165,
+    "passingScore": 300,
+    "scoreScale": 500,
+    "scoreFloor": 100,
+    "aPlusScore": 340,
+    "proctored": true,
+    "closedBook": true,
+    "scenarioPool": 8,
+    "scenariosPresented": 4,
+    "recommendedPrep": "IAPP AIGP Body of Knowledge + the free IAPP study guide; background in privacy/GRC helps"
+  },
+  "blueprintNote": "Domain weights on this track are PEDAGOGY weights, NOT IAPP-published percentages. The AIGP Body of Knowledge does not publish domain percentages; it publishes a min/max number of scored questions per domain. The weights here are normalized from the midpoints of those published ranges ([{\"code\":\"d1\",\"minQ\":16,\"maxQ\":20},{\"code\":\"d2\",\"minQ\":19,\"maxQ\":23},{\"code\":\"d3\",\"minQ\":21,\"maxQ\":25},{\"code\":\"d4\",\"minQ\":21,\"maxQ\":25}] → midpoints 18 / 21 / 23 / 23 = 85 → 0.21 / 0.25 / 0.27 / 0.27), which sum to 1.00 exactly — the engine reads weights from data, so a correction is a content edit. Scoring is modeled on the real IAPP scheme: a scaled score on 100–500 with 300 to pass (IAPP explicitly notes 300 does NOT represent 60%); scoreFloor 100 is the bottom of that scale and aPlusScore 340 is the Academy's A+ margin bar (pass 300 + 10% of the 400-point 100→500 span). The scenario drills are an Academy training device — the AIGP is a knowledge exam and IAPP does not describe a scenario/case-study question format. Authored to BoK version 2.1 (effective 2 February 2026; approved 9 September 2025; supersedes 2.0.1); the four domain titles and all four question ranges are verbatim-identical between v2.0.1 and v2.1, so the normalized weights are unchanged from the version the domain outlines were drafted against.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "https://iapp.org/certify/aigp",
+      "https://iapp.org/media/pdf/certification/AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf"
+    ],
+    "notes": "Live check 2026-07-02 against the IAPP AIGP cert page, the certification FAQ, the exam store page, and both BoK PDFs. CONFIRMED on live pages: exam format 100 questions / 2.75 hours (=165 min) / scaled score on a 100–500 scale / 300 to pass ('which does not represent 60%') / Pearson VUE + OnVUE (certification FAQ, iapp.org/certify/faqs); price 799 non-member, 649 member, plus CMF/membership options (store.iapp.org/aigp-exam); four domain titles verbatim-correct; midpoint weights 0.21/0.25/0.27/0.27 recompute exactly (mids 18/21/23/23 = 85). The PDF binaries fetched as raw streams via WebFetch but were saved to disk and successfully extracted locally with pdftotext -layout (both PDFs, 9 pages each).\n\nTWO items of drift found in PRD-S3-AIGP.md sections 2-3:\n\n1) BoK VERSION IS OUTDATED (section 3, lines 43-47 + 57 + 87 + 114). The PRD cites \"Version 2.0.1, effective 3 February 2025.\" The AIGP cert page (iapp.org/certify/aigp) now links a NEWER BoK: VERSION 2.1, effective date 2 February 2026, approved 9 September 2025, \"Supersedes: 2.0.1\" (printed on every page footer of the PDF at assets.contentstack.io/.../AIGP_Cert BOK.pdf, metadata title \"2025_Cert_CoverUpdates_BOK_FINAL_24nov2025\"). Per the task instruction to fetch the newer version if linked from the cert page, I verified v2.1 directly. GOOD NEWS: the four domain titles are VERBATIM IDENTICAL and all four question ranges are IDENTICAL between v2.0.1 and v2.1 (D1 16-20, D2 19-23, D3 21-25, D4 21-25), so the normalized weights are unchanged. ACTION: bump the PRD's cited BoK version/date/PDF-link from \"v2.0.1 / 3 Feb 2025 / AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf\" to \"v2.1 / effective 2 Feb 2026 / the contentstack PDF linked off the cert page\". Also update the Acceptance gate (section 7, line 114) which pins \"match BoK v2.0.1\". The direct v2.0.1 URL in the PRD still resolves (redirects to prod.iapp.org) but is now a superseded document. Note: v2.1 Domain I/III/IV bodies now reference \"AI system\" language and v2.1 adds new-law examples (e.g. South Korean AI Basic Law) in Domain II prose — content-level refresh worth folding into d2, but does not change titles/ranges/weights.\n\n2) TERM LENGTH IS NOW VERIFIABLE (section 2, lines 35 + 118-120). The PRD says exam term length is \"not stated on the FAQ -> unverified\" and the closing note lists term length as \"Unverified at author time (do not assert).\" This is now resolvable: the exam STORE page (store.iapp.org/aigp-exam) explicitly states \"The AIGP certification term is two years, beginning the day after you pass your exam.\" The FAQ page still does NOT state a duration (only references \"certification term\" generically), so the PRD's statement about the FAQ is technically still true — but the fact is no longer unverified overall. ACTION: update lines 35 and 118-120 to assert the two-year term citing the store page (not the FAQ). Also: the store page confirms the exam \"must be completed within one year of purchase\" (exam-purchase validity, distinct from the 2-yr cert term) — worth capturing.\n\nNO OTHER DRIFT: exam format (100 Q / 2.75h=165min / scaled 300 on 100-500 / Pearson VUE + OnVUE) all confirmed on the live FAQ; price (799/649, 250 CMF, 295 membership) confirmed on the live store; domain titles verbatim-correct; midpoint weights 0.21/0.25/0.27/0.27 recompute exactly (mids 18/21/23/23=85). The PDF binaries fetched as raw streams via WebFetch but were saved to disk and successfully extracted locally with pdftotext -layout (both PDFs, 9 pages each).\n\nTERM LENGTH: 2 years, per the exam store page (store.iapp.org/aigp-exam): \"The AIGP certification term is two years, beginning the day after you pass your exam.\" NOTE: the two-year figure is still NOT stated on the certification FAQ page — the FAQ references \"certification term\" without a duration; the two-year number comes only from the exam store page."
+  },
+  "badge": {
+    "completionLabel": "Prep completed — AIGP (AI Governance Professional)",
+    "definition": "Completed the Automatos Academy AIGP preparation track to the A+ readiness standard: ≥90% blueprint-weighted mastery and a full-length mock passed with margin (≥340 on the 100–500 scale, i.e. pass 300 plus a 10% margin). This certifies preparation completion — the AIGP (AI Governance Professional) credential itself is issued only by the IAPP."
+  },
+  "domainFiles": [
+    "d1-foundations.json",
+    "d2-laws-standards.json",
+    "d3-govern-development.json",
+    "d4-govern-deployment.json"
+  ],
+  "officialResources": [
+    {
+      "id": "off-aigp-cert",
+      "title": "AIGP — Artificial Intelligence Governance Professional (IAPP certification page)",
+      "url": "https://iapp.org/certify/aigp",
+      "kind": "official-doc",
+      "annotation": "The credential's home page: what the AIGP certifies, the exam blueprint / Body of Knowledge link, the study guide request, how-to-prepare, and the buy-the-exam store link. The stable anchor to re-verify the current BoK version and exam facts at refresh time (as of 2026-07-02 it links BoK v2.1).",
+      "domainIds": []
+    },
+    {
+      "id": "off-aigp-bok",
+      "title": "AIGP Body of Knowledge & Exam Blueprint (IAPP, PDF — link only, never rehosted)",
+      "url": "https://iapp.org/media/pdf/certification/AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf",
+      "kind": "spec",
+      "annotation": "The authoritative blueprint: the four domains, their sub-domain outlines, and the per-domain min/max scored-question ranges (D1 16–20, D2 19–23, D3 21–25, D4 21–25) that this track's pedagogy weights are normalized from. LINK ONLY — the PDF is IAPP copyright and is never rehosted. NOTE (2026-07-02): this direct v2.0.1 URL still resolves but is SUPERSEDED; the cert page now links BoK v2.1 (effective 2 Feb 2026) — titles and ranges are identical, so weights are unchanged.",
+      "domainIds": []
+    },
+    {
+      "id": "off-aigp-faq",
+      "title": "IAPP Certification FAQs (exam format & scaled scoring)",
+      "url": "https://iapp.org/certify/faqs",
+      "kind": "official-doc",
+      "annotation": "Where IAPP states the exam facts used on this track: AIGP is 100 questions in 2.75 hours, scored on a scaled 100–500 range, 300 to pass ('which does not represent 60%'), delivered via Pearson VUE / OnVUE. Does NOT state the certification term length (that is on the store page).",
+      "domainIds": []
+    },
+    {
+      "id": "off-aigp-store",
+      "title": "AIGP exam — IAPP store (price, term & exam validity)",
+      "url": "https://store.iapp.org/aigp-exam/",
+      "kind": "official-doc",
+      "annotation": "Exam purchase page: price (799 non-member / 649 member, plus CMF and membership bundles), the two-year certification term ('beginning the day after you pass your exam'), and the exam-purchase validity ('must be completed within one year of purchase').",
+      "domainIds": []
+    },
+    {
+      "id": "off-eu-ai-act-oj",
+      "title": "Regulation (EU) 2024/1689 — the EU AI Act (EUR-Lex official text)",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "spec",
+      "annotation": "The canonical legal source for every EU AI Act claim on the track (risk tiers; Article 3 definitions; the high-risk obligations in Arts 9–15; transparency Art 50; GPAI Arts 51/53/55; post-market monitoring & incident reporting Arts 72/73). The ELI landing page renders empty to a headless fetch — read article text via the artificialintelligenceact.eu per-article mirror, but cite this OJ URL as the source of truth.",
+      "domainIds": []
+    },
+    {
+      "id": "off-eu-ai-act-timeline",
+      "title": "EU AI Act implementation timeline (artificialintelligenceact.eu)",
+      "url": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "kind": "official-doc",
+      "annotation": "The phase-in dates for the Act (prohibitions, GPAI, high-risk, full applicability). Maintained by the Future of Life Institute. NOTE: the EU AI Act timeline is in legislative flux (a 'Digital Omnibus' simplification package may revise high-risk dates) — re-verify the current timeline and legislative status against live EUR-Lex / European Commission sources before asserting any specific phase-in date.",
+      "domainIds": []
+    },
+    {
+      "id": "off-nist-ai-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "spec",
+      "annotation": "The voluntary US framework (AI RMF 1.0, Jan 2023): the four core functions (Govern, Map, Measure, Manage) and the trustworthiness characteristics, plus the companion Playbook and the Generative AI Profile. The primary non-EU governance framework the AIGP tests.",
+      "domainIds": []
+    },
+    {
+      "id": "off-iso-42001",
+      "title": "ISO/IEC 42001 — AI management system (ISO catalogue)",
+      "url": "https://www.iso.org/standard/81230.html",
+      "kind": "spec",
+      "annotation": "The certifiable AI management-system (AIMS) standard (2023) — the organisational 'wrapper' for AI accountability, monitoring and supplier controls. NAMED in the AIGP BoK (Domain II.D). NOTE: iso.org returns HTTP 403 to automated fetches; confirm the exact title/scope/edition against the ISO catalogue entry (or the BoK's own reference) at authoring time — do not quote clause-level ISO text.",
+      "domainIds": []
+    },
+    {
+      "id": "off-iso-22989",
+      "title": "ISO/IEC 22989 — AI concepts and terminology (ISO catalogue)",
+      "url": "https://www.iso.org/standard/74296.html",
+      "kind": "spec",
+      "annotation": "The AI terminology/concepts standard (2022) — the shared vocabulary the other AI standards build on. NAMED alongside 42001 in the AIGP BoK (Domain II.D). NOTE: iso.org returns HTTP 403 to automated fetches; confirm the exact title/scope/edition against the ISO catalogue entry (or the BoK's own reference) at authoring time.",
+      "domainIds": []
+    },
+    {
+      "id": "off-oecd-ai-principles",
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "spec",
+      "annotation": "The first intergovernmental AI standard (adopted 2019, updated May 2024): five values-based principles and five policy recommendations, and the OECD AI-system definition that the EU, Council of Europe, US and UN have adopted. Grounds the AIGP's 'shared international baseline' material.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "The AIGP blueprint & how to sit it",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [],
+      "sourceNotebook": "aigp / overview / blueprint-overview"
+    },
+    {
+      "id": "v-ov-2",
+      "title": "AIGP exam strategy — pacing, scaled scoring & the four domains",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [],
+      "sourceNotebook": "aigp / overview / exam-strategy"
+    }
+  ]
+}

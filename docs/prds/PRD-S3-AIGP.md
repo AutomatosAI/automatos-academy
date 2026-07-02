@@ -13,6 +13,13 @@ the underserved lane in the roadmap and the clearest reason a compliance-minded 
 The pull is strongest for **UK/EU** learners (Gerard's context): the AIGP BoK folds the **EU AI Act**
 in as core content, and the Act's obligations are now biting on a published timeline
 ([entry into force Aug 2024; GPAI obligations Aug 2025; high-risk phase-in through 2026–2027](https://artificialintelligenceact.eu/implementation-timeline/)).
+> **⚠ Timeline currency (2026-07-02):** the **Digital Omnibus on AI** (political agreement May 2026,
+> Parliament + Council endorsements June 2026, **not yet in the Official Journal**) defers the
+> high-risk dates — Annex III 2 Aug 2026 → **2 Dec 2027**, Annex I product-embedded 2 Aug 2027 →
+> **2 Aug 2028**; prohibitions (Feb 2025) and GPAI (Aug 2025) unchanged. The
+> artificialintelligenceact.eu timeline page still shows the pre-Omnibus dates (last updated
+> Aug 2024). Track content teaches the phase-in **order** as durable and dates with a dated
+> currency note; **re-verify against EUR-Lex before any content refresh.**
 Per the roadmap, **EU AI Act and ISO/IEC 42001 do NOT get their own tracks — they fold into AIGP as
 content** (§4 below). This keeps one governance track that maps to a real, proctored credential.
 
@@ -32,17 +39,21 @@ FAQ **[iapp.org/certify/faqs](https://iapp.org/certify/faqs)**, and the exam sto
 - **Price: USD 799 non-member / USD 649 member.** Non-members' initial CMF is included in the exam
   fee; USD 250 CMF on recertification. [store](https://store.iapp.org/aigp-exam/)
 - **Maintenance:** CPE requirements + a certification maintenance fee (USD 250/term) or IAPP
-  membership (USD 295/yr). Exam term length **not stated on the FAQ → unverified**.
-  [IAPP FAQ](https://iapp.org/certify/faqs)
+  membership (USD 295/yr). **Term: 2 years, beginning the day after the pass** — stated on the
+  [exam store page](https://store.iapp.org/aigp-exam/) (still not on the FAQ); exam purchase must
+  be used within 1 year. *(Verified live 2026-07-02.)*
 
 `track.exam{}`: `questionCount 100, durationMinutes 165, passingScore 300, scoreScale 500,
 proctored true, provider "Pearson VUE / OnVUE"`.
 
 ## 3. Blueprint → 4 domains (published ranges → normalized pedagogy weights)
 
-Source: **AIGP Body of Knowledge & Exam Blueprint, Version 2.0.1, effective 3 February 2025**
-([PDF](https://iapp.org/media/pdf/certification/AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf); the BoK
-**publishes** the min/max questions per domain). Weights below are normalized from the blueprint
+Source: **AIGP Body of Knowledge & Exam Blueprint, Version 2.1, effective 2 February 2026**
+(supersedes v2.0.1; linked from the [cert page](https://iapp.org/certify/aigp) — the BoK
+**publishes** the min/max questions per domain). *Verified 2026-07-02: v2.1's four domain titles
+and all question ranges are identical to v2.0.1, so the weights below are unchanged; v2.1 adds
+"AI system" language and new-law examples (e.g. South Korea's AI Basic Law) in the Domain II
+prose — fold into d2 content.* Weights below are normalized from the blueprint
 **midpoints** (sum 1.0) — i.e. **pedagogy weights derived from the real published ranges**, not guessed.
 Verify against the live BoK before authoring (a version bump is a data edit).
 
@@ -84,7 +95,8 @@ Governance frameworks fold in **here as content** (roadmap §4), mapped to the d
 ## 5. Research / source library (official only — Firecrawl seeds)
 
 Per [KNOWLEDGE_INGEST.md](../KNOWLEDGE_INGEST.md); official docs & blueprints only, **no exam dumps**.
-- **IAPP AIGP BoK & Exam Blueprint v2.0.1** (the [PDF](https://iapp.org/media/pdf/certification/AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf))
+- **IAPP AIGP BoK & Exam Blueprint v2.1** (effective 2026-02-02, supersedes v2.0.1 — fetch the
+  current PDF via the [cert page](https://iapp.org/certify/aigp); link, never rehost)
   + [cert page](https://iapp.org/certify/aigp) + [free AIGP study guide](https://iapp.org/l/aigp-study-guide-request)
   + [certification handbook](https://assets.contentstack.io/v3/assets/bltd4dd5b2d705252bc/blteb8b5d531fd78971/IAPP-Certification_Handbook.pdf).
 - **EU AI Act official text** — EUR-Lex Regulation (EU) 2024/1689
@@ -111,10 +123,11 @@ placeholders first (same as GH-500).
 
 `npm run validate` green (weights = 1.0, unique IDs, answerable, scenarios have a `best`) · renders on
 all eight surfaces · A+ readiness gate reachable · **every source official** (IAPP / EUR-Lex / ISO /
-NIST / OECD only, no dumps) · exam facts cite the live IAPP page and match BoK **v2.0.1** · EU AI Act
+NIST / OECD only, no dumps) · exam facts cite the live IAPP page and match BoK **v2.1** · EU AI Act
 content carries the current risk tiers + timeline. Reuse the GH-500 authoring flow verbatim where possible.
 
 ---
-_Unverified at author time (do not assert): AIGP certification **term length** (years to
-recertification) — not stated on the IAPP FAQ. Per-domain weights are **pedagogy weights derived from
-the BoK's published question ranges**, not an IAPP-published percentage._
+_Resolved 2026-07-02 (track authored): term length **verified — 2 years** via the exam store page
+(still absent from the FAQ). Still true: per-domain weights are **pedagogy weights derived from
+the BoK's published question ranges**, not an IAPP-published percentage — stated as such in the
+track's blueprintNote._
