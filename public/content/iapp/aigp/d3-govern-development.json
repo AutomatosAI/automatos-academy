@@ -1,0 +1,1014 @@
+{
+  "id": "d3-govern-development",
+  "order": 3,
+  "code": "D3",
+  "name": "Understanding how to govern AI development",
+  "weight": 0.27,
+  "tagline": "Governance during the build: who owns which control across design → train → test → maintain, the impact assessment on the model itself, data quality and bias, evaluation metrics and thresholds that gate release, human-in-the-loop, and the model card and technical documentation that prove conformity — grounded in the EU AI Act's high-risk duties, NIST's Map/Measure functions, and ISO/IEC 42001.",
+  "overview": "One of the two heaviest AIGP domains (21–25 of the 100 questions; sub-domains III.A–III.C). It tests whether you can govern the *development* of a model, not its deployment: assign responsibilities across designing, building, training, testing and maintaining; run an impact assessment ON the model; get data governance, quality and bias right; choose evaluation metrics and thresholds that gate a release; place human-in-the-loop during training and testing (distinct from human oversight at use time); and produce the model card and technical documentation that make the build auditable and defensible. The exam rewards two habits above all: (1) mapping a duty to the right actor — under the EU AI Act the **provider** (developer) carries the build-time obligations (risk management, data governance, technical documentation, record-keeping, human-oversight design, accuracy/robustness), while the **deployer** implements them at use time; and (2) knowing which framework owns which control — the **EU AI Act** is the binding law (Articles 9–17 for high-risk systems), **NIST AI RMF** is the voluntary US framework whose **Map** and **Measure** functions cover exactly this build-time risk and evaluation work, and **ISO/IEC 42001** is the certifiable AI management-system standard that wraps the whole lifecycle in policies and continual improvement. Get the actor and the framework right and the scenario questions fall out.",
+  "objectives": [
+    "Assign AI-governance responsibilities across the development stages (design, build, train, test, maintain) and distinguish the provider/developer's build-time duties from the deployer's use-time duties under the EU AI Act.",
+    "Explain the impact assessment ON the model — the continuous, lifecycle-long risk management system (EU AI Act Article 9) and its NIST Map/Measure analogue — and how it differs from a data-protection impact assessment.",
+    "Apply data-governance and quality requirements (EU AI Act Article 10): relevant, representative, error-free-to-best-extent, complete data; where bias enters and the measures to detect, prevent and mitigate it; and data lineage/provenance.",
+    "Choose evaluation metrics and thresholds that gate a release, distinguish accuracy/performance metrics from fairness metrics, and place human-in-the-loop during training and testing versus human oversight during use.",
+    "Produce and critique a model card and the EU AI Act technical documentation (Article 11 + Annex IV) — what belongs in each, that documentation is created *during* development and kept up to date, and how it evidences conformity.",
+    "Embed secure and documented development (Article 15 accuracy/robustness/cybersecurity; Article 17 quality management system) so the build is secure by design and defensible — the bridge to the AI-security mindset."
+  ],
+  "lessons": [
+    {
+      "id": "l1-lifecycle-responsibilities",
+      "title": "Who governs the build: responsibilities across design → train → test → maintain",
+      "estMinutes": 18,
+      "objective": "Assign governance responsibilities across each development stage, and separate the provider's build-time duties from the deployer's use-time duties.",
+      "body": "## The domain in one sentence\n\nDomain III is about **governance during the build** — the AIGP Body of Knowledge frames it as the responsibilities of governance professionals with respect to *designing, building, training, testing and maintaining* AI models. The three sub-domains follow the lifecycle: **III.A** govern the *designing and building*, **III.B** govern the *collection and use of data in training and testing*, and **III.C** govern the *release, monitoring and maintenance*.\n\n## Provider vs. deployer — the split the exam tests everywhere\n\nThe single most-tested distinction in this domain is **who owns a duty**. The EU AI Act pins the build-time obligations on the **provider**, and the use-time obligations on the **deployer**:\n\n- A **provider** (Article 3(3)) is the actor that *develops* an AI system (or has it developed) and *places it on the market or puts it into service under its own name or trademark*. The provider carries the heavy Chapter III, Section 2 duties: the risk management system (Art 9), data governance (Art 10), technical documentation (Art 11), record-keeping/logging (Art 12), transparency to deployers (Art 13), designing in human oversight (Art 14), accuracy/robustness/cybersecurity (Art 15), and the quality management system (Art 17).\n- A **deployer** (Article 3(4)) is the actor *using* an AI system *under its own authority* (except purely personal, non-professional use). The deployer's duties are lighter and operational — use the system per the instructions, *implement* the human oversight the provider designed, monitor operation, keep logs. Deployer duties are the heart of **Domain IV**, not here.\n\n> **Exam tip:** when a stem says an organisation is *building or training* a model, think **provider / Domain III**. When it says an organisation is *procuring and using* someone else's model in its business, think **deployer / Domain IV**. A classic distractor treats data governance or documentation as a deployment-time concern — it isn't; those are the developer's job at build time. And beware the flip: an organisation that *substantially modifies* a high-risk system, or puts its *own name* on a third-party system, can become a **provider** and inherit the provider's duties.\n\n## Mapping controls to the development stages\n\n| Stage | Core governance question | EU AI Act anchor (high-risk) | NIST AI RMF function |\n|---|---|---|---|\n| **Design** | What's the use case, business context and applicable law? Ethics-by-design? | Art 9 risk management begins; Art 6/Annex III risk classification | **Map** (context, intended use, impacts) |\n| **Build** | Architecture and model selection; data analysis; metric/threshold choices; operational controls | Art 10 data governance; Art 15 accuracy/robustness by design | Map / **Measure** |\n| **Train** | Lawful, quality, representative data; where does bias enter? | Art 10(2)–(3) data governance and quality | Measure (evaluate bias, validity) |\n| **Test** | Unit/integration/validation/performance/security/bias/interpretability testing | Art 9(6) testing for risk measures; Art 15 | **Measure** (test, evaluate, verify, validate) |\n| **Release** | Readiness, conformity, model card, CE/declaration | Art 11 technical documentation; Art 43 conformity assessment | Manage (release decision) |\n| **Maintain** | Continuous monitoring, retraining schedule, incidents, drift | Art 9 (continuous, whole-lifecycle); Art 72 post-market monitoring | **Manage** (monitor, respond) |\n\nThe BoK's III.A performance indicators name most of this explicitly: define the business context and use case, perform or review an impact assessment on the model, identify applicable laws, apply policies/best practices to design and build (purpose, requirements gathering, architecture and model selection, human oversight, data analysis, metric and threshold evaluation, stakeholder engagement, operational controls), and identify/manage internal and external risks using tools like a **probability/severity harms matrix**, a **risk-mitigation hierarchy**, stakeholder mapping, benchmarking, and pre-deployment pilots.\n\n## Which framework owns which obligation\n\nThe exam constantly asks you to attribute a control to the right instrument. Keep these lanes crisp:\n\n- **EU AI Act** — *binding law*. Regulation (EU) 2024/1689. Imposes enforceable, tiered obligations. For a **high-risk** system, the build-time duties are Articles 9–17; conformity assessment is Article 43. This is the only source that creates *legal* obligations, dates and penalties.\n- **NIST AI RMF 1.0** — *voluntary, non-regulatory, sector-agnostic* US framework (released January 2023). Four functions — **Govern, Map, Measure, Manage**. Development-time work lives in **Map** (frame the context and risks) and **Measure** (test, evaluate, verify, validate the trustworthiness characteristics). Companion **Playbook** offers suggested actions; the **Generative AI Profile (NIST AI 600-1)** applies it to GenAI risks.\n- **ISO/IEC 42001** — *certifiable management-system standard* (AI Management System, AIMS). It doesn't hand you metrics; it requires you to *establish, implement, maintain and continually improve* a management system for responsible AI across the lifecycle. Think of it as the ISO-27001-style wrapper around the whole thing.\n- **ISO/IEC 22989** — *terminology*. It defines the concepts (AI system, training/validation/inference, etc.) the others rely on.\n- **OECD AI Principles** — five values-based principles (inclusive growth; human rights and democratic values including fairness and privacy; transparency and explainability; robustness, security and safety; accountability). *Soft-law* intergovernmental reference that shaped the others.\n\n> **Exam tip:** if a stem asks 'what does the *law require*', answer from the **EU AI Act**. If it asks for a *voluntary framework* to structure risk and evaluation, that's **NIST AI RMF**. If it asks how to *certify an organisational management system* for AI, that's **ISO/IEC 42001**. Don't say NIST or ISO 'requires' anything with legal force — they don't.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-1",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An organisation is training and testing its own machine-learning model before placing it on the EU market under its own trademark. Under the EU AI Act, which role does it hold, and which duties does that role carry?",
+          "options": [
+            { "id": "a", "text": "Provider — it carries the build-time duties (risk management, data governance, technical documentation, human-oversight design, accuracy/robustness)", "correct": true },
+            { "id": "b", "text": "Deployer — it only has to follow the instructions for use and implement human oversight" },
+            { "id": "c", "text": "Neither — build-time activity is unregulated until the system is actually used" },
+            { "id": "d", "text": "Provider, but the build-time duties (data governance, documentation) apply only after deployment" }
+          ],
+          "explanation": "Developing a system and placing it on the market under your own name makes you a **provider** (Art 3(3)), which carries the Chapter III, Section 2 duties — risk management (Art 9), data governance (Art 10), technical documentation (Art 11), human-oversight design (Art 14), accuracy/robustness (Art 15). It is not a deployer (that's the use-time role in Domain IV). Build-time activity is regulated (documentation must be drawn up *before* placing on the market), and those duties bite *during* development, not only after deployment.",
+          "sourceRefs": ["r-euaiact", "r-euaiact-art11", "r-bok"]
+        },
+        {
+          "id": "kc-d3-2",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which pairing of instrument → nature is correct?",
+          "options": [
+            { "id": "a", "text": "EU AI Act = binding law; NIST AI RMF = voluntary framework; ISO/IEC 42001 = certifiable management-system standard", "correct": true },
+            { "id": "b", "text": "NIST AI RMF = binding US law; EU AI Act = voluntary guidance; ISO/IEC 42001 = terminology standard" },
+            { "id": "c", "text": "All three are legally binding obligations with penalties for non-compliance" },
+            { "id": "d", "text": "ISO/IEC 42001 = binding EU law; EU AI Act = voluntary; NIST AI RMF = a metric library" }
+          ],
+          "explanation": "The **EU AI Act** is the only *binding law* of the three (Regulation (EU) 2024/1689, with penalties). **NIST AI RMF 1.0** is *voluntary and non-regulatory*. **ISO/IEC 42001** is a *certifiable management-system standard* (AIMS), not law. NIST is not US law, ISO 42001 is not EU law, and ISO/IEC *22989* — not 42001 — is the terminology standard.",
+          "sourceRefs": ["r-euaiact", "r-nist-rmf", "r-iso42001", "r-iso22989"]
+        },
+        {
+          "id": "kc-d3-3",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In the NIST AI Risk Management Framework, which two functions cover the build-time work of framing risk and then testing/evaluating the model?",
+          "options": [
+            { "id": "a", "text": "Map (context and risk framing) and Measure (test, evaluate, verify, validate)", "correct": true },
+            { "id": "b", "text": "Govern and Manage" },
+            { "id": "c", "text": "Plan and Do" },
+            { "id": "d", "text": "Identify and Recover" }
+          ],
+          "explanation": "**Map** frames the context, intended use and risks; **Measure** analyses and assesses risks by testing, evaluating, verifying and validating trustworthiness characteristics — exactly the development-time work. Govern (policies/oversight) and Manage (mitigate/monitor) are the other two RMF functions but are not the framing-then-evaluation pair. 'Plan/Do' is the ISO PDCA cycle, and 'Identify/Recover' are NIST *Cybersecurity* Framework functions, not the AI RMF.",
+          "sourceRefs": ["r-nist-rmf"]
+        }
+      ]
+    },
+    {
+      "id": "l2-impact-assessment-data-bias",
+      "title": "Impact assessment on the model, data governance and bias",
+      "estMinutes": 18,
+      "objective": "Run an impact assessment ON the model as a continuous risk-management process, and apply the data-governance, quality and bias-mitigation duties — knowing where bias enters and how to catch it.",
+      "body": "## The impact assessment is ON the model, and it's continuous\n\nDomain III's spine is the **impact assessment on the AI model** (a III.A performance indicator: *perform or review an impact assessment on the AI model*). Under the EU AI Act this is operationalised as the **risk management system** of **Article 9**, and two properties are heavily tested:\n\n1. **It runs across the entire lifecycle.** Art 9(2): a *continuous iterative process planned and run throughout the entire lifecycle* of the system, *requiring regular systematic review and updating*. It is **not** a one-off gate at the end.\n2. **Its steps are risk-identify → estimate → mitigate → verify residual risk is acceptable.** Identify and analyse known and reasonably foreseeable risks to *health, safety or fundamental rights* (Art 9(2)(a)); estimate and evaluate risks under intended use *and reasonably foreseeable misuse* (b); adopt appropriate, targeted risk-management measures (d); ensure the residual risk is *judged acceptable* (5); and **test** to identify the most appropriate measures and ensure consistent performance (6). It must also consider adverse impact on **persons under 18 and other vulnerable groups** (9).\n\n> **Exam distinction — three different 'assessments':** (a) the **impact assessment on the model / risk management system** (Art 9) is what Domain III owns — it's about the model's risks to people. (b) A **data protection impact assessment (DPIA)** under the GDPR is a *privacy* assessment of personal-data processing — related but distinct (that's Domain II territory). (c) The EU AI Act separately requires deployers of certain high-risk systems to run a **fundamental rights impact assessment (FRIA)** at *use* time (Domain IV). If a stem asks about assessing the *model's* risks during development, the answer is the Article 9 risk-management process, not a DPIA and not the deployer's FRIA.\n\n## Data governance and quality (Article 10) — the developer's duty\n\nHigh-risk systems trained on data must use **training, validation and testing data sets that meet quality criteria** (Art 10(1)). The provider must apply **data-governance and management practices** (Art 10(2)) covering: design choices; data collection processes and **origin**; **preparation** (annotation, labelling, cleaning, updating, enrichment, aggregation); the assumptions the data encodes; assessment of availability, quantity and **suitability**; examination for **biases** likely to affect health/safety, harm fundamental rights, or lead to prohibited discrimination; **measures to detect, prevent and mitigate** those biases; and identifying data gaps or shortcomings.\n\nAnd the quality bar itself (Art 10(3)): data sets must be **relevant, sufficiently representative, and — to the best extent possible — free of errors and complete** in view of the intended purpose. Note the calibrated language: *sufficiently* representative and error-free *to the best extent possible* — the Act does not demand perfection, it demands appropriateness for the intended purpose, considering the specific **geographical, contextual, behavioural or functional setting** (Art 10(4)). The BoK's III.B indicators map onto this directly: assess and document *lawful rights to collect and use data* and its *quality, quantity, integrity and fit-for-purpose*, and establish **data lineage and provenance**.\n\n> **Exam tip:** a common trap treats data governance as a deployment concern or as optional 'nice to have'. For a high-risk system it is a **binding, build-time provider obligation** under Article 10. Another trap over-reads Art 10(3) as requiring *perfectly* error-free data — the standard is 'to the best extent possible' and 'sufficiently representative', judged against the intended purpose.\n\n## Where bias enters — and why it's a training-time job\n\nBias is not a single thing that appears at the end. It enters at multiple points, and catching it is a **development-time** responsibility:\n\n- **Historical / societal bias** baked into the source data (the world was unequal, so the data is).\n- **Representation / sampling bias** — some groups under-represented, so the model performs worse for them (why Art 10(3) demands *representativeness*).\n- **Measurement / label bias** — the proxy or the labels don't mean what you assume (why Art 10(2) scrutinises labelling and assumptions).\n- **Aggregation bias** — one model forced across groups that behave differently.\n- **Feedback-loop bias** — the model's own outputs re-enter the data and amplify (Art 15(4) requires addressing feedback loops).\n\nBecause bias mostly enters through **data and modelling choices made during the build**, the AIGP position is that the **developer** carries primary responsibility for detecting and mitigating it at training time (Art 10(2)(f)–(g)) — not that the deployer 'fixes bias later'. The Act even permits, under strict conditions, processing **special categories of personal data** *for the specific purpose of bias detection and correction* (Art 10(5)), because you sometimes need the sensitive attribute to *measure* fairness.\n\n> **Exam tip:** 'Whose job is bias mitigation — developer at training time or deployer at use time?' The AIGP answer leans **developer, at training/testing time**, because that's where bias enters and where Article 10 places the duty — though deployers still monitor for it in operation. Don't let 'human oversight at deployment' be presented as a substitute for getting the data and training right.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-4",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Under EU AI Act Article 9, the risk management system for a high-risk AI system is best described as:",
+          "options": [
+            { "id": "a", "text": "A continuous, iterative process run throughout the entire lifecycle, with regular review and updating", "correct": true },
+            { "id": "b", "text": "A one-off assessment completed once, just before the system is placed on the market" },
+            { "id": "c", "text": "A purely voluntary exercise the provider may skip for internal models" },
+            { "id": "d", "text": "A privacy assessment of personal-data processing, identical to a GDPR DPIA" }
+          ],
+          "explanation": "Article 9(2) makes it a **continuous iterative process planned and run throughout the entire lifecycle**, requiring regular systematic review and updating — not a one-off end gate. It is a mandatory obligation for high-risk systems, not optional. And it is an assessment of the *model's* risks to health, safety and fundamental rights, which is distinct from a GDPR **DPIA** (a privacy assessment of personal-data processing).",
+          "sourceRefs": ["r-euaiact-art9"]
+        },
+        {
+          "id": "kc-d3-5",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "EU AI Act Article 10 requires that training, validation and testing data sets for a high-risk system be:",
+          "options": [
+            { "id": "a", "text": "Relevant, sufficiently representative, and — to the best extent possible — free of errors and complete, in view of the intended purpose", "correct": true },
+            { "id": "b", "text": "Guaranteed 100% error-free and perfectly balanced across every demographic group" },
+            { "id": "c", "text": "Only relevant; representativeness and error rates are not addressed" },
+            { "id": "d", "text": "Whatever the deployer chooses at use time, since data is a deployment concern" }
+          ],
+          "explanation": "Article 10(3) sets the bar as **relevant, sufficiently representative, and to the best extent possible free of errors and complete** in view of the intended purpose — calibrated language, not a demand for perfection. It is more than 'only relevant' (representativeness and errors are explicitly addressed), and it is a **build-time provider** duty, not a deployer choice.",
+          "sourceRefs": ["r-euaiact-art10"]
+        },
+        {
+          "id": "kc-d3-6",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A model performs well on average but noticeably worse for an under-represented group. Which bias source and which EU AI Act lever most directly address this at development time?",
+          "options": [
+            { "id": "a", "text": "Representation/sampling bias → Article 10's representativeness requirement and bias-mitigation measures, including (under strict conditions) processing sensitive data to detect and correct bias", "correct": true },
+            { "id": "b", "text": "Feedback-loop bias → nothing in the Act addresses it, so no action is required" },
+            { "id": "c", "text": "It is purely a deployment problem the deployer must fix with human oversight, with no developer duty" },
+            { "id": "d", "text": "Cybersecurity bias → resolved solely by Article 15 fail-safe redundancy" }
+          ],
+          "explanation": "Worse performance for an under-represented group is **representation/sampling bias**, addressed by Article 10(3)'s **representativeness** requirement and Article 10(2)(f)–(g) **detect/prevent/mitigate** measures; Article 10(5) even permits processing **special-category data** specifically to detect and correct bias. It is not feedback-loop bias (that's outputs re-entering the data), the Act clearly *does* address bias, and while deployers monitor in use, the primary data/bias duty here is the developer's. Article 15 is about accuracy/robustness/security, not group-fairness sampling.",
+          "sourceRefs": ["r-euaiact-art10"]
+        }
+      ]
+    },
+    {
+      "id": "l3-evaluation-metrics-hitl",
+      "title": "Evaluation, metrics and thresholds — and human-in-the-loop",
+      "estMinutes": 16,
+      "objective": "Choose evaluation metrics and thresholds that gate a release, separate accuracy from fairness, and place human-in-the-loop during training/testing versus human oversight at use time.",
+      "body": "## Evaluation is what turns risk-management intent into a release decision\n\nA III.B performance indicator is to **plan and perform training and testing** — unit, integration, validation, **performance, security, bias and interpretability** — and a III.A indicator is **metric and threshold evaluation**. The EU AI Act reinforces this: Article 9(6) requires **testing to identify the most appropriate risk-management measures and to ensure consistent performance**, and Article 15(1)–(3) requires an **appropriate level of accuracy** with the **accuracy metrics declared in the instructions for use**. NIST puts the same work in its **Measure** function — *test, evaluate, verify and validate*.\n\n## Metrics: pick the metric that answers the risk\n\nThe exam wants you to choose a metric that matches the question being asked, and — critically — **not to confuse an accuracy/performance metric with a fairness metric**:\n\n- **Performance / accuracy metrics** answer *is the model correct?* — accuracy, **precision** (of the positives it flags, how many are right), **recall/sensitivity** (of the real positives, how many it catches), **F1** (their balance), **AUC/ROC**. These say nothing on their own about fairness.\n- **Calibration** answers *are the predicted probabilities trustworthy?*\n- **Fairness metrics** answer *is performance equitable across groups?* — e.g. **demographic parity** (equal positive rates across groups), **equalized odds** (equal error rates across groups), **equal opportunity** (equal true-positive rates). A model can have excellent overall accuracy and still fail a fairness metric badly for a subgroup.\n- **Robustness/security evaluations** answer *does it hold up under stress or attack?* — adversarial testing, **red teaming**, threat modelling (III.C names these for the release/monitoring phase).\n- **Interpretability/explainability** answers *can we explain a decision?*\n\n> **Exam tip — the classic distractor:** a stem describes a discriminatory outcome and offers 'improve overall accuracy' as the fix. Wrong: raising *accuracy* need not close a *fairness* gap; you need a **fairness metric** (and often a fairness-specific intervention). Accuracy ≠ fairness is one of the most reliable D3 trap patterns. A second trap swaps precision and recall — anchor them: precision guards against false *positives*, recall guards against missed *positives*.\n\n## Thresholds gate the release\n\nMetrics without thresholds don't decide anything. Governance sets **acceptance thresholds** — a minimum recall for a safety-critical detector, a maximum tolerated gap between groups, a residual-risk ceiling — and an evaluation result below threshold **blocks deployment** (or triggers mitigation and re-test). This is the operational meaning of Article 9(5)'s 'residual risk judged **acceptable**': *acceptable against a pre-defined bar*. On the exam, 'the model hit 92% accuracy' is not a release decision until you know the **threshold** and whether **fairness/robustness** bars were also met.\n\n> **Exam tip:** if an evaluation result fails a governance threshold, the governed answer is **do not release / mitigate and re-test** — never 'ship it and monitor', and never 'lower the threshold to pass'. Thresholds are set by the risk, not by the result you got.\n\n## Human-in-the-loop (development) vs. human oversight (deployment)\n\nA precise AIGP distinction:\n\n- **Human-in-the-loop (HITL)** is a *development-time* control: humans are in the training/testing loop — labelling and reviewing data, adjudicating edge cases, validating outputs, approving that the model may progress. It shapes the model *before* release. This is III.B territory.\n- **Human oversight** (EU AI Act **Article 14**) is a *design + use-time* control: the provider **designs** the system so a natural person can effectively oversee it *while it is in use* — understand its capacities and limits, resist **automation bias**, correctly interpret output, **decide not to use / override**, and **intervene or stop** it. The deployer then **implements** that oversight in operation (Domain IV).\n\nNote the bridge: Article 14 is *designed in* by the developer (Domain III) but *exercised* at use time (Domain IV). Certain biometric identification systems carry a stricter rule — no action on an identification unless **at least two competent persons** verify it (Art 14(5)).\n\n> **Exam tip:** do not let 'human oversight at deployment' be offered as a *substitute* for human-in-the-loop during training/testing — they operate at different lifecycle stages and neither replaces the other. If the stem is about catching a data/label problem *before* release, that's HITL in development; if it's about a person being able to override or stop a *running* system, that's Article 14 human oversight.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-7",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A hiring model scores 94% overall accuracy but rejects qualified women at a much higher rate than qualified men. Which evaluation approach actually surfaces and addresses this problem?",
+          "options": [
+            { "id": "a", "text": "A fairness metric such as equalized odds or equal opportunity across groups, plus a fairness-specific mitigation", "correct": true },
+            { "id": "b", "text": "Simply push overall accuracy higher — that will resolve the disparity" },
+            { "id": "c", "text": "Measure precision alone, since precision captures group fairness" },
+            { "id": "d", "text": "No evaluation is needed; 94% accuracy already proves the model is fit to deploy" }
+          ],
+          "explanation": "A group disparity is a **fairness** problem, surfaced by a **fairness metric** (equalized odds / equal opportunity) and closed by a fairness-specific intervention. Raising **overall accuracy** need not close a subgroup gap (accuracy ≠ fairness — the signature D3 trap). Precision is a performance metric, not a fairness metric. And a single headline accuracy number is never sufficient evidence of fitness to deploy.",
+          "sourceRefs": ["r-nist-rmf", "r-euaiact-art10", "r-bok"]
+        },
+        {
+          "id": "kc-d3-8",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Governance set a minimum recall of 0.95 for a safety-critical defect detector. Pre-release evaluation returns recall 0.88 (with high overall accuracy). What is the governed decision?",
+          "options": [
+            { "id": "a", "text": "Do not release; mitigate (more/representative data, model changes) and re-test until the threshold is met", "correct": true },
+            { "id": "b", "text": "Release and monitor in production, since overall accuracy is high" },
+            { "id": "c", "text": "Lower the recall threshold to 0.85 so the model passes" },
+            { "id": "d", "text": "Release, because recall is a fairness metric and does not gate a safety decision" }
+          ],
+          "explanation": "The threshold encodes the *risk*: missing defects (a false negative) is the harm, so a recall below the bar **blocks release** — mitigate and re-test. You do not ship-and-monitor past a failed safety bar, and you never **lower the threshold to force a pass** (that's gaming the gate, not managing risk). Recall here is a **performance** metric that directly gates the safety decision, not a fairness metric.",
+          "sourceRefs": ["r-euaiact-art9", "r-nist-rmf"]
+        },
+        {
+          "id": "kc-d3-9",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement correctly distinguishes human-in-the-loop from human oversight under the EU AI Act?",
+          "options": [
+            { "id": "a", "text": "Human-in-the-loop is a development-time control in training/testing; human oversight (Art 14) is designed by the provider and exercised at use time so a person can interpret, override and stop the running system", "correct": true },
+            { "id": "b", "text": "They are identical terms for the same deployment-time control" },
+            { "id": "c", "text": "Human oversight at deployment fully substitutes for human-in-the-loop during training, so training-time humans are unnecessary" },
+            { "id": "d", "text": "Human-in-the-loop is required only by ISO 42001 and has no bearing on model development" }
+          ],
+          "explanation": "**HITL** operates during *training/testing* (labelling, adjudicating, validating before release); **human oversight** under **Article 14** is *designed in* by the provider and *exercised at use time* (understand limits, resist automation bias, override, stop). They are not the same, and use-time oversight does **not** substitute for development-time HITL — different lifecycle stages, different purposes. HITL is a development control the AIGP BoK expects, not solely an ISO 42001 artefact.",
+          "sourceRefs": ["r-euaiact-art14", "r-bok"]
+        }
+      ]
+    },
+    {
+      "id": "l4-model-cards-docs-secure",
+      "title": "Model cards, technical documentation and secure development",
+      "estMinutes": 17,
+      "objective": "Produce and critique a model card and the EU AI Act technical documentation, and embed secure, documented development so the build evidences conformity.",
+      "body": "## Documentation is a governance control, not paperwork\n\nA III.C performance indicator is to **assess readiness and prepare for release into production — e.g. creating the model card and satisfying conformity requirements** — and to **make public disclosures to meet transparency obligations** (technical documentation, instructions for use, post-market monitoring plans). On the exam, documentation is treated as **evidence of conformity**: it is what *proves* the model was built responsibly. Two ideas dominate: **what belongs where**, and **when it must be made**.\n\n## Model card vs. technical documentation — what belongs where\n\nThey overlap but serve different audiences and duties:\n\n- **Model card** — a concise, structured transparency artefact *about the model*: its **intended use** (and out-of-scope uses), the **training/evaluation data** at a high level, the **evaluation metrics and results** (including performance *and* fairness across groups), **known limitations and risks**, and the **human-in-the-loop / oversight** points. It is a communication and accountability tool — emphatically **not a marketing sheet**. A good model card is honest about what the model *cannot* do.\n- **EU AI Act technical documentation** (**Article 11 + Annex IV**) — the fuller, regulator-facing dossier for a **high-risk** system. It must **demonstrate compliance** with the Chapter III, Section 2 requirements and give authorities and notified bodies the information to **assess conformity**. Annex IV expects, among much else: a general description of the system and its intended purpose; the development process and design choices; the **data** requirements (Art 10); the **risk management** measures (Art 9); the **testing/validation** procedures and metrics; **accuracy, robustness and cybersecurity** measures (Art 15); **human-oversight** measures (Art 14); and the **post-market monitoring** plan. The model card is often a *subset/summary* of this dossier.\n\n> **Exam tip — three traps to spot:** (1) *model card ≠ marketing* — it records limitations, not selling points; (2) documentation is created **during** development and **kept up to date**, not reconstructed afterwards (Art 11(1): drawn up *before* the system is placed on the market and kept up to date); (3) don't conflate the two artefacts — Article 11 technical documentation is the legally-required, regulator-facing dossier, while the model card is the shareable transparency summary. Also distinguish these from **Article 13 instructions for use** (what the *deployer* is told to use the system safely — provider identity, capabilities/limitations, accuracy metrics, oversight measures, maintenance).\n\n## When it must be made: during development, kept current\n\nArticle 11(1) is unambiguous: technical documentation is **drawn up *before* the system is placed on the market or put into service, and kept up to date**. Article 12 requires the system to **automatically log events over its lifetime** so operation and post-market monitoring are evidenced. Article 17 wraps this in a **quality management system** — written policies, procedures and instructions covering compliance strategy, design and verification, testing/validation, data management, the Art 9 risk system, post-market monitoring, incident reporting and record-keeping. The through-line: *documented development*. If a stem describes a team writing the technical file *after* an incident to satisfy an auditor, that already fails the standard — it had to exist during the build.\n\n## Conformity: proving it\n\nBefore a high-risk system goes to market, the provider undergoes a **conformity assessment** (**Article 43**) — either **internal control** (Annex VI) or, where required, an assessment involving a **notified body** (Annex VII) — draws up the **EU declaration of conformity**, and affixes the **CE marking**. A **substantial modification** triggers a **new** conformity assessment. Model card + technical documentation + logs are the evidentiary backbone of that assessment. NIST frames the release decision in **Manage**, and ISO/IEC 42001 requires the whole thing to sit inside a **continually improving management system** — but only the **EU AI Act** makes the declaration and CE marking a *legal* precondition to market.\n\n## Secure and documented development — the bridge to AI security\n\nSecurity is part of *governing the build*, not a separate silo. **Article 15** requires high-risk systems to be **secure by design**: an appropriate level of **accuracy, robustness and cybersecurity**, consistent across the lifecycle, and **resilient against attacks** — the Act explicitly names **data poisoning, model poisoning, adversarial examples / model evasion, and confidentiality attacks**, addressed with measures like technical redundancy, fail-safe plans, and controls tuned to those threats. III.C's periodic activities — **audits, red teaming, threat modelling, security testing** — are how you keep evidencing this after release. For **general-purpose AI models with systemic risk**, Article 55 raises the bar further: **adversarial testing (red-teaming)**, systemic-risk assessment and mitigation, **serious-incident reporting** to the AI Office, and an adequate level of **cybersecurity**.\n\n> **Exam tip:** treat 'secure development' as a **governance** obligation that lives inside Domain III (Art 15, plus III.C's red teaming/threat modelling), not as something bolted on later or owned only by a security team. The defensible build is *documented, tested, and secure by design* — and the model card/technical documentation are what let you prove all three.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-10",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which best captures the difference between a model card and EU AI Act technical documentation (Article 11 + Annex IV)?",
+          "options": [
+            { "id": "a", "text": "The model card is a concise transparency summary (intended use, data, evaluation, limitations, oversight); the technical documentation is the fuller regulator-facing dossier that demonstrates conformity for a high-risk system", "correct": true },
+            { "id": "b", "text": "The model card is the legally-required conformity dossier; technical documentation is an optional marketing summary" },
+            { "id": "c", "text": "They are the same document under two names" },
+            { "id": "d", "text": "Both are produced only after deployment, in response to an audit" }
+          ],
+          "explanation": "The **model card** is the shareable transparency artefact (often a subset of the fuller record); the **Article 11 + Annex IV technical documentation** is the legally-required, regulator-facing dossier that **demonstrates conformity** for a high-risk system. The roles are not reversed, they are not the same document, and the technical documentation must be drawn up **before** market placement — not reconstructed after an audit.",
+          "sourceRefs": ["r-euaiact-art11", "r-bok"]
+        },
+        {
+          "id": "kc-d3-11",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "When must the technical documentation for a high-risk AI system be drawn up under Article 11?",
+          "options": [
+            { "id": "a", "text": "Before the system is placed on the market or put into service, and kept up to date thereafter", "correct": true },
+            { "id": "b", "text": "Only if and when a regulator formally requests it after an incident" },
+            { "id": "c", "text": "At the deployer's discretion, any time after go-live" },
+            { "id": "d", "text": "Only once at launch; it never needs updating" }
+          ],
+          "explanation": "Article 11(1) requires the documentation to be **drawn up before** the system is placed on the market or put into service **and kept up to date**. It is not created reactively after an incident, not at the deployer's discretion, and not a static one-off — 'documented development, kept current' is the standard.",
+          "sourceRefs": ["r-euaiact-art11"]
+        },
+        {
+          "id": "kc-d3-12",
+          "domainId": "d3-govern-development",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "EU AI Act Article 15 requires high-risk AI systems to be resilient against specific attacks. Which set does it explicitly call out?",
+          "options": [
+            { "id": "a", "text": "Data poisoning, model poisoning, adversarial examples / model evasion, and confidentiality attacks", "correct": true },
+            { "id": "b", "text": "Only physical theft of servers" },
+            { "id": "c", "text": "Only social-engineering of end users" },
+            { "id": "d", "text": "None — cybersecurity is out of scope for the AI Act and handled solely by the deployer" }
+          ],
+          "explanation": "Article 15 names **data poisoning, model poisoning, adversarial examples (model evasion), and confidentiality attacks** among the threats a high-risk system must be resilient against — secure-by-design is a build-time provider duty. It is not limited to physical theft or social engineering, and cybersecurity is very much **in scope** of the Act (Art 15), not something left entirely to deployers.",
+          "sourceRefs": ["r-euaiact-art15"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d3-1",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Domain III of the AIGP focuses on governing which part of the AI lifecycle?",
+      "options": [
+        { "id": "a", "text": "Designing, building, training, testing and maintaining AI models (the development lifecycle)", "correct": true },
+        { "id": "b", "text": "Only the post-deployment monitoring of third-party models in production" },
+        { "id": "c", "text": "Only the legal drafting of AI regulations" },
+        { "id": "d", "text": "Only the marketing and sale of AI products" }
+      ],
+      "explanation": "The BoK frames Domain III around the responsibilities of governing the **development** — designing, building, training, testing and maintaining models (III.A–III.C). Deployment-and-use governance is Domain IV; drafting law and marketing are not what this domain covers.",
+      "sourceRefs": ["r-bok"]
+    },
+    {
+      "id": "q-d3-2",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Under the EU AI Act, which actor carries the build-time obligations (risk management, data governance, technical documentation, accuracy/robustness) for a high-risk system?",
+      "options": [
+        { "id": "a", "text": "The provider (developer)", "correct": true },
+        { "id": "b", "text": "The deployer (professional user)" },
+        { "id": "c", "text": "The end user who interacts with the system" },
+        { "id": "d", "text": "The notified body that certifies it" }
+      ],
+      "explanation": "The **provider** (Art 3(3)) develops the system and places it on the market, and carries the Chapter III, Section 2 build-time duties. The **deployer** has use-time duties (Domain IV); end users are not obligated actors for these duties; and a notified body *assesses* conformity, it does not build or bear the provider's obligations.",
+      "sourceRefs": ["r-euaiact"]
+    },
+    {
+      "id": "q-d3-3",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A company buys a third-party high-risk model, rebrands it under its own trademark, and places it on the EU market. What is its status under the AI Act?",
+      "options": [
+        { "id": "a", "text": "It becomes a provider and inherits the provider's obligations", "correct": true },
+        { "id": "b", "text": "It remains only a deployer with no build-time duties" },
+        { "id": "c", "text": "It has no obligations because it did not train the model itself" },
+        { "id": "d", "text": "It automatically becomes the notified body for the system" }
+      ],
+      "explanation": "Placing a system on the market **under your own name or trademark** makes you a **provider** (Art 3(3)) — you inherit the provider's obligations even if you did not originally build it. So it is not merely a deployer, it is not obligation-free, and putting your name on a system does not make you a notified body.",
+      "sourceRefs": ["r-euaiact"]
+    },
+    {
+      "id": "q-d3-4",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The EU AI Act Article 9 risk management system for a high-risk AI system must be:",
+      "options": [
+        { "id": "a", "text": "A continuous, iterative process maintained across the entire lifecycle, with regular review and updating", "correct": true },
+        { "id": "b", "text": "A single document completed once and never revisited" },
+        { "id": "c", "text": "Optional for systems used only inside the EU" },
+        { "id": "d", "text": "Run exclusively by the deployer after go-live" }
+      ],
+      "explanation": "Article 9(2) requires a **continuous iterative process throughout the entire lifecycle**, with regular systematic review and updating. It is not a one-off document, it is mandatory for high-risk systems, and it is a **provider** obligation established during development, not something the deployer runs alone after go-live.",
+      "sourceRefs": ["r-euaiact-art9"]
+    },
+    {
+      "id": "q-d3-5",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is a distinct EU AI Act obligation from the deployer's fundamental rights impact assessment (FRIA), and which domain owns each?",
+      "options": [
+        { "id": "a", "text": "The Article 9 risk management system (impact assessment on the model) is a development-time provider duty in Domain III; the FRIA is a use-time deployer duty in Domain IV", "correct": true },
+        { "id": "b", "text": "They are the same assessment performed by the same actor at the same time" },
+        { "id": "c", "text": "The FRIA is the developer's build-time duty and Article 9 is the deployer's use-time duty" },
+        { "id": "d", "text": "Neither exists in the EU AI Act" }
+      ],
+      "explanation": "The **Article 9 risk management system** — the impact assessment *on the model* — is a **development-time provider** duty (Domain III). The **FRIA** is a separate **use-time deployer** duty for certain high-risk systems (Domain IV). They are not the same, the roles are not reversed, and both do exist in the Act.",
+      "sourceRefs": ["r-euaiact-art9", "r-euaiact"]
+    },
+    {
+      "id": "q-d3-6",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "EU AI Act Article 10 sets the data-quality bar for high-risk training/validation/testing data as:",
+      "options": [
+        { "id": "a", "text": "Relevant, sufficiently representative, and to the best extent possible free of errors and complete, in view of the intended purpose", "correct": true },
+        { "id": "b", "text": "Perfectly error-free and exhaustively complete, with no tolerance" },
+        { "id": "c", "text": "Any data the provider has on hand, with no quality criteria" },
+        { "id": "d", "text": "Determined entirely by the deployer at use time" }
+      ],
+      "explanation": "Article 10(3) uses calibrated language — **relevant, sufficiently representative, and to the best extent possible free of errors and complete** for the intended purpose. It does not demand perfection, it does impose real quality criteria (not 'anything on hand'), and data governance is a **build-time provider** duty, not a deployer choice.",
+      "sourceRefs": ["r-euaiact-art10"]
+    },
+    {
+      "id": "q-d3-7",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Under what condition does EU AI Act Article 10 permit processing special categories of personal data (e.g. race, health) in development?",
+      "options": [
+        { "id": "a", "text": "Where strictly necessary to detect and correct bias in a high-risk system, subject to safeguards (technical limits on re-use, security, access controls, no third-party transmission, timely deletion)", "correct": true },
+        { "id": "b", "text": "Freely, for any development purpose, with no conditions" },
+        { "id": "c", "text": "Never — sensitive data can never be processed for any AI purpose" },
+        { "id": "d", "text": "Only if the deployer, not the provider, authorises it after deployment" }
+      ],
+      "explanation": "Article 10(5) allows processing special-category data **exceptionally, for the specific purpose of bias detection and correction**, under strict safeguards — because you sometimes need the sensitive attribute to *measure* fairness. It is not a free pass for any purpose, it is not an absolute prohibition, and it is a development-time provision, not a post-deployment deployer authorisation.",
+      "sourceRefs": ["r-euaiact-art10"]
+    },
+    {
+      "id": "q-d3-8",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A model shows strong overall accuracy but a large true-positive-rate gap between demographic groups. Which metric family should govern the release decision?",
+      "options": [
+        { "id": "a", "text": "A fairness metric (e.g. equal opportunity / equalized odds), not overall accuracy alone", "correct": true },
+        { "id": "b", "text": "Overall accuracy alone — the gap is irrelevant if accuracy is high" },
+        { "id": "c", "text": "Model file size and inference latency" },
+        { "id": "d", "text": "The number of training epochs" }
+      ],
+      "explanation": "A between-group performance gap is a **fairness** problem measured by **fairness metrics** (equal opportunity, equalized odds). Overall accuracy can be high while a subgroup is badly served (accuracy ≠ fairness). File size, latency and epoch count are engineering facts that do not answer the fairness question.",
+      "sourceRefs": ["r-nist-rmf", "r-euaiact-art10"]
+    },
+    {
+      "id": "q-d3-9",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In a fraud detector, missing a real fraud (a false negative) is far costlier than a false alarm. Which metric should the release threshold prioritise?",
+      "options": [
+        { "id": "a", "text": "Recall (sensitivity) — the share of real frauds the model catches", "correct": true },
+        { "id": "b", "text": "Precision only — false alarms are the sole concern" },
+        { "id": "c", "text": "Demographic parity, since it fixes all error types" },
+        { "id": "d", "text": "Raw accuracy, which fully captures missed-fraud risk on imbalanced data" }
+      ],
+      "explanation": "When **missed positives** are the costly failure, prioritise **recall** (catch as many real frauds as possible). **Precision** guards against false *positives* — the less costly error here. **Demographic parity** is a fairness metric, not an error-cost lever, and **raw accuracy** is misleading on imbalanced data (a model that flags almost nothing can still look 'accurate').",
+      "sourceRefs": ["r-nist-rmf"]
+    },
+    {
+      "id": "q-d3-10",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Governance requires a maximum residual-risk threshold and a minimum recall before release. Evaluation meets recall but the residual risk is judged NOT acceptable. What does Article 9 imply?",
+      "options": [
+        { "id": "a", "text": "Adopt further risk-management measures and re-test until residual risk is acceptable; do not release yet", "correct": true },
+        { "id": "b", "text": "Release anyway, because the recall threshold passed" },
+        { "id": "c", "text": "Declare the residual risk acceptable by fiat to unblock the release" },
+        { "id": "d", "text": "Transfer the entire decision to the deployer with no further action" }
+      ],
+      "explanation": "Article 9(5) requires the **residual risk to be judged acceptable**; if it is not, the provider must adopt **further targeted measures and re-test** — a passing recall does not override an unacceptable residual risk. You cannot simply *declare* it acceptable to force a release, and the provider cannot offload an unfinished risk-management duty onto the deployer.",
+      "sourceRefs": ["r-euaiact-art9"]
+    },
+    {
+      "id": "q-d3-11",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which best distinguishes human-in-the-loop from human oversight?",
+      "options": [
+        { "id": "a", "text": "Human-in-the-loop is a development-time control (training/testing); human oversight (Art 14) is designed by the provider and exercised at use time to interpret, override and stop the running system", "correct": true },
+        { "id": "b", "text": "Both are the same use-time control with two names" },
+        { "id": "c", "text": "Human oversight happens during training; human-in-the-loop happens only after retirement" },
+        { "id": "d", "text": "Neither has any role in governing AI development" }
+      ],
+      "explanation": "**HITL** operates in *development* (labelling, adjudicating, validating before release); **human oversight** under **Article 14** is *designed in* by the provider and *exercised at use time*. They are distinct, the stages are not reversed, and both are squarely relevant to governing development (HITL directly; Art 14 oversight because the provider must *design it in*).",
+      "sourceRefs": ["r-euaiact-art14", "r-bok"]
+    },
+    {
+      "id": "q-d3-12",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "EU AI Act Article 14 requires that a high-risk system be designed so a human overseer can, among other things:",
+      "options": [
+        { "id": "a", "text": "Understand its capacities and limitations, stay aware of automation bias, correctly interpret output, decide not to use / override it, and intervene or stop it", "correct": true },
+        { "id": "b", "text": "Rewrite the model's training code in real time during operation" },
+        { "id": "c", "text": "Guarantee the model is correct 100% of the time" },
+        { "id": "d", "text": "Nothing — Article 14 places no design duty on the provider" }
+      ],
+      "explanation": "Article 14(4) lists exactly these oversight capabilities — understand limits, resist **automation bias**, interpret output, decide not to use / override, and **intervene or stop** (the 'stop button'). It does not require live retraining or a guarantee of perfection, and Article 14 clearly *does* impose a design duty on the provider.",
+      "sourceRefs": ["r-euaiact-art14"]
+    },
+    {
+      "id": "q-d3-13",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "For certain biometric identification systems, Article 14 adds a stricter oversight rule. What is it?",
+      "options": [
+        { "id": "a", "text": "No action may be taken on an identification unless it is separately verified by at least two competent persons", "correct": true },
+        { "id": "b", "text": "The system must operate with no human involvement at all" },
+        { "id": "c", "text": "A single administrator may approve all identifications automatically" },
+        { "id": "d", "text": "Biometric systems are exempt from human oversight entirely" }
+      ],
+      "explanation": "Article 14(5) requires that, for certain biometric identification systems (Annex III point 1(a)), no action be taken unless **at least two competent, trained, authorised persons** separately verify the identification (with narrow law-enforcement/border derogations). It is not zero human involvement, not single-person auto-approval, and biometric systems are certainly not exempt from oversight — they get a *stricter* rule.",
+      "sourceRefs": ["r-euaiact-art14"]
+    },
+    {
+      "id": "q-d3-14",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A model card is best described as:",
+      "options": [
+        { "id": "a", "text": "A concise transparency artefact stating intended use, data, evaluation results, limitations and oversight — not a marketing sheet", "correct": true },
+        { "id": "b", "text": "A promotional one-pager highlighting the model's selling points" },
+        { "id": "c", "text": "The system's source code repository" },
+        { "id": "d", "text": "A billing invoice for model usage" }
+      ],
+      "explanation": "A model card is a **transparency and accountability** document — intended use, data, evaluation (performance *and* fairness), limitations, oversight. It is explicitly **not marketing** (it records what the model *cannot* do), not the code repo, and not a billing artefact.",
+      "sourceRefs": ["r-bok", "r-euaiact-art11"]
+    },
+    {
+      "id": "q-d3-15",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When must EU AI Act technical documentation (Article 11) for a high-risk system be created?",
+      "options": [
+        { "id": "a", "text": "Before the system is placed on the market or put into service, and kept up to date afterwards", "correct": true },
+        { "id": "b", "text": "Reconstructed after an incident, only if an auditor asks" },
+        { "id": "c", "text": "At any point the deployer prefers, post-launch" },
+        { "id": "d", "text": "Once at launch and never updated again" }
+      ],
+      "explanation": "Article 11(1) requires the technical documentation to be **drawn up before** market placement and **kept up to date** — documentation is created *during* development, not reconstructed reactively, not left to the deployer's timing, and not frozen at launch.",
+      "sourceRefs": ["r-euaiact-art11"]
+    },
+    {
+      "id": "q-d3-16",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which document is the legally-required, regulator-facing dossier that demonstrates a high-risk system's conformity, and where are its minimum contents specified?",
+      "options": [
+        { "id": "a", "text": "The Article 11 technical documentation, with minimum contents in Annex IV", "correct": true },
+        { "id": "b", "text": "The model card, with contents in Annex I" },
+        { "id": "c", "text": "The marketing brochure, with contents in Article 5" },
+        { "id": "d", "text": "The end-user licence agreement, with contents in Annex III" }
+      ],
+      "explanation": "The **Article 11** technical documentation is the conformity dossier, and its **minimum elements are in Annex IV**. The model card is a transparency summary (not the legal dossier, and Annex I is the product-safety legislation list); a brochure/EULA are not conformity documentation, and Annex III lists high-risk *use cases*, not documentation contents.",
+      "sourceRefs": ["r-euaiact-art11"]
+    },
+    {
+      "id": "q-d3-17",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "EU AI Act Article 12 (record-keeping) requires high-risk systems to:",
+      "options": [
+        { "id": "a", "text": "Technically allow automatic logging of events over the system's lifetime to support risk identification and post-market monitoring", "correct": true },
+        { "id": "b", "text": "Delete all logs immediately to protect privacy" },
+        { "id": "c", "text": "Log only marketing analytics, not operational events" },
+        { "id": "d", "text": "Keep logs only if the deployer chooses to enable them" }
+      ],
+      "explanation": "Article 12 requires systems to **technically allow automatic logging of events over their lifetime**, to help identify risk situations and enable post-market monitoring. It does not mandate immediate deletion, it targets operational events (not marketing analytics), and the logging *capability* is a provider design duty, not an optional deployer toggle.",
+      "sourceRefs": ["r-euaiact-art12"]
+    },
+    {
+      "id": "q-d3-18",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Article 15 requires that the accuracy metrics of a high-risk system be:",
+      "options": [
+        { "id": "a", "text": "Declared in the accompanying instructions for use", "correct": true },
+        { "id": "b", "text": "Kept secret from deployers to protect trade secrets" },
+        { "id": "c", "text": "Set to exactly 100% or the system cannot ship" },
+        { "id": "d", "text": "Chosen by the deployer after deployment" }
+      ],
+      "explanation": "Article 15(3) requires the **levels of accuracy and the relevant accuracy metrics to be declared in the instructions for use** — transparency to the deployer. They are not concealed, there is no 100% mandate (the requirement is an *appropriate* level), and the metrics are declared by the **provider** at build time, not chosen post-hoc by the deployer.",
+      "sourceRefs": ["r-euaiact-art15"]
+    },
+    {
+      "id": "q-d3-19",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which attacks does EU AI Act Article 15 explicitly require high-risk AI systems to be resilient against?",
+      "options": [
+        { "id": "a", "text": "Data poisoning, model poisoning, adversarial examples (model evasion), and confidentiality attacks", "correct": true },
+        { "id": "b", "text": "Only distributed denial-of-service on the web server" },
+        { "id": "c", "text": "Only insider phishing emails" },
+        { "id": "d", "text": "No specific attacks — Article 15 ignores cybersecurity" }
+      ],
+      "explanation": "Article 15 explicitly names **data poisoning, model poisoning, adversarial examples/model evasion, and confidentiality attacks** as threats to be resilient against — AI-specific security is a build-time duty. It is not limited to DDoS or phishing, and Article 15 very much addresses cybersecurity.",
+      "sourceRefs": ["r-euaiact-art15"]
+    },
+    {
+      "id": "q-d3-20",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Article 17 (quality management system) for a high-risk provider requires:",
+      "options": [
+        { "id": "a", "text": "A documented QMS — written policies, procedures and instructions covering compliance strategy, design/verification, testing/validation, data management, the Art 9 risk system, post-market monitoring, incident reporting and record-keeping", "correct": true },
+        { "id": "b", "text": "A single verbal agreement among the engineering team" },
+        { "id": "c", "text": "Only a marketing plan for the product launch" },
+        { "id": "d", "text": "Nothing in writing, provided the model performs well" }
+      ],
+      "explanation": "Article 17 requires a **quality management system documented in a systematic, orderly way** as written policies/procedures/instructions spanning compliance strategy, design and verification, testing/validation, data management, the Article 9 risk system, post-market monitoring, incident reporting and record-keeping. A verbal agreement, a marketing plan, or nothing-in-writing all fail this documented-QMS standard.",
+      "sourceRefs": ["r-euaiact-art17"]
+    },
+    {
+      "id": "q-d3-21",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Before a high-risk AI system can be placed on the EU market, Article 43 requires the provider to:",
+      "options": [
+        { "id": "a", "text": "Undergo a conformity assessment (internal control or, where required, involving a notified body), then draw up the EU declaration of conformity and affix CE marking", "correct": true },
+        { "id": "b", "text": "Simply self-declare compliance with no assessment of any kind" },
+        { "id": "c", "text": "Obtain approval from the model's end users" },
+        { "id": "d", "text": "Wait for the deployer to run the assessment after go-live" }
+      ],
+      "explanation": "Article 43 requires a **conformity assessment** — internal control (Annex VI) or, where required, one involving a **notified body** (Annex VII) — followed by the **EU declaration of conformity** and **CE marking**. It is not a bare self-declaration with no assessment, end-user approval is irrelevant, and the assessment is a **provider** precondition to market, not a post-launch deployer task.",
+      "sourceRefs": ["r-euaiact-art43"]
+    },
+    {
+      "id": "q-d3-22",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A high-risk system already on the market undergoes a substantial modification. What does the AI Act require?",
+      "options": [
+        { "id": "a", "text": "A new conformity assessment (and updated technical documentation)", "correct": true },
+        { "id": "b", "text": "Nothing — the original assessment covers all future changes forever" },
+        { "id": "c", "text": "Only a press release announcing the change" },
+        { "id": "d", "text": "Immediate withdrawal of the system from all markets" }
+      ],
+      "explanation": "Article 43(4) requires a **new conformity assessment** upon a **substantial modification**, and the technical documentation (Art 11) must be kept up to date. The original assessment does not cover unlimited future changes, a press release is not a conformity step, and modification triggers reassessment — not automatic withdrawal.",
+      "sourceRefs": ["r-euaiact-art43", "r-euaiact-art11"]
+    },
+    {
+      "id": "q-d3-23",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which NIST AI RMF function is where a provider would document its testing, evaluation, verification and validation of a model's trustworthiness characteristics?",
+      "options": [
+        { "id": "a", "text": "Measure", "correct": true },
+        { "id": "b", "text": "Govern" },
+        { "id": "c", "text": "Map" },
+        { "id": "d", "text": "Manage" }
+      ],
+      "explanation": "**Measure** is the function for analysing and assessing risk through **test, evaluate, verify and validate** of trustworthiness characteristics (validity, safety, security, fairness, explainability, etc.). Govern sets policy/culture, Map frames context and risks, and Manage acts on prioritised risks — none is the evaluation function.",
+      "sourceRefs": ["r-nist-rmf"]
+    },
+    {
+      "id": "q-d3-24",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does ISO/IEC 42001 relate to governing AI development?",
+      "options": [
+        { "id": "a", "text": "It is a certifiable AI management-system standard requiring an organisation to establish, implement, maintain and continually improve a management system for responsible AI across the lifecycle", "correct": true },
+        { "id": "b", "text": "It is an EU regulation that legally bans high-risk AI" },
+        { "id": "c", "text": "It is a list of specific fairness metrics and thresholds to apply" },
+        { "id": "d", "text": "It is a US federal statute enforced by NIST" }
+      ],
+      "explanation": "ISO/IEC 42001 is the **AI management-system standard (AIMS)** — a certifiable, ISO-27001-style wrapper for responsible AI across the lifecycle. It is not EU law, it does not prescribe specific metrics/thresholds, and it is a voluntary international standard, not a US statute.",
+      "sourceRefs": ["r-iso42001"]
+    },
+    {
+      "id": "q-d3-25",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which standard provides the foundational AI concepts and terminology that other AI standards build on?",
+      "options": [
+        { "id": "a", "text": "ISO/IEC 22989", "correct": true },
+        { "id": "b", "text": "ISO/IEC 42001" },
+        { "id": "c", "text": "EU AI Act" },
+        { "id": "d", "text": "NIST AI 600-1" }
+      ],
+      "explanation": "**ISO/IEC 22989** establishes AI **concepts and terminology**. ISO/IEC 42001 is the *management-system* standard, the EU AI Act is binding law, and NIST AI 600-1 is the Generative AI Profile of the NIST AI RMF — none of those is the terminology standard.",
+      "sourceRefs": ["r-iso22989"]
+    },
+    {
+      "id": "q-d3-26",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The OECD AI Principles include which of the following as one of their five values-based principles?",
+      "options": [
+        { "id": "a", "text": "Transparency and explainability", "correct": true },
+        { "id": "b", "text": "Mandatory open-sourcing of all model weights" },
+        { "id": "c", "text": "A prohibition on all commercial AI" },
+        { "id": "d", "text": "A requirement to use only EU-hosted data centres" }
+      ],
+      "explanation": "**Transparency and explainability** is one of the five OECD principles (with inclusive growth; human rights/democratic values incl. fairness and privacy; robustness, security and safety; and accountability). Mandatory open-sourcing, banning commercial AI, and EU-only hosting are not OECD principles.",
+      "sourceRefs": ["r-oecd"]
+    },
+    {
+      "id": "q-d3-27",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A provider of a general-purpose AI model (not systemic-risk) claims it has no development documentation duties. Under Article 53, what is actually required?",
+      "options": [
+        { "id": "a", "text": "Maintain technical documentation (including training/testing and evaluation results), provide information to downstream integrators, put in place a copyright policy, and publish a sufficiently detailed summary of training content", "correct": true },
+        { "id": "b", "text": "Nothing — GPAI models are entirely exempt from documentation" },
+        { "id": "c", "text": "Only a CE marking, with no documentation" },
+        { "id": "d", "text": "Only the high-risk Annex IV dossier, identical to a high-risk system" }
+      ],
+      "explanation": "Article 53 requires GPAI providers to keep **technical documentation** (with training/testing and evaluation results), give **downstream integrators** the needed information, maintain a **copyright policy**, and publish a **training-content summary**. GPAI models are not fully exempt (a free/open-source licence relaxes only some documentation duties, never the copyright policy or training summary), CE marking is a high-risk mechanism, and GPAI duties are distinct from the high-risk Annex IV dossier.",
+      "sourceRefs": ["r-euaiact-art53"]
+    },
+    {
+      "id": "q-d3-28",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "For a general-purpose AI model classified as having systemic risk, Article 55 adds which additional development-time duties?",
+      "options": [
+        { "id": "a", "text": "Model evaluation including adversarial testing (red-teaming), systemic-risk assessment and mitigation, serious-incident reporting to the AI Office, and adequate cybersecurity", "correct": true },
+        { "id": "b", "text": "None beyond the baseline GPAI duties in Article 53" },
+        { "id": "c", "text": "Only a requirement to lower the model's price" },
+        { "id": "d", "text": "Only a duty to publish marketing benchmarks" }
+      ],
+      "explanation": "Article 55 layers on **adversarial testing/red-teaming, systemic-risk assessment and mitigation, serious-incident reporting to the AI Office, and adequate cybersecurity** for GPAI models with systemic risk. These are additional to Article 53, and they are substantive safety duties — not pricing or marketing requirements.",
+      "sourceRefs": ["r-euaiact-art55"]
+    },
+    {
+      "id": "q-d3-29",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An Annex III system performs only a narrow procedural task and does not materially influence the outcome of decision-making. Under Article 6(3), how is it treated — and what is the carve-out?",
+      "options": [
+        { "id": "a", "text": "It may be exempt from high-risk classification via the Article 6(3) derogation — but profiling of natural persons is always high-risk", "correct": true },
+        { "id": "b", "text": "It is automatically high-risk with no possible exemption, even for a purely clerical task" },
+        { "id": "c", "text": "It is always minimal-risk regardless of what it does, including profiling" },
+        { "id": "d", "text": "It is prohibited outright under Article 5" }
+      ],
+      "explanation": "Article 6(3) lets an Annex III system escape high-risk classification when it does **not pose a significant risk of harm** (e.g. a narrow procedural task, improving a prior human activity, not replacing human judgment, or a preparatory task) — **but profiling of natural persons is always high-risk**. So it is neither automatically high-risk nor automatically minimal-risk, and a merely narrow task is not a *prohibited* practice under Article 5.",
+      "sourceRefs": ["r-euaiact-art6", "r-euaiact"]
+    },
+    {
+      "id": "q-d3-30",
+      "domainId": "d3-govern-development",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team plans to write the model's technical file and evaluation records only after launch, 'if a regulator ever asks'. Why does this fail Domain III governance?",
+      "options": [
+        { "id": "a", "text": "Documentation is a governance control created during development — Article 11 requires it before market placement and kept up to date, and evaluation records must evidence the pre-release testing that actually occurred", "correct": true },
+        { "id": "b", "text": "It does not fail — reconstructing documents after the fact is fully compliant" },
+        { "id": "c", "text": "It fails only because the marketing team was not consulted" },
+        { "id": "d", "text": "It fails only for GPAI models, never for high-risk systems" }
+      ],
+      "explanation": "Documentation is treated as **evidence of conformity created during the build**: Article 11 requires the technical file **before** market placement and kept current, and evaluation records must reflect testing that genuinely happened pre-release. Reconstructing it later is not compliant; the flaw is timing/evidence, not marketing sign-off; and the 'documented during development' principle applies to **high-risk systems** (Art 11) as much as anywhere.",
+      "sourceRefs": ["r-euaiact-art11", "r-euaiact-art17", "r-bok"]
+    },
+    {
+      "id": "q-d3-31",
+      "domainId": "d3-govern-development",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which of the following are build-time provider obligations for a high-risk AI system under the EU AI Act? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Establish a lifecycle risk management system (Art 9)", "correct": true },
+        { "id": "b", "text": "Apply data-governance and quality practices to training/validation/testing data (Art 10)", "correct": true },
+        { "id": "c", "text": "Draw up technical documentation before market placement (Art 11)", "correct": true },
+        { "id": "d", "text": "Perform the deployer's fundamental rights impact assessment (FRIA) at use time" }
+      ],
+      "explanation": "A, B and C are core **provider** build-time duties — the Article 9 risk system, Article 10 data governance, and Article 11 technical documentation. D is a **deployer** use-time duty (the FRIA, Domain IV), not a provider build-time obligation.",
+      "sourceRefs": ["r-euaiact-art9", "r-euaiact-art10", "r-euaiact-art11", "r-euaiact"]
+    },
+    {
+      "id": "q-d3-32",
+      "domainId": "d3-govern-development",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which activities belong to III.C — governing the release, monitoring and maintenance of the AI model? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Assess readiness for release, including creating the model card and satisfying conformity requirements", "correct": true },
+        { "id": "b", "text": "Conduct periodic audits, red teaming, threat modelling and security testing after release", "correct": true },
+        { "id": "c", "text": "Establish a schedule for monitoring, maintenance, updates and retraining", "correct": true },
+        { "id": "d", "text": "Choose the initial training data annotation scheme" }
+      ],
+      "explanation": "A, B and C are the III.C performance indicators — release readiness/model card/conformity, periodic assessment (audits, red teaming, threat modelling, security testing), and a monitoring/maintenance/retraining schedule. D (initial data annotation) is a **III.B** training-data activity, not a release/monitoring one.",
+      "sourceRefs": ["r-bok", "r-euaiact-art11"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d3-govern-the-build",
+      "domainIds": ["d3-govern-development"],
+      "title": "Govern a high-risk model from design to release",
+      "tagline": "Assign the right control, at the right stage, to the right actor — grounded in the EU AI Act's build-time duties.",
+      "context": "Your company is *developing* a CV-screening model that ranks job applicants, intending to place it on the EU market under your own brand. Employment screening is an Annex III use case, so this is likely a high-risk system and your company is the **provider**. Walk the development lifecycle and make the governance call at each stage.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "At design, before any code: what governance step anchors the build?",
+          "choices": [
+            { "id": "a", "text": "Define the business context/use case, classify risk (Annex III → likely high-risk), and stand up the Article 9 risk management system as a continuous, lifecycle-long process", "verdict": "best", "rationale": "III.A starts with business context, use case and an impact assessment on the model; Article 9 makes risk management continuous from the outset. Getting the risk classification right (high-risk) determines every downstream duty.", "next": "st2" },
+            { "id": "b", "text": "Skip risk framing and start collecting training data immediately to save time", "verdict": "wrong", "rationale": "Jumping to data with no use-case definition or risk classification means you can't judge what data quality, oversight or documentation the system needs — you'd be governing blind." },
+            { "id": "c", "text": "Treat it as minimal-risk because it's 'just ranking', and apply no obligations", "verdict": "wrong", "rationale": "Employment screening is an Annex III high-risk use case; assuming minimal-risk skips the entire Chapter III, Section 2 duty set. Only the Article 6(3) derogation could lower it, and profiling of applicants weighs against that." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "During training you find the model favours candidates from historically over-represented groups. Whose duty is it to address this, and how?",
+          "choices": [
+            { "id": "a", "text": "The provider's, at training time: apply Article 10 data-governance and bias-mitigation measures (representativeness, detect/prevent/mitigate), and — under strict safeguards — process sensitive attributes to measure and correct the bias", "verdict": "best", "rationale": "Bias enters through data/modelling choices during the build, so Article 10 places the detect/mitigate duty on the provider at training time; Article 10(5) permits limited special-category processing precisely to detect and correct bias.", "next": "st3" },
+            { "id": "b", "text": "Nobody's yet — leave it for the deployer to catch with human oversight after go-live", "verdict": "wrong", "rationale": "Deferring bias to the deployer contradicts Article 10: data quality and bias mitigation are build-time provider duties, and use-time oversight is not a substitute for fixing the training data." },
+            { "id": "c", "text": "The provider's — but 'fix' it only by increasing overall accuracy", "verdict": "viable", "rationale": "Right actor and stage, wrong tool: raising overall accuracy need not close a group-fairness gap. You need fairness metrics and a fairness-specific mitigation, not just higher accuracy." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "At the release gate, evaluation shows strong accuracy but a large true-positive-rate gap between demographic groups, and the residual fairness risk is judged not acceptable. What's the governed decision?",
+          "choices": [
+            { "id": "a", "text": "Do not release; adopt further mitigations and re-test against the fairness threshold until the residual risk is acceptable (Article 9(5))", "verdict": "best", "rationale": "A failed fairness bar with unacceptable residual risk blocks release under Article 9(5) — mitigate and re-test. Accuracy passing does not override an unacceptable fairness risk.", "next": "st4" },
+            { "id": "b", "text": "Release now and monitor the fairness gap in production", "verdict": "wrong", "rationale": "Shipping past an unacceptable residual risk is exactly what Article 9 forbids; monitoring does not substitute for meeting the acceptance bar before release." },
+            { "id": "c", "text": "Lower the fairness threshold so the current result passes", "verdict": "wrong", "rationale": "Thresholds are set by the risk, not by the result you got — moving the bar to force a pass is gaming the gate, not managing risk." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "You're ready to place the (now-mitigated) system on the market. What must exist first, and in what form?",
+          "choices": [
+            { "id": "a", "text": "A model card plus the Article 11 technical documentation (Annex IV) drawn up during development, a completed Article 43 conformity assessment, the EU declaration of conformity and CE marking", "verdict": "best", "rationale": "Release readiness (III.C) means the model card and conformity requirements are satisfied: technical documentation created during the build (Art 11), conformity assessment (Art 43), declaration of conformity and CE marking." },
+            { "id": "b", "text": "Just a marketing one-pager describing the model's strengths", "verdict": "wrong", "rationale": "A marketing sheet is not a model card and is nowhere near the Article 11 dossier or a conformity assessment — this fails the release gate outright." },
+            { "id": "c", "text": "Nothing formal yet — write the technical file later if a regulator asks", "verdict": "wrong", "rationale": "Article 11 requires the technical documentation *before* market placement and kept up to date; reconstructing it on demand is non-compliant." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-euaiact-art9", "r-euaiact-art10", "r-euaiact-art11", "r-euaiact-art43", "r-bok"]
+    },
+    {
+      "id": "s-d3-frameworks-and-docs",
+      "domainIds": ["d3-govern-development"],
+      "title": "Pick the framework, place human-in-the-loop, and document securely",
+      "tagline": "Attribute each control to the right instrument, stage and artefact.",
+      "context": "You lead AI governance for a team building an internal ML model that will later be sold in the EU. Leadership keeps conflating 'the law', 'a framework', and 'a standard', and keeps treating documentation and security as afterthoughts. Set them straight at each turn.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Leadership asks: 'Which instrument actually *requires* us — with legal force — to do risk management, data governance and technical documentation for this high-risk system?'",
+          "choices": [
+            { "id": "a", "text": "The EU AI Act — binding law (Articles 9, 10, 11 for high-risk systems)", "verdict": "best", "rationale": "Only the EU AI Act imposes enforceable legal obligations here; Articles 9/10/11 are the build-time duties for high-risk systems.", "next": "st2" },
+            { "id": "b", "text": "The NIST AI RMF — it legally mandates these controls in the EU", "verdict": "wrong", "rationale": "NIST AI RMF is voluntary and non-regulatory; it structures risk work but imposes no legal obligation, and certainly not in the EU." },
+            { "id": "c", "text": "ISO/IEC 42001 — it is the EU regulation for AI", "verdict": "wrong", "rationale": "ISO/IEC 42001 is a voluntary, certifiable management-system standard, not EU law." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "You still want a voluntary framework to structure risk framing and model evaluation during the build. Which fits, and where does the evaluation work sit?",
+          "choices": [
+            { "id": "a", "text": "NIST AI RMF — frame risk/context in Map, and test/evaluate/verify/validate in Measure", "verdict": "best", "rationale": "Map frames context and risks; Measure covers the test-evaluate-verify-validate work — exactly the build-time evaluation you want to structure.", "next": "st3" },
+            { "id": "b", "text": "The OECD AI Principles — use their five principles as your detailed test-and-evaluation methodology", "verdict": "viable", "rationale": "The OECD principles are a sound high-level values reference (and shaped the others), but they are not a build-time test/evaluate methodology — NIST's Measure function is the right tool for that." },
+            { "id": "c", "text": "ISO/IEC 22989 — apply its terminology as your evaluation metrics", "verdict": "wrong", "rationale": "ISO/IEC 22989 defines concepts and terminology; it is not an evaluation framework and provides no metrics or thresholds." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "An engineer says 'we'll just add human oversight at deployment, so we don't need humans in the training/testing loop.' Correct them.",
+          "choices": [
+            { "id": "a", "text": "They're different controls at different stages: human-in-the-loop shapes the model during training/testing; Article 14 human oversight is designed in now but exercised at use time — neither substitutes for the other", "verdict": "best", "rationale": "HITL (development) and Article 14 human oversight (designed by the provider, exercised at use time) operate at different lifecycle points; use-time oversight cannot replace catching data/label issues during training/testing.", "next": "st4" },
+            { "id": "b", "text": "Agree — deployment-time oversight fully covers everything, so training-time humans are optional", "verdict": "wrong", "rationale": "This is the exact distractor the exam plants: use-time oversight does not substitute for development-time HITL." },
+            { "id": "c", "text": "Say human involvement is unnecessary at any stage if accuracy is high enough", "verdict": "wrong", "rationale": "High accuracy does not remove the need for human-in-the-loop during development or Article 14 oversight at use — both are governance controls independent of headline accuracy." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Finally, leadership wants to treat security and documentation as post-launch clean-up. What's the governed position?",
+          "choices": [
+            { "id": "a", "text": "Both are build-time governance controls: Article 15 requires accuracy/robustness/cybersecurity secure-by-design (resilient to data/model poisoning, adversarial examples, confidentiality attacks), and Article 11 requires the technical documentation to exist before market placement and be kept up to date", "verdict": "best", "rationale": "Security (Art 15) and documentation (Art 11) are governance obligations embedded in the build, evidenced by the model card and technical file — not afterthoughts. III.C's red teaming/threat modelling keeps evidencing security after release." },
+            { "id": "b", "text": "Document and harden only if an incident or audit forces it", "verdict": "wrong", "rationale": "Reactive documentation violates Article 11's 'before market placement, kept up to date', and bolt-on security contradicts Article 15's secure-by-design duty." },
+            { "id": "c", "text": "Treat security as wholly the deployer's problem and documentation as marketing's job", "verdict": "wrong", "rationale": "Article 15 places secure-by-design on the provider at build time, and the technical documentation is a regulator-facing conformity artefact, not marketing copy." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-euaiact", "r-nist-rmf", "r-euaiact-art14", "r-euaiact-art15", "r-euaiact-art11", "r-oecd"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d3-model-card-critique",
+      "domainId": "d3-govern-development",
+      "title": "Draft and critique a model card against the Domain III documentation checklist",
+      "goal": "Turn 'documentation is a governance control' from a slogan into a working artefact: produce a model card, then red-line it the way an EU AI Act high-risk reviewer would.",
+      "steps": "## What you'll do\n\nThis is a **governance artefact** exercise — no code. Pick any model you understand (a real one you've used, or a realistic hypothetical high-risk system such as a CV-screener or a medical-triage classifier).\n\n1. **Draft a model card** with these sections (write 1–3 honest sentences each):\n   - **Intended use** and explicit **out-of-scope / prohibited uses**.\n   - **Training/evaluation data**: source, provenance/lineage, known gaps, representativeness.\n   - **Evaluation**: the metrics used and results — include *both* a performance metric (e.g. recall) *and* a fairness metric (e.g. equal opportunity) across groups, plus the **thresholds** you set and whether they were met.\n   - **Known limitations and risks** (be specific — where does it fail?).\n   - **Human-in-the-loop / human-oversight** points (development-time review and Article 14 use-time oversight).\n   - **Security**: robustness/adversarial testing done; residual concerns.\n2. **Red-line it as a reviewer.** Go section by section and ask: is anything *marketing* rather than *evidence*? Is any claim unsupported by a recorded evaluation? Is a fairness result missing where only accuracy is reported? Are limitations vague or absent?\n3. **Map to the EU AI Act.** For each model-card section, note which Article it helps evidence — intended use/limitations & instructions (Art 13), data (Art 10), evaluation/risk (Art 9), accuracy/robustness/security (Art 15), oversight (Art 14) — and identify what the fuller **Article 11 + Annex IV technical documentation** would still demand beyond the card.\n4. **Timing check.** Confirm every claim could have been written *during* development (Art 11: before market placement, kept up to date). Flag anything that would have to be reconstructed after the fact.\n5. **Automatos tie-in (optional).** Treat an **agent blueprint** as the model/system card: record intended use, the data/tools it may touch, evaluation notes and limitations as a versioned artefact; note where **approval gates** enforce human-in-the-loop and **audit logging** evidences documented development.\n\n## Why it matters\n\nDomain III treats the model card and technical documentation as *proof of conformity*. Drafting one and then failing it against the checklist teaches the distinctions the exam tests — model card vs technical documentation, evidence vs marketing, and 'documented during development' vs reconstructed after.",
+      "checklist": [
+        "Model card drafted with intended use, out-of-scope uses, data/provenance, evaluation (a performance AND a fairness metric with thresholds), limitations, human-in-the-loop/oversight, and security",
+        "Every section red-lined for marketing-vs-evidence and any unsupported or missing claim (esp. fairness reported alongside accuracy)",
+        "Each section mapped to the EU AI Act article it evidences (Art 9/10/13/14/15), with the extra Article 11 + Annex IV items the card omits identified",
+        "Confirmed each claim could have been produced during development and kept up to date (Art 11), with any reconstruct-after-the-fact gaps flagged"
+      ]
+    },
+    {
+      "id": "lab-d3-risk-classify-obligation-map",
+      "domainId": "d3-govern-development",
+      "title": "Risk-tier a system and map its build-time obligations to the right actor",
+      "goal": "Practise the two skills the exam drills hardest: classify a system's EU AI Act risk tier, then assign each development-time obligation to the correct actor and article.",
+      "steps": "## What you'll do\n\nA **governance worksheet** exercise — no code. Take three short system briefs (write your own or use: (i) a CV-screening ranker sold in the EU; (ii) an internal spam filter with no significant rights impact; (iii) a general-purpose language model you fine-tune and release).\n\n1. **Classify the risk tier** for each: **unacceptable/prohibited** (Art 5), **high-risk** (Annex III use case or Annex I safety component — Art 6), **limited/transparency** (Art 50 disclosure), or **minimal**. For any Annex III candidate, apply the **Article 6(3) derogation** test (narrow procedural task / improving a prior human activity / not replacing human judgment / preparatory task) — and remember **profiling of natural persons is always high-risk**.\n2. **Identify the actor.** For each system, state whether your organisation is the **provider** (develops + places on market under its name) or **deployer** (uses under its authority) — and note when a rebrand or substantial modification would flip a deployer into a provider.\n3. **Map the build-time obligations.** For the high-risk system, list the provider's duties against their articles: risk management (Art 9), data governance/quality/bias (Art 10), technical documentation (Art 11), record-keeping/logging (Art 12), transparency/instructions to deployers (Art 13), human-oversight design (Art 14), accuracy/robustness/cybersecurity (Art 15), quality management system (Art 17), conformity assessment (Art 43). For the GPAI model, list Article 53 duties (technical docs, downstream info, copyright policy, training-content summary) and any Article 55 systemic-risk additions (red-teaming, incident reporting, cybersecurity).\n4. **Cross-check the framework lane.** For two obligations, note the *voluntary* analogue: where NIST AI RMF (Map/Measure) would structure the same work, and how ISO/IEC 42001 would wrap it in a management system — being careful to label the EU AI Act items as the only *binding* ones.\n5. **Spot the traps.** For each brief, write the one wrong classification or misassigned actor you think the exam would plant (e.g. calling the CV-ranker minimal-risk; treating data governance as a deployer duty; assuming the GPAI model is fully documentation-exempt).\n\n## Why it matters\n\nEvery scenario question in this domain reduces to *what tier is it, who owns the duty, and which article/framework says so*. Doing it on three contrasting briefs builds the reflex to attribute correctly under time pressure.",
+      "checklist": [
+        "Each system assigned a risk tier with the Article 6(3) derogation test applied to Annex III candidates (and profiling-always-high-risk noted)",
+        "Provider vs deployer identified per system, including the rebrand/substantial-modification flip",
+        "High-risk build-time obligations mapped to their articles (Art 9/10/11/12/13/14/15/17/43); GPAI duties mapped to Art 53 (+ Art 55 if systemic)",
+        "For two obligations, the NIST (Map/Measure) and ISO/IEC 42001 analogues noted, with the EU AI Act items labelled as the only legally binding ones",
+        "One likely exam trap (wrong tier or misassigned actor) written out per brief"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-bok",
+      "title": "IAPP AIGP Body of Knowledge & Exam Blueprint (Domain III)",
+      "url": "https://iapp.org/certify/aigp/",
+      "kind": "official-doc",
+      "annotation": "The authoritative outline for Domain III 'Understanding how to govern AI development' (21–25 questions). Extract the three sub-domains verbatim — III.A govern the designing and building of the model; III.B govern the collection and use of data in training and testing; III.C govern the release, monitoring and maintenance — and their performance indicators (impact assessment on the model; probability/severity harms matrix and risk-mitigation hierarchy; data quality/quantity/integrity/fit-for-purpose and lineage/provenance; unit/integration/validation/performance/security/bias/interpretability testing; model card + conformity; audits/red teaming/threat modelling; public transparency disclosures). Note: the cert page now links BoK v2.1 (effective 2 Feb 2026); the Domain III title and 21–25 range are identical to v2.0.1.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact",
+      "title": "EU AI Act — Regulation (EU) 2024/1689 (full text & high-level summary)",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "regulation",
+      "annotation": "The binding law. Extract the provider (Art 3(3)) vs deployer (Art 3(4)) definitions, the four risk tiers (unacceptable/high/limited/minimal), and how high-risk is assigned (Annex I safety component requiring third-party conformity assessment, or Annex III use case). Ground every 'the law requires' claim here; the artificialintelligenceact.eu article pages give a readable per-article view of the same text.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art9",
+      "title": "EU AI Act Article 9 — Risk management system",
+      "url": "https://artificialintelligenceact.eu/article/9/",
+      "kind": "regulation",
+      "annotation": "The impact assessment ON the model. Extract that it is a continuous iterative process across the entire lifecycle (Art 9(2)) with regular review; the steps (identify/analyse foreseeable risks to health/safety/fundamental rights; estimate under intended use and reasonably foreseeable misuse; adopt targeted measures; residual risk judged acceptable, Art 9(5)); testing to identify the most appropriate measures (Art 9(6)); and consideration of persons under 18 / vulnerable groups.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art10",
+      "title": "EU AI Act Article 10 — Data and data governance",
+      "url": "https://artificialintelligenceact.eu/article/10/",
+      "kind": "regulation",
+      "annotation": "The developer's data duty. Extract the quality bar (Art 10(3): relevant, sufficiently representative, to the best extent possible free of errors and complete for the intended purpose); the data-governance practices (Art 10(2): origin, annotation/labelling/cleaning/aggregation, assumptions, suitability, examination for biases, measures to detect/prevent/mitigate biases, data gaps); the geographical/contextual/behavioural/functional setting (Art 10(4)); and the special-category-data exception for bias detection and correction (Art 10(5)).",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art11",
+      "title": "EU AI Act Article 11 — Technical documentation (with Annex IV)",
+      "url": "https://artificialintelligenceact.eu/article/11/",
+      "kind": "regulation",
+      "annotation": "Documentation as a conformity control. Extract that the technical documentation must be drawn up BEFORE the system is placed on the market or put into service and kept up to date (Art 11(1)); that it must demonstrate compliance with Section 2 and let authorities assess conformity; and that it must contain at minimum the elements in Annex IV. Contrast with the shareable model card and with Article 13 instructions for use.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art12",
+      "title": "EU AI Act Article 12 — Record-keeping (logging)",
+      "url": "https://artificialintelligenceact.eu/article/12/",
+      "kind": "regulation",
+      "annotation": "Extract that high-risk systems shall technically allow automatic recording of events (logs) over the system's lifetime (Art 12(1)), and that logging must enable identifying risk situations/substantial modifications and support post-market monitoring and operational oversight (Art 12(2)). Grounds the 'documented and auditable development/operation' point.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art13",
+      "title": "EU AI Act Article 13 — Transparency and provision of information to deployers",
+      "url": "https://artificialintelligenceact.eu/article/13/",
+      "kind": "regulation",
+      "annotation": "Extract that high-risk systems must be sufficiently transparent for deployers to interpret and use output appropriately, and be accompanied by instructions for use that are concise/complete/correct/clear, including provider identity, capabilities and limitations, accuracy/robustness/cybersecurity levels and metrics, foreseeable risks/misuse, human-oversight measures, and expected lifetime/maintenance. Use to distinguish instructions-for-use from the model card and the Article 11 dossier.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art14",
+      "title": "EU AI Act Article 14 — Human oversight",
+      "url": "https://artificialintelligenceact.eu/article/14/",
+      "kind": "regulation",
+      "annotation": "Extract that high-risk systems must be designed (incl. human-machine interface tools) so natural persons can effectively oversee them in use (Art 14(1)); oversight measures are built by the provider and/or implemented by the deployer (Art 14(3)); the human must understand capacities/limitations, remain aware of automation bias, correctly interpret output, decide not to use/override, and intervene or stop (Art 14(4)); and the two-person verification rule for certain biometric systems (Art 14(5)). Use to separate human oversight (design + use time) from human-in-the-loop (development time).",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art15",
+      "title": "EU AI Act Article 15 — Accuracy, robustness and cybersecurity",
+      "url": "https://artificialintelligenceact.eu/article/15/",
+      "kind": "regulation",
+      "annotation": "The secure-by-design duty. Extract that high-risk systems must achieve an appropriate level of accuracy, robustness and cybersecurity consistently across the lifecycle (Art 15(1)); accuracy levels and metrics declared in the instructions for use (Art 15(3)); resilience to errors/faults and feedback loops via redundancy/fail-safe (Art 15(4)); and resilience to attacks explicitly including data poisoning, model poisoning, adversarial examples/model evasion and confidentiality attacks (Art 15(5)). This is the bridge to the AI-security mindset.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art17",
+      "title": "EU AI Act Article 17 — Quality management system",
+      "url": "https://artificialintelligenceact.eu/article/17/",
+      "kind": "regulation",
+      "annotation": "Extract that providers of high-risk systems must put in place a QMS documented as written policies/procedures/instructions (Art 17(1)), covering a compliance strategy, design and verification techniques, examination/test/validation before-during-after development, technical specifications, data management, the Article 9 risk system, post-market monitoring, incident reporting, communication with authorities, record-keeping, resource management and an accountability framework. Grounds 'documented development' as an organisational control.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art43",
+      "title": "EU AI Act Article 43 — Conformity assessment",
+      "url": "https://artificialintelligenceact.eu/article/43/",
+      "kind": "regulation",
+      "annotation": "Extract the two conformity-assessment routes for high-risk systems — internal control (Annex VI) vs assessment involving a notified body (Annex VII) — when each applies for Annex III systems, that a substantial modification triggers a new assessment (Art 43(4)), and that the outcome is the EU declaration of conformity plus CE marking. Grounds 'satisfying conformity requirements' in III.C.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art6",
+      "title": "EU AI Act Article 6 — Classification rules for high-risk AI systems",
+      "url": "https://artificialintelligenceact.eu/article/6/",
+      "kind": "regulation",
+      "annotation": "Extract the two high-risk routes (Art 6(1) Annex I safety component requiring third-party conformity assessment; Art 6(2) Annex III use cases) and the Article 6(3) derogation whereby an Annex III system is NOT high-risk if it does not pose a significant risk of harm (narrow procedural task; improving a prior human activity; detecting patterns without replacing human assessment; preparatory task) — with the carve-out that profiling of natural persons is ALWAYS high-risk.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art53",
+      "title": "EU AI Act Article 53 — Obligations for providers of general-purpose AI models",
+      "url": "https://artificialintelligenceact.eu/article/53/",
+      "kind": "regulation",
+      "annotation": "Extract the GPAI provider duties: keep technical documentation of the model (incl. training/testing and evaluation results, Annex XI); provide information to downstream integrators (Annex XII); put in place a Union copyright-law policy; and publish a sufficiently detailed summary of training content (AI Office template). Note the free/open-source relaxation of the documentation duties in 1(a)/(b) — but not the copyright policy or training summary, and not for systemic-risk models.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-art55",
+      "title": "EU AI Act Article 55 — Obligations for GPAI models with systemic risk",
+      "url": "https://artificialintelligenceact.eu/article/55/",
+      "kind": "regulation",
+      "annotation": "Extract the additional systemic-risk duties: model evaluation including adversarial testing/red-teaming (Art 55(1)(a)); assess and mitigate systemic risks (b); document and report serious incidents to the AI Office without undue delay (c); ensure adequate cybersecurity (d). Note the Article 51 classification basis (high-impact capabilities; the 10^25 FLOP training-compute threshold).",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-nist-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0) + Playbook",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "framework",
+      "annotation": "The voluntary US framework (released Jan 2023, sector-agnostic, non-regulatory, rights-preserving). Extract the four functions — Govern, Map, Measure, Manage — and that development-time work lives in Map (frame context/intended use/impacts/risks) and Measure (analyse/assess risk via test, evaluate, verify, validate of trustworthiness characteristics: validity/reliability, safety, security/resilience, accountability/transparency, explainability/interpretability, privacy, fairness/bias). Note the Playbook offers suggested (not mandatory) actions, and the Generative AI Profile (NIST AI 600-1, July 2024) applies it to GenAI risks.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-iso42001",
+      "title": "ISO/IEC 42001:2023 — AI management system (AIMS)",
+      "url": "https://www.iso.org/standard/81230.html",
+      "kind": "standard",
+      "annotation": "The world's first AI management-system standard (published 2023). Extract that it specifies requirements to establish, implement, maintain and continually improve an AI Management System within organisations that provide or use AI-based products/services, on a Plan-Do-Check-Act basis, covering leadership, planning, support, operation, performance evaluation and continual improvement across the AI lifecycle — the certifiable, ISO-27001-style wrapper around responsible AI. Not law and not a metric library. (iso.org blocks automated fetch; facts confirmed via the ISO catalogue/OBP listing.)",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-iso22989",
+      "title": "ISO/IEC 22989:2022 — AI concepts and terminology",
+      "url": "https://www.iso.org/standard/74296.html",
+      "kind": "standard",
+      "annotation": "The foundational AI terminology standard (published 2022): establishes terminology and describes concepts in AI (components/functions, algorithms, data; tasks like classification/clustering/regression/generation; functions like training/validation/evaluation/inference) for use in other standards and cross-stakeholder communication. Use to anchor precise definitions the exam relies on. (iso.org blocks automated fetch; facts confirmed via the ISO catalogue listing.)",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-oecd",
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "framework",
+      "annotation": "The first intergovernmental AI standard (adopted May 2019, updated May 2024). Extract the five values-based principles — (1) inclusive growth, sustainable development and well-being; (2) human rights and democratic values, including fairness and privacy; (3) transparency and explainability; (4) robustness, security and safety; (5) accountability — as the soft-law reference that shaped the EU AI Act, NIST RMF and ISO standards.",
+      "domainIds": ["d3-govern-development"]
+    },
+    {
+      "id": "r-euaiact-timeline",
+      "title": "EU AI Act implementation timeline",
+      "url": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "kind": "reference",
+      "annotation": "The phase-in dates for currency: entry into force 1 Aug 2024; prohibitions + AI-literacy 2 Feb 2025; GPAI-model obligations, governance and penalties 2 Aug 2025 (existing GPAI providers have until 2 Aug 2027); stand-alone Annex III high-risk obligations 2 December 2027; Article 6(1) / Annex I product-safety high-risk obligations 2 August 2028. Use to place when the development-time high-risk duties bite. CURRENCY CAVEAT (as of 2026-07-02): the EU AI Act timeline is in legislative flux — the Digital Omnibus on AI (provisional agreement 6–7 May 2026; publication in the Official Journal expected shortly) DEFERS the two high-risk dates from the original 2 Aug 2026 (Annex III) / 2 Aug 2027 (Annex I) to 2 Dec 2027 / 2 Aug 2028; prohibitions (2 Feb 2025) and GPAI (2 Aug 2025) are unchanged. Re-verify the current timeline and legislative status against live EUR-Lex / European Commission sources before asserting any specific phase-in date.",
+      "domainIds": ["d3-govern-development"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d3-1",
+      "title": "D3 · Governing the build — lifecycle responsibilities, impact assessment on the model, data quality, bias & evaluation",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d3-govern-development"],
+      "sourceNotebook": "aigp / d3 / development-lifecycle-data-bias-evaluation"
+    },
+    {
+      "id": "v-d3-2",
+      "title": "D3 · Documentation, model cards, conformity & secure development",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d3-govern-development"],
+      "sourceNotebook": "aigp / d3 / model-cards-documentation-secure-development"
+    }
+  ]
+}

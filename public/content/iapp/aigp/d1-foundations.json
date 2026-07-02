@@ -1,0 +1,876 @@
+{
+  "id": "d1-foundations",
+  "order": 1,
+  "code": "D1",
+  "name": "Understanding the foundations of AI governance",
+  "weight": 0.21,
+  "tagline": "The vocabulary and the spine of the whole exam: what AI is (and how it differs from deterministic software), the governance lifecycle end to end, the core trustworthy-AI principles, and the roles — developer vs deployer — that every later domain leans on.",
+  "overview": "Domain I is worth roughly a fifth of the AIGP exam (blueprint 16-20 of 100 questions across sub-domains I.A-I.C) and it is the foundation the scenario questions in Domains II-IV are drawn on. It tests four things you must be able to DO, not just recite: (1) place a system on the AI/ML/deterministic spectrum and name why AI's characteristics — probabilistic outputs, opacity, autonomy, scale, data dependency — demand a governance approach ordinary software does not; (2) walk the AI governance lifecycle in order (use-case assessment -> risk management -> ethics by design -> data acquisition & use -> model development, training & testing -> deployment & monitoring -> documentation & incident management) and say which stage a control belongs to; (3) given a fact pattern, name which core principle is at stake — fairness, transparency & explainability, accountability, or human oversight (human-centricity) — and not confuse transparency with explainability or accountability with human oversight; and (4) decide whether an organisation is acting as a developer or a deployer, since the whole legal architecture in Domain II turns on that split. The AI risk & impact assessment is the instrument that threads the entire lifecycle — treat it as the spine. This domain teaches the frameworks (OECD principles, NIST AI RMF, the ISO AI standards, and the EU AI Act's four-tier risk model and provider/deployer roles) at the level of definitions and structure; the granular legal timelines and obligations are drilled in Domain II. NOTE ON CURRENCY: the EU AI Act's application timeline is in flux as of authoring (an EU 'AI Omnibus' simplification package was moving through the legislature in late 2025 / 2026), so this domain teaches the stable structure — the four risk tiers and the Article 3 role definitions, which the Omnibus does not change — and does not assert specific phase-in dates as settled; those are Domain II material.",
+  "objectives": [
+    "Distinguish AI, machine learning, and deterministic/rule-based systems, and name the characteristics of AI (probabilistic outputs, opacity, autonomy, speed and scale, data dependency, potential for harm) that make governance necessary.",
+    "Walk the AI governance lifecycle in order and place any given control or activity in the correct stage — from use-case assessment through risk management, ethics by design, data governance, model development and testing, to deployment, monitoring and incident management.",
+    "Define and correctly apply each core trustworthy-AI principle — fairness, transparency, explainability, accountability, and human oversight/human-centricity — and tell the commonly-confused pairs apart (transparency vs explainability; accountability vs human oversight).",
+    "Position the AI risk & impact assessment as the recurring instrument that runs through the lifecycle, and distinguish a broad risk assessment from a rights-and-impact assessment.",
+    "Determine, for a given organisation and scenario, whether it is acting as an AI developer or a deployer (and recognise it can be both), grounded in the EU AI Act's provider/deployer definitions.",
+    "Recognise the roles and structural relationships of the foundational frameworks — OECD AI Principles, NIST AI RMF, ISO/IEC 22989 and 42001 — as the trustworthy-AI backbone, without over-claiming the legal specifics reserved for Domain II."
+  ],
+  "lessons": [
+    {
+      "id": "l1-what-is-ai",
+      "title": "What AI is, and why it needs its own governance",
+      "estMinutes": 16,
+      "objective": "Place a system on the AI / machine-learning / deterministic spectrum, and name the characteristics of AI that make ordinary software governance insufficient.",
+      "body": "## Definitions first — the exam rewards precision\n\nThe AIGP is built on shared vocabulary, so start with the definitions the official sources actually use.\n\n**AI system (EU AI Act, Article 3(1)):** *\"a machine-based system that is designed to operate with varying levels of autonomy and that may exhibit adaptiveness after deployment, and that, for explicit or implicit objectives, infers, from the input it receives, how to generate outputs such as predictions, content, recommendations, or decisions that can influence physical or virtual environments.\"* The **OECD** definition (updated 2023-24) is near-identical — deliberately, because the EU aligned to it. Memorise the load-bearing verbs: a system that **infers** from input **how to generate** outputs, with **autonomy** and possible **adaptiveness**. That is what separates AI from a script.\n\n**Machine learning (ML)** is the dominant *approach* to building modern AI: instead of a human writing the rules, the system **learns patterns from data** and generalises to new inputs. ML is a subset of AI, and today's high-profile systems (large language models, computer vision, recommenders) are ML.\n\n**Deterministic / rule-based systems** are the contrast case. A deterministic system follows **explicit, human-authored rules**: the same input always yields the same output, and you can read the logic. A tax calculator, a spam filter with hand-written rules, an `if/else` approval flow — these are automation, not AI, because nothing is *inferred* from data; the behaviour was *specified*.\n\n> **Exam tip:** the single sharpest distinction the exam probes is the BoK's own phrase — **\"probabilistic versus deterministic outputs.\"** A deterministic system is predictable and auditable by construction. An ML system is **probabilistic**: it produces a most-likely output, can be wrong in ways nobody explicitly coded, and can behave differently as data or context shifts. That probabilistic nature is the *root* of why AI needs governance rules that plain software does not.\n\n## Why AI needs governance ordinary software does not\n\nThe BoK asks you to *\"identify the unique characteristics of AI that require a comprehensive approach to governance.\"* Learn these six — they are the justification for the entire discipline:\n\n- **Complexity** — modern models have millions/billions of parameters; behaviour emerges rather than being designed line by line.\n- **Opacity** — many models are effectively **black boxes**; even their builders cannot fully explain a specific decision. (This is *why* explainability is a principle.)\n- **Autonomy** — systems act with varying independence, sometimes without a human in the loop for each decision.\n- **Speed and scale** — a flawed model can make millions of decisions before anyone notices, so a small bias becomes a mass harm.\n- **Data dependency** — the system is only as good, and only as fair, as its training data; garbage or biased data in, biased decisions out.\n- **Potential for harm or misuse** — outputs influence real people (credit, hiring, health, justice) and can be repurposed maliciously.\n\nContrast with deterministic software: a bug there is a *known-wrong rule* you can find and fix. An AI failure can be a **statistical, emergent, hard-to-reproduce** behaviour — which is exactly why you need lifecycle governance, impact assessments, and human oversight rather than just unit tests.\n\n## The categories of AI risk and harm\n\nThe BoK also expects you to *\"identify the types of risks and harms posed by AI to individuals, groups, organizations and society.\"* It gives examples worth knowing: **misalignment with objectives** (the system optimises the wrong thing), **ethics and bias risk** (discriminatory or unfair outcomes), and **complexity and scalability** risk (harm amplified by scale and opacity). Note the four levels of who is harmed — **individuals, groups, organisations, and society** — because impact assessments (Lesson 4) must consider all four, not just the direct user.\n\n## The exam decision this lesson trains\n\nGiven a description of a system, you must be able to say: *is this AI (does it infer from data?) or deterministic automation (does it follow authored rules?)*, and *which of AI's characteristics makes this case risky?* A rules-based loan-decline flow is deterministic and auditable; an ML credit-scoring model is probabilistic, opaque, and data-dependent — and that is why only the second one triggers the heavier governance machinery.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-1",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A bank's legacy loan tool applies a fixed set of human-written eligibility rules: the same application always produces the same decision, and every rule is readable. Which best describes it?",
+          "options": [
+            { "id": "a", "text": "A deterministic, rule-based system — not machine learning — because its outputs follow explicit authored rules rather than being inferred from data", "correct": true },
+            { "id": "b", "text": "A machine-learning system, because it makes automated decisions" },
+            { "id": "c", "text": "A general-purpose AI model, because it processes many applications" },
+            { "id": "d", "text": "An AI system as defined by the EU AI Act, because it produces outputs that influence people" }
+          ],
+          "explanation": "The defining test is whether the system **infers** behaviour from data (AI/ML) or **follows explicit human-authored rules** (deterministic). Fixed, readable, repeatable rules make this deterministic automation. It is not ML (nothing is learned from data), not a general-purpose AI model (that is a large, broadly-capable trained model), and not an EU-AI-Act 'AI system' — that definition centres on *inferring* how to generate outputs, which a hard-coded rule engine does not do, even though it does affect people.",
+          "sourceRefs": ["r-eu-ai-act-summary", "r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-2",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which characteristic of AI is the primary reason a specific model decision may be difficult to justify to an affected person — the reason 'explainability' is a governance principle at all?",
+          "options": [
+            { "id": "a", "text": "Opacity — many models are effectively black boxes whose internal reasoning even their builders cannot fully articulate", "correct": true },
+            { "id": "b", "text": "Speed and scale — the system makes decisions very quickly" },
+            { "id": "c", "text": "Data dependency — the system needs training data" },
+            { "id": "d", "text": "Determinism — the system always returns the same output" }
+          ],
+          "explanation": "**Opacity** (the black-box problem) is what makes a single decision hard to explain, which is precisely why explainability is a named principle. Speed/scale amplifies *harm* but does not make a decision unexplainable; data dependency drives *bias* risk; and determinism is a property of rule-based software, not the opaque, probabilistic AI models the principle addresses.",
+          "sourceRefs": ["r-iapp-bok", "r-nist-rmf"]
+        },
+        {
+          "id": "kc-d1-3",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Per the AIGP Body of Knowledge, AI can pose risks and harms to which of the following?",
+          "options": [
+            { "id": "a", "text": "Individuals, groups, organisations, and society", "correct": true },
+            { "id": "b", "text": "Only the individual end user of the system" },
+            { "id": "c", "text": "Only the organisation that deploys the system" },
+            { "id": "d", "text": "Only regulators and standards bodies" }
+          ],
+          "explanation": "The BoK explicitly frames AI risks and harms as reaching **individuals, groups, organisations, and society** — a deliberately broad scope. That breadth is why impact assessments must look beyond the direct user. Limiting harm to just the end user, just the deploying organisation, or just regulators all understate the scope the exam expects.",
+          "sourceRefs": ["r-iapp-bok"]
+        }
+      ]
+    },
+    {
+      "id": "l2-lifecycle",
+      "title": "The AI governance lifecycle, end to end",
+      "estMinutes": 18,
+      "objective": "Walk the governance lifecycle in the order the BoK uses, and place any control or activity in the correct stage.",
+      "body": "## Governance is a lifecycle, not a gate\n\nThe biggest conceptual shift the exam wants is this: **AI governance runs across the whole life of a system, not once at launch.** The BoK's own competency (I.C) is to *\"create and implement policies to ensure oversight and accountability across all AI life cycle stages\"* — and it lists the stages. Learn them **in order**, because a common question hands you an activity and asks which stage owns it.\n\n### The stages (BoK wording)\n\n1. **Use-case assessment** — define the business context and intended purpose. *What problem, for whom, is AI even the right tool, and what could go wrong?* Everything downstream inherits from here. (In Domain III this becomes 'define the business context and use case of the AI model'.)\n2. **Risk management** — identify, analyse, and treat the risks the use case raises. This is where the **risk & impact assessment** (Lesson 4) lives, though its findings ripple through every later stage.\n3. **Ethics by design** — bake the principles (fairness, transparency, human oversight) into the design *before* building, rather than bolting them on afterwards. This is the AI analogue of 'privacy by design'.\n4. **Data acquisition and use** — source, document, and govern the data. Is it representative? Lawfully obtained? Does it carry historical bias? Data governance is a whole discipline the exam treats seriously because **data dependency** is where much AI harm originates.\n5. **Model development, training and testing** — build, train, and evaluate the model against defined metrics and thresholds, including bias and performance testing. (Domain III drills this.)\n6. **Deployment and monitoring** — put the system into use and **keep watching it**. Models drift; the world changes; a model that was fair at launch can degrade. Monitoring is not optional. (Domain IV drills this.)\n7. **Documentation and reporting, and incident management** — maintain the paper trail (model cards, technical documentation, records) that supports accountability, and have a process to detect, escalate, and remediate incidents.\n\n> **Exam tip:** memorise the sequence as a story: *decide the use case -> assess its risk -> design ethically -> govern the data -> build and test -> deploy and monitor -> document and handle incidents.* If a question describes 'checking the training set for under-represented groups', that is **data acquisition and use**. 'Watching a live model for performance drift' is **deployment and monitoring**. 'Writing the model card' is **documentation**. The trap is to lump everything into 'development'.\n\n## Why the ordering matters\n\nThe lifecycle is **iterative and cumulative**, not a one-way waterfall. A monitoring finding (stage 6) can send you back to re-govern data (stage 4) or re-test the model (stage 5); an incident (stage 7) can trigger a fresh risk assessment (stage 2). But the exam still expects you to know the *canonical order*, because governance controls are designed to be applied as early as possible — the earlier you catch a problem (ideally at use-case or data stage), the cheaper and safer the fix. This is the governance version of 'shift left'.\n\n## Governance scales with context\n\nThe BoK (I.B) is explicit that you must *\"differentiate approaches to AI governance based upon company size, maturity, industry, products and services, objectives and risk tolerance.\"* There is no single mandated program. A two-person startup shipping a low-stakes recommender and a global bank deploying credit models need *proportionate* governance — same lifecycle, very different rigour. On the exam, beware absolute claims like 'every organisation must run a full formal impact assessment for every system' — proportionality to risk and context is the governing idea.\n\n## Policies, not heroics\n\nNote the BoK verbs: *create and implement **policies**.* Governance is institutionalised through **policies and procedures** applied across the lifecycle (plus training and cross-functional collaboration, per I.B), not through one diligent engineer remembering to be careful. That is why 'update existing data privacy and security policies for AI' and 'create policies to manage third-party/procurement/supply-chain risk' are named I.C competencies — governance is organisational, documented, and repeatable.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-4",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team discovers that a live model's accuracy for a customer segment has quietly degraded over six months as customer behaviour shifted. Which AI governance lifecycle stage is this finding a function of?",
+          "options": [
+            { "id": "a", "text": "Deployment and monitoring", "correct": true },
+            { "id": "b", "text": "Use-case assessment" },
+            { "id": "c", "text": "Data acquisition and use" },
+            { "id": "d", "text": "Ethics by design" }
+          ],
+          "explanation": "Watching a system *after it is live* for drift and degradation is **deployment and monitoring** — the stage that recognises models decay as the world changes. Use-case assessment happens before building; data acquisition governs the training data; and ethics by design is a pre-build design activity. The trap is that fixing the drift may later touch data or the model, but the *finding itself* is a monitoring function.",
+          "sourceRefs": ["r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-5",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement best reflects the BoK's expectation about how much governance an organisation should apply?",
+          "options": [
+            { "id": "a", "text": "Governance should be proportionate — differentiated by company size, maturity, industry, objectives, and risk tolerance", "correct": true },
+            { "id": "b", "text": "Every organisation must apply an identical, maximal governance program to every AI system" },
+            { "id": "c", "text": "Governance is only required for organisations that build their own models" },
+            { "id": "d", "text": "Governance is a one-time approval performed before launch and not revisited" }
+          ],
+          "explanation": "The BoK (I.B) says to **differentiate** governance by size, maturity, industry, products, objectives, and risk tolerance — i.e. proportionality. A single maximal program for everything ignores that; governance applies to deployers too, not only builders; and it is a **lifecycle** activity, not a one-off gate. Proportionality-to-context is the governing idea, and absolute 'every system, identical rigour' statements are classic distractors.",
+          "sourceRefs": ["r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-6",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "'Ethics by design' in the governance lifecycle most nearly means:",
+          "options": [
+            { "id": "a", "text": "Building the trustworthy-AI principles into the system from the design stage, rather than adding them after the model is built", "correct": true },
+            { "id": "b", "text": "Running an ethics review only after an incident occurs" },
+            { "id": "c", "text": "Delegating all ethical judgement to the model itself" },
+            { "id": "d", "text": "Publishing a public ethics statement instead of changing the system" }
+          ],
+          "explanation": "'Ethics by design' is the AI analogue of 'privacy by design' — embed fairness, transparency, and oversight **from the outset** of design. It is proactive, not a post-incident review; it does not offload judgement to the model; and it is about engineering the system, not merely publishing a statement.",
+          "sourceRefs": ["r-iapp-bok", "r-oecd-principles"]
+        }
+      ]
+    },
+    {
+      "id": "l3-principles",
+      "title": "The core trustworthy-AI principles (and the pairs candidates confuse)",
+      "estMinutes": 17,
+      "objective": "Define each core principle and, given a scenario, name which one is at stake — without confusing transparency with explainability or accountability with human oversight.",
+      "body": "## One vocabulary, several frameworks\n\nThe trustworthy-AI principles show up almost identically across the sources, and the exam expects you to recognise them in any of these dialects:\n\n- **AIGP BoK (I.A):** *\"fairness, safety and reliability, privacy and security, transparency and explainability, accountability and human-centricity.\"*\n- **OECD AI Principles** (adopted 2019, updated 2024) — the five values-based principles for **trustworthy AI**: (1) inclusive growth, sustainable development & well-being; (2) human rights & democratic values, **including fairness and privacy**; (3) **transparency and explainability**; (4) robustness, security and safety; (5) **accountability**.\n- **NIST AI RMF** — seven characteristics of trustworthy AI: valid & reliable; safe; secure & resilient; **accountable & transparent**; **explainable & interpretable**; privacy-enhanced; **fair — with harmful bias managed**.\n\nThe labels differ but the spine is the same: **fairness, transparency, explainability, accountability, and human oversight/human-centricity**, wrapped around safety, security, and privacy. Learn the definitions, then learn the distinctions the exam actually tests.\n\n## The four you must be able to apply\n\n**Fairness** — the system does not produce **unjustified discriminatory** outcomes; harmful bias is identified and managed across affected groups. NIST's phrasing is precise: *fair, with harmful bias managed* — it does not promise a single universal notion of fairness (fairness definitions vary by context), it promises that **harmful bias is actively managed**.\n\n**Transparency** — **disclosure about the AI**: that AI is being used at all, and meaningful information about how the system works, its data, and its limitations. Transparency is *system-level and outward-facing*: labelling a chatbot as AI, publishing model documentation, telling people a decision was automated. NIST: *\"transparency reflects the extent to which information about an AI system and its outputs is available to individuals interacting with such a system.\"*\n\n**Explainability** — making a **specific output or decision intelligible**: *why did the model produce this result for this person?* Explainability (with its sibling *interpretability*) is *decision-level*. You can be transparent (I've told you this is an AI and published its docs) yet not explainable (I still cannot tell you why it declined *your* application).\n\n**Accountability** — someone is **answerable** for the system and its impacts. OECD: *\"all actors must be accountable\"* for the development, deployment, and use of AI and its outcomes. Accountability is about **ownership, responsibility, records, and remedy** — who is on the hook, and how you can prove it (audit logs, documentation, governance structures).\n\n**Human oversight / human-centricity** — a **human can supervise, intervene in, or override** the system; AI stays subordinate to human judgement and serves human ends. In the EU AI Act this becomes a concrete high-risk obligation (a human able to intervene or stop the system).\n\n> **Exam tip — the two traps the module framing calls out by name:**\n>\n> 1. **Transparency is not explainability.** Transparency = *disclosing that/how AI is used* (outward, system-level). Explainability = *making a particular output understandable* (decision-level). A system can satisfy one and fail the other. If a scenario is about **telling people AI is involved / publishing documentation**, that is transparency; if it is about **understanding a specific decision**, that is explainability.\n>\n> 2. **Accountability is not human oversight.** Accountability = *who is answerable and how it is evidenced* (responsibility, records, remedy). Human oversight = *a human can watch, intervene, or override in operation* (a control in the loop). You can have a human-in-the-loop control (oversight) and still have unclear accountability, or clear accountability with no real-time human control. Match the verb: **answerable -> accountability; able to intervene -> human oversight.**\n\n## A worked disambiguation\n\nA bank deploys an AI to screen mortgage applications.\n- It puts a notice on the site: *\"decisions are assisted by an automated system,\"* and publishes a model summary -> **transparency**.\n- A declined applicant asks *why*, and the bank can produce the factors that drove that specific decision -> **explainability**.\n- The Chief Risk Officer is formally responsible for the model, and every decision is logged for audit -> **accountability**.\n- A loan officer can review and overturn the automated decision before it is finalised -> **human oversight**.\n- The model is tested so it does not systematically disadvantage a protected group -> **fairness**.\n\nFive principles, one use case — and the exam will hand you one of these facts and ask which principle it evidences. Naming them apart is the whole skill.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-7",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An insurer publishes documentation stating that an AI model is used in pricing and how it broadly works, but a specific customer still cannot get an intelligible reason for why THEIR premium was set high. Which principle is satisfied, and which is not?",
+          "options": [
+            { "id": "a", "text": "Transparency is satisfied (AI use is disclosed and documented); explainability is not (the specific decision is not made intelligible)", "correct": true },
+            { "id": "b", "text": "Explainability is satisfied; transparency is not" },
+            { "id": "c", "text": "Both transparency and explainability are satisfied" },
+            { "id": "d", "text": "Neither is relevant — this is purely an accountability question" }
+          ],
+          "explanation": "Disclosing that AI is used and publishing how it works is **transparency** (outward, system-level). Being unable to make the *specific* decision understandable is a failure of **explainability** (decision-level). So transparency is met and explainability is not — the exact distinction the exam probes. It is not the reverse, both are not met, and while accountability matters generally, the fact pattern is specifically the transparency/explainability split.",
+          "sourceRefs": ["r-oecd-principles", "r-nist-rmf-characteristics", "r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-8",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A governance policy names the Chief Risk Officer as the person answerable for an AI system's outcomes and requires every decision to be logged for audit. Which core principle does this most directly implement?",
+          "options": [
+            { "id": "a", "text": "Accountability", "correct": true },
+            { "id": "b", "text": "Human oversight" },
+            { "id": "c", "text": "Explainability" },
+            { "id": "d", "text": "Fairness" }
+          ],
+          "explanation": "Naming who is **answerable** plus keeping **records/audit logs** is the essence of **accountability** (ownership + evidence + remedy). Human oversight would be a human able to *intervene or override in operation* — not the case here. Explainability is about making a specific output intelligible, and fairness is about managing harmful bias — neither is what 'who is on the hook + audit logging' implements.",
+          "sourceRefs": ["r-oecd-principles", "r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-9",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Which pairing of scenario -> principle is INCORRECT?",
+          "options": [
+            { "id": "a", "text": "A human reviewer can pause and override the model before its decision takes effect -> accountability", "correct": true },
+            { "id": "b", "text": "The model is tested to ensure it does not systematically disadvantage a protected group -> fairness" },
+            { "id": "c", "text": "Users are told they are interacting with an AI and given information about its limitations -> transparency" },
+            { "id": "d", "text": "A declined applicant can be given the specific factors that drove that decision -> explainability" }
+          ],
+          "explanation": "Option A is the incorrect pairing: a human able to **pause/override in operation** is **human oversight**, not accountability (accountability is about who is *answerable* and how it is evidenced). B (managing harmful bias = fairness), C (disclosing AI use and limitations = transparency), and D (making a specific decision intelligible = explainability) are all correctly matched. This item targets the accountability-vs-oversight trap head-on.",
+          "sourceRefs": ["r-oecd-principles", "r-nist-rmf", "r-eu-ai-act-summary"]
+        }
+      ]
+    },
+    {
+      "id": "l4-roles-and-assessment",
+      "title": "Developer vs deployer, and the risk & impact assessment as the spine",
+      "estMinutes": 15,
+      "objective": "Decide whether an organisation is a developer or a deployer (and when it is both), and position the AI risk & impact assessment as the instrument that threads the lifecycle.",
+      "body": "## The role split the whole exam turns on\n\nThe BoK (I.B) asks you to *\"identify differences among AI developers, deployers and users from a governance perspective.\"* This looks small in Domain I but it is **load-bearing** for Domains II-IV, where obligations attach to your role. Get the role right and the later legal questions fall out; get it wrong and you misassign every obligation.\n\nThe EU AI Act gives the two roles precise legal names — learn both the plain-English and the Act's terms:\n\n- **Developer / Provider** — the party that **builds or has built** an AI system (or general-purpose AI model) and **places it on the market or puts it into service under its own name or trademark**. In EU AI Act Article 3, this is the **provider**: *\"a natural or legal person... that develops an AI system or a general-purpose AI model or that has [one] developed and places it on the market or puts the AI system into service under its own name or trademark.\"* The provider carries the heaviest obligations because it shapes what the system *is*.\n- **Deployer** — the party that **uses** an AI system **under its own authority** in a professional/organisational capacity. EU AI Act Article 3: *\"a natural or legal person... using an AI system under its authority except where the AI system is used in the course of a personal non-professional activity.\"* A deployer did not build the system but is responsible for **how it is used** in context (appropriate use, human oversight in operation, monitoring, informing affected people).\n- **User (end user / affected person)** — the individual subject to or interacting with the system. Note the Act now uses **deployer** for the professional operator; the plain word 'user' can be ambiguous, so the exam prefers the developer/deployer framing.\n\nThe Act also names **importers** and **distributors** in the supply chain, but the primary Domain I distinction is **developer/provider vs deployer**.\n\n> **Exam tip — the trap named in the module framing: do not mislabel a deployer as a developer.** A company that **buys a third-party model and puts it to work** is a **deployer**, even though it operates sophisticated AI. It becomes a **developer/provider** only if it **builds, substantially modifies, or rebrands/markets** the system as its own. And crucially: **the same organisation can be both** — a bank that trains its own fraud model (developer) and also deploys a vendor's chatbot (deployer). Read each scenario for *which hat* the organisation is wearing *for that system*.\n\n### Why role assignment matters downstream\n- Under the **EU AI Act**, providers of high-risk systems owe the big obligations (risk management system, data governance, technical documentation, conformity assessment); deployers owe *use-side* duties (operate per instructions, ensure human oversight, monitor, keep logs, inform affected people). Same system, different duties by role.\n- Under **NIST/OECD**, responsibility is framed across all **AI actors** — but the actor's *position* still determines what they can control and are answerable for.\n\n## The risk & impact assessment: the instrument that runs through everything\n\nIf the lifecycle is the skeleton, the **AI risk & impact assessment is the spine** running down it. It is not a one-time form; it is the recurring instrument by which an organisation asks, at each stage, *what could go wrong, for whom, how badly, and what will we do about it?* The BoK threads it through: Domain I lists **risk management** as a lifecycle stage; Domain III's very first tasks are to *\"perform or review an impact assessment on the AI model.\"*\n\nTwo related-but-distinct instruments the exam may separate:\n- **Risk assessment** — broad: identify, analyse, evaluate, and treat risks to the organisation and stakeholders (safety, security, performance, legal, reputational). This is the NIST AI RMF's home turf (**MAP -> MEASURE -> MANAGE**, all under **GOVERN**).\n- **Impact assessment** (e.g. a fundamental-rights / algorithmic impact assessment) — focused on the system's **effects on people and their rights** (fairness, privacy, autonomy, the individuals/groups/society the BoK names). The EU AI Act requires certain deployers of high-risk systems to perform a **fundamental rights impact assessment (FRIA)**; a **DPIA** under GDPR covers the data-protection dimension. (The legal specifics are Domain II/IV; for Domain I, know that the impact assessment is the rights-focused instrument, and it feeds the lifecycle.)\n\n> **Exam tip:** when a scenario asks *how should an organisation decide whether/how to proceed with an AI use case*, the answer is almost always **run (or update) a risk & impact assessment** — early (use-case/risk stage) and repeatedly (whenever the system, data, or context materially changes). It is the connective tissue between the abstract principles and concrete controls: the assessment is where 'we care about fairness' becomes 'we tested for bias against these groups and set this threshold.'\n\n## Frameworks as the backbone (a Domain I-level map)\n\nDomain I wants you to recognise the foundational frameworks and what each is *for* — the legal drill-down is Domain II:\n- **OECD AI Principles** — the international, values-based statement of trustworthy AI (fairness, transparency & explainability, robustness/safety/security, accountability, human-centred values). The common vocabulary many laws build on.\n- **NIST AI RMF (1.0, 2023)** — a **voluntary, non-regulatory** US framework structured around four functions — **GOVERN** (cross-cutting), **MAP**, **MEASURE**, **MANAGE** — plus the seven trustworthiness characteristics. A practical 'how to operationalise risk management' companion.\n- **ISO/IEC 22989** — the **terminology** standard: shared AI concepts and vocabulary.\n- **ISO/IEC 42001** — the **AI management system (AIMS)** standard: certifiable requirements to establish, run, and continually improve organisational AI governance (the AI analogue of ISO 27001 for security).\n- **EU AI Act** — the binding, **risk-tiered law** (unacceptable / high / limited / minimal) with role-based obligations. Its structure and role definitions are Domain I foundations; its detailed tiers, obligations, and timeline are Domain II.\n\nThat map is enough for Domain I: know each framework's *job* and how the roles and the risk/impact assessment tie them to the lifecycle.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-10",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A retailer licenses a third-party AI chatbot and configures it for its own customer service. It does not train, modify, or rebrand the underlying model. Under the EU AI Act's role framing, the retailer is primarily acting as a:",
+          "options": [
+            { "id": "a", "text": "Deployer — it uses an AI system under its own authority in a professional capacity", "correct": true },
+            { "id": "b", "text": "Provider/developer — because it operates the AI for its customers" },
+            { "id": "c", "text": "Importer — because the model was made by another company" },
+            { "id": "d", "text": "It has no role or responsibility because it did not build the model" }
+          ],
+          "explanation": "Using an AI system under your own authority, without building/substantially modifying/rebranding it, makes you a **deployer**. It is not a provider/developer (it did not develop or market the system as its own), and 'operating it for customers' does not convert a deployer into a provider. 'Importer' has a specific supply-chain meaning (placing a third-country system on the EU market under that firm's name) that does not fit here, and a deployer very much *does* carry use-side responsibilities.",
+          "sourceRefs": ["r-eu-ai-act-article-3", "r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-11",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A bank trains its own in-house fraud-detection model AND separately runs a vendor's HR screening tool it did not build. Which is the most accurate characterisation of its roles?",
+          "options": [
+            { "id": "a", "text": "It is a developer/provider for the fraud model and a deployer for the HR tool — one organisation can hold both roles depending on the system", "correct": true },
+            { "id": "b", "text": "It is a developer for both, because it is a single organisation using AI" },
+            { "id": "c", "text": "It is a deployer for both, because banks only use, never build, AI" },
+            { "id": "d", "text": "It must choose a single role for the whole organisation" }
+          ],
+          "explanation": "Role is assigned **per system**: building and putting into service its own fraud model makes the bank a **developer/provider** for that system; merely operating a vendor tool makes it a **deployer** for that one. So it holds both roles simultaneously. It is not a developer for both (it did not build the HR tool), not a deployer for both (it did build the fraud model), and roles are not organisation-wide — you read each scenario for the hat worn *for that system*.",
+          "sourceRefs": ["r-eu-ai-act-article-3", "r-iapp-bok"]
+        },
+        {
+          "id": "kc-d1-12",
+          "domainId": "d1-foundations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which best captures the role of the AI risk & impact assessment across the governance lifecycle?",
+          "options": [
+            { "id": "a", "text": "A recurring instrument, run early and repeated when the system, data, or context materially changes, that turns principles into concrete tested controls", "correct": true },
+            { "id": "b", "text": "A one-time document completed at launch and never revisited" },
+            { "id": "c", "text": "A purely technical benchmark of model accuracy with no rights or stakeholder dimension" },
+            { "id": "d", "text": "A marketing disclosure published to end users" }
+          ],
+          "explanation": "The risk & impact assessment is the **connective spine** — performed early (use-case/risk stage) and **repeated** as things change, translating abstract principles into concrete, tested controls (e.g. bias thresholds). It is not a one-and-done form (models drift; contexts change), not merely an accuracy benchmark (impact assessments centre on effects on people and rights), and not a public marketing disclosure (that is transparency).",
+          "sourceRefs": ["r-iapp-bok", "r-nist-rmf"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d1-1",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is the most accurate distinction between machine learning and a deterministic, rule-based system?",
+      "options": [
+        { "id": "a", "text": "Machine learning infers behaviour by learning patterns from data; a deterministic system follows explicit human-authored rules", "correct": true },
+        { "id": "b", "text": "Machine learning is always more accurate than rule-based systems" },
+        { "id": "c", "text": "A deterministic system learns from data while machine learning uses fixed rules" },
+        { "id": "d", "text": "They are the same thing described with different words" }
+      ],
+      "explanation": "The core distinction is **learned-from-data (ML)** versus **explicit authored rules (deterministic)**. Accuracy is not the differentiator (a good rule engine can outperform a bad model). Option C reverses the definitions, and D is simply false — the probabilistic-vs-deterministic difference is real and is exactly what the BoK highlights.",
+      "sourceRefs": ["r-iapp-bok", "r-eu-ai-act-summary"]
+    },
+    {
+      "id": "q-d1-2",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The EU AI Act's Article 3 definition of an 'AI system' centres on a machine-based system that, for explicit or implicit objectives, does what?",
+      "options": [
+        { "id": "a", "text": "Infers from the input it receives how to generate outputs such as predictions, content, recommendations, or decisions", "correct": true },
+        { "id": "b", "text": "Executes a fixed sequence of pre-written instructions with no variation" },
+        { "id": "c", "text": "Stores and retrieves records from a database" },
+        { "id": "d", "text": "Connects two software services over a network" }
+      ],
+      "explanation": "The Article 3 definition hinges on a system that **infers how to generate outputs** (predictions, content, recommendations, decisions) with varying autonomy and possible adaptiveness. Executing fixed instructions is deterministic automation; database storage/retrieval and service integration are ordinary software functions, none of which is the *inference* that defines an AI system.",
+      "sourceRefs": ["r-eu-ai-act-article-3", "r-eu-ai-act-summary"]
+    },
+    {
+      "id": "q-d1-3",
+      "domainId": "d1-foundations",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Per the AIGP Body of Knowledge, which are characteristics of AI that create the need for a comprehensive governance approach? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Opacity (black-box behaviour)", "correct": true },
+        { "id": "b", "text": "Autonomy and the capacity to act with limited human intervention", "correct": true },
+        { "id": "c", "text": "Data dependency", "correct": true },
+        { "id": "d", "text": "Guaranteed, fully explainable outputs for every decision" }
+      ],
+      "explanation": "The BoK names opacity, autonomy, speed/scale, data dependency, complexity, and potential for harm as the characteristics that demand governance — so A, B, and C are correct. D is the opposite of reality: AI's frequent *lack* of per-decision explainability (opacity) is one of the reasons governance is needed, so 'guaranteed fully explainable outputs' is not a characteristic of AI.",
+      "sourceRefs": ["r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-4",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An organisation is deciding whether to proceed with a new AI use case. According to the governance lifecycle, what should happen at the very start, before building anything?",
+      "options": [
+        { "id": "a", "text": "A use-case assessment defining the business context and intended purpose, followed by risk assessment", "correct": true },
+        { "id": "b", "text": "Deployment to production to see how it behaves with real users" },
+        { "id": "c", "text": "Writing the final model card and publishing it" },
+        { "id": "d", "text": "Incident-response tabletop exercises" }
+      ],
+      "explanation": "The lifecycle begins with **use-case assessment** (business context and intended purpose) and then **risk management** — everything downstream inherits from this framing. Deploying first inverts the lifecycle; the model card is a later documentation artefact; and incident-response drills belong to the operate/monitor phase, not the very start.",
+      "sourceRefs": ["r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-5",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which activity belongs to the 'data acquisition and use' stage of the governance lifecycle rather than 'model development, training and testing'?",
+      "options": [
+        { "id": "a", "text": "Checking whether the training dataset is representative and lawfully sourced, and documenting its provenance", "correct": true },
+        { "id": "b", "text": "Tuning model hyperparameters to hit an accuracy threshold" },
+        { "id": "c", "text": "Running a bias evaluation on the trained model's predictions" },
+        { "id": "d", "text": "Selecting the model architecture" }
+      ],
+      "explanation": "Assessing **representativeness, lawful sourcing, and provenance of the data** is the **data acquisition and use** stage — where data dependency risk is governed. Tuning hyperparameters, evaluating the *trained model's* predictions, and choosing an architecture are all **model development/training/testing** activities. The exam wants you to keep data governance distinct from model building.",
+      "sourceRefs": ["r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-6",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which principle is chiefly concerned with disclosing that AI is being used and providing meaningful information about how the system works?",
+      "options": [
+        { "id": "a", "text": "Transparency", "correct": true },
+        { "id": "b", "text": "Explainability" },
+        { "id": "c", "text": "Fairness" },
+        { "id": "d", "text": "Robustness" }
+      ],
+      "explanation": "**Transparency** is outward, system-level **disclosure** — that AI is in use and how it works. Explainability is about making a *specific decision* intelligible; fairness is about managing harmful bias; robustness is about resilience/reliability under varied conditions. The transparency/explainability split is a favourite exam trap, so anchor transparency to 'disclosure that/how'.",
+      "sourceRefs": ["r-oecd-principles", "r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-7",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regulator asks a company to make a specific automated denial understandable to the affected individual. Which principle is most directly engaged?",
+      "options": [
+        { "id": "a", "text": "Explainability", "correct": true },
+        { "id": "b", "text": "Transparency" },
+        { "id": "c", "text": "Accountability" },
+        { "id": "d", "text": "Human oversight" }
+      ],
+      "explanation": "Making a **specific decision intelligible** to the person affected is **explainability** (decision-level). Transparency would be disclosing that AI is used / publishing documentation (system-level). Accountability is about who is answerable and how it is evidenced; human oversight is about a human being able to intervene. The verb 'make this decision understandable' points squarely at explainability.",
+      "sourceRefs": ["r-nist-rmf", "r-oecd-principles"]
+    },
+    {
+      "id": "q-d1-8",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which scenario is the clearest example of the human oversight (human-centricity) principle rather than accountability?",
+      "options": [
+        { "id": "a", "text": "A designated reviewer can monitor the AI in operation and override or halt its decision before it takes effect", "correct": true },
+        { "id": "b", "text": "A named executive is formally responsible for the system's outcomes" },
+        { "id": "c", "text": "All decisions are logged so they can be audited later" },
+        { "id": "d", "text": "The organisation can compensate individuals harmed by the system" }
+      ],
+      "explanation": "**Human oversight** is a human able to **watch, intervene in, or override** the system in operation — option A exactly. Options B (who is answerable), C (audit records), and D (remedy) are all facets of **accountability**, not oversight. Match the verb: *intervene/override -> oversight*; *answerable/records/remedy -> accountability*.",
+      "sourceRefs": ["r-eu-ai-act-summary", "r-oecd-principles"]
+    },
+    {
+      "id": "q-d1-9",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "NIST's fairness characteristic in the AI RMF is stated precisely as which of the following?",
+      "options": [
+        { "id": "a", "text": "Fair — with harmful bias managed (recognising fairness definitions vary by context)", "correct": true },
+        { "id": "b", "text": "Fair — guaranteeing identical outcomes for every group in every context" },
+        { "id": "c", "text": "Fair — meaning the model is always the most accurate available" },
+        { "id": "d", "text": "Fair — meaning no human is ever involved in decisions" }
+      ],
+      "explanation": "NIST frames the characteristic as **'fair — with harmful bias managed,'** and explicitly notes fairness standards **vary across cultures and applications**; it promises *management of harmful bias*, not a single universal notion of fairness. It does not guarantee identical outcomes everywhere, is not about maximal accuracy, and has nothing to do with removing humans from decisions.",
+      "sourceRefs": ["r-nist-rmf-characteristics", "r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-10",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under the EU AI Act, which party is the 'provider' of an AI system?",
+      "options": [
+        { "id": "a", "text": "The party that develops (or has developed) the system and places it on the market or puts it into service under its own name or trademark", "correct": true },
+        { "id": "b", "text": "The individual end user who interacts with the system's outputs" },
+        { "id": "c", "text": "Any organisation that merely uses the system under its own authority" },
+        { "id": "d", "text": "The national regulator that supervises the market" }
+      ],
+      "explanation": "Article 3 defines the **provider** as the party that **develops or has developed** an AI system/GPAI model and **places it on the market or puts it into service under its own name or trademark**. The end user (affected person) is different; an organisation that merely *uses* a system is a **deployer**, not a provider; and the regulator/market-surveillance authority is a separate actor entirely.",
+      "sourceRefs": ["r-eu-ai-act-article-3"]
+    },
+    {
+      "id": "q-d1-11",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Under the EU AI Act, a 'deployer' is best described as:",
+      "options": [
+        { "id": "a", "text": "A person or body using an AI system under its authority in a professional capacity", "correct": true },
+        { "id": "b", "text": "The party that trained and marketed the model under its own brand" },
+        { "id": "c", "text": "An individual using an AI system for purely personal, non-professional activity" },
+        { "id": "d", "text": "A body that certifies AI systems for conformity" }
+      ],
+      "explanation": "Article 3 defines a **deployer** as one **using an AI system under its authority**, *except* for personal non-professional use. Training and marketing under one's own brand makes a party a **provider/developer**; purely personal use is expressly **excluded** from the deployer definition; and a conformity-certifying body (notified body) is a different actor.",
+      "sourceRefs": ["r-eu-ai-act-article-3"]
+    },
+    {
+      "id": "q-d1-12",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A company takes an open-source foundation model, fine-tunes it substantially for its own product, and sells the result under its own brand. For that product, which role does it most likely take on under the EU AI Act's framing?",
+      "options": [
+        { "id": "a", "text": "Provider/developer — it substantially modifies and places the system on the market under its own name", "correct": true },
+        { "id": "b", "text": "Deployer — because it started from someone else's model" },
+        { "id": "c", "text": "Neither, because open-source models are outside the Act entirely" },
+        { "id": "d", "text": "End user, because it consumes an existing model" }
+      ],
+      "explanation": "**Substantially modifying** a system and **placing it on the market under its own name/brand** pushes a party into the **provider/developer** role, with the heavier obligations. Merely starting from someone else's model does not keep you a deployer once you rebrand and market it; open-source components are not blanket-exempt from the Act; and selling a product is not 'end use.' This is the classic case where a firm crosses from deployer to provider.",
+      "sourceRefs": ["r-eu-ai-act-article-3", "r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-13",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The OECD AI Principles are best described as:",
+      "options": [
+        { "id": "a", "text": "An international, values-based statement of principles for trustworthy AI (adopted 2019, updated 2024)", "correct": true },
+        { "id": "b", "text": "A binding EU regulation with fines for non-compliance" },
+        { "id": "c", "text": "A US federal law governing AI procurement" },
+        { "id": "d", "text": "A certifiable management-system standard published by ISO" }
+      ],
+      "explanation": "The OECD AI Principles are a **non-binding, values-based international standard** for trustworthy AI, adopted in 2019 and updated in 2024, and a common vocabulary many laws build on. They are not the EU AI Act (a binding regulation), not US federal law, and not an ISO management-system standard (that describes ISO/IEC 42001).",
+      "sourceRefs": ["r-oecd-principles"]
+    },
+    {
+      "id": "q-d1-14",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The NIST AI Risk Management Framework is organised around four core functions. Which set names them correctly?",
+      "options": [
+        { "id": "a", "text": "GOVERN, MAP, MEASURE, MANAGE", "correct": true },
+        { "id": "b", "text": "Plan, Do, Check, Act" },
+        { "id": "c", "text": "Identify, Protect, Detect, Respond, Recover" },
+        { "id": "d", "text": "Prohibited, High, Limited, Minimal" }
+      ],
+      "explanation": "The AI RMF's four functions are **GOVERN, MAP, MEASURE, MANAGE** (with GOVERN cross-cutting the others). 'Plan-Do-Check-Act' is the generic management-system cycle; 'Identify/Protect/Detect/Respond/Recover' are the NIST *Cybersecurity* Framework functions; and 'Prohibited/High/Limited/Minimal' are the EU AI Act's risk tiers — three tempting but wrong frameworks.",
+      "sourceRefs": ["r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-15",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the NIST AI RMF, which function is described as cross-cutting — informing and being integrated throughout the other three?",
+      "options": [
+        { "id": "a", "text": "GOVERN", "correct": true },
+        { "id": "b", "text": "MAP" },
+        { "id": "c", "text": "MEASURE" },
+        { "id": "d", "text": "MANAGE" }
+      ],
+      "explanation": "**GOVERN** is the cross-cutting function that establishes the culture, policies, and accountability that run through MAP, MEASURE, and MANAGE. MAP (context/risk identification), MEASURE (assessment), and MANAGE (treatment) are the operational functions that GOVERN wraps around; none of them is the cross-cutting one.",
+      "sourceRefs": ["r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-16",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Is the NIST AI Risk Management Framework legally binding?",
+      "options": [
+        { "id": "a", "text": "No — it is a voluntary, non-regulatory framework for organisations to adopt", "correct": true },
+        { "id": "b", "text": "Yes — it is enforced by the US federal government with penalties" },
+        { "id": "c", "text": "Yes — it is binding on all organisations operating in the EU" },
+        { "id": "d", "text": "Only for organisations certified to ISO/IEC 42001" }
+      ],
+      "explanation": "The AI RMF is expressly **voluntary and non-regulatory** — a framework to help organisations manage AI risk, not a law. It carries no federal penalties, does not bind EU operators (that is the EU AI Act), and is independent of ISO/IEC 42001 certification.",
+      "sourceRefs": ["r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-17",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing of ISO standard to its purpose is correct?",
+      "options": [
+        { "id": "a", "text": "ISO/IEC 42001 = AI management system (AIMS); ISO/IEC 22989 = AI terminology and concepts", "correct": true },
+        { "id": "b", "text": "ISO/IEC 42001 = AI terminology; ISO/IEC 22989 = AI management system" },
+        { "id": "c", "text": "Both 42001 and 22989 are AI management-system standards" },
+        { "id": "d", "text": "Both 42001 and 22989 are terminology standards" }
+      ],
+      "explanation": "**ISO/IEC 42001** is the **AI management system (AIMS)** standard (certifiable, ISO-27001-style), while **ISO/IEC 22989** provides **AI terminology and concepts**. Option B reverses them; C and D wrongly collapse the two into a single type. The BoK names both as 'the core ISO AI standards, i.e. 22989 and 42001.'",
+      "sourceRefs": ["r-iso-42001", "r-iso-22989", "r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-18",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the defining feature of ISO/IEC 42001 that distinguishes it from a set of principles like the OECD AI Principles?",
+      "options": [
+        { "id": "a", "text": "It is a certifiable management-system standard specifying requirements to establish, implement, maintain, and continually improve an AI management system", "correct": true },
+        { "id": "b", "text": "It is a non-binding list of ethical values with no organisational requirements" },
+        { "id": "c", "text": "It is a national law of the European Union" },
+        { "id": "d", "text": "It is a technical benchmark for measuring model accuracy" }
+      ],
+      "explanation": "ISO/IEC 42001 is a **management-system standard** — like ISO 27001 for information security — giving auditable, **certifiable requirements** for an organisational AI management system (establish/implement/maintain/improve). The OECD Principles, by contrast, are values without organisational requirements. 42001 is not a law and not an accuracy benchmark.",
+      "sourceRefs": ["r-iso-42001", "r-oecd-principles"]
+    },
+    {
+      "id": "q-d1-19",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The EU AI Act classifies AI systems into four risk levels. Which set lists them correctly, from most to least restricted?",
+      "options": [
+        { "id": "a", "text": "Unacceptable (prohibited), high, limited (transparency), minimal", "correct": true },
+        { "id": "b", "text": "Critical, major, moderate, minor" },
+        { "id": "c", "text": "Red, amber, green, white" },
+        { "id": "d", "text": "Banned, licensed, registered, exempt" }
+      ],
+      "explanation": "The Act's four tiers are **unacceptable/prohibited, high, limited (transparency-obligation), and minimal/no risk**. The other options are invented severity or traffic-light labels that do not match the Act's terminology. Knowing the exact tier names is foundational for every EU-AI-Act question in Domain II.",
+      "sourceRefs": ["r-eu-ai-act-summary", "r-eu-commission-framework"]
+    },
+    {
+      "id": "q-d1-20",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Under the EU AI Act's risk model, which practice falls in the 'unacceptable risk' (prohibited) tier rather than the 'high risk' tier?",
+      "options": [
+        { "id": "a", "text": "Government social scoring of individuals based on behaviour leading to detrimental treatment", "correct": true },
+        { "id": "b", "text": "An AI system used to screen job applicants" },
+        { "id": "c", "text": "An AI system used in credit scoring" },
+        { "id": "d", "text": "An AI system used as a safety component of a medical device" }
+      ],
+      "explanation": "**Social scoring** by public authorities that leads to detrimental treatment is an **outright prohibited (unacceptable-risk)** practice. Recruitment screening, credit scoring, and AI as a medical-device safety component are all **high-risk** use cases — heavily regulated but *permitted with obligations*, not banned. The exam tests whether you can separate 'prohibited' from 'high-risk-but-allowed.'",
+      "sourceRefs": ["r-eu-ai-act-summary", "r-eu-commission-framework"]
+    },
+    {
+      "id": "q-d1-21",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of the following is an obligation the EU AI Act places on PROVIDERS of high-risk AI systems?",
+      "options": [
+        { "id": "a", "text": "Establish a risk management system across the system's lifecycle and maintain technical documentation", "correct": true },
+        { "id": "b", "text": "Nothing — all obligations fall on the individual end users" },
+        { "id": "c", "text": "Only a duty to publish a marketing brochure about the system" },
+        { "id": "d", "text": "A duty to make the system free of charge" }
+      ],
+      "explanation": "High-risk **providers** must, among other things, run a **lifecycle risk-management system**, ensure data governance, maintain **technical documentation**, enable record-keeping, provide instructions to deployers, enable human oversight, and meet accuracy/robustness/cybersecurity. Obligations do not fall solely on end users; a marketing brochure is not an obligation; and there is no requirement to give the system away for free.",
+      "sourceRefs": ["r-eu-ai-act-summary"]
+    },
+    {
+      "id": "q-d1-22",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An organisation asks how it should decide whether — and how — to move ahead with a proposed AI use case that could affect people's rights. What is the most appropriate foundational instrument?",
+      "options": [
+        { "id": "a", "text": "Perform an AI risk & impact assessment early in the lifecycle, and repeat it when the system, data, or context materially changes", "correct": true },
+        { "id": "b", "text": "Deploy first and address any problems only if complaints arrive" },
+        { "id": "c", "text": "Rely solely on the model's accuracy score to decide" },
+        { "id": "d", "text": "Publish an ethics statement and take no further action" }
+      ],
+      "explanation": "The **risk & impact assessment** is the recurring instrument for deciding whether/how to proceed and for surfacing effects on people and rights — run early and repeated as things change. Deploying-then-reacting inverts governance; an accuracy score ignores fairness/rights/impact; and a published statement without action does not assess or mitigate anything.",
+      "sourceRefs": ["r-iapp-bok", "r-nist-rmf"]
+    },
+    {
+      "id": "q-d1-23",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "How do a broad AI risk assessment and a fundamental-rights/algorithmic impact assessment most usefully differ?",
+      "options": [
+        { "id": "a", "text": "The risk assessment evaluates the full range of risks (safety, security, legal, reputational, performance); the impact assessment focuses specifically on effects on people and their rights", "correct": true },
+        { "id": "b", "text": "They are identical and the terms are fully interchangeable" },
+        { "id": "c", "text": "The impact assessment covers only financial risk to the organisation" },
+        { "id": "d", "text": "The risk assessment is only about model accuracy metrics" }
+      ],
+      "explanation": "A **risk assessment** is broad — it treats the whole spectrum of risks to the organisation and stakeholders — while an **impact assessment** is targeted at the system's **effects on individuals, groups, and their rights** (fairness, privacy, autonomy). They overlap but are not interchangeable; the impact assessment is not merely financial, and the risk assessment is not merely accuracy metrics. (The precise legal instruments — FRIA, DPIA — are drilled in Domains II and IV.)",
+      "sourceRefs": ["r-iapp-bok", "r-eu-ai-act-summary"]
+    },
+    {
+      "id": "q-d1-24",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "According to the OECD, accountability for AI is framed as applying to whom?",
+      "options": [
+        { "id": "a", "text": "AI actors — those responsible for the development, deployment, and use of AI systems and their outcomes", "correct": true },
+        { "id": "b", "text": "Only the software vendor, never the organisation using the system" },
+        { "id": "c", "text": "Only national governments" },
+        { "id": "d", "text": "Only the individuals affected by AI decisions" }
+      ],
+      "explanation": "The OECD accountability principle states that **all actors must be accountable** for the development, deployment, and use of AI and its impacts — accountability is distributed across the parties who shape and operate the system. It is not confined to the vendor, to governments, or to affected individuals; each actor is answerable for what it controls.",
+      "sourceRefs": ["r-oecd-principles"]
+    },
+    {
+      "id": "q-d1-25",
+      "domainId": "d1-foundations",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which of the following correctly describe the AI governance lifecycle as framed by the BoK? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "It spans from use-case assessment through risk management, ethics by design, data governance, model development/testing, to deployment, monitoring and incident management", "correct": true },
+        { "id": "b", "text": "It is iterative — monitoring or incident findings can send the organisation back to earlier stages", "correct": true },
+        { "id": "c", "text": "Governance ends once the system is deployed", "correct": false },
+        { "id": "d", "text": "Oversight and accountability policies should apply across all lifecycle stages", "correct": true }
+      ],
+      "explanation": "A, B, and D are correct: the BoK spans the full lifecycle, treats it as iterative (findings loop back), and calls for oversight/accountability policies **across all stages**. C is false — deployment is the beginning of the monitoring/maintenance phase, not the end of governance; models drift and must be watched, so governance continues post-deployment.",
+      "sourceRefs": ["r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-26",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The BoK expects an AI governance program to be institutionalised primarily through what?",
+      "options": [
+        { "id": "a", "text": "Policies and procedures (plus training and cross-functional collaboration) applied across the lifecycle", "correct": true },
+        { "id": "b", "text": "The vigilance of a single conscientious engineer" },
+        { "id": "c", "text": "A one-off external audit at launch" },
+        { "id": "d", "text": "Purchasing a specific software product" }
+      ],
+      "explanation": "The BoK (I.B/I.C) frames governance as **policies and procedures**, backed by **training and cross-functional collaboration**, applied throughout the lifecycle — governance is organisational and repeatable. It is explicitly not dependent on one individual's diligence, not a single launch-time audit, and not something a tool purchase alone provides.",
+      "sourceRefs": ["r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-27",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A scenario states an org has 'strong human oversight' because a person reviews samples of outputs weekly, but no one is formally answerable for the system and there are no decision records. Which principle is the real gap?",
+      "options": [
+        { "id": "a", "text": "Accountability — there is no clear answerable owner and no records/audit trail, even though some oversight exists", "correct": true },
+        { "id": "b", "text": "Transparency — the model is not disclosed to users" },
+        { "id": "c", "text": "Fairness — the model is biased" },
+        { "id": "d", "text": "Robustness — the model is not resilient" }
+      ],
+      "explanation": "The gap is **accountability**: no answerable owner and no records/remedy, despite some human review. The scenario says nothing about failing to disclose AI use (transparency), about biased outcomes (fairness), or about resilience (robustness) — so those are unsupported. This tests the accountability-vs-oversight distinction: sampling outputs is a (weak) oversight activity, but it does not create accountability.",
+      "sourceRefs": ["r-oecd-principles", "r-iapp-bok"]
+    },
+    {
+      "id": "q-d1-28",
+      "domainId": "d1-foundations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of these is a general-purpose AI (GPAI) model, as distinct from a narrow AI system?",
+      "options": [
+        { "id": "a", "text": "A model that displays significant generality and can competently perform a wide range of distinct tasks, integrable into many downstream applications", "correct": true },
+        { "id": "b", "text": "A rules engine that approves or declines expense reports" },
+        { "id": "c", "text": "A single-purpose spam classifier trained only to flag junk email" },
+        { "id": "d", "text": "A spreadsheet macro that sums a column" }
+      ],
+      "explanation": "A **GPAI model** is defined by **significant generality** and the ability to perform **a wide range of distinct tasks** across many downstream uses (e.g. a large foundation model). A rules engine is deterministic automation; a single-purpose spam classifier is narrow AI; and a spreadsheet macro is not AI at all. Generality-plus-broad-capability is the GPAI hallmark.",
+      "sourceRefs": ["r-eu-ai-act-article-3", "r-eu-ai-act-summary"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d1-lifecycle-usecase",
+      "domainIds": ["d1-foundations"],
+      "title": "Govern one AI use case across its lifecycle",
+      "tagline": "Thread a single use case through the governance lifecycle, naming the stage, principle, and role at each step.",
+      "context": "A retail bank wants to introduce an AI system that helps decide personal-loan applications. You are the AI governance lead. Walk the use case through the governance lifecycle, choosing the right foundational move at each step — and be ready to name the lifecycle stage, the principle at stake, and whether the bank is acting as a developer or a deployer.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "The product team wants to start building immediately. What is the correct first governance move?",
+          "choices": [
+            { "id": "a", "text": "Run a use-case assessment (business context, intended purpose, who is affected, what could go wrong) and an initial risk & impact assessment before building", "verdict": "best", "rationale": "The lifecycle starts with use-case assessment and risk management; everything downstream inherits from this framing, and lending decisions clearly affect people's rights, so an impact assessment belongs at the front.", "next": "st2" },
+            { "id": "b", "text": "Build a prototype first, then assess risks once there is something concrete to look at", "verdict": "viable", "rationale": "You will learn something from a prototype, but assessing risk only after building inverts the lifecycle and bakes in choices before you have framed the use case — governance should shift left." },
+            { "id": "c", "text": "Skip assessment because loan decisions are a long-standing business function", "verdict": "wrong", "rationale": "Familiarity of the business function does not remove AI-specific risks (opacity, bias, scale); a use-case and risk/impact assessment is exactly what surfaces them." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The team will train the model on ten years of historical lending decisions. What must governance ensure at the data stage?",
+          "choices": [
+            { "id": "a", "text": "Assess the training data for representativeness, lawful sourcing, and historical bias, and document its provenance — because past decisions may encode discrimination", "verdict": "best", "rationale": "This is the data acquisition and use stage, where data dependency risk is governed; historical lending data can carry bias that a model would learn and scale, so representativeness and provenance are essential (a fairness concern).", "next": "st3" },
+            { "id": "b", "text": "Use the historical data as-is; more data always means a better, fairer model", "verdict": "wrong", "rationale": "Volume is not fairness — biased historical decisions in means biased predictions out, at scale. This ignores the central data-dependency risk." },
+            { "id": "c", "text": "Only check the data for technical formatting errors, not for bias", "verdict": "viable", "rationale": "Format hygiene matters, but stopping there misses the substantive governance question — whether the data is representative and free of harmful historical bias." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The model will be probabilistic and somewhat opaque. Leadership wants declined applicants to be treated fairly and to understand outcomes. Which controls map to the right principles?",
+          "choices": [
+            { "id": "a", "text": "Bias testing against protected groups (fairness), a way to give applicants the key factors behind their specific decision (explainability), and clear disclosure that AI is used (transparency)", "verdict": "best", "rationale": "Each control is matched to the correct principle: manage harmful bias = fairness; make a specific decision intelligible = explainability; disclose that/how AI is used = transparency. This is exactly the disambiguation the exam tests.", "next": "st4" },
+            { "id": "b", "text": "Publish a general statement that the bank values responsible AI, and consider that sufficient for fairness, explainability, and transparency", "verdict": "wrong", "rationale": "A values statement is neither bias testing, nor per-decision explanation, nor operational disclosure — it implements none of the three principles concretely." },
+            { "id": "c", "text": "Provide a human review step so an officer can override decisions, and treat that alone as covering fairness and explainability", "verdict": "viable", "rationale": "Human oversight is valuable, but overriding a decision is not the same as testing for bias (fairness) or explaining a specific outcome (explainability) — oversight is a different principle and does not substitute for the other two." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The bank will build and operate this model itself, and it separately runs a vendor's chatbot it did not build. How should you characterise the bank's role(s), and what continues after go-live?",
+          "choices": [
+            { "id": "a", "text": "Developer/provider for the loan model it builds and puts into service; deployer for the vendor chatbot — and after go-live, deployment monitoring, incident management, and documentation continue across the lifecycle", "verdict": "best", "rationale": "Role is per system: building and putting the loan model into service makes the bank a provider/developer for it, while operating a vendor tool makes it a deployer for that one. Governance does not stop at launch — monitoring, incidents, and records run on.", "next": "st5" },
+            { "id": "b", "text": "Deployer for everything, since a bank only ever uses AI", "verdict": "wrong", "rationale": "Building and putting its own model into service makes the bank a developer/provider for that system; 'deployer for everything' misassigns the heavier obligations." },
+            { "id": "c", "text": "Developer for everything, and governance is complete once the system passes launch review", "verdict": "wrong", "rationale": "It did not build the vendor chatbot (so not developer for that), and governance continues post-deployment through monitoring and incident management — launch is not the finish line." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-iapp-bok", "r-eu-ai-act-article-3", "r-oecd-principles", "r-nist-rmf"]
+    },
+    {
+      "id": "s-d1-principles-frameworks",
+      "domainIds": ["d1-foundations"],
+      "title": "Name the principle, pick the framework",
+      "tagline": "Disambiguate the confusable principles and match the right foundational framework to the need.",
+      "context": "You advise a mid-size health-tech company adopting AI. Leadership keeps mixing up the trustworthy-AI principles and the various frameworks. In a series of decisions, name the principle actually at stake and choose the framework that fits — grounded in the official sources, not vibes.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "A clinician complains: 'The tool tells me it's AI-assisted and shows me its documentation, but when it flags a patient as high-risk I can't tell WHY for that patient.' Which principle is the gap?",
+          "choices": [
+            { "id": "a", "text": "Explainability — the specific output is not intelligible, even though transparency (disclosure of AI use + documentation) is met", "verdict": "best", "rationale": "Disclosure that/how AI is used is transparency and it is satisfied; being unable to understand a specific flag is an explainability gap. This is the transparency-vs-explainability distinction the exam loves.", "next": "st2" },
+            { "id": "b", "text": "Transparency — because the clinician wants more information", "verdict": "wrong", "rationale": "Transparency (disclosing AI use and how it works) is already satisfied here; the unmet need is understanding a *specific decision*, which is explainability." },
+            { "id": "c", "text": "Fairness — because the clinician disagrees with the flag", "verdict": "viable", "rationale": "Fairness could be a separate concern if the flag were biased, but the stated problem is not being able to understand the decision — that is explainability, not a bias claim." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The company wants a recognised, certifiable way to run its AI governance organisation-wide and be audited against it. Which framework fits best?",
+          "choices": [
+            { "id": "a", "text": "ISO/IEC 42001 — the certifiable AI management system standard", "verdict": "best", "rationale": "42001 is the AI management-system (AIMS) standard, giving auditable, certifiable requirements to run AI governance organisation-wide — exactly the ask.", "next": "st3" },
+            { "id": "b", "text": "The OECD AI Principles — adopt them as the governance program", "verdict": "viable", "rationale": "The OECD Principles are a sound values foundation but are non-binding and not a certifiable management system; they inform, but do not provide, an auditable program." },
+            { "id": "c", "text": "ISO/IEC 22989 — implement it as the management system", "verdict": "wrong", "rationale": "22989 is the terminology/concepts standard, not a management system; it defines vocabulary rather than governance requirements you can be certified against." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The risk team wants a practical, voluntary framework to structure how they identify, assess, and treat AI risks, with named functions to organise the work. Which fits?",
+          "choices": [
+            { "id": "a", "text": "The NIST AI Risk Management Framework — GOVERN, MAP, MEASURE, MANAGE", "verdict": "best", "rationale": "The AI RMF is a voluntary framework built exactly for structuring risk identification (MAP), assessment (MEASURE), and treatment (MANAGE) under a cross-cutting GOVERN function.", "next": "st4" },
+            { "id": "b", "text": "The EU AI Act — use it as the voluntary risk-structuring method", "verdict": "wrong", "rationale": "The EU AI Act is binding law with a risk-tier classification and obligations, not a voluntary risk-management method organised by functions; it is the wrong tool for 'a voluntary framework to structure the work.'" },
+            { "id": "c", "text": "ISO/IEC 22989 — use its vocabulary as the risk process", "verdict": "viable", "rationale": "Shared terminology (22989) supports the work, but it is not a risk-management process with functions; it will not structure identify/assess/treat on its own." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Leadership asks which single principle ensures 'someone is answerable and we can prove what the system did.' Name it — and don't confuse it with human oversight.",
+          "choices": [
+            { "id": "a", "text": "Accountability — a clear answerable owner plus records/audit trail and a route to remedy", "verdict": "best", "rationale": "Answerability + evidence (records/audit) + remedy is accountability. It is distinct from human oversight (a human able to intervene/override in operation), which is the trap the exam sets.", "next": "st5" },
+            { "id": "b", "text": "Human oversight — because a human is involved somewhere", "verdict": "wrong", "rationale": "Human oversight is about intervening in or overriding the system in operation, not about who is answerable or about maintaining records — that is accountability." },
+            { "id": "c", "text": "Transparency — because records make things visible", "verdict": "viable", "rationale": "Records support transparency and accountability, but the specific idea of 'someone is answerable and we can prove it' is the definition of accountability, not disclosure to users (transparency)." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-oecd-principles", "r-nist-rmf", "r-iso-42001", "r-iso-22989", "r-eu-ai-act-summary"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d1-lifecycle-map",
+      "domainId": "d1-foundations",
+      "title": "Map a real AI use case to the governance lifecycle",
+      "goal": "Take one concrete AI use case and place every governance activity, principle, and role onto the lifecycle — turning the abstract stages into a worksheet you could hand to a project team.",
+      "steps": "## What you'll do\n\nThis is a governance artefact exercise, not code. Pick ONE AI use case you know (real or realistic) — e.g. an AI CV-screening tool, a customer-service chatbot, a credit or fraud model, or an internal document summariser.\n\n1. **Frame the use case.** In two or three sentences, write the intended purpose, who is affected (name the individuals/groups/organisation/society dimensions), and the single worst plausible harm. This is your use-case assessment.\n2. **Draw the lifecycle as rows.** Create a seven-row table with the stages in order: use-case assessment; risk management; ethics by design; data acquisition & use; model development, training & testing; deployment & monitoring; documentation, reporting & incident management.\n3. **Place at least one concrete activity in each row.** For your use case, write a specific governance activity per stage (e.g. data stage: 'audit training data for representativeness across age and gender'; monitoring stage: 'monthly drift check on approval rates by segment'). If a stage feels empty, that is a finding — note the gap.\n4. **Tag the principle.** Next to each activity, tag which core principle it serves — fairness, transparency, explainability, accountability, or human oversight. Some activities serve more than one; some principles should appear at several stages.\n5. **Assign the role.** State whether your organisation is the developer/provider, the deployer, or both for this system, and note one obligation that attaches because of that role.\n6. **Locate the risk & impact assessment.** Mark where in your lifecycle the risk & impact assessment first runs and where it must be REPEATED (which later events — a data change, a model retrain, an incident, drift — would trigger a re-assessment?).\n7. **Write the one-line rationale.** In a sentence, state why this use case needs AI-specific governance beyond ordinary software controls (reference at least one AI characteristic: opacity, probabilistic outputs, autonomy, scale, or data dependency).\n\n## Why it matters\n\nThe exam repeatedly hands you a fact and asks 'which stage / which principle / which role.' Building the map once, for a use case you understand, wires those three axes together far better than memorising lists — and the worksheet is a genuine governance artefact you could reuse on a real project.",
+      "checklist": [
+        "Use case is framed with intended purpose, who is affected, and the worst plausible harm",
+        "All seven lifecycle stages have at least one concrete activity (gaps explicitly noted)",
+        "Every activity is tagged with the core principle(s) it serves",
+        "The organisation's role (developer / deployer / both) is stated with one role-based obligation",
+        "The risk & impact assessment's first run and re-trigger points are marked on the lifecycle",
+        "A one-line rationale ties the use case to at least one AI-specific characteristic"
+      ]
+    },
+    {
+      "id": "lab-d1-principle-critique",
+      "domainId": "d1-foundations",
+      "title": "Critique a governance claim against the core principles",
+      "goal": "Practise the exam's signature skill — separating transparency from explainability and accountability from human oversight — by auditing a set of governance claims and rewriting the weak ones.",
+      "steps": "## What you'll do\n\nA governance artefact / critique exercise. Below are claims an organisation might make about its AI system. Your job is to judge each against the correct principle, decide whether it actually satisfies that principle, and fix the ones that do not.\n\n**The claims to audit (copy them into your worksheet):**\n\n1. 'Our website says decisions are AI-assisted, so our system is fully explainable.'\n2. 'A manager reviews a sample of outputs each week, so we have strong accountability.'\n3. 'We published a responsible-AI statement, so we have addressed fairness.'\n4. 'Every decision is logged and the Head of Data Science is named as the owner, so we are accountable.'\n5. 'The model is very accurate, so it is fair.'\n6. 'Users can request the specific reasons behind a decision that affected them, so the system is explainable.'\n\n**For EACH claim, in your worksheet:**\n\n1. **Name the principle the claim invokes** (transparency, explainability, accountability, fairness, or human oversight).\n2. **Name the principle the claim actually delivers** — which may be a DIFFERENT one, or none.\n3. **Verdict:** does the claim genuinely satisfy the principle it invokes? (Yes / Partially / No.)\n4. **Fix it:** if the verdict is not a clean Yes, rewrite the claim into a concrete, defensible statement — or state what additional control would be needed to make it true.\n5. **One-line rule:** after auditing all six, write the two disambiguation rules in your own words: transparency vs explainability, and accountability vs human oversight.\n\n**Worked example (claim 1):** invokes *explainability*; actually delivers *transparency* (it discloses AI use); verdict **No** — disclosing that AI is used does not make a specific decision intelligible; fix: 'We disclose AI use (transparency) AND provide the key factors behind each individual decision on request (explainability).'\n\n## Why it matters\n\nMislabelling these principles is the most common way candidates lose Domain I points, and the errors are baked into how organisations really talk about AI. Auditing sloppy claims — and rewriting them — trains you to instantly separate 'disclosing that AI is used' (transparency) from 'explaining a decision' (explainability), and 'a human can intervene' (oversight) from 'someone is answerable with records' (accountability).",
+      "checklist": [
+        "Each of the six claims has the invoked principle and the actually-delivered principle named",
+        "Each claim has a Yes / Partially / No verdict with a one-line justification",
+        "Every non-Yes claim is rewritten into a concrete, defensible statement or paired with the missing control",
+        "The transparency-vs-explainability rule is written in your own words",
+        "The accountability-vs-human-oversight rule is written in your own words"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-iapp-bok",
+      "title": "IAPP AIGP Body of Knowledge & Exam Blueprint (v2.0.1)",
+      "url": "https://iapp.org/media/pdf/certification/AIGP_Cert_BOK_FINAL_012925_2.0.1.pdf",
+      "kind": "spec",
+      "annotation": "The authoritative blueprint. For Domain I, extract the three sub-domains verbatim — I.A 'Understand what AI is and why it needs governance', I.B 'Establish and communicate organizational expectations for AI governance', I.C 'Establish policies and procedures to apply throughout the AI life cycle' — plus the performance indicators: the definitions/types of AI; the AI characteristics list (complexity, opacity, autonomy, speed and scale, data dependency, probabilistic-vs-deterministic outputs); the common responsible-AI principles ('fairness, safety and reliability, privacy and security, transparency and explainability, accountability and human-centricity'); the developer/deployer/user distinction; and the full life-cycle stage list. NOTE: the IAPP cert page now links a newer BoK (v2.1, effective 2 Feb 2026) that supersedes 2.0.1 — the Domain I title and 16-20 question range are unchanged between versions; re-verify against the current PDF before each edit.",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-oecd-principles",
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "official-doc",
+      "annotation": "The international values-based principles for trustworthy AI (adopted 2019, updated 2024). Extract the five values-based principles — inclusive growth/well-being; human rights & democratic values (incl. fairness and privacy); transparency and explainability; robustness, security and safety; accountability — and the wording that 'all actors must be accountable' for the development, deployment, and use of AI and its outcomes. Also the OECD 'AI system' definition (the basis the EU aligned to).",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-nist-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "official-doc",
+      "annotation": "The voluntary, non-regulatory US framework (released January 2023). Extract the four core functions — GOVERN (cross-cutting), MAP, MEASURE, MANAGE — and the seven trustworthiness characteristics (valid & reliable [the base]; safe; secure & resilient; accountable & transparent [cross-cutting]; explainable & interpretable; privacy-enhanced; fair — with harmful bias managed). Use for the framework's structure and the precise 'fair, with harmful bias managed' phrasing.",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-nist-rmf-characteristics",
+      "title": "NIST AI RMF — Characteristics of Trustworthy AI (AIRC Knowledge Base)",
+      "url": "https://airc.nist.gov/AI_RMF_Knowledge_Base/AI_RMF/Foundational_Information/3-sec-characteristics",
+      "kind": "official-doc",
+      "annotation": "The authoritative detail on the seven trustworthiness characteristics and how they relate — 'valid and reliable' as the necessary base for the others, and 'accountable and transparent' as cross-cutting (relating to all other characteristics). Extract the one-line meaning of each characteristic and the note that fairness standards vary across contexts (hence 'harmful bias managed', not a single universal fairness).",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-eu-ai-act-article-3",
+      "title": "EU AI Act — Article 3 (Definitions)",
+      "url": "https://artificialintelligenceact.eu/article/3/",
+      "kind": "spec",
+      "annotation": "The binding definitions Domain I leans on. Extract verbatim: 'AI system' (a machine-based system, varying autonomy, may adapt, that infers from input how to generate outputs — predictions/content/recommendations/decisions); 'provider' (develops or has developed a system/GPAI model and places it on the market / puts it into service under its own name or trademark); 'deployer' (uses an AI system under its authority, except personal non-professional use); 'general-purpose AI model' (significant generality, wide range of distinct tasks); and 'importer'/'distributor'. This is the source of truth for the developer/deployer role split.",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-eu-ai-act-summary",
+      "title": "EU AI Act — High-level summary (risk tiers & obligations)",
+      "url": "https://artificialintelligenceact.eu/high-level-summary/",
+      "kind": "official-doc",
+      "annotation": "The four risk tiers (unacceptable/prohibited, high, limited/transparency, minimal) and what each means. Extract: prohibited practices (social scoring, manipulative/subliminal techniques, certain biometric categorisation, untargeted facial-image scraping, emotion recognition in workplace/education, most real-time remote biometric ID in public by law enforcement); high-risk provider obligations (risk management system across the lifecycle, data governance, technical documentation, record-keeping, information to deployers, human oversight, accuracy/robustness/cybersecurity, quality management); limited-risk transparency duties; and the GPAI-model obligations incl. systemic-risk models. For Domain I use the STRUCTURE and role framing; reserve granular obligations and the phase-in timeline for Domain II.",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-eu-commission-framework",
+      "title": "European Commission — Regulatory framework for AI",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      "kind": "official-doc",
+      "annotation": "The Commission's own description of the risk-based approach (unacceptable / high / transparency / minimal) and the high-risk domains (biometrics, critical infrastructure, education, employment, essential services, law enforcement, migration/asylum, justice). CURRENCY WATCH: this page also references the 'AI Omnibus' / Digital Omnibus simplification package affecting the AI Act's application timeline — treat any specific revised phase-in dates as in-flux and DO NOT teach them as settled in Domain I; the four-tier structure and role definitions are stable. Confirm the legislative status against the live page before asserting any date.",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-iso-42001",
+      "title": "ISO/IEC 42001 — AI management system (AIMS)",
+      "url": "https://www.iso.org/standard/81230.html",
+      "kind": "spec",
+      "annotation": "The world's first AI management system standard (published 2023): certifiable requirements to establish, implement, maintain, and continually improve an organisational AI management system — the AI analogue of ISO/IEC 27001 for information security. Extract the title and that it is a management-system (auditable/certifiable) standard for organisations that provide or use AI, distinct from a principles document. (ISO page may block scraping; verify title/scope via the ISO catalogue entry.)",
+      "domainIds": ["d1-foundations"]
+    },
+    {
+      "id": "r-iso-22989",
+      "title": "ISO/IEC 22989 — AI concepts and terminology",
+      "url": "https://www.iso.org/standard/74296.html",
+      "kind": "spec",
+      "annotation": "The AI terminology/concepts standard (published 2022): establishes shared vocabulary and concepts for artificial intelligence. Extract the title and that it is a terminology/concepts standard (NOT a management system), the reference base the BoK names alongside 42001 as 'the core ISO AI standards'. (ISO page may block scraping; verify title/scope via the ISO catalogue entry.)",
+      "domainIds": ["d1-foundations"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d1-1",
+      "title": "D1 · Foundations — AI vs deterministic systems, the governance lifecycle & the core principles",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-foundations"],
+      "sourceNotebook": "aigp / d1 / foundations-lifecycle-and-principles"
+    },
+    {
+      "id": "v-d1-2",
+      "title": "D1 · Developer vs deployer & the risk/impact assessment — the role split the whole exam turns on",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-foundations"],
+      "sourceNotebook": "aigp / d1 / roles-and-impact-assessment"
+    }
+  ]
+}

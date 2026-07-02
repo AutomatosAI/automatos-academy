@@ -1,0 +1,1776 @@
+{
+  "id": "d2-laws-standards",
+  "order": 2,
+  "code": "D2",
+  "name": "Understanding how laws, standards and frameworks apply to AI",
+  "weight": 0.25,
+  "tagline": "Which instrument owns which obligation. The EU AI Act's four risk tiers and who carries the high-risk duties, GPAI provider duties on a phased timeline, GDPR's grip on personal data inside AI, and the voluntary-vs-certifiable frameworks (NIST AI RMF, ISO/IEC 42001 & 22989, OECD).",
+  "overview": "The legal-and-frameworks core of the AIGP, and the heaviest single domain (blueprint 19-23 questions of 100). It tests whether you can take a scenario and say exactly which body of rules applies and what it demands. Four things dominate: (1) the EU AI Act's risk-tier architecture - unacceptable/prohibited, high-risk, limited-risk (transparency), minimal - and, given a system, which tier it lands in and therefore which obligations attach; (2) who carries each obligation - provider (developer) vs deployer (user), the distinction the exam returns to again and again; (3) GDPR x AI - that data-protection law still governs personal data the moment it enters a prompt, training set, or log, independent of the AI Act; and (4) the framework landscape - NIST AI RMF and OECD are voluntary, ISO/IEC 42001 is a certifiable management system, and only the EU AI Act is binding law. Currency matters here: the Act bites on a published timeline (into force Aug 2024; prohibitions Feb 2025; GPAI Aug 2025; high-risk Annex III 2 Dec 2027; Annex I / Article 6(1) 2 Aug 2028 — the two high-risk dates were deferred from the original Aug 2026 / Aug 2027 by the Digital Omnibus on AI, agreed May 2026), and 'all obligations apply on day one' is a classic distractor. This domain maps to BoK sub-domains II.A (existing data-privacy laws), II.B (other existing laws - non-discrimination, consumer protection, product liability, IP), II.C (the EU AI Act) and II.D (industry standards - OECD, NIST RMF/Playbook, NIST ARIA, ISO 22989 & 42001).",
+  "objectives": [
+    "Classify an AI system into the correct EU AI Act risk tier (unacceptable / high / limited / minimal) and derive the obligations that attach - the single highest-leverage skill in this domain.",
+    "List the high-risk obligations (risk management, data governance, technical documentation, record-keeping/logging, transparency to deployers, human oversight, accuracy/robustness/cybersecurity) and assign each to the provider or the deployer.",
+    "Distinguish provider (developer) from deployer (user) - and importer/distributor - and explain how obligations differ by role, including for general-purpose AI (GPAI) models.",
+    "Explain how GDPR continues to govern personal data used in AI (DPIAs, lawful basis, data minimisation, third-party processors, cross-border transfers, retention) independently of the EU AI Act.",
+    "Place each framework on the binding / voluntary / certifiable spectrum - EU AI Act (binding), NIST AI RMF and OECD principles (voluntary), ISO/IEC 42001 (certifiable management system) with ISO/IEC 22989 (terminology) - and pick the instrument that answers a given governance need.",
+    "Recall the EU AI Act implementation timeline and match each obligation to the date it starts to apply."
+  ],
+  "lessons": [
+    {
+      "id": "l1-eu-ai-act-risk-tiers",
+      "title": "The EU AI Act risk-tier pyramid",
+      "estMinutes": 18,
+      "objective": "Classify any AI system into the correct EU AI Act tier - unacceptable, high, limited or minimal - and know that GPAI is a separate track.",
+      "body": "## The pyramid the whole exam is built on\n\nThe EU AI Act (Regulation (EU) 2024/1689) does not regulate 'AI' as one thing. It sorts AI systems by the **risk they pose to health, safety and fundamental rights**, and the obligations scale with the tier. Learn the pyramid cold, because most Domain II questions reduce to *'which tier is this, and therefore what applies?'*\n\n- **Unacceptable risk - prohibited (Article 5).** A short, closed list of practices banned outright. No compliance path exists; you simply may not do them.\n- **High risk (Article 6 + Annexes I and III).** Permitted, but only under the heavy obligation set (risk management, data governance, documentation, logging, human oversight, accuracy/robustness/cybersecurity, conformity assessment). This is where the bulk of the Act's text lives.\n- **Limited risk - transparency (Article 50).** Permitted with light **disclosure** duties: tell people they are dealing with, or looking at, AI.\n- **Minimal or no risk.** Everything else (spam filters, AI in video games). No obligations under the Act; voluntary codes of conduct are encouraged.\n\n> **Exam tip - the number-one distractor:** treating *high-risk* as *banned*. High-risk systems are **allowed**; they just carry obligations. 'Banned' is only the unacceptable tier. If an option says a high-risk system 'must be prohibited', it is wrong.\n\n## Tier 1 - unacceptable risk (the Article 5 prohibitions)\n\nThese are **banned** because the risk is deemed incompatible with EU values. The list (Article 5) includes:\n\n- **Harmful manipulation** - subliminal, purposefully manipulative or deceptive techniques that materially distort behaviour and cause significant harm.\n- **Exploiting vulnerabilities** - of age, disability, or a specific social or economic situation, to distort behaviour harmfully.\n- **Social scoring** - evaluating or classifying people over time based on social behaviour or personal characteristics, leading to unjustified detrimental treatment.\n- **Predictive policing based solely on profiling** a person's personality traits.\n- **Untargeted scraping** of facial images from the internet or CCTV to build facial-recognition databases.\n- **Emotion recognition in the workplace and education** (narrow medical/safety exceptions).\n- **Biometric categorisation** to infer sensitive attributes (race, political opinions, trade-union membership, religious/philosophical beliefs, sex life, sexual orientation).\n- **Real-time remote biometric identification in publicly accessible spaces for law enforcement**, save for narrowly defined, authorised exceptions (e.g. a targeted search for a missing person or preventing an imminent terror threat).\n\n> **Exam tip:** you don't need to recite all eight verbatim, but you must **recognise a prohibited practice when a scenario describes one** - and know the ban is absolute (no risk-management workaround makes social scoring legal).\n\n## Tier 2 - high risk: two doors in (Article 6)\n\nAn AI system is **high-risk** by one of two routes:\n\n1. **Article 6(1) - safety-component / product route (Annex I).** The AI is a safety component of, or is itself, a product covered by listed EU harmonisation legislation (machinery, medical devices, toys, lifts, etc.) **and** that product must already undergo **third-party conformity assessment**. Think: the AI that controls a surgical robot.\n2. **Article 6(2) - use-case route (Annex III).** The AI falls into one of the listed high-stakes **use cases**, regardless of what product it sits in. Annex III areas: **biometrics; critical infrastructure; education and vocational training; employment and worker management; access to essential private and public services** (e.g. credit scoring, benefits, emergency dispatch); **law enforcement; migration, asylum and border control; administration of justice and democratic processes.**\n\nThere is a narrow **Article 6(3) filter**: an Annex III system may *not* be high-risk if it performs only a narrow procedural task, improves the result of prior human work, detects decision-patterns without replacing human judgement, or does preparatory work - **but** any system that does **profiling of natural persons is always high-risk**.\n\n> **Exam tip:** Annex III is the door the exam walks through most. If a stem mentions CV-screening, credit decisions, exam grading, or benefits eligibility, your antenna should say **high-risk (Annex III)** immediately - then the question is which *obligation* applies and to *whom*.\n\n## Tier 3 - limited risk (Article 50 transparency)\n\nNot dangerous enough for the high-risk regime, but people deserve to **know AI is involved**. Article 50 duties (covered fully in Lesson 2) include telling users they are interacting with a chatbot, and labelling AI-generated 'deepfake' or synthetic content. Forgetting this tier exists - or assuming a chatbot must be high-risk - is a common error.\n\n## Tier 4 - minimal or no risk\n\nThe large majority of AI. No obligations under the Act. The Act *encourages* voluntary codes of conduct but imposes nothing.\n\n## Where GPAI sits\n\n**General-purpose AI (GPAI) models** (think foundation models) are governed by a **separate, parallel track** (Articles 51-55), not by the four-tier pyramid. A GPAI model provider has its own duties, and a subset of very capable models are designated **GPAI with systemic risk** with extra obligations. Keep this mentally distinct: a scenario can involve *both* a GPAI model provider *and* a downstream deployer who has built a high-risk system on top - different rules for each. Lesson 3 handles GPAI in full.\n\n## The one procedure to run on any scenario\n\n1. Is it a **prohibited** practice (Article 5)? -> banned, stop.\n2. Is it **Annex I safety-component** or **Annex III use-case** (and not filtered out by 6(3))? -> **high-risk**, full obligations.\n3. Does it **interact with people or generate synthetic content** (chatbot, deepfake, emotion recognition)? -> **limited-risk transparency** duties.\n4. Otherwise -> **minimal**, no obligations.\n5. Separately: is a **GPAI model** in play? -> apply Articles 53/55 to its provider.\n\nRun that ladder and the tier - and therefore the obligations - falls out.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-1",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Under the EU AI Act, an AI system used to screen job applicants (an Annex III use case) is classified as:",
+          "options": [
+            {
+              "id": "a",
+              "text": "High-risk - permitted, but subject to the full obligation set",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Unacceptable-risk - prohibited outright"
+            },
+            {
+              "id": "c",
+              "text": "Limited-risk - only a transparency/disclosure duty applies"
+            },
+            {
+              "id": "d",
+              "text": "Minimal-risk - no obligations under the Act"
+            }
+          ],
+          "explanation": "Employment and worker management is an Annex III high-risk use case, so the system is **high-risk** and carries the full obligations - but it is **permitted**, not banned. It is not unacceptable (that tier is the closed Article 5 list), not merely limited-risk (transparency-only is for chatbots/deepfakes), and certainly not minimal.",
+          "sourceRefs": [
+            "r-eu-ai-act-art6",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-2",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which of the following is a PROHIBITED (unacceptable-risk) practice under Article 5?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Social scoring of individuals leading to unjustified detrimental treatment",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "An AI system that scores creditworthiness for a bank"
+            },
+            {
+              "id": "c",
+              "text": "A customer-service chatbot on a retail website"
+            },
+            {
+              "id": "d",
+              "text": "An AI that recommends films to streaming subscribers"
+            }
+          ],
+          "explanation": "**Social scoring** appears on the Article 5 prohibited list. Credit scoring is **high-risk** (Annex III access-to-essential-services), a chatbot is **limited-risk** (Article 50 transparency), and film recommendation is **minimal-risk**. Only the first is banned outright.",
+          "sourceRefs": [
+            "r-eu-ai-act-art5",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-3",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A colleague says: 'Our AI is high-risk, so the EU AI Act means we cannot deploy it at all.' What is the correction?",
+          "options": [
+            {
+              "id": "a",
+              "text": "High-risk systems are permitted; they must meet the obligation set (risk management, documentation, human oversight, etc.). Only 'unacceptable-risk' practices are banned",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Nothing - high-risk does mean the system is prohibited"
+            },
+            {
+              "id": "c",
+              "text": "High-risk only means a transparency label is required, nothing more"
+            },
+            {
+              "id": "d",
+              "text": "High-risk classification only applies to general-purpose AI models"
+            }
+          ],
+          "explanation": "High-risk is **allowed with obligations**, not banned - conflating high-risk with prohibited is the classic trap. Transparency-only is the *limited-risk* tier, and high-risk applies to Annex I/III systems, not (specifically) to GPAI models, which have their own separate track.",
+          "sourceRefs": [
+            "r-eu-ai-act-art6",
+            "r-eu-ai-act-art5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l2-provider-deployer-obligations",
+      "title": "Provider vs deployer, and the high-risk obligation set",
+      "estMinutes": 19,
+      "objective": "Assign each EU AI Act obligation to the right operator (provider/deployer/importer/distributor) and recall the seven high-risk provider obligations - plus that existing law (GDPR, non-discrimination, product liability, IP) still applies.",
+      "body": "## Same system, different hats\n\nThe AIGP tests role allocation harder than almost anything else in Domain II. The EU AI Act assigns obligations to **operators**, and the two you must never confuse are:\n\n- **Provider (Article 3(3))** - *'a natural or legal person ... that develops an AI system ... or that has [one] developed and places it on the market or puts it into service under its own name or trademark'*. Informally: the **developer/maker**. Carries the lion's share of high-risk obligations.\n- **Deployer (Article 3(4))** - *'a natural or legal person ... using an AI system under its authority'* in a professional capacity. Informally: the **user/operator organisation**. Carries a smaller, use-time set of obligations.\n\nTwo more operators appear in Annex-role questions: the **importer** (places a third-country provider's system on the EU market) and the **distributor** (makes it available in the supply chain). The BoK explicitly says to *'understand the differences in requirements based on organizational context (e.g., providers, deployers, importers, and distributors)'* - so expect a stem that hinges on which hat the org is wearing.\n\n> **Exam tip - the role flip:** if you build a model in-house and put it into service, you may be **both** provider and deployer. And a deployer can be **re-classified as a provider** if it substantially modifies a high-risk system or puts its own name on it, or repurposes another system into a high-risk use. Watch for stems that quietly flip the role.\n\n## The high-risk obligation set (who owns what)\n\nFor a high-risk system, the **provider** must build and document the following before it goes on the market. Learn the seven headline obligations and their article numbers:\n\n| # | Obligation | Article | In one line |\n|---|---|---|---|\n| 1 | **Risk management system** | 9 | A *continuous, iterative* process across the whole lifecycle - identify, estimate, evaluate, mitigate risks. |\n| 2 | **Data and data governance** | 10 | Training/validation/testing data must be relevant, **sufficiently representative**, and to the best extent possible free of errors; examine for **bias**. |\n| 3 | **Technical documentation** | 11 | Draw up docs proving conformity (kept up to date), the basis for the conformity assessment. |\n| 4 | **Record-keeping / logging** | 12 | The system must **automatically record events (logs)** over its lifetime for traceability and post-market monitoring. |\n| 5 | **Transparency & information to deployers** | 13 | Provide clear **instructions for use** so deployers can understand and operate the system correctly. |\n| 6 | **Human oversight** | 14 | Design so people can **effectively oversee** it - understand it, catch automation bias, override, and **stop** it. |\n| 7 | **Accuracy, robustness & cybersecurity** | 15 | Appropriate, consistent performance; resilience to errors and to attacks (data/model poisoning, adversarial examples). |\n\nWrapping these: the provider must run a **conformity assessment**, register the system in the EU database, affix the **CE marking**, and put a **quality management system** in place.\n\n> **Exam tip - representative, not perfect:** Article 10 says data should be *'relevant, sufficiently representative, and to the best extent possible, free of errors and complete'*. The Act does **not** demand perfect, error-free data - an option claiming '100% error-free data is required' is wrong. 'Sufficiently representative' is the phrase to remember.\n\n## What the *deployer* must do\n\nDeployers are not off the hook - they have a distinct, lighter set, including:\n\n- **Use the system in accordance with the provider's instructions for use.**\n- **Assign human oversight** to competent, trained, resourced people (they operationalise Article 14 on the ground).\n- **Monitor** operation and **inform the provider/authorities** of risks or serious incidents.\n- **Keep the logs** the system generates (where under their control).\n- For certain Annex III systems, carry out a **fundamental rights impact assessment (FRIA, Article 27)** before first use - notably public bodies and providers of essential services.\n- Meet any **Article 50 transparency** duties they trigger (e.g. disclosing a deepfake, informing people subject to emotion recognition).\n\n> **Exam tip - human oversight is shared:** the **provider designs** the oversight *capability* (the stop button, the interface) under Article 14; the **deployer assigns** the actual humans to use it. A question asking 'whose obligation is human oversight?' wants you to see it's **both**, split by design-time vs use-time.\n\n## Tier 3 in detail - Article 50 transparency\n\nThe limited-risk duties, and note they mostly fall on **providers for generation** and **deployers for use**:\n\n- **Chatbots / direct interaction** - the **provider** designs the system so people are informed they are interacting with an **AI system**, unless it is obvious.\n- **Synthetic content marking** - the **provider** of a generative system marks outputs (audio/image/video/text) as **artificially generated or manipulated**, in a machine-readable way where feasible.\n- **Deepfakes** - the **deployer** who generates or manipulates image/audio/video that resembles real people/events **discloses** it is artificially generated (with narrow artistic/satirical carve-outs).\n- **Emotion recognition / biometric categorisation** - the **deployer** informs the natural persons exposed.\n- **AI-generated public-interest text** - the **deployer** discloses when published text on matters of public interest is AI-generated (unless human-reviewed with editorial responsibility).\n\n## Existing laws still apply (II.A and II.B)\n\nThe EU AI Act sits **on top of** law that already governs AI - it does not replace it. The BoK devotes two whole sub-domains to this:\n\n- **II.A - data-privacy law** (GDPR): notice, choice, consent, **purpose limitation**, **data minimisation**, **privacy by design**, controller obligations (**DPIAs**, third-party processors, **cross-border transfers**, data-subject rights, breach notification, record-keeping), and special-category data (**biometrics**). Full treatment in Lesson 4.\n- **II.B - other existing laws:** **non-discrimination** law (employment, credit, lending, housing, insurance), **consumer protection** (unfair/deceptive practices), **product liability** (design/manufacturing defects), and **intellectual property** (limits on using data for training).\n\n> **Exam tip - 'which law?':** a discriminatory hiring model can breach **non-discrimination law**, the **EU AI Act** (high-risk employment), **and** GDPR (if it profiles personal data) all at once. When a stem asks which regime applies, the answer is often 'more than one' - and the *best* option names the one the facts most directly trigger.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-4",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Under the EU AI Act, the operator that DEVELOPS a high-risk AI system and places it on the market under its own name is the:",
+          "options": [
+            {
+              "id": "a",
+              "text": "Provider",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Deployer"
+            },
+            {
+              "id": "c",
+              "text": "Importer"
+            },
+            {
+              "id": "d",
+              "text": "Distributor"
+            }
+          ],
+          "explanation": "Developing a system and placing it on the market under your own name/trademark is the **provider** role (Article 3(3)), which carries the bulk of high-risk obligations. A **deployer** uses a system under its authority; an **importer** brings a third-country provider's system into the EU; a **distributor** makes it available downstream.",
+          "sourceRefs": [
+            "r-eu-ai-act-art3",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-5",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "For a high-risk AI system, who is responsible for human oversight under the EU AI Act?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Both - the provider designs the oversight capability (Article 14), and the deployer assigns competent people to exercise it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Only the provider - oversight is purely a design-time obligation"
+            },
+            {
+              "id": "c",
+              "text": "Only the deployer - the provider has no oversight duties"
+            },
+            {
+              "id": "d",
+              "text": "Neither - human oversight is optional for high-risk systems"
+            }
+          ],
+          "explanation": "Human oversight is **split**: the **provider** must design the system so it *can* be effectively overseen (interface, stop button) per Article 14; the **deployer** must **assign** trained, resourced humans to actually oversee it in use. It's not one-sided, and it is mandatory for high-risk systems, not optional.",
+          "sourceRefs": [
+            "r-eu-ai-act-art14",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-6",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Article 10 (data governance) requires that training, validation and testing data for a high-risk system be:",
+          "options": [
+            {
+              "id": "a",
+              "text": "Relevant, sufficiently representative, and to the best extent possible free of errors and complete",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Guaranteed 100% error-free and perfectly complete"
+            },
+            {
+              "id": "c",
+              "text": "Sourced exclusively from within the EU"
+            },
+            {
+              "id": "d",
+              "text": "Fully anonymised in every case, with no exceptions"
+            }
+          ],
+          "explanation": "The Act's standard is **'relevant, sufficiently representative, and to the best extent possible, free of errors and complete'** - a reasonableness bar, not perfection. It does not mandate literally error-free data, EU-only sourcing, or universal anonymisation (indeed Article 10 permits limited processing of special-category data for bias detection under safeguards).",
+          "sourceRefs": [
+            "r-eu-ai-act-art10",
+            "r-eu-ai-act-oj"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l3-gpai-and-timeline",
+      "title": "General-purpose AI duties and the implementation timeline",
+      "estMinutes": 17,
+      "objective": "Explain GPAI model provider obligations (Article 53), the systemic-risk extras (Articles 51 & 55, incl. the 10^25 FLOP presumption), and match each obligation to its date on the phased timeline.",
+      "body": "## A separate track for foundation models\n\nLarge models that can do many things - the foundation models behind chatbots, copilots and image generators - didn't fit the four-tier, use-case pyramid, so the EU AI Act gives them their own regime: **general-purpose AI (GPAI) models**, Articles 51-56.\n\n- **General-purpose AI model (Article 3(63))** - a model that *'displays significant generality'* and *'is capable of ... performing a wide range of distinct tasks'* and can be integrated into downstream systems. (A model, not yet an application.)\n- **General-purpose AI system (Article 3(66))** - an AI **system** built on a GPAI model that can serve many purposes.\n\nCrucially, the tier a *downstream* application lands in (Lesson 1) is **independent** of the GPAI rules. A hospital that builds a high-risk diagnostic tool on top of a general-purpose model is a **deployer/provider of a high-risk system**; the model maker is a **GPAI model provider**. Different duties, same supply chain.\n\n> **Exam tip - don't conflate the two:** 'a GPAI model provider' and 'a high-risk-system deployer' are different roles with different obligations. A stem that describes building an app on a foundation model is inviting you to keep them apart.\n\n## Baseline GPAI provider duties (Article 53)\n\nEvery GPAI model provider must:\n\n1. **Draw up and keep technical documentation** of the model (training, testing, evaluation), available to the AI Office and national authorities on request (Annex XI).\n2. **Provide information and documentation to downstream providers** who integrate the model - enough to *'understand the capabilities and limitations'* and meet their own obligations (Annex XII).\n3. **Put in place a policy to comply with EU copyright law**, including respecting rights reservations (text-and-data-mining opt-outs).\n4. **Publish a sufficiently detailed summary of the content used for training**, using the AI Office's template.\n\n> **Exam tip - the open-source carve-out (and its limit):** free and open-source GPAI models are **exempt from (1) and (2)** - *except* where the model has **systemic risk**. The copyright policy and training-data summary duties are **not** waived by open-sourcing. So 'open-source models have no GPAI obligations at all' is wrong.\n\n## GPAI with systemic risk (Articles 51 & 55)\n\nThe most capable models get an extra layer. A GPAI model is designated **systemic-risk** when it has **high-impact capabilities** - and there is a **presumption** of that when *'the cumulative amount of computation used for its training measured in floating point operations is greater than 10^25'* (Article 51). The Commission can also designate a model by decision.\n\nOn top of the Article 53 baseline, systemic-risk providers must (Article 55):\n\n- **Perform model evaluation, including adversarial testing (red-teaming)**, to identify and mitigate systemic risks.\n- **Assess and mitigate systemic risks at Union level.**\n- **Track, document and report serious incidents** to the AI Office (and national authorities) **without undue delay**, with corrective measures.\n- **Ensure an adequate level of cybersecurity** for the model and its physical infrastructure.\n\n> **Exam tip:** the **10^25 FLOP** threshold and **red-teaming/adversarial testing** are the two most quotable systemic-risk facts. Note it is a *presumption* (rebuttable / adjustable by delegated act), not an eternal hard line.\n\n## The implementation timeline (currency-critical)\n\nThe Act entered into force but its obligations **phase in**. 'Everything applies from day one' is a top distractor. The **structure** below is the durable, examinable fact - prohibitions first, then GPAI, then high-risk - and it did not change even though the two high-risk dates were later deferred (see the currency note):\n\n| Date | What starts to apply |\n|---|---|\n| **1 Aug 2024** | **Entry into force.** No requirements apply yet. |\n| **2 Feb 2025** | **Prohibitions (Article 5)** and **AI-literacy** obligations start. |\n| **2 May 2025** | Codes of practice to be ready. |\n| **2 Aug 2025** | **GPAI model** obligations, **governance** bodies, notified bodies, confidentiality and **penalties** apply. (GPAI models already on the market before this date have until **2 Aug 2027** to comply.) |\n| **2 Dec 2027** | **High-risk obligations for Annex III** use-case (stand-alone) systems apply, together with Article 50 transparency and the bulk of the remaining obligations. *(Deferred from the original 2 Aug 2026 by the Digital Omnibus - see the currency note.)* |\n| **2 Aug 2028** | **Article 6(1) / Annex I** high-risk (product-safety-embedded) obligations apply. *(Deferred from the original 2 Aug 2027 by the Digital Omnibus.)* |\n\n> **Currency note (as of 2 July 2026):** the two **high-risk** application dates were **deferred by the Digital Omnibus on AI** - provisional political agreement 6-7 May 2026, confirmed by the Council 13 May 2026, endorsed by the European Parliament 16 June 2026, with publication in the Official Journal expected shortly (before the original 2 Aug 2026 deadline). **Stand-alone Annex III high-risk** moved from **2 Aug 2026 → 2 December 2027**, and **product-embedded Annex I high-risk** moved from **2 Aug 2027 → 2 August 2028**. **Prohibitions (2 Feb 2025)** and **GPAI (2 Aug 2025)** are **unchanged**. Re-verify the final dates against EUR-Lex once the Omnibus is published in the Official Journal.\n\n> **Exam tip - anchor the dates that did NOT move:** **prohibitions Feb 2025** and **GPAI Aug 2025** are settled and unchanged - lean on them. If a scenario says 'today is early 2026', prohibitions and GPAI duties are **live**, but **no** high-risk obligations are yet in force (the earliest, Annex III, is now 2 Dec 2027). Matching an obligation to its phase is fair game; because the high-risk calendar dates were deferred, the exam-safe move is to reason from the **order** (prohibitions → GPAI → Annex III high-risk → Annex I high-risk) rather than memorising a single moving date.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-7",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which is an obligation on EVERY provider of a general-purpose AI model under Article 53 (even absent systemic risk)?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Publish a sufficiently detailed summary of the content used to train the model",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Conduct adversarial red-team testing for systemic risk"
+            },
+            {
+              "id": "c",
+              "text": "Report serious incidents to the AI Office without undue delay"
+            },
+            {
+              "id": "d",
+              "text": "Register the model as a high-risk system in the EU database"
+            }
+          ],
+          "explanation": "The **training-content summary** (plus technical docs, downstream information, and an EU-copyright policy) is a **baseline Article 53** duty for all GPAI providers. Adversarial red-teaming and serious-incident reporting are **Article 55** duties reserved for **systemic-risk** models. Registering as high-risk confuses the separate high-risk regime with the GPAI track.",
+          "sourceRefs": [
+            "r-eu-ai-act-art53",
+            "r-eu-ai-act-art55"
+          ]
+        },
+        {
+          "id": "kc-d2-8",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Under Article 51, a general-purpose AI model is PRESUMED to have systemic risk when the cumulative training compute exceeds:",
+          "options": [
+            {
+              "id": "a",
+              "text": "10^25 floating point operations (FLOP)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "10^25 model parameters"
+            },
+            {
+              "id": "c",
+              "text": "10^12 floating point operations (FLOP)"
+            },
+            {
+              "id": "d",
+              "text": "There is no quantitative threshold - it is purely a Commission decision"
+            }
+          ],
+          "explanation": "The presumption trigger is **>10^25 FLOP of cumulative training compute**. It is measured in **FLOP (computation)**, not parameters; the exponent is 25, not 12; and while the Commission *can* also designate a model by decision, there **is** a published quantitative presumption.",
+          "sourceRefs": [
+            "r-eu-ai-act-art51",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-9",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "On the EU AI Act timeline, which obligations were the FIRST to start applying after entry into force?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The prohibitions on unacceptable-risk practices (and AI-literacy duties), from 2 February 2025",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The full high-risk obligations for Annex III systems, immediately on entry into force in August 2024"
+            },
+            {
+              "id": "c",
+              "text": "The Annex I product-safety high-risk obligations, from February 2025"
+            },
+            {
+              "id": "d",
+              "text": "All obligations applied simultaneously on the date of entry into force"
+            }
+          ],
+          "explanation": "The **Article 5 prohibitions and AI-literacy** duties came first, on **2 Feb 2025** - six months after entry into force. High-risk **Annex III** obligations don't apply until **2 December 2027** and **Annex I** high-risk until **2 August 2028** (both deferred from the original Aug 2026 / Aug 2027 by the Digital Omnibus, agreed May 2026), and the whole point of the phased timeline is that obligations do **not** all start at once. Note the *order* is what this question tests - prohibitions are unambiguously first regardless of where the later high-risk dates land.",
+          "sourceRefs": [
+            "r-eu-ai-act-timeline"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l4-frameworks-and-gdpr",
+      "title": "NIST AI RMF, ISO standards, OECD principles - and GDPR x AI",
+      "estMinutes": 20,
+      "objective": "Place each instrument on the binding/voluntary/certifiable spectrum, recall NIST's four core functions (and ARIA/Playbook), distinguish ISO/IEC 42001 (management system) from 22989 (terminology) and the OECD principles, and identify when GDPR obligations (DPIA, lawful basis, transfers) are triggered by AI.",
+      "body": "## Two questions the exam keeps asking\n\nDomain II's non-EU-AI-Act half turns on two habits of mind:\n\n1. **Is this instrument binding, voluntary, or certifiable?** Get this reflex right and a third of the framework questions answer themselves.\n2. **Does personal data touch this AI?** If yes, **GDPR applies** - full stop - regardless of what the AI Act does.\n\n## Binding vs voluntary vs certifiable\n\n| Instrument | Nature | What it is |\n|---|---|---|\n| **EU AI Act** | **Binding law** | Enforceable regulation with penalties; the only *mandatory* item here. |\n| **GDPR** | **Binding law** | Enforceable data-protection regulation; governs personal data in AI. |\n| **NIST AI RMF 1.0** | **Voluntary framework** | US guidance for managing AI risk; *'intended for voluntary use'*. |\n| **OECD AI Principles** | **Voluntary (soft law)** | Intergovernmental principles; not directly enforceable. |\n| **ISO/IEC 42001** | **Certifiable standard** | A management-system standard an organisation can be **audited and certified** against. |\n| **ISO/IEC 22989** | **Terminology standard** | Establishes AI **vocabulary and concepts**; nothing to certify. |\n\n> **Exam tip:** the two most-tested confusions are (a) thinking **NIST AI RMF is mandatory** - it is voluntary; and (b) thinking **ISO/IEC 42001 certifies a model** - it certifies a **management system** (process), not any single AI model or its accuracy.\n\n## NIST AI RMF 1.0 - the four core functions\n\nReleased **26 January 2023** by the US National Institute of Standards and Technology, the AI RMF is a **voluntary** framework organised around four **core functions** (each broken into categories and subcategories). Learn all four:\n\n- **GOVERN** - a **cross-cutting** function that *'cultivates and implements a culture of risk management'* and is *'infused throughout AI risk management'*. Policies, roles, accountability, culture. (This is the one that runs through the other three.)\n- **MAP** - *'establishes the context to frame risks related to an AI system'* and identifies risks and contributing factors. (Context and problem-framing.)\n- **MEASURE** - uses *'quantitative, qualitative, or mixed-method tools ... to analyze, assess, benchmark, and monitor AI risk'*. (Metrics and testing.)\n- **MANAGE** - *'allocat[es] risk resources to mapped and measured risks'* and plans responses, recovery and communication about incidents. (Acting on and prioritising risk.)\n\nSupporting pieces the BoK names:\n- **The AI RMF Playbook** - a companion offering suggested, actionable ways to implement the core functions' subcategories.\n- **The Generative AI Profile (NIST AI 600-1, July 2024)** - a cross-sectoral profile for GenAI-specific risks.\n- **The ARIA program (Assessing Risks and Impacts of AI)** - a NIST **evaluation/measurement** program developing methodologies, tools and metrics for AI safety and real-world impact. The BoK explicitly lists 'the NIST ARIA program for methodologies, tools, metrics and measurements on AI safety'.\n\n> **Exam tip - GOVERN is the odd one out:** Map, Measure and Manage are broadly sequential; **GOVERN is cross-cutting** and wraps all three. If asked 'which NIST function is present throughout / is about culture and accountability?', it's **GOVERN**.\n\n## ISO/IEC 42001 and 22989\n\nThe BoK, in II.D, tells you to *'understand the core ISO AI standards (i.e., 22989 and 42001)'*. Keep their jobs distinct:\n\n- **ISO/IEC 42001** - the **AI management system (AIMS)** standard (2023). It specifies requirements to **establish, implement, maintain and continually improve** an AI management system, in the same certifiable, Plan-Do-Check-Act family as ISO 9001 (quality) and ISO/IEC 27001 (information security). You certify an **organisation's processes** for governing AI - not a model. This is the framework you'd point a regulated buyer at when they ask *'can you prove you manage AI responsibly?'*\n- **ISO/IEC 22989** - **AI concepts and terminology.** It establishes the **vocabulary** the field uses (what 'AI system', 'machine learning', 'training data' etc. mean). It's a reference standard, not something you certify against.\n\n> **Exam tip:** map the need to the standard. *'We want to be audited/certified for responsible AI governance'* -> **42001**. *'We need a shared definition of AI terms'* -> **22989**. *'We want a voluntary process to manage AI risk'* -> **NIST AI RMF**. *'We must legally conform'* -> **EU AI Act**.\n\n## OECD AI Principles\n\nAdopted in **2019** and **updated in 2024**, the OECD AI Principles are the **first intergovernmental standard on AI** and the basis the **G20** drew its principles from. The **five value-based principles**:\n\n1. **Inclusive growth, sustainable development and well-being**\n2. **Human rights and democratic values, including fairness and privacy**\n3. **Transparency and explainability**\n4. **Robustness, security and safety**\n5. **Accountability**\n\nThey are **soft law** - influential, widely adopted (dozens of adherents), but not directly enforceable. Recognise them as *principles/values*, distinct from the operational NIST functions and the certifiable ISO standards.\n\n## GDPR x AI (sub-domain II.A)\n\nGDPR governs **personal data** whenever it enters an AI system - in a prompt, a training set, an output, or a log. The AIGP tests the specific triggers:\n\n- **Lawful basis and purpose limitation** - you need a valid basis to process personal data, and you can't quietly repurpose data collected for X to train a model for Y.\n- **Data minimisation & privacy by design** - collect only what's needed; bake protection in (echoes Article 10's discipline but is a *separate* GDPR duty).\n- **DPIA (data-protection impact assessment)** - required for processing **likely to result in a high risk** to individuals' rights, which AI profiling/large-scale or sensitive-data use routinely triggers. *(Distinguish from the AI Act's FRIA in Article 27 - a related but separate assessment.)*\n- **Special-category data** - biometrics, health, etc. carry heightened conditions; the BoK's II.A calls out **biometrics** specifically.\n- **Automated decision-making (Article 22 GDPR)** - individuals have rights around solely-automated decisions with legal/similarly-significant effects (information, human intervention, contest).\n- **Third-party processors** - a controller using a vendor/model API must have the right contracts and safeguards.\n- **Cross-border transfers / data residency** - moving personal data outside the EEA needs a lawful transfer mechanism; where prompts/logs are stored matters.\n- **Retention, logging and breach notification** - keep personal data no longer than necessary; the same logs the AI Act wants for traceability are **personal data** if they contain identifiers, and a leak may be a notifiable **breach**.\n\n> **Exam tip - PII in prompts:** typing a customer's personal data into a third-party LLM is a **GDPR processing event** - it needs a lawful basis, a processor agreement, minimisation, and attention to where the data (and any logs) reside. The AI Act tier is a *separate* question. Where a scenario is fundamentally about personal data, the answer lives in **GDPR**, even if the AI Act also applies.\n\n## Putting the frameworks together\n\nFor one deployment you might: **conform** to the EU AI Act (binding), **comply** with GDPR (binding) for the personal data, **run** your governance using the NIST AI RMF (voluntary process), **certify** your management system to ISO/IEC 42001 (certifiable), speak a common vocabulary via ISO/IEC 22989, and align to the OECD principles (values). Different instruments, different jobs - which is exactly what Domain II asks you to sort.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-10",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement correctly characterises these instruments?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The EU AI Act is binding law, the NIST AI RMF is voluntary, and ISO/IEC 42001 is a certifiable management-system standard",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The NIST AI RMF is legally mandatory in the EU"
+            },
+            {
+              "id": "c",
+              "text": "ISO/IEC 42001 certifies that an individual AI model is accurate and unbiased"
+            },
+            {
+              "id": "d",
+              "text": "The OECD AI Principles are directly enforceable regulations with penalties"
+            }
+          ],
+          "explanation": "The EU AI Act is **binding**, the NIST AI RMF is **voluntary**, and ISO/IEC 42001 is a **certifiable management-system** standard - all correct. NIST's framework is not EU law; ISO/IEC 42001 certifies an organisation's **management system (process)**, not a single model's accuracy; and the OECD principles are **soft law**, not enforceable regulations.",
+          "sourceRefs": [
+            "r-nist-ai-rmf",
+            "r-iso-42001",
+            "r-oecd-principles",
+            "r-eu-ai-act-oj"
+          ]
+        },
+        {
+          "id": "kc-d2-11",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the NIST AI RMF, which core function is CROSS-CUTTING - a culture of risk management infused throughout the other three?",
+          "options": [
+            {
+              "id": "a",
+              "text": "GOVERN",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "MAP"
+            },
+            {
+              "id": "c",
+              "text": "MEASURE"
+            },
+            {
+              "id": "d",
+              "text": "MANAGE"
+            }
+          ],
+          "explanation": "**GOVERN** is the cross-cutting function - it cultivates the risk-management culture, policies and accountability that run through **MAP** (frame context/identify risks), **MEASURE** (analyse/benchmark risks) and **MANAGE** (act on and prioritise risks).",
+          "sourceRefs": [
+            "r-nist-ai-rmf-core",
+            "r-nist-ai-rmf"
+          ]
+        },
+        {
+          "id": "kc-d2-12",
+          "domainId": "d2-laws-standards",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A support team wants to paste customers' personal data into a third-party LLM to draft replies. Which legal regime most directly governs that personal data?",
+          "options": [
+            {
+              "id": "a",
+              "text": "GDPR - it applies to processing personal data (lawful basis, minimisation, processor agreement, transfers) regardless of the AI Act tier",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Only the EU AI Act - GDPR stops applying once data is inside an AI system"
+            },
+            {
+              "id": "c",
+              "text": "ISO/IEC 22989, because it defines AI terminology"
+            },
+            {
+              "id": "d",
+              "text": "The NIST AI RMF, because it is mandatory for personal-data processing"
+            }
+          ],
+          "explanation": "Personal data in a prompt is a **GDPR processing event** - lawful basis, purpose limitation, minimisation, a processor agreement, and cross-border-transfer rules all apply, independent of any AI Act classification. GDPR does not switch off inside AI; ISO/IEC 22989 is a terminology standard (not a legal regime); and the NIST AI RMF is voluntary, not mandatory.",
+          "sourceRefs": [
+            "r-eu-ai-act-oj",
+            "r-aigp-bok"
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d2-1",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The EU AI Act sorts AI systems into how many principal risk tiers, and what are they?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Four: unacceptable (prohibited), high, limited (transparency), and minimal",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Two: legal and illegal"
+        },
+        {
+          "id": "c",
+          "text": "Three: low, medium and high"
+        },
+        {
+          "id": "d",
+          "text": "Five: banned, critical, high, medium and low"
+        }
+      ],
+      "explanation": "The Act uses a **four-tier** risk pyramid: **unacceptable/prohibited, high, limited (transparency), and minimal/none**. It is not a binary legal/illegal split, not a generic low/medium/high scale, and not five tiers.",
+      "sourceRefs": [
+        "r-eu-ai-act-oj",
+        "r-aigp-bok"
+      ]
+    },
+    {
+      "id": "q-d2-2",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Under the EU AI Act, which term describes the organisation that DEVELOPS an AI system and puts it on the market under its own name?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Provider",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Deployer"
+        },
+        {
+          "id": "c",
+          "text": "Data subject"
+        },
+        {
+          "id": "d",
+          "text": "Supervisory authority"
+        }
+      ],
+      "explanation": "The **provider** (Article 3(3)) develops the system and places it on the market under its own name/trademark. A **deployer** merely uses it; a **data subject** is an individual whose data is processed (a GDPR term); a **supervisory authority** is a regulator.",
+      "sourceRefs": [
+        "r-eu-ai-act-art3"
+      ]
+    },
+    {
+      "id": "q-d2-3",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How many core functions does the NIST AI Risk Management Framework define?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Four - Govern, Map, Measure and Manage",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Three - Plan, Do and Check"
+        },
+        {
+          "id": "c",
+          "text": "Five - Identify, Protect, Detect, Respond and Recover"
+        },
+        {
+          "id": "d",
+          "text": "Two - Assess and Mitigate"
+        }
+      ],
+      "explanation": "The AI RMF has **four** core functions: **Govern, Map, Measure, Manage**. Plan-Do-Check is a management-system cycle; Identify/Protect/Detect/Respond/Recover is the NIST *Cybersecurity* Framework, a different NIST framework.",
+      "sourceRefs": [
+        "r-nist-ai-rmf",
+        "r-nist-ai-rmf-core"
+      ]
+    },
+    {
+      "id": "q-d2-4",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Is compliance with the NIST AI Risk Management Framework legally mandatory?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No - it is a voluntary framework",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes - it is mandatory for all US companies"
+        },
+        {
+          "id": "c",
+          "text": "Yes - it is mandatory throughout the EU"
+        },
+        {
+          "id": "d",
+          "text": "Yes - it is mandatory for any company using AI worldwide"
+        }
+      ],
+      "explanation": "The NIST AI RMF is **voluntary** - NIST describes it as intended for voluntary use. It is not a mandate in the US, the EU, or globally; that binding role belongs to laws like the EU AI Act and GDPR.",
+      "sourceRefs": [
+        "r-nist-ai-rmf"
+      ]
+    },
+    {
+      "id": "q-d2-5",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "ISO/IEC 42001 is best described as a standard for:",
+      "options": [
+        {
+          "id": "a",
+          "text": "An AI management system (AIMS) - a certifiable set of organisational processes for governing AI",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Certifying that a specific AI model is accurate and free of bias"
+        },
+        {
+          "id": "c",
+          "text": "The vocabulary and concepts used in AI"
+        },
+        {
+          "id": "d",
+          "text": "A binding EU regulation with fines for non-compliance"
+        }
+      ],
+      "explanation": "ISO/IEC 42001 specifies an **AI management system** - certifiable organisational **processes**, in the ISO management-system family. It does not certify a single model's accuracy, is not a terminology standard (that's **22989**), and is a voluntary standard, not binding EU law.",
+      "sourceRefs": [
+        "r-iso-42001",
+        "r-aigp-bok"
+      ]
+    },
+    {
+      "id": "q-d2-6",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "ISO/IEC 22989 primarily provides:",
+      "options": [
+        {
+          "id": "a",
+          "text": "AI concepts and terminology (a shared vocabulary)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A certifiable AI management system"
+        },
+        {
+          "id": "c",
+          "text": "The EU AI Act's list of prohibited practices"
+        },
+        {
+          "id": "d",
+          "text": "NIST's Generative AI Profile"
+        }
+      ],
+      "explanation": "ISO/IEC 22989 establishes AI **concepts and terminology**. The certifiable management system is **ISO/IEC 42001**; the prohibited-practice list is EU AI Act Article 5; the Generative AI Profile (AI 600-1) is a NIST document.",
+      "sourceRefs": [
+        "r-iso-22989",
+        "r-aigp-bok"
+      ]
+    },
+    {
+      "id": "q-d2-7",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The OECD AI Principles are best characterised as:",
+      "options": [
+        {
+          "id": "a",
+          "text": "Voluntary intergovernmental principles for trustworthy AI (soft law), first adopted in 2019 and updated in 2024",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A binding treaty enforceable in national courts"
+        },
+        {
+          "id": "c",
+          "text": "A certifiable technical standard like ISO/IEC 42001"
+        },
+        {
+          "id": "d",
+          "text": "A section of the EU AI Act"
+        }
+      ],
+      "explanation": "The OECD AI Principles are **voluntary, intergovernmental soft law** (2019, updated 2024) - the first intergovernmental AI standard. They are not a binding treaty, not a certifiable standard, and not part of the EU AI Act.",
+      "sourceRefs": [
+        "r-oecd-principles"
+      ]
+    },
+    {
+      "id": "q-d2-8",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which assessment is the GDPR instrument for processing likely to result in a high risk to individuals' rights?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A Data Protection Impact Assessment (DPIA)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A conformity assessment under the EU AI Act"
+        },
+        {
+          "id": "c",
+          "text": "A Fundamental Rights Impact Assessment (FRIA)"
+        },
+        {
+          "id": "d",
+          "text": "A NIST ARIA evaluation"
+        }
+      ],
+      "explanation": "The **DPIA** is the GDPR mechanism for high-risk processing of personal data. A **conformity assessment** is the EU AI Act's high-risk pre-market check; a **FRIA** is the AI Act's Article 27 assessment (related but distinct); **ARIA** is a NIST evaluation program.",
+      "sourceRefs": [
+        "r-aigp-bok",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-9",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A company builds an AI system that assigns each citizen a 'trustworthiness score' from their everyday social behaviour, used by public bodies to deny access to services. Under the EU AI Act this is:",
+      "options": [
+        {
+          "id": "a",
+          "text": "A prohibited practice (social scoring) under Article 5",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A permitted high-risk system if a conformity assessment is passed"
+        },
+        {
+          "id": "c",
+          "text": "A limited-risk system requiring only a transparency notice"
+        },
+        {
+          "id": "d",
+          "text": "Outside the scope of the EU AI Act"
+        }
+      ],
+      "explanation": "General-purpose **social scoring** leading to unjustified detrimental treatment is **prohibited** under Article 5 - no conformity assessment legalises it. It is therefore not a permitted high-risk system, not a mere transparency case, and squarely within the Act's scope.",
+      "sourceRefs": [
+        "r-eu-ai-act-art5",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-10",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A bank deploys a third-party AI system to decide consumer loan applications. Which EU AI Act tier applies, and why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "High-risk - creditworthiness/access to essential services is an Annex III use case",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Unacceptable - all automated credit decisions are prohibited"
+        },
+        {
+          "id": "c",
+          "text": "Limited-risk - it only needs to disclose that AI is used"
+        },
+        {
+          "id": "d",
+          "text": "Minimal-risk - financial services are excluded from the Act"
+        }
+      ],
+      "explanation": "AI used for **creditworthiness / access to essential private services** is an **Annex III high-risk** use case. Automated credit decisions are not banned, transparency-only is the wrong tier, and financial-services AI is not excluded.",
+      "sourceRefs": [
+        "r-eu-ai-act-art6",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-11",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For a high-risk AI system, which obligation requires the system to AUTOMATICALLY record events (logs) over its lifetime?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Record-keeping / logging (Article 12)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Human oversight (Article 14)"
+        },
+        {
+          "id": "c",
+          "text": "Accuracy and robustness (Article 15)"
+        },
+        {
+          "id": "d",
+          "text": "Data governance (Article 10)"
+        }
+      ],
+      "explanation": "**Article 12 (record-keeping)** requires automatic event logging over the system's lifetime for traceability and post-market monitoring. Article 14 is human oversight, Article 15 is accuracy/robustness/cybersecurity, and Article 10 is data governance - related duties, but not the logging one.",
+      "sourceRefs": [
+        "r-eu-ai-act-art12",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-12",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A hospital fine-tunes an off-the-shelf general-purpose model into a tool that diagnoses disease from scans, then puts it into service under its own name. Which best describes the hospital's role for that diagnostic tool?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It becomes a provider of a high-risk AI system (and must meet the high-risk obligations)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is only a deployer, with no provider obligations, because it started from someone else's model"
+        },
+        {
+          "id": "c",
+          "text": "It is a GPAI model provider governed solely by Article 53"
+        },
+        {
+          "id": "d",
+          "text": "It has no obligations because diagnosis is a purely clinical activity"
+        }
+      ],
+      "explanation": "By substantially adapting the model into a high-risk medical tool and putting it into service under its own name, the hospital takes on the **provider** role for a **high-risk system** - full obligations. Starting from a third-party model doesn't limit it to deployer status, the GPAI-provider track governs the *model maker*, and medical AI is not exempt.",
+      "sourceRefs": [
+        "r-eu-ai-act-art3",
+        "r-eu-ai-act-art6"
+      ]
+    },
+    {
+      "id": "q-d2-13",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is a LIMITED-RISK transparency obligation under Article 50 rather than a high-risk obligation?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ensuring users are informed when they are interacting with a chatbot (unless obvious)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Establishing a lifecycle risk-management system"
+        },
+        {
+          "id": "c",
+          "text": "Drawing up technical documentation for conformity assessment"
+        },
+        {
+          "id": "d",
+          "text": "Designing the system for effective human oversight"
+        }
+      ],
+      "explanation": "Informing users they're dealing with an **AI system/chatbot** is an **Article 50 transparency** duty (limited-risk). Risk-management systems, technical documentation, and human-oversight design are **high-risk** obligations (Articles 9, 11, 14).",
+      "sourceRefs": [
+        "r-eu-ai-act-art50",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-14",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A provider of a generative AI system that outputs images and audio must, under Article 50:",
+      "options": [
+        {
+          "id": "a",
+          "text": "Mark the outputs as artificially generated or manipulated in a machine-readable format (where technically feasible)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Obtain a CE marking for the generated images"
+        },
+        {
+          "id": "c",
+          "text": "Delete all generated content after 30 days"
+        },
+        {
+          "id": "d",
+          "text": "Register each generated image in the EU high-risk database"
+        }
+      ],
+      "explanation": "Article 50 requires providers of generative systems to **mark synthetic outputs as artificially generated/manipulated** in a machine-readable way where feasible. CE marking and the EU database belong to the **high-risk** regime, and there is no blanket 30-day deletion rule.",
+      "sourceRefs": [
+        "r-eu-ai-act-art50"
+      ]
+    },
+    {
+      "id": "q-d2-15",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is a baseline obligation for a provider of a general-purpose AI model, even without systemic risk (Article 53)?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Put in place a policy to comply with EU copyright law",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Conduct Union-level systemic-risk assessment and mitigation"
+        },
+        {
+          "id": "c",
+          "text": "Ensure cybersecurity of the model's physical infrastructure as a systemic-risk measure"
+        },
+        {
+          "id": "d",
+          "text": "Report serious incidents to the AI Office without undue delay"
+        }
+      ],
+      "explanation": "An **EU-copyright-compliance policy** (alongside technical docs, downstream information, and a training-content summary) is a **baseline Article 53** duty. Union-level systemic-risk assessment, infrastructure cybersecurity, and serious-incident reporting are **Article 55** duties for **systemic-risk** models only.",
+      "sourceRefs": [
+        "r-eu-ai-act-art53",
+        "r-eu-ai-act-art55"
+      ]
+    },
+    {
+      "id": "q-d2-16",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A model is presumed to be a general-purpose AI model 'with systemic risk'. Which ADDITIONAL obligation does that trigger under Article 55?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Performing and documenting adversarial testing (red-teaming) to identify and mitigate systemic risks",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Publishing a summary of training data (this is unique to systemic-risk models)"
+        },
+        {
+          "id": "c",
+          "text": "Providing instructions for use to consumers"
+        },
+        {
+          "id": "d",
+          "text": "Affixing a CE marking to the model"
+        }
+      ],
+      "explanation": "**Article 55** adds **model evaluation including adversarial red-teaming**, Union-level risk mitigation, serious-incident reporting, and cybersecurity. The training-data summary is a **baseline Article 53** duty (not unique to systemic-risk), consumer instructions/CE marking belong to the high-risk-system regime, not the GPAI track.",
+      "sourceRefs": [
+        "r-eu-ai-act-art55",
+        "r-eu-ai-act-art53"
+      ]
+    },
+    {
+      "id": "q-d2-17",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "It is early 2026. Which EU AI Act obligations are ALREADY in force?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Article 5 prohibitions (since Feb 2025) and GPAI model obligations (since Aug 2025)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The full high-risk obligations for Annex III systems"
+        },
+        {
+          "id": "c",
+          "text": "The Annex I product-safety high-risk obligations"
+        },
+        {
+          "id": "d",
+          "text": "No obligations are in force yet - nothing applies until the high-risk obligations land"
+        }
+      ],
+      "explanation": "By early 2026 the **prohibitions** (2 Feb 2025) and **GPAI** duties (2 Aug 2025) are **live** - and these two dates are settled/unchanged. The high-risk obligations are **not** yet in force: **Annex III** starts **2 December 2027** and **Annex I** **2 August 2028** (both deferred from the original Aug 2026 / Aug 2027 by the Digital Omnibus, agreed May 2026). So it is wrong to say *nothing* applies. The answer holds for any 'early 2026' scenario regardless of the exact high-risk dates, because prohibitions and GPAI are the early anchors.",
+      "sourceRefs": [
+        "r-eu-ai-act-timeline"
+      ]
+    },
+    {
+      "id": "q-d2-18",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which NIST AI RMF function 'establishes the context to frame risks related to an AI system' and identifies risks?",
+      "options": [
+        {
+          "id": "a",
+          "text": "MAP",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "GOVERN"
+        },
+        {
+          "id": "c",
+          "text": "MEASURE"
+        },
+        {
+          "id": "d",
+          "text": "MANAGE"
+        }
+      ],
+      "explanation": "**MAP** establishes context and identifies risks and contributing factors. **GOVERN** is the cross-cutting culture/accountability function, **MEASURE** analyses and benchmarks risks, and **MANAGE** allocates resources to and acts on them.",
+      "sourceRefs": [
+        "r-nist-ai-rmf-core",
+        "r-nist-ai-rmf"
+      ]
+    },
+    {
+      "id": "q-d2-19",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An organisation wants an independent, auditable certification that its processes for governing AI meet a recognised standard. Which instrument fits?",
+      "options": [
+        {
+          "id": "a",
+          "text": "ISO/IEC 42001 (AI management system certification)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The NIST AI RMF, which issues certifications"
+        },
+        {
+          "id": "c",
+          "text": "The OECD AI Principles, which can be certified against"
+        },
+        {
+          "id": "d",
+          "text": "ISO/IEC 22989, which certifies AI governance"
+        }
+      ],
+      "explanation": "**ISO/IEC 42001** is the certifiable **AI management system** standard - the right answer for auditable certification of processes. The **NIST AI RMF** and **OECD principles** are voluntary and not certification schemes, and **22989** is a terminology standard, not a certifiable management system.",
+      "sourceRefs": [
+        "r-iso-42001",
+        "r-nist-ai-rmf",
+        "r-oecd-principles"
+      ]
+    },
+    {
+      "id": "q-d2-20",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A marketing team wants to upload a spreadsheet of named customers to a public generative-AI tool to segment them. Which is the MOST relevant obligation to raise first?",
+      "options": [
+        {
+          "id": "a",
+          "text": "GDPR - there must be a lawful basis, data minimisation, a processor arrangement, and attention to where data/logs reside",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Article 5 of the EU AI Act, because customer segmentation is prohibited"
+        },
+        {
+          "id": "c",
+          "text": "ISO/IEC 22989, to define the term 'customer'"
+        },
+        {
+          "id": "d",
+          "text": "Nothing - once data is in an AI tool it is no longer personal data"
+        }
+      ],
+      "explanation": "Uploading named customers is **personal-data processing**, so **GDPR** (lawful basis, minimisation, processor terms, transfers/residency) is the first flag. Segmentation isn't an Article 5 prohibition, a terminology standard doesn't govern the data, and data doesn't stop being personal by entering an AI tool.",
+      "sourceRefs": [
+        "r-aigp-bok",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-21",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under the EU AI Act, a deployer of a high-risk AI system is typically required to:",
+      "options": [
+        {
+          "id": "a",
+          "text": "Use the system per the provider's instructions, assign competent human oversight, and monitor operation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Draw up the technical documentation and run the conformity assessment"
+        },
+        {
+          "id": "c",
+          "text": "Affix the CE marking to the system"
+        },
+        {
+          "id": "d",
+          "text": "Publish the training-data summary for the underlying model"
+        }
+      ],
+      "explanation": "**Deployers** must follow the instructions for use, **assign human oversight**, and **monitor** the system (informing the provider/authorities of incidents). Technical documentation, conformity assessment, and CE marking are **provider** duties, and the training-data summary is a **GPAI provider** duty.",
+      "sourceRefs": [
+        "r-eu-ai-act-art14",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-22",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The NIST 'ARIA' program is best described as:",
+      "options": [
+        {
+          "id": "a",
+          "text": "A NIST program developing methodologies, tools, metrics and measurements for AI safety and real-world impact",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A binding US law regulating high-risk AI"
+        },
+        {
+          "id": "c",
+          "text": "The EU AI Act's conformity-assessment procedure"
+        },
+        {
+          "id": "d",
+          "text": "An ISO certification for AI management systems"
+        }
+      ],
+      "explanation": "**ARIA (Assessing Risks and Impacts of AI)** is a NIST **evaluation/measurement** program for AI safety and impact, named in BoK II.D. It is not a US law, not the EU AI Act's conformity assessment, and not an ISO certification.",
+      "sourceRefs": [
+        "r-aigp-bok",
+        "r-nist-ai-rmf"
+      ]
+    },
+    {
+      "id": "q-d2-23",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A start-up releases a general-purpose AI model under a genuine free and open-source licence. The model is NOT designated systemic-risk. Which Article 53 duties still apply?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The EU-copyright-compliance policy and the public training-content summary still apply; the technical-documentation and downstream-information duties are exempted",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "All Article 53 duties are waived because the model is open-source"
+        },
+        {
+          "id": "c",
+          "text": "No duties apply unless the model is later designated systemic-risk"
+        },
+        {
+          "id": "d",
+          "text": "Only the technical-documentation duty applies; the copyright and training-summary duties are waived"
+        }
+      ],
+      "explanation": "The open-source exemption covers the **technical-documentation and downstream-information** duties, but the **copyright policy** and **training-content summary** are **not** waived. So it's wrong that everything is waived, that nothing applies, or that documentation is the surviving duty (it's the opposite).",
+      "sourceRefs": [
+        "r-eu-ai-act-art53",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-24",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An AI tool sits in an Annex III area (employment) but only performs a narrow procedural task and does no profiling. What does the Article 6(3) filter imply?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It may be treated as NOT high-risk - but the provider must document that assessment, and any profiling would keep it high-risk",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is automatically prohibited because it touches employment"
+        },
+        {
+          "id": "c",
+          "text": "It is automatically high-risk with no exceptions because it is in Annex III"
+        },
+        {
+          "id": "d",
+          "text": "It is exempt from the entire EU AI Act, including transparency duties"
+        }
+      ],
+      "explanation": "Article 6(3) lets a narrow-task, non-profiling Annex III system be treated as **not high-risk**, provided the provider **documents** the assessment - and **profiling always makes it high-risk**. It isn't prohibited (that's Article 5), isn't automatically high-risk (that's the point of the filter), and isn't wholly exempt from the Act (e.g. transparency can still apply).",
+      "sourceRefs": [
+        "r-eu-ai-act-art6",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-25",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A recruitment AI systematically rejects candidates over 50 at a higher rate. An AIGP is asked which legal exposures apply. Which is the MOST complete answer?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Potentially all three: EU AI Act (high-risk employment obligations), non-discrimination law (age), and GDPR (profiling of personal data)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Only the EU AI Act applies; discrimination and data-protection law are superseded by it"
+        },
+        {
+          "id": "c",
+          "text": "Only non-discrimination law applies; the EU AI Act does not cover employment"
+        },
+        {
+          "id": "d",
+          "text": "No law applies because the bias was unintentional"
+        }
+      ],
+      "explanation": "The scenario can trigger the **EU AI Act** (Annex III employment high-risk), **non-discrimination** law (age), **and GDPR** (profiling personal data) simultaneously - the AI Act does not supersede existing law (BoK II.A/II.B exist precisely because it stacks). Employment *is* covered by the Act, and lack of intent does not remove discrimination or data-protection liability.",
+      "sourceRefs": [
+        "r-aigp-bok",
+        "r-eu-ai-act-art6"
+      ]
+    },
+    {
+      "id": "q-d2-26",
+      "domainId": "d2-laws-standards",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which pairing of governance need to instrument is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'We must legally conform in the EU' -> EU AI Act; 'we want a voluntary process to manage AI risk' -> NIST AI RMF; 'we want to be certified' -> ISO/IEC 42001",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "'We must legally conform in the EU' -> NIST AI RMF; 'we want certification' -> OECD principles"
+        },
+        {
+          "id": "c",
+          "text": "'We want a shared AI vocabulary' -> ISO/IEC 42001; 'we want a management system' -> ISO/IEC 22989"
+        },
+        {
+          "id": "d",
+          "text": "'We want to prohibit social scoring' -> the OECD principles as binding law"
+        }
+      ],
+      "explanation": "The correct mapping is **EU AI Act = binding conformity**, **NIST AI RMF = voluntary process**, **ISO/IEC 42001 = certification**. Option B mislabels NIST/OECD; option C swaps 42001 and 22989 (42001=management system, 22989=vocabulary); and the OECD principles are soft law, not the binding source of the social-scoring ban (that's EU AI Act Article 5).",
+      "sourceRefs": [
+        "r-eu-ai-act-oj",
+        "r-nist-ai-rmf",
+        "r-iso-42001",
+        "r-iso-22989",
+        "r-oecd-principles"
+      ]
+    },
+    {
+      "id": "q-d2-27",
+      "domainId": "d2-laws-standards",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Under the EU AI Act, how do human-oversight responsibilities divide between provider and deployer for a high-risk system? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "The provider must design the system so it can be effectively overseen (interface, ability to intervene/stop) - Article 14",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The deployer must assign competent, trained, resourced natural persons to carry out the oversight",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Only the provider has any human-oversight responsibility; the deployer has none"
+        },
+        {
+          "id": "d",
+          "text": "Human oversight is optional for high-risk systems if accuracy is high enough"
+        }
+      ],
+      "explanation": "Human oversight is **shared**: the **provider designs** the oversight capability (Article 14) and the **deployer assigns** the humans who use it. So A and B are both correct; it is not provider-only (C), and it is **mandatory** for high-risk systems regardless of accuracy (D).",
+      "sourceRefs": [
+        "r-eu-ai-act-art14",
+        "r-eu-ai-act-oj"
+      ]
+    },
+    {
+      "id": "q-d2-28",
+      "domainId": "d2-laws-standards",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about the binding-versus-voluntary nature of AI governance instruments are correct? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "The EU AI Act and GDPR are binding law with enforcement/penalties",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The NIST AI RMF and the OECD AI Principles are voluntary",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "ISO/IEC 42001 is a standard an organisation can be certified against",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "ISO/IEC 42001 is a binding EU regulation that overrides the EU AI Act"
+        }
+      ],
+      "explanation": "A, B and C are correct: the **EU AI Act and GDPR bind**; the **NIST AI RMF and OECD principles are voluntary**; **ISO/IEC 42001 is certifiable**. D is false - ISO/IEC 42001 is a voluntary international standard, not binding EU law, and it does not override the Act.",
+      "sourceRefs": [
+        "r-eu-ai-act-oj",
+        "r-nist-ai-rmf",
+        "r-oecd-principles",
+        "r-iso-42001"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d2-classify-cv-screener",
+      "domainIds": [
+        "d2-laws-standards"
+      ],
+      "title": "Classify an AI CV-screener and map its obligations",
+      "tagline": "Run the tier ladder, then assign each duty to the right operator.",
+      "context": "A recruitment-software vendor has built an AI system that ranks and filters job applicants for its enterprise customers. Your customer, a large employer, is about to deploy it across the EU. Walk the EU AI Act analysis: which tier, which obligations, and who carries them.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First decision: which EU AI Act risk tier does this applicant-screening system fall into?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "High-risk - employment/worker-management is an Annex III use case",
+              "verdict": "best",
+              "rationale": "AI for recruitment and worker management is expressly an Annex III high-risk use case, so the full high-risk obligation set is in play.",
+              "next": "st2"
+            },
+            {
+              "id": "b",
+              "text": "Unacceptable-risk - screening people with AI is prohibited",
+              "verdict": "wrong",
+              "rationale": "Nothing on the Article 5 prohibited list bans AI recruitment; treating high-risk as banned is the classic error."
+            },
+            {
+              "id": "c",
+              "text": "Limited-risk - it just needs a notice that AI is used",
+              "verdict": "wrong",
+              "rationale": "Transparency-only is for chatbots/deepfakes; an employment decision system carries the far heavier high-risk regime."
+            }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "The vendor developed the system and sells it under its own brand; your customer will use it. Who is the provider and who is the deployer?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "The vendor is the provider; the employer is the deployer",
+              "verdict": "best",
+              "rationale": "The vendor develops and markets it under its own name (provider, Art 3(3)); the employer uses it under its authority (deployer, Art 3(4)).",
+              "next": "st3"
+            },
+            {
+              "id": "b",
+              "text": "The employer is the provider because it will make the hiring decisions",
+              "verdict": "wrong",
+              "rationale": "Making decisions with a system doesn't make you its provider; developing/marketing it does. The employer is the deployer - unless it re-brands or substantially modifies the system."
+            },
+            {
+              "id": "c",
+              "text": "Both are deployers; there is no provider in this chain",
+              "verdict": "wrong",
+              "rationale": "Every high-risk system has a provider - here, the vendor. The provider carries the bulk of the obligations."
+            }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The employer asks what IT specifically must do as the deployer (as opposed to the vendor). What's the best answer?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Use the system per the provider's instructions, assign trained human oversight, monitor it, keep logs, and - as an employer/essential-context deployer - consider a fundamental-rights impact assessment",
+              "verdict": "best",
+              "rationale": "These are the deployer duties: follow instructions for use, operationalise human oversight, monitor/report, retain logs, and (for certain Annex III deployers) run a FRIA.",
+              "next": "st4"
+            },
+            {
+              "id": "b",
+              "text": "Draw up the technical documentation and perform the conformity assessment before launch",
+              "verdict": "wrong",
+              "rationale": "Technical documentation and conformity assessment are provider obligations, not the deployer's."
+            },
+            {
+              "id": "c",
+              "text": "Nothing - once the vendor has done its conformity assessment, the deployer has no obligations",
+              "verdict": "wrong",
+              "rationale": "Deployers have their own real duties (oversight, monitoring, instructions, logs); they are not obligation-free."
+            }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Data-protection asks whether GDPR is engaged, given the AI Act analysis is done. Best response?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Yes - the system profiles applicants' personal data, so GDPR applies in parallel (lawful basis, DPIA, minimisation, Article 22 automated-decision rights); the AI Act does not switch GDPR off",
+              "verdict": "best",
+              "rationale": "Profiling personal data engages GDPR independently of the AI Act - a DPIA is very likely required, plus lawful basis, minimisation, and automated-decision safeguards. Non-discrimination law may also apply."
+            },
+            {
+              "id": "b",
+              "text": "No - the EU AI Act supersedes GDPR for AI systems, so only the Act applies",
+              "verdict": "wrong",
+              "rationale": "The AI Act sits on top of GDPR; it does not replace it. Personal data in the system is still fully subject to GDPR."
+            },
+            {
+              "id": "c",
+              "text": "Only if the applicants explicitly complain",
+              "verdict": "wrong",
+              "rationale": "GDPR obligations attach to the processing itself, not to whether anyone complains."
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "r-eu-ai-act-art6",
+        "r-eu-ai-act-art3",
+        "r-eu-ai-act-art14",
+        "r-aigp-bok"
+      ]
+    },
+    {
+      "id": "s-d2-choose-instrument",
+      "domainIds": [
+        "d2-laws-standards"
+      ],
+      "title": "Pick the right instrument for each governance need",
+      "tagline": "Binding vs voluntary vs certifiable - match the tool to the ask.",
+      "context": "You advise a fintech that deploys AI in the EU and builds on a large foundation model. Leadership fires questions at you across a week. For each, choose the instrument (or law) that most directly answers the need - and don't reach for a binding law when a voluntary framework is what's being asked, or vice versa.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "'We operate in the EU. What must we legally CONFORM to for our high-risk AI?'",
+          "choices": [
+            {
+              "id": "a",
+              "text": "The EU AI Act - the binding regulation whose high-risk obligations you must meet",
+              "verdict": "best",
+              "rationale": "Legal conformity for AI in the EU = the EU AI Act (plus GDPR for personal data). It is the binding instrument.",
+              "next": "st2"
+            },
+            {
+              "id": "b",
+              "text": "The NIST AI RMF - adopt it and you are legally compliant in the EU",
+              "verdict": "wrong",
+              "rationale": "NIST's framework is voluntary US guidance; it confers no EU legal conformity."
+            },
+            {
+              "id": "c",
+              "text": "The OECD AI Principles, as the governing EU law",
+              "verdict": "wrong",
+              "rationale": "The OECD principles are voluntary soft law, not the binding EU regime."
+            }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "'We want a structured but VOLUNTARY process to manage AI risk internally - functions we can operate day to day.'",
+          "choices": [
+            {
+              "id": "a",
+              "text": "The NIST AI RMF - Govern/Map/Measure/Manage give you a voluntary operating process",
+              "verdict": "best",
+              "rationale": "The AI RMF's four core functions are exactly a voluntary, operable risk-management process.",
+              "next": "st3"
+            },
+            {
+              "id": "b",
+              "text": "ISO/IEC 22989 - it defines AI terms, so it will run your risk process",
+              "verdict": "wrong",
+              "rationale": "22989 is a vocabulary standard; it doesn't provide a risk-management process."
+            },
+            {
+              "id": "c",
+              "text": "The EU AI Act, run voluntarily",
+              "verdict": "viable",
+              "rationale": "The Act's high-risk process is rigorous, but it is a binding legal regime, not the 'voluntary internal framework' being asked for - NIST fits the ask better."
+            }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "'A regulated customer wants independent proof - a CERTIFICATION - that we govern AI responsibly.'",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Pursue ISO/IEC 42001 certification of your AI management system",
+              "verdict": "best",
+              "rationale": "ISO/IEC 42001 is the certifiable AI-management-system standard - the instrument that yields auditable, independent certification.",
+              "next": "st4"
+            },
+            {
+              "id": "b",
+              "text": "Publish your alignment to the OECD AI Principles as a certification",
+              "verdict": "wrong",
+              "rationale": "The OECD principles are not a certification scheme; alignment is self-asserted soft law."
+            },
+            {
+              "id": "c",
+              "text": "Point to your voluntary NIST AI RMF adoption as the certification",
+              "verdict": "viable",
+              "rationale": "Using the NIST RMF is good practice and evidence of maturity, but it is not itself an accredited certification - 42001 is what gets certified."
+            }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "'The model we build on is a very large foundation model. Who handles the model-level GPAI duties?'",
+          "choices": [
+            {
+              "id": "a",
+              "text": "The foundation-model provider handles Article 53 (and Article 55 if it's systemic-risk); we handle our own downstream/high-risk duties",
+              "verdict": "best",
+              "rationale": "GPAI model duties sit with the model provider; your fintech carries its own obligations for whatever system it builds and deploys. Two distinct roles."
+            },
+            {
+              "id": "b",
+              "text": "We inherit all the model provider's Article 53/55 duties automatically",
+              "verdict": "wrong",
+              "rationale": "Downstream users don't automatically assume the model provider's GPAI duties; those stay with the provider (you get documentation to meet *your* obligations)."
+            },
+            {
+              "id": "c",
+              "text": "Nobody - GPAI models are entirely outside the EU AI Act",
+              "verdict": "wrong",
+              "rationale": "GPAI models are explicitly governed by Articles 51-55; they are not outside the Act."
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "r-eu-ai-act-oj",
+        "r-nist-ai-rmf",
+        "r-iso-42001",
+        "r-iso-22989",
+        "r-oecd-principles",
+        "r-eu-ai-act-art53"
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d2-classify-and-map",
+      "domainId": "d2-laws-standards",
+      "title": "EU AI Act classification + obligation-mapping worksheet",
+      "goal": "Produce a one-page artefact that classifies a real AI system into its risk tier, assigns provider/deployer roles, maps each obligation to its owner, flags parallel laws (GDPR/non-discrimination/product-liability/IP), and stamps the timeline.",
+      "steps": "## What you'll do\n\nTake one real AI use case and produce a **one-page EU AI Act classification + obligation map** - the exact artefact a governance function would file. Use a concrete system (e.g. an AI that triages customer-support tickets, screens CVs, or scores loan applications).\n\n1. **Describe the system in three lines** - purpose, who builds it, who uses it, what data it touches. Name the intended context of use.\n2. **Run the tier ladder** (from Lesson 1) in writing:\n   - Is it a **prohibited** Article 5 practice? (If yes, stop - it's banned.)\n   - Is it **Annex I safety-component** or an **Annex III use case**? Check the Article 6(3) filter (narrow task? profiling?).\n   - Does it **interact with people or generate synthetic content** (Article 50 transparency)?\n   - Otherwise **minimal**.\n   Record the tier **and the reason**, citing the route (e.g. 'Annex III - access to essential services').\n3. **Assign the roles** - name the **provider** and the **deployer** (and importer/distributor if relevant). Note any role-flip risk (does the deployer modify or re-brand it?).\n4. **Map the obligations to owners.** If high-risk, build a table: for each of the seven obligations (risk mgmt / data governance / technical documentation / logging / instructions-transparency / human oversight / accuracy-robustness-cyber), write **who owns it** (provider vs deployer) and **one sentence** on what satisfying it looks like here. If limited-risk, list the applicable Article 50 disclosures.\n5. **Add the parallel-law line.** In one row each, note whether **GDPR** (personal data / DPIA), **non-discrimination**, **product-liability**, or **IP** law is also engaged, and why.\n6. **Timeline stamp.** Note, from the implementation timeline, the date the relevant obligations start to apply (prohibitions Feb 2025 / GPAI Aug 2025 / Annex III high-risk 2 Dec 2027 / Annex I high-risk 2 Aug 2028 — the two high-risk dates were deferred from the original Aug 2026 / Aug 2027 by the Digital Omnibus, agreed May 2026; re-verify against EUR-Lex once it is published in the Official Journal).\n\n## Why it matters\n\nClassification-plus-obligation-mapping is *the* Domain II skill and a real deliverable. Doing it end to end - tier, reason, roles, owners, parallel law, timeline - is exactly what an exam scenario compresses into one question, and what a regulator would expect to see on file.",
+      "checklist": [
+        "System described (purpose, builder, user, data, context of use)",
+        "Risk tier recorded with the reason and the classification route (Article 5 / Annex I / Annex III / Article 50 / minimal)",
+        "Provider and deployer named, with any role-flip risk noted",
+        "Each applicable obligation mapped to its owner (provider vs deployer) with a one-line 'what good looks like'",
+        "Parallel laws (GDPR, non-discrimination, product liability, IP) flagged where engaged",
+        "Relevant obligations stamped with the date they start to apply on the implementation timeline"
+      ]
+    },
+    {
+      "id": "lab-d2-model-card-critique",
+      "domainId": "d2-laws-standards",
+      "title": "Critique a model card against EU AI Act obligations",
+      "goal": "Review an AI system's documentation/model card against the high-risk obligation set, Article 50 transparency, GDPR, and (for foundation models) GPAI duties - producing findings and remediations, the way a governance reviewer would.",
+      "steps": "## What you'll do\n\n**Critique a model/system card against EU AI Act high-risk documentation and transparency expectations** - a governance artefact reviewers actually produce. Obtain any AI system's public model card or documentation (a foundation-model card works well), or use one your team drafted.\n\n1. **Set the standard.** From Lesson 2, list the seven high-risk provider obligations and the Article 50 transparency duties as your review checklist.\n2. **Coverage pass.** For each obligation, mark the card **Present / Partial / Absent**:\n   - Intended purpose and **limitations** clearly stated? (feeds instructions-for-use, Art 13)\n   - **Data governance** - training-data provenance, representativeness, known **bias** and mitigations? (Art 10)\n   - **Accuracy/robustness** metrics and their test conditions declared? (Art 15)\n   - **Human-oversight** guidance - how a person should supervise, when to override/stop? (Art 14)\n   - **Logging / traceability** described? (Art 12)\n   - **Risk management** - identified risks and residual-risk treatment? (Art 9)\n   - **Transparency** - does it disclose the system is AI, and (if generative) how outputs are marked as synthetic? (Art 50)\n3. **GDPR pass.** Does the card address **personal data** (lawful basis, minimisation, whether a **DPIA** was done, retention, transfers)? Note gaps.\n4. **GPAI pass (if a foundation model).** Does it include a **training-content summary** and a **copyright policy** statement (Article 53)? If it's a very large model, any **systemic-risk** evaluation / red-teaming (Article 55)?\n5. **Write three findings.** For each gap, write a one-line **finding** and a **remediation** ('Absent: no bias evaluation - add representativeness stats and disparate-impact testing per Art 10').\n6. **Verdict.** In two sentences, state whether this documentation would support a high-risk conformity story, and the single biggest gap.\n\n## Why it matters\n\nDocumentation critique is how governance teams turn the Act's obligations into evidence - and the exam repeatedly asks whether a given artefact satisfies a given obligation. Practising the map (card section -> article -> present/absent) trains precisely that judgement.",
+      "checklist": [
+        "Review checklist built from the seven high-risk obligations plus Article 50",
+        "Each obligation marked Present / Partial / Absent against the card, tied to its article",
+        "GDPR pass done (personal data, DPIA, retention, transfers) with gaps noted",
+        "GPAI pass done where relevant (training-content summary, copyright policy, systemic-risk red-teaming)",
+        "At least three findings written, each with a concrete remediation",
+        "A two-sentence verdict naming the single biggest documentation gap"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-aigp-bok",
+      "title": "IAPP AIGP Body of Knowledge & Exam Blueprint",
+      "url": "https://iapp.org/certify/aigp/",
+      "kind": "official-doc",
+      "annotation": "The authoritative Domain II outline (blueprint 19-23 questions, weight ~0.25). Extract the sub-domains verbatim: II.A existing data-privacy laws (notice/consent/purpose limitation, minimisation, privacy-by-design, DPIAs, third-party processors, cross-border transfers, data-subject rights, breach notification, biometrics), II.B other existing laws (non-discrimination, consumer protection, product liability, IP), II.C the EU AI Act (risk classification 'prohibited/high/limited/minimal', the high-risk requirements, GPAI, enforcement/penalties, provider/deployer/importer/distributor), II.D industry standards (OECD principles, NIST AI RMF & Playbook, NIST ARIA, ISO/IEC 22989 & 42001). Note the current BoK is v2.1 (effective 2 Feb 2026, supersedes 2.0.1); domain titles and question ranges are unchanged from v2.0.1.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-oj",
+      "title": "Regulation (EU) 2024/1689 (EU AI Act) - Official Journal (EUR-Lex)",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "official-doc",
+      "annotation": "The primary legal text. Use it to ground the four-tier structure, the Article 3 operator definitions, the high-risk obligation articles (9-15), Article 50 transparency, and the GPAI articles (51-55). The binding source of truth for every EU-AI-Act claim in this domain.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art3",
+      "title": "EU AI Act - Article 3 (Definitions)",
+      "url": "https://artificialintelligenceact.eu/article/3/",
+      "kind": "reference",
+      "annotation": "Official Act text reproduced with article navigation. Extract the definitions of 'provider' (3(3), the developer placing a system on the market under its own name), 'deployer' (3(4), using a system under its authority), 'general-purpose AI model' (3(63)), 'general-purpose AI system' (3(66)), and 'systemic risk' (3(65)). The provider-vs-deployer distinction is the most-tested item in Domain II.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art5",
+      "title": "EU AI Act - Article 5 (Prohibited AI practices)",
+      "url": "https://artificialintelligenceact.eu/article/5/",
+      "kind": "reference",
+      "annotation": "The unacceptable-risk tier. Extract the prohibited practices: harmful manipulation, exploitation of vulnerabilities, social scoring, predictive policing based solely on profiling, untargeted facial-image scraping, emotion recognition in workplace/education, biometric categorisation of sensitive attributes, and real-time remote biometric ID in public for law enforcement (with narrow exceptions). These are banned outright - no compliance path.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art6",
+      "title": "EU AI Act - Article 6 (Classification of high-risk AI systems) + Annex III",
+      "url": "https://artificialintelligenceact.eu/article/6/",
+      "kind": "reference",
+      "annotation": "How a system becomes high-risk: Article 6(1) safety-component/product route (Annex I harmonisation legislation + third-party conformity assessment) and Article 6(2) Annex III use-case route (biometrics, critical infrastructure, education, employment, essential services, law enforcement, migration/borders, justice/democracy). Extract the Article 6(3) filter (narrow-task exception, but profiling is always high-risk).",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art10",
+      "title": "EU AI Act - Article 10 (Data and data governance)",
+      "url": "https://artificialintelligenceact.eu/article/10/",
+      "kind": "reference",
+      "annotation": "A high-risk obligation. Extract the standard for training/validation/testing data: 'relevant, sufficiently representative, and to the best extent possible, free of errors and complete', plus bias examination and the limited permission to process special-category data for bias detection under safeguards. Note the exam trap: the Act requires 'sufficiently representative', NOT perfect/100%-error-free data.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art12",
+      "title": "EU AI Act - Article 12 (Record-keeping / logging)",
+      "url": "https://artificialintelligenceact.eu/article/12/",
+      "kind": "reference",
+      "annotation": "The high-risk logging obligation: systems must technically allow the automatic recording of events (logs) over their lifetime, to identify risk situations and substantial modifications and to support post-market monitoring. Contrast with GDPR: if those logs contain identifiers they are also personal data.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art14",
+      "title": "EU AI Act - Article 14 (Human oversight)",
+      "url": "https://artificialintelligenceact.eu/article/14/",
+      "kind": "reference",
+      "annotation": "High-risk human-oversight obligation. Extract that systems must be designed for effective oversight (understand capacities/limitations, counter automation bias, interpret output, override, and stop via a 'stop button'). Key exam point: the provider designs the oversight capability while the deployer assigns the humans - a shared duty. Note the two-person verification rule for certain biometric systems.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art50",
+      "title": "EU AI Act - Article 50 (Transparency obligations)",
+      "url": "https://artificialintelligenceact.eu/article/50/",
+      "kind": "reference",
+      "annotation": "The limited-risk transparency tier. Extract: inform people they are interacting with an AI system/chatbot (unless obvious); mark synthetic audio/image/video/text as artificially generated in machine-readable form; deployers disclose deepfakes and inform persons subject to emotion recognition/biometric categorisation; disclose AI-generated public-interest text. Mostly provider-for-generation, deployer-for-use.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art53",
+      "title": "EU AI Act - Article 53 (Obligations for providers of GPAI models)",
+      "url": "https://artificialintelligenceact.eu/article/53/",
+      "kind": "reference",
+      "annotation": "Baseline GPAI provider duties: technical documentation; information/documentation to downstream providers; a policy to comply with EU copyright law; and a publicly available detailed summary of training content. Extract the free-and-open-source exemption from the documentation duties - and its limit (it does NOT apply to systemic-risk models, and the copyright/training-summary duties still stand).",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art55",
+      "title": "EU AI Act - Article 55 (Obligations for GPAI models with systemic risk)",
+      "url": "https://artificialintelligenceact.eu/article/55/",
+      "kind": "reference",
+      "annotation": "The systemic-risk extras on top of Article 53: model evaluation including adversarial testing (red-teaming); assess and mitigate systemic risks at Union level; track, document and report serious incidents to the AI Office without undue delay; ensure adequate cybersecurity for the model and its infrastructure. Pairs with Article 51's 10^25-FLOP presumption.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-art51",
+      "title": "EU AI Act - Article 51 (Classification of GPAI models with systemic risk)",
+      "url": "https://artificialintelligenceact.eu/article/51/",
+      "kind": "reference",
+      "annotation": "The systemic-risk trigger: a GPAI model is presumed to have high-impact capabilities (hence systemic risk) when cumulative training compute exceeds 10^25 floating point operations (FLOP); the Commission may also designate by decision, and may adjust the threshold via delegated act. Extract the exact FLOP threshold - it is a common quotable fact.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-eu-ai-act-timeline",
+      "title": "EU AI Act Implementation Timeline (artificialintelligenceact.eu)",
+      "url": "https://artificialintelligenceact.eu/implementation-timeline/",
+      "kind": "reference",
+      "annotation": "The phased dates - the currency-critical facts: entry into force 1 Aug 2024 (nothing applies yet); prohibitions + AI literacy 2 Feb 2025; GPAI models + governance + penalties 2 Aug 2025; stand-alone Annex III high-risk 2 December 2027; Article 6(1)/Annex I high-risk 2 August 2028 (pre-2025 GPAI compliance deadline remains 2 Aug 2027). Anchor the settled dates prohibitions=Feb 2025, GPAI=Aug 2025. CURRENCY CAVEAT (as of 2026-07-02): the EU AI Act timeline is in legislative flux — the Digital Omnibus on AI (provisional agreement 6–7 May 2026; publication in the Official Journal expected shortly) DEFERS the two high-risk dates from the original 2 Aug 2026 (Annex III) / 2 Aug 2027 (Annex I) to 2 Dec 2027 / 2 Aug 2028; prohibitions and GPAI are unchanged. Re-verify the current timeline and legislative status against live EUR-Lex / European Commission sources before asserting any specific phase-in date.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-nist-ai-rmf",
+      "title": "NIST AI Risk Management Framework (AI RMF 1.0)",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "official-doc",
+      "annotation": "The landing page for the voluntary NIST AI RMF (released 26 Jan 2023). Confirm it is 'intended for voluntary use', the four core functions (Govern/Map/Measure/Manage), the AI RMF Playbook companion, the Generative AI Profile (NIST AI 600-1, Jul 2024), and the seven trustworthy-AI characteristics. Ground the 'voluntary, not mandatory' exam point here.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-nist-ai-rmf-core",
+      "title": "NIST AI RMF - Core (the four functions)",
+      "url": "https://airc.nist.gov/airmf-resources/airmf/",
+      "kind": "official-doc",
+      "annotation": "The AI RMF Core detail. Extract each function's job: GOVERN (cross-cutting - cultivates a risk-management culture, infused throughout), MAP (establishes context to frame risks and identify them), MEASURE (quantitative/qualitative tools to analyse, assess, benchmark and monitor AI risk), MANAGE (allocate resources to mapped/measured risks; plan responses and recovery). GOVERN is the cross-cutting one the exam asks about.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-iso-42001",
+      "title": "ISO/IEC 42001 - Artificial intelligence management system (AIMS)",
+      "url": "https://www.iso.org/standard/81230.html",
+      "kind": "official-doc",
+      "annotation": "The certifiable AI-management-system standard (2023). Confirm it specifies requirements to establish, implement, maintain and continually improve an AI management system within organisations - a management SYSTEM (process), in the same certifiable family as ISO 9001/27001, NOT a certification of any single model's accuracy. The exam contrast: 42001 certifies process; it does not certify a model. (Fetch may be blocked by ISO bot protection; corroborate via the BoK II.D naming.)",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-iso-22989",
+      "title": "ISO/IEC 22989 - AI concepts and terminology",
+      "url": "https://www.iso.org/standard/74296.html",
+      "kind": "official-doc",
+      "annotation": "The AI terminology/vocabulary standard. Establishes concepts and definitions (what 'AI system', 'machine learning', 'training data' mean) - a reference standard, not a certifiable management system. The exam contrast: 22989 = terminology; 42001 = management system. (Fetch may be blocked by ISO bot protection; corroborate via the BoK II.D naming, which pairs '22989 and 42001'.)",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    },
+    {
+      "id": "r-oecd-principles",
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "official-doc",
+      "annotation": "The voluntary intergovernmental principles (adopted 2019, updated 2024; basis for the G20 principles; first intergovernmental AI standard). Extract the five value-based principles: (1) inclusive growth/sustainable development/well-being; (2) human rights and democratic values incl. fairness and privacy; (3) transparency and explainability; (4) robustness, security and safety; (5) accountability. Soft law - influential but not directly enforceable.",
+      "domainIds": [
+        "d2-laws-standards"
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d2-1",
+      "title": "D2 - The EU AI Act: risk tiers, high-risk obligations & the implementation timeline",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d2-laws-standards"
+      ],
+      "sourceNotebook": "aigp / d2 / eu-ai-act-risk-tiers-and-timeline"
+    },
+    {
+      "id": "v-d2-2",
+      "title": "D2 - NIST AI RMF, ISO/IEC 42001 & 22989, OECD principles, and GDPR x AI",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d2-laws-standards"
+      ],
+      "sourceNotebook": "aigp / d2 / frameworks-and-gdpr"
+    }
+  ]
+}
