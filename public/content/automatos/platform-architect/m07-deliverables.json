@@ -1,0 +1,523 @@
+{
+  "id": "m07-deliverables",
+  "order": 7,
+  "code": "07",
+  "name": "Deliverables & templates — consistent, templated documents",
+  "tagline": "Stop accepting a wall of chat text when you wanted a document. This module makes agents hand you a proper deliverable — a security audit, a weekly review, a research summary — with the same sections and shape every single time. You'll write a markdown Template with {{placeholder}} variables, ask an agent to generate a deliverable from it via the generate_document tool, then find that deliverable as a card in Activity → Reports, open it in the viewer, and grade it 1–5 stars — a grade that feeds straight into your agents' quality analytics. The judgment underneath: a Template is the shape you author once so output stops drifting; the star grade is the feedback loop that makes the next one better.",
+  "overview": "This is the practitioner sibling of the 'agents should hand you a document, not just a chat reply' idea. If you came from AI Business Foundations, this is the machinery behind a playbook or mission that ends by producing something you can actually send — the deliverable is what that automation hands back. A Template defines the structure, sections, and formatting for a type of document, so an agent's reports, summaries, and analyses come out consistent every time instead of a different shape on every run. The platform ships four example templates you'll recognise — Daily Standup, Security Audit, Code Review, Research Summary — and you create your own from the Templates area with a five-part flow: + New Template, name and description, a markdown structure (headings, tables, bullet lists), placeholder variables like {{agent_name}} and {{date}} that get filled at generation time, then Save. Templates are automatically available to agents: when a task or playbook calls for a specific format the agent references the matching template, and from Chat you can just ask — 'Write a security audit report for the auth module using the Security Audit template.' The distinction that runs through the whole module is Template (the shape) versus Deliverable (the document the agent actually produces). Agents build the deliverable with the generate_document tool — a real platform tool the chatbot runs like any other. Per the user docs, markdown deliverables from your templates are the documented baseline; richer branded output (PDF/DOCX with a brand kit, block-based templates) is recent build work with no docs page yet, so treat it as verify-in-product and don't promise a file format you haven't watched generate. Separately, the file-type list in the Documents area (DOCX, XLSX, PPTX, PDF, MD, and more) describes what you can UPLOAD into a knowledge base, not what generation guarantees — don't confuse the two. Deliverables land in Activity → Reports as cards showing the agent, title, timestamp, status (unread / reviewed / graded), and a preview; click a card to open the full report in a slide-over viewer that renders the markdown, shows referenced files and artifacts, and links the agent and task. Grade it 1–5 stars (optionally with a comment), and that grade flows into Analytics → Agents so agent quality is tracked over time. Reports are stored persistently — in the workspace filesystem at /reports/{agent}/{date}_{slug}.md and in the database for querying. Put it together and you have a loop a serious builder lives in: author a template so output stops drifting, generate against it, review and grade in Reports, then iterate the template until the shape is exactly right.",
+  "objectives": [
+    "Explain what a Template is (the structure, sections, and formatting for a type of document) and why templating exists — so an agent's reports, summaries, and analyses come out consistent every time rather than a different shape on every run.",
+    "Create a Template from the five-part flow — + New Template, name and description, a markdown structure (headings / tables / lists), {{placeholder}} variables such as {{agent_name}} and {{date}} filled at generation time, and Save — using the four documented examples (Daily Standup, Security Audit, Code Review, Research Summary) as models.",
+    "Distinguish a Template (the reusable shape) from a Deliverable (the document an agent produces via the generate_document tool), and request a specific template from Chat (for example 'Write a security audit report for the auth module using the Security Audit template').",
+    "Locate a deliverable in Activity → Reports — read the card fields (agent, title, timestamp, status, preview), open the slide-over viewer (rendered markdown, referenced files/artifacts, linked agent and task), and know that reports are stored at /reports/{agent}/{date}_{slug}.md and in the database.",
+    "Grade a report 1–5 stars (optionally with a comment) and explain how that grade feeds Analytics → Agents to track agent quality over time — the feedback loop that improves future output.",
+    "Apply the currency judgment: markdown templates and markdown reports are the documented live baseline, branded PDF/DOCX generation and block templates are verify-in-product, and the Documents file-type list describes UPLOAD formats — never claim a generated file format you haven't seen produced."
+  ],
+  "lessons": [
+    {
+      "id": "m07-l1-templates",
+      "title": "Templates — the shape you author once so output stops drifting",
+      "estMinutes": 14,
+      "objective": "Understand what a template is, why templating beats re-asking, and how to author one from markdown structure plus placeholder variables.",
+      "body": "## The problem templates solve\n\nAsk an agent for a report five times and you'll often get five different shapes: one has a summary at the top, one buries it at the bottom, one forgets the recommendations entirely. That's fine for a throwaway question and useless for anything you file, compare week-to-week, or hand to a colleague. A **Template** fixes it. A template **defines the structure, sections, and formatting for a type of document**, so when an agent needs to create a report, summary, or analysis, it *follows the template* — and the output comes out consistent every time.\n\nThink of it as the difference between asking a new hire to \"write up the security review\" versus handing them a form with the sections already laid out. The form doesn't write the content — the reviewer still does the thinking — but it guarantees the *shape*. That's exactly what a template is: the shape, authored once, reused forever.\n\n> **Vocabulary, fixed early.** The file an agent produces is a **Deliverable** — not an \"output\", \"artifact\", or \"workspace file\" in the words you use out loud. The reusable shape it's built from is a **Template**. Keep those two straight and the rest of this module is easy: *template = the shape, deliverable = the document*. Lesson 2 is entirely about that distinction.\n\n## The four example templates\n\nThe platform ships four templates that double as a design vocabulary — read them as \"here's the kind of thing a template is for\":\n\n| Template | Purpose |\n| --- | --- |\n| **Daily Standup** | An agent's daily report of activities and findings |\n| **Security Audit** | A structured security review with severity ratings |\n| **Code Review** | A PR review with sections for issues, suggestions, and approvals |\n| **Research Summary** | Research findings with sources and recommendations |\n\nNotice what they have in common: each is a *recurring type of document* where consistency matters. A security audit that sometimes includes severity ratings and sometimes doesn't is a bad security audit. A daily standup that changes shape every day is hard to skim. These four aren't a fixed menu you're limited to — they're examples of the pattern, and you'll author your own the same way.\n\n## What a template is made of\n\nA template is two things layered together:\n\n1. **A markdown structure.** Headings, tables, bullet lists — the sections of the document, written in plain markdown. This is the skeleton: *Summary*, *Findings*, *Actions*, *Recommendations*, or whatever suits the document type. Templates support markdown formatting, tables, and lists.\n2. **Placeholder variables.** Tokens written in double braces — `{{agent_name}}`, `{{date}}` — that are **filled in automatically at generation time**. Where you write `{{date}}` in the template, the actual date appears in the finished deliverable. Placeholders are what let one template serve many concrete documents: the same Security Audit template, filled with a different module name and date each time it runs.\n\nThat second part is the crux. Without placeholders a template is just a static document. *With* them, it's a reusable form: the fixed parts (section headings, table columns, boilerplate) stay put, and the variable parts (`{{agent_name}}`, `{{date}}`, and any others you define) get filled at the moment of generation. Design a good template and you're really designing that split — what's fixed structure versus what's a fill-in-the-blank.\n\n## Creating one: the five-part flow\n\nThe documented create flow is short:\n\n1. Click **+ New Template**.\n2. Define the **template name and description**.\n3. Write the **template structure using markdown** (headings, tables, lists).\n4. Set **placeholder variables** (e.g. `{{agent_name}}`, `{{date}}`).\n5. **Save.**\n\nAll five happen in the Templates area of your Knowledge Bases. Like a playbook, the craft isn't in the clicking — it's in steps 3 and 4. A template whose sections are clear and whose placeholders capture exactly the things that change run-to-run is a good template; a beautifully-named one with no structure is just an empty title.\n\n## Worked walkthrough: reading the Security Audit template as a design\n\nTake the **Security Audit** example and read it as an anatomy exercise before you author your own. Its *purpose* is a structured security review with severity ratings, so a sensible structure has: a top **Summary** (one paragraph — what was reviewed, headline verdict), a **Findings** section (ideally a markdown table with columns like *Issue*, *Severity*, *Location*, *Recommendation* — because a table forces every finding to carry a severity, which is the whole point of *this* document type), and a **Recommendations** section (prioritised next steps).\n\nNow the placeholders. What changes every time this audit runs? The **module or system reviewed**, the **date**, and the **agent** that produced it. So the template's header might read: *\"Security Audit — {{target}} · produced by {{agent_name}} on {{date}}\"*. Every time an agent generates against this template, `{{target}}`, `{{agent_name}}`, and `{{date}}` are filled with the real values, while the *sections and the severity-table columns stay identical*. That is a template doing its job: the auth-module audit this week and the billing-service audit next week come out as recognisably the same document, because you fixed the shape and let only the specifics vary.\n\nContrast that with *not* templating — just asking \"do a security review of the auth module\" cold each time. You'd get a security review, but its shape would drift, and comparing this week's to last week's would mean squinting past formatting differences. The template is what makes a *type* of document reproducible.\n\n## Why this matters to a builder\n\nTemplating is the difference between an agent that answers and an agent that *delivers*. The moment you want output you'll file, compare, or send — anything beyond a one-off glance — you want it templated, because consistency is what makes a document trustworthy and skimmable. You've now got the shape. Next you'll turn it into an actual file.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m07-l1-1",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What does a Template define, and what is the point of defining it?",
+          "options": [
+            { "id": "a", "text": "The structure, sections, and formatting for a type of document — so an agent's reports, summaries, and analyses come out consistent every time", "correct": true },
+            { "id": "b", "text": "The model, temperature, and token budget an agent uses when it writes", "correct": false },
+            { "id": "c", "text": "The list of tools an agent is allowed to call while producing the document", "correct": false },
+            { "id": "d", "text": "The cron schedule on which a report is automatically generated", "correct": false }
+          ],
+          "explanation": "A template defines the structure, sections, and formatting for a type of document, and the point is consistency — the agent follows the template so output doesn't drift shape run-to-run. Option b describes settings of an LLM call, not the document's shape. Option c describes tool scoping (a module 03 concern), not what a template is. Option d confuses a template (the shape) with a schedule (when something runs) — templates have nothing to do with cron timing.",
+          "sourceRefs": ["r-gb-templates", "r-gb-documents"]
+        },
+        {
+          "id": "kc-m07-l1-2",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In a template, what is a placeholder variable such as {{date}} or {{agent_name}} for?",
+          "options": [
+            { "id": "a", "text": "It marks a spot in the fixed structure that gets filled in automatically at generation time, so one template can serve many concrete documents", "correct": true },
+            { "id": "b", "text": "It is a comment that reminds the author what to write there but never appears in the output", "correct": false },
+            { "id": "c", "text": "It permanently hard-codes a value into every document, so it can never change between runs", "correct": false },
+            { "id": "d", "text": "It selects which agent is allowed to open the template", "correct": false }
+          ],
+          "explanation": "Placeholders are the fill-in-the-blank tokens — filled automatically at generation time — that let the same template produce many documents with the specifics (date, agent, target) varying while the structure stays fixed. Option b is wrong: a placeholder is replaced with a real value in the output, it isn't a hidden note. Option c is backwards — placeholders exist precisely so those values *do* vary each run; the structure is what stays fixed. Option d confuses a placeholder with a permission control, which it is not.",
+          "sourceRefs": ["r-gb-templates"]
+        },
+        {
+          "id": "kc-m07-l1-3",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You're authoring a Security Audit template so every audit comes out the same shape. Which choice best reflects the fixed-structure vs fill-in-the-blank split?",
+          "options": [
+            { "id": "a", "text": "Keep the section headings and a Findings table with a Severity column as fixed structure; make the reviewed target, the date, and the producing agent placeholders", "correct": true },
+            { "id": "b", "text": "Make every heading a placeholder so the sections change on each run, and hard-code one specific module name into the body", "correct": false },
+            { "id": "c", "text": "Put no structure in the template at all and rely on the agent to invent a fresh layout each time", "correct": false },
+            { "id": "d", "text": "Store the whole audit as a single placeholder called {{report}} that the agent fills with everything", "correct": false }
+          ],
+          "explanation": "The point of templating a security audit is that the sections and the severity table stay identical while only the specifics vary — so headings and the Findings/Severity table are fixed, and target/date/agent are placeholders. Option b inverts it: making headings placeholders lets the shape drift (the exact failure templating prevents), and hard-coding one module name defeats reuse. Option c is 'no template' — it reintroduces the shape-drift problem. Option d collapses the whole document into one blank, which provides no structure and no consistency at all.",
+          "sourceRefs": ["r-gb-templates"]
+        }
+      ]
+    },
+    {
+      "id": "m07-l2-generate-deliverable",
+      "title": "Template vs deliverable — generate_document and requesting a template from chat",
+      "estMinutes": 15,
+      "objective": "Separate the template (shape) from the deliverable (document) cleanly, know how an agent produces one via generate_document, and request a specific template from chat — while keeping the format-currency lines straight.",
+      "body": "## Two words, one clean distinction\n\nThe single idea that makes this module click: **a Template is the shape; a Deliverable is the document an agent actually produces from it.** The template is reusable and lives in your Templates area. The deliverable is a specific file, produced on a specific run, with the placeholders filled — this week's auth-module audit, tomorrow's billing-service audit. One template, many deliverables.\n\nAgents build the deliverable with a real platform tool: **`generate_document`**. It sits in the agent's toolbox alongside the other tools it can call (the same lane as, for example, the meta-tool that runs connected-app actions). When an agent decides a task needs a produced document rather than a chat reply, it calls `generate_document` and hands back a deliverable. You don't invoke the tool by name yourself — you ask for the outcome (\"write me the report\") and the agent reaches for the tool. Frame it exactly as: **template = the shape, `generate_document` = produces the file.**\n\n## How agents get to a template\n\nTemplates are **automatically available to agents** — you don't attach them per-agent. There are two documented ways a template gets used:\n\n1. **A task or playbook calls for a format.** When a playbook step or a task specifies a particular output shape, the agent **references the matching template** on its own. This is how a nightly playbook can reliably end with a properly-structured standup or audit — the format is expected, so the agent uses the template for it.\n2. **You ask in Chat.** You can request a template directly, in plain language:\n\n> \"Write a security audit report for the auth module using the Security Audit template\"\n\nThe agent recognises the named template, generates a deliverable that follows its structure, fills the placeholders, and hands it back. Naming the template in the request is how you steer the *shape* of what you get — same as picking the right form for the job.\n\n> **ABF seam.** If you came from AI Business Foundations, this is the machinery behind \"an agent should hand you a document.\" A playbook (ABF module 4) or a mission (ABF module 5) that ends by producing a deliverable is doing exactly this — its final step generates a templated document via `generate_document`, which is why the thing you get back has a consistent shape instead of being a loose chat message.\n\n## The currency lines — say only what's documented\n\nHere is where a careful practitioner earns trust, because it's easy to over-claim. Three lines to keep straight:\n\n- **Markdown is the documented baseline.** The user docs describe **markdown templates** (with `{{placeholder}}` variables) and **markdown reports**. That is what you can rely on being there and demo confidently today.\n- **Branded rich formats are verify-in-product.** Richer output — PDF or DOCX with a brand kit, block-based (drag-and-drop) templates — is recent build work with no user-docs page yet. It may well exist in your build; the discipline is *only claim what you can see working*. If you open the product and a PDF genuinely generates, great — show it. Until you've watched it produce, don't promise a generated file format. Treat branded/block templates as **architecture direction**, not a documented UI guarantee.\n- **The Documents file-type list is about UPLOADS, not generation.** The Documents area lists supported types — `.md`, `.txt`, `.csv`, `.json`, `.docx`, `.xlsx`, `.pptx`, `.pdf` (with OCR), code, `.html`. That list describes what the platform can **ingest into a knowledge base**, *not* what `generate_document` promises to emit. Reading \"DOCX is supported\" as \"agents generate DOCX\" is the exact trap — supported-to-upload and produced-as-a-deliverable are two different things.\n\nWhy be this fussy? Because the fastest way to lose a serious user is to demo a branded PDF that turns out to be half-built, or to promise XLSX output because you saw `.xlsx` in an upload list. Ground your claims: markdown you can stand behind; anything richer you verify in the product first.\n\n## Worked walkthrough: one template, two deliverables, honest formats\n\nYou've authored the Security Audit template from Lesson 1. In Chat you ask: *\"Write a security audit report for the auth module using the Security Audit template.\"* The agent references the template, calls `generate_document`, fills `{{target}}` with \"auth module\", `{{date}}` with today, `{{agent_name}}` with itself, and hands back **deliverable #1** — a markdown security audit with your fixed sections and severity table. Next week you ask the same thing for the billing service: same template, same `generate_document`, **deliverable #2** — identical shape, different specifics. One shape, two documents: that's the template/deliverable split in action.\n\nNow the honest-format part. If a colleague asks \"can it hand me that as a branded PDF for the client?\", the correct answer isn't a confident \"yes\" or a flat \"no\" — it's *\"markdown is the documented baseline; let me check whether branded PDF generation is live in our build before I promise it.\"* You open the product, and either it generates a PDF (show them) or it doesn't yet (give them the markdown and note the branded format is in progress). That's the difference between a builder who over-promises and one who's trusted: you claim markdown freely and verify anything richer before you say it out loud.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m07-l2-1",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is the precise difference between a Template and a Deliverable?",
+          "options": [
+            { "id": "a", "text": "A Template is the reusable shape; a Deliverable is the specific document an agent produces from it (via generate_document) with the placeholders filled", "correct": true },
+            { "id": "b", "text": "A Template is the finished file you send; a Deliverable is a draft that never leaves the workspace", "correct": false },
+            { "id": "c", "text": "They are the same thing under two names, used interchangeably", "correct": false },
+            { "id": "d", "text": "A Template is produced per run; a Deliverable is authored once and reused forever", "correct": false }
+          ],
+          "explanation": "The template is the reusable shape you author once; the deliverable is the concrete document generated from it on a given run, placeholders filled — 'template = the shape, generate_document = produces the file.' Option b inverts which one is finished/sent — the deliverable is the produced document. Option c is wrong: they are deliberately distinct concepts, which is the whole point of the lesson. Option d swaps their roles — the deliverable is the per-run artifact and the template is the reusable one, not the reverse.",
+          "sourceRefs": ["r-gb-templates", "r-gb-reports", "r-generate-document-tool"]
+        },
+        {
+          "id": "kc-m07-l2-2",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want an agent to produce a report in a specific shape from Chat. What actually happens when you ask 'Write a security audit report for the auth module using the Security Audit template'?",
+          "options": [
+            { "id": "a", "text": "Templates are automatically available to agents; the agent references the named template, calls generate_document to produce a deliverable that follows its structure, and fills the placeholders", "correct": true },
+            { "id": "b", "text": "You must first manually attach the template to that specific agent before it can see it", "correct": false },
+            { "id": "c", "text": "The agent pastes the raw template text back to you unfilled and asks you to complete it", "correct": false },
+            { "id": "d", "text": "Nothing — templates can only be used by scheduled playbooks, never from Chat", "correct": false }
+          ],
+          "explanation": "Templates are automatically available to agents, and requesting one by name in chat is a documented path: the agent references the matching template, generates a deliverable via generate_document, and fills the placeholders. Option b is wrong — you don't attach templates per-agent; they're auto-available. Option c misdescribes the outcome: the agent produces a filled deliverable, it doesn't hand back the blank template. Option d is false — chat requests and playbook/task references are both documented ways to use a template.",
+          "sourceRefs": ["r-gb-templates", "r-generate-document-tool"]
+        },
+        {
+          "id": "kc-m07-l2-3",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A teammate points at the Documents area, sees '.docx' and '.xlsx' in the supported file types, and concludes 'so our agents can generate DOCX and XLSX deliverables.' Why is that a mistake?",
+          "options": [
+            { "id": "a", "text": "That list describes formats you can UPLOAD into a knowledge base, not what generate_document is documented to emit — markdown is the documented generation baseline, and branded PDF/DOCX output is verify-in-product", "correct": true },
+            { "id": "b", "text": "It's correct — any format the platform can upload it can also generate, they're always the same set", "correct": false },
+            { "id": "c", "text": "It's a mistake only because .xlsx specifically can never be uploaded; DOCX generation is fully guaranteed", "correct": false },
+            { "id": "d", "text": "The supported-types list refers to templates, so it dictates which template formats you may author", "correct": false }
+          ],
+          "explanation": "The Documents supported-types list is about ingestion (what you can upload), which is a different thing from what generation produces; the documented generation baseline is markdown, and richer branded output is verify-in-product, not promised. Option b states the exact fallacy — upload support and generation output are not the same set. Option c invents a false claim about .xlsx uploads and wrongly guarantees DOCX generation, which the docs don't. Option d misattributes the list to templates; it describes uploadable knowledge-base file types, not template authoring formats.",
+          "sourceRefs": ["r-gb-documents", "r-gb-templates", "r-prd63-docgen"]
+        }
+      ]
+    },
+    {
+      "id": "m07-l3-reports-grading",
+      "title": "Where deliverables live — Reports, the viewer, grading, and the feedback loop",
+      "estMinutes": 14,
+      "objective": "Find a deliverable in Activity → Reports, read it in the viewer, grade it 1–5 stars, and understand how that grade feeds agent quality analytics — plus where reports are stored.",
+      "body": "## Deliverables surface as Reports\n\nOnce an agent produces a deliverable, where does it go? The **Reports** tab in Activity is where you review what your agents have produced. Agents submit reports after completing tasks, after scheduled routines, or when they find something noteworthy — so Reports is the running record of your agents' output.\n\nThey arrive two ways, both documented:\n\n- **Automatically** — when an agent finishes a scheduled routine or task, it generates a report summarising what it found, what it did, and anything needing attention. This is how a nightly playbook's work shows up without you asking.\n- **Manually** — you ask for one in Chat: *\"Write a report on today's security findings.\"* The deliverable you generated in Lesson 2 lands here the same way.\n\n## Reading a report card\n\nEach report appears as a **card**. The card is a scannable summary so you can triage a grid of them at a glance. It shows:\n\n- **Agent name** and icon — who produced it\n- **Report title** and type\n- **Timestamp** — when it was submitted\n- **Status** — *unread*, *reviewed*, or *graded*\n- **Preview** — the first few lines of content\n\nThat status field is quietly useful: it's how you tell, across a wall of cards, which reports you've already dealt with and which are still waiting for a look or a grade. You can also **filter** the grid — by agent, by date range, by status, or by type (routine / task completion / incident) — to cut a busy Reports tab down to just what you need.\n\n## The viewer\n\nClick a card and the full report opens in a **slide-over panel** — the viewer. It shows three things:\n\n1. **Full markdown-rendered content** — the deliverable itself, formatting and tables intact. (This is why markdown templates and a markdown viewer fit together so cleanly: you author markdown, the agent produces markdown, the viewer renders markdown.)\n2. **Referenced files and artifacts** — anything the report links to.\n3. **Linked agent and task details** — a jump back to who produced it and the task it came from.\n\nA typical report's *content* follows a recognisable shape — **Summary** (one-paragraph overview), **Findings** (the detailed results or observations), **Actions taken** (what the agent did — tool calls, changes), **Recommendations** (suggested next steps), and **Linked artifacts**. If that list feels familiar, it should: it's the same section thinking you put into a template in Lesson 1. A good template and a good report are the same shape seen from two ends.\n\n## Grading — the feedback loop that matters\n\nThis is the part a serious builder cares about most. Every report can be **graded for quality** with a star rating:\n\n1. Open a report.\n2. Click the grade button.\n3. Select a **star rating (1–5)**.\n4. Optionally add a **comment**.\n\nGrading isn't busywork — it's a **feedback loop**. Grades help track agent quality over time and appear in **Analytics → Agents** (and the Agent Details → Reports tab). So a low grade on a report isn't just a personal note; it's a signal that flows into how you see that agent's quality trend. Grade honestly and consistently and you build a real picture of which agents produce reliable deliverables and which need their prompt, tools, or template tightened. Skip grading and you're flying blind — the analytics have nothing to chart.\n\nThat closes the loop this whole module has been building: author a template so output has a consistent shape (Lesson 1), generate a deliverable against it (Lesson 2), then **review and grade it in Reports** — and use what the grade tells you to iterate the template until the shape, and the quality, are exactly what you want.\n\n## Where reports are stored\n\nReports aren't ephemeral chat scrollback — they're **persisted in two places**:\n\n- **The workspace filesystem**, at the path `/reports/{agent}/{date}_{slug}.md` — note the `.md`: markdown, the documented baseline, on disk under a per-agent folder.\n- **The database**, for querying.\n\nThat dual storage is why a deliverable is a real artifact you can come back to, link to, and analyse — not a message that scrolls away. The `{agent}` folder and `{date}_{slug}` naming also means reports are organised by who produced them and when, which is the same axis you filter and grade along.\n\n## Worked walkthrough: generate, find, read, grade\n\nFollow one deliverable end to end. You ask in Chat for the auth-module security audit (Lesson 2); the agent generates it via `generate_document`. You switch to **Activity → Reports** and there's a fresh **card** — the agent's name, the title (\"Security Audit — auth module\"), a timestamp, status *unread*, and a preview of the summary line. You **click it**; the slide-over **viewer** opens with the full markdown rendered — your fixed sections, the severity table populated, the placeholders filled. You read it, decide the findings are solid but the recommendations are thin, and **grade it 3 stars with a comment** (\"good findings, weak recommendations\"). The card's status flips to *graded*, and that 3-star grade now feeds **Analytics → Agents**, nudging this agent's quality trend and reminding future-you that the *template's* Recommendations section could prompt for more. On disk, the report is sitting at `/reports/{that-agent}/{today}_security-audit-auth-module.md`, queryable from the database. Generated, found, read, graded, stored — the full deliverable lifecycle.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m07-l3-1",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In Activity → Reports, what does a report card show before you open it?",
+          "options": [
+            { "id": "a", "text": "Agent name and icon, report title and type, timestamp, status (unread / reviewed / graded), and a short content preview", "correct": true },
+            { "id": "b", "text": "The full rendered markdown of the entire report inline on the card", "correct": false },
+            { "id": "c", "text": "Only the agent's name, with no title, timestamp, or status", "correct": false },
+            { "id": "d", "text": "The agent's system prompt and its complete tool configuration", "correct": false }
+          ],
+          "explanation": "A card is a triage summary: agent name/icon, title and type, timestamp, status, and a preview of the first lines. Option b describes the viewer (the slide-over that renders the full report), not the card. Option c understates the card, which carries several fields, not just a name. Option d is unrelated — cards summarise a produced report, they don't expose the agent's prompt or tool setup.",
+          "sourceRefs": ["r-gb-reports"]
+        },
+        {
+          "id": "kc-m07-l3-2",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You grade a report 3 stars and add a comment. Beyond your own note, what does that grade actually do?",
+          "options": [
+            { "id": "a", "text": "It feeds agent quality tracking over time and appears in Analytics → Agents (and Agent Details → Reports) — a feedback loop on that agent's output", "correct": true },
+            { "id": "b", "text": "It deletes the report if the rating is below a threshold", "correct": false },
+            { "id": "c", "text": "It changes the model the agent will use on its next run", "correct": false },
+            { "id": "d", "text": "It is stored only on that one card and never informs any analytics", "correct": false }
+          ],
+          "explanation": "The 1–5 star grade helps track agent quality over time and surfaces in Analytics → Agents, making grading a genuine feedback loop rather than a private note. Option b invents a destructive behaviour — grading doesn't delete reports. Option c overstates it — a grade doesn't automatically switch models; it's a quality signal you act on. Option d contradicts the documented flow: the grade explicitly appears in the agent analytics, so it does inform them.",
+          "sourceRefs": ["r-gb-reports", "r-gb-analytics-agents"]
+        },
+        {
+          "id": "kc-m07-l3-3",
+          "domainId": "m07-deliverables",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Where are agent reports persisted, and in what format on disk?",
+          "options": [
+            { "id": "a", "text": "In the workspace filesystem at /reports/{agent}/{date}_{slug}.md (markdown) and in the database for querying", "correct": true },
+            { "id": "b", "text": "Only in the chat scrollback, so they disappear once the session ends", "correct": false },
+            { "id": "c", "text": "As branded PDF files in a shared cloud drive, with no database record", "correct": false },
+            { "id": "d", "text": "Only in the database as binary blobs, with nothing on the filesystem", "correct": false }
+          ],
+          "explanation": "Reports are stored persistently in the workspace filesystem at /reports/{agent}/{date}_{slug}.md — the .md confirms markdown, the documented baseline — and in the database for querying. Option b is wrong: reports are persisted artifacts, not ephemeral chat. Option c invents branded-PDF cloud storage and drops the database record — neither matches the docs (and PDF generation is verify-in-product, not the documented store format). Option d is half-right at best; storage is dual (filesystem + database), and the filesystem copy is markdown, not an opaque blob.",
+          "sourceRefs": ["r-gb-reports"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m07-1",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is a Template in Automatos?",
+      "options": [
+        { "id": "a", "text": "A pre-built document structure defining the sections and formatting for a type of document, so agents produce consistent output", "correct": true },
+        { "id": "b", "text": "A saved chat prompt that an agent runs verbatim", "correct": false },
+        { "id": "c", "text": "A connected external app that an agent calls as a tool", "correct": false },
+        { "id": "d", "text": "A scheduled routine that fires a report on a cron", "correct": false }
+      ],
+      "explanation": "A template is a pre-built document structure — sections and formatting for a type of document — that agents follow so output is consistent. Option b describes a saved prompt, not a document's structure. Option c describes a tool/integration, a different concept entirely. Option d describes scheduling, which governs when something runs, not the shape of the document a template defines.",
+      "sourceRefs": ["r-gb-templates", "r-gb-documents"]
+    },
+    {
+      "id": "q-m07-2",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which set correctly names the four documented example templates?",
+      "options": [
+        { "id": "a", "text": "Daily Standup, Security Audit, Code Review, Research Summary", "correct": true },
+        { "id": "b", "text": "Invoice, Contract, Newsletter, Slide Deck", "correct": false },
+        { "id": "c", "text": "Summary, Findings, Actions, Recommendations", "correct": false },
+        { "id": "d", "text": "Chat, Playbook, Mission, Routine", "correct": false }
+      ],
+      "explanation": "The four documented example templates are Daily Standup, Security Audit, Code Review, and Research Summary. Option b lists plausible business documents that are not the documented examples. Option c lists the sections that appear *inside* a typical report, not the names of templates. Option d lists execution modes and a conversion, not templates.",
+      "sourceRefs": ["r-gb-templates"]
+    },
+    {
+      "id": "q-m07-3",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which sequence matches the documented steps for creating a template?",
+      "options": [
+        { "id": "a", "text": "+ New Template → name and description → write the structure in markdown → set placeholder variables → Save", "correct": true },
+        { "id": "b", "text": "Open Chat → paste an example report → click 'Save as Template'", "correct": false },
+        { "id": "c", "text": "Connect a tool → assign it to an agent → schedule a run", "correct": false },
+        { "id": "d", "text": "Upload a DOCX → convert to PDF → publish to the Marketplace", "correct": false }
+      ],
+      "explanation": "The documented flow is: + New Template, define name and description, write the structure in markdown, set placeholder variables, Save. Option b invents a 'Save as Template' path from a chat message that isn't the documented flow. Option c is the tool-connection flow from a different module, not template creation. Option d is an upload/convert/publish sequence unrelated to authoring a template.",
+      "sourceRefs": ["r-gb-templates"]
+    },
+    {
+      "id": "q-m07-4",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When does a placeholder like {{date}} get its real value?",
+      "options": [
+        { "id": "a", "text": "At generation time — it's filled in automatically when the agent produces the deliverable", "correct": true },
+        { "id": "b", "text": "When the template is first saved — the value is baked in permanently", "correct": false },
+        { "id": "c", "text": "Never — placeholders are decorative and appear as literal braces in the output", "correct": false },
+        { "id": "d", "text": "Only if a human manually edits every deliverable after it's produced", "correct": false }
+      ],
+      "explanation": "Placeholders are filled automatically at generation time, which is what lets one template serve many deliverables with the specifics varying each run. Option b is wrong — baking the value in at save time would defeat the purpose; the value is resolved per generation. Option c contradicts the docs: placeholders are replaced with real values, not left as literal braces. Option d describes manual post-editing, whereas the fill is automatic at generation.",
+      "sourceRefs": ["r-gb-templates"]
+    },
+    {
+      "id": "q-m07-5",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What tool do agents use to produce the actual deliverable document?",
+      "options": [
+        { "id": "a", "text": "generate_document", "correct": true },
+        { "id": "b", "text": "composio_execute", "correct": false },
+        { "id": "c", "text": "workspace_write_file", "correct": false },
+        { "id": "d", "text": "platform_create_template", "correct": false }
+      ],
+      "explanation": "generate_document is the platform tool an agent calls to produce a deliverable — 'template = the shape, generate_document = produces the file.' Option b, composio_execute, is the meta-tool for running connected-app actions, not document generation. Option c, workspace_write_file, writes raw files to the workspace but isn't the documented deliverable-generation tool. Option d isn't the generation tool — creating a template is authoring the shape, not producing a deliverable.",
+      "sourceRefs": ["r-generate-document-tool", "r-gb-templates"]
+    },
+    {
+      "id": "q-m07-6",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You ask in Chat: 'Write a security audit report for the auth module using the Security Audit template.' What makes this work without any per-agent setup?",
+      "options": [
+        { "id": "a", "text": "Templates are automatically available to agents, so the agent references the named template and generates a deliverable that follows its structure", "correct": true },
+        { "id": "b", "text": "You must attach the Security Audit template to the agent's profile first", "correct": false },
+        { "id": "c", "text": "The Universal Router rewrites your message into a cron schedule", "correct": false },
+        { "id": "d", "text": "The agent can only use a template if it authored that template itself", "correct": false }
+      ],
+      "explanation": "Templates are automatically available to agents, so naming one in a chat request is enough — the agent references it and generates a matching deliverable. Option b is wrong: no per-agent attachment is needed. Option c is irrelevant — routing your message to an agent has nothing to do with turning it into a schedule. Option d invents an authorship restriction that doesn't exist; any agent can use any available template.",
+      "sourceRefs": ["r-gb-templates", "r-generate-document-tool"]
+    },
+    {
+      "id": "q-m07-7",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A colleague sees '.docx', '.xlsx', and '.pdf' listed under supported file types in the Documents area and says 'so our agents generate Word, Excel, and PDF deliverables.' What's the accurate correction?",
+      "options": [
+        { "id": "a", "text": "That list is the formats you can UPLOAD into a knowledge base; the documented generation baseline is markdown, and branded PDF/DOCX output should be verified in the product before it's promised", "correct": true },
+        { "id": "b", "text": "They're right — the upload list and the generation list are always identical", "correct": false },
+        { "id": "c", "text": "They're wrong because those formats can't be uploaded either; only markdown can be uploaded", "correct": false },
+        { "id": "d", "text": "The list defines which templates you may author, so it does control generated formats", "correct": false }
+      ],
+      "explanation": "The supported-types list describes ingestion (uploads into a knowledge base), which is separate from what generation emits; markdown is the documented generation baseline and branded PDF/DOCX is verify-in-product. Option b asserts the exact fallacy — upload support does not equal generation output. Option c is false: those office/PDF formats are uploadable (the list says so), so the objection is misplaced. Option d misreads the list as governing template authoring or generated formats, which it does not.",
+      "sourceRefs": ["r-gb-documents", "r-gb-templates", "r-prd63-docgen"]
+    },
+    {
+      "id": "q-m07-8",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about generated deliverable formats is the safe, accurate one to make today?",
+      "options": [
+        { "id": "a", "text": "Markdown deliverables from templates are the documented baseline; richer branded formats (PDF/DOCX, block templates) are verify-in-product — claim only what you've seen generate", "correct": true },
+        { "id": "b", "text": "Every deliverable is always produced as a fully branded PDF by default", "correct": false },
+        { "id": "c", "text": "Agents cannot produce documents at all; they can only reply in chat", "correct": false },
+        { "id": "d", "text": "XLSX generation is guaranteed because .xlsx appears in the upload list", "correct": false }
+      ],
+      "explanation": "The documented baseline is markdown; branded/block formats are recent build work with no docs page, so the honest stance is to verify them in-product before promising. Option b over-claims — branded PDF-by-default is not the documented behaviour. Option c under-claims — agents do produce deliverables via generate_document. Option d repeats the upload-list-equals-generation fallacy, guaranteeing an output format the docs don't promise.",
+      "sourceRefs": ["r-prd63-docgen", "r-gb-templates", "r-gb-documents"]
+    },
+    {
+      "id": "q-m07-9",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where do agent-produced deliverables surface for you to review?",
+      "options": [
+        { "id": "a", "text": "Activity → Reports, as cards you can open, read, and grade", "correct": true },
+        { "id": "b", "text": "The Marketplace → Playbooks tab", "correct": false },
+        { "id": "c", "text": "Settings → General", "correct": false },
+        { "id": "d", "text": "The Tools page, next to connected apps", "correct": false }
+      ],
+      "explanation": "Reports is where you review what agents have produced — deliverables appear as cards you open in the viewer and grade. Option b is where you install pre-built playbooks, not where reports live. Option c holds configuration such as cost alerts, not produced deliverables. Option d is where you connect and assign tools, unrelated to reviewing reports.",
+      "sourceRefs": ["r-gb-reports"]
+    },
+    {
+      "id": "q-m07-10",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which values does a report card display to help you triage a grid of reports?",
+      "options": [
+        { "id": "a", "text": "Agent name/icon, title and type, timestamp, status (unread / reviewed / graded), and a content preview", "correct": true },
+        { "id": "b", "text": "The full markdown body, the agent's prompt, and the token cost of the run", "correct": false },
+        { "id": "c", "text": "Only a star rating with no other information", "correct": false },
+        { "id": "d", "text": "The workspace's billing plan and seat count", "correct": false }
+      ],
+      "explanation": "The card fields are agent name/icon, title and type, timestamp, status, and a preview — a scannable triage summary. Option b describes contents of the viewer plus analytics detail, not the card. Option c understates the card; the star rating is one part of the flow, not the card's only field. Option d is billing information, which isn't on a report card.",
+      "sourceRefs": ["r-gb-reports"]
+    },
+    {
+      "id": "q-m07-11",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does the report viewer (the slide-over panel) show when you open a card?",
+      "options": [
+        { "id": "a", "text": "Full markdown-rendered report content, referenced files and artifacts, and linked agent and task details", "correct": true },
+        { "id": "b", "text": "A blank editor for writing a brand-new report from scratch", "correct": false },
+        { "id": "c", "text": "The agent's raw system prompt and nothing else", "correct": false },
+        { "id": "d", "text": "A list of every other workspace's reports", "correct": false }
+      ],
+      "explanation": "The viewer renders the full markdown content and shows referenced files/artifacts plus links back to the agent and task. Option b is wrong — the viewer displays a produced report, it isn't an authoring surface. Option c is far too narrow and incorrect: the viewer shows the report, not the agent's prompt. Option d violates workspace isolation and isn't what the viewer does — it shows this report, in this workspace.",
+      "sourceRefs": ["r-gb-reports"]
+    },
+    {
+      "id": "q-m07-12",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How do you grade a report, and why does it matter beyond your own record?",
+      "options": [
+        { "id": "a", "text": "Open it, click the grade button, pick a 1–5 star rating (optionally a comment); the grade feeds Analytics → Agents to track agent quality over time", "correct": true },
+        { "id": "b", "text": "Type a number into the chat box; it only affects that single chat session", "correct": false },
+        { "id": "c", "text": "Grading is disabled unless you're on a paid tier", "correct": false },
+        { "id": "d", "text": "You grade the template, not the report, and it changes the template's structure", "correct": false }
+      ],
+      "explanation": "You open the report, click grade, choose 1–5 stars (comment optional), and that grade flows into Analytics → Agents as a quality signal over time. Option b misdescribes the mechanism and its reach — grading is a report action that informs analytics, not a chat-only number. Option c invents a paywall; the academy and platform docs describe grading as a standard action. Option d confuses the object — you grade the produced report, and it doesn't rewrite the template.",
+      "sourceRefs": ["r-gb-reports", "r-gb-analytics-agents"]
+    },
+    {
+      "id": "q-m07-13",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Where are agent reports stored persistently?",
+      "options": [
+        { "id": "a", "text": "In the workspace filesystem at /reports/{agent}/{date}_{slug}.md and in the database for querying", "correct": true },
+        { "id": "b", "text": "Nowhere — they live only in the Reports tab UI and vanish on refresh", "correct": false },
+        { "id": "c", "text": "Only in an external cloud bucket you must connect yourself", "correct": false },
+        { "id": "d", "text": "Inside each template file, appended to the bottom", "correct": false }
+      ],
+      "explanation": "Reports persist in the workspace filesystem at /reports/{agent}/{date}_{slug}.md and in the database for querying — dual storage. Option b is wrong: reports are durable artifacts, not transient UI. Option c invents a required external bucket; storage is the workspace filesystem plus the database. Option d is nonsensical — reports aren't appended into template files; templates are the reusable shape, reports are separate produced artifacts.",
+      "sourceRefs": ["r-gb-reports"]
+    },
+    {
+      "id": "q-m07-14",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A typical agent report's content is organised into which sections?",
+      "options": [
+        { "id": "a", "text": "Summary, Findings, Actions taken, Recommendations, and Linked artifacts", "correct": true },
+        { "id": "b", "text": "Subject, To, Cc, Bcc, and Attachments", "correct": false },
+        { "id": "c", "text": "Minute, Hour, Day-of-month, Month, Day-of-week", "correct": false },
+        { "id": "d", "text": "Public key, JWT, SSE endpoint, and callback URL", "correct": false }
+      ],
+      "explanation": "A typical report is structured as Summary, Findings, Actions taken, Recommendations, and Linked artifacts — the same section thinking that goes into a good template. Option b is the header of an email, not a report's sections. Option c lists cron fields, unrelated to report content. Option d lists widget/auth concepts from a different module, not report sections.",
+      "sourceRefs": ["r-gb-reports", "r-gb-templates"]
+    },
+    {
+      "id": "q-m07-15",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You want to defend the claim 'a Template is not the same as a Deliverable' to a teammate. Which explanation is precise and correct?",
+      "options": [
+        { "id": "a", "text": "The Template is the reusable shape you author once (structure + placeholders); a Deliverable is a specific document an agent produces from it via generate_document, with placeholders filled — one template yields many deliverables", "correct": true },
+        { "id": "b", "text": "The Template is produced fresh on every run; the Deliverable is the single reusable form you author once", "correct": false },
+        { "id": "c", "text": "The Template is a graded report in Analytics; the Deliverable is the star rating you give it", "correct": false },
+        { "id": "d", "text": "They differ only by file extension — a Template is .md and a Deliverable is .pdf, otherwise identical", "correct": false }
+      ],
+      "explanation": "The template is the reusable shape (structure plus placeholders); the deliverable is the concrete, per-run document generated from it via generate_document, so one template produces many deliverables. Option b swaps the roles — the deliverable is the per-run artifact, the template is the reusable one. Option c invents unrelated definitions (a grade is a quality signal, not a deliverable). Option d reduces a conceptual distinction to a file extension, and misstates it too — markdown is the baseline for both the template and the produced report, while branded PDF is verify-in-product.",
+      "sourceRefs": ["r-gb-templates", "r-gb-reports", "r-generate-document-tool"]
+    },
+    {
+      "id": "q-m07-16",
+      "domainId": "m07-deliverables",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You've watched an agent generate weekly reviews for a month. The findings are always solid but the 'Actions' section is consistently thin, and your grades hover at 2–3 stars. What's the most leveraged fix, and why?",
+      "options": [
+        { "id": "a", "text": "Iterate the template — strengthen the Actions section so it prompts for specifics — because the template is the shared shape every generation follows, and the grades are the signal telling you where the shape is weak", "correct": true },
+        { "id": "b", "text": "Stop grading, since 2–3 stars is dragging down the analytics unfairly", "correct": false },
+        { "id": "c", "text": "Delete every past report so the low grades no longer appear in Analytics → Agents", "correct": false },
+        { "id": "d", "text": "Switch the whole task to a fully-branded PDF, which will make the Actions section fill itself in", "correct": false }
+      ],
+      "explanation": "Consistent weakness in one section across many runs points at the shared shape — the template — and the grades are exactly the feedback loop that localised the problem, so improving the template's Actions section is the highest-leverage fix. Option b throws away the feedback loop that just diagnosed the issue. Option c hides the signal instead of fixing the cause and defeats the point of quality tracking. Option d confuses format with content — changing the output to PDF (itself verify-in-product) does nothing to make the Actions section richer; the template prompt is what drives that.",
+      "sourceRefs": ["r-gb-templates", "r-gb-reports", "r-gb-analytics-agents"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m07-weekly-review-deliverable",
+      "domainId": "m07-deliverables",
+      "title": "Author a template, generate a deliverable, find and grade it in Reports",
+      "goal": "Produce your signature artifact for this module: a real, saved Template plus a generated Deliverable that follows it — then locate that deliverable as a card in Activity → Reports, read it in the viewer, and grade it 1–5 stars so the grade feeds your agent analytics. You come away with a reusable template and a graded report you can point to.",
+      "steps": "## What you'll build\n\nA **Weekly Review** template with placeholder variables, a deliverable generated from it, and a grade on that deliverable in the Reports tab. This is the module's 'Try it now' turned into a guided build. Every step maps to a documented area: `knowledge/templates.md` (authoring), the `generate_document` deliverable tool, and `activity/reports.md` (finding and grading).\n\n### Before you start\n\n- **Sign in.** Your personal workspace is created automatically on first login and you're the Admin, so you can do every step solo.\n- **(Optional) Have something to summarise.** If you've done module 03, you may have documents in a Knowledge Base the review can draw on. Not required — you can ask the agent to review a topic or a pasted note instead.\n\n### Part A — Author the template\n\n1. **Go to Knowledge Bases → Templates → + New Template.**\n2. **Name it 'Weekly Review'** and give it a one-line description (e.g. 'A weekly summary of progress, findings, and next actions').\n3. **Write the structure in markdown.** Keep it clean and section-based — for example headings for **Summary**, **Findings**, and **Actions**. Use a markdown table under Findings if you want each finding to carry a consistent set of columns (this is the same 'fix the shape' thinking from Lesson 1).\n4. **Add placeholder variables** for the things that change every week: at least `{{agent_name}}` and `{{date}}` (a `{{period}}` or `{{week_of}}` is a nice addition). Put them where they belong — a header line like *'Weekly Review — {{period}} · by {{agent_name}} on {{date}}'* is a good pattern.\n5. **Save.** Your template now lives in the Templates area and is automatically available to agents — you do NOT attach it to a specific agent.\n\n### Part B — Generate a deliverable from it\n\n6. **Open Chat** and ask an agent to generate against your template, in plain language — for example: *\"Write this week's review using the Weekly Review template, based on my uploaded documents\"* (or *\"...based on this note: [paste].\"*). Naming the template is how you steer the shape.\n7. **Let it generate.** The agent references the Weekly Review template, calls `generate_document`, fills `{{agent_name}}`/`{{date}}` (and any others), and hands back a **deliverable** that follows your structure. Note the distinction you just watched happen: the *template* was the shape, the *deliverable* is the produced document.\n\n### Part C — Find it, read it, grade it\n\n8. **Go to Activity → Reports.** Find the fresh **card** for your review — it shows the agent, the title, a timestamp, status *unread*, and a preview line.\n9. **Click the card to open the viewer.** Read the full markdown-rendered deliverable: confirm your sections are present, the placeholders are filled with real values, and (if you added one) the Findings table rendered.\n10. **Grade it 1–5 stars** (add a comment if you like). Watch the card's status flip toward *graded*. This grade feeds **Analytics → Agents** — it's a real feedback signal, not a throwaway.\n11. **Iterate the template.** Based on what the deliverable looked like, go back and tweak the Weekly Review template — tighten a section that came out thin, add a placeholder you wished you had — then regenerate. Repeat until the shape is exactly what you want. That loop (author → generate → grade → iterate) is the whole point of the module.\n\n### A note on cost\n\nGenerating a deliverable runs an AI model, and models cost money per use. The realistic setup for an operator is bring-your-own-key — supply your provider key in Settings and pay the provider directly. This exercise is short and cheap; keep it in mind for heavier or scheduled generation, where cheaper-model routing is your biggest cost lever.",
+      "checklist": [
+        "Signed in and working in your own personal workspace",
+        "Created a template named 'Weekly Review' with a name and description",
+        "Wrote a markdown structure with clear sections (e.g. Summary / Findings / Actions), optionally a Findings table",
+        "Added at least two placeholder variables ({{agent_name}} and {{date}}) placed where they belong",
+        "Saved the template and confirmed it's available without attaching it to a specific agent",
+        "Asked an agent in Chat to generate a deliverable USING the Weekly Review template by name",
+        "Confirmed the generated deliverable followed the template's structure with placeholders filled",
+        "Found the deliverable as a card in Activity → Reports and opened it in the viewer",
+        "Graded the report 1–5 stars (optionally with a comment) and saw the status update",
+        "Iterated the template at least once and regenerated to improve the shape",
+        "ARTIFACT SAVED: your Weekly Review template plus a graded deliverable, kept as proof of the full loop"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gb-templates",
+      "title": "Automatos AI — Templates (platform docs)",
+      "url": "automatos-gitbook/knowledge/templates.md",
+      "kind": "first-party-doc",
+      "annotation": "The core source for this module: what a template is (structure, sections, formatting for a type of document), the four example templates (Daily Standup, Security Audit, Code Review, Research Summary), how templates are automatically available to agents and requested from chat ('...using the Security Audit template'), and the five-part create flow (+ New Template → name/description → markdown structure → {{placeholder}} variables → Save). Currency note: this documents MARKDOWN templates with placeholder variables — that's the live baseline; richer branded/block templates are verify-in-product.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-gb-reports",
+      "title": "Automatos AI — Reports (platform docs)",
+      "url": "automatos-gitbook/activity/reports.md",
+      "kind": "first-party-doc",
+      "annotation": "Where deliverables surface and get reviewed: report cards (agent, title, timestamp, status unread/reviewed/graded, preview), the slide-over viewer (full markdown render + referenced files/artifacts + linked agent/task), 1–5 star grading that feeds Analytics → Agents, typical report contents (Summary / Findings / Actions taken / Recommendations / Linked artifacts), filters, and persistent storage at /reports/{agent}/{date}_{slug}.md plus the database. The source for the whole find-read-grade loop.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-gb-documents",
+      "title": "Automatos AI — Documents & supported file types (platform docs)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "first-party-doc",
+      "annotation": "Read this specifically for the supported file-types table (.md/.txt/.csv/.json, .docx/.xlsx/.pptx, .pdf with OCR, code, .html). The critical practitioner point: that list is what you can UPLOAD into a knowledge base, NOT what generate_document is documented to emit — don't read '.docx supported' as 'agents generate DOCX'. Markdown is the documented generation baseline.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-gb-analytics-agents",
+      "title": "Automatos AI — Agent Analytics (platform docs)",
+      "url": "automatos-gitbook/analytics/agents.md",
+      "kind": "first-party-doc",
+      "annotation": "Where the report grades land: the 1–5 star ratings you give in Reports feed agent quality tracking here (and in Agent Details → Reports), building a picture of which agents produce reliable deliverables over time. This is the destination end of the feedback loop that makes grading worth doing — grade honestly and this analytic becomes real signal.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-generate-document-tool",
+      "title": "Automatos AI — the generate_document deliverable tool (orchestrator/consumers/chatbot/service.py)",
+      "url": "automatos-ai/orchestrator/consumers/chatbot/service.py",
+      "kind": "first-party-doc",
+      "annotation": "The real platform tool agents call to produce a deliverable. In the chatbot service it's registered as a genuine multi-step tool alongside composio_execute and the workspace file tools — grounding for 'template = the shape, generate_document = produces the file.' This is a code source (proves the tool exists and how it's wired); the gitbook remains the proof of what the UI surfaces. Treat the tool as live; treat the RICHNESS of what it emits (branded PDF/DOCX vs markdown) as verify-in-product.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-prd63-docgen",
+      "title": "Automatos AI — Document Generation module (PRD-63, architecture direction)",
+      "url": "automatos-ai/docs/PRDS/63-DOCUMENT-GENERATION-MODULE.md",
+      "kind": "first-party-doc",
+      "annotation": "The WHY behind deliverables: deliverables are the 'last mile' that turns AI analysis into documents a business actually sends, and the design intent is templated output extending to PDF/DOCX/XLSX. Read this as ARCHITECTURE DIRECTION, not a shipped-UI feature — it explains why generation matters and where it's heading, while the user docs' live baseline remains markdown templates and markdown reports. Use it to understand the direction; verify any branded-format claim in the product before demoing.",
+      "domainIds": ["m07-deliverables"]
+    },
+    {
+      "id": "r-gb-missions",
+      "title": "Automatos AI — Missions (platform docs)",
+      "url": "automatos-gitbook/activity/missions.md",
+      "kind": "first-party-doc",
+      "annotation": "Context for how a deliverable is the end of a bigger piece of work: a mission (an autonomous objective an agent plans and you approve) can conclude by generating a templated deliverable — the report that lands in Reports is often what a mission or a scheduled playbook hands back. Useful for connecting this module to earlier ones; the deliverable is the output, not the orchestration.",
+      "domainIds": ["m07-deliverables"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-07-1",
+      "title": "07 · Author a template, generate a deliverable, grade it in Reports — the full deliverable loop",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m07-deliverables"],
+      "sourceNotebook": "platform-architect / m07 / template-to-deliverable-to-grade"
+    },
+    {
+      "id": "v-07-2",
+      "title": "07 · Template vs deliverable, and the honest-format rule — markdown baseline vs verify-in-product branded output (deep dive)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m07-deliverables"],
+      "sourceNotebook": "platform-architect / m07 / template-vs-deliverable-and-format-currency"
+    }
+  ]
+}

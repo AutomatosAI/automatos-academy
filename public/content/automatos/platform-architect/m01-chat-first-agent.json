@@ -1,0 +1,577 @@
+{
+  "id": "m01-chat-first-agent",
+  "order": 1,
+  "code": "01",
+  "name": "Chat, your first agent & the Universal Router",
+  "tagline": "Chat is the front door to the whole platform: you type, the Universal Router picks the best agent, and the answer streams back. This module teaches the machinery behind that — the five routing tiers and why they exist, how a good agent description is what actually gets your agent picked, how to build and test an agent that routes, and the judgment call every builder faces first: when to make a new agent versus letting Auto pick an existing one.",
+  "overview": "If you came from AI Business Foundations, this is the machinery behind module 4 — where ABF taught you to write a brief and hand work to an AI, APA teaches you to build the worker that receives it and to understand exactly how the platform decided to send the work its way. Chat is the front door: there is no separate 'command line' for Automatos — you talk to your workforce in plain language and the Universal Router does the dispatching. That router is the single most important mechanism in this module, because it is the reason a vague agent description quietly fails and a sharp one succeeds. It runs a five-tier ladder — Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM — and the tiers are ordered by cost and latency on purpose: the cache is fast and free, the LLM fallback is slow and expensive, and everything the platform does to route cheaply is really an effort to avoid falling all the way to Tier 3. That single insight — cheaper routing is the point, and cheaper-model routing is the number-one cost lever you control — runs through the whole track. You will learn to read the input bar and its three areas, the quick actions, voice chat and file attachments, and the ~60,000-token context budget that auto-summarises long conversations. Then you will build your first agent through the six-step create flow, learn why the description field is really a routing instruction and how the prompt-engineering discipline (be specific about the role, define the output format, set boundaries, give examples, reference tools) is what makes a capability test score well. You will scope tools with least privilege, test with the chat-then-capability loop, and correct wrong routing so the system learns. Finally, the judgment: a new agent takes five to ten interactions to warm into the cache and semantic tiers, so the choice between a well-described generalist and a sharp single-purpose specialist is a real trade-off — one this module resolves into a practical rule of thumb for a builder.",
+  "objectives": [
+    "Explain how the Chat front door works end to end — you type, the Universal Router selects an agent, the response streams via SSE — and navigate the three areas of the chat page, the quick actions, voice chat, and file attachments.",
+    "Name the five routing tiers in order (Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM) and explain why they are ordered by cost and latency, and why avoiding the Tier 3 LLM fallback is the point of the ladder.",
+    "Write an agent description that the router will actually match on, and explain why the description field is a routing instruction — not marketing copy — that the rules and semantic tiers read.",
+    "Build an agent through the six-step create flow (starting point, basic info, model, persona, tools and skills, create), choosing a model and temperature that fit the job and scoping tools with least privilege.",
+    "Run the testing loop — chat test, then capability test for a scored report (quality, tool usage, persona, error handling), then review routing in Auto mode — and correct wrong routing so the system learns from the correction.",
+    "Decide when to create a new agent versus letting Auto route to an existing one, accounting for the five-to-ten-interaction cache warm-up, description quality, and maintenance cost — and distinguish an agent from a playbook and a mission as the right unit of work.",
+    "Read the Configuration tab's global defaults and safety guidelines (guardrails, orchestrator soul) and understand that safety here is applied as a base layer under every agent's own prompt."
+  ],
+  "lessons": [
+    {
+      "id": "m01-l1-chat-and-the-router",
+      "title": "The front door: Chat and the Universal Router",
+      "estMinutes": 15,
+      "objective": "Understand Chat as the single entry point to the platform and read the five-tier Universal Router as a cost-and-latency ladder you can steer.",
+      "body": "## Chat is the whole front door\n\nThere is no separate console for driving Automatos. You do not pick an agent from a menu, learn a command syntax, or open a different tool for each job. You open **Chat**, type in plain language, and the platform works out who should answer. That is the entire interaction model, and it is worth pausing on because it changes how you design everything else: your agents are not buttons a user clicks, they are workers the **Universal Router** dispatches based on what you wrote. Build accordingly.\n\nThe chat page has three areas. On the left, **chat history** — your past conversations, each auto-titled from its first message, workspace-scoped so a teammate sees only their own. In the centre, the **message area** — the conversation thread where responses stream in. At the bottom, the **input bar** — where you type, with the Auto-mode selector, model indicators, quick actions, and the attachment and microphone buttons.\n\nA few mechanics you will lean on constantly:\n\n- **Streaming.** Responses arrive token-by-token over SSE (Server-Sent Events). You see the answer forming rather than waiting for a finished block. If you are building a surface on top of the API later, this is why the platform is Vercel-AI-SDK-compatible — but for now, just know the stream is normal, not a glitch.\n- **File attachments.** The attachment button takes PDFs, images, and documents up to **20 MB**; the answering agent can read and reference them in its reply.\n- **The context budget.** Each conversation carries a budget of **approximately 60,000 tokens**. Long conversations are **automatically summarised** to preserve the important context rather than silently dropping the front of the thread. Conversations are independent: starting a new chat resets the window. (Agent *memory* is a separate system that does persist across chats — that is module 06's subject; do not confuse the per-conversation context budget with long-term memory.)\n- **Switching mid-conversation.** Click the agent name in the header, or use the Auto dropdown, to hand the same thread to a different agent — it picks up the context seamlessly.\n\n## The Router: five tiers, ordered by cost\n\nWhen you send a message in Auto mode, the router runs a **multi-tier system**. The order is not arbitrary — it is a ladder from cheapest-and-fastest to most-expensive-and-slowest, and the router stops at the first tier that produces a confident answer. Memorise the names and the order; the rest of the track assumes them.\n\n| Tier | Name | What happens | Cost / latency |\n| --- | --- | --- | --- |\n| **Tier 0** | User override | You picked a specific agent from the dropdown, so the message goes straight there. No routing logic runs at all. | Zero routing cost |\n| **Tier 1** | Cache | You (or the workspace) asked a similar question before and it routed successfully, so the system reuses that decision. | Fast and free — no LLM call |\n| **Tier 2** | Rules | Keyword rules match your message against known patterns — \"code review\" to the Code Reviewer, \"security\" to Sentinel. | Cheap, deterministic |\n| **Tier 2.5** | Semantic | No rule matched, so the router compares your message by **semantic similarity** against agent descriptions and past successful routings. | Moderate — an embedding compare |\n| **Tier 3** | LLM | The final fallback: an LLM reads your message and classifies the best agent. Handles genuinely novel queries well. | The most expensive tier |\n\nHere is the mental model that makes the whole thing click: **the point of the ladder is to avoid Tier 3.** Every cheaper tier exists so that most messages never reach the expensive LLM classifier. A workspace where routing works well is one where the cache and rules catch the common traffic and the LLM fallback is rare. This is the first appearance of the theme that runs through the entire track — cheaper routing is a design goal, and steering work to cheaper tiers (and cheaper models) is the number-one cost lever you have. You are not being asked to hand-tune tiers; you are being asked to understand that a good agent description is what lets the router settle on tiers 2 and 2.5 instead of falling to 3.\n\n## How the router learns, and how you correct it\n\nEvery routing decision is **logged to a database table**. That log is not just an audit trail — it is the training signal. It means the system builds a history of which agents handle which kinds of messages, and it means your **corrections feed directly into future routing**.\n\nWhen a response comes back from the wrong agent:\n\n1. The **response header shows which agent handled it** — so you can always trace a routing decision to its source.\n2. You use the **correction mechanism** to reassign it to the agent that should have answered.\n3. **Future similar messages route correctly**, because the correction is now part of the history the cache and semantic tiers read from.\n\nYou can also **upvote or downvote** any response; that feedback, too, is used by the router to learn which agents give good answers. You can view the accumulated routing patterns under **Analytics → Agents**. The practical upshot: routing is not a fixed rule set you fight against — it is a system that gets better as you use it honestly, and a single correction on a common query pays back every time that query recurs.\n\n## Two tips the docs make explicit\n\n- **New agents take a few interactions to warm up.** They are not in the cache yet and the semantic tier has few past routings to compare against, so give a new agent **five to ten interactions** before you judge its routing accuracy. Cold-start is normal.\n- **Specific keywords in the description help the rule tier match faster**, and **detailed, distinct descriptions help the semantic tier**. This is the bridge to the next lesson: the description field is not a label, it is the instruction the router routes on.\n\n## Walkthrough: reading a route\n\nOpen Chat, leave the selector on **Auto**, and send *\"Review this pull request for security issues.\"* The response streams back and its header names the agent that answered — say, Sentinel, because \"security\" matched a Tier 2 rule. Now send *\"Can you look over some code changes I made?\"* — softer wording, no obvious keyword. This one may fall to the semantic tier (2.5) or, if nothing is close, to the LLM (Tier 3), and it might land on a general assistant instead of your code reviewer. If it routed wrong, the header tells you who took it; you correct it to the Code Reviewer, and the next time similar wording arrives, the cache and history carry your correction forward. You have just watched the ladder in action and taught it something — the core loop of living with the router.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m01-l1-1",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In Auto mode, what is the correct order of the Universal Router's tiers from first-tried to last-resort?",
+          "options": [
+            { "id": "a", "text": "Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM", "correct": true },
+            { "id": "b", "text": "Tier 0 LLM, Tier 1 semantic, Tier 2 rules, Tier 2.5 cache, Tier 3 user override" },
+            { "id": "c", "text": "Tier 1 rules, Tier 2 cache, Tier 3 semantic, then an LLM only if you ask for it" },
+            { "id": "d", "text": "The router tries all five tiers in parallel and takes whichever answers first" }
+          ],
+          "explanation": "The documented order is Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM — cheapest and fastest first, most expensive last, stopping at the first confident tier. Option b inverts the ladder, putting the expensive LLM first and the free override last, which defeats the whole cost-saving design. Option c reorders cache and rules and misstates the LLM as opt-in; it is the automatic final fallback, not a user request. Option d describes a parallel race, but the router is a sequential ladder that stops early precisely to avoid running the expensive tiers.",
+          "sourceRefs": ["r-gb-chat-routing", "r-gb-chat-readme"]
+        },
+        {
+          "id": "kc-m01-l1-2",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why are the router tiers ordered the way they are, and what does that tell a builder to care about?",
+          "options": [
+            { "id": "a", "text": "They are ordered by cost and latency so most messages resolve on cheap tiers; the point of the ladder is to avoid the expensive Tier 3 LLM fallback, which is why a good agent description matters", "correct": true },
+            { "id": "b", "text": "They are ordered alphabetically, so the order carries no real meaning for cost or design", "correct": false },
+            { "id": "c", "text": "They are ordered by accuracy, with Tier 1 cache being the most accurate and Tier 3 LLM the least", "correct": false },
+            { "id": "d", "text": "They are ordered by how recently each tier was added to the platform, oldest first", "correct": false }
+          ],
+          "explanation": "The tiers run cheapest-and-fastest to most-expensive-and-slowest, and the router stops at the first confident tier, so the goal is to resolve on the cache/rules/semantic tiers and rarely fall to the LLM — which is exactly why a distinct, keyword-rich description is a routing lever. Option b is wrong: the order is by cost and latency, not alphabetical, and it is highly meaningful. Option c misreads the ordering as accuracy — the LLM fallback actually handles novel queries well; it is just expensive. Option d invents a chronological ordering that the docs do not describe.",
+          "sourceRefs": ["r-gb-chat-routing"]
+        },
+        {
+          "id": "kc-m01-l1-3",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The router sent your message to the wrong agent. What actually happens when you use the correction mechanism, and why does it help next time?",
+          "options": [
+            { "id": "a", "text": "The correction is logged with the routing history, so the cache and semantic tiers pick it up and future similar messages route correctly", "correct": true },
+            { "id": "b", "text": "The correction only fixes the current message; routing history is read-only and cannot learn from you", "correct": false },
+            { "id": "c", "text": "The correction permanently deletes the agent that answered wrongly so it can never be routed to again", "correct": false },
+            { "id": "d", "text": "Nothing changes until an admin manually rewrites the keyword rules in the Configuration tab", "correct": false }
+          ],
+          "explanation": "Every routing decision is logged to a database table, corrections feed directly into that history, and future similar messages route correctly because the cache and semantic tiers read from it — so a single correction on a recurring query pays back repeatedly. Option b contradicts the documented behaviour: the history is the learning signal, not read-only. Option c is false — correcting a route reassigns a message, it does not delete an agent. Option d is wrong because corrections take effect through the logged history automatically; no admin rule-editing is required.",
+          "sourceRefs": ["r-gb-chat-routing", "r-gb-chat-history"]
+        }
+      ]
+    },
+    {
+      "id": "m01-l2-build-and-test",
+      "title": "Build an agent the Router will pick — and test it",
+      "estMinutes": 17,
+      "objective": "Create an agent through the six-step flow, write a routing-friendly description and a sharp system prompt, scope tools with least privilege, and run the chat-then-capability testing loop.",
+      "body": "## The agent is the unit you build\n\nAn agent is a specialised AI worker with **its own model, persona, tools, and skills** — not a chatbot, and not a script. The Agent Management page is where you build them; it has four tabs (**Roster**, **Configuration**, **Coordination**, **Playbooks**) and a stats bar showing Total Agents, Active Agents, Categories, and Avg Performance. New workspaces arrive with **10 pre-configured starter agents** (Code Reviewer, QA Engineer, Sentinel, Scribe, Scout, Comms, and more) — so you are never staring at a blank roster, and your first move is often to customise a starter rather than build from zero.\n\nIf you came from AI Business Foundations, this is the machinery behind module 4: ABF had you write a brief and hand it to an AI; here you build the worker that receives the brief, and you decide what it knows, what it is allowed to touch, and how it talks.\n\n## The six-step create flow\n\nClick **+ Create Agent** to open the creation dialog. Six steps:\n\n1. **Choose a starting point.** *From Template* gives you sensible defaults for model, persona, tools, and system prompt — recommended, especially for your first build. *From Scratch* is a blank agent you configure entirely by hand; reach for it only when no template is close.\n2. **Basic information.** Name (required), Category (required — custom, support, code_architect, and so on), and **Description** (recommended). Read the next section before you write this field — it is the most consequential thing in the dialog.\n3. **Model selection.** Provider (**OpenRouter, OpenAI, Anthropic, or DeepSeek**), the specific model ID, **Temperature** (0 = deterministic, 1 = creative), and **Max tokens** (the response-length cap). OpenRouter is the platform's primary provider and fronts 100+ models; you can bring your own key.\n4. **Persona.** Professional (formal, detailed), Casual (conversational), Technical (precise, code-focused), or Custom (write your own). Persona shapes *how* the agent talks; the system prompt shapes *what* it does.\n5. **Tools and skills.** Assign **tools** (apps like GitHub, Slack, Jira via Composio — 1,000+ apps), **skills** (git-based capability packages), and **plugins** (marketplace bundles). Scope these deliberately — see least privilege below.\n6. **Create.** The agent **appears on the roster immediately** and is ready to receive messages through Chat.\n\nYou can change any of this later from the Agent Details panel — name, description, model, temperature, system prompt, persona, tools — and changes take effect immediately, no restart. So do not treat the create dialog as a one-shot; treat it as a first draft you will refine against test results.\n\n## The description is a routing instruction, not a label\n\nThis is the crux of the module. The **Description field is what the Universal Router uses to decide when to send messages to this agent.** It is read by the rules tier (for keywords) and the semantic tier (for meaning). So a description is not marketing copy and not a friendly summary — it is the routing instruction. Compare:\n\n- *\"Code stuff\"* — matches almost nothing. No distinctive keywords for the rule tier, nothing specific for the semantic tier to latch onto. This agent will lose routing races and force messages down to the expensive LLM fallback.\n- *\"Reviews GitHub pull requests and code for bugs, security issues, and style problems in TypeScript and Python\"* — dense with the exact terms real messages contain (\"review\", \"pull request\", \"security\", \"TypeScript\"). The rule tier matches it; the semantic tier finds it distinct from other agents.\n\nWrite the description as if you are listing the phrases a user would type when they need this agent. That single habit is what gets your agent into the cache and semantic tiers during its five-to-ten-interaction warm-up instead of leaving it cold.\n\n## The system prompt is the biggest quality lever\n\nThe description gets the agent *picked*; the **system prompt** is *\"the single biggest factor in response quality\"* once it is picked. The docs give five prompt-engineering disciplines, and they map almost one-to-one onto what the capability test scores:\n\n- **Be specific about the role.** Not \"You are a helpful assistant\" but \"You are a senior TypeScript developer specialising in React performance optimisation. You review code for render bottlenecks, unnecessary re-renders, and bundle-size issues.\"\n- **Define the output format.** \"Always list findings as numbered items with severity (HIGH/MEDIUM/LOW) and a one-line fix.\" This is what makes responses consistent and gradeable.\n- **Set boundaries.** State what the agent must *not* do: \"Do not suggest rewriting entire components; focus on targeted fixes to the code provided.\"\n- **Include examples.** One or two example input/output pairs dramatically improve consistency.\n- **Reference tools explicitly.** If the agent has a GitHub tool: \"Use the GitHub tool to fetch the PR diff before reviewing; always check the latest commit.\"\n\n## Least privilege: scope tools to the job\n\nA judgment habit to build from day one: give an agent only the tools it needs. A code reviewer needs GitHub read access; it does not need your Slack posting tool, your Jira write tool, and your email send tool \"just in case.\" Over-scoping is a real cost — it enlarges what a confused or mis-prompted agent can do, it clutters the tool-selection the agent reasons over, and it widens the blast radius of a mistake. Start narrow. You can always add a tool from Agent Details the moment a test proves the agent needs it; you cannot easily un-ring the bell of an agent that emailed a customer because it *could*.\n\n## The testing loop: chat, then capability, then routing\n\nDo not rely on a fresh agent for real work until it has passed a three-part loop:\n\n1. **Chat test.** Select the agent explicitly from the Auto dropdown (Tier 0 override, so routing is out of the picture) and send a few real messages. Does it respond appropriately? Does it use its assigned tools?\n2. **Capability test.** From the Agent Details panel, click **Run Capability Test** for a comprehensive scored report across **response quality, tool-usage accuracy, persona adherence, and error handling**. This is your objective read on the system prompt — and the four scores are exactly what the five prompt disciplines above move.\n3. **Review routing.** Now send messages in **Auto** mode and confirm the router directs relevant queries to your new agent. If it does not, the fix is almost always to **sharpen the description** — and remember the five-to-ten-interaction warm-up before you judge.\n\n## Walkthrough: a Code Reviewer that routes\n\nCreate an agent from the **Code Reviewer** template. Give it the description *\"Reviews GitHub pull requests and code for bugs, security issues, and style problems in TypeScript and Python.\"* Set the model with **temperature ~0.3** — low, because code review wants consistency, not creativity — and choose the **Technical** persona. Assign only a GitHub tool. Click **Create**; it lands on the roster. Chat-test it by selecting it from the dropdown and pasting a public file with *\"Review this for bugs and security issues.\"* Run a capability test and read the four scores. Then start a fresh chat, switch to Auto, and send *\"Can you review some code for me?\"* — check the response header. If the router picked your reviewer, the description did its job; if not, sharpen it and try again over the next few interactions. That is the whole build-and-route loop, and it is the core loop of the entire platform.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m01-l2-1",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which agent Description will the Universal Router match on most reliably, and why?",
+          "options": [
+            { "id": "a", "text": "\"Reviews GitHub pull requests and code for bugs, security issues, and style problems in TypeScript and Python\" — it is dense with the exact terms real messages contain, so the rules and semantic tiers can match it", "correct": true },
+            { "id": "b", "text": "\"Code stuff\" — short descriptions are easier for the router to parse", "correct": false },
+            { "id": "c", "text": "\"The best and most reliable agent in the workspace\" — confident, positive language ranks agents higher", "correct": false },
+            { "id": "d", "text": "It makes no difference — the description is only shown to humans and never read by the router", "correct": false }
+          ],
+          "explanation": "The description is the routing instruction the rules tier (keywords) and semantic tier (meaning) read, so a specific one packed with the phrases users actually type gets matched and keeps messages off the expensive LLM fallback. Option b is the trap the docs call out by name — \"Code stuff\" matches almost nothing. Option c is marketing language with no routable terms; the router matches on relevance, not self-praise. Option d is simply false — the router uses the description to decide when to route to the agent.",
+          "sourceRefs": ["r-gb-agents-creating", "r-gb-chat-routing"]
+        },
+        {
+          "id": "kc-m01-l2-2",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You have created a code-review agent. What is the correct order of the testing loop before relying on it?",
+          "options": [
+            { "id": "a", "text": "Chat test (select it directly and send real messages), then Run Capability Test for a scored report, then review routing in Auto mode", "correct": true },
+            { "id": "b", "text": "Review routing in Auto mode first, then chat test, and skip the capability test since routing already proves quality", "correct": false },
+            { "id": "c", "text": "Run only the capability test — if it scores well, chat testing and routing review are unnecessary", "correct": false },
+            { "id": "d", "text": "Delete and recreate the agent a few times until the router happens to pick it", "correct": false }
+          ],
+          "explanation": "The documented loop is chat test to confirm basic behaviour and tool use, then a capability test for a scored report on quality, tool usage, persona, and error handling, then a routing review in Auto mode where the fix for wrong routing is a sharper description. Option b puts routing first, but a new agent needs 5-10 interactions to warm up, so judging routing before basic behaviour is premature — and the capability test is not redundant. Option c skips two stages that test different things: routing accuracy and live tool use are not covered by the capability score alone. Option d is not a testing method; it wastes the warm-up each time and never diagnoses the real issue, which is usually the description.",
+          "sourceRefs": ["r-gb-agents-creating"]
+        },
+        {
+          "id": "kc-m01-l2-3",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You are building a Code Reviewer. Applying least-privilege tool scoping, which tool assignment is best?",
+          "options": [
+            { "id": "a", "text": "Assign a GitHub tool for reading pull requests, and add anything else only when a test proves the agent needs it", "correct": true },
+            { "id": "b", "text": "Assign every connected tool — GitHub, Slack, Jira, email — so the agent is ready for anything", "correct": false },
+            { "id": "c", "text": "Assign no tools at all, because a well-written system prompt removes the need for any tools", "correct": false },
+            { "id": "d", "text": "Assign an email-send tool so the reviewer can message customers about code quality", "correct": false }
+          ],
+          "explanation": "Least privilege means giving the agent only what the job requires — a code reviewer needs GitHub read access — and adding more only when a test demonstrates the need, since tools can be added from Agent Details at any time. Option b over-scopes: extra tools widen the blast radius of a mistake and clutter the agent's tool reasoning for no benefit. Option c goes too far the other way — a reviewer that must fetch PR diffs genuinely needs a GitHub tool; a prompt cannot substitute for tool access. Option d assigns an irrelevant, high-consequence tool (customer email) to a code-review agent, the opposite of least privilege.",
+          "sourceRefs": ["r-gb-agents-creating", "r-gb-tools-security"]
+        }
+      ]
+    },
+    {
+      "id": "m01-l3-roster-safety-and-judgment",
+      "title": "The roster, safety guidelines, voice — and the judgment call",
+      "estMinutes": 14,
+      "objective": "Manage agents from the roster, understand where workspace-wide safety guidelines live, use voice and quick actions, and decide when to make a new agent versus routing to an existing one.",
+      "body": "## Living with the roster\n\nOnce agents exist, the **Agent Roster** is where you run the fleet. Each agent is a card showing name, category, model (as a badge), success rate, tasks completed, capability tags, and a status dot (green online / grey idle). You filter by **Active / Idle**, and the search bar filters instantly by name, type, or capability. Click a card to open **Agent Details** — a slide-over with Overview, Performance, Workload, Plugins, and Reports tabs — where you edit the agent, read its performance and token/cost metrics, manage its plugins and tools, and read the standup reports it files. The card menu (three dots) gives you **Edit, Duplicate, Delete**; note that **deleting is permanent** (history and reports are retained, but the configuration is gone), and **Duplicate** is the fast way to fork a working agent into a near-variant.\n\n## Where safety lives: the Configuration tab\n\nThe **Configuration** tab holds workspace-wide defaults that apply as a base layer across your whole fleet — and this is where safety is expressed as policy, not per-agent guesswork:\n\n- **Default model settings** — the provider, model, temperature, and max-token cap new agents start from. Individual agents override these. (This default is a cost lever: set a cheaper default model and every new agent inherits it unless deliberately upgraded.)\n- **System prompt defaults** — snippets injected into *all* agents, including **global instructions**, **safety guidelines** (content filtering and guardrails), and output-formatting preferences.\n- **Orchestrator soul** — the overarching personality and behaviour of the entire fleet: global tone, **safety boundaries (what agents are not allowed to do)**, and response guidelines.\n\nThe mechanic to internalise: **agent-specific prompts are appended *after* the global defaults, and the agent's own prompt takes priority on conflict.** So workspace safety guidelines set a floor, and an individual agent's prompt refines behaviour on top — you get one place to state fleet-wide guardrails rather than repeating them in every agent. If you came from AI Business Foundations, this is the machinery behind the guardrails idea in modules 5 and 6: here, guardrails are literally a system-prompt layer under every agent. (Deeper governance — approvals, delegation rules, RBAC, budgets — is module 09; this is just the agent-prompt safety layer.)\n\n## Voice and quick actions\n\n**Voice chat** is live and documented. Click the **microphone icon** in the input bar to speak; your message is transcribed (speech-to-text), handled by the assigned agent, and the reply is read back (text-to-speech). Manage voices under **Settings → Voice Profiles** — browse and preview voices, set a workspace default, and even create **custom cloned voices** from an uploaded sample. Voice does not replace text; the text response is still in the thread, and you can switch between voice and text in the same conversation. It shines for quick questions and status checks; for long code review, text is more efficient.\n\n**Quick actions** are the shortcut buttons below the input: **Code** (routes to code-focused agents with code formatting), **Create an Agent** (launches the create flow without leaving chat), **Knowledge Base** (focuses the conversation on your uploaded documents), **Playbooks** (browse and run multi-step workflows), and **Edit Tools** (jump to tool management). A quick action *sets the context* for your next message — you still type the request normally after clicking one.\n\n## The judgment call: new agent, or let Auto route?\n\nEvery builder hits this early: *should I create a NEW agent, or just chat in Auto and let the router pick an existing one?* There is a real trade-off, and the sources give you both sides.\n\n**The case for fewer, well-described generalists.** Fewer agents means easier routing (less for the semantic tier to disambiguate between), and you dodge the **five-to-ten-interaction cache cold-start** every new agent suffers. A well-described generalist that is already warm in the cache answers instantly and cheaply.\n\n**The case for specific single-purpose agents.** A narrow agent gets a sharper system prompt, which means **better capability-test scores** and clearer, more consistent reports. Its description is easier to make distinct, so once warm it routes very cleanly. But every new agent adds cache cold-start and ongoing maintenance.\n\n**The practical rule of thumb for a builder:** *do not spin up a new agent for a one-off — chat in Auto and let the router use what you have. Create a new agent when a distinct, repeating job deserves its own sharp prompt, its own least-privilege tool set, and its own capability score* — and when it does, invest in the description so it earns its place in the routing tiers quickly. In short: reach for an **agent** when you need a persistent, testable specialist; you do not manufacture one for a single question.\n\n## Agent vs playbook vs mission — the right unit of work\n\nThe agent is one of three units, and choosing the wrong one is a common early mistake:\n\n- An **agent** is a *worker* — the right unit when a single specialist can do the job in one turn (or a short exchange).\n- A **playbook** is a *multi-step workflow that chains agents together* in sequence — the right unit when the work has several ordered steps across more than one agent. (This is module 04.)\n- A **mission** is a *long-running, coordinated objective* — the right unit when work spans time and multiple agents toward a goal. (This is module 05.)\n\nA useful test: if you can name a single worker and a single ask, build an **agent**. If you find yourself writing \"first do X, then Y, then Z,\" you are describing a **playbook**. If the work is an ongoing objective rather than a task, that is a **mission**. Module 01 is deliberately about the agent — get the worker and its routing right first, and the playbooks and missions in later modules are built from workers you can trust.\n\n## Walkthrough: one specialist beats three vague ones\n\nSuppose you keep asking for TypeScript code reviews. You could (a) create three narrow agents — a TS reviewer, a Python reviewer, a security reviewer — or (b) let Auto route to the Code Reviewer starter, or (c) build one sharp Code Reviewer with a description that names TypeScript, Python, and security, and a strong system prompt. For a repeating job, (c) wins: one agent to keep warm in the cache, one description to sharpen, one capability score to improve — versus three cold-start agents competing in the semantic tier and three prompts to maintain. You reserve new agents for genuinely distinct repeating jobs, and you let Auto handle the one-offs. That is the judgment this module is really teaching: the router rewards a few sharp, well-described specialists over a crowd of vague ones.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m01-l3-1",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Where are workspace-wide safety guidelines applied, and how do they interact with an individual agent's own prompt?",
+          "options": [
+            { "id": "a", "text": "In the Configuration tab (system prompt defaults and the orchestrator soul); they inject as a base layer under every agent, and the agent's own prompt is appended after and takes priority on conflict", "correct": true },
+            { "id": "b", "text": "Only inside each individual agent's system prompt; there is no workspace-wide place to set guardrails", "correct": false },
+            { "id": "c", "text": "In the chat input bar as a per-message toggle the user flips before sending", "correct": false },
+            { "id": "d", "text": "Nowhere configurable — safety is fixed by the platform and cannot be expressed as prompts", "correct": false }
+          ],
+          "explanation": "The Configuration tab holds system-prompt defaults including safety guidelines and the orchestrator soul's safety boundaries; these apply as a base layer to every agent, with the agent's own prompt appended after and winning on conflict — one place for fleet-wide guardrails. Option b misses the workspace-wide layer entirely. Option c invents a per-message toggle that does not exist. Option d is wrong because safety here is explicitly expressed as configurable system-prompt layers, not a fixed unchangeable behaviour.",
+          "sourceRefs": ["r-gb-agents-configuration", "r-gb-agents-details"]
+        },
+        {
+          "id": "kc-m01-l3-2",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A builder keeps asking for TypeScript code reviews several times a week. By the module's rule of thumb, what is the right move?",
+          "options": [
+            { "id": "a", "text": "Build one sharp Code Reviewer with a distinct description and a strong system prompt, invest in warming it up, and reserve new agents for other genuinely distinct repeating jobs", "correct": true },
+            { "id": "b", "text": "Create a separate new agent for every individual review request so each one is maximally specialised", "correct": false },
+            { "id": "c", "text": "Never create any agent; only ever use Auto mode with the starter agents no matter how repetitive the job", "correct": false },
+            { "id": "d", "text": "Spin up ten generalist agents so the router has more options to choose from", "correct": false }
+          ],
+          "explanation": "The rule of thumb: create a new agent when a distinct, repeating job deserves its own sharp prompt, tool set, and capability score — a several-times-a-week review job qualifies, and one well-described specialist beats a crowd. Option b manufactures an agent per request, which is the one-off anti-pattern the rule warns against and multiplies cold-start and maintenance. Option c is too rigid — a repeating, distinct job is exactly when a dedicated agent pays off. Option d adds cold-start and semantic-tier confusion with more vague agents, the opposite of the module's advice to prefer a few sharp specialists.",
+          "sourceRefs": ["r-gb-chat-routing", "r-gb-agents-creating"]
+        },
+        {
+          "id": "kc-m01-l3-3",
+          "domainId": "m01-chat-first-agent",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You describe a job as 'first fetch the open PRs, then review each one, then post a summary to Slack.' Which unit of work does that describe?",
+          "options": [
+            { "id": "a", "text": "A playbook — a multi-step workflow that chains agents together in sequence", "correct": true },
+            { "id": "b", "text": "A single agent, because any amount of ordered work is still one worker's job", "correct": false },
+            { "id": "c", "text": "Voice chat, because multi-step requests must be spoken rather than typed", "correct": false },
+            { "id": "d", "text": "A quick action, because 'Playbooks' is one of the buttons under the chat input", "correct": false }
+          ],
+          "explanation": "Ordered, multi-step work across more than one capability — fetch, then review, then post — is the definition of a playbook, the multi-step workflow unit covered in module 04. Option b is the common mistake: when you catch yourself writing 'first X, then Y, then Z,' you are past a single agent's turn and describing a workflow. Option c is unrelated — voice is an input mode, not a unit of work. Option d confuses the quick-action button (a shortcut to browse and run playbooks) with the concept of a playbook itself.",
+          "sourceRefs": ["r-gb-agents-readme", "r-gb-chat-quick-actions"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m01-1",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the primary way you interact with agents on the platform?",
+      "options": [
+        { "id": "a", "text": "The Chat page — you type in plain language and the Universal Router picks the best agent", "correct": true },
+        { "id": "b", "text": "A command-line console where you type an agent name and a command", "correct": false },
+        { "id": "c", "text": "A drag-and-drop canvas where you wire agents together before every message", "correct": false },
+        { "id": "d", "text": "You must open each agent's own page and message it individually", "correct": false }
+      ],
+      "explanation": "Chat is the front door: you type a message and the platform automatically routes it to the best agent via the Universal Router. Option b is wrong — there is no command syntax; you write in plain language. Option c describes a workflow-builder metaphor that is not how you send a chat message. Option d is the opposite of the design — you do not pick an agent per message; the router dispatches for you, though you can override it.",
+      "sourceRefs": ["r-gb-chat-readme"]
+    },
+    {
+      "id": "q-m01-2",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the routing ladder, which tier is described as fast and free with no LLM call?",
+      "options": [
+        { "id": "a", "text": "Tier 1 — Cache", "correct": true },
+        { "id": "b", "text": "Tier 3 — LLM", "correct": false },
+        { "id": "c", "text": "Tier 2.5 — Semantic", "correct": false },
+        { "id": "d", "text": "Tier 0 — User override", "correct": false }
+      ],
+      "explanation": "Tier 1 (Cache) reuses a previous successful routing decision for a similar question, which is fast and free with no LLM call. Option b is the opposite — the LLM tier is the most expensive fallback. Option c, the semantic tier, runs an embedding comparison, which has a moderate cost, not free. Option d, user override, does skip routing cost but it is not a cache hit — it is you having selected a specific agent, and it is described as Tier 0, not the free cache tier.",
+      "sourceRefs": ["r-gb-chat-routing"]
+    },
+    {
+      "id": "q-m01-3",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Roughly how large is a single conversation's context budget, and what happens when a conversation gets long?",
+      "options": [
+        { "id": "a", "text": "About 60,000 tokens, and long conversations are automatically summarised to preserve important context", "correct": true },
+        { "id": "b", "text": "Unlimited — conversations never lose any earlier context", "correct": false },
+        { "id": "c", "text": "About 60,000 tokens, and once full the conversation is hard-stopped and cannot continue", "correct": false },
+        { "id": "d", "text": "About 1,000 tokens, so you must start a new chat every few messages", "correct": false }
+      ],
+      "explanation": "Each conversation maintains a context budget of approximately 60,000 tokens, and long conversations are automatically summarised to preserve the important context. Option b is wrong — the budget is finite, which is exactly why summarisation exists. Option c misstates the behaviour: the conversation is summarised, not hard-stopped. Option d has the number an order of magnitude too low; 60,000 tokens is a substantial budget.",
+      "sourceRefs": ["r-gb-chat-readme"]
+    },
+    {
+      "id": "q-m01-4",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which four providers can power an agent's model, per the create flow?",
+      "options": [
+        { "id": "a", "text": "OpenRouter, OpenAI, Anthropic, DeepSeek", "correct": true },
+        { "id": "b", "text": "AWS, Azure, Google Cloud, Oracle", "correct": false },
+        { "id": "c", "text": "GitHub, Slack, Jira, Composio", "correct": false },
+        { "id": "d", "text": "Only a single built-in Automatos model with no provider choice", "correct": false }
+      ],
+      "explanation": "Step 3 of the create flow lists the provider options as OpenRouter, OpenAI, Anthropic, and DeepSeek, with OpenRouter as the primary provider fronting many models. Option b lists cloud hosting vendors, not the model providers in the dialog. Option c lists tool integrations (via Composio), which are assigned in step 5 — they are not model providers. Option d is false — you explicitly choose a provider and model, and can even bring your own key.",
+      "sourceRefs": ["r-gb-agents-creating"]
+    },
+    {
+      "id": "q-m01-5",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A new agent you just created is not being picked in Auto mode. What is the most likely explanation and the right first response?",
+      "options": [
+        { "id": "a", "text": "It has not warmed up yet — new agents take 5-10 interactions to enter the cache and semantic tiers — so give it a few interactions and sharpen the description if it still misses", "correct": true },
+        { "id": "b", "text": "The platform is broken; delete the agent and file a bug report", "correct": false },
+        { "id": "c", "text": "Auto mode ignores custom agents entirely and only ever routes to starter agents", "correct": false },
+        { "id": "d", "text": "You must manually rewrite the router's keyword rules for every new agent before it can be routed to", "correct": false }
+      ],
+      "explanation": "New agents take a few routing cycles — 5-10 interactions — to be picked up by the semantic and cache tiers, and if routing still misses, the documented fix is to improve the description. Option b overreacts to normal cold-start behaviour. Option c is false — Auto routes to any suitable agent, custom or starter, once it is warm. Option d is not required; corrections and warm-up feed the tiers automatically without hand-editing rules.",
+      "sourceRefs": ["r-gb-chat-routing", "r-gb-agents-creating"]
+    },
+    {
+      "id": "q-m01-6",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does the capability test produce, and what is it primarily testing?",
+      "options": [
+        { "id": "a", "text": "A scored report on response quality, tool-usage accuracy, persona adherence, and error handling — an objective read on how well the agent (and its system prompt) performs", "correct": true },
+        { "id": "b", "text": "A routing decision that permanently pins the agent to a set of keywords", "correct": false },
+        { "id": "c", "text": "A bill estimating the agent's monthly token cost and nothing else", "correct": false },
+        { "id": "d", "text": "A pass/fail on whether the agent's name is unique in the workspace", "correct": false }
+      ],
+      "explanation": "Run Capability Test returns a comprehensive scored report covering response quality, tool-usage accuracy, persona adherence, and error handling — the objective check on the agent's behaviour and prompt. Option b confuses testing with routing; the capability test does not pin keywords. Option c is a different feature — token/cost data lives in the Performance tab, not the capability report. Option d invents a name-uniqueness check that the capability test does not perform.",
+      "sourceRefs": ["r-gb-agents-creating", "r-gb-agents-details"]
+    },
+    {
+      "id": "q-m01-7",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The module calls cheaper-model routing the number-one cost lever. Which action most directly reflects that principle?",
+      "options": [
+        { "id": "a", "text": "Writing distinct, keyword-rich descriptions and setting a sensible default model so most traffic resolves on cheap tiers and cheaper models instead of the expensive LLM fallback", "correct": true },
+        { "id": "b", "text": "Forcing every message through the Tier 3 LLM classifier so routing is always maximally accurate", "correct": false },
+        { "id": "c", "text": "Selecting a specific agent for every single message so the cache never gets used", "correct": false },
+        { "id": "d", "text": "Deleting the cache regularly so routing decisions are always recomputed from scratch", "correct": false }
+      ],
+      "explanation": "The ladder is designed so cheap tiers catch most traffic; distinct descriptions keep messages on the rules/semantic tiers, and a sensible default model keeps per-call cost down — both directly reduce spend. Option b is the opposite: routing everything through the LLM tier maximises cost, which is what the ladder exists to avoid. Option c bypasses the free cache entirely and adds manual effort with no cost benefit. Option d throws away the free-and-fast cache tier, forcing more expensive recomputation — the reverse of the cost lever.",
+      "sourceRefs": ["r-gb-chat-routing", "r-gb-agents-configuration"]
+    },
+    {
+      "id": "q-m01-8",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For a code-review agent, why set the temperature low (around 0.3) rather than high?",
+      "options": [
+        { "id": "a", "text": "Low temperature is more deterministic, which suits code review where you want consistent, repeatable findings rather than creative variation", "correct": true },
+        { "id": "b", "text": "Low temperature makes the agent respond faster, which is the only reason to lower it", "correct": false },
+        { "id": "c", "text": "Temperature controls which routing tier is used, and 0.3 forces the cache tier", "correct": false },
+        { "id": "d", "text": "Temperature sets the maximum response length, and 0.3 keeps reviews short", "correct": false }
+      ],
+      "explanation": "Temperature runs from 0 (deterministic) to 1 (creative), so a low value gives consistent, repeatable output — exactly what code review wants. Option b misattributes the effect; temperature governs randomness, not response speed. Option c confuses two unrelated settings — temperature is a model parameter and has nothing to do with routing tiers. Option d confuses temperature with max tokens, which is the separate setting that caps response length.",
+      "sourceRefs": ["r-gb-agents-creating"]
+    },
+    {
+      "id": "q-m01-9",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which prompt-engineering habit most directly improves the 'persona adherence' and 'output format' aspects a capability test scores?",
+      "options": [
+        { "id": "a", "text": "Defining the output format explicitly and giving one or two example input/output pairs in the system prompt", "correct": true },
+        { "id": "b", "text": "Making the system prompt as short as possible so the model has fewer instructions to follow", "correct": false },
+        { "id": "c", "text": "Leaving the system prompt at 'You are a helpful assistant' so the model stays flexible", "correct": false },
+        { "id": "d", "text": "Removing all boundaries so the agent can answer anything however it likes", "correct": false }
+      ],
+      "explanation": "Defining the output format ('numbered findings with HIGH/MEDIUM/LOW severity and a one-line fix') and including examples are two of the five documented disciplines, and they are exactly what drives consistent, gradeable responses. Option b is wrong — brevity for its own sake removes the specificity that quality depends on. Option c is the explicit 'bad' example the docs give; a vague prompt yields inconsistent output. Option d removes the boundaries that keep the agent on task, degrading rather than improving adherence.",
+      "sourceRefs": ["r-gb-agents-creating"]
+    },
+    {
+      "id": "q-m01-10",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "When is it correct to select a specific agent from the Auto dropdown (Tier 0) instead of leaving it on Auto?",
+      "options": [
+        { "id": "a", "text": "When you know exactly which agent you want, or when you are testing a new agent's responses in isolation", "correct": true },
+        { "id": "b", "text": "Always — leaving it on Auto is never advisable because the router is unreliable", "correct": false },
+        { "id": "c", "text": "Never — Tier 0 is an internal state you cannot trigger yourself", "correct": false },
+        { "id": "d", "text": "Only when you want the message to cost more by forcing the LLM tier", "correct": false }
+      ],
+      "explanation": "Selecting a specific agent bypasses routing (Tier 0) and is useful when you know who you want to talk to, or when you are chat-testing a new agent without routing interfering. Option b overstates the case — Auto is the intended default and the router improves with use; override is situational. Option c is false — you trigger Tier 0 yourself by picking an agent from the dropdown. Option d is nonsensical: a direct override skips routing entirely, so it does not invoke the LLM tier at all.",
+      "sourceRefs": ["r-gb-chat-routing", "r-gb-chat-readme"]
+    },
+    {
+      "id": "q-m01-11",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which capability is documented as live in Chat today?",
+      "options": [
+        { "id": "a", "text": "Voice chat — speak via the microphone icon, get a spoken reply, and manage voices (including custom cloned voices) under Settings → Voice Profiles", "correct": true },
+        { "id": "b", "text": "One-click branded PDF and DOCX generation of any response directly from the chat thread", "correct": false },
+        { "id": "c", "text": "A pre-set spend ceiling that hard-blocks a conversation once a dollar limit is hit", "correct": false },
+        { "id": "d", "text": "Google Drive and OneDrive sync of attachments straight from the input bar", "correct": false }
+      ],
+      "explanation": "Voice chat is documented live: the microphone icon transcribes your speech, the reply is read back, and Settings → Voice Profiles manages voices including cloned ones. Option b overstates deliverables — the documented baseline is markdown templates and reports; branded PDF/DOCX generation is in-development, verify in product. Option c misstates budgets — the platform documents cost alerts and mission pause/resume-with-increased-budget, not a pre-set hard spend ceiling. Option d names sync sources that are 'coming soon' — Dropbox and S3 are the live cloud-sync options, not Google Drive or OneDrive.",
+      "sourceRefs": ["r-gb-chat-voice", "r-gb-chat-readme"]
+    },
+    {
+      "id": "q-m01-12",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need work done that goes 'draft the release notes, then get them reviewed, then publish to the blog.' What unit of work fits, and which module covers it?",
+      "options": [
+        { "id": "a", "text": "A playbook — a multi-step workflow chaining agents in sequence — covered in module 04", "correct": true },
+        { "id": "b", "text": "A single agent, because one specialist should always do everything in one turn", "correct": false },
+        { "id": "c", "text": "The Configuration tab, because chained work is set up as a global default", "correct": false },
+        { "id": "d", "text": "Voice chat, because sequential tasks require spoken commands", "correct": false }
+      ],
+      "explanation": "Ordered multi-step work across agents (draft, then review, then publish) is a playbook, the multi-step workflow unit introduced here and taught in module 04. Option b ignores that the work has three distinct ordered steps beyond a single agent's turn. Option c confuses a workflow with global agent defaults, which are unrelated to chaining steps. Option d is wrong — the input mode (voice or text) has nothing to do with whether work is a single turn or a chained workflow.",
+      "sourceRefs": ["r-gb-agents-readme", "r-gb-chat-quick-actions"]
+    },
+    {
+      "id": "q-m01-13",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You correct a mis-routed message once. The same phrasing recurs many times a week afterwards. What is the compounding effect, and through which tier does it mostly pay off?",
+      "options": [
+        { "id": "a", "text": "The correction is stored in the routing history, so the cache (Tier 1) increasingly serves that phrasing for free — the one correction saves the cost of falling to the LLM on every future recurrence", "correct": true },
+        { "id": "b", "text": "The correction helps only that one message; each recurrence is routed from scratch with no memory of the fix", "correct": false },
+        { "id": "c", "text": "The correction forces every future recurrence through the Tier 3 LLM to double-check, raising cost over time", "correct": false },
+        { "id": "d", "text": "The correction rewrites the agent's system prompt, so quality improves but routing cost is unaffected", "correct": false }
+      ],
+      "explanation": "Corrections feed the logged routing history, so a recurring phrasing is increasingly answered from the free cache tier and correctly routed without falling to the expensive LLM — the single correction compounds across every recurrence. Option b contradicts the documented learning behaviour; the history is exactly what makes corrections persist. Option c inverts the design — a learned correction reduces reliance on the LLM tier, it does not force it. Option d confuses routing with prompting; a routing correction changes where messages go, not the agent's system prompt.",
+      "sourceRefs": ["r-gb-chat-routing", "r-gb-chat-history"]
+    },
+    {
+      "id": "q-m01-14",
+      "domainId": "m01-chat-first-agent",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A workspace admin adds a safety guideline to the Configuration tab, but one agent's own system prompt contains an instruction that conflicts with it. Given how the layers combine, what is the safest way to guarantee the guideline holds for that agent?",
+      "options": [
+        { "id": "a", "text": "Because the agent's own prompt is appended after the global defaults and wins on conflict, remove or fix the conflicting instruction in that agent's prompt so it no longer overrides the guideline", "correct": true },
+        { "id": "b", "text": "Do nothing — global safety guidelines always override any conflicting agent-specific prompt automatically", "correct": false },
+        { "id": "c", "text": "Delete the Configuration tab guideline, since agent prompts are the only place safety can be enforced", "correct": false },
+        { "id": "d", "text": "Switch the agent to a different model, because the model — not the prompt layering — decides which instruction wins", "correct": false }
+      ],
+      "explanation": "The documented layering is that agent-specific prompts are appended after the global defaults and take priority on conflict, so a conflicting agent instruction would win over the global guideline — the fix is to correct that agent's prompt. Option b is the dangerous misconception: globals set a base layer but do not automatically override an agent's own conflicting instruction. Option c throws away the useful fleet-wide layer; the problem is the agent-level conflict, not the global guideline. Option d misattributes the outcome to the model; it is the prompt-layering precedence, not the model choice, that determines which instruction wins.",
+      "sourceRefs": ["r-gb-agents-configuration"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m01-new-agent-vs-auto",
+      "domainIds": ["m01-chat-first-agent"],
+      "title": "New agent, or let Auto route?",
+      "tagline": "The judgment call every builder faces first — spin up a fresh specialist, or lean on a well-described generalist the router already knows.",
+      "context": "You are onboarding a small team onto a fresh Automatos workspace. It came with the 10 starter agents, including a Code Reviewer. A developer says: 'I do TypeScript PR reviews several times a day, and once in a while I need a quick one-off summary of a design doc. I want this to be fast and cheap. Should I build new agents for these?' Walk the decision using what the sources say about routing tiers, cold-start, and the right unit of work.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "The developer's instinct is to create a brand-new agent for every distinct thing they might ask — a TS reviewer, a Python reviewer, a doc-summariser, a security checker. What's your first move?",
+          "choices": [
+            { "id": "a", "text": "Separate the repeating job from the one-offs: the several-times-a-day TS review deserves its own sharp agent; the occasional doc summary does not — chat that in Auto and let the router use an existing agent", "verdict": "best", "rationale": "This is the rule of thumb the module lands on: create a new agent for a distinct, repeating job that deserves its own prompt, tool set, and capability score; for one-offs, chat in Auto. It also avoids paying cold-start on agents you'll barely use." },
+            { "id": "b", "text": "Agree and create all four agents now, so every possible request has a dedicated specialist ready", "verdict": "viable", "rationale": "Specialists do get sharper prompts and cleaner capability scores, so this isn't reckless — but every new agent adds the 5-10 interaction cache cold-start and ongoing maintenance, and building one for a rare one-off spends effort you won't recoup. Separate the repeating job from the occasional one first." },
+            { "id": "c", "text": "Tell them never to create agents — the 10 starters plus Auto can cover everything, so custom agents are unnecessary", "verdict": "wrong", "rationale": "This ignores the real upside of a dedicated agent for a high-frequency, distinct job: a sharper system prompt, a distinct routable description, and its own capability score. A several-times-a-day TS review is exactly the case where a custom specialist earns its place." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "You've decided to build one dedicated TypeScript Code Reviewer. The developer writes its description as 'Handles code and dev stuff.' What do you tell them?",
+          "choices": [
+            { "id": "a", "text": "Rewrite it to name the exact terms real messages contain — 'Reviews GitHub pull requests for bugs, security issues, and style in TypeScript' — because the description is the routing instruction the rules and semantic tiers match on", "verdict": "best", "rationale": "The description is what gets the agent picked: specific keywords help the rules tier and a distinct description helps the semantic tier, keeping messages off the expensive LLM fallback. 'Handles code and dev stuff' matches almost nothing and will lose routing races." },
+            { "id": "b", "text": "Leave the description vague but tell them to always select the agent manually from the dropdown so routing never matters", "verdict": "viable", "rationale": "Manual selection (Tier 0) does work and guarantees the right agent — but it throws away the whole point of Auto and the cache, makes every teammate do the picking, and means the agent never warms into the tiers. Fine as a stopgap while testing; not the answer for daily use." },
+            { "id": "c", "text": "Tell them the description doesn't affect routing — only the agent's category and name matter — so any text is fine", "verdict": "wrong", "rationale": "This is factually wrong: the docs are explicit that the router uses the description to decide when to route to the agent, and that detailed, distinct descriptions are what make the rules and semantic tiers work. Vague copy directly causes mis-routing." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The new reviewer is built with a sharp description, but for its first day it keeps getting missed in Auto — a generic assistant answers instead. The developer wants to scrap it. How do you respond?",
+          "choices": [
+            { "id": "a", "text": "Explain that new agents take 5-10 interactions to warm into the cache and semantic tiers; keep using it, correct any wrong routes so the history learns, and re-judge after it's warm", "verdict": "best", "rationale": "Cold-start is documented and expected: give a new agent 5-10 interactions before judging routing, and corrections feed the routing history so future similar messages route correctly. Scrapping it on day one destroys the warm-up you've already started paying for." },
+            { "id": "b", "text": "Immediately rewrite the description again and again after each miss, hoping one wording finally sticks on the first try", "verdict": "viable", "rationale": "Sharpening a genuinely weak description is the right fix when routing keeps missing — but churning it every single interaction resets the warm-up and doesn't give any version time to enter the tiers. If the description is already specific, patience plus corrections beats constant rewrites." },
+            { "id": "c", "text": "Conclude the router is broken, switch the whole team to selecting agents manually forever, and stop using Auto", "verdict": "wrong", "rationale": "This over-corrects on normal cold-start behaviour. Abandoning Auto throws away the free cache tier and the router's ability to learn from corrections — the exact mechanisms that would have fixed the routing within a few interactions." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-gb-chat-routing", "r-gb-agents-creating", "r-gb-agents-readme"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m01-code-reviewer-routes",
+      "domainId": "m01-chat-first-agent",
+      "title": "Build a Code Reviewer and prove it routes",
+      "goal": "Produce your signature artifact for this module: a working, dedicated Code Reviewer agent that the Universal Router picks in Auto mode. You'll build it from a template, give it a routing-friendly description and a least-privilege tool set, test it with the chat-then-capability loop, and then prove — from the response header — that Auto routes a plain-language request to it.",
+      "steps": "## What you'll do\n\nYou'll create one agent and take it all the way to being routable. Everything here is grounded in the Agents and Chat pages — no invented buttons.\n\n### Before you start\n\n- **Sign in.** A personal workspace is created on first login and you're its admin, so every step is solo-achievable. It already contains the 10 starter agents.\n- Open the **Agents** page (Agent Management). You'll see the Roster tab, the stats bar (Total / Active / Categories / Avg Performance), and **+ Create Agent** in the top right.\n\n### Build the agent (the six-step create flow)\n\n1. **Click + Create Agent → From Template → Code Reviewer.** Starting from a template gives you sensible defaults; recommended for a first build.\n2. **Write a routing-friendly Description.** Replace any generic text with the exact terms real requests contain, e.g. *\"Reviews GitHub pull requests and code for bugs, security issues, and style problems in TypeScript and Python.\"* This is the single most important field — it's the instruction the Universal Router matches on.\n3. **Set the model.** Pick a provider and model, and set **Temperature ~0.3** (low, because review wants consistency over creativity). Leave max tokens at a sensible cap.\n4. **Choose the Technical persona** (precise, code-focused).\n5. **Scope tools with least privilege.** Assign a GitHub tool for reading pull requests; do NOT pile on Slack, email, or Jira 'just in case.' You can add more from Agent Details later if a test proves the need.\n6. **Click Create.** The agent lands on the roster immediately.\n\n### Test it (chat, then capability)\n\n7. **Chat test.** Open **Chat**, select your Code Reviewer directly from the **Auto** dropdown (this is Tier 0 override, so routing is out of the picture), and paste a public GitHub file or PR link with *\"Review this for bugs and security issues.\"* Watch the response stream. Confirm it behaves like a reviewer and uses its tool.\n8. **Capability test.** Open the agent from the roster → Agent Details → **Run Capability Test.** Read the scored report across response quality, tool-usage accuracy, persona adherence, and error handling. If a score is weak, improve the system prompt (be specific about the role, define the output format, set boundaries, add an example, reference the GitHub tool) and re-test.\n\n### Prove it routes\n\n9. **Start a NEW chat, switch back to Auto,** and send a plain-language request that names no agent: *\"Can you review some code for me?\"*\n10. **Read the response header** to see which agent answered. If it's your Code Reviewer, the description did its job. If it isn't, sharpen the description, use the correction mechanism to reassign the message, and try again over the next few interactions — remember a new agent needs **5-10 interactions** to warm into the cache and semantic tiers.\n\n### Why it matters\n\nThis is the core loop of the whole platform: build a worker, describe it so the router can find it, test it, and route to it. Every later module — playbooks, missions, knowledge, governance — is built on agents you can trust to be picked. If you came from AI Business Foundations, you've just built the machinery behind 'hand the brief to an AI.'\n\n### A note on cost\n\nCapability tests and chats call a real model, and models cost money per use. The realistic setup for a builder is bring-your-own-key. Keeping temperature and the model choice sensible, and letting the cache/rules tiers catch repeat traffic, is the number-one cost lever — module 09 covers cost and governance properly.",
+      "checklist": [
+        "Signed in and confirmed you're the admin of your own personal workspace with the 10 starter agents present",
+        "Created a Code Reviewer from a template via the six-step create flow",
+        "Description names the exact terms real requests contain (e.g. GitHub, pull requests, security, TypeScript, Python) — not vague copy",
+        "Temperature set low (~0.3) and the Technical persona selected",
+        "Tools scoped to least privilege — a GitHub tool only, nothing extra 'just in case'",
+        "Chat-tested by selecting the agent directly (Tier 0) and confirming it reviews and uses its tool",
+        "Ran a Capability Test and read the scored report (quality, tool usage, persona, error handling)",
+        "ROUTING PROVED: in a fresh Auto chat, a plain-language 'review some code' request was picked up by your agent (confirmed in the response header) — or you corrected the route and are re-testing over 5-10 interactions"
+      ]
+    },
+    {
+      "id": "lab-m01-router-diagnosis",
+      "domainId": "m01-chat-first-agent",
+      "title": "Read and correct the Router",
+      "goal": "Produce a short routing log of your own: send a handful of messages in Auto mode, record which agent each one landed on (from the response header), decide whether the route was right, and correct at least one wrong route so the system learns. The artifact is your before/after note showing a correction taking effect.",
+      "steps": "## What you'll do\n\nYou'll turn the abstract 'five-tier ladder' into something you've watched happen, and you'll exercise the correction mechanism that makes routing improve. This uses only the Chat page and its response headers.\n\n### Before you start\n\n- Have at least one custom agent from the first lab (a Code Reviewer) plus the starter agents in your workspace.\n- Open **Chat** and make sure the selector reads **Auto** (not a specific agent — you want the router to actually run).\n\n### Send a spread of messages and log the routes\n\n1. **Send a strong-keyword message:** *\"Review this pull request for security issues.\"* Note the agent in the **response header** — a keyword like 'security' or 'review' likely matches a Tier 2 rule.\n2. **Send a soft-wording message for the same intent:** *\"Can you look over some changes I made to the login screen?\"* Note the agent. With no obvious keyword this may fall to the semantic tier (2.5) or the LLM (Tier 3) and could land on a general assistant.\n3. **Send an off-topic message:** *\"Summarise the key points of a design document I'll paste.\"* Note the agent.\n4. **Repeat the soft-wording message once or twice more** and note whether the landing agent changes as the system sees more of it.\n5. **Write down the log:** message → agent that answered → was it the right agent? Three to five rows.\n\n### Correct a wrong route\n\n6. **Pick a message that routed wrong** (for example, the soft-wording code request that went to a general assistant instead of your Code Reviewer).\n7. **Use the correction mechanism** to reassign it to the agent that should have handled it, and/or downvote the wrong response. Corrections feed the routing history.\n8. **Send the same soft-wording message again** and note whether it now routes correctly. Record the before/after in your log.\n\n### Reflect (the judgment)\n\n9. In one or two lines, note *why* the soft-wording message was harder to route than the keyword one — and what you'd change in the Code Reviewer's **description** to help the rules and semantic tiers catch that phrasing next time. This links routing behaviour back to the description lever from Lesson 2.\n\n### Why it matters\n\nRouting isn't a black box you fight — it's a system that learns from your corrections, and the response header is your window into every decision. A single correction on a recurring phrase pays back every time that phrase returns, because the cheap cache tier increasingly serves it for free instead of falling to the expensive LLM.",
+      "checklist": [
+        "Confirmed the chat selector was on Auto so the router actually ran (not a Tier 0 override)",
+        "Sent at least three messages spanning strong-keyword, soft-wording, and off-topic intents",
+        "Logged each message with the agent that answered (read from the response header) and whether the route was correct",
+        "Identified at least one wrong route and used the correction mechanism (and/or downvote) to reassign it",
+        "Re-sent the corrected message and recorded whether it now routes correctly (before/after captured)",
+        "Wrote a one-to-two-line reflection on why soft wording routes worse and what description change would help",
+        "ARTIFACT SAVED: your short routing log showing a correction taking effect"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gb-chat-readme",
+      "title": "Automatos AI — Chat (platform docs)",
+      "url": "automatos-gitbook/chat/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The canonical description of the front door: the three areas (history, message thread, input bar), how the Universal Router picks an agent, SSE streaming, file attachments up to 20 MB, the ~60,000-token per-conversation context budget with auto-summarisation, and switching agents mid-thread. Read this first — everything else in the module hangs off it. Note the context budget is per-conversation and separate from long-term memory (module 06).",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-chat-routing",
+      "title": "Automatos AI — Routing & Auto Mode (platform docs)",
+      "url": "automatos-gitbook/chat/routing.md",
+      "kind": "first-party-doc",
+      "annotation": "The single most important page for this module: the five routing tiers by their exact names (Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM), the fact that they're ordered by cost and latency, how decisions are logged and corrections feed future routing, and the note that new agents take a few interactions to warm up. Treat the tier order and the 'avoid Tier 3' insight as load-bearing.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-chat-quick-actions",
+      "title": "Automatos AI — Quick Actions (platform docs)",
+      "url": "automatos-gitbook/chat/quick-actions.md",
+      "kind": "first-party-doc",
+      "annotation": "The shortcut buttons under the input bar — Code, Create an Agent, Knowledge Base, Playbooks, Edit Tools — and the key nuance that a quick action sets context for your next message; you still type the request normally. Useful for orienting a new builder around what's one click away from Chat.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-chat-history",
+      "title": "Automatos AI — Chat History (platform docs)",
+      "url": "automatos-gitbook/chat/history.md",
+      "kind": "first-party-doc",
+      "annotation": "How past conversations are stored (auto-titled, workspace-scoped, independent context per chat) and — importantly for this module — the feedback and correction loop: upvote/downvote and routing corrections feed the Universal Router so it improves over time. The proof that routing learns from you.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-chat-voice",
+      "title": "Automatos AI — Voice Chat (platform docs)",
+      "url": "automatos-gitbook/chat/voice.md",
+      "kind": "first-party-doc",
+      "annotation": "Voice chat is documented live: microphone to speak, speech-to-text in, text-to-speech out, and voice profiles (including custom cloned voices) under Settings → Voice Profiles. Read it for the 'when to use voice vs text' judgment — voice suits quick questions and status checks, text suits long code review.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-agents-readme",
+      "title": "Automatos AI — Agents (Agent Management) (platform docs)",
+      "url": "automatos-gitbook/agents/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The Agent Management page: the four tabs (Roster, Configuration, Coordination, Playbooks), the stats bar, the 10 starter agents in a new workspace, and the quick-start create summary. Use it to place the agent as one unit of work among playbooks (module 04) and to see where fleet-wide settings live.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-agents-creating",
+      "title": "Automatos AI — Creating an Agent (platform docs)",
+      "url": "automatos-gitbook/agents/creating.md",
+      "kind": "first-party-doc",
+      "annotation": "The six-step create flow (starting point, basic info, model, persona, tools/skills, create), the explicit note that the Description is what the router matches on, the testing loop (chat test → capability test scoring quality/tool-usage/persona/error-handling → review routing), the 5-10 interaction warm-up, and the five prompt-engineering disciplines. The practical spine of Lesson 2 and the first lab.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-agents-configuration",
+      "title": "Automatos AI — Configuration (global agent settings) (platform docs)",
+      "url": "automatos-gitbook/agents/configuration.md",
+      "kind": "first-party-doc",
+      "annotation": "Where fleet-wide defaults and safety live: default model settings (a cost lever), system-prompt defaults including safety guidelines/guardrails, and the orchestrator soul (global tone and safety boundaries). The load-bearing mechanic is that agent-specific prompts are appended after the global defaults and win on conflict — so global guidelines set a floor, not an absolute override. Deeper governance (approvals, RBAC, budgets) is module 09.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-agents-details",
+      "title": "Automatos AI — Agent Details & Roster (platform docs)",
+      "url": "automatos-gitbook/agents/details.md",
+      "kind": "first-party-doc",
+      "annotation": "The per-agent slide-over (Overview, Performance, Workload, Plugins, Reports) where you edit an agent, read its performance and token/cost metrics, manage its tools, and run the capability test — plus roster actions (Edit, Duplicate, Delete; deletes are permanent). Pair with agents/roster.md for card fields and filtering. This is where you refine an agent after the create dialog.",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-gb-tools-security",
+      "title": "Automatos AI — Tools: security & least privilege (platform docs)",
+      "url": "automatos-gitbook/tools/security.md",
+      "kind": "first-party-doc",
+      "annotation": "Grounds the least-privilege habit from Lesson 2: scope an agent's tools to the job rather than assigning everything 'just in case,' because over-scoping widens the blast radius of a mistake. Read alongside tools/assigning.md when you start attaching real integrations (covered in depth in module 03).",
+      "domainIds": ["m01-chat-first-agent"]
+    },
+    {
+      "id": "r-ai-docs-universal-router",
+      "title": "Automatos platform — Universal Router (architecture direction)",
+      "url": "automatos-ai/docs/universal-router",
+      "kind": "reference",
+      "annotation": "The WHY behind the tiers — the design rationale for a cost-and-latency-ordered routing ladder and how the platform learns from routing history. Architecture direction, not a UI guide: read it to understand why the router is built this way, but treat only the gitbook as proof of what's live in the product today.",
+      "domainIds": ["m01-chat-first-agent"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-01-1",
+      "title": "01 · Chat, your first agent & the Universal Router — a watch-me-do-it build and route",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m01-chat-first-agent"],
+      "sourceNotebook": "platform-architect / m01 / chat-create-agent-and-read-the-router"
+    },
+    {
+      "id": "v-01-2",
+      "title": "01 · New agent or let Auto route? — the builder's judgment call (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m01-chat-first-agent"],
+      "sourceNotebook": "platform-architect / m01 / debate-new-agent-vs-auto-routing"
+    }
+  ]
+}

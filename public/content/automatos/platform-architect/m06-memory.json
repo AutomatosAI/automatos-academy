@@ -1,0 +1,594 @@
+{
+  "id": "m06-memory",
+  "order": 6,
+  "code": "06",
+  "name": "Memory — what agents remember (+ the deeper architecture)",
+  "tagline": "Your agents build context over time — they store facts, decisions, preferences and outcomes automatically, and recall them across conversations. This module teaches you the part you actually control: browse what an agent has stored on the Memory tab, search it with natural-language vector search, and curate it with pin, edit, and delete (delete is permanent). You'll learn the documented two-tier model — short-term and long-term — plus per-agent versus workspace-shared scope and automatic consolidation, and where memory pays off versus where you should uploading a document to a Knowledge Base instead. Then, clearly labelled as architecture direction and not a UI you'll find today, the deeper five-layer model (L0–L4) and field memory (PRD-166), so you understand where the platform's long-horizon memory is headed. If you came from AI Business Foundations, this is the machinery behind 'teach it your business' once the teaching starts persisting on its own.",
+  "overview": "Memory is the capability that turns a fresh-every-time chatbot into an agent that knows things about your work. On Automatos, agents automatically store important information from conversations and tasks — key facts and decisions, task results, user preferences and corrections, and cross-agent shared knowledge — and that memory persists across conversations, so context compounds. You don't have to do anything to make this happen; it is on by default (gated by the Agent memory feature flag). What you DO control lives on the Activity → Memory tab: you can browse every stored entry with its source agent, timestamp, and relevance (how often it has been recalled); search across all memories with natural-language vector search ('What do we know about the auth system?'); and manage entries with three actions — Pin (protect a memory from pruning), Edit (fix a factual error in place), and Delete (remove it, permanently). That last word matters: a deleted memory is gone and the agent will no longer recall it. Underneath the tab, the documented model has two tiers — short-term memory (recent conversation context and active task state, session-scoped, in PostgreSQL) and long-term memory (important facts, decisions, preferences, and cross-conversation learnings that survive across sessions) — plus a scope rule that keeps each agent's memory its own while sharing workspace-level knowledge across the whole team, and a periodic consolidation pass the platform runs automatically to merge related facts, remove duplicates, and strengthen the ones recalled most. The judgment this module builds is knowing which of those the platform handles for you (capture, tiering, consolidation, pruning) and which are yours (browse, search, curate), and when memory is the right tool at all versus a Knowledge Base document. The final third steps deliberately outside the user manual: labelled as architecture direction from the platform's design docs — never as a UI feature — you'll meet the five-layer model (L0 focus → L1 working → L2 short-term → L3 long-term → L4 organisational knowledge) and field memory (PRD-166), a workspace-persistent memory that compounds across missions with provenance and honest scoring. You learn those not to click them, but to understand the shape of where agent memory is going and to talk about it accurately.",
+  "objectives": [
+    "Explain what agent memory does — automatic capture of facts, decisions, preferences/corrections, task outcomes, and cross-agent shared knowledge that persists across conversations — and why that changes how an agent behaves over time.",
+    "Browse the Activity → Memory tab and read each entry's source agent, timestamp, and relevance (how often it has been recalled), and describe what relevance signals about a memory's value.",
+    "Search memory with natural-language vector search and explain why semantic (meaning-based) search returns relevant entries even when the wording differs from what was stored.",
+    "Curate memory with the three documented management actions — Pin to protect from pruning, Edit to correct a fact in place, and Delete (permanent) — and apply a hygiene judgment about when to use each.",
+    "Distinguish the two documented tiers — short-term (session-scoped, active task state, PostgreSQL) and long-term (persistent facts and learnings across sessions) — and the per-agent versus workspace-shared scope rule that keeps agents' memories separate while sharing team knowledge.",
+    "Describe automatic consolidation — merging related facts, removing duplicates, strengthening frequently-recalled ones — and separate what the platform manages automatically from what you manage on the tab.",
+    "Decide when memory is the right mechanism versus when to put stable reference material in a Knowledge Base document, and why persisted preferences beat repeating yourself every chat.",
+    "Recognise, as clearly-labelled architecture direction (not shipped UI), the five-layer model (L0–L4) and field memory (PRD-166), and explain the promotion/decay idea and honest scoring without presenting either as a user surface."
+  ],
+  "lessons": [
+    {
+      "id": "m06-l1-what-agents-remember",
+      "title": "What agents remember, and how memory is created",
+      "estMinutes": 13,
+      "objective": "Explain what agent memory captures automatically, why it changes agent behaviour over time, and browse the Memory tab to read a stored entry's source, timestamp, and relevance.",
+      "body": "## The capability, in one sentence\n\nA plain chatbot starts every conversation from zero — say your name today and it has forgotten by tomorrow. An Automatos agent doesn't. It **automatically stores important information from conversations and tasks**, and that memory **persists across conversations**, so the agent builds context over time. That single property — persistence — is what turns a stateless assistant into a coworker who remembers how you like things done. This lesson is about what gets stored, why it matters, and how to see it.\n\n> If you came from AI Business Foundations, this is the machinery behind module 3, 'teach it your business.' There you learned the *idea* that an assistant gets more useful as you feed it context. Here you'll see where that context actually lives, how it's captured without you asking, and how to inspect and shape it.\n\n## What gets captured — automatically\n\nYou do not press a 'remember this' button. The platform extracts and stores important information on its own during conversations and task execution. The gitbook names four kinds of thing an agent stores:\n\n- **Key facts and decisions** from chat interactions — 'we chose Postgres over Mongo for the audit log', 'the client's fiscal year ends in March'.\n- **Results from completed tasks** — what an agent found or produced when it ran.\n- **User preferences and corrections** — 'always format findings as HIGH/MEDIUM/LOW', 'call the product Automatos, not “the tool”'. When you correct an agent, that correction is exactly the kind of thing it stores.\n- **Cross-agent shared knowledge** — project context and team preferences that shouldn't live in just one agent's head.\n\nThe practical consequence: the more you work with an agent, the less you have to repeat yourself. A preference you state once ('findings as HIGH/MEDIUM/LOW') gets captured, and a later conversation — even a brand-new chat — can recall it. That is the behaviour you're really buying, and it's why memory is a distinct capability rather than a footnote to chat.\n\n## Why persistence changes behaviour\n\nWithout memory, every instruction you give is good for exactly one conversation. With memory, an instruction becomes a *standing* instruction: state a formatting rule, a naming convention, or a fact about your business once, and the agent carries it forward. This is the difference between telling someone something and them *learning* it. It also means memory is a thing you now have to **manage** — because an agent that remembers a wrong fact will keep acting on it until you fix it. Lesson 2 is entirely about that management surface; this lesson is about seeing what's there.\n\n## The Memory tab: your window into it\n\nEverything you can see and do with memory lives on the **Activity → Memory** tab — the memory explorer. (Whether memory runs at all is governed by the **Agent memory** feature flag in Settings → General; assume it's on unless an admin turned it off.) The explorer shows individual memory **entries** — each one a fact or learning — and for each entry three pieces of metadata worth reading carefully:\n\n- **Source** — which agent stored it. This is how you know *whose* memory you're looking at (and it foreshadows the per-agent scope rule below).\n- **Timestamp** — when it was created. Useful for spotting stale entries and for understanding what an agent knew *at the time* it acted.\n- **Relevance** — **how often the memory has been recalled**. This is the most interesting field: a high-relevance memory is one the agents keep reaching for, which is a signal it's genuinely load-bearing; a memory that's never recalled is a candidate for pruning. Relevance is not importance you set — it's usage the platform observes.\n\nReading those three together tells a story: *this fact, stored by Sentinel three weeks ago, has been recalled forty times* is a very different memory from *this one-off note nobody has touched since it was created*.\n\n## Worked example: a preference becomes permanent\n\nYou're working with a Code Reviewer agent and, mid-conversation, you tell it: 'From now on, always group review findings as HIGH / MEDIUM / LOW.' You didn't ask it to remember that — but it's a **user preference/correction**, exactly the kind of thing the system captures. Later you open **Activity → Memory**, and there it is: an entry whose **source** is the Code Reviewer, **timestamped** to that conversation. A week later, in a completely new chat, the Code Reviewer formats its findings HIGH/MEDIUM/LOW without being told — and back on the Memory tab, that entry's **relevance** has ticked up, because it was recalled to shape the new reply. You watched a throwaway sentence become a durable behaviour, and you can see the evidence of it. That round trip — state a preference, find it stored, watch it get recalled — is the whole point of the hands-on lab, and it's the clearest way to *feel* what persistence buys you.\n\n## What this buys you\n\nYou now know what agents remember (facts, decisions, preferences, task results, shared knowledge), that they capture it automatically, and how to read an entry's source, timestamp, and especially its relevance on the Memory tab. Next you'll learn to search that memory by meaning and to curate it — pin, edit, and the one irreversible action, delete.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-l1-1",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "How does an agent decide what to store in memory?",
+          "options": [
+            { "id": "a", "text": "It automatically extracts and stores important information — facts, decisions, preferences/corrections, task outcomes, and shared knowledge — during conversations and tasks", "correct": true },
+            { "id": "b", "text": "It stores nothing unless you click a 'remember this' button on each message", "correct": false },
+            { "id": "c", "text": "It stores the full transcript of every conversation verbatim, with no extraction", "correct": false },
+            { "id": "d", "text": "It only stores information you upload as a document to a Knowledge Base", "correct": false }
+          ],
+          "explanation": "Memory capture is automatic: the platform extracts important information (key facts and decisions, user preferences and corrections, task results, cross-agent shared knowledge) during conversations and task execution. Option b is wrong — there is no per-message 'remember' button; capture happens without you asking. Option c overstates it — the system extracts important items, it does not persist every message verbatim as a long-term memory. Option d confuses two different capabilities: documents you upload live in a Knowledge Base (Module 03), whereas memory is captured from interactions — they are separate systems.",
+          "sourceRefs": ["r-gitbook-memory", "r-gitbook-settings-general"]
+        },
+        {
+          "id": "kc-m06-l1-2",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "On the Memory tab, an entry shows a high 'relevance' value. What does relevance actually measure?",
+          "options": [
+            { "id": "a", "text": "How often the memory has been recalled — usage the platform observes, signalling the memory is load-bearing", "correct": true },
+            { "id": "b", "text": "An importance rating you set manually when you create the memory", "correct": false },
+            { "id": "c", "text": "How recently the memory was created, i.e. the same thing as its timestamp", "correct": false },
+            { "id": "d", "text": "How large the memory entry is in bytes", "correct": false }
+          ],
+          "explanation": "Relevance on the Memory tab is defined as how often a memory has been recalled — it's observed usage, so a high value means the agents keep reaching for it. Option b is wrong: relevance isn't a manual importance score you assign; it's measured by the platform (though you can Pin a memory to protect it, which is different). Option c confuses relevance with the separate timestamp field — recency and recall-frequency are not the same thing. Option d is invented — relevance has nothing to do with entry size.",
+          "sourceRefs": ["r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l1-3",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You tell an agent 'always format findings as HIGH/MEDIUM/LOW', then start a brand-new chat days later and it formats findings that way unprompted. What best explains this?",
+          "options": [
+            { "id": "a", "text": "The preference was captured as a memory and persists across conversations, so a later chat can recall it", "correct": true },
+            { "id": "b", "text": "The agent is re-reading the entire previous conversation transcript inside the new chat's context window", "correct": false },
+            { "id": "c", "text": "Coincidence — agents cannot carry any instruction from one conversation to another", "correct": false },
+            { "id": "d", "text": "You must have re-typed the instruction; agents never recall preferences on their own", "correct": false }
+          ],
+          "explanation": "Persistence across conversations is the defining property of memory: a stated preference is captured and can be recalled in a later, separate chat — that's why the behaviour carries over unprompted. Option b describes the context window (L0), which is per-conversation and doesn't span a brand-new chat — the carry-over is memory, not re-reading an old transcript. Option c contradicts the core capability — memory exists precisely so instructions can carry across conversations. Option d is wrong for the same reason: recalling a stored preference without re-typing it is exactly what memory does.",
+          "sourceRefs": ["r-gitbook-memory"]
+        }
+      ]
+    },
+    {
+      "id": "m06-l2-search-curate-tiers",
+      "title": "Search, curate, and the two documented tiers",
+      "estMinutes": 15,
+      "objective": "Search memory by meaning, curate it with pin/edit/delete (delete is permanent), and distinguish the two documented tiers and the per-agent versus workspace-shared scope rule.",
+      "body": "## Finding a memory: search by meaning, not keyword\n\nMemory grows, and scrolling isn't a strategy. The Memory tab lets you **search across all stored memories**, and the important detail is *how* it searches: it uses **vector similarity**, so natural-language queries work well. You can ask *'What do we know about the authentication system?'*, *'previous security findings'*, or *'customer preferences'* and get back memories that are semantically related — even if they don't contain those exact words. A memory stored as 'the login flow uses JWT with a 15-minute expiry' will surface for a query about 'the auth system' because the search matches **meaning**, not string overlap. This is the same semantic-retrieval idea you met with RAG in Module 03, pointed at the memory store instead of your documents. Practically: search the way you'd ask a colleague, not the way you'd grep a file.\n\n## Curating memory: three actions, one of them irreversible\n\nBecause agents act on what they remember, a wrong or stale memory is a live liability — so the tab gives you three management actions. Learn them as a set, because choosing the right one is the judgment:\n\n- **Pin** — mark a memory as important so it's **protected from pruning**. Use this for facts you never want the platform to age out: a critical business rule, a naming convention, a security constraint. Pinning doesn't create the memory; it defends an existing one from the automatic cleanup you'll meet below.\n- **Edit** — **correct a factual error in place**. Use this when a memory is *right in spirit but wrong in a detail* — the fact drifted, a number changed, a name was captured wrong. Editing keeps the memory (and its recall history) while fixing the content. Prefer Edit over delete-and-recreate when you just need to fix a fact.\n- **Delete** — remove a memory entirely. Use this for genuinely incorrect or obsolete entries — something that's simply *wrong* or no longer true and shouldn't influence anything. **Deleting a memory is permanent. The agent will no longer recall that information.** There is no undo; treat it as a one-way door.\n\nThe decision tree is small but real: *fact wrong in a detail?* Edit. *Fact simply false or obsolete?* Delete (and accept it's gone). *Fact critical and must never age out?* Pin. Reaching for Delete when Edit would do throws away a memory's recall history and risks removing something an agent was relying on — so default to the least destructive action that fixes the problem.\n\n## The two documented tiers\n\nUnderneath the tab, the memory system has **two tiers** — this is the model the user docs commit to, so learn it as how memory works today:\n\n| Tier | What it stores | Retention |\n| --- | --- | --- |\n| **Short-term** | Recent conversation context and active task state | Session-scoped; stored in PostgreSQL |\n| **Long-term** | Important facts, decisions, user preferences, cross-conversation learnings | Persistent — survives across sessions |\n\nRead it as **retention windows**. Short-term is the working state of what's happening *now* — the current conversation and the task in flight — and it's scoped to the session. Long-term is the durable layer: the facts and preferences that outlive any single conversation, which is exactly what let your HIGH/MEDIUM/LOW preference resurface in a new chat last lesson. When you browse the Memory tab, the persistent entries you see and curate are long-term memory; short-term is the transient context that supports the live session. (The design docs describe a finer-grained five-layer version of this — Lesson 3, clearly labelled as architecture direction, not something you manage here.)\n\n## Scope: per-agent, plus a shared workspace layer\n\nMemory isn't one undifferentiated pool. **Each agent has its own memory scope, plus access to workspace-level shared memories.** Two consequences the gitbook spells out:\n\n- **Sentinel's security findings don't clutter Code Reviewer's memory.** Agent-specific learnings stay with the agent that formed them, so a specialist's memory stays focused and uncontaminated by unrelated work.\n- **Shared knowledge — project context, team preferences — is available to all agents.** Facts that belong to the whole team live at the workspace level, so every agent can reach them.\n\nThe judgment this unlocks: when you see a memory on the tab, its **source** tells you whether it's an agent's private learning or shared team knowledge, and that tells you the *blast radius* of editing or deleting it. Delete a workspace-shared fact and you've changed what *every* agent knows; delete one of Sentinel's private findings and you've only touched Sentinel. Scope is not just tidiness — it's how you reason about the consequence of a change.\n\n## When memory is the right tool — and when it isn't\n\nA practitioner question: should this live in *memory* or in a *Knowledge Base document* (Module 03)? A useful split:\n\n- **Memory** is for things learned *through interaction* that should shape behaviour — preferences, corrections, decisions, running context. It's captured automatically and it accretes. You don't pre-author it; you curate it.\n- **A Knowledge Base document** is for stable reference material you *own and maintain* — a policy, a product spec, a price list, an onboarding guide. You upload it deliberately, version it, and agents retrieve from it via RAG.\n\nRule of thumb: *if it's a fact about how you like things done or something learned in conversation, let memory hold it; if it's a maintained document you'd want to edit as a source of truth, put it in a Knowledge Base.* Trying to force a 40-page policy into memory by pasting it into chat is the wrong tool; letting the agent remember 'this client prefers weekly summaries on Fridays' is exactly right.\n\n## Worked example: fixing what an agent 'knows'\n\nAn agent has been telling teammates the staging database is Postgres 14 — but you upgraded to 16 last month, and the old fact is still being recalled (you can see its relevance is high, so it's actively shaping answers). You open **Activity → Memory**, search *'staging database version'*, and the entry surfaces by meaning. It's *right in spirit, wrong in a detail*, so you **Edit** it to 'Postgres 16' rather than deleting — preserving the memory and its recall history while correcting the fact. If instead the memory had said something wholesale false — 'we use MySQL for staging', which was never true — you'd **Delete** it, accepting it's permanently gone. And because this is shared infrastructure knowledge every agent relies on, once corrected you might **Pin** it so the cleanup job never ages out a fact the whole team depends on. Three actions, one memory, each chosen by the shape of the problem. That is memory hygiene, and it's the artifact of this module's second lab.\n\n## What this buys you\n\nYou can now find any memory by meaning, choose the least-destructive action that fixes it (Edit for a wrong detail, Delete — permanently — for a false fact, Pin to protect a critical one), reason about the two tiers as retention windows, and read an entry's scope to judge the blast radius of a change. Next you'll step outside the manual to see the deeper architecture the platform is built toward.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-l2-1",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Memory search returns a relevant entry even though your query used none of the words the memory was stored with. Why?",
+          "options": [
+            { "id": "a", "text": "Search uses vector similarity, so it matches on meaning — natural-language queries surface semantically related memories regardless of exact wording", "correct": true },
+            { "id": "b", "text": "Search requires an exact keyword match, and it must have found the literal words in the entry", "correct": false },
+            { "id": "c", "text": "Search returns every memory in the store and lets you scroll to find the right one", "correct": false },
+            { "id": "d", "text": "The memory was automatically rewritten to include your query's words before the search ran", "correct": false }
+          ],
+          "explanation": "Memory search uses vector similarity, which matches meaning rather than exact strings — so a query about 'the auth system' surfaces a memory about 'the login flow uses JWT' because they're semantically related. Option b describes keyword/exact-match search, which is precisely what vector search is not. Option c is wrong — search ranks by relevance, it doesn't dump the whole store. Option d invents a mechanism; memories aren't rewritten to match your query.",
+          "sourceRefs": ["r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l2-2",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A stored memory is correct in spirit but has one wrong detail (a version number changed). Which management action fits best, and why?",
+          "options": [
+            { "id": "a", "text": "Edit — correct the fact in place, preserving the memory and its recall history while fixing only the wrong detail", "correct": true },
+            { "id": "b", "text": "Delete — remove it permanently, then hope the correct fact gets re-learned later", "correct": false },
+            { "id": "c", "text": "Pin — pinning changes the memory's content to the correct value", "correct": false },
+            { "id": "d", "text": "Nothing can be done — stored memories are read-only once created", "correct": false }
+          ],
+          "explanation": "Edit is the documented action for correcting a factual error in place; it's the least-destructive fix for a memory that's mostly right, and it keeps the entry (and its recall history) intact. Option b over-reaches — Delete is permanent and throws away a memory that only needed a small correction, plus you lose its history. Option c misdescribes Pin: pinning protects a memory from pruning, it does not change the content. Option d is false — memories are editable and deletable from the tab.",
+          "sourceRefs": ["r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l2-3",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The scope rule says each agent has its own memory plus access to workspace-level shared memories. Why does that matter when you delete a memory?",
+          "options": [
+            { "id": "a", "text": "Deleting a workspace-shared memory changes what every agent knows, while deleting an agent's private memory affects only that agent — scope tells you the blast radius", "correct": true },
+            { "id": "b", "text": "It doesn't matter — deleting any memory affects all agents identically", "correct": false },
+            { "id": "c", "text": "Deleting a shared memory only affects the agent whose 'source' is on the entry", "correct": false },
+            { "id": "d", "text": "Agents share a single undifferentiated memory pool, so scope is irrelevant to deletion", "correct": false }
+          ],
+          "explanation": "Scope defines the blast radius of a change: a workspace-shared fact is reachable by every agent, so deleting it changes what the whole team knows, whereas an agent-specific memory only touches that one agent. Option b ignores the per-agent/shared distinction entirely. Option c is backwards for shared memories — shared knowledge is available to all agents, not just the source. Option d contradicts the documented model, which explicitly gives each agent its own scope plus a shared layer, not one undifferentiated pool.",
+          "sourceRefs": ["r-gitbook-memory"]
+        }
+      ]
+    },
+    {
+      "id": "m06-l3-consolidation-and-five-layer",
+      "title": "Consolidation, and the deeper five-layer architecture (direction)",
+      "estMinutes": 15,
+      "objective": "Describe automatic consolidation and separate platform-managed from user-managed memory, then recognise the five-layer L0–L4 model as clearly-labelled architecture direction rather than a UI feature.",
+      "body": "## What the platform manages while you're not looking\n\nSo far everything has been *your* side of memory — browse, search, curate. But the platform is doing steady work on its own, and understanding it is what stops you fighting the system. The headline background process is **consolidation**: the platform **periodically consolidates memories — merging related facts, removing duplicates, and strengthening frequently-recalled information.** It happens **automatically, as part of the session lifecycle.** Think of it as a librarian tidying the shelves overnight: two entries that say almost the same thing get merged, exact duplicates get pruned, and the facts everyone keeps asking for get reinforced so they surface faster next time.\n\nThat single behaviour reframes the whole tab. **Relevance** (Lesson 1) is the observable signal consolidation acts on — the more a memory is recalled, the more it's strengthened. **Pin** (Lesson 2) is your override on the pruning half — it protects a memory from being aged out even if it isn't recalled often. And the reason you *don't* need to hand-deduplicate memory is that consolidation already does it. So the honest division of labour is:\n\n**The platform manages automatically:** capturing memories, sorting them into tiers, consolidating (merge/dedupe/strengthen), and pruning low-value entries over time.\n\n**You manage on the tab:** browsing, searching, and the three deliberate actions — Pin, Edit, Delete.\n\nGetting this split right is the practitioner payoff of the whole module: you curate the *content* and protect the *critical*; the platform handles *volume and hygiene*. Trying to micro-manage what the platform automates (obsessively deleting near-duplicates it would have merged anyway) is wasted effort; failing to do *your* part (fixing a wrong fact, pinning a critical one) is where memory actually goes wrong.\n\n## Augmentation: memory you can add on purpose\n\nOne more documented behaviour rounds out the picture. Capture is automatic, but agents **can also be instructed to store specific knowledge via the memory API**, and **external data — from tools, documents, or manual input — can be injected into the memory system.** This is *augmentation*: a deliberate write, versus the automatic extraction that happens by default. You won't usually reach for it as an everyday user, but it's why memory isn't a closed box — it can be seeded on purpose, not only grown from conversation. (The REST surface for this — store, retrieve, augment, consolidate, stats — is in the API reference; you don't need it for the hands-on work, but it's there when a build calls for it.)\n\n## Now, clearly labelled: the deeper architecture direction\n\nEverything above is the **documented model** — two tiers, scope, consolidation, the three actions — and it is how memory works today. The rest of this lesson steps into the platform's **design docs**, and the rule from here on is strict: **this is architecture direction, not a UI you will find.** It's worth learning because it explains *why* the system behaves as it does and where it's heading — but you must never describe these layers to someone as buttons they can click. If in doubt, say 'the design docs describe…', never 'the platform lets you…'.\n\nThe design docs model memory as **five layers, L0 through L4**, each a different retention window and access pattern. The two documented tiers you already know map onto the middle of this stack (short-term ≈ L2, long-term ≈ L3):\n\n- **L0 — Focus:** the current context window — the immediate conversation fed straight to the model. Ephemeral; there's no store and no API. It's simply *what the agent is looking at right now*.\n- **L1 — Working memory:** short-lived session state (the design docs describe a Redis-backed session, roughly a 24-hour window). The running summary, decisions, and action items of an active conversation.\n- **L2 — Short-term memory:** recent memories in PostgreSQL, subject to a decay curve (an Ebbinghaus-style forgetting model) so unused items lose weight over time. This is the documented short-term tier.\n- **L3 — Long-term memory:** fact-extracted, persistent knowledge — the durable facts and preferences. This is the documented long-term tier.\n- **L4 — Organisational knowledge:** your documents and databases, reached by tools (RAG and NL2SQL from Module 03). Note the boundary: **L4 is not pre-loaded into the agent's context — the agent must call a tool to query it.** This is the seam where 'memory' hands off to 'knowledge': the first four layers are the agent's own recollection; L4 is the organisation's reference material the agent goes and fetches.\n\n## The flow between the layers\n\nThe design docs also describe how a memory *moves up* the stack, and it maps neatly onto consolidation. A conversation lives in **L0**; its session state accumulates in **L1**; when the session ends, that state is **consolidated down into L2** as short-term memory; frequently-accessed, important L2 items are **promoted to L3** as durable facts; and low-value items **decay** and age out. In one line: **capture in the moment, consolidate at session end, promote what proves important, forget what doesn't.** That is the same merge/strengthen/prune story the user docs describe as 'consolidation' — the five-layer model is just the finer-grained engineering picture of it. You now understand the *why* behind the tidy tab.\n\n## Worked example: reading behaviour through the layers\n\nYou ask an agent 'what did we decide about the API rate limits earlier in this chat?' and it answers instantly from the live conversation — that's **L0/L1**, working memory of the session, no lookup needed. The next day you open a fresh chat and ask 'what's our stance on rate limiting?' — it recalls the decision, which by now has been consolidated to short-term (**L2**) and, because you kept referring to it, promoted to a durable fact (**L3**). Ask it instead 'what does our published API policy PDF say about limits?' and it has to **call a knowledge tool** to fetch from the document — that's **L4**, and the tell is the tool call: the agent isn't *remembering*, it's *looking it up*. Same topic, four behaviours, and knowing the layers lets you predict which one you'll get. But note the discipline: you diagnosed this from the *design model*; on the actual product you'd simply see the Memory tab's two tiers and the agent's answers — not a layer picker.\n\n## What this buys you\n\nYou can now separate what the platform automates (capture, tiering, consolidation, pruning) from what you manage (browse/search/pin/edit/delete), explain consolidation as merge-dedupe-strengthen, and reason about the five-layer L0–L4 model as engineering direction — while keeping the hard line that it is *not* a user surface. Next: field memory, the same architecture-direction discipline applied to where long-horizon memory is headed.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-l3-1",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What does automatic memory consolidation do, per the documented model?",
+          "options": [
+            { "id": "a", "text": "Merges related facts, removes duplicates, and strengthens frequently-recalled memories — automatically, as part of the session lifecycle", "correct": true },
+            { "id": "b", "text": "Exports all memories to a downloadable file at the end of each session", "correct": false },
+            { "id": "c", "text": "Deletes every memory older than 24 hours regardless of value", "correct": false },
+            { "id": "d", "text": "Requires you to manually merge duplicate memories one pair at a time on the tab", "correct": false }
+          ],
+          "explanation": "Consolidation is the platform's automatic housekeeping: it merges related facts, removes duplicates, and strengthens the memories that are recalled most, running as part of the session lifecycle. Option b invents an export feature that isn't part of consolidation. Option c is wrong — consolidation strengthens and prunes by value, it doesn't blanket-delete by age. Option d is the opposite of the truth: consolidation is automatic precisely so you don't hand-merge duplicates.",
+          "sourceRefs": ["r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l3-2",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "The five-layer model (L0–L4) appears in the platform's design docs. How should an APA practitioner treat it?",
+          "options": [
+            { "id": "a", "text": "As architecture direction that explains the 'why' — never described to a user as a UI surface; the shipped product exposes two documented tiers, not a five-layer picker", "correct": true },
+            { "id": "b", "text": "As a live UI feature with a screen where users select which of the five layers to store a memory in", "correct": false },
+            { "id": "c", "text": "As obsolete documentation that contradicts the platform and should be ignored entirely", "correct": false },
+            { "id": "d", "text": "As identical to the user-facing model, so 'five tiers' and 'two tiers' can be used interchangeably", "correct": false }
+          ],
+          "explanation": "The five-layer model comes from design docs and must be taught as architecture direction — useful for understanding why memory behaves as it does, but never presented as a clickable UI; the product documents two tiers. Option b invents a layer-picker screen that doesn't exist. Option c is too dismissive — the design model isn't wrong, it's the deeper engineering picture; it just isn't a user surface. Option d collapses a distinction the module insists on: the user docs commit to two tiers, and conflating that with the design-doc five layers is exactly the drift to avoid.",
+          "sourceRefs": ["r-design-five-layer", "r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l3-3",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "In the five-layer design model, what distinguishes L4 (organisational knowledge) from the memory layers above it?",
+          "options": [
+            { "id": "a", "text": "L4 is documents and databases reached by a tool call — it is not pre-loaded into context; the agent must explicitly query it, which is the seam where 'memory' hands off to 'knowledge'", "correct": true },
+            { "id": "b", "text": "L4 is the fastest layer and is always injected into every prompt automatically", "correct": false },
+            { "id": "c", "text": "L4 is short-term session state that expires within an hour", "correct": false },
+            { "id": "d", "text": "L4 stores the agent's persona and identity for the current conversation", "correct": false }
+          ],
+          "explanation": "L4 is organisational knowledge — your documents and databases — accessed via tools (RAG/NL2SQL); the design docs are explicit that it is not pre-fetched into context and the agent must call a tool to reach it, which is precisely the boundary between remembering and looking up. Option b is backwards — L4 is tool-gated, not auto-injected into every prompt. Option c describes L1 working memory, not L4. Option d describes L0 focus (persona/identity in the context window), not the organisational-knowledge layer.",
+          "sourceRefs": ["r-design-five-layer"]
+        }
+      ]
+    },
+    {
+      "id": "m06-l4-field-memory-and-judgment",
+      "title": "Field memory (direction), and the judgment that ties it together",
+      "estMinutes": 13,
+      "objective": "Recognise field memory as clearly-labelled architecture direction — workspace-persistent, compounding across missions, honestly scored — and consolidate the module's core judgment about what you manage versus what the platform manages.",
+      "body": "## The frontier: memory that compounds across missions\n\nLesson 3 ended with the five-layer model — the deeper picture of *today's* memory. This lesson looks one step further, at where the platform's **long-horizon** memory is headed. The concept is **field memory**, described in the platform's design docs (PRD-166). The same discipline applies, even more strictly: **this is architecture direction, not a feature you will find in the UI today.** Learn it to understand the trajectory and to talk about it accurately — not to go looking for a 'Field' button.\n\nHere's the idea. Today, a Mission (Module 05) plans and executes a goal, and what it learned is captured into memory. Field memory raises that to the **workspace** level: instead of each mission's learnings being isolated, they **merge into a per-workspace 'field' that compounds across missions.** Run one mission, then another, and the field carries forward what proved durable from both — so the platform's knowledge of *how work goes in this workspace* accumulates over time rather than resetting per mission. It's the long-memory analogue of consolidation, but across whole missions instead of within a session.\n\n## What makes the concept interesting: provenance and honest scoring\n\nTwo design commitments in PRD-166 are worth carrying, because they show the *quality bar* the platform is aiming for — and they're good practitioner instincts regardless of what ships:\n\n- **Provenance.** Each stored pattern carries where it came from — which mission, which task, which agent, and when. Memory without provenance is a rumour; memory *with* it can be traced, trusted, and audited. This is the same instinct as reading a Memory-tab entry's **source** and **timestamp**, taken to the level of missions.\n- **Honest scoring.** Patterns are ranked by **similarity × stability × recency** — how well a pattern matches the situation, how *consistently* it has held up, and how *recently* it applied — with the result set **budgeted honestly** (when there's more than fits, it says so rather than silently dropping context). 'Honest' is the operative word: the design explicitly avoids pretending to know more than it does. And to stay bounded, a **compaction** pass prunes low-stability patterns so the field doesn't grow forever — the mission-scale echo of the consolidation you already understand.\n\nYou don't operate any of this. But if someone asks 'where is Automatos memory going?', the accurate answer is: *toward workspace-persistent memory that compounds across missions, with provenance on every pattern and honest, bounded scoring* — and you'd add, unprompted, *'that's design direction, not a shipped tab.'* That precision is the mark of an APA practitioner.\n\n## The judgment that ties the whole module together\n\nStrip away the layers and the field and here is what actually makes you good at memory on Automatos — one clean split you can apply to any situation:\n\n**What the platform manages for you (don't fight it):**\n- **Capture** — it extracts facts, decisions, preferences, and outcomes automatically.\n- **Tiering** — it sorts memories into short-term and long-term.\n- **Consolidation** — it merges, deduplicates, and strengthens on its own.\n- **Pruning** — it ages out low-value memories over time.\n\n**What you manage (do these well):**\n- **Browse and search** — know what your agents remember; search by meaning, not keyword.\n- **Curate** — **Edit** a wrong detail, **Delete** (permanently) a false fact, **Pin** a critical one so pruning never touches it.\n- **Choose the right home** — interaction-learned behaviour → memory; maintained reference material → a Knowledge Base document.\n- **Reason about scope** — before you change a memory, check whether it's an agent's private learning or shared team knowledge, because that's the blast radius.\n\nThe failure modes are the mirror image: fighting the platform (hand-deduplicating what consolidation handles), or neglecting your part (leaving a wrong fact in place so agents keep acting on it, or deleting when you should have edited). Good memory practice is doing your four things well and trusting the platform to do its four.\n\n## Worked example: a week of real memory work\n\nYou run a security-review mission; afterwards, on **Activity → Memory**, you spot that Sentinel stored 'the payments service has no rate limiting' — true, high-stakes, and every agent should keep it, so you **Pin** it. A day later you notice a stale entry: 'the staging DB is Postgres 14', now wrong — you **Edit** it to 16. You also see three near-identical notes about the same finding, but you leave them alone — **consolidation** will merge them, and micro-managing that is the platform's job, not yours. When a teammate asks whether the review's findings will inform the *next* mission, you give the honest, correctly-labelled answer: today each mission's learnings are captured into memory; *field memory — the design direction — is where those learnings compound across missions with provenance and honest scoring, but that's roadmap, not a tab you'll open now.* You did your job (pin the critical, fix the wrong, leave the automatable alone) and you described the frontier accurately. That is the whole module in one week of work.\n\n## What this buys you\n\nYou can place field memory correctly — workspace-persistent, mission-compounding, provenance-carrying, honestly scored — as architecture direction rather than shipped UI, and you hold the module's central judgment: manage the four things that are yours, trust the platform with the four that are its, and always label the deeper architecture as direction. That precision, applied on the free platform, is what 'Automatos-ready on memory' means.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-l4-1",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How should field memory (PRD-166) be presented to a learner?",
+          "options": [
+            { "id": "a", "text": "As architecture direction — workspace-persistent memory that compounds across missions — explicitly not a UI feature available today", "correct": true },
+            { "id": "b", "text": "As a live tab in the interface where users browse their workspace 'field' right now", "correct": false },
+            { "id": "c", "text": "As a synonym for the Memory tab's long-term tier, with no meaningful difference", "correct": false },
+            { "id": "d", "text": "As a Knowledge Base feature for uploading documents to a workspace", "correct": false }
+          ],
+          "explanation": "Field memory is a design-doc concept (PRD-166) and must be labelled as architecture direction — workspace-persistent memory compounding across missions — never as a shipped UI. Option b invents a live 'field' tab that doesn't exist. Option c erases the distinction: field memory is a mission-compounding, workspace-level direction, not just a rename of the documented long-term tier. Option d confuses it with the Knowledge Base, a separate, live capability for uploaded documents.",
+          "sourceRefs": ["r-design-field-memory", "r-gitbook-memory"]
+        },
+        {
+          "id": "kc-m06-l4-2",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Field memory's design describes scoring patterns by 'similarity × stability × recency', budgeted honestly. What's the point of the 'honest' framing?",
+          "options": [
+            { "id": "a", "text": "It ranks by match, consistency, and recency and flags when results are truncated rather than silently dropping context — it avoids pretending to know more than it does", "correct": true },
+            { "id": "b", "text": "It guarantees the scores are always 100% accurate with no uncertainty", "correct": false },
+            { "id": "c", "text": "It means users manually assign the similarity, stability, and recency scores by hand", "correct": false },
+            { "id": "d", "text": "It stores every pattern forever with no pruning, to be fully transparent", "correct": false }
+          ],
+          "explanation": "'Honest' scoring means the design ranks patterns by similarity (match), stability (consistency), and recency, and surfaces when the result set is truncated rather than quietly dropping context — it's about not overstating confidence. Option b overclaims — honest scoring is the opposite of pretending to perfect accuracy. Option c is wrong — the scoring is computed, not hand-assigned. Option d contradicts the design, which includes a compaction pass to prune low-stability patterns and stay bounded.",
+          "sourceRefs": ["r-design-field-memory"]
+        },
+        {
+          "id": "kc-m06-l4-3",
+          "domainId": "m06-memory",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which pair correctly splits what the platform manages automatically from what you manage on the Memory tab?",
+          "options": [
+            { "id": "a", "text": "Platform: capture, tiering, consolidation, pruning. You: browse, search, pin, edit, delete", "correct": true },
+            { "id": "b", "text": "Platform: pin, edit, delete. You: capture, tiering, consolidation, pruning", "correct": false },
+            { "id": "c", "text": "Platform: nothing — the user does all memory work manually", "correct": false },
+            { "id": "d", "text": "You: nothing — the platform does everything and the tab is read-only", "correct": false }
+          ],
+          "explanation": "The platform automatically captures memories, sorts them into tiers, consolidates (merge/dedupe/strengthen), and prunes low-value entries; you browse, search, and take the three deliberate actions — pin, edit, delete. Option b inverts the split — pin/edit/delete are the user's actions, and capture/tiering/consolidation/pruning are the platform's. Option c is wrong because capture and consolidation are automatic, not manual. Option d is wrong because the tab is interactive — you actively curate with pin, edit, and delete.",
+          "sourceRefs": ["r-gitbook-memory", "r-design-five-layer"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m06-1",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the defining property of agent memory on Automatos?",
+      "options": [
+        { "id": "a", "text": "Agents automatically store important information and it persists across conversations, so context builds over time", "correct": true },
+        { "id": "b", "text": "Agents remember only within a single conversation and forget everything when it ends", "correct": false },
+        { "id": "c", "text": "Memory only exists if you paste documents into a Knowledge Base", "correct": false },
+        { "id": "d", "text": "Agents remember, but only the last message of each chat", "correct": false }
+      ],
+      "explanation": "Memory's defining property is persistence: agents capture important information automatically and it survives across conversations, so an agent builds context over time. Option b describes a plain, memoryless chatbot — exactly what memory changes. Option c confuses memory (captured from interaction) with the Knowledge Base (uploaded documents); they're separate systems. Option d understates it — memory stores extracted facts, decisions, and preferences, not merely the last message.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-2",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On the Memory tab, which three pieces of metadata does each memory entry show?",
+      "options": [
+        { "id": "a", "text": "Source (which agent stored it), timestamp (when), and relevance (how often it's been recalled)", "correct": true },
+        { "id": "b", "text": "Author's email, file size, and encryption status", "correct": false },
+        { "id": "c", "text": "Model name, token count, and temperature", "correct": false },
+        { "id": "d", "text": "Channel, invoice number, and approval status", "correct": false }
+      ],
+      "explanation": "The memory explorer shows each entry's source (which agent stored it), timestamp (when it was created), and relevance (how often it's been recalled). Option b invents fields that aren't part of the memory explorer. Option c lists model-inference parameters, not memory metadata. Option d mixes in unrelated concepts (channels, billing, approvals) that don't appear on a memory entry.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-3",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which action on the Memory tab is permanent and cannot be undone?",
+      "options": [
+        { "id": "a", "text": "Delete — the agent will no longer recall that information", "correct": true },
+        { "id": "b", "text": "Pin — protecting a memory from pruning", "correct": false },
+        { "id": "c", "text": "Edit — correcting a factual error in place", "correct": false },
+        { "id": "d", "text": "Search — querying across all memories", "correct": false }
+      ],
+      "explanation": "Deleting a memory is permanent — the gitbook warns that the agent will no longer recall that information, and there's no undo. Option b, Pin, is reversible and protective, not destructive. Option c, Edit, changes content but keeps the memory. Option d, Search, is a read-only query that changes nothing.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-4",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The documented memory model has how many tiers, and what are they?",
+      "options": [
+        { "id": "a", "text": "Two — short-term (session-scoped, active task state) and long-term (persistent facts and learnings across sessions)", "correct": true },
+        { "id": "b", "text": "Five — L0 through L4, each selectable in the UI", "correct": false },
+        { "id": "c", "text": "One — a single flat memory pool with no tiers", "correct": false },
+        { "id": "d", "text": "Three — short-term, medium-term, and long-term", "correct": false }
+      ],
+      "explanation": "The user docs commit to two tiers: short-term (recent conversation context and active task state, session-scoped) and long-term (persistent facts, decisions, preferences, and cross-conversation learnings). Option b is the design-doc five-layer model, which is architecture direction — not a selectable UI, and not the documented user-facing count. Option c is wrong — there are two tiers, not one flat pool. Option d invents a 'medium-term' tier the docs don't describe.",
+      "sourceRefs": ["r-gitbook-memory", "r-design-five-layer"]
+    },
+    {
+      "id": "q-m06-5",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why does natural-language search work well against the memory store?",
+      "options": [
+        { "id": "a", "text": "Search uses vector similarity, matching on meaning so semantically related memories surface even without exact-word overlap", "correct": true },
+        { "id": "b", "text": "Search does a case-insensitive exact keyword match on the entry text", "correct": false },
+        { "id": "c", "text": "Search asks each agent to re-derive the answer from scratch", "correct": false },
+        { "id": "d", "text": "Search only works if you type the memory's ID number", "correct": false }
+      ],
+      "explanation": "Memory search uses vector similarity, so it matches on meaning — a query phrased differently from the stored text still surfaces the relevant memory. Option b describes keyword matching, the opposite of semantic search. Option c invents a re-derivation step; search retrieves stored memories, it doesn't recompute them. Option d is false — you search in natural language, not by ID.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-6",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An agent's stored fact is wrong in a single detail but otherwise correct. Which action is the better first choice, and why?",
+      "options": [
+        { "id": "a", "text": "Edit — it corrects the detail in place while keeping the memory and its recall history, the least-destructive fix", "correct": true },
+        { "id": "b", "text": "Delete — always remove a memory the moment any part of it is wrong", "correct": false },
+        { "id": "c", "text": "Pin — pinning rewrites the incorrect detail to the right value", "correct": false },
+        { "id": "d", "text": "Leave it — wrong memories fix themselves through consolidation", "correct": false }
+      ],
+      "explanation": "Edit is the documented way to correct a factual error in place, and it's the least-destructive choice — it fixes the detail without discarding the memory or its recall history. Option b over-reaches: Delete is permanent and wasteful when only a detail is wrong. Option c misunderstands Pin, which protects from pruning and does not change content. Option d is wrong — consolidation merges and strengthens, it doesn't correct a factual error you haven't fixed.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-7",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does pinning a memory actually do?",
+      "options": [
+        { "id": "a", "text": "Marks it as important so it's protected from pruning — the platform won't age it out even if it's rarely recalled", "correct": true },
+        { "id": "b", "text": "Pushes it to the top of the agent's context window in every conversation", "correct": false },
+        { "id": "c", "text": "Shares a private agent memory with every other agent in the workspace", "correct": false },
+        { "id": "d", "text": "Locks the memory so it can never be edited or deleted", "correct": false }
+      ],
+      "explanation": "Pin marks a memory as important to protect it from pruning, so the automatic cleanup won't remove it. Option b overstates it — pinning protects from pruning; it isn't a guarantee of top-of-context placement every turn. Option c confuses pinning with scope — pinning doesn't move a memory from agent-private to workspace-shared. Option d is wrong — a pinned memory can still be edited or deleted by you; pinning defends against automatic pruning, not against your own actions.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-8",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The scope rule keeps Sentinel's security findings out of Code Reviewer's memory while shared project context stays available to all. What's the practitioner takeaway?",
+      "options": [
+        { "id": "a", "text": "An entry's source tells you whether it's an agent's private learning or shared team knowledge, which is the blast radius when you edit or delete it", "correct": true },
+        { "id": "b", "text": "All memories are shared by every agent, so scope never affects the impact of a change", "correct": false },
+        { "id": "c", "text": "Each agent is fully isolated with no shared layer at all", "correct": false },
+        { "id": "d", "text": "Only Sentinel has memory; other agents have none", "correct": false }
+      ],
+      "explanation": "The takeaway is that scope defines blast radius: source tells you if a memory is agent-private or workspace-shared, so you know whether editing or deleting it touches one agent or every agent. Option b ignores the per-agent scope entirely. Option c is wrong in the other direction — there IS a shared workspace layer alongside each agent's private scope. Option d is nonsense — every agent has its own memory scope, not just Sentinel.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-9",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You have a stable 12-page returns policy the whole team must follow. Should it live in memory or a Knowledge Base, and why?",
+      "options": [
+        { "id": "a", "text": "A Knowledge Base document — it's maintained reference material you own and version; agents retrieve it via RAG rather than remembering it from a chat", "correct": true },
+        { "id": "b", "text": "Memory — paste the whole policy into a chat so an agent memorises all 12 pages", "correct": false },
+        { "id": "c", "text": "Neither — policies can't be used by agents in any form", "correct": false },
+        { "id": "d", "text": "Memory — because memory is always preferred over a Knowledge Base for any text", "correct": false }
+      ],
+      "explanation": "Stable, maintained reference material belongs in a Knowledge Base: you own and version it, and agents retrieve from it via RAG (Module 03). Option b abuses memory — memory is for interaction-learned facts and preferences, not for stuffing long documents through chat. Option c is false — agents absolutely use policies, via the Knowledge Base. Option d states a rule that doesn't exist — the right home depends on the content: interaction-learned → memory, maintained document → Knowledge Base.",
+      "sourceRefs": ["r-gitbook-memory", "r-design-five-layer"]
+    },
+    {
+      "id": "q-m06-10",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is managed automatically by the platform, NOT by you on the Memory tab?",
+      "options": [
+        { "id": "a", "text": "Consolidation — merging related facts, removing duplicates, and strengthening frequently-recalled memories", "correct": true },
+        { "id": "b", "text": "Pinning a critical memory to protect it from pruning", "correct": false },
+        { "id": "c", "text": "Editing a memory to correct a wrong fact", "correct": false },
+        { "id": "d", "text": "Deleting an obsolete memory permanently", "correct": false }
+      ],
+      "explanation": "Consolidation is a platform-managed background process — it merges, deduplicates, and strengthens memories automatically as part of the session lifecycle. Options b, c, and d are all deliberate user actions on the Memory tab: pinning, editing, and deleting are exactly the levers you control. That split — platform does capture/tiering/consolidation/pruning, you do browse/search/pin/edit/delete — is the module's core judgment.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-11",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which flag governs whether persistent agent memory runs at all, and where is it?",
+      "options": [
+        { "id": "a", "text": "The 'Agent memory' feature flag in Settings → General (enable/disable persistent memory)", "correct": true },
+        { "id": "b", "text": "The 'Mission mode' flag in Settings → General", "correct": false },
+        { "id": "c", "text": "The 'Voice chat' flag in Settings → General", "correct": false },
+        { "id": "d", "text": "There is no flag — memory can never be turned off", "correct": false }
+      ],
+      "explanation": "Persistent memory is governed by the 'Agent memory' feature flag under Settings → General, which enables or disables persistent memory. Option b, Mission mode, gates autonomous multi-step missions — a different capability (Module 05). Option c, Voice chat, controls speech input/output, unrelated to memory. Option d is wrong — there is a flag, so an admin can disable memory at the workspace level.",
+      "sourceRefs": ["r-gitbook-settings-general", "r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-12",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Two agents each need different knowledge: Sentinel accumulates security findings, and the whole team needs to know 'the client prefers weekly Friday summaries.' How does scope handle this?",
+      "options": [
+        { "id": "a", "text": "Sentinel's findings stay in its own agent scope; the client preference lives at the workspace level so every agent can reach it", "correct": true },
+        { "id": "b", "text": "Both facts go into one shared pool visible to every agent equally", "correct": false },
+        { "id": "c", "text": "Both facts stay private to Sentinel, so no other agent learns the client preference", "correct": false },
+        { "id": "d", "text": "Neither fact is stored, because agents can't hold preferences", "correct": false }
+      ],
+      "explanation": "Scope handles exactly this: agent-specific learnings (Sentinel's findings) stay in that agent's scope, while shared team knowledge (the client's Friday-summary preference) lives at the workspace level, available to all agents. Option b ignores the per-agent scope that keeps specialists' memories uncluttered. Option c traps the shared preference inside one agent, defeating the workspace layer. Option d contradicts the whole capability — preferences are precisely what memory captures.",
+      "sourceRefs": ["r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-13",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "In the design-doc five-layer model, an agent answers 'what did we agree earlier in THIS conversation?' with no lookup, but must call a tool to answer 'what does our policy PDF say?'. Which layers are these, respectively?",
+      "options": [
+        { "id": "a", "text": "The in-conversation recall is L0/L1 (focus/working memory); the policy PDF is L4 (organisational knowledge), reached only by a tool call", "correct": true },
+        { "id": "b", "text": "Both are L4, since all recall goes through tools", "correct": false },
+        { "id": "c", "text": "The in-conversation recall is L4; the policy PDF is L0", "correct": false },
+        { "id": "d", "text": "Both are L3 long-term memory, retrieved identically", "correct": false }
+      ],
+      "explanation": "Recalling something from the live conversation is L0 (focus/context window) shading into L1 (working session memory) — no lookup needed. Fetching from a policy document is L4 organisational knowledge, which the design docs say is not pre-loaded and must be reached by a tool call. Option b is wrong — in-conversation recall doesn't go through a tool. Option c inverts the two layers. Option d collapses the distinction — the two behaviours are different layers with different access patterns, which is the whole point of the model.",
+      "sourceRefs": ["r-design-five-layer"]
+    },
+    {
+      "id": "q-m06-14",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A colleague says: 'Automatos already has a Field Memory tab where I browse workspace patterns that compound across missions.' What's the accurate correction?",
+      "options": [
+        { "id": "a", "text": "Field memory is architecture direction (PRD-166), not a shipped tab — the live product exposes the Memory tab with two documented tiers; workspace-persistent, mission-compounding memory is where it's headed", "correct": true },
+        { "id": "b", "text": "They're right — the Field Memory tab is a current, browsable UI surface", "correct": false },
+        { "id": "c", "text": "Field memory is the same thing as the Memory tab, just renamed, so both statements are equivalent", "correct": false },
+        { "id": "d", "text": "Field memory is a Knowledge Base feature for uploading mission documents", "correct": false }
+      ],
+      "explanation": "The accurate correction is that field memory is design-doc architecture direction (PRD-166), not a live tab — the shipped surface is the Memory tab with two documented tiers, and workspace-persistent memory that compounds across missions is a trajectory, not a feature to browse today. Option b accepts a false claim about a UI that doesn't exist. Option c erases the distinction between the live two-tier Memory tab and the mission-compounding design concept. Option d confuses field memory with the Knowledge Base, an unrelated live capability.",
+      "sourceRefs": ["r-design-field-memory", "r-gitbook-memory"]
+    },
+    {
+      "id": "q-m06-15",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Field memory's design ranks patterns by 'similarity × stability × recency' and includes a compaction pass. What is compaction's role?",
+      "options": [
+        { "id": "a", "text": "It prunes low-stability patterns so the workspace field stays bounded — the mission-scale echo of memory consolidation", "correct": true },
+        { "id": "b", "text": "It compresses every pattern into a single blob to save disk space, losing provenance", "correct": false },
+        { "id": "c", "text": "It permanently keeps all patterns so nothing is ever removed", "correct": false },
+        { "id": "d", "text": "It converts patterns into Knowledge Base documents for the user to edit", "correct": false }
+      ],
+      "explanation": "Compaction prunes low-stability patterns to keep the field bounded — it's the mission-scale analogue of the consolidation that keeps the everyday memory store tidy. Option b is wrong — compaction prunes by stability and the design deliberately preserves provenance, it doesn't blob everything together. Option c contradicts the purpose — the point of compaction is precisely that not everything is kept. Option d invents a conversion to Knowledge Base documents that isn't what compaction does.",
+      "sourceRefs": ["r-design-field-memory"]
+    },
+    {
+      "id": "q-m06-16",
+      "domainId": "m06-memory",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You notice three near-duplicate memory entries about the same finding. What's the right practitioner move?",
+      "options": [
+        { "id": "a", "text": "Leave them — consolidation automatically merges related facts and removes duplicates; hand-deduplicating is fighting a job the platform already does", "correct": true },
+        { "id": "b", "text": "Immediately delete two of the three, since duplicates must never coexist even briefly", "correct": false },
+        { "id": "c", "text": "Pin all three so none of them is ever removed", "correct": false },
+        { "id": "d", "text": "Edit each one to be slightly different so they stop looking like duplicates", "correct": false }
+      ],
+      "explanation": "Deduplication is part of automatic consolidation — the platform merges related facts and removes duplicates on its own, so hand-cleaning near-duplicates is wasted effort that fights the system. Option b is over-management: manually deleting duplicates the platform would merge risks removing something and duplicates the platform's job. Option c is counterproductive — pinning all three protects the duplicates from the very consolidation that would tidy them. Option d makes things worse by manufacturing spurious distinctions. The judgment is to curate content and protect the critical, and trust the platform with volume and hygiene.",
+      "sourceRefs": ["r-gitbook-memory"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [
+    {
+      "id": "lab-m06-browse-search-pin",
+      "domainId": "m06-memory",
+      "title": "Watch memory work: browse, search, pin, and prove cross-session recall",
+      "goal": "Produce a concrete demonstration that your agents build context over time. You'll browse the Memory tab and read each entry's source/timestamp/relevance, search memory by meaning, pin one entry and edit another, then plant a preference in one chat and confirm a brand-new chat recalls it — the full 'memory working across sessions' loop on the free platform. Your artifact is a short note recording the before/after of the cross-session test.",
+      "steps": "## What you'll do\n\nYou'll drive the platform's memory surface end to end: inspect what's stored, search it semantically, curate two entries, and run a live test that proves persistence across separate conversations. Everything here is grounded in `automatos-gitbook/activity/memory.md` and `automatos-gitbook/settings/general.md`.\n\n### Before you start\n\n- **Sign in** to your workspace (created automatically on first login; you're its admin).\n- **Confirm memory is on.** Persistent memory is governed by the **Agent memory** feature flag in **Settings → General → Features** ('enable/disable persistent memory'). If the Memory tab looks empty or inactive, check this first. (While you're in General, note the read-only Platform/API version fields — harmless context.)\n- **Have a short conversation or two first** if your workspace is brand-new, so there are memories to browse. A couple of exchanges with any agent will seed some entries.\n\n### Part A — Browse and read the metadata\n\n1. **Go to Activity → Memory.** This is the memory explorer.\n2. **Read three entries carefully.** For each, note its **Source** (which agent stored it), **Timestamp** (when), and **Relevance** (how often it's been recalled). Pick out the highest-relevance entry you can find — that's a memory the agents keep reaching for.\n3. **Ask yourself the diagnostic question:** does the source tell you this is an agent's private learning or shared team knowledge? Jot the answer for one entry — you'll use this 'blast radius' thinking in Part C.\n\n### Part B — Search by meaning\n\n4. **Run a natural-language search** across memory — phrase it the way you'd ask a colleague, e.g. *'What do we know about the documents I uploaded?'* or *'previous decisions we made.'* Confirm the results are semantically relevant even where the wording differs from what was stored (that's vector search doing its job).\n5. **Try a deliberately loose query** (a synonym or paraphrase of something you saw in Part A) and confirm the right memory still surfaces. This is the difference between meaning-based and keyword search.\n\n### Part C — Curate: pin and edit\n\n6. **Pin one memory** you'd never want aged out — a fact or preference that's genuinely load-bearing. Confirm it's marked protected from pruning.\n7. **Edit one memory** to correct a detail (if nothing needs correcting, edit a minor wording issue so you see the flow). Notice you're fixing content **in place** — the entry and its history survive.\n8. **Do NOT delete anything yet** — just read the permanent-delete warning and register that it's a one-way door. (The second lab practises the delete decision deliberately.)\n\n### Part D — Prove cross-session recall (the payoff)\n\n9. **In a chat, state a clear preference** to an agent, e.g. *'From now on, always format findings as HIGH / MEDIUM / LOW.'* You don't need to ask it to remember — that capture is automatic.\n10. **Confirm the capture:** back on Activity → Memory, find the new entry (its source will be that agent, timestamped to now).\n11. **Open a brand-new chat** and give the agent a task that would produce findings. Check whether it applies the HIGH/MEDIUM/LOW format **without being told** — that's memory recalled across sessions.\n12. **Record the result** in a short note: the preference you planted, that you found it on the Memory tab, and whether the new chat honoured it. That note is your artifact.\n\n### Why it matters\n\nThis is the fastest way to *feel* what persistence buys you: an instruction stated once becomes a standing behaviour, visible on the tab and provable in a fresh conversation. Reading source/timestamp/relevance trains the inspection habit; the pin/edit steps train curation; and the cross-session test is the whole capability in miniature. You've now touched everything the module says is *yours* to manage — the platform handled capture, tiering, and consolidation while you weren't looking.",
+      "checklist": [
+        "Confirmed the Agent memory feature flag is enabled in Settings → General → Features",
+        "Browsed Activity → Memory and read Source, Timestamp, and Relevance on at least three entries",
+        "Identified, for one entry, whether it is an agent's private learning or workspace-shared knowledge (its blast radius)",
+        "Ran a natural-language search and confirmed vector search returned semantically relevant memories despite different wording",
+        "Pinned one load-bearing memory to protect it from pruning",
+        "Edited one memory in place to correct a detail (and noted the entry survives the edit)",
+        "Read and understood the permanent-delete warning without deleting anything in this lab",
+        "Planted a clear preference in one chat and confirmed it appeared as a new memory entry (correct source and timestamp)",
+        "Opened a NEW chat and verified the agent recalled the preference unprompted — cross-session recall",
+        "ARTIFACT SAVED: a short note recording the planted preference, its appearance on the Memory tab, and the new-chat result"
+      ]
+    },
+    {
+      "id": "lab-m06-memory-hygiene",
+      "domainId": "m06-memory",
+      "title": "Memory hygiene: choosing edit vs delete vs pin by the shape of the problem",
+      "goal": "Produce a short memory-hygiene decision log: for a handful of real entries in your workspace, decide and apply the least-destructive correct action (Edit a wrong detail, Delete a false fact permanently, Pin a critical one) and record why — while deliberately leaving near-duplicates for automatic consolidation. The artifact is your log of decisions and the reasoning behind each.",
+      "steps": "## What you'll do\n\nYou'll practise the curation judgment that separates good memory practice from busywork: matching each of the three management actions to the shape of the problem, and knowing when to do nothing because the platform will. Grounded in `automatos-gitbook/activity/memory.md`.\n\n### Before you start\n\n- **Sign in** and open **Activity → Memory**. You'll want a workspace with at least a few stored memories (do the first lab first if it's empty).\n- **Keep a running log** (a note or doc) as you go — that's your artifact.\n\n### Triage the entries\n\n1. **Scan your memories and sort candidates into three buckets** using the decision tree from Lesson 2:\n   - **Wrong in a detail** (right in spirit, a number/name/version drifted) → **Edit** candidate.\n   - **Simply false or obsolete** (something that was never true, or is no longer true and shouldn't influence anything) → **Delete** candidate.\n   - **Critical, must never age out** (a business rule, security constraint, naming convention) → **Pin** candidate.\n2. **Log each candidate** with which bucket and one line of *why*.\n\n### Apply the actions\n\n3. **Edit** at least one 'wrong detail' entry in place. Record what you changed and note that the entry keeps its recall history.\n4. **Delete** at most one entry you are genuinely sure is false/obsolete — and only after re-reading the permanent-delete warning. In your log, write one sentence justifying why Delete (not Edit) was right: the fact was *wholesale wrong*, not merely inaccurate in a detail. If nothing qualifies, record 'nothing warranted deletion' — that's a valid, correct outcome.\n5. **Pin** one critical entry so automatic pruning can never remove it. Log why the whole team depends on it.\n\n### Deliberately do nothing (the hard part)\n\n6. **Find near-duplicate entries** — two or three memories saying almost the same thing. **Leave them.** In your log, write that consolidation will merge/dedupe these automatically and that hand-cleaning them fights a platform job. This 'restraint' entry is as important as the actions.\n7. **Check scope before any destructive action.** For anything you deleted or plan to delete, note from its **source** whether it was agent-private or workspace-shared — i.e. the blast radius — and confirm you were comfortable with it.\n\n### Why it matters\n\nMemory goes wrong in two opposite directions: neglect (leaving a wrong fact so agents keep acting on it) and over-management (deleting or hand-deduplicating what the platform handles). This lab makes you practise the middle path — the least-destructive correct action, plus the discipline to leave automatable work alone. The decision log is a reusable habit: on a real workspace you'll run this triage periodically, and the reasoning matters more than the clicks.",
+      "checklist": [
+        "Opened Activity → Memory and triaged candidate entries into Edit / Delete / Pin buckets with a one-line reason each",
+        "Edited at least one 'wrong-in-a-detail' memory in place and confirmed the entry (and its history) survives",
+        "Made a deliberate Delete decision on at most one wholesale-false entry after re-reading the permanent warning — or recorded that nothing warranted deletion",
+        "Pinned one critical memory the whole team depends on, with the reason logged",
+        "Identified near-duplicate entries and deliberately LEFT them for automatic consolidation, noting why hand-deduplication is the wrong move",
+        "For any destructive action, checked the entry's source to judge its scope/blast radius (agent-private vs workspace-shared)",
+        "ARTIFACT SAVED: a memory-hygiene decision log showing each action (or deliberate non-action) and the reasoning behind it"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-gitbook-memory",
+      "title": "Automatos AI — Memory tab (platform docs)",
+      "url": "automatos-gitbook/activity/memory.md",
+      "kind": "first-party-doc",
+      "annotation": "The primary source for this entire module and the only proof of what's live. Read it literally: how agent memory works (automatic capture of facts/decisions/preferences/task-results/shared-knowledge, persisting across conversations), browsing entries (source, timestamp, relevance = how often recalled), searching by vector similarity, and the three management actions — Pin (protect from pruning), Edit (correct in place), Delete (PERMANENT). Also the documented two-tier model (short-term/long-term), the per-agent-plus-workspace-shared scope rule, automatic consolidation, and augmentation via the memory API. Everything in the hands-on labs traces to this page.",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-gitbook-settings-general",
+      "title": "Automatos AI — General Settings (platform docs)",
+      "url": "automatos-gitbook/settings/general.md",
+      "kind": "first-party-doc",
+      "annotation": "Where the memory kill-switch lives: the Agent memory feature flag under Features enables/disables persistent memory at the workspace level, and Cost alerts notifies on budget thresholds. Read the Features and Feature-flags sections so you know memory is a governed capability an admin can turn off — the first thing to check if the Memory tab looks inactive. (Roles and who may toggle flags are covered in Module 09.)",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-gitbook-apiref-memory",
+      "title": "Automatos AI — API reference: Memory endpoints (platform docs)",
+      "url": "automatos-gitbook/api-reference.md",
+      "kind": "first-party-doc",
+      "annotation": "The REST surface behind the tab: store, retrieve (by query), augment (add external knowledge), consolidate (trigger), and stats. You don't need these for the hands-on labs — the Memory tab covers everyday use — but they're the proof that memory is a first-class, programmable system, and the 'augment' endpoint is what makes deliberate injection possible. Skim the Memory section; it's a small endpoint table.",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-design-five-layer",
+      "title": "Automatos AI — Five-Layer Memory Architecture (design doc — architecture direction)",
+      "url": "automatos-ai/docs/memory-system/five-layer-memory-architecture.md",
+      "kind": "first-party-doc",
+      "annotation": "ARCHITECTURE DIRECTION, not a shipped UI — teach it labelled as such. The engineering picture behind the two documented tiers: L0 focus (context window) → L1 working memory (session state) → L2 short-term (Postgres, Ebbinghaus decay) → L3 long-term (fact-extracted, persistent) → L4 organisational knowledge (RAG/NL2SQL, tool-gated, NOT pre-loaded). Read it to understand WHY memory behaves as it does and to speak about the direction accurately; never present the five layers as buttons a user picks — the product exposes two tiers.",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-design-memory-lifecycle",
+      "title": "Automatos AI — Memory Lifecycle & Consolidation (design doc — architecture direction)",
+      "url": "automatos-ai/docs/memory-system/memory-lifecycle-consolidation.md",
+      "kind": "first-party-doc",
+      "annotation": "ARCHITECTURE DIRECTION — the flow behind the user-facing word 'consolidation': session state consolidates L1→L2 at session end, low-value items decay out (Ebbinghaus), and high-value/frequently-accessed items are promoted L2→L3 as durable facts. Read it to see that the tidy Memory tab is the surface of a capture → consolidate → promote → forget lifecycle. Label as direction; the user manages none of these jobs directly.",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-design-field-memory",
+      "title": "Automatos AI — PRD-166 Field Memory Core (design doc — architecture direction)",
+      "url": "automatos-ai/docs/PRDS/PRD-166-FIELD-MEMORY-CORE.md",
+      "kind": "first-party-doc",
+      "annotation": "ARCHITECTURE DIRECTION and explicitly NOT a live tab — where long-horizon memory is headed. Field memory is workspace-persistent memory that compounds across missions: episode payloads carry provenance (mission/task/agent/timestamps), patterns are scored honestly by similarity × stability × recency with token-budgeted (truncation-flagged) queries, and a compaction pass prunes low-stability patterns to stay bounded. Teach the trajectory and the honest-scoring instinct; always say 'design direction', never 'a tab you'll open'.",
+      "domainIds": ["m06-memory"]
+    },
+    {
+      "id": "r-apa-survey",
+      "title": "APA source survey — the binding grounding map (2026-07-02)",
+      "url": "automatos-academy/docs/research/apa-source-survey-2026-07-02.md",
+      "kind": "reference",
+      "annotation": "The author's grounding contract for the whole APA track, and the reason this module is careful about labels. Key rows for memory: the gitbook is the ONLY proof of live; user docs = two tiers + scope + consolidation + pin/edit/delete, while five-layer L0–L4 and field memory (PRD-166) are design vocabulary to be labelled as architecture direction. Also the vocabulary map (playbook not recipe; roles are Admin/Member/Viewer) that keeps the track consistent. Read it to see why 'live' and 'direction' are kept strictly apart here.",
+      "domainIds": ["m06-memory"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-06-1",
+      "title": "M06 · What your agents remember — browse, search, and curate the Memory tab",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m06-memory"],
+      "sourceNotebook": "platform-architect / m06 / memory-tab-browse-search-manage"
+    },
+    {
+      "id": "v-06-2",
+      "title": "M06 · The deeper architecture — two tiers, consolidation, and where memory is headed (five-layer + field memory, as direction)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m06-memory"],
+      "sourceNotebook": "platform-architect / m06 / memory-architecture-direction"
+    }
+  ]
+}
