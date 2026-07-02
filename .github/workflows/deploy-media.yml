@@ -1,0 +1,111 @@
+# Academy media → S3 + CloudFront (mirrors automatos-widget-sdk's deploy pattern).
+#
+# Required repository secrets — SAME FIVE as automatos-widget-sdk (copy them across
+# or promote to org-level):
+#   AWS_SDK_DEPLOY_ACCESS_KEY_ID
+#   AWS_SDK_DEPLOY_SECRET_ACCESS_KEY
+#   AWS_SDK_DEPLOY_REGION              (e.g., us-east-1)
+#   AWS_SDK_DEPLOY_BUCKET              (the widget CDN bucket — academy media lives under /academy/)
+#   AWS_SDK_DEPLOY_DISTRIBUTION_ID     (CloudFront distribution ID)
+#
+# Two ways to run (both workflow_dispatch — MP4s should never live on main long-term):
+#   1. MIGRATION (one-time): run against main while the legacy MP4s are still tracked —
+#      syncs public/content/*/videos/ → s3://$BUCKET/academy/<vendor>/videos/.
+#      Afterwards scripts/register-videos.mjs --swap-cdn rewrites the JSON urls and the
+#      MP4s get git rm'd (see docs/VIDEO_HOSTING.md).
+#   2. ONGOING: push new videos to a short-lived branch under media-staging/<vendor>/<track>/,
+#      dispatch this workflow with that ref — files sync to s3://$BUCKET/academy/<vendor>/<track>/,
+#      then delete the branch. Name files after their video-slot id (e.g. v-d1-2.mp4) so
+#      scripts/register-videos.mjs --publish can register them automatically.
+
+name: Deploy academy media to CDN
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "migrate = legacy public/content/*/videos · staging = media-staging/**"
+        type: choice
+        options: [staging, migrate]
+        default: staging
+      dry_run:
+        description: "Print what would sync without uploading"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-media
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SDK_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SDK_DEPLOY_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_SDK_DEPLOY_REGION }}
+
+      - name: Sync media to S3
+        id: sync
+        env:
+          # workflow_dispatch choice/boolean inputs are type-constrained, but the
+          # env indirection keeps run: free of inline expansions (injection hygiene).
+          MODE: ${{ inputs.mode }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          BUCKET: ${{ secrets.AWS_SDK_DEPLOY_BUCKET }}
+        run: |
+          set -euo pipefail
+          DRY=""
+          if [ "$DRY_RUN" = "true" ]; then DRY="--dryrun"; fi
+          synced=0
+
+          if [ "$MODE" = "migrate" ]; then
+            # Legacy layout: public/content/<vendor>/videos/*.mp4 → academy/<vendor>/videos/
+            for dir in public/content/*/videos; do
+              [ -d "$dir" ] || continue
+              vendor=$(basename "$(dirname "$dir")")
+              echo "── $dir → s3://…/academy/$vendor/videos/"
+              aws s3 sync "$dir" "s3://$BUCKET/academy/$vendor/videos/" \
+                $DRY \
+                --exclude "*" --include "*.mp4" --include "*.mp3" --include "*.vtt" \
+                --content-type "video/mp4" \
+                --cache-control "public, max-age=2592000"
+              synced=1
+            done
+          else
+            # Ongoing layout: media-staging/<vendor>/<track>/*.mp4 → academy/<vendor>/<track>/
+            if [ -d media-staging ]; then
+              aws s3 sync media-staging/ "s3://$BUCKET/academy/" \
+                $DRY \
+                --exclude "*" --include "*.mp4" --include "*.mp3" --include "*.vtt" \
+                --cache-control "public, max-age=2592000"
+              synced=1
+            fi
+          fi
+
+          if [ "$synced" = "0" ]; then
+            echo "::error::Nothing to sync — no matching media directories on this ref."
+            exit 1
+          fi
+
+      - name: Invalidate CloudFront (/academy/*)
+        if: ${{ inputs.dry_run != true }}
+        env:
+          DISTRIBUTION_ID: ${{ secrets.AWS_SDK_DEPLOY_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/academy/*"
+
+      - name: Summary
+        run: |
+          echo "Synced under s3://…/academy/ — serve via the CDN domain (widgets.automatos.app/academy/...)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Next: node scripts/register-videos.mjs (see docs/VIDEO_HOSTING.md)" >> "$GITHUB_STEP_SUMMARY"
