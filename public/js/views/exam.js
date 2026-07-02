@@ -4,7 +4,7 @@
 import { el, clear, seal, fmtTime } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
 import { url } from "../router.js";
-import { buildMock, scoreMock } from "../engine/exam.js";
+import { buildMock, scoreMock, examScale } from "../engine/exam.js";
 import { questionCard } from "./question.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { track as tk } from "../analytics.js";
@@ -135,7 +135,8 @@ export function examView(ctx) {
   function showResults(mock, answers, res) {
     clear(root);
     root.appendChild(trackHeader(track, "exam"));
-    const sealGrade = res.passed ? (res.scaled >= 800 ? "A+" : "A") : "—";
+    const sc = examScale(spec);
+    const sealGrade = res.passed ? (res.scaled >= sc.aPlus ? "A+" : "A") : "—";
     const dom = el("div", { class: "mastery" }, track.domains.map((d) => {
       const pd = res.perDomain[d.id];
       const pct = pd ? Math.round((pd.correct / pd.total) * 100) : 0;
@@ -150,8 +151,8 @@ export function examView(ctx) {
         seal(sealGrade, res.passed ? "Passed" : "Below pass", "lg"),
         el("div", { class: "verdict" }, [
           el("span", { class: "mono-label", text: "Mock result" }),
-          el("h2", { text: `${res.scaled} / 1000 — ${res.passed ? "pass" : "below the 720 line"}` }),
-          el("p", { text: res.passed ? "You cleared the bar. A+ needs 800+ with the mastery to match — keep sitting full mocks under time." : "Not yet. Review every miss below, rebuild the weak domains, and re-sit. The real exam is closed-book and unforgiving." }),
+          el("h2", { text: `${res.scaled} / ${sc.scale} — ${res.passed ? "pass" : `below the ${sc.passing} line`}` }),
+          el("p", { text: res.passed ? `You cleared the bar. A+ needs ${sc.aPlus}+ with the mastery to match — keep sitting full mocks under time.` : "Not yet. Review every miss below, rebuild the weak domains, and re-sit. The real exam is closed-book and unforgiving." }),
           mock.capped ? el("p", { class: "muted", style: { fontSize: "13px" }, text: `Drawn from ${mock.total} available questions; the bank is still growing toward the full ${spec.questionCount}.` }) : null,
         ]),
       ]),

@@ -45,6 +45,14 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
   const isExam = !!(t.exam && t.exam.questionCount);
   if (t.exam && !t.exam.questionCount) err(`${label}: exam{} present but questionCount missing — either complete it or drop exam{} (skills track)`);
   if (!isExam) console.log(`${label}: skills track (no exam — weights optional, no readiness gate)`);
+  // Non-1000 scales (e.g. AIGP's 100–500) must state their A+ margin bar
+  // explicitly — the historic 800 default only makes sense on a 1000 scale.
+  if (isExam && t.exam.scoreScale && t.exam.scoreScale !== 1000 && !t.exam.aPlusScore) {
+    warn(`${label}: scoreScale ${t.exam.scoreScale} without exam.aPlusScore — set the A+ margin bar explicitly`);
+  }
+  if (isExam && t.exam.aPlusScore && !(t.exam.aPlusScore > t.exam.passingScore && t.exam.aPlusScore <= (t.exam.scoreScale || 1000))) {
+    err(`${label}: exam.aPlusScore ${t.exam.aPlusScore} must sit between passingScore and scoreScale`);
+  }
 
   const ids = new Set();
   let weightSum = 0, domainCount = 0, weighted = 0;

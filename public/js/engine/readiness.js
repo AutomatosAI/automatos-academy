@@ -5,6 +5,7 @@
 // answer can't fake mastery). Overall readiness is the blueprint-weighted
 // sum. The grade band turns that into a letter, where A+ is the
 // qualification bar: ≥90% weighted mastery AND a full mock passed with margin.
+import { examScale } from "./exam.js";
 
 export function domainStats(domain, store) {
   const lessons = domain.lessons || [];
@@ -37,13 +38,17 @@ export function overall(track, store) {
   return { mastery: wsum ? sum / wsum : 0, perDomain };
 }
 
-export function grade(mastery, bestMock) {
-  const mockScaled = bestMock ? bestMock.scaled : 0;
+// Scale-aware (CCA-F/GH-x score 0–1000, IAPP AIGP 100–500): the composite
+// normalizes the mock onto [floor, scale] and the A+ margin bar comes from
+// examScale (exam.aPlusScore, defaulting to the historic 800 on 1000-scale).
+export function grade(mastery, bestMock, examSpec) {
+  const { scale, floor, aPlus } = examScale(examSpec);
+  const mockScaled = bestMock ? bestMock.scaled : floor;
   const passed = bestMock ? bestMock.passed : false;
-  const composite = 0.65 * mastery + 0.35 * (mockScaled / 1000);
+  const composite = 0.65 * mastery + 0.35 * ((mockScaled - floor) / (scale - floor || 1));
 
   let g;
-  if (mastery >= 0.9 && passed && mockScaled >= 800) g = "A+";
+  if (mastery >= 0.9 && passed && mockScaled >= aPlus) g = "A+";
   else if (composite >= 0.84 && passed) g = "A";
   else if (composite >= 0.78) g = "A-";
   else if (composite >= 0.72) g = "B+";
@@ -52,13 +57,14 @@ export function grade(mastery, bestMock) {
   else if (composite >= 0.44) g = "D";
   else g = "F";
 
-  return { grade: g, qualified: g === "A+", composite, mockScaled, passed };
+  return { grade: g, qualified: g === "A+", composite, mockScaled, passed, aPlus, scale };
 }
 
 export function verdict(track, store) {
   const ov = overall(track, store);
   const bestMock = store.bestMock();
-  const gr = grade(ov.mastery, bestMock);
+  const spec = track.exam || {};
+  const gr = grade(ov.mastery, bestMock, spec);
   const due = store.dueQuestions().length;
   const weakest = Object.values(ov.perDomain).filter((d) => d.poolSize).sort((a, b) => a.mastery - b.mastery)[0];
 
@@ -70,8 +76,8 @@ export function verdict(track, store) {
     headline = `${gr.grade} — not yet qualified.`;
     const bits = [];
     if (ov.mastery < 0.9) bits.push(`lift weighted mastery to 90%+ (now ${(ov.mastery * 100).toFixed(0)}%)`);
-    if (!gr.passed) bits.push("pass a full-length mock (60 Q · 120 min)");
-    else if (gr.mockScaled < 800) bits.push(`pass a mock with margin — ≥800/1000 (best ${gr.mockScaled})`);
+    if (!gr.passed) bits.push(`pass a full-length mock (${spec.questionCount || 60} Q · ${spec.durationMinutes || 120} min)`);
+    else if (gr.mockScaled < gr.aPlus) bits.push(`pass a mock with margin — ≥${gr.aPlus}/${gr.scale} (best ${gr.mockScaled})`);
     next = `A+ is the only qualifying grade. To reach it: ${bits.join("; ")}.`;
   }
 

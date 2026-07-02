@@ -59,6 +59,18 @@ ok(grade(0.95, { scaled: 860, passed: true }).qualified === true, "A+ is the qua
 ok(grade(0.95, { scaled: 760, passed: true }).grade !== "A+", "0.95 mastery but mock<800 → not A+ (margin gate)");
 ok(grade(0.92, null).grade !== "A+", "high mastery but no passed mock → not A+");
 ok(grade(0.1, null).grade === "F", "no work → F");
+
+// scale-aware scoring (AIGP-style 100–500, pass 300, A+ 340)
+const aigpSpec = { questionCount: 100, durationMinutes: 165, passingScore: 300, scoreScale: 500, scoreFloor: 100, aPlusScore: 340 };
+ok(grade(0.95, { scaled: 360, passed: true }, aigpSpec).grade === "A+", "500-scale: 360 ≥ aPlus 340 → A+");
+ok(grade(0.95, { scaled: 320, passed: true }, aigpSpec).grade !== "A+", "500-scale: 320 < aPlus 340 → not A+");
+ok(grade(0.95, { scaled: 860, passed: true }, track.exam).grade === "A+", "explicit 1000-scale spec keeps historic behavior");
+const aigpTrack = { exam: aigpSpec, domains: track.domains };
+const aigpMock = buildMock(aigpTrack, stub);
+const aigpPerfect = scoreMock(aigpTrack, aigpMock.items, Object.fromEntries(aigpMock.items.map((q) => [q.id, q.options.filter((o) => o.correct).map((o) => o.id)])));
+ok(aigpPerfect.scaled === 500 && aigpPerfect.passed, `500-scale all-correct → 500 (${aigpPerfect.scaled})`);
+const aigpBlank = scoreMock(aigpTrack, aigpMock.items, {});
+ok(aigpBlank.scaled === 100 && !aigpBlank.passed, `500-scale blank → floor 100 (${aigpBlank.scaled})`);
 const v = verdict(track, stub);
 ok(typeof v.headline === "string" && Array.isArray(v.reasons), "verdict returns headline + reasons");
 ok(v.grade === "F" && !v.qualified, "fresh learner is F / not qualified");

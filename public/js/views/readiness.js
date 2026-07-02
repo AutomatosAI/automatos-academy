@@ -112,7 +112,7 @@ export function readinessView(ctx) {
       el("div", { class: "panel", style: { marginTop: "34px" } }, [
         el("div", { class: "stat-row" }, [
           el("div", { class: "s" }, [el("b", { text: masteryPct + "%" }), el("span", { class: "mono-label", text: "Weighted mastery" })]),
-          el("div", { class: "s" }, [el("b", { text: best ? `${best.scaled}` : "—" }), el("span", { class: "mono-label", text: "Best mock / 1000" })]),
+          el("div", { class: "s" }, [el("b", { text: best ? `${best.scaled}` : "—" }), el("span", { class: "mono-label", text: `Best mock / ${r.scale}` })]),
           el("div", { class: "s" }, [el("b", { text: String(r.due) }), el("span", { class: "mono-label", text: "Review due" })]),
           el("div", { class: "s" }, [el("b", { text: (store.s.exams || []).length + "" }), el("span", { class: "mono-label", text: "Mocks sat" })]),
         ]),
