@@ -14,7 +14,10 @@ import { examView } from "./views/exam.js";
 import { scenariosIndex, scenarioRun } from "./views/scenario.js";
 import { readinessView } from "./views/readiness.js";
 import { libraryView, videosView } from "./views/library.js";
+import { certificateView } from "./views/certificate.js";
+import { pathFinderView } from "./views/pathfinder.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
+import { track as tkEvent, mountCtaTracking } from "./analytics.js";
 
 const appEl = document.getElementById("app");
 const progressEl = document.getElementById("ac-progress");
@@ -54,6 +57,8 @@ route("/t/:vendor/:track/quiz/:domain", quizView);
 route("/t/:vendor/:track/exam", examView);
 route("/t/:vendor/:track/readiness", readinessView);
 route("/tutor", tutorPageView);
+route("/start", pathFinderView);
+route("/cert/:payload", certificateView);
 
 async function handle(match) {
   setProgress(18);
@@ -70,6 +75,7 @@ async function handle(match) {
     mount(node);
     setProgress(100);
     syncTopnav(match.path);
+    tkEvent("page_view");
   } catch (e) {
     console.error("[route]", e);
     mount(shell("Error", "Something broke.", String((e && e.message) || e)));
@@ -80,7 +86,7 @@ async function handle(match) {
 function syncTopnav(path) {
   document.querySelectorAll(".ac-topnav a[data-nav]").forEach((a) => {
     const k = a.getAttribute("data-nav");
-    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor");
+    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "start" && path === "/start");
     if (on) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
@@ -102,3 +108,4 @@ function syncTopnav(path) {
 
 start(handle);
 mountTutor();
+mountCtaTracking();

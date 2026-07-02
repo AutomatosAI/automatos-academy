@@ -31,8 +31,11 @@ export async function loadTrack(vendorId, trackId) {
   const full = { vendorId, trackId, ...track, domains };
 
   // Light validation — surface authoring mistakes without crashing the app.
+  // Skills tracks (no exam) carry no blueprint weights, so only exam tracks
+  // are held to the sum-to-1.0 rule here (same rule as the validator).
   const sum = domains.reduce((s, d) => s + (d.weight || 0), 0);
-  if (domains.length && Math.abs(sum - 1) > 0.02) {
+  const isExamTrack = !!(track.exam && track.exam.questionCount);
+  if (isExamTrack && domains.length && Math.abs(sum - 1) > 0.02) {
     console.warn(`[content] ${trackId} domain weights sum to ${sum.toFixed(3)} (expected 1.000)`);
   }
   cache.set(key, full);

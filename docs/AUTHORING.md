@@ -103,3 +103,45 @@ Markdown supported: `##`/`###` headings (become the on-page TOC), `**bold**`, `*
 ## Security note
 
 Lesson/question/explanation bodies are rendered as HTML from our **first-party** markdown (the renderer HTML-escapes all text before formatting, and link URLs are author-controlled). This is safe for first-party content. **If content ever becomes user-generated, add HTML sanitisation (e.g. DOMPurify) before rendering** — the `html`-setting code paths are in `js/ui.js`, `js/markdown.js`, and `js/views/parts.js`.
+
+## Track shapes: exam vs skills
+
+The engine renders **two shapes**, decided by one thing — whether `track.json` has a real `exam{}`:
+
+| | Exam track (CCA-F, GH-300, GH-500, AIGP) | Skills track (APA, ABF, AI-Security, Cross-Vendor) |
+|---|---|---|
+| `track.exam{}` | required, with `questionCount` | **omit entirely** (a partial `exam{}` fails validation) |
+| Domain `weight` | required, sums to 1.0 | omit (if any weight is present, all must sum to 1.0) |
+| Mock exam / A+ gate | rendered | hidden — the exam tab disappears, `/exam` shows a "no exam, on purpose" page |
+| Readiness tab | A+ verdict | **Progress** — lessons done per module group |
+| Completion | A+ (≥90% mastery + mock ≥800 passed) | every lesson done |
+| Badge claim | unlocks at A+ | unlocks at full completion |
+
+Everything else (lessons, knowledge checks, quizzes, scenarios, labs, resources, videos) works identically in both shapes.
+
+### `badge{}` (optional, both shapes — PRD-CREDENTIALS)
+
+```json
+"badge": {
+  "completionLabel": "Prep completed — GH-500 (GitHub Advanced Security)",
+  "definition": "One-sentence honest statement of what completion means."
+}
+```
+
+Rendered on the claim panel and certificate pages. **Honesty rule:** exam-track copy must say it certifies *preparation* completion, never the vendor credential. Omitting `badge{}` falls back to safe generated copy.
+
+### `verification{}` (exam tracks — PRD-OPS-FRESHNESS)
+
+```json
+"verification": {
+  "verifiedAt": "2026-07-01",
+  "sourceOfTruth": ["https://learn.microsoft.com/..."],
+  "notes": "What was checked and any traps found."
+}
+```
+
+Rendered as a chip on the track header ("Facts verified <date> …"). Bump `verifiedAt` only after actually re-fetching the official source and diffing the load-bearing facts (count, duration, pass score, domain names/weights, feature names). An overdue date showing publicly is intentional — visible staleness keeps us honest.
+
+### Landing shells
+
+`scripts/generate-shells.mjs` runs at server boot and emits a static SEO page per **live** track (`/tracks/<trackId>/`) plus `sitemap.xml`/`robots.txt` from the manifest + track.json — no authoring step needed; just keep `summary`, `exam{}`, and `verification{}` accurate.

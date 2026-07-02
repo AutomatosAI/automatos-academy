@@ -1,7 +1,8 @@
-// Platform home (track catalog) + the "learning model" explainer.
+// Platform home (track catalog, two doors) + the "learning model" explainer.
 import { el } from "../ui.js";
 import { loadCatalog } from "../content.js";
 import { url } from "../router.js";
+import { track as tk } from "../analytics.js";
 
 const SPINE = [
   ["01", "Learn", "Tutorials that teach the why, not just the what — grounded in primary sources."],
@@ -15,6 +16,30 @@ function spine() {
   return el("div", { class: "spine" }, SPINE.map(([n, h, p]) =>
     el("div", { class: "step" }, [el("div", { class: "n", text: n }), el("h3", { text: h }), el("p", { text: p })])
   ));
+}
+
+// "Notify me" on coming-soon cards — the highest-intent demand signal we can
+// capture (PRD-GROWTH §4.2). POSTs to /api/notify; unconfigured server → 503
+// and we fall back to pointing at the platform site.
+function notifyForm(t) {
+  const input = el("input", { class: "claim-input", type: "email", placeholder: "you@company.com", "aria-label": `Email me when ${t.name} launches` });
+  const btn = el("button", { class: "ac-btn", type: "button" }, ["Notify me"]);
+  const row = el("div", { class: "row notify-form", style: { gap: "8px" } }, [input, btn]);
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const email = input.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.focus(); return; }
+    btn.disabled = true; btn.textContent = "…";
+    try {
+      const r = await fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, trackId: t.trackId }) });
+      if (!r.ok) throw new Error(String(r.status));
+      tk("notify_me", { track: t.trackId });
+      row.replaceChildren(el("span", { class: "mono-label", style: { color: "var(--accent)" }, text: "✓ You're on the list" }));
+    } catch (_) {
+      row.replaceChildren(el("a", { class: "mono-label", href: "https://automatos.app", target: "_blank", rel: "noopener", text: "Sign-ups open soon — meanwhile: automatos.app ↗" }));
+    }
+  });
+  return row;
 }
 
 function trackCard(t) {
@@ -36,6 +61,33 @@ function trackCard(t) {
       el("span", { class: "stat", text: live ? `${t.domains} domains${t.exam ? " · " + t.exam.questionCount + "Q exam" : ""}` : "In development" }),
       live ? el("span", { class: "arr serif-i", text: "→" }) : null,
     ]),
+    live ? null : notifyForm(t),
+  ]);
+}
+
+// Two doors, one academy (PRD-GROWTH §5): the operator who wants AI running
+// their business, and the practitioner chasing a credential. Lane comes from
+// manifest data (track.lane) — the engine stays vendor-agnostic.
+function doors(tracks) {
+  const firstLive = (lane, fallbackLane) => {
+    const inLane = tracks.filter((t) => (t.lane || "practitioner") === lane);
+    return inLane.find((t) => t.status === "live") || inLane[0] ||
+      tracks.filter((t) => (t.lane || "practitioner") === fallbackLane).find((t) => t.status === "live");
+  };
+  const operator = firstLive("operator", "practitioner");
+  const practitioner = tracks.find((t) => t.flagship && t.status === "live") || firstLive("practitioner", "operator");
+  const door = (kicker, title, body, t) => {
+    const live = t && t.status === "live";
+    return el(live ? "a" : "div", { class: "door" + (live ? "" : " is-soon"), href: live ? "#" + url.track(t.vendorId, t.trackId) : null }, [
+      el("span", { class: "mono-label", text: kicker }),
+      el("h3", { class: "serif-i", text: title }),
+      el("p", { class: "muted", text: body }),
+      el("span", { class: "mono-label", style: { marginTop: "auto" }, text: t ? (live ? `Start: ${t.name} →` : `First track in development: ${t.name}`) : "" }),
+    ]);
+  };
+  return el("div", { class: "door-grid" }, [
+    door("For operators", "Run your business with AI.", "Plain English, no exam — you leave with one real automation running in your business.", operator),
+    door("For practitioners", "Get certified in AI.", "Exam-grade prep, weighted to real blueprints, gated by an honest A+ readiness score.", practitioner),
   ]);
 }
 
@@ -54,8 +106,10 @@ export async function catalog() {
     ]),
     el("div", { class: "cta-row" }, [
       flagship ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.track(flagship.vendorId, flagship.trackId) }, ["Start the flagship track ", el("span", { class: "arr", text: "→" })]) : null,
+      el("a", { class: "ac-btn", href: "#/start" }, ["Which track is mine?"]),
       el("a", { class: "ac-btn", href: "#" + url.method() }, ["See the model"]),
     ]),
+    doors(tracks),
     spine(),
   ])]);
 

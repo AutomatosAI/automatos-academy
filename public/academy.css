@@ -419,3 +419,38 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 400; letter-spacing: -0
   .ac-topnav { gap: 14px; }
   .ac-topnav a:not(.ac-ext) { display: none; }
 }
+
+/* ── two doors, path finder, credentials, freshness (feat/platform-ready) ── */
+.door-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule-c); border: 1px solid var(--rule-c); margin-top: 34px; }
+.door { background: var(--bg); padding: 26px 24px; display: flex; flex-direction: column; gap: 10px; min-height: 170px; transition: background .18s; }
+a.door:hover { background: var(--bg-2); }
+.door.is-soon { opacity: .78; }
+.door h3 { font-size: 26px; line-height: 1.05; }
+
+.pf-opts { display: grid; gap: 1px; background: var(--rule-c); border: 1px solid var(--rule-c); margin-top: 26px; }
+.pf-opt { background: var(--bg); border: 0; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; text-align: left; color: var(--fg); transition: background .18s; }
+.pf-opt:hover { background: var(--bg-2); }
+
+.claim-input { background: var(--bg); border: 1px solid var(--rule-strong); color: var(--fg); font: 500 15px/1.2 var(--sans); padding: 10px 12px; min-width: 240px; flex: 1; }
+.claim-input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.claim-box { border-left: 3px solid var(--accent); }
+
+.cert-card { background: var(--bg); border: 1px solid var(--rule-strong); box-shadow: var(--ring); padding: 44px 40px; }
+@media print {
+  .no-print, .ac-topbar, .ac-footer, .tut-fab, .tut-panel, #ac-progress { display: none !important; }
+  .cert-card { border: 1px solid #000; box-shadow: none; }
+}
+
+.notify-form { margin-top: 12px; }
+.track-card.is-soon .notify-form { opacity: 1; }
+.notify-form .claim-input { min-width: 0; font-size: 13px; padding: 8px 10px; }
+
+.verify-chip { display: inline-block; font: 500 var(--t-meta)/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; text-decoration: none; }
+a.verify-chip:hover { background: var(--accent-soft); }
+
+.tut-dogfood { margin-left: auto; margin-right: 8px; opacity: .75; font-size: 10px; }
+
+@media (max-width: 720px) {
+  .door-grid { grid-template-columns: 1fr; }
+  .tut-dogfood { display: none; }
+}

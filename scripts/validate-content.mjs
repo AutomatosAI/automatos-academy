@@ -40,10 +40,14 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
   const label = `${vendor}/${track}`;
   let t;
   try { t = read(join(dir, "track.json")); } catch (e) { err(`${label}: track.json invalid — ${e.message}`); continue; }
-  if (!t.exam) warn(`${label}: no exam spec`);
+  // Two shapes: exam tracks (weighted blueprint, mock, A+ gate) and skills
+  // tracks (no exam{} — APA/ABF/AI-Security shape; weights optional).
+  const isExam = !!(t.exam && t.exam.questionCount);
+  if (t.exam && !t.exam.questionCount) err(`${label}: exam{} present but questionCount missing — either complete it or drop exam{} (skills track)`);
+  if (!isExam) console.log(`${label}: skills track (no exam — weights optional, no readiness gate)`);
 
   const ids = new Set();
-  let weightSum = 0, domainCount = 0;
+  let weightSum = 0, domainCount = 0, weighted = 0;
   for (const df of t.domainFiles || []) {
     const dp = join(dir, df);
     if (!existsSync(dp)) { err(`${label}: missing domain file ${df}`); continue; }
@@ -51,7 +55,8 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
     try { d = read(dp); } catch (e) { err(`${label}/${df}: invalid JSON — ${e.message}`); continue; }
     domainCount++;
     weightSum += d.weight || 0;
-    if (typeof d.weight !== "number") err(`${label}/${df}: weight missing/not a number`);
+    if (typeof d.weight === "number") weighted++;
+    if (isExam && typeof d.weight !== "number") err(`${label}/${df}: weight missing/not a number (exam tracks are blueprint-weighted)`);
     for (const l of d.lessons || []) {
       if (!l.body) warn(`${d.id}/${l.id}: empty lesson body`);
       for (const kc of l.knowledgeCheck || []) {
@@ -70,8 +75,10 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
     }
     console.log(`  ✓ ${d.code || df} — ${(d.lessons || []).length} lessons, ${(d.questions || []).length} q, ${(d.scenarios || []).length} scn, weight ${d.weight}`);
   }
-  if (domainCount && Math.abs(weightSum - 1) > 0.005) err(`${label}: domain weights sum to ${weightSum.toFixed(3)}, expected 1.000`);
-  console.log(`${label}: ${domainCount} domains, weight sum ${weightSum.toFixed(3)}`);
+  // Exam tracks must sum to 1.000. A skills track may omit weights entirely;
+  // if it declares any, they must still sum (half-weighted = authoring bug).
+  if ((isExam || weighted > 0) && domainCount && Math.abs(weightSum - 1) > 0.005) err(`${label}: domain weights sum to ${weightSum.toFixed(3)}, expected 1.000`);
+  console.log(`${label}: ${domainCount} domains${isExam || weighted ? `, weight sum ${weightSum.toFixed(3)}` : ""}`);
 }
 
 if (warnings.length) { console.log("\nWarnings:"); warnings.forEach((w) => console.log("  ! " + w)); }

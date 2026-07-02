@@ -6,6 +6,8 @@ import { trackHeader, section } from "./_chrome.js";
 import { url } from "../router.js";
 import { buildMock, scoreMock } from "../engine/exam.js";
 import { questionCard } from "./question.js";
+import { isSkillsTrack } from "../engine/certificate.js";
+import { track as tk } from "../analytics.js";
 
 function examHistory(store) {
   const ex = store.s.exams || [];
@@ -25,6 +27,15 @@ function examHistory(store) {
 export function examView(ctx) {
   const { track, store } = ctx;
   const v = track.vendorId, t = track.trackId;
+  // Skills tracks have no exam by design — say so instead of a broken mock.
+  if (isSkillsTrack(track)) {
+    return el("div", {}, [trackHeader(track, "readiness"), section(
+      el("span", { class: "mono-label", text: "Skills track" }),
+      el("h1", { style: { fontSize: "clamp(30px,5vw,52px)", marginTop: "8px" }, text: "No exam here — on purpose." }),
+      el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "This track has no external exam, so there's no mock and no gate. Progress is the work itself: finish every module and ship the capstone." }),
+      el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t), style: { marginTop: "22px" } }, ["My progress →"]),
+    )]);
+  }
   const spec = track.exam || {};
   const root = el("div", {});
   let activeTimer = null;
@@ -51,6 +62,7 @@ export function examView(ctx) {
   function begin() {
     const mock = buildMock(track, store);
     if (!mock.total) { clear(root); root.appendChild(trackHeader(track, "exam")); root.appendChild(section(el("p", { text: "No questions available yet — add content first." }))); return; }
+    tk("mock_start", { track: t });
     runExam(mock);
   }
 
@@ -116,6 +128,7 @@ export function examView(ctx) {
       store.recordAnswer(q.id, ok, q.domainId);
     });
     store.pushExam({ scaled: res.scaled, passed: res.passed, correct: res.correct, total: res.total, perDomain: res.perDomain, count: mock.total });
+    tk("mock_score", { track: t, scaled: res.scaled, passed: res.passed });
     showResults(mock, answers, res);
   }
 

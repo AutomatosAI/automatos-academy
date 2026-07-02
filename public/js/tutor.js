@@ -187,6 +187,7 @@ function send(text, listEl) {
   session.messages.push(bot);
   let body = renderList(listEl);
   const repaint = () => { body = renderList(listEl); };
+  import("./analytics.js").then((a) => a.track("tutor_message")).catch(() => {});
   streamChat(text, {
     onChunk: (c) => { bot.text += c; if (body) { body.textContent = bot.text; listEl.scrollTop = listEl.scrollHeight; } },
     onDone: () => { bot.done = true; session.busy = false; repaint(); },
@@ -218,6 +219,11 @@ export function tutorPageView() {
         el("span", { class: "mono-label", text: "Academy tutor · powered by Automatos" }),
         el("h1", { class: "serif", style: { fontSize: "clamp(28px,4vw,44px)", marginTop: "8px" }, text: "Study with the tutor" }),
         el("p", { class: "lede muted", style: { maxWidth: "60ch", marginTop: "10px" }, text: "Grounded in everything Claude — the docs, the SDKs, MCP, and the exam blueprint. Ask it to explain, quiz you, grade your reasoning, or draw a flow." }),
+        el("p", { class: "mono-label", style: { marginTop: "12px" } }, [
+          "Dogfood, live: this tutor is an ",
+          el("a", { href: "https://automatos.app", target: "_blank", rel: "noopener", style: { color: "var(--accent)" }, text: "Automatos" }),
+          " workspace agent — the same thing you can build there in an afternoon.",
+        ]),
       ]),
       el("div", { class: "tut-page-grid" }, [
         el("aside", { class: "tut-aside" }, [
@@ -242,6 +248,7 @@ export function mountTutor() {
   const panel = el("div", { class: "tut-panel", "data-open": "false", role: "dialog", "aria-label": "Academy tutor" }, [
     el("div", { class: "tut-head" }, [
       el("span", { class: "tut-title", text: "Tutor" }),
+      el("span", { class: "mono-label tut-dogfood", text: "an Automatos agent, live" }),
       el("div", { class: "tut-head-actions" }, [
         el("button", { class: "tut-icon", type: "button", title: "Open full study mode", "aria-label": "Expand to full study page", html: "&#10530;", onclick: () => { setOpen(false); location.hash = "#/tutor"; } }),
         el("button", { class: "tut-icon", type: "button", title: "Close", "aria-label": "Close tutor", html: "&times;", onclick: () => setOpen(false) }),

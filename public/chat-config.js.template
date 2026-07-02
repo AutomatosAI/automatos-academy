@@ -18,4 +18,7 @@ window.ACADEMY_CHAT = {
   publicKey: "${ACADEMY_CHAT_PUBLIC_KEY}",
   agentId:   "${ACADEMY_CHAT_AGENT_ID}",
   apiBase:   "https://api.automatos.app",
+  // Privacy-clean event beacon (js/analytics.js). Empty → analytics is a
+  // no-op. Set ACADEMY_ANALYTICS_ENDPOINT on the deploy once a tool is chosen.
+  analyticsEndpoint: "${ACADEMY_ANALYTICS_ENDPOINT}",
 };
