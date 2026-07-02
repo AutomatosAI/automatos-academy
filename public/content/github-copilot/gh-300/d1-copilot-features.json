@@ -3,7 +3,7 @@
   "order": 1,
   "code": "D1",
   "name": "Use GitHub Copilot Features",
-  "weight": 0.30,
+  "weight": 0.3,
   "tagline": "Completions, chat, and the modes — plus agents, CLI, MCP, Spaces, Spark, and code review. Pick the right surface for the job.",
   "overview": "The heaviest domain on GH-300 (25–30%). It tests whether you can use Copilot's full feature set well: inline completions and chat, the Ask/Edit/Agent interaction modes and Plan Mode, the coding agent and Copilot CLI, grounding with MCP and Spaces, building with Spark, and Copilot code review — and whether you can choose the right surface for a given task and operate agents responsibly. The January 2026 refresh put agents, Plan Mode, MCP, Spaces, Spark, and code review squarely in scope.",
   "objectives": [
@@ -28,13 +28,28 @@
           "difficulty": 1,
           "stem": "You want Copilot to explain what an unfamiliar function does, without changing any code. Which surface fits best?",
           "options": [
-            { "id": "a", "text": "Chat in Ask mode (e.g. /explain with the function referenced)", "correct": true },
-            { "id": "b", "text": "Agent mode, so it can refactor the function" },
-            { "id": "c", "text": "Inline completions" },
-            { "id": "d", "text": "The coding agent via a GitHub issue" }
+            {
+              "id": "a",
+              "text": "Chat in Ask mode (e.g. /explain with the function referenced)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Agent mode, so it can refactor the function"
+            },
+            {
+              "id": "c",
+              "text": "Inline completions"
+            },
+            {
+              "id": "d",
+              "text": "The coding agent via a GitHub issue"
+            }
           ],
           "explanation": "Understanding code with no edits is exactly what **Ask mode** is for — `/explain` with a `#`-reference to the function. Agent mode would start changing code; completions won't explain; the coding agent is for background tasks that end in a PR.",
-          "sourceRefs": ["r-features"]
+          "sourceRefs": [
+            "r-features"
+          ]
         },
         {
           "id": "kc-d1-2",
@@ -43,13 +58,29 @@
           "difficulty": 2,
           "stem": "A change touches three files and needs a test run to confirm it works. Which mode is the natural fit?",
           "options": [
-            { "id": "a", "text": "Agent mode — it edits across files and can run the tests, iterating until done", "correct": true },
-            { "id": "b", "text": "Ask mode — it will apply the multi-file change itself" },
-            { "id": "c", "text": "Completions — accept enough ghost text and the change appears" },
-            { "id": "d", "text": "None — Copilot cannot edit more than one file" }
+            {
+              "id": "a",
+              "text": "Agent mode — it edits across files and can run the tests, iterating until done",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Ask mode — it will apply the multi-file change itself"
+            },
+            {
+              "id": "c",
+              "text": "Completions — accept enough ghost text and the change appears"
+            },
+            {
+              "id": "d",
+              "text": "None — Copilot cannot edit more than one file"
+            }
           ],
           "explanation": "Multi-file work with a verification step is **Agent mode**: it makes the edits, runs the tests, and iterates. Ask mode proposes but doesn't apply; completions are line-level; Copilot can absolutely edit many files.",
-          "sourceRefs": ["r-features", "r-agents"]
+          "sourceRefs": [
+            "r-features",
+            "r-agents"
+          ]
         },
         {
           "id": "kc-d1-3",
@@ -58,13 +89,28 @@
           "difficulty": 2,
           "stem": "What does Plan mode add over jumping straight into Agent mode?",
           "options": [
-            { "id": "a", "text": "A reviewable step-by-step plan you approve before any code is written, so a wrong approach is caught early", "correct": true },
-            { "id": "b", "text": "It runs the change without a language model, so it's deterministic" },
-            { "id": "c", "text": "It merges the resulting pull request automatically" },
-            { "id": "d", "text": "It disables tests to run faster" }
+            {
+              "id": "a",
+              "text": "A reviewable step-by-step plan you approve before any code is written, so a wrong approach is caught early",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It runs the change without a language model, so it's deterministic"
+            },
+            {
+              "id": "c",
+              "text": "It merges the resulting pull request automatically"
+            },
+            {
+              "id": "d",
+              "text": "It disables tests to run faster"
+            }
           ],
           "explanation": "Plan mode surfaces Copilot's intended approach as a plan you approve first — cheap insurance against it heading the wrong way on a big or ambiguous task. It doesn't remove the model, auto-merge, or skip tests.",
-          "sourceRefs": ["r-agents"]
+          "sourceRefs": [
+            "r-agents"
+          ]
         }
       ]
     },
@@ -82,13 +128,28 @@
           "difficulty": 1,
           "stem": "You assign a GitHub issue to the Copilot coding agent. What do you get back?",
           "options": [
-            { "id": "a", "text": "A pull request with its changes, for you to review", "correct": true },
-            { "id": "b", "text": "A direct commit pushed to main" },
-            { "id": "c", "text": "A merged release, deployed automatically" },
-            { "id": "d", "text": "Only a chat message describing what it would do" }
+            {
+              "id": "a",
+              "text": "A pull request with its changes, for you to review",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A direct commit pushed to main"
+            },
+            {
+              "id": "c",
+              "text": "A merged release, deployed automatically"
+            },
+            {
+              "id": "d",
+              "text": "Only a chat message describing what it would do"
+            }
           ],
           "explanation": "The coding agent works in the background and opens a **pull request** — the human review gate is the point. It doesn't push to main or deploy on its own.",
-          "sourceRefs": ["r-agents"]
+          "sourceRefs": [
+            "r-agents"
+          ]
         },
         {
           "id": "kc-d1-5",
@@ -97,13 +158,28 @@
           "difficulty": 2,
           "stem": "Which task is the best fit to hand to the coding agent rather than doing it interactively?",
           "options": [
-            { "id": "a", "text": "A well-specified dependency upgrade with existing tests to prove it", "correct": true },
-            { "id": "b", "text": "Deciding the system's core architecture" },
-            { "id": "c", "text": "A production incident needing a judgment call right now" },
-            { "id": "d", "text": "A vague 'make the app better' request" }
+            {
+              "id": "a",
+              "text": "A well-specified dependency upgrade with existing tests to prove it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Deciding the system's core architecture"
+            },
+            {
+              "id": "c",
+              "text": "A production incident needing a judgment call right now"
+            },
+            {
+              "id": "d",
+              "text": "A vague 'make the app better' request"
+            }
           ],
           "explanation": "Background agents shine on scoped, verifiable chores — a tested dependency bump. Architecture, live incidents, and vague asks need human judgment and shouldn't be delegated blind.",
-          "sourceRefs": ["r-agents"]
+          "sourceRefs": [
+            "r-agents"
+          ]
         },
         {
           "id": "kc-d1-6",
@@ -112,13 +188,28 @@
           "difficulty": 2,
           "stem": "What is the Copilot CLI for?",
           "options": [
-            { "id": "a", "text": "Running Copilot as an agent in the terminal for shell, git, and multi-step tasks", "correct": true },
-            { "id": "b", "text": "Installing IDE extensions from the command line" },
-            { "id": "c", "text": "Training a custom model on your repository" },
-            { "id": "d", "text": "Replacing the GitHub REST API" }
+            {
+              "id": "a",
+              "text": "Running Copilot as an agent in the terminal for shell, git, and multi-step tasks",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Installing IDE extensions from the command line"
+            },
+            {
+              "id": "c",
+              "text": "Training a custom model on your repository"
+            },
+            {
+              "id": "d",
+              "text": "Replacing the GitHub REST API"
+            }
           ],
           "explanation": "Copilot CLI brings the agent to the terminal — it can run shell and git commands and carry out multi-step work from the command line. It isn't an extension installer, a training tool, or an API replacement.",
-          "sourceRefs": ["r-cli"]
+          "sourceRefs": [
+            "r-cli"
+          ]
         }
       ]
     },
@@ -136,13 +227,28 @@
           "difficulty": 2,
           "stem": "You want Copilot to read live tickets from your issue tracker and your internal deployment tool while it works. Which feature is designed for that?",
           "options": [
-            { "id": "a", "text": "MCP servers — connect external tools/data via the open protocol", "correct": true },
-            { "id": "b", "text": "A Copilot Space of screenshots" },
-            { "id": "c", "text": "Raising the completion length" },
-            { "id": "d", "text": "Switching the chat model" }
+            {
+              "id": "a",
+              "text": "MCP servers — connect external tools/data via the open protocol",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A Copilot Space of screenshots"
+            },
+            {
+              "id": "c",
+              "text": "Raising the completion length"
+            },
+            {
+              "id": "d",
+              "text": "Switching the chat model"
+            }
           ],
           "explanation": "Connecting Copilot to live external systems is **MCP** — configure a server for the tool/data and Copilot can pull context and act through it. A Space curates static context; model choice and length don't add data sources.",
-          "sourceRefs": ["r-mcp"]
+          "sourceRefs": [
+            "r-mcp"
+          ]
         },
         {
           "id": "kc-d1-8",
@@ -151,13 +257,28 @@
           "difficulty": 2,
           "stem": "New joiners keep asking the same questions about a service's conventions. You want Copilot answers grounded in that service's docs and code for the whole team. What fits?",
           "options": [
-            { "id": "a", "text": "A Copilot Space bundling the service's repo, docs, and notes, shared with the team", "correct": true },
-            { "id": "b", "text": "An MCP server that trains a bespoke model nightly" },
-            { "id": "c", "text": "Telling everyone to paste the docs into each chat" },
-            { "id": "d", "text": "Turning off content exclusions" }
+            {
+              "id": "a",
+              "text": "A Copilot Space bundling the service's repo, docs, and notes, shared with the team",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "An MCP server that trains a bespoke model nightly"
+            },
+            {
+              "id": "c",
+              "text": "Telling everyone to paste the docs into each chat"
+            },
+            {
+              "id": "d",
+              "text": "Turning off content exclusions"
+            }
           ],
           "explanation": "Curating a reusable, shareable context bundle is a **Copilot Space**. MCP connects live tools (and doesn't train models); pasting docs every time doesn't scale; content exclusions are unrelated.",
-          "sourceRefs": ["r-spaces"]
+          "sourceRefs": [
+            "r-spaces"
+          ]
         }
       ]
     },
@@ -175,13 +296,28 @@
           "difficulty": 2,
           "stem": "Your team turns on Copilot code review for every PR. What's the correct way to frame it?",
           "options": [
-            { "id": "a", "text": "An assistive first pass that augments human review; a person is still accountable for the merge", "correct": true },
-            { "id": "b", "text": "A replacement for human reviewers, so approvals can be automated" },
-            { "id": "c", "text": "A guarantee the code is bug-free once it comments" },
-            { "id": "d", "text": "A tool that merges the PR when it finds no issues" }
+            {
+              "id": "a",
+              "text": "An assistive first pass that augments human review; a person is still accountable for the merge",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A replacement for human reviewers, so approvals can be automated"
+            },
+            {
+              "id": "c",
+              "text": "A guarantee the code is bug-free once it comments"
+            },
+            {
+              "id": "d",
+              "text": "A tool that merges the PR when it finds no issues"
+            }
           ],
           "explanation": "Copilot code review speeds the loop and catches easy misses, but it's **assistive** — humans remain accountable for what merges. It's not a replacement, a correctness guarantee, or an auto-merger.",
-          "sourceRefs": ["r-code-review"]
+          "sourceRefs": [
+            "r-code-review"
+          ]
         },
         {
           "id": "kc-d1-10",
@@ -190,13 +326,28 @@
           "difficulty": 1,
           "stem": "An admin needs to disable the Copilot CLI for one team while keeping chat enabled. How is that done?",
           "options": [
-            { "id": "a", "text": "Through organisation/enterprise Copilot policies that toggle features by scope", "correct": true },
-            { "id": "b", "text": "By uninstalling the CLI from each developer's machine manually" },
-            { "id": "c", "text": "It can't be done — features are all-or-nothing" },
-            { "id": "d", "text": "By downgrading everyone to the Free plan" }
+            {
+              "id": "a",
+              "text": "Through organisation/enterprise Copilot policies that toggle features by scope",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "By uninstalling the CLI from each developer's machine manually"
+            },
+            {
+              "id": "c",
+              "text": "It can't be done — features are all-or-nothing"
+            },
+            {
+              "id": "d",
+              "text": "By downgrading everyone to the Free plan"
+            }
           ],
           "explanation": "Feature enablement is governed by **policies** at the org/enterprise level, scoped to teams. It isn't manual per-machine, all-or-nothing, or tied to forcing a plan downgrade.",
-          "sourceRefs": ["r-features"]
+          "sourceRefs": [
+            "r-features"
+          ]
         }
       ]
     }
@@ -209,13 +360,28 @@
       "difficulty": 1,
       "stem": "Which surface is best for quickly accepting a one-line, obvious next statement while typing?",
       "options": [
-        { "id": "a", "text": "Inline code completions", "correct": true },
-        { "id": "b", "text": "The coding agent" },
-        { "id": "c", "text": "Plan mode" },
-        { "id": "d", "text": "A Copilot Space" }
+        {
+          "id": "a",
+          "text": "Inline code completions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The coding agent"
+        },
+        {
+          "id": "c",
+          "text": "Plan mode"
+        },
+        {
+          "id": "d",
+          "text": "A Copilot Space"
+        }
       ],
       "explanation": "Line-level, in-flow suggestions are **completions** (accept with Tab). Agents, Plan mode, and Spaces are heavier surfaces for larger or context-grounding work.",
-      "sourceRefs": ["r-features"]
+      "sourceRefs": [
+        "r-features"
+      ]
     },
     {
       "id": "q-d1-2",
@@ -224,13 +390,28 @@
       "difficulty": 2,
       "stem": "A developer asks Copilot to implement a feature spanning several files and run the tests. Which mode is designed for this?",
       "options": [
-        { "id": "a", "text": "Agent mode", "correct": true },
-        { "id": "b", "text": "Ask mode" },
-        { "id": "c", "text": "Completions only" },
-        { "id": "d", "text": "PR summaries" }
+        {
+          "id": "a",
+          "text": "Agent mode",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Ask mode"
+        },
+        {
+          "id": "c",
+          "text": "Completions only"
+        },
+        {
+          "id": "d",
+          "text": "PR summaries"
+        }
       ],
       "explanation": "Multi-file implementation with test execution is **Agent mode**. Ask mode proposes without applying, completions are line-level, and PR summaries describe an existing diff.",
-      "sourceRefs": ["r-agents"]
+      "sourceRefs": [
+        "r-agents"
+      ]
     },
     {
       "id": "q-d1-3",
@@ -239,13 +420,28 @@
       "difficulty": 2,
       "stem": "Why use Plan mode before a large refactor?",
       "options": [
-        { "id": "a", "text": "To review and approve Copilot's intended approach before any code changes", "correct": true },
-        { "id": "b", "text": "To skip code review afterwards" },
-        { "id": "c", "text": "To force the cheapest model" },
-        { "id": "d", "text": "To disable content exclusions for the repo" }
+        {
+          "id": "a",
+          "text": "To review and approve Copilot's intended approach before any code changes",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "To skip code review afterwards"
+        },
+        {
+          "id": "c",
+          "text": "To force the cheapest model"
+        },
+        {
+          "id": "d",
+          "text": "To disable content exclusions for the repo"
+        }
       ],
       "explanation": "Plan mode makes the approach explicit and approvable up front — you catch a wrong direction before edits. It doesn't remove review, pick a model, or touch exclusions.",
-      "sourceRefs": ["r-agents"]
+      "sourceRefs": [
+        "r-agents"
+      ]
     },
     {
       "id": "q-d1-4",
@@ -254,13 +450,28 @@
       "difficulty": 1,
       "stem": "The Copilot coding agent finishes a task. Where do its changes appear?",
       "options": [
-        { "id": "a", "text": "In a pull request for human review", "correct": true },
-        { "id": "b", "text": "Committed directly to the default branch" },
-        { "id": "c", "text": "Deployed straight to production" },
-        { "id": "d", "text": "Only in the agent's private memory" }
+        {
+          "id": "a",
+          "text": "In a pull request for human review",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Committed directly to the default branch"
+        },
+        {
+          "id": "c",
+          "text": "Deployed straight to production"
+        },
+        {
+          "id": "d",
+          "text": "Only in the agent's private memory"
+        }
       ],
       "explanation": "The coding agent opens a **pull request** — review is built into the workflow. It does not push to main or deploy autonomously.",
-      "sourceRefs": ["r-agents"]
+      "sourceRefs": [
+        "r-agents"
+      ]
     },
     {
       "id": "q-d1-5",
@@ -269,13 +480,28 @@
       "difficulty": 2,
       "stem": "Which is the strongest candidate to delegate to the background coding agent?",
       "options": [
-        { "id": "a", "text": "Bumping a library version and fixing the call sites, with tests to verify", "correct": true },
-        { "id": "b", "text": "Choosing between two competing architectures" },
-        { "id": "c", "text": "Responding to a live outage" },
-        { "id": "d", "text": "An open-ended 'improve performance somewhere' task" }
+        {
+          "id": "a",
+          "text": "Bumping a library version and fixing the call sites, with tests to verify",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Choosing between two competing architectures"
+        },
+        {
+          "id": "c",
+          "text": "Responding to a live outage"
+        },
+        {
+          "id": "d",
+          "text": "An open-ended 'improve performance somewhere' task"
+        }
       ],
       "explanation": "Scoped, testable chores are ideal for the coding agent. Architecture choices, live incidents, and vague asks need human judgment.",
-      "sourceRefs": ["r-agents"]
+      "sourceRefs": [
+        "r-agents"
+      ]
     },
     {
       "id": "q-d1-6",
@@ -284,13 +510,28 @@
       "difficulty": 2,
       "stem": "You need Copilot to query your internal database and read live tickets while assisting. What's the right mechanism?",
       "options": [
-        { "id": "a", "text": "Configure MCP servers for those systems", "correct": true },
-        { "id": "b", "text": "Paste rows and tickets into the prompt each time" },
-        { "id": "c", "text": "Create a Space of static screenshots" },
-        { "id": "d", "text": "Switch to inline completions" }
+        {
+          "id": "a",
+          "text": "Configure MCP servers for those systems",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Paste rows and tickets into the prompt each time"
+        },
+        {
+          "id": "c",
+          "text": "Create a Space of static screenshots"
+        },
+        {
+          "id": "d",
+          "text": "Switch to inline completions"
+        }
       ],
       "explanation": "Live external tools/data are connected via **MCP**. Manual pasting doesn't scale, static screenshots aren't live, and completions add no data source.",
-      "sourceRefs": ["r-mcp"]
+      "sourceRefs": [
+        "r-mcp"
+      ]
     },
     {
       "id": "q-d1-7",
@@ -299,13 +540,28 @@
       "difficulty": 2,
       "stem": "A team wants Copilot chat answers grounded in one service's repo, docs, and conventions, reusable by everyone. Which feature?",
       "options": [
-        { "id": "a", "text": "A shared Copilot Space", "correct": true },
-        { "id": "b", "text": "An MCP server that fine-tunes a model" },
-        { "id": "c", "text": "A longer system prompt pasted per chat" },
-        { "id": "d", "text": "Turning off duplication detection" }
+        {
+          "id": "a",
+          "text": "A shared Copilot Space",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "An MCP server that fine-tunes a model"
+        },
+        {
+          "id": "c",
+          "text": "A longer system prompt pasted per chat"
+        },
+        {
+          "id": "d",
+          "text": "Turning off duplication detection"
+        }
       ],
       "explanation": "Curating shareable, task-specific context is a **Copilot Space**. MCP connects live tools (and doesn't fine-tune); per-chat pasting doesn't scale; duplication detection is unrelated.",
-      "sourceRefs": ["r-spaces"]
+      "sourceRefs": [
+        "r-spaces"
+      ]
     },
     {
       "id": "q-d1-8",
@@ -314,13 +570,28 @@
       "difficulty": 1,
       "stem": "What does GitHub Spark do?",
       "options": [
-        { "id": "a", "text": "Generates and can deploy a full-stack app from a natural-language description", "correct": true },
-        { "id": "b", "text": "Reviews pull requests for security issues" },
-        { "id": "c", "text": "Stores organisation-wide Copilot policies" },
-        { "id": "d", "text": "Excludes files from Copilot" }
+        {
+          "id": "a",
+          "text": "Generates and can deploy a full-stack app from a natural-language description",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Reviews pull requests for security issues"
+        },
+        {
+          "id": "c",
+          "text": "Stores organisation-wide Copilot policies"
+        },
+        {
+          "id": "d",
+          "text": "Excludes files from Copilot"
+        }
       ],
       "explanation": "**Spark** builds (and can deploy) full-stack apps from prose — great for prototypes and internal tools. The other options describe code review, admin policies, and content exclusion.",
-      "sourceRefs": ["r-spark"]
+      "sourceRefs": [
+        "r-spark"
+      ]
     },
     {
       "id": "q-d1-9",
@@ -329,13 +600,28 @@
       "difficulty": 2,
       "stem": "How should Copilot code review sit in a team's process?",
       "options": [
-        { "id": "a", "text": "As an assistive pass alongside human review, which remains accountable for merges", "correct": true },
-        { "id": "b", "text": "As the sole approver, replacing human reviewers" },
-        { "id": "c", "text": "As a guarantee of correctness" },
-        { "id": "d", "text": "As an auto-merge bot" }
+        {
+          "id": "a",
+          "text": "As an assistive pass alongside human review, which remains accountable for merges",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "As the sole approver, replacing human reviewers"
+        },
+        {
+          "id": "c",
+          "text": "As a guarantee of correctness"
+        },
+        {
+          "id": "d",
+          "text": "As an auto-merge bot"
+        }
       ],
       "explanation": "AI review augments humans; it doesn't replace the accountable reviewer, guarantee correctness, or merge on its own.",
-      "sourceRefs": ["r-code-review"]
+      "sourceRefs": [
+        "r-code-review"
+      ]
     },
     {
       "id": "q-d1-10",
@@ -344,13 +630,28 @@
       "difficulty": 1,
       "stem": "What do Copilot PR summaries produce?",
       "options": [
-        { "id": "a", "text": "A draft pull-request description generated from the diff", "correct": true },
-        { "id": "b", "text": "A merge decision" },
-        { "id": "c", "text": "A new MCP server" },
-        { "id": "d", "text": "A deployment pipeline" }
+        {
+          "id": "a",
+          "text": "A draft pull-request description generated from the diff",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A merge decision"
+        },
+        {
+          "id": "c",
+          "text": "A new MCP server"
+        },
+        {
+          "id": "d",
+          "text": "A deployment pipeline"
+        }
       ],
       "explanation": "PR summaries **draft the description** from the changes so reviewers get context faster. You still edit and own it; it doesn't merge, add servers, or deploy.",
-      "sourceRefs": ["r-code-review"]
+      "sourceRefs": [
+        "r-code-review"
+      ]
     },
     {
       "id": "q-d1-11",
@@ -359,13 +660,28 @@
       "difficulty": 2,
       "stem": "An enterprise admin wants agents enabled for engineering but off for a contractor team. What's the mechanism?",
       "options": [
-        { "id": "a", "text": "Organisation/enterprise Copilot policies scoped by team", "correct": true },
-        { "id": "b", "text": "Asking each contractor not to use agents" },
-        { "id": "c", "text": "Deleting the agent feature from GitHub" },
-        { "id": "d", "text": "Moving contractors to a personal plan" }
+        {
+          "id": "a",
+          "text": "Organisation/enterprise Copilot policies scoped by team",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Asking each contractor not to use agents"
+        },
+        {
+          "id": "c",
+          "text": "Deleting the agent feature from GitHub"
+        },
+        {
+          "id": "d",
+          "text": "Moving contractors to a personal plan"
+        }
       ],
       "explanation": "Feature enablement by scope is governed by **policies**. Honour systems, deletion, and plan-juggling aren't the control surface.",
-      "sourceRefs": ["r-features"]
+      "sourceRefs": [
+        "r-features"
+      ]
     },
     {
       "id": "q-d1-12",
@@ -374,13 +690,28 @@
       "difficulty": 2,
       "stem": "A developer says 'Copilot agent mode isn't available in my setup'. What's the first thing to check?",
       "options": [
-        { "id": "a", "text": "Whether their plan and IDE support the feature, and whether org policy enables it", "correct": true },
-        { "id": "b", "text": "Whether they have enough disk space" },
-        { "id": "c", "text": "Whether the repository is public" },
-        { "id": "d", "text": "Whether they cleared their browser cache" }
+        {
+          "id": "a",
+          "text": "Whether their plan and IDE support the feature, and whether org policy enables it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Whether they have enough disk space"
+        },
+        {
+          "id": "c",
+          "text": "Whether the repository is public"
+        },
+        {
+          "id": "d",
+          "text": "Whether they cleared their browser cache"
+        }
       ],
       "explanation": "Availability depends on **plan, IDE, and org policy** — the feature matrix plus admin settings. Disk, repo visibility, and cache aren't the gating factors.",
-      "sourceRefs": ["r-features"]
+      "sourceRefs": [
+        "r-features"
+      ]
     },
     {
       "id": "q-d1-13",
@@ -389,13 +720,28 @@
       "difficulty": 2,
       "stem": "Which pairing of task → surface is the best match?",
       "options": [
-        { "id": "a", "text": "Understand a bug in unfamiliar code → Chat/Ask with @workspace", "correct": true },
-        { "id": "b", "text": "Accept a boilerplate line → the coding agent" },
-        { "id": "c", "text": "Explain one function → GitHub Spark" },
-        { "id": "d", "text": "Toggle a team's features → inline completions" }
+        {
+          "id": "a",
+          "text": "Understand a bug in unfamiliar code → Chat/Ask with @workspace",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Accept a boilerplate line → the coding agent"
+        },
+        {
+          "id": "c",
+          "text": "Explain one function → GitHub Spark"
+        },
+        {
+          "id": "d",
+          "text": "Toggle a team's features → inline completions"
+        }
       ],
       "explanation": "Ask mode with workspace context is right for understanding unfamiliar code. The others are mismatched: boilerplate is completions, explaining is Ask (not Spark), and feature toggles are admin policies.",
-      "sourceRefs": ["r-features"]
+      "sourceRefs": [
+        "r-features"
+      ]
     },
     {
       "id": "q-d1-14",
@@ -404,13 +750,30 @@
       "difficulty": 3,
       "stem": "Which are sound reasons to run a task through Plan mode before Agent mode? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "The change is large and the approach is uncertain", "correct": true },
-        { "id": "b", "text": "You want to review and adjust the steps before edits happen", "correct": true },
-        { "id": "c", "text": "You want an artifact that documents the intended approach", "correct": true },
-        { "id": "d", "text": "You want to bypass pull-request review afterwards" }
+        {
+          "id": "a",
+          "text": "The change is large and the approach is uncertain",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You want to review and adjust the steps before edits happen",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "You want an artifact that documents the intended approach",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "You want to bypass pull-request review afterwards"
+        }
       ],
       "explanation": "Plan mode is for scoping big/ambiguous changes, reviewing steps first, and producing a plan artifact. It never removes downstream code review.",
-      "sourceRefs": ["r-agents"]
+      "sourceRefs": [
+        "r-agents"
+      ]
     },
     {
       "id": "q-d1-15",
@@ -419,13 +782,29 @@
       "difficulty": 2,
       "stem": "MCP and Copilot Spaces — which statement is correct?",
       "options": [
-        { "id": "a", "text": "MCP connects Copilot to live external tools/data; a Space curates a reusable context bundle", "correct": true },
-        { "id": "b", "text": "They are two names for the same feature" },
-        { "id": "c", "text": "Spaces connect live databases; MCP stores static notes" },
-        { "id": "d", "text": "Both require training a custom model" }
+        {
+          "id": "a",
+          "text": "MCP connects Copilot to live external tools/data; a Space curates a reusable context bundle",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They are two names for the same feature"
+        },
+        {
+          "id": "c",
+          "text": "Spaces connect live databases; MCP stores static notes"
+        },
+        {
+          "id": "d",
+          "text": "Both require training a custom model"
+        }
       ],
       "explanation": "**MCP = live connections; Spaces = curated context.** They're distinct and composable, and neither trains a model.",
-      "sourceRefs": ["r-mcp", "r-spaces"]
+      "sourceRefs": [
+        "r-mcp",
+        "r-spaces"
+      ]
     },
     {
       "id": "q-d1-16",
@@ -434,13 +813,28 @@
       "difficulty": 1,
       "stem": "Which slash command asks Copilot Chat to propose tests for the selected code?",
       "options": [
-        { "id": "a", "text": "/tests", "correct": true },
-        { "id": "b", "text": "/deploy" },
-        { "id": "c", "text": "/merge" },
-        { "id": "d", "text": "/exclude" }
+        {
+          "id": "a",
+          "text": "/tests",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "/deploy"
+        },
+        {
+          "id": "c",
+          "text": "/merge"
+        },
+        {
+          "id": "d",
+          "text": "/exclude"
+        }
       ],
       "explanation": "`/tests` requests tests for the current selection/context. The others aren't Copilot Chat test commands.",
-      "sourceRefs": ["r-features"]
+      "sourceRefs": [
+        "r-features"
+      ]
     },
     {
       "id": "q-d1-17",
@@ -449,13 +843,28 @@
       "difficulty": 2,
       "stem": "You want Copilot in the terminal to run a sequence of git operations for you. Which surface?",
       "options": [
-        { "id": "a", "text": "Copilot CLI", "correct": true },
-        { "id": "b", "text": "A Copilot Space" },
-        { "id": "c", "text": "PR summaries" },
-        { "id": "d", "text": "Inline completions" }
+        {
+          "id": "a",
+          "text": "Copilot CLI",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Copilot Space"
+        },
+        {
+          "id": "c",
+          "text": "PR summaries"
+        },
+        {
+          "id": "d",
+          "text": "Inline completions"
+        }
       ],
       "explanation": "Terminal-native, multi-step agentic work is **Copilot CLI**. Spaces curate context, PR summaries describe diffs, and completions are in-editor.",
-      "sourceRefs": ["r-cli"]
+      "sourceRefs": [
+        "r-cli"
+      ]
     },
     {
       "id": "q-d1-18",
@@ -464,13 +873,29 @@
       "difficulty": 3,
       "stem": "A reviewer says 'the coding agent's PR passed Copilot code review, so we can skip human review'. What's the flaw?",
       "options": [
-        { "id": "a", "text": "Both are assistive; a human must still be accountable for what merges", "correct": true },
-        { "id": "b", "text": "Copilot code review only runs on private repos" },
-        { "id": "c", "text": "The coding agent cannot open PRs" },
-        { "id": "d", "text": "Nothing — AI review replaces human review" }
+        {
+          "id": "a",
+          "text": "Both are assistive; a human must still be accountable for what merges",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Copilot code review only runs on private repos"
+        },
+        {
+          "id": "c",
+          "text": "The coding agent cannot open PRs"
+        },
+        {
+          "id": "d",
+          "text": "Nothing — AI review replaces human review"
+        }
       ],
       "explanation": "Stacking two assistive tools doesn't remove accountability. The coding agent proposes; AI review augments — a human still owns the merge decision.",
-      "sourceRefs": ["r-agents", "r-code-review"]
+      "sourceRefs": [
+        "r-agents",
+        "r-code-review"
+      ]
     },
     {
       "id": "q-d1-19",
@@ -479,19 +904,37 @@
       "difficulty": 2,
       "stem": "On the GH-300 blueprint, how does Edit mode differ from Agent mode?",
       "options": [
-        { "id": "a", "text": "Edit mode changes a set of files you nominate and review inline; Agent mode works more autonomously — choosing files and running commands until the goal is met", "correct": true },
-        { "id": "b", "text": "Edit mode only answers questions and never changes code" },
-        { "id": "c", "text": "Agent mode is read-only; Edit mode runs the terminal" },
-        { "id": "d", "text": "They are two names for the same feature" }
+        {
+          "id": "a",
+          "text": "Edit mode changes a set of files you nominate and review inline; Agent mode works more autonomously — choosing files and running commands until the goal is met",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Edit mode only answers questions and never changes code"
+        },
+        {
+          "id": "c",
+          "text": "Agent mode is read-only; Edit mode runs the terminal"
+        },
+        {
+          "id": "d",
+          "text": "They are two names for the same feature"
+        }
       ],
       "explanation": "Edit mode applies changes across a scoped set of files you choose and review inline; Agent mode is more autonomous — it decides which files to touch and can run commands/tests, iterating to the goal. Ask mode is the read-only, explain-only surface. In the product GitHub has been folding Edit into Agent, but the January-2026 exam blueprint still lists Ask, Edit, Agent, and Plan — so know all four.",
-      "sourceRefs": ["r-features", "r-agents"]
+      "sourceRefs": [
+        "r-features",
+        "r-agents"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d1-featurefit",
-      "domainIds": ["d1-copilot-features"],
+      "domainIds": [
+        "d1-copilot-features"
+      ],
       "title": "Ship a feature with the right surfaces",
       "tagline": "Match each step of real work to the right Copilot surface.",
       "context": "You're adding a rate-limiter to an unfamiliar service. You'll need to understand the code, make a cross-file change, pull config from an internal system, and hand off a follow-up chore. Pick the surface for each.",
@@ -500,44 +943,110 @@
           "id": "st1",
           "prompt": "First you need to understand how requests currently flow, without touching code. What do you use?",
           "choices": [
-            { "id": "a", "text": "Chat in Ask mode with @workspace to explain the request path", "verdict": "best", "rationale": "Read-only understanding of unfamiliar code is exactly Ask mode with workspace context." },
-            { "id": "b", "text": "Agent mode, and let it refactor as it explains", "verdict": "wrong", "rationale": "You explicitly don't want edits yet; Agent mode will start changing code." },
-            { "id": "c", "text": "Inline completions while you scroll", "verdict": "viable", "rationale": "Completions help while typing but won't give you a structured explanation of the flow." }
+            {
+              "id": "a",
+              "text": "Chat in Ask mode with @workspace to explain the request path",
+              "verdict": "best",
+              "rationale": "Read-only understanding of unfamiliar code is exactly Ask mode with workspace context."
+            },
+            {
+              "id": "b",
+              "text": "Agent mode, and let it refactor as it explains",
+              "verdict": "wrong",
+              "rationale": "You explicitly don't want edits yet; Agent mode will start changing code."
+            },
+            {
+              "id": "c",
+              "text": "Inline completions while you scroll",
+              "verdict": "viable",
+              "rationale": "Completions help while typing but won't give you a structured explanation of the flow."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Now implement the limiter across the middleware, config, and tests. How?",
           "choices": [
-            { "id": "a", "text": "Plan mode to agree the approach, then Agent mode to implement and run tests", "verdict": "best", "rationale": "A multi-file change with tests benefits from Plan-then-Agent: agree the approach, then let the agent execute and verify." },
-            { "id": "b", "text": "Ask mode and copy each suggested snippet in by hand", "verdict": "viable", "rationale": "Works, but you're doing the multi-file application manually — Agent mode is what that's for." },
-            { "id": "c", "text": "Accept completions until the feature emerges", "verdict": "wrong", "rationale": "Line-level completions can't reliably carry a coordinated cross-file change with verification." }
+            {
+              "id": "a",
+              "text": "Plan mode to agree the approach, then Agent mode to implement and run tests",
+              "verdict": "best",
+              "rationale": "A multi-file change with tests benefits from Plan-then-Agent: agree the approach, then let the agent execute and verify."
+            },
+            {
+              "id": "b",
+              "text": "Ask mode and copy each suggested snippet in by hand",
+              "verdict": "viable",
+              "rationale": "Works, but you're doing the multi-file application manually — Agent mode is what that's for."
+            },
+            {
+              "id": "c",
+              "text": "Accept completions until the feature emerges",
+              "verdict": "wrong",
+              "rationale": "Line-level completions can't reliably carry a coordinated cross-file change with verification."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "The limits live in an internal config service. You want Copilot to read the real values. What do you set up?",
           "choices": [
-            { "id": "a", "text": "An MCP server for the config service so Copilot can pull live values", "verdict": "best", "rationale": "Live external data is MCP's job — connect the config service and Copilot reads real values." },
-            { "id": "b", "text": "Paste the current config into the chat once", "verdict": "viable", "rationale": "Fine for a one-off, but it goes stale and doesn't scale to the team or to actions." },
-            { "id": "c", "text": "A Space of last quarter's config screenshots", "verdict": "wrong", "rationale": "Static, stale screenshots aren't the live source of truth this step needs." }
+            {
+              "id": "a",
+              "text": "An MCP server for the config service so Copilot can pull live values",
+              "verdict": "best",
+              "rationale": "Live external data is MCP's job — connect the config service and Copilot reads real values."
+            },
+            {
+              "id": "b",
+              "text": "Paste the current config into the chat once",
+              "verdict": "viable",
+              "rationale": "Fine for a one-off, but it goes stale and doesn't scale to the team or to actions."
+            },
+            {
+              "id": "c",
+              "text": "A Space of last quarter's config screenshots",
+              "verdict": "wrong",
+              "rationale": "Static, stale screenshots aren't the live source of truth this step needs."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "There's a tidy follow-up: add the same limiter to two sibling services, well specified, with tests. How do you hand it off?",
           "choices": [
-            { "id": "a", "text": "Open issues and assign them to the coding agent; review the PRs it opens", "verdict": "best", "rationale": "Scoped, testable, independent chores are the coding agent's sweet spot — you review the resulting PRs." },
-            { "id": "b", "text": "Do both interactively in Agent mode yourself right now", "verdict": "viable", "rationale": "Perfectly fine, just not the most leveraged use of your time for well-specified, parallelisable work." },
-            { "id": "c", "text": "Let the coding agent push straight to main to save a review cycle", "verdict": "wrong", "rationale": "The agent opens PRs for review by design; bypassing review defeats the safety model." }
+            {
+              "id": "a",
+              "text": "Open issues and assign them to the coding agent; review the PRs it opens",
+              "verdict": "best",
+              "rationale": "Scoped, testable, independent chores are the coding agent's sweet spot — you review the resulting PRs."
+            },
+            {
+              "id": "b",
+              "text": "Do both interactively in Agent mode yourself right now",
+              "verdict": "viable",
+              "rationale": "Perfectly fine, just not the most leveraged use of your time for well-specified, parallelisable work."
+            },
+            {
+              "id": "c",
+              "text": "Let the coding agent push straight to main to save a review cycle",
+              "verdict": "wrong",
+              "rationale": "The agent opens PRs for review by design; bypassing review defeats the safety model."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-features", "r-agents", "r-mcp"]
+      "sourceRefs": [
+        "r-features",
+        "r-agents",
+        "r-mcp"
+      ]
     },
     {
       "id": "s-d1-rollout",
-      "domainIds": ["d1-copilot-features"],
+      "domainIds": [
+        "d1-copilot-features"
+      ],
       "title": "Roll Copilot out across an engineering org",
       "tagline": "Policies, grounding, and review as an admin decision.",
       "context": "You're the platform lead enabling Copilot for 300 engineers plus a contractor team. You must control which features are on, ground answers in internal systems, and slot AI into the PR process — responsibly.",
@@ -546,31 +1055,80 @@
           "id": "st1",
           "prompt": "Engineering gets agents and CLI; the contractor team should have chat only. How do you enforce it?",
           "choices": [
-            { "id": "a", "text": "Set organisation/enterprise Copilot policies, scoped per team", "verdict": "best", "rationale": "Policies are the control surface for enabling features by team scope." },
-            { "id": "b", "text": "Ask the contractors not to use agents", "verdict": "wrong", "rationale": "An honour system isn't enforcement; use policy." },
-            { "id": "c", "text": "Give contractors a separate, lower plan and hope features differ", "verdict": "viable", "rationale": "Plan differences do gate some features, but policy is the precise, intentional control here." }
+            {
+              "id": "a",
+              "text": "Set organisation/enterprise Copilot policies, scoped per team",
+              "verdict": "best",
+              "rationale": "Policies are the control surface for enabling features by team scope."
+            },
+            {
+              "id": "b",
+              "text": "Ask the contractors not to use agents",
+              "verdict": "wrong",
+              "rationale": "An honour system isn't enforcement; use policy."
+            },
+            {
+              "id": "c",
+              "text": "Give contractors a separate, lower plan and hope features differ",
+              "verdict": "viable",
+              "rationale": "Plan differences do gate some features, but policy is the precise, intentional control here."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Answers ignore your internal frameworks and conventions. How do you ground them for everyone?",
           "choices": [
-            { "id": "a", "text": "Publish shared Copilot Spaces for key systems, and add MCP servers for live tools", "verdict": "best", "rationale": "Spaces curate the conventions; MCP connects the live systems — together they ground answers org-wide." },
-            { "id": "b", "text": "Tell each engineer to paste the conventions into every chat", "verdict": "wrong", "rationale": "Doesn't scale and isn't consistent — exactly what Spaces solve." },
-            { "id": "c", "text": "Only raise the model tier", "verdict": "viable", "rationale": "A stronger model still lacks your private context; grounding is the real fix." }
+            {
+              "id": "a",
+              "text": "Publish shared Copilot Spaces for key systems, and add MCP servers for live tools",
+              "verdict": "best",
+              "rationale": "Spaces curate the conventions; MCP connects the live systems — together they ground answers org-wide."
+            },
+            {
+              "id": "b",
+              "text": "Tell each engineer to paste the conventions into every chat",
+              "verdict": "wrong",
+              "rationale": "Doesn't scale and isn't consistent — exactly what Spaces solve."
+            },
+            {
+              "id": "c",
+              "text": "Only raise the model tier",
+              "verdict": "viable",
+              "rationale": "A stronger model still lacks your private context; grounding is the real fix."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "You want AI to help with reviews without weakening accountability. What's the policy?",
           "choices": [
-            { "id": "a", "text": "Enable Copilot code review as an assistive first pass; keep a human approver required to merge", "verdict": "best", "rationale": "AI augments the review and a human stays accountable — the responsible pattern." },
-            { "id": "b", "text": "Let Copilot code review auto-approve PRs it likes", "verdict": "wrong", "rationale": "Auto-approval removes the accountable human — not acceptable." },
-            { "id": "c", "text": "Use PR summaries only, no AI review", "verdict": "viable", "rationale": "Summaries help context but leave the review-quality gain on the table; both can coexist." }
+            {
+              "id": "a",
+              "text": "Enable Copilot code review as an assistive first pass; keep a human approver required to merge",
+              "verdict": "best",
+              "rationale": "AI augments the review and a human stays accountable — the responsible pattern."
+            },
+            {
+              "id": "b",
+              "text": "Let Copilot code review auto-approve PRs it likes",
+              "verdict": "wrong",
+              "rationale": "Auto-approval removes the accountable human — not acceptable."
+            },
+            {
+              "id": "c",
+              "text": "Use PR summaries only, no AI review",
+              "verdict": "viable",
+              "rationale": "Summaries help context but leave the review-quality gain on the table; both can coexist."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-features", "r-spaces", "r-code-review"]
+      "sourceRefs": [
+        "r-features",
+        "r-spaces",
+        "r-code-review"
+      ]
     }
   ],
   "labs": [
@@ -608,7 +1166,9 @@
       "url": "https://docs.github.com/en/copilot/get-started/features",
       "kind": "official-doc",
       "annotation": "Completions, chat, CLI, agents, code review, PR summaries — and where each is available by IDE and plan. The backbone of this domain.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-agents",
@@ -616,7 +1176,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-coding-agent",
       "kind": "official-doc",
       "annotation": "How the coding agent works, plans before acting, and opens a PR you review. Core January-2026 content. Edit mode is on the exam blueprint too (in the product, GitHub is consolidating it into Agent mode).",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-cli",
@@ -624,7 +1186,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-copilot-cli",
       "kind": "official-doc",
       "annotation": "The terminal-native agent — interactive and plan modes, running shell/git, delegating tasks.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-mcp",
@@ -632,7 +1196,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/context/mcp",
       "kind": "official-doc",
       "annotation": "The open standard for connecting Copilot to external tools/data; setup in the IDE and CLI.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-spaces",
@@ -640,7 +1206,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/context/spaces",
       "kind": "official-doc",
       "annotation": "Curate and share a bundle of context (repos, files, docs, notes) to ground chat for a task or team.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-spark",
@@ -648,7 +1216,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/spark",
       "kind": "official-doc",
       "annotation": "Generate and deploy full-stack apps from natural language. Best for prototypes and internal tools.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     },
     {
       "id": "r-code-review",
@@ -656,35 +1226,43 @@
       "url": "https://docs.github.com/en/copilot/concepts/agents/code-review",
       "kind": "official-doc",
       "annotation": "Request an AI review on a PR and draft PR descriptions — assistive tools with humans accountable for the merge.",
-      "domainIds": ["d1-copilot-features"]
+      "domainIds": [
+        "d1-copilot-features"
+      ]
     }
   ],
   "videos": [
     {
       "id": "v-d1-1",
       "title": "D1 · Surfaces & modes — Ask, Plan, Agent",
-      "provider": "youtube",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["d1-copilot-features"],
+      "provider": "file",
+      "url": "/content/github-copilot/videos/d1-acing.mp4",
+      "status": "published",
+      "domainIds": [
+        "d1-copilot-features"
+      ],
       "sourceNotebook": "gh-300 / d1 / surfaces-and-modes"
     },
     {
       "id": "v-d1-2",
       "title": "D1 · Agents — coding agent, Plan mode & CLI",
-      "provider": "youtube",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["d1-copilot-features"],
+      "provider": "file",
+      "url": "/content/github-copilot/videos/d1-mastering.mp4",
+      "status": "published",
+      "domainIds": [
+        "d1-copilot-features"
+      ],
       "sourceNotebook": "gh-300 / d1 / agents"
     },
     {
       "id": "v-d1-3",
       "title": "D1 · Context & scale — MCP, Spaces, Spark, code review",
-      "provider": "youtube",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["d1-copilot-features"],
+      "provider": "file",
+      "url": "/content/github-copilot/videos/d1-context-scale.mp4",
+      "status": "published",
+      "domainIds": [
+        "d1-copilot-features"
+      ],
       "sourceNotebook": "gh-300 / d1 / context-and-scale"
     }
   ]
