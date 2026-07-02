@@ -5,10 +5,14 @@ import { subhead, linkList, resList } from "./parts.js";
 import { url } from "../router.js";
 import { domainById } from "../content.js";
 import { domainStats } from "../engine/readiness.js";
+import { isSkillsTrack } from "../engine/certificate.js";
+import { trackOnce } from "../analytics.js";
 
 export function trackHome(ctx) {
   const { track, store } = ctx;
   const v = track.vendorId, t = track.trackId;
+  const skills = isSkillsTrack(track);
+  trackOnce(`start:${v}/${t}`, "track_start", { track: t });
 
   let resume = null;
   for (const d of track.domains) {
@@ -22,14 +26,15 @@ export function trackHome(ctx) {
 
   const actions = el("div", { class: "row", style: { gap: "12px", marginBottom: "30px" } }, [
     el("a", { class: "ac-btn ac-btn-solid", href: "#" + startHref }, [resume ? "Resume " : "Start learning ", el("span", { class: "arr", text: "→" })]),
-    el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Take a mock exam"]),
-    el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, ["My readiness"]),
+    skills ? null : el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Take a mock exam"]),
+    el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
   ]);
 
   const map = el("div", { class: "domain-list" }, track.domains.map((d) => {
     const st = domainStats(d, store);
+    // Skills tracks have no scored bank — the ring is lesson coverage there.
     return el("a", { class: "domain-row", href: "#" + url.domain(v, t, d.id) }, [
-      ring(st.mastery * 100),
+      ring((skills ? st.coverage : st.mastery) * 100),
       el("div", { class: "body" }, [
         el("div", { class: "row", style: { gap: "10px" } }, [
           el("span", { class: "mono-label", text: d.code || `D${d.order || ""}` }),
@@ -41,9 +46,9 @@ export function trackHome(ctx) {
           el("span", { class: "mono-label", text: `${st.poolSize} questions` }),
         ]),
       ]),
-      el("div", { class: "weight" }, [
-        el("div", { class: "wbar" }, [el("i", { style: { width: Math.round((d.weight || 0) * 100) + "%" } })]),
-        el("span", { class: "pct", text: Math.round((d.weight || 0) * 100) + "% of exam" }),
+      skills || !d.weight ? null : el("div", { class: "weight" }, [
+        el("div", { class: "wbar" }, [el("i", { style: { width: Math.round(d.weight * 100) + "%" } })]),
+        el("span", { class: "pct", text: Math.round(d.weight * 100) + "% of exam" }),
       ]),
     ]);
   }));
@@ -52,7 +57,7 @@ export function trackHome(ctx) {
     trackHeader(track, "overview"),
     section(
       actions,
-      el("div", { class: "eyebrow", style: { marginBottom: "6px" } }, [el("span", { class: "mono-label", text: "Curriculum · weighted to the exam blueprint" })]),
+      el("div", { class: "eyebrow", style: { marginBottom: "6px" } }, [el("span", { class: "mono-label", text: skills ? "Curriculum · learn by doing" : "Curriculum · weighted to the exam blueprint" })]),
       map,
     ),
   ]);
@@ -105,7 +110,7 @@ export function domainView(ctx) {
   const head = section(
     el("div", { class: "row", style: { gap: "14px", alignItems: "baseline" } }, [
       el("span", { class: "mono-label", text: d.code || "Domain" }),
-      el("span", { class: "mono-label", text: Math.round((d.weight || 0) * 100) + "% of exam" }),
+      d.weight ? el("span", { class: "mono-label", text: Math.round(d.weight * 100) + "% of exam" }) : null,
     ]),
     el("h1", { style: { fontSize: "clamp(30px,4.5vw,48px)", marginTop: "10px" }, text: d.name }),
     d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, text: d.overview }) : null,
