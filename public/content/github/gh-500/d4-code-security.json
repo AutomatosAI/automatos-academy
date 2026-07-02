@@ -1,0 +1,1430 @@
+{
+  "id": "d4-code-security",
+  "order": 4,
+  "code": "D4",
+  "name": "Configure and use Code Security (formerly Code Scanning with CodeQL)",
+  "weight": 0.13,
+  "tagline": "CodeQL as the native engine vs third-party scanners you ingest via SARIF — enable it (default setup, advanced setup, or external CI), then triage the dataflow, dismiss with the honest reason, and tune coverage with query suites.",
+  "overview": "Code Security (formerly Code Scanning with CodeQL) is the 10–15% D4 domain. It tests three decisions: (1) native CodeQL versus a third-party tool whose SARIF you upload; (2) how you enable scanning — default setup, advanced setup with a customisable Actions workflow, or the CodeQL CLI in an external CI system; and (3) how you work an alert — reading its source→sink dataflow, choosing to fix or to dismiss with the correct reason (False positive / Won't fix / Used in tests), using Copilot Autofix as a reviewed suggestion, and tuning the query suite (default → security-extended → security-and-quality) for the right coverage-vs-noise balance. Lead with the current name Code Security; CodeQL is the engine inside it, and SARIF is the format that lets every other engine plug in.",
+  "objectives": [
+    "Distinguish Code Security (the suite), code scanning (the feature), and CodeQL (the engine), and choose CodeQL vs a third-party tool whose SARIF you ingest.",
+    "Enable scanning the right way for the constraint: default setup, advanced setup (Actions workflow), or the CodeQL CLI in external CI — with the correct triggers, matrix, and build modes.",
+    "Read a code scanning alert, including its dataflow source→sink path and its severity/security-severity, and close it by fixing or dismissing with the honest reason.",
+    "Use Copilot Autofix as an assistive suggestion the developer reviews and commits — never an automatic change.",
+    "Tune detection with CodeQL query suites (default, security-extended, security-and-quality) and custom queries, trading coverage against false-positive noise."
+  ],
+  "lessons": [
+    {
+      "id": "l1-what-is-code-security",
+      "title": "Code Security, CodeQL, and the two ways to scan",
+      "estMinutes": 16,
+      "objective": "Explain what Code Security is, how CodeQL relates to it, and when to use CodeQL versus a third-party scanner whose results you ingest.",
+      "body": "## The suite, the feature, the engine\n\nThree words the exam keeps straight, and you must too:\n\n- **Code Security** — the July-2026 name for the suite. It is one of the three GitHub security suites (alongside **Secret Protection** and **Supply Chain Security**). *Formerly* this area was called **Code Scanning with CodeQL**; lead with **Code Security**.\n- **Code scanning** — the *feature* you use to analyse the code in a repository to find security vulnerabilities and coding errors. Results appear as **code scanning alerts**.\n- **CodeQL** — the *analysis engine* GitHub built to automate those security checks. It is the default engine behind code scanning, but it is **not** the only one.\n\n> **Exam tip:** if a question treats \"CodeQL\" and \"Code Security\" as the same thing, that is the trap. CodeQL is the engine *inside* the Code Security suite — not the suite itself.\n\n## Two ways to scan: native CodeQL vs third-party + SARIF\n\nCode scanning supports **two analysis approaches**, and choosing between them is a headline exam decision:\n\n1. **CodeQL (native)** — GitHub's own engine. GitHub describes CodeQL as \"a programming language and associated tools that treat code like data\": you generate a **CodeQL database** from your codebase, run **queries** against it, and the results surface as code scanning alerts. Reach for CodeQL when you want deep, dataflow-aware analysis in a GitHub-supported language with the least setup.\n2. **Third-party tools** — any scanner (ESLint security plugins, a container/IaC scanner, a commercial SAST product) that can emit **SARIF**. Code scanning is \"interoperable with third-party code scanning tools that output Static Analysis Results Interchange Format (SARIF) data.\" You run the tool, it produces a SARIF file, and you **upload** that file so its findings appear as ordinary code scanning alerts in the same UI.\n\nThe two are **not mutually exclusive** — you can run CodeQL *and* upload a third-party SARIF file for the same repo, and both sets of findings live in one alert list.\n\n### SARIF is the glue\n\n**SARIF (Static Analysis Results Interchange Format)** is an open standard for the output of static-analysis tools. GitHub code scanning \"only supports SARIF version `2.1.0`.\" Because SARIF is a shared format, *any* tool that speaks it can render its results as GitHub alerts — that is the whole reason SARIF matters on the exam. The mental model: **CodeQL is one engine; SARIF is the universal format that lets every other engine plug in.**\n\n## Supported languages (know the shape, not the trivia)\n\nCodeQL supports a fixed set of languages: **C/C++, C#, Go, Java/Kotlin, JavaScript/TypeScript, Python, Ruby, Rust, Swift, and GitHub Actions workflows** — both compiled and interpreted. The exam-relevant takeaway is the *consequence*: if your language **is** CodeQL-supported, native CodeQL is the natural choice; if it is **not**, you reach for a third-party scanner and ingest its SARIF. \"My language isn't supported by CodeQL\" is a classic prompt whose answer is \"use a third-party tool that outputs SARIF.\"\n\n## Where it runs and what it costs\n\nCode scanning runs **free on public repositories**. For **private repositories you need a GitHub Code Security license** (the Code Security part of GitHub Advanced Security). That licensing split — free public, licensed private — is a recurring administration-flavoured fact.\n\n## Why the exam cares\n\nThe whole D4 domain (10–15%) opens on this fork: *native CodeQL, or a third-party tool whose SARIF you ingest?* Get the engine-vs-suite-vs-format model right and most D4 questions become a matter of matching the tool to the constraint (language support, existing tooling, where the scan runs).",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-1",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In July-2026 terminology, how do \"Code Security\" and \"CodeQL\" relate?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Code Security is the suite; CodeQL is the analysis engine inside it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "They are two names for exactly the same thing"
+            },
+            {
+              "id": "c",
+              "text": "CodeQL is the suite; Code Security is one query pack within it"
+            },
+            {
+              "id": "d",
+              "text": "Code Security is a third-party tool; CodeQL is GitHub's SARIF format"
+            }
+          ],
+          "explanation": "**Code Security** is the suite (formerly \"Code Scanning with CodeQL\"); **CodeQL** is GitHub's static-analysis engine used by the code scanning feature. They are not synonyms — treating them as identical is the intended trap. CodeQL is not the suite, and Code Security is not a third-party tool; SARIF (not CodeQL) is the interchange format.",
+          "sourceRefs": [
+            "r-about-code-scanning",
+            "r-about-codeql"
+          ]
+        },
+        {
+          "id": "kc-d4-2",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team wants to surface findings from a commercial scanner for a language CodeQL does not support, inside GitHub's code scanning alerts. What makes that possible?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The tool emits SARIF, which you upload so its findings appear as code scanning alerts",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "You rewrite the tool's rules as CodeQL queries first"
+            },
+            {
+              "id": "c",
+              "text": "It is impossible — only CodeQL can create code scanning alerts"
+            },
+            {
+              "id": "d",
+              "text": "You switch the repository to a public repository"
+            }
+          ],
+          "explanation": "Code scanning is interoperable with any third-party tool that outputs **SARIF** — you upload the SARIF file and its results render as ordinary code scanning alerts. You do not have to port rules to CodeQL, it is emphatically not CodeQL-only, and repository visibility is unrelated to SARIF ingestion.",
+          "sourceRefs": [
+            "r-about-code-scanning",
+            "r-sarif"
+          ]
+        },
+        {
+          "id": "kc-d4-3",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement about running CodeQL and a third-party scanner on the same repository is correct?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Both can run and their findings appear together in one code scanning alert list",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Enabling CodeQL disables all third-party SARIF uploads"
+            },
+            {
+              "id": "c",
+              "text": "You may use CodeQL or a third-party tool, never both, per repository"
+            },
+            {
+              "id": "d",
+              "text": "Third-party results appear only in the Actions log, never as alerts"
+            }
+          ],
+          "explanation": "CodeQL and third-party tools are complementary — run CodeQL and also upload third-party SARIF, and every finding lands in the same alerts view. Enabling CodeQL does not block SARIF uploads, the two are not mutually exclusive, and uploaded SARIF results become first-class alerts, not just log lines.",
+          "sourceRefs": [
+            "r-about-code-scanning",
+            "r-sarif"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l2-enabling",
+      "title": "Enabling scanning: default setup, advanced setup, and external CI",
+      "estMinutes": 18,
+      "objective": "Choose between default setup, advanced setup, and running CodeQL in external CI — and know the Actions workflow triggers, matrix, and build modes that go with advanced setup.",
+      "body": "## Three enablement paths\n\nYou can turn CodeQL analysis on in three ways. Knowing which fits a constraint is the second big D4 decision.\n\n### 1. Default setup (start here)\n\n**Default setup** is the quick, GitHub-managed path. You enable it from the repository's **Security** settings and GitHub \"automatically chooses the languages to analyze, query suite to run, and events that trigger scans.\" GitHub Actions runs the analysis for you — there is no workflow file to maintain. Reach for default setup when you want CodeQL working in minutes with sensible defaults and no YAML.\n\n### 2. Advanced setup (customise the workflow)\n\n**Advanced setup** \"adds the CodeQL workflow to your repository\" — it generates a **customisable workflow file** (`codeql.yml`, using `github/codeql-action`) that you can edit and commit. Choose advanced setup when you need to control *anything*: specific languages, a different query suite, custom build steps for a compiled language, a schedule, or scanning only part of a monorepo. The trade is flexibility for a file you now own.\n\n> **Exam tip:** \"we need to customise which queries run / add a build step / change the schedule\" ⇒ **advanced setup**. \"just turn it on with defaults, no YAML\" ⇒ **default setup**.\n\n### 3. External CI with the CodeQL CLI\n\nIf your build runs **outside GitHub Actions** — Jenkins, GitLab CI, CircleCI, Azure Pipelines — you use the **CodeQL CLI** directly. GitHub's own words: \"you can use the CodeQL CLI to run code scanning on code that you're processing in a third-party continuous integration (CI) system.\" The three-command shape to remember:\n\n1. `codeql database create` — build the CodeQL database from your source.\n2. `codeql database analyze` — run queries and \"summarize the results in a SARIF file.\"\n3. `codeql github upload-results` — upload the SARIF so results match to a branch or PR and appear as alerts.\n\nSo even the *native* engine, run outside Actions, ends up **uploading SARIF** — the same ingestion path a third-party tool uses. That symmetry is a favourite exam point.\n\n## The advanced-setup workflow: triggers, matrix, build modes\n\nWhen you do own the workflow, four knobs come up on the exam.\n\n### Scan frequency (the `on:` triggers)\n\nThe workflow's `on:` block sets *when* scans run:\n\n```yaml\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n  schedule:\n    - cron: '20 14 * * 1'\n```\n\n- `push` — scan on every push to the named branch(es); this is what populates alerts on your **default branch**.\n- `pull_request` — scan PRs targeting those branches, so alerts show *before* merge.\n- `schedule` (cron) — a periodic full scan (e.g. weekly), which catches issues from newly published CodeQL queries even when code hasn't changed.\n\n### Matrix builds (one language per leg)\n\nA **matrix** runs each language's analysis in parallel and lets you customise per language:\n\n```yaml\nstrategy:\n  matrix:\n    include:\n      - language: javascript-typescript\n        build-mode: none\n      - language: python\n        build-mode: none\n```\n\n### Build modes (compiled languages)\n\nCodeQL needs to observe a build for **compiled** languages. The `build-mode` values:\n\n- `none` — no build needed (interpreted languages, and some compiled ones via a buildless mode).\n- `autobuild` — CodeQL tries to build the project automatically.\n- `manual` — you provide the exact build steps between the `init` and `analyze` actions.\n\n\"CodeQL can't build my compiled project automatically\" ⇒ switch that language's `build-mode` to **`manual`** and script the build.\n\n## Why the exam cares\n\nEnablement questions are scenario-shaped: a constraint (no YAML wanted / must customise queries / build runs in Jenkins / compiled project won't autobuild) maps to exactly one of default setup, advanced setup, or CLI-in-external-CI. Internalise the mapping and these are quick points.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-4",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You want CodeQL running in minutes with GitHub choosing the languages, queries, and triggers, and no workflow file to maintain. Which enablement path is that?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Default setup",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Advanced setup"
+            },
+            {
+              "id": "c",
+              "text": "The CodeQL CLI in an external CI system"
+            },
+            {
+              "id": "d",
+              "text": "Uploading a third-party SARIF file"
+            }
+          ],
+          "explanation": "**Default setup** is the zero-YAML path: GitHub automatically picks the languages, query suite, and trigger events and runs the analysis on Actions. Advanced setup gives you a workflow file to maintain, the CLI path is for builds outside Actions, and uploading third-party SARIF is a different tool entirely.",
+          "sourceRefs": [
+            "r-about-codeql"
+          ]
+        },
+        {
+          "id": "kc-d4-5",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your build runs on Jenkins, not GitHub Actions, but you still want CodeQL findings as code scanning alerts in GitHub. What is the correct approach?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Run the CodeQL CLI in Jenkins to create and analyze a database, then upload the SARIF results to GitHub",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Use default setup — it detects Jenkins automatically"
+            },
+            {
+              "id": "c",
+              "text": "It cannot be done; CodeQL requires GitHub Actions"
+            },
+            {
+              "id": "d",
+              "text": "Mirror the repo hourly and hope alerts appear"
+            }
+          ],
+          "explanation": "For an external CI system you use the **CodeQL CLI**: `database create` → `database analyze` (produces SARIF) → `github upload-results`. Default setup only runs on GitHub Actions, CodeQL is explicitly designed to run in third-party CI, and repo mirroring does nothing for scanning.",
+          "sourceRefs": [
+            "r-about-codeql",
+            "r-codeql-cli"
+          ]
+        },
+        {
+          "id": "kc-d4-6",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In an advanced-setup workflow, a compiled C# project fails because CodeQL cannot build it automatically. Which change fits?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Set that language's build-mode to manual and script the exact build steps",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Delete the pull_request trigger from the on: block"
+            },
+            {
+              "id": "c",
+              "text": "Switch from advanced setup back to default setup for more control"
+            },
+            {
+              "id": "d",
+              "text": "Lower the SARIF size limit"
+            }
+          ],
+          "explanation": "When autobuild can't build a compiled project, use **`build-mode: manual`** and provide the build commands between init and analyze. Removing the PR trigger only changes *when* scans run; default setup gives you *less* control, not more; and the SARIF size limit is unrelated to building the database.",
+          "sourceRefs": [
+            "r-advanced-config"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l3-triage",
+      "title": "Triaging alerts: dataflow, severity, dismissal reasons, and autofix",
+      "estMinutes": 16,
+      "objective": "Read a code scanning alert (including its dataflow path), close it correctly by fixing or dismissing with the right reason, and use Copilot Autofix as a reviewed suggestion.",
+      "body": "## What an alert tells you\n\nA code scanning alert carries \"the line of code that triggered the alert, as well as properties of the alert, such as the alert severity, security severity, and the nature of the problem.\" Two severity dimensions matter:\n\n- **Severity** — `Error`, `Warning`, or `Note` (the SARIF `level`).\n- **Security severity** — for CodeQL security alerts, `Critical`, `High`, `Medium`, or `Low`, derived from a CVSS-style score. This is what you sort and prioritise by.\n\nNon-application code can be labelled `Generated`, `Test`, `Library`, or `Documentation`, which helps you judge whether a finding is production-relevant.\n\n## Dataflow: source → sink\n\nCodeQL's strength is **dataflow analysis**: it can \"find data-flow problems in your code\" — \"using data insecurely, passing dangerous arguments to functions, and leaking sensitive information.\" For those alerts CodeQL shows the **path** the tainted data travels, from where it enters (the **source** — e.g. an HTTP request parameter) to where it is used unsafely (the **sink** — e.g. a SQL query). In the UI you expand the path steps to trace exactly how untrusted input reaches the dangerous call.\n\n> **Exam tip:** a dataflow alert is not saying \"this one line is bad\" — it is saying \"untrusted data flows from *here* to *there* without being sanitised.\" The fix usually goes **somewhere along the path** (validate/encode the input), not necessarily on the flagged sink line. Reading source→sink is the skill the exam probes.\n\n## Closing an alert: fix vs dismiss\n\n\"There are two ways of closing an alert. You can fix the problem in the code, or you can dismiss the alert.\"\n\n- **Fix** — change the code; the next scan closes the alert automatically (\"GitHub closes the alert\" once the triggering code is fixed). Anyone with **write** permission can fix an alert.\n- **Dismiss** — mark it as not needing a fix. Dismissing closes it **in all branches**, removes it from the current-alert count, records who dismissed it and why, and moves it to the **Closed** list — from where you can **re-open** it later. Importantly, \"next time code scanning runs, the same code won't generate an alert,\" so a dismissal sticks.\n\n### The three dismissal reasons (know these verbatim)\n\nWhen you dismiss, you must choose a reason. The exact reasons are:\n\n- **False positive** — the alert does not represent a real problem (the analysis is wrong here).\n- **Won't fix** — the alert is accurate but you accept the risk and are not going to fix it.\n- **Used in tests** — the flagged code is test code, not production, so the finding is not important.\n\n> **Exam tip:** these three map to distinct meanings and the exam tests them. A genuine vulnerability that you're choosing to accept is **Won't fix** — *not* False positive. Test-only code is **Used in tests** — *not* Won't fix. Picking the honest reason matters because it is recorded for audit and can affect whether that query keeps running.\n\n## Copilot Autofix: a suggestion, not an auto-commit\n\n**Copilot Autofix** (formerly \"code scanning autofix\") can \"generate fixes automatically for code scanning alerts, including CodeQL alerts.\" It proposes a concrete code change — most visibly on **pull requests**, and also for alerts on the default branch. The word \"automatically\" is about *generating the suggestion*, not merging it: \"You must assess the suggested changes to determine whether they are a good solution for your codebase,\" and then you \"commit the changes, and push them to your branch\" — or click **Dismiss suggestion** to reject it.\n\n> **Exam tip:** the accountability line is the point. Autofix **suggests**; a human **reviews and commits**. Any answer that says Autofix silently rewrites or auto-merges your code is wrong — it is an assistive suggestion you validate, exactly like Copilot code review.\n\n## Why the exam cares\n\nTriage is the daily job the exam simulates: read the dataflow to understand the finding, then close it the *right* way — fix it, or dismiss it with the reason that honestly describes the situation — and treat Autofix as a reviewed proposal.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-7",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A CodeQL dataflow alert traces untrusted input from an HTTP parameter (the source) into a SQL query (the sink). What is the alert actually telling you?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Untrusted data flows from source to sink without being sanitised along the path",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Only the single flagged line is syntactically invalid"
+            },
+            {
+              "id": "c",
+              "text": "The database is offline"
+            },
+            {
+              "id": "d",
+              "text": "A secret was committed to the repository"
+            }
+          ],
+          "explanation": "A dataflow alert describes a **path**: tainted input enters at the source and reaches a dangerous operation at the sink un-sanitised — here, a classic SQL-injection shape. It is not a syntax error on one line, not an availability problem, and secret detection is Secret Protection, a different suite.",
+          "sourceRefs": [
+            "r-about-alerts"
+          ]
+        },
+        {
+          "id": "kc-d4-8",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "CodeQL flags a real vulnerability, but leadership accepts the risk for now and will not fix it. Which dismissal reason is correct?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Won't fix",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "False positive"
+            },
+            {
+              "id": "c",
+              "text": "Used in tests"
+            },
+            {
+              "id": "d",
+              "text": "You must never dismiss a real vulnerability"
+            }
+          ],
+          "explanation": "A genuine finding you are choosing not to remediate is **Won't fix** (accepted risk). It is not a **False positive** — the alert is accurate. It is not **Used in tests** unless the code is actually test code. Dismissing with an honest reason is legitimate and is recorded for audit; you can re-open it later.",
+          "sourceRefs": [
+            "r-about-alerts",
+            "r-rest-api"
+          ]
+        },
+        {
+          "id": "kc-d4-9",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How should a developer treat a Copilot Autofix suggestion on a code scanning alert?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Review and validate it, then commit it if it's correct — it is a suggestion, not an automatic change",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Trust it blindly; Autofix guarantees a correct, secure fix"
+            },
+            {
+              "id": "c",
+              "text": "Expect it to merge the pull request on its own once generated"
+            },
+            {
+              "id": "d",
+              "text": "Assume it only works for third-party tools, never CodeQL"
+            }
+          ],
+          "explanation": "Copilot Autofix **generates a suggested fix** the developer must assess and then commit (or dismiss) — the human stays accountable. It is not a guarantee of correctness, it does not merge PRs, and it explicitly works for code scanning alerts **including CodeQL** alerts.",
+          "sourceRefs": [
+            "r-about-alerts",
+            "r-copilot-autofix"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l4-query-suites",
+      "title": "Tuning coverage: CodeQL query suites and custom queries",
+      "estMinutes": 14,
+      "objective": "Select the right built-in CodeQL query suite for a coverage/noise trade-off, and know how custom queries and suites tailor analysis.",
+      "body": "## Why suites exist\n\nA **query suite** lets you \"pass multiple queries to CodeQL without having to specify the path to each query file individually.\" Instead of naming dozens of `.ql` files, you name a suite and CodeQL runs the whole curated set. Suites are how you dial coverage up or down.\n\n## The built-in suites (the exam's noise-vs-coverage dial)\n\nThree built-in suites, in increasing breadth:\n\n- **`default`** — the group of queries run **by default** in CodeQL code scanning. These are \"highly precise and return few false positive code scanning results.\" This is what **default setup** uses. Best when you want signal, not noise.\n- **`security-extended`** — \"Queries from the default suite, plus lower severity and precision queries.\" Broader coverage, but it \"may return a greater number of false positive\" results. Choose it when you want to catch more, accepting more triage.\n- **`security-and-quality`** — \"Queries from security-extended, plus maintainability and reliability queries.\" The widest net: security **and** code-quality findings, and the most noise.\n\n> **Exam tip:** remember the nesting — `security-and-quality` ⊇ `security-extended` ⊇ `default`. More breadth = more findings = more false positives to triage. \"We're missing issues, willing to triage more\" ⇒ step **up** to `security-extended` or `security-and-quality`. \"Too much noise\" ⇒ step **down** toward `default`.\n\n## Selecting a suite\n\n- **Default setup** — pick the suite in the repository's code scanning settings UI; there is no workflow file.\n- **Advanced setup** — set the `queries` key in the workflow's `init` step:\n\n```yaml\n- uses: github/codeql-action/init@v4\n  with:\n    queries: security-extended\n```\n\nYou can list more than one value (comma-separated) to combine a suite with extra queries.\n\n## Custom queries and custom suites\n\nBeyond the built-ins you can add your **own** CodeQL queries — for a vulnerability pattern specific to your codebase or an internal framework — and bundle them into a **custom query suite** (a `.qls` file) referenced from the `queries` key. This is how an organisation tailors detection to its own risk profile. (Custom query authoring is deeper D5/security-operations territory; for D4, know that custom queries and `.qls` suites are the extension point beyond `default` / `security-extended` / `security-and-quality`.)\n\n## Why the exam cares\n\nSuite selection is a precise, testable trade-off between **coverage and false-positive noise**. If you can order the three built-in suites by breadth and say where each is chosen (UI for default setup, `queries` key for advanced setup), you own the tuning questions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-10",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team says CodeQL is missing some issues and they are willing to triage more findings. Which built-in query suite should they move to, and what is the trade-off?",
+          "options": [
+            {
+              "id": "a",
+              "text": "security-extended (or security-and-quality) — broader coverage at the cost of more false positives",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The default suite — it always finds the most issues"
+            },
+            {
+              "id": "c",
+              "text": "A suite called 'high-precision-only' that removes all false positives"
+            },
+            {
+              "id": "d",
+              "text": "None — query suites cannot change coverage"
+            }
+          ],
+          "explanation": "Stepping up to **security-extended** (or **security-and-quality**) adds lower-precision/severity queries, catching more but returning more false positives. The **default** suite is the *narrowest, most precise* set (not the broadest), there is no 'high-precision-only' built-in, and suites are exactly the mechanism for changing coverage.",
+          "sourceRefs": [
+            "r-query-suites",
+            "r-advanced-config"
+          ]
+        },
+        {
+          "id": "kc-d4-11",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Order the three built-in CodeQL suites from narrowest to broadest coverage.",
+          "options": [
+            {
+              "id": "a",
+              "text": "default ⊂ security-extended ⊂ security-and-quality",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "security-and-quality ⊂ security-extended ⊂ default"
+            },
+            {
+              "id": "c",
+              "text": "security-extended ⊂ default ⊂ security-and-quality"
+            },
+            {
+              "id": "d",
+              "text": "They all run identical queries"
+            }
+          ],
+          "explanation": "`default` is the precise baseline; **`security-extended`** = default plus lower-precision/severity security queries; **`security-and-quality`** = security-extended plus maintainability/reliability queries. So default ⊂ security-extended ⊂ security-and-quality. The reverse orderings and 'all identical' are wrong.",
+          "sourceRefs": [
+            "r-query-suites",
+            "r-advanced-config"
+          ]
+        },
+        {
+          "id": "kc-d4-12",
+          "domainId": "d4-code-security",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "You need CodeQL to detect a vulnerability pattern unique to your internal framework that no built-in query covers. What is the right extension point?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Write a custom CodeQL query and reference it (optionally via a custom .qls suite) from the workflow's queries key",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Switch to a third-party tool because CodeQL cannot be extended"
+            },
+            {
+              "id": "c",
+              "text": "Raise the SARIF size limit so more results fit"
+            },
+            {
+              "id": "d",
+              "text": "Change the alert's security severity to Critical"
+            }
+          ],
+          "explanation": "Custom detection is done with **custom CodeQL queries**, optionally bundled into a **`.qls` custom suite** and passed via the `queries` key. CodeQL is explicitly extensible, the SARIF size limit governs uploads not detection logic, and editing an alert's severity does not create new detection.",
+          "sourceRefs": [
+            "r-query-suites",
+            "r-advanced-config"
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d4-1",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the July-2026 name for the suite that includes CodeQL-based code scanning?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Code Security",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Secret Protection"
+        },
+        {
+          "id": "c",
+          "text": "Supply Chain Security"
+        },
+        {
+          "id": "d",
+          "text": "Code Scanning with CodeQL (still the current suite name)"
+        }
+      ],
+      "explanation": "The suite is now **Code Security**; \"Code Scanning with CodeQL\" is the *former* name. Secret Protection (secrets) and Supply Chain Security (dependencies) are the other two suites, not this one.",
+      "sourceRefs": [
+        "r-about-code-scanning",
+        "r-about-codeql"
+      ]
+    },
+    {
+      "id": "q-d4-2",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which open standard lets third-party analysis tools surface their findings as GitHub code scanning alerts?",
+      "options": [
+        {
+          "id": "a",
+          "text": "SARIF (Static Analysis Results Interchange Format)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "CodeQL"
+        },
+        {
+          "id": "c",
+          "text": "SPDX"
+        },
+        {
+          "id": "d",
+          "text": "CVSS"
+        }
+      ],
+      "explanation": "**SARIF** is the interchange format code scanning ingests. CodeQL is an analysis engine (it *produces* SARIF); SPDX is an SBOM/license format (Supply Chain Security); CVSS is a severity scoring system.",
+      "sourceRefs": [
+        "r-sarif",
+        "r-about-code-scanning"
+      ]
+    },
+    {
+      "id": "q-d4-3",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which SARIF version does GitHub code scanning support?",
+      "options": [
+        {
+          "id": "a",
+          "text": "2.1.0",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "1.0.0"
+        },
+        {
+          "id": "c",
+          "text": "3.0.0"
+        },
+        {
+          "id": "d",
+          "text": "Any version, as long as it is valid JSON"
+        }
+      ],
+      "explanation": "GitHub states \"code scanning only supports SARIF version `2.1.0`.\" The other versions are not accepted, and merely being valid JSON is not sufficient.",
+      "sourceRefs": [
+        "r-sarif"
+      ]
+    },
+    {
+      "id": "q-d4-4",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On which repositories does code scanning run free of charge?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Public repositories",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "All private repositories, with no license"
+        },
+        {
+          "id": "c",
+          "text": "Only enterprise-owned repositories"
+        },
+        {
+          "id": "d",
+          "text": "No repositories — it always requires a paid license"
+        }
+      ],
+      "explanation": "Code scanning is **free on public repositories**. Private repositories require a **GitHub Code Security license**, so 'all private, no license' is wrong; it is not limited to enterprise-owned repos, and it is not universally paid.",
+      "sourceRefs": [
+        "r-about-code-scanning"
+      ]
+    },
+    {
+      "id": "q-d4-5",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where do code scanning results appear for a developer to act on?",
+      "options": [
+        {
+          "id": "a",
+          "text": "As code scanning alerts in the repository",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Only as raw log output in Actions, never summarised"
+        },
+        {
+          "id": "c",
+          "text": "As emailed PDF reports only"
+        },
+        {
+          "id": "d",
+          "text": "As commits pushed directly to the default branch"
+        }
+      ],
+      "explanation": "Findings surface as **code scanning alerts** in the repo's Security tab (and as PR annotations). They are not confined to raw logs, are not delivered only as PDFs, and are never auto-committed to a branch.",
+      "sourceRefs": [
+        "r-about-code-scanning",
+        "r-about-alerts"
+      ]
+    },
+    {
+      "id": "q-d4-6",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which of these is a language CodeQL supports for analysis?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Java/Kotlin",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "COBOL"
+        },
+        {
+          "id": "c",
+          "text": "Assembly"
+        },
+        {
+          "id": "d",
+          "text": "Any language whatsoever"
+        }
+      ],
+      "explanation": "CodeQL's supported set includes **Java/Kotlin** (plus C/C++, C#, Go, JavaScript/TypeScript, Python, Ruby, Rust, Swift, and Actions workflows). COBOL and Assembly are not in the set, and CodeQL is not language-agnostic — unsupported languages need a third-party tool + SARIF.",
+      "sourceRefs": [
+        "r-about-codeql"
+      ]
+    },
+    {
+      "id": "q-d4-7",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team wants CodeQL enabled with the least effort and no workflow file to maintain. Which setup, and what does GitHub choose for them?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Default setup — GitHub picks the languages, query suite, and trigger events automatically",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Advanced setup — you must hand-write the workflow first"
+        },
+        {
+          "id": "c",
+          "text": "External CI with the CodeQL CLI"
+        },
+        {
+          "id": "d",
+          "text": "A third-party SARIF upload"
+        }
+      ],
+      "explanation": "**Default setup** requires no YAML and auto-selects languages, query suite, and triggers. Advanced setup means owning a workflow file, the CLI path is for non-Actions CI, and third-party SARIF is a different engine entirely.",
+      "sourceRefs": [
+        "r-about-codeql"
+      ]
+    },
+    {
+      "id": "q-d4-8",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Your organisation must customise which CodeQL queries run and add a manual build step for a compiled language. Which enablement path fits?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Advanced setup — it generates an editable workflow file you commit",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Default setup — it exposes full YAML for editing"
+        },
+        {
+          "id": "c",
+          "text": "Uploading a third-party SARIF file"
+        },
+        {
+          "id": "d",
+          "text": "Nothing — CodeQL cannot be customised"
+        }
+      ],
+      "explanation": "Customising queries and build steps is exactly what **advanced setup** is for — it produces an editable `codeql.yml`. Default setup deliberately hides the workflow, a SARIF upload is unrelated to CodeQL configuration, and CodeQL is highly customisable.",
+      "sourceRefs": [
+        "r-about-codeql",
+        "r-advanced-config"
+      ]
+    },
+    {
+      "id": "q-d4-9",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Using the CodeQL CLI in an external CI system, what is the correct order of operations?",
+      "options": [
+        {
+          "id": "a",
+          "text": "database create → database analyze (produces SARIF) → github upload-results",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "github upload-results → database analyze → database create"
+        },
+        {
+          "id": "c",
+          "text": "database analyze → database create → github upload-results"
+        },
+        {
+          "id": "d",
+          "text": "Only database create is needed; GitHub does the rest"
+        }
+      ],
+      "explanation": "You **create** the database, **analyze** it to produce a SARIF file, then **upload** the results to GitHub. The other orderings are impossible (you can't analyze or upload before the database exists), and creating the database alone produces no alerts without analyze + upload.",
+      "sourceRefs": [
+        "r-codeql-cli"
+      ]
+    },
+    {
+      "id": "q-d4-10",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In an advanced-setup workflow, which trigger produces code scanning alerts on the repository's default branch?",
+      "options": [
+        {
+          "id": "a",
+          "text": "on: push to the default branch",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "on: pull_request only"
+        },
+        {
+          "id": "c",
+          "text": "A workflow_dispatch button with no push trigger"
+        },
+        {
+          "id": "d",
+          "text": "on: schedule is the only way to populate the default branch"
+        }
+      ],
+      "explanation": "Alerts on the **default branch** come from scanning pushes to it (`on: push`). `pull_request` scans populate PR-level results before merge; `workflow_dispatch` alone is manual and won't scan pushes; and while `schedule` also scans, it is not the *only* way — `push` is the primary mechanism.",
+      "sourceRefs": [
+        "r-advanced-config",
+        "r-about-alerts"
+      ]
+    },
+    {
+      "id": "q-d4-11",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does a matrix in the CodeQL advanced-setup workflow let you do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Analyze each language in parallel and customise the build per language",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Merge multiple pull requests at once"
+        },
+        {
+          "id": "c",
+          "text": "Combine several repositories into one scan"
+        },
+        {
+          "id": "d",
+          "text": "Disable CodeQL for the default branch"
+        }
+      ],
+      "explanation": "A **matrix** runs each language leg in parallel with its own settings (e.g. per-language `build-mode`). It has nothing to do with merging PRs, cross-repo scanning, or disabling analysis.",
+      "sourceRefs": [
+        "r-advanced-config"
+      ]
+    },
+    {
+      "id": "q-d4-12",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A code scanning alert shows a data-flow path from an HTTP request parameter to a shell command execution. Where should the fix generally go?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Somewhere along the path — validate/sanitise the untrusted input before it reaches the sink",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nowhere; you should always dismiss dataflow alerts as false positives"
+        },
+        {
+          "id": "c",
+          "text": "Only by deleting the source line, never touching the sink"
+        },
+        {
+          "id": "d",
+          "text": "By raising the alert's severity to Critical"
+        }
+      ],
+      "explanation": "Dataflow alerts describe untrusted data reaching a dangerous operation un-sanitised, so the remedy is to **break the path** — validate or encode the input before the sink. Blanket-dismissing real command-injection flow is wrong, deleting the source is rarely feasible, and changing severity fixes nothing.",
+      "sourceRefs": [
+        "r-about-alerts"
+      ]
+    },
+    {
+      "id": "q-d4-13",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A finding is a genuine vulnerability, but it exists only in code under a /tests directory that never ships. Which dismissal reason is most appropriate?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Used in tests",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "False positive"
+        },
+        {
+          "id": "c",
+          "text": "Won't fix"
+        },
+        {
+          "id": "d",
+          "text": "Fixed"
+        }
+      ],
+      "explanation": "Test-only code that never reaches production is dismissed as **Used in tests**. It is not a **False positive** (the analysis is correct), **Won't fix** implies production risk you're accepting, and **Fixed** is not a dismissal reason — fixing closes the alert via a code change, not a dismissal.",
+      "sourceRefs": [
+        "r-about-alerts",
+        "r-rest-api"
+      ]
+    },
+    {
+      "id": "q-d4-14",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What happens after you dismiss a code scanning alert with a reason?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It closes in all branches, is recorded with the reason, and won't re-appear for the same code — but you can re-open it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is permanently deleted and cannot be recovered"
+        },
+        {
+          "id": "c",
+          "text": "It closes on the current branch only and re-triggers next scan"
+        },
+        {
+          "id": "d",
+          "text": "It is auto-fixed by CodeQL"
+        }
+      ],
+      "explanation": "Dismissal closes the alert **in all branches**, records the reason, and suppresses the same finding on future scans, but it moves to the **Closed** list where it can be **re-opened**. It is not deleted, not branch-local, and dismissing is not fixing.",
+      "sourceRefs": [
+        "r-resolving-alerts"
+      ]
+    },
+    {
+      "id": "q-d4-15",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does Copilot Autofix behave for a code scanning alert?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It generates a suggested fix that the developer must review and commit; it is not applied automatically",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It rewrites and commits the fix without human involvement"
+        },
+        {
+          "id": "c",
+          "text": "It only works on third-party alerts, never CodeQL"
+        },
+        {
+          "id": "d",
+          "text": "It merges the pull request once it proposes a fix"
+        }
+      ],
+      "explanation": "Autofix **suggests**; the developer assesses and commits (or dismisses) — the human is accountable. It does not auto-commit, it works for code scanning alerts **including CodeQL**, and it never merges PRs on its own.",
+      "sourceRefs": [
+        "r-about-alerts",
+        "r-copilot-autofix"
+      ]
+    },
+    {
+      "id": "q-d4-16",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which built-in CodeQL query suite runs by default and is tuned for high precision / few false positives?",
+      "options": [
+        {
+          "id": "a",
+          "text": "default",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "security-extended"
+        },
+        {
+          "id": "c",
+          "text": "security-and-quality"
+        },
+        {
+          "id": "d",
+          "text": "quality-only"
+        }
+      ],
+      "explanation": "The **default** suite is the precise baseline run by default setup. **security-extended** and **security-and-quality** add lower-precision queries (more findings, more noise), and **quality-only** is not a built-in suite.",
+      "sourceRefs": [
+        "r-query-suites"
+      ]
+    },
+    {
+      "id": "q-d4-17",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A monorepo builds two services in Jenkins (an unsupported-by-autobuild C++ service) and also has a JavaScript frontend you'd like scanned on every PR in GitHub. What is a sound combined approach?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Run CodeQL via the CLI in Jenkins for C++ (manual build) and upload its SARIF; use default or advanced setup on Actions for the JavaScript, scanning on pull_request",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Force everything through default setup, since it can drive Jenkins builds"
+        },
+        {
+          "id": "c",
+          "text": "Abandon CodeQL for C++ because CodeQL only runs on GitHub Actions"
+        },
+        {
+          "id": "d",
+          "text": "Upload one SARIF file for both languages generated by a single default-setup run"
+        }
+      ],
+      "explanation": "The pragmatic split: **CLI + manual build in Jenkins** for the C++ service (upload its SARIF), and **Actions-based setup** for the JavaScript with a `pull_request` trigger. Default setup cannot drive Jenkins, CodeQL is not Actions-only (the CLI exists for external CI), and default setup won't produce a single cross-CI SARIF for a Jenkins-built language.",
+      "sourceRefs": [
+        "r-about-codeql",
+        "r-codeql-cli",
+        "r-advanced-config"
+      ]
+    },
+    {
+      "id": "q-d4-18",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You upload SARIF from two different tools for the same commit and want their alerts kept distinct rather than de-duplicated together. What controls that separation?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The category assigned to each SARIF upload, which lets you analyze the same commit in multiple ways",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The SARIF version number, which must differ per tool"
+        },
+        {
+          "id": "c",
+          "text": "The repository visibility setting"
+        },
+        {
+          "id": "d",
+          "text": "Nothing — GitHub always merges all SARIF into one analysis"
+        }
+      ],
+      "explanation": "The **category** input differentiates multiple analyses/tools on the same commit so results are tracked separately. The SARIF version is fixed at 2.1.0 for all uploads, visibility is irrelevant, and GitHub does *not* force-merge distinct categories.",
+      "sourceRefs": [
+        "r-sarif",
+        "r-upload-sarif"
+      ]
+    },
+    {
+      "id": "q-d4-19",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A GitHub Actions job uses github/codeql-action/upload-sarif to upload results, but the upload is rejected for lack of permission. Which token permission is required?",
+      "options": [
+        {
+          "id": "a",
+          "text": "security-events: write",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "contents: read only"
+        },
+        {
+          "id": "c",
+          "text": "issues: write"
+        },
+        {
+          "id": "d",
+          "text": "No permission is needed for SARIF uploads"
+        }
+      ],
+      "explanation": "Uploading SARIF (or running the CodeQL workflow) requires **`security-events: write`**. `contents: read` is insufficient for writing alerts, `issues: write` is unrelated, and uploads are not permission-free.",
+      "sourceRefs": [
+        "r-upload-sarif"
+      ]
+    },
+    {
+      "id": "q-d4-20",
+      "domainId": "d4-code-security",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Why schedule a periodic (cron) CodeQL scan even when a repository's code changes rarely?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Newly published CodeQL queries can surface issues in unchanged code that earlier scans missed",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Cron scans are the only way to create alerts on pull requests"
+        },
+        {
+          "id": "c",
+          "text": "A schedule disables push and pull_request scanning"
+        },
+        {
+          "id": "d",
+          "text": "Scheduling reduces the SARIF size limit"
+        }
+      ],
+      "explanation": "A **scheduled** scan re-runs the latest query set against existing code, catching vulnerabilities flagged by **newly added queries** even with no code change. PR alerts come from the `pull_request` trigger (not cron), adding a schedule doesn't disable other triggers, and it has no effect on SARIF limits.",
+      "sourceRefs": [
+        "r-advanced-config",
+        "r-query-suites"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d4-enable",
+      "domainIds": [
+        "d4-code-security"
+      ],
+      "title": "Stand up Code Security across a mixed-CI codebase",
+      "tagline": "Pick the right enablement path for each constraint.",
+      "context": "You own security for a repo with a Python service (built in GitHub Actions), a legacy C++ service (built only in Jenkins), and findings from a commercial IaC scanner your platform team already runs. Get every finding into GitHub's code scanning alerts.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First, enable CodeQL for the Python service with the least maintenance overhead. What do you choose?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Default setup — GitHub auto-selects languages, query suite, and triggers; no workflow file",
+              "verdict": "best",
+              "rationale": "Python is CodeQL-supported and builds on Actions, so default setup gets you scanning in minutes with nothing to maintain."
+            },
+            {
+              "id": "b",
+              "text": "Advanced setup with a hand-written workflow",
+              "verdict": "viable",
+              "rationale": "It works, but you've taken on a YAML file you don't yet need — reserve advanced setup for when you must customise."
+            },
+            {
+              "id": "c",
+              "text": "The CodeQL CLI in an external CI system",
+              "verdict": "wrong",
+              "rationale": "The Python build already runs on Actions; the CLI-in-external-CI path is for builds that don't run on Actions."
+            }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Now the C++ service, whose build exists only in Jenkins and which CodeQL cannot autobuild. How do you scan it?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Run the CodeQL CLI inside Jenkins with a manual build, produce SARIF, and github upload-results to GitHub",
+              "verdict": "best",
+              "rationale": "External CI + a compiled project that won't autobuild = CLI with a manual build, then upload the SARIF so results appear as alerts."
+            },
+            {
+              "id": "b",
+              "text": "Recreate the C++ build in a GitHub Actions advanced-setup workflow with build-mode: manual",
+              "verdict": "viable",
+              "rationale": "Technically possible, but duplicating a Jenkins-only build in Actions is real effort — running CodeQL where the build already lives is cleaner."
+            },
+            {
+              "id": "c",
+              "text": "Use default setup and let it drive the Jenkins build",
+              "verdict": "wrong",
+              "rationale": "Default setup runs on GitHub Actions and cannot orchestrate a Jenkins build."
+            }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The commercial IaC scanner already runs in the platform pipeline and emits SARIF. How do its findings become code scanning alerts?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Upload its SARIF file to GitHub (upload-sarif action or the code scanning API), giving it its own category",
+              "verdict": "best",
+              "rationale": "Third-party findings enter code scanning via SARIF upload; a distinct category keeps them separate from the CodeQL analyses on the same commit."
+            },
+            {
+              "id": "b",
+              "text": "Rewrite the IaC scanner's rules as CodeQL queries so CodeQL finds them",
+              "verdict": "wrong",
+              "rationale": "Pointless duplication — SARIF exists precisely so you don't reimplement another tool in CodeQL."
+            },
+            {
+              "id": "c",
+              "text": "Paste the scanner's console output into an issue for tracking",
+              "verdict": "viable",
+              "rationale": "You'd have a record, but the findings never become first-class, de-duplicated, trackable code scanning alerts."
+            }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "You want every service scanned on pull requests and a weekly safety-net scan. What do you configure?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "pull_request triggers for pre-merge alerts plus a scheduled (cron) run for the weekly full scan",
+              "verdict": "best",
+              "rationale": "pull_request catches issues before merge; a cron schedule re-runs the latest queries weekly, surfacing new query findings in unchanged code."
+            },
+            {
+              "id": "b",
+              "text": "Only a push trigger to the default branch",
+              "verdict": "viable",
+              "rationale": "You'd get default-branch alerts, but you lose pre-merge PR feedback and the scheduled net for newly published queries."
+            },
+            {
+              "id": "c",
+              "text": "Disable scheduled scans to save Actions minutes and rely on manual runs",
+              "verdict": "wrong",
+              "rationale": "Manual-only scanning means newly discovered vulnerability classes in untouched code go unnoticed indefinitely."
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "r-about-codeql",
+        "r-codeql-cli",
+        "r-sarif",
+        "r-advanced-config"
+      ]
+    },
+    {
+      "id": "s-d4-triage",
+      "domainIds": [
+        "d4-code-security"
+      ],
+      "title": "Triage a wave of new CodeQL alerts",
+      "tagline": "Read the dataflow, then close each alert the right way.",
+      "context": "A fresh CodeQL run on your web app raised several alerts. You need to work through them correctly: understand each finding, then fix or dismiss with an honest reason — and decide how to use Autofix and tune future noise.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "The top alert is a High security-severity dataflow finding: a request parameter reaches a raw SQL query. What's your first move?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Read the source→sink path to confirm untrusted input reaches the query un-sanitised, then plan a fix along the path",
+              "verdict": "best",
+              "rationale": "Understanding the dataflow tells you it's real SQL-injection shape and where to break the path — the correct first step before any fix or dismissal."
+            },
+            {
+              "id": "b",
+              "text": "Immediately dismiss it as 'False positive' to clear the queue",
+              "verdict": "wrong",
+              "rationale": "Dismissing a genuine High-severity injection as a false positive is dishonest and dangerous — and it's recorded."
+            },
+            {
+              "id": "c",
+              "text": "Raise its security severity to Critical and move on",
+              "verdict": "viable",
+              "rationale": "Re-labelling severity changes nothing about the vulnerability; the flaw still needs a real fix."
+            }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Copilot Autofix proposes a parameterised-query fix on the PR. How do you handle it?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Review the suggested diff, verify it's correct and complete, then commit it to the branch",
+              "verdict": "best",
+              "rationale": "Autofix is an assistive suggestion — the developer validates and commits, staying accountable for the change."
+            },
+            {
+              "id": "b",
+              "text": "Merge the PR immediately because Autofix proposed a fix",
+              "verdict": "wrong",
+              "rationale": "Autofix doesn't guarantee correctness and never merges for you; a human still owns the review."
+            },
+            {
+              "id": "c",
+              "text": "Dismiss the suggestion and write the parameterised query by hand",
+              "verdict": "viable",
+              "rationale": "Perfectly fine — Autofix is optional. You just spend effort re-deriving a fix it already drafted for you to check."
+            }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Another alert is a real finding but lives entirely in a test-fixtures file that never ships. How do you close it?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Dismiss it with reason 'Used in tests'",
+              "verdict": "best",
+              "rationale": "Accurate finding, test-only code, never in production — 'Used in tests' is the honest, auditable reason."
+            },
+            {
+              "id": "b",
+              "text": "Dismiss it as 'False positive'",
+              "verdict": "wrong",
+              "rationale": "The analysis is correct, so 'False positive' misrepresents it — the reason is recorded and matters."
+            },
+            {
+              "id": "c",
+              "text": "Dismiss it as 'Won't fix'",
+              "verdict": "viable",
+              "rationale": "Not the best fit: 'Won't fix' signals accepted production risk, whereas this is specifically test-only code."
+            }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Post-triage, the team feels CodeQL is missing some issue classes and can absorb more triage. What do you change?",
+          "choices": [
+            {
+              "id": "a",
+              "text": "Move the query suite up to security-extended (or security-and-quality), accepting more false positives for broader coverage",
+              "verdict": "best",
+              "rationale": "Broader suites add lower-precision queries — more findings, more noise — which is the deliberate trade the team just agreed to."
+            },
+            {
+              "id": "b",
+              "text": "Stay on the default suite but dismiss fewer alerts",
+              "verdict": "wrong",
+              "rationale": "Dismissing less can't reveal issue classes the default suite never queries for — coverage comes from the suite, not from triage habits."
+            },
+            {
+              "id": "c",
+              "text": "Write a custom query for one specific internal pattern only",
+              "verdict": "viable",
+              "rationale": "Useful for that one pattern, but it doesn't broaden coverage across issue classes the way stepping up the built-in suite does."
+            }
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "r-about-alerts",
+        "r-resolving-alerts",
+        "r-copilot-autofix",
+        "r-query-suites"
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d4-default-setup",
+      "domainId": "d4-code-security",
+      "title": "Enable CodeQL default setup and triage a seeded alert",
+      "goal": "Turn on CodeQL with zero YAML, then read a real dataflow alert and dismiss it with the correct reason.",
+      "steps": "## What you'll do\n\nUse a repo you own (a small JavaScript/TypeScript or Python app is ideal — both scan with `build-mode: none`).\n\n1. **Enable default setup.** Go to the repo's **Settings ▸ Code security** (or **Security ▸ Code scanning ▸ Set up ▸ Default**). Choose **Default** and enable CodeQL. Confirm GitHub selected the languages and a query suite for you.\n2. **Trigger a scan.** Push a commit (or open a PR). Watch the CodeQL run in the **Actions** tab and wait for it to finish.\n3. **Seed a finding (optional).** Add an obviously unsafe snippet, e.g. building a SQL string or shell command from a request parameter, and push it so CodeQL raises a dataflow alert. In pseudocode:\n\n```\n// UNSAFE on purpose — do not ship\nhandler(req):\n  name = req.query['name']          // source: untrusted input\n  db.exec('SELECT * FROM users WHERE name = ' + name)   // sink: raw SQL\n```\n\n4. **Read the alert.** Open **Security ▸ Code scanning alerts**, click the alert, and expand the **path** / **Show paths**. Trace it from **source** (the request parameter) to **sink** (the SQL call). Note the **security severity**.\n5. **Close it correctly.** Either fix it (use a parameterised query and push — the next scan closes it) *or* dismiss it and pick the honest reason from **False positive / Won't fix / Used in tests**. Re-open it afterwards to see it return to the open list.\n\n## Why it matters\n\nThis is the whole D4 loop in miniature: enable with defaults, read a dataflow path source→sink, and close the alert the right way. Doing it once makes the exam's triage questions concrete.",
+      "checklist": [
+        "Default setup enabled with GitHub-selected languages and query suite",
+        "A CodeQL scan completed in the Actions tab",
+        "You traced an alert's dataflow path from source to sink",
+        "You closed the alert by fixing it OR dismissing with the correct reason",
+        "You re-opened a dismissed alert to confirm it can return"
+      ]
+    },
+    {
+      "id": "lab-d4-sarif-and-suite",
+      "domainId": "d4-code-security",
+      "title": "Ingest third-party SARIF and step up the query suite",
+      "goal": "Prove that any tool's SARIF becomes code scanning alerts, and change coverage by switching CodeQL query suites in an advanced-setup workflow.",
+      "steps": "## Part A — upload third-party SARIF\n\n1. Produce a **SARIF 2.1.0** file from any third-party tool you like (e.g. a linter with a SARIF formatter), or hand-craft a minimal valid SARIF file with one `result` and a `tool.driver` name.\n2. Upload it. Easiest in CI with the action:\n\n```yaml\n- uses: github/codeql-action/upload-sarif@v4\n  with:\n    sarif_file: results.sarif\n    category: my-thirdparty-tool\n# job needs: permissions: { security-events: write }\n```\n\n   (Or upload via the `POST /repos/{owner}/{repo}/code-scanning/sarifs` REST endpoint.)\n3. Confirm the finding appears under **Security ▸ Code scanning alerts**, attributed to your tool's category — living beside any CodeQL alerts.\n\n## Part B — switch the CodeQL query suite (advanced setup)\n\n1. Enable **advanced setup** to generate `.github/workflows/codeql.yml` (or convert from default setup).\n2. In the `init` step, set the query suite and commit:\n\n```yaml\n- uses: github/codeql-action/init@v4\n  with:\n    languages: javascript-typescript\n    queries: security-extended\n```\n\n3. Re-run the scan and compare the alert count against the `default` suite. Then try `security-and-quality` and observe still-broader results (and more noise).\n\n## Why it matters\n\nPart A proves the engine-agnostic model: **SARIF in ⇒ alerts out**, needing `security-events: write` and a `category`. Part B makes the **coverage-vs-noise** suite trade-off tangible — the two levers D4 tests hardest.",
+      "checklist": [
+        "A third-party SARIF 2.1.0 file uploaded successfully",
+        "The uploaded finding appears as a code scanning alert with its category",
+        "The workflow granted security-events: write for the upload",
+        "You changed the queries key to security-extended (and tried security-and-quality)",
+        "You compared alert counts across default vs broader suites"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-about-code-scanning",
+      "title": "About code scanning",
+      "url": "https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning",
+      "kind": "official-doc",
+      "annotation": "The definition of code scanning, CodeQL-vs-third-party analysis, SARIF interoperability, running via Actions or external CI, and the free-public / licensed-private split. Extract the two-analysis-approaches framing.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-about-codeql",
+      "title": "About code scanning with CodeQL",
+      "url": "https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql",
+      "kind": "official-doc",
+      "annotation": "CodeQL as an engine, the database→query→alert flow, default vs advanced setup, code-scanning vs external-CI modes, and the supported-language list. Extract the default-vs-advanced decision.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-sarif",
+      "title": "SARIF support for code scanning",
+      "url": "https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/sarif-support-for-code-scanning",
+      "kind": "official-doc",
+      "annotation": "SARIF 2.1.0 as the only supported version, the tool.driver rules / result / ruleId / level structure, category via runAutomationDetails.id, and result limits. Extract the version and the category concept.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-upload-sarif",
+      "title": "Uploading a SARIF file to GitHub",
+      "url": "https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github",
+      "kind": "official-doc",
+      "annotation": "The three upload paths (CodeQL CLI, upload-sarif action, code scanning API), the optional category input, and the required security-events: write permission. Extract how third-party results become alerts.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-codeql-cli",
+      "title": "About the CodeQL CLI",
+      "url": "https://docs.github.com/en/code-security/codeql-cli/getting-started-with-the-codeql-cli/about-the-codeql-cli",
+      "kind": "official-doc",
+      "annotation": "Running CodeQL in third-party CI: the database create → database analyze (SARIF) → github upload-results sequence. Extract the external-CI workflow.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-advanced-config",
+      "title": "Customizing your advanced setup for code scanning",
+      "url": "https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning",
+      "kind": "official-doc",
+      "annotation": "The advanced-setup workflow knobs: the queries key (security-extended, security-and-quality), the language matrix and build-mode (none/autobuild/manual), and on: push/pull_request/schedule triggers. Extract the trigger + build-mode options.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-query-suites",
+      "title": "CodeQL query suites",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-your-code-scanning-configuration/codeql-query-suites",
+      "kind": "official-doc",
+      "annotation": "Built-in suites and their nesting: default (precise, run by default), security-extended (broader, more false positives), security-and-quality (adds maintainability/reliability). Extract the coverage-vs-noise ordering.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-about-alerts",
+      "title": "About code scanning alerts",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts",
+      "kind": "official-doc",
+      "annotation": "Alert anatomy: severity vs security severity, dataflow (source→sink) findings, Copilot Autofix for alerts including CodeQL, and PR-vs-default-branch behaviour. Extract the dataflow reading and severity model.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-resolving-alerts",
+      "title": "Resolving code scanning alerts",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/resolving-code-scanning-alerts",
+      "kind": "official-doc",
+      "annotation": "Fix vs dismiss, that dismissal closes an alert in all branches and can be re-opened, and that write permission fixes an alert. Extract the dismissal behaviour.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-rest-api",
+      "title": "Code scanning REST API — update a code scanning alert",
+      "url": "https://docs.github.com/en/rest/code-scanning/code-scanning",
+      "kind": "official-doc",
+      "annotation": "The authoritative enum for dismissed_reason: 'false positive', 'won't fix', 'used in tests' (plus state open/dismissed and dismissed_comment). Extract the exact dismissal-reason values.",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    },
+    {
+      "id": "r-copilot-autofix",
+      "title": "Responsible use of Copilot Autofix for code scanning",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-your-code-scanning-alerts/about-autofix-for-codeql-code-scanning",
+      "kind": "official-doc",
+      "annotation": "Copilot Autofix generates suggested fixes the developer must assess and commit (not automatic). Extract the human-review-required framing. (Autofix is also covered on the About code scanning alerts page used here.)",
+      "domainIds": [
+        "d4-code-security"
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d4-1",
+      "title": "D4 · Code Security & CodeQL — engine, SARIF, and enablement",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d4-code-security"
+      ],
+      "sourceNotebook": "gh-500 / d4 / codeql-and-enablement"
+    },
+    {
+      "id": "v-d4-2",
+      "title": "D4 · Triage — dataflow, dismissal reasons, autofix & query suites",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "d4-code-security"
+      ],
+      "sourceNotebook": "gh-500 / d4 / triage-and-tuning"
+    }
+  ]
+}

@@ -1,0 +1,813 @@
+{
+  "id": "d6-administration",
+  "order": 6,
+  "code": "D6",
+  "name": "GitHub Security suites administration",
+  "weight": 0.15,
+  "tagline": "Turn the suites on at scale — enterprise, org, and repo — with security configurations, the right roles, Cloud-vs-Server gaps, and the REST API. Know which scope wins and who can do what.",
+  "overview": "The administration domain (10–15%) is where you stop using the security suites and start rolling them out. It tests whether you can enable Code Security, Secret Protection, and Supply Chain Security at the enterprise, organization, and repository levels; build and apply security configurations (including the GitHub-recommended one) and reason about default-for-new-repos and enforcement; place the administrator, security-manager, and developer roles precisely; know where GitHub Enterprise Cloud and GitHub Enterprise Server differ; and drive it all at scale with the REST API. The recurring exam decisions are the scope question (enterprise vs org vs repo, and which default wins), the role question (what a security manager can and cannot do versus an owner), and the enforcement question (what an enforced configuration locks and what still slips through).",
+  "objectives": [
+    "Enable the three security suites at enterprise, organization, and repository scope, and reason about which scope's default configuration applies to a new repository.",
+    "Build, apply, set as default, and enforce security configurations — and know exactly what enforcement locks and what it doesn't.",
+    "Place the administrator, security-manager, and developer roles correctly, including what a security manager may not do and how enterprise policy overrides repo admins.",
+    "Identify GitHub Enterprise Cloud vs GitHub Enterprise Server differences that gate feature availability and management.",
+    "Use the code security configurations REST API to roll out and govern security at scale, at both the organization and enterprise levels."
+  ],
+  "lessons": [
+    {
+      "id": "l1-scope",
+      "title": "Three scopes, one inheritance model: enterprise, organization, repository",
+      "estMinutes": 15,
+      "objective": "Enable the suites at the right scope and predict which default configuration a new repository inherits.",
+      "body": "## Where you turn security on\n\nThe security suites — **Code Security** (code scanning with CodeQL), **Secret Protection** (secret scanning and push protection), and **Supply Chain Security** (the dependency graph, Dependabot, Dependency Review) — can be enabled at three scopes, and administration is mostly about choosing the right one.\n\n- **Enterprise** — an enterprise owner sets policy and can roll a configuration across every organization the enterprise owns. This is the top of the tree.\n- **Organization** — an organization owner (or a security manager) enables features across the org's repositories, usually through a **security configuration**.\n- **Repository** — a repo admin can flip individual features on a single repo, unless a higher scope has enforced them.\n\n## Security configurations are the unit of rollout\n\nDon't picture flipping toggles one repo at a time. GitHub's own words: a security configuration is a *\"collection of enablement settings for GitHub security products that you can apply to any repository within an organization or enterprise.\"* You define what's on once, then attach it to many repositories. The **GitHub-recommended security configuration** is a ready-made one — built and maintained by GitHub's security experts, the quickest to apply to all repositories, and designed to secure both low- and high-impact repos. It enables Code Security and Secret Protection features. GitHub's guidance is to start with the recommended configuration, review the findings, *then* build custom configurations if you need something different.\n\n## The default-for-new-repos rule (a top exam trap)\n\nA configuration can be marked with **\"Use as default for newly created repositories\"**, scoped to one of: **None**, **Public**, **Private and internal**, or **All repositories**. The rule the exam loves: a default configuration *\"is only automatically applied to new repositories created in your organization.\"* Two consequences fall straight out of that:\n\n1. **Existing repositories are untouched** when you set a default — you must apply the configuration to them explicitly.\n2. **A repository transferred into the org is untouched** too — it wasn't *created* in your org, so you apply a configuration to it manually.\n\n## Which default wins: org beats enterprise\n\nBoth an enterprise and an organization can have a default configuration for new repos. The precedence rule (from the configurations API docs): an enterprise-level default is applied to new repositories *\"only for organizations within the enterprise that do not already have a default code security configuration set.\"* Read that as: **an organization's own default takes precedence over the enterprise default.** If Org A has set its own default, new repos in Org A get Org A's default; new repos in an org with no default fall through to the enterprise default.\n\n> **Exam note.** When a question describes a *new* repo and asks which settings it gets, walk the tree: does the org have its own default? If yes, that wins. If no, the enterprise default (if any) applies. And remember — \"new\" is literal: created-in-org, not transferred-in, and not a pre-existing repo.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d6-1",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You set a security configuration as the default for newly created repositories in your organization. What happens to the org's existing repositories?",
+          "options": [
+            { "id": "a", "text": "Nothing automatically — the default only applies to repos created after it's set; you must apply the configuration to existing repos explicitly", "correct": true },
+            { "id": "b", "text": "They are all retroactively updated to match the default within 24 hours" },
+            { "id": "c", "text": "They are detached from any current configuration and left unmanaged" },
+            { "id": "d", "text": "Only public existing repos are updated; private ones are skipped" }
+          ],
+          "explanation": "A default configuration *\"is only automatically applied to new repositories created in your organization.\"* Existing repos are not touched — you apply the configuration to them yourself (a). There's no retroactive sweep (b), setting a default doesn't detach anything (c), and the default's scope choice (public / private and internal / all) governs which *new* repos inherit it, not a partial pass over existing ones (d).",
+          "sourceRefs": ["r-config-concept", "r-establish-coverage"]
+        },
+        {
+          "id": "kc-d6-2",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Org A has its own default security configuration for new repos. The enterprise that owns Org A also has an enterprise-wide default. A new repository is created in Org A. Which default applies?",
+          "options": [
+            { "id": "a", "text": "Org A's own default — the enterprise default applies only to organizations that do not already have their own default set", "correct": true },
+            { "id": "b", "text": "The enterprise default — enterprise scope always overrides organization scope" },
+            { "id": "c", "text": "Both are merged, with the stricter setting winning per feature" },
+            { "id": "d", "text": "Neither — conflicting defaults cancel out and the repo starts with no configuration" }
+          ],
+          "explanation": "The enterprise default is applied *\"only for organizations within the enterprise that do not already have a default code security configuration set,\"* so Org A's own default wins (a). Enterprise scope does not blindly override the org (b); there is no per-feature merge of the two defaults (c); and defaults don't cancel out (d).",
+          "sourceRefs": ["r-rest-configs", "r-establish-coverage"]
+        },
+        {
+          "id": "kc-d6-3",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A repository is transferred into your organization from elsewhere. Your org has a default configuration set to \"All repositories.\" What must an admin do to secure the transferred repo?",
+          "options": [
+            { "id": "a", "text": "Apply a security configuration to it manually — the default only auto-applies to repos created in the org, not transferred-in ones", "correct": true },
+            { "id": "b", "text": "Nothing — \"All repositories\" includes transferred repos automatically" },
+            { "id": "c", "text": "Re-create the repository so it counts as newly created" },
+            { "id": "d", "text": "Move it to a different org that has no default configuration" }
+          ],
+          "explanation": "The default is automatically applied only to repos *created* in the org, so a transferred repo needs a configuration applied manually (a). \"All repositories\" as a default scope refers to newly created repos of all visibilities, not transferred ones (b). Re-creating (c) or shuffling orgs (d) are absurd workarounds, not how administration is meant to work.",
+          "sourceRefs": ["r-config-concept", "r-manage-coverage"]
+        }
+      ]
+    },
+    {
+      "id": "l2-configs",
+      "title": "Security configurations: what they control, defaults, and enforcement",
+      "estMinutes": 16,
+      "objective": "Compose a security configuration, and reason precisely about what enforcement does and doesn't lock.",
+      "body": "## What a configuration actually contains\n\nA security configuration is a set of per-feature switches. Each feature is set to **Not set**, **Enabled**, or **Disabled** (some keep an \"existing settings\" choice). Across the three suites, a configuration controls:\n\n- **Supply Chain Security** — Dependency graph, automatic dependency submission, Dependabot alerts, Dependabot security updates, grouped security updates, and malware/other Dependabot alert behavior.\n- **Code Security** — Code scanning **default setup** (CodeQL), including the \"Enabled with advanced setup allowed\" option and runner choices.\n- **Secret Protection** — Secret scanning, push protection, validity checks, non-provider patterns, scanning for generic passwords, delegated bypass privileges, and \"prevent direct alert dismissals.\"\n- **Private vulnerability reporting** — the intake channel for external reports.\n\nA custom configuration is where you *include the paid products* — Code Security and Secret Protection carry usage cost / require licensing on private and internal repos — or leave them out for a lightweight baseline.\n\n## Default vs enforce — two different things\n\nStudents conflate these; the exam separates them cleanly.\n\n- **Default** decides *which new repositories inherit this configuration* (the None / Public / Private and internal / All choice from Lesson 1). It's about reach.\n- **Enforce** decides *whether a repo admin can change what the configuration set*. It's about lock-down.\n\n### Exactly what enforcement locks\n\nStraight from the docs: enforcing a configuration means *\"repository owners are blocked from changing features that have been enabled or disabled in the configuration, but features that are not set aren't enforced.\"* So:\n\n- A feature the configuration **Enabled** → the repo admin can't turn it off.\n- A feature the configuration **Disabled** → the repo admin can't turn it on.\n- A feature left **Not set** → **not enforced** — the repo admin is still free to change it.\n\nThat last line is the trap: enforcement is not \"lock everything.\" Anything you left at *Not set* is wide open at the repo level. If you want it locked, you must explicitly enable or disable it in the configuration.\n\n## When the configuration link breaks\n\nA repository's tie to a configuration can change *\"if a repository admin overrides a security setting on an unenforced configuration, if an organization or enterprise admin detaches the configuration, if enforcement is enabled, or if the initial attachment fails.\"* Practically: on an **unenforced** configuration, a repo admin who overrides a setting knocks that repo off the clean \"applied\" state — which is exactly why you enforce the settings that matter.\n\n> **Exam note.** Two-part instinct: (1) to make a feature *reach* new repos, set the configuration as the default at the right scope; (2) to make a feature *stick* against repo-level tampering, enforce it — and only enabled/disabled features are enforced, never Not-set ones.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d6-4",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A security configuration has push protection Enabled, code scanning default setup Disabled, and Dependabot alerts left as Not set. The configuration is enforced and applied to a repo. Which change can the repo admin still make?",
+          "options": [
+            { "id": "a", "text": "Turn Dependabot alerts on or off — it was Not set, and features that are not set aren't enforced", "correct": true },
+            { "id": "b", "text": "Turn off push protection, because repo admins always override push protection" },
+            { "id": "c", "text": "Enable code scanning default setup, because Disabled settings are only advisory" },
+            { "id": "d", "text": "Nothing — an enforced configuration locks every feature on the repo" }
+          ],
+          "explanation": "Enforcement blocks changes to features the configuration *enabled or disabled*, but *\"features that are not set aren't enforced\"* — so Dependabot alerts (Not set) remain changeable (a). Push protection was Enabled and is therefore locked (b), Disabled code scanning is likewise locked, not advisory (c), and enforcement is explicitly not \"lock everything\" — Not-set features stay open (d).",
+          "sourceRefs": ["r-config-concept", "r-apply-custom"]
+        },
+        {
+          "id": "kc-d6-5",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want secret scanning to reach every repository created in the org from now on, AND you want repo admins unable to turn it off. Which two settings do you use?",
+          "options": [
+            { "id": "a", "text": "Set the configuration as the default for newly created repositories (correct scope) to get reach, and enforce the configuration so the Enabled secret scanning setting can't be changed", "correct": true },
+            { "id": "b", "text": "Enforce only — enforcement automatically applies the configuration to all new repos" },
+            { "id": "c", "text": "Set as default only — a default configuration also prevents repo admins from changing its settings" },
+            { "id": "d", "text": "Neither — secret scanning can only be managed one repo at a time" }
+          ],
+          "explanation": "Reach and lock-down are two different controls: default-for-new-repos gives reach, enforcement prevents repo-admin changes to enabled/disabled features (a). Enforcement alone doesn't apply the config to new repos — that's the default's job (b). A default alone gives reach but, unenforced, a repo admin can override the setting (c). Configurations are precisely the tool for managing this at scale, not one repo at a time (d).",
+          "sourceRefs": ["r-config-concept", "r-apply-custom"]
+        },
+        {
+          "id": "kc-d6-6",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A repo shows as no longer cleanly \"applied\" to its org security configuration, even though nobody detached it. The configuration is not enforced. What most likely happened?",
+          "options": [
+            { "id": "a", "text": "A repository admin overrode a security setting on the unenforced configuration", "correct": true },
+            { "id": "b", "text": "GitHub automatically rotates configurations weekly" },
+            { "id": "c", "text": "The organization owner changed the org's display name" },
+            { "id": "d", "text": "The repo exceeded a size limit and lost its configuration" }
+          ],
+          "explanation": "A repo's relationship to a configuration changes when *\"a repository admin overrides a security setting on an unenforced configuration\"* (among other causes like detaching, enabling enforcement, or a failed attach) — an unenforced config is exactly what lets a repo admin drift it (a). There's no weekly rotation (b), the org name is irrelevant (c), and there's no size-based loss of configuration (d).",
+          "sourceRefs": ["r-about-enterprise-config", "r-apply-custom"]
+        }
+      ]
+    },
+    {
+      "id": "l3-roles",
+      "title": "Roles: administrator, security manager, developer — and enterprise policy override",
+      "estMinutes": 15,
+      "objective": "Place each security-administration role exactly, and predict how enterprise policy interacts with lower scopes.",
+      "body": "## The three roles the exam tests\n\nAdministration questions almost always hinge on *who can do what*. Three roles matter.\n\n### Organization owner (administrator)\n\nFull control of the organization: create and apply security configurations, set defaults, enforce, change any org setting, manage people and teams. The owner is the superset.\n\n### Security manager (the surgical one)\n\nA built-in organization role an **owner** assigns to a **member or a team**. Its permissions, verbatim:\n\n- *\"Read access on all repositories in the organization, in addition to any existing repository access\"*\n- *\"Write access on all security alerts in the organization\"*\n- *\"The ability to configure settings for security features at the organization level, including the ability to enable or disable GitHub Advanced Security features\"*\n- *\"The ability to configure settings for security features at the repository level, including the ability to enable or disable GitHub Advanced Security features\"*\n\nWhat that role deliberately does **not** give: write/admin access to repository *code*, and control over *non-security* organization settings (billing, membership policy, org renaming, and the like). It's scoped to *managing security*, nothing more — which is the whole point and the source of most distractors. Only an owner can grant it; it can go to an individual or, better for scale, to a dedicated security team.\n\nNeed something narrower than the built-in role? **Custom organization roles** let you compose reduced security roles — for example, one limited to managing secret scanning results and bypass requests. At the repository level the relevant fine-grained permissions have exact names: *\"View secret scanning alerts,\" \"Dismiss, reopen, or assign secret scanning alerts,\" \"View code scanning alerts,\" \"Dismiss or reopen code scanning alerts,\" \"View Dependabot alerts,\"* and so on.\n\n### Developer (member)\n\nA base member works in repos they can access, sees and triages alerts their permissions allow, fixes findings, and responds to push protection. They don't administer the suites org-wide and can't enable/disable GHAS across the org.\n\n## Permissions for dismissing alerts are their own lever\n\nWho may *dismiss* an alert is configurable and separable from who can see it — hence configuration options like **\"prevent direct alert dismissals\"** and **delegated bypass** for push protection. Administration means deciding not just *is scanning on* but *who may wave a finding away*.\n\n## Enterprise policy can override repo admins — with a twist\n\nAn enterprise owner sets code security policy under **Policies → Advanced Security**, choosing **\"Allow for all organizations,\" \"Disallow for all organizations,\"** or **\"Allow for selected organizations.\"** Two exam-critical subtleties:\n\n1. **Disallow is not retroactive.** Disallowing *\"prevents repository administrators from enabling these features for additional repositories, but does not disable the features for repositories where the features are already enabled.\"* It stops new spread; it doesn't rip out what's live.\n2. **Owners and security managers bypass the restriction.** *\"Organization owners and security managers can always enable security features regardless of how you set this policy.\"* The policy constrains **repository administrators**, not org owners or security managers.\n\n> **Exam note.** For a role question, ask: is this a *security* action or a *general org-admin* action? Security-only → a security manager can do it. General admin (billing, membership, renaming) → owner only. And when enterprise policy is in play, remember it gates repo admins, not owners/security managers, and doesn't undo already-enabled features.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d6-7",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A person holds the security manager role (and is not an organization owner). Which action can they NOT perform?",
+          "options": [
+            { "id": "a", "text": "Change the organization's billing plan and membership policy", "correct": true },
+            { "id": "b", "text": "Enable or disable GitHub Advanced Security features at the organization level" },
+            { "id": "c", "text": "Read all repositories in the organization" },
+            { "id": "d", "text": "Write to (triage/dismiss) security alerts across the organization" }
+          ],
+          "explanation": "The security manager role is scoped to *managing security*: it grants read on all repos, write on all security alerts, and the ability to configure security features at org and repo level — so (b), (c), and (d) are all within it. It does not grant control over non-security org settings such as billing or membership policy (a), which remain owner-only.",
+          "sourceRefs": ["r-security-managers", "r-custom-roles"]
+        },
+        {
+          "id": "kc-d6-8",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An enterprise owner sets the Advanced Security policy to \"Disallow for all organizations.\" A repository already had code scanning enabled before the change. What is the effect?",
+          "options": [
+            { "id": "a", "text": "Existing enabled features keep running; the policy only prevents repo admins from enabling the features on additional repositories", "correct": true },
+            { "id": "b", "text": "Code scanning is immediately disabled on that repository and all others" },
+            { "id": "c", "text": "The policy has no effect at all until each org owner re-confirms it" },
+            { "id": "d", "text": "Only public repositories are affected; private repos are exempt" }
+          ],
+          "explanation": "Disallowing *\"prevents repository administrators from enabling these features for additional repositories, but does not disable the features for repositories where the features are already enabled\"* — so the already-enabled repo keeps running (a). It is not retroactive, so nothing is force-disabled (b); the policy takes effect without per-org reconfirmation (c); and it isn't scoped by repo visibility (d).",
+          "sourceRefs": ["r-enterprise-policy"]
+        },
+        {
+          "id": "kc-d6-9",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Enterprise policy is \"Disallow for all organizations.\" A security manager in one org needs to enable Secret Protection on a new repository. Can they?",
+          "options": [
+            { "id": "a", "text": "Yes — organization owners and security managers can always enable security features regardless of this policy; it restricts repository administrators", "correct": true },
+            { "id": "b", "text": "No — \"Disallow for all organizations\" blocks everyone, including owners and security managers" },
+            { "id": "c", "text": "Only if the enterprise owner grants a one-time exception per repository" },
+            { "id": "d", "text": "Only by using the REST API, which bypasses enterprise policy" }
+          ],
+          "explanation": "The docs are explicit: *\"Organization owners and security managers can always enable security features regardless of how you set this policy.\"* The disallow setting constrains repository administrators, not owners or security managers (a) — so it does not block everyone (b), needs no per-repo exception (c), and the API respects the same permission model rather than bypassing policy (d).",
+          "sourceRefs": ["r-enterprise-policy", "r-security-managers"]
+        }
+      ]
+    },
+    {
+      "id": "l4-cloud-server-api",
+      "title": "Cloud vs Server, and administering at scale with the REST API",
+      "estMinutes": 15,
+      "objective": "Call out Enterprise Cloud vs Enterprise Server gaps and use the configurations REST API to govern at scale.",
+      "body": "## GitHub Enterprise Cloud vs GitHub Enterprise Server\n\nThe suites exist on both platforms, but administration differs — a named D6 task is knowing *\"feature availability and differences across GitHub Enterprise Cloud and GitHub Enterprise Server.\"*\n\n- **Both** support GHAS (Code Security and Secret Protection) and, from recent versions (e.g. Enterprise Server 3.16), **security configurations**.\n- **On Enterprise Server, availability is gated by what the site administrator has installed and licensed.** The docs are blunt: *\"only features installed by a site administrator on your GitHub Enterprise Server instance will appear in the UI,\"* and GHAS features *\"will only be visible if your organization or GitHub Enterprise Server instance holds a GitHub Advanced Security license.\"*\n- **Some features need GitHub Actions on the Server box.** *\"Certain features, like Dependabot security updates and code scanning default setup, also require that GitHub Actions is installed on the GitHub Enterprise Server instance.\"* On Cloud, Actions is just there; on Server, it's an install/ops prerequisite.\n- **Cloud gets the freshest, cloud-hosted capabilities first** — things like the GitHub-hosted intelligence behind validity checks, security campaigns, and newer Dependabot features land on Cloud and reach Server on its release train (or not at all for cloud-only pieces).\n\nThe exam instinct: if a scenario is on **Enterprise Server** and a feature seems missing, suspect a **missing license, an uninstalled feature, or GitHub Actions not being set up on the appliance** before anything exotic.\n\n## Administer at scale with the REST API\n\nDoing this by clicking doesn't scale to hundreds of repos or dozens of orgs. A named D6 task is understanding *\"APIs and automation methods for large-scale security configuration and governance.\"* The **code security configurations API** is the workhorse.\n\n**Organization level:**\n\n- `POST /orgs/{org}/code-security/configurations` — create a configuration (body sets each feature: `advanced_security`, `dependency_graph`, `dependabot_alerts`, `dependabot_security_updates`, `code_scanning_default_setup`, `secret_scanning`, `secret_scanning_push_protection`, `private_vulnerability_reporting`, `enforcement`, and more — each `enabled`, `disabled`, or `not_set`).\n- `GET|PATCH|DELETE /orgs/{org}/code-security/configurations/{id}` — read, update, delete.\n- `POST /orgs/{org}/code-security/configurations/{id}/attach` — apply to repos via a **`scope`**: `all`, `all_without_configurations`, `public`, `private_or_internal`, or `selected`.\n- `PUT /orgs/{org}/code-security/configurations/{id}/defaults` — set the default for new repos via **`default_for_new_repos`**: `all`, `none`, `public`, or `private_and_internal`.\n- `DELETE /orgs/{org}/code-security/configurations/detach` — detach repos.\n\n**Enterprise level:** the same shape under `/enterprises/{enterprise}/code-security/configurations…`. Note the narrower attach scope (`all` or `all_without_configurations`), and that listing/managing enterprise configurations *\"must be an administrator of the enterprise\"* and requires the **`admin:enterprise`** scope on a classic PAT — it does **not** work with GitHub App tokens or fine-grained PATs.\n\n> **Exam note.** Two recall anchors: the **attach `scope`** vocabulary (`all_without_configurations` is the \"don't clobber repos that already have a config\" option) and the **`default_for_new_repos`** vocabulary (`private_and_internal` is one token). And the enterprise default only reaches orgs *without their own default* — the same org-beats-enterprise precedence, expressed in the API.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d6-10",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "On GitHub Enterprise Server, an org admin can't find Dependabot security updates or code scanning default setup in the UI, even though GHAS is licensed. What's the most likely cause?",
+          "options": [
+            { "id": "a", "text": "GitHub Actions isn't installed on the Enterprise Server instance — those features require it", "correct": true },
+            { "id": "b", "text": "Those features have been permanently removed from Enterprise Server" },
+            { "id": "c", "text": "The org needs to be renamed to enable Actions-based features" },
+            { "id": "d", "text": "Dependabot and code scanning only exist on GitHub Enterprise Cloud" }
+          ],
+          "explanation": "The docs state that *\"certain features, like Dependabot security updates and code scanning default setup, also require that GitHub Actions is installed on the GitHub Enterprise Server instance\"* (a). They aren't removed from Server (b), renaming is irrelevant (c), and these features do exist on Server — they're just gated on the Actions prerequisite, not Cloud-exclusive (d).",
+          "sourceRefs": ["r-server-config", "r-about-ghas"]
+        },
+        {
+          "id": "kc-d6-11",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Using the REST API, you want to attach an org security configuration to every repository that does NOT already have a configuration, without disturbing repos that do. Which `scope` value fits?",
+          "options": [
+            { "id": "a", "text": "all_without_configurations", "correct": true },
+            { "id": "b", "text": "all" },
+            { "id": "c", "text": "selected" },
+            { "id": "d", "text": "private_or_internal" }
+          ],
+          "explanation": "`all_without_configurations` attaches to exactly the repos that currently have no configuration, leaving already-configured repos alone (a). `all` would also (re)attach to repos that already have a config (b); `selected` requires you to enumerate specific repos (c); and `private_or_internal` filters by visibility, not by whether a config already exists (d).",
+          "sourceRefs": ["r-rest-configs"]
+        },
+        {
+          "id": "kc-d6-12",
+          "domainId": "d6-administration",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You're scripting enterprise-level security configurations via the REST API. Which authentication requirement applies?",
+          "options": [
+            { "id": "a", "text": "You must be an enterprise administrator, and a classic PAT needs the admin:enterprise scope; GitHub App tokens and fine-grained PATs don't work for these endpoints", "correct": true },
+            { "id": "b", "text": "Any organization member with a fine-grained PAT can call the enterprise endpoints" },
+            { "id": "c", "text": "No authentication is needed for read-only enterprise configuration endpoints" },
+            { "id": "d", "text": "A GitHub App installation token is the only supported credential" }
+          ],
+          "explanation": "Enterprise configuration endpoints require an enterprise administrator and, for classic PATs, the `admin:enterprise` scope; they explicitly do not work with GitHub App user/installation access tokens or fine-grained PATs (a). So a fine-grained PAT held by an ordinary member won't work (b), the endpoints aren't anonymous (c), and App installation tokens are unsupported here, not the only option (d).",
+          "sourceRefs": ["r-rest-configs"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d6-1",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is a GitHub security configuration?",
+      "options": [
+        { "id": "a", "text": "A collection of enablement settings for GitHub's security products that you can apply to repositories across an organization or enterprise", "correct": true },
+        { "id": "b", "text": "A single YAML file committed to each repository that defines its CI pipeline" },
+        { "id": "c", "text": "A billing plan that determines how many committers a repo may have" },
+        { "id": "d", "text": "A read-only report of all open security alerts in an org" }
+      ],
+      "explanation": "A security configuration is a *\"collection of enablement settings for GitHub security products that you can apply to any repository within an organization or enterprise\"* (a). It's not a per-repo CI file (b), not a billing plan (c), and not an alert report — it turns features on/off, it doesn't list findings (d).",
+      "sourceRefs": ["r-config-concept"]
+    },
+    {
+      "id": "q-d6-2",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which describes the GitHub-recommended security configuration?",
+      "options": [
+        { "id": "a", "text": "A ready-made configuration built and maintained by GitHub's security experts, the quickest to apply to all repos, covering Code Security and Secret Protection features", "correct": true },
+        { "id": "b", "text": "A blank configuration you must fill in entirely before it does anything" },
+        { "id": "c", "text": "A configuration that only works on public repositories" },
+        { "id": "d", "text": "A configuration that disables all security features by default for performance" }
+      ],
+      "explanation": "The GitHub-recommended configuration is created and managed by GitHub's subject-matter experts, is the quickest to apply to all repositories, and enables Code Security and Secret Protection features (a). It isn't blank (b), isn't public-only (c), and enables rather than disables protections (d).",
+      "sourceRefs": ["r-config-concept", "r-establish-coverage"]
+    },
+    {
+      "id": "q-d6-3",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You mark a security configuration as the default for newly created repositories, scoped to \"Private and internal.\" What happens to existing private repositories in the org?",
+      "options": [
+        { "id": "a", "text": "Nothing automatically — the default applies only to repos created after it's set; existing repos need the configuration applied explicitly", "correct": true },
+        { "id": "b", "text": "All existing private and internal repos are immediately brought under the configuration" },
+        { "id": "c", "text": "Existing private repos are detached from any other configuration" },
+        { "id": "d", "text": "Existing repos are deleted and recreated under the configuration" }
+      ],
+      "explanation": "A default configuration is *\"only automatically applied to new repositories created in your organization,\"* so existing repos are untouched and must be handled explicitly (a). There's no retroactive sweep of existing repos (b), setting a default doesn't detach anything (c), and nothing is deleted/recreated (d).",
+      "sourceRefs": ["r-config-concept", "r-establish-coverage"]
+    },
+    {
+      "id": "q-d6-4",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An enforced security configuration has secret scanning Enabled and push protection Enabled, but Dependabot alerts are Not set. What can a repository admin do on a repo the configuration is applied to?",
+      "options": [
+        { "id": "a", "text": "Change the Dependabot alerts setting, because features that are not set aren't enforced — but not disable secret scanning or push protection", "correct": true },
+        { "id": "b", "text": "Disable secret scanning, since repo admins outrank org configurations" },
+        { "id": "c", "text": "Nothing at all — enforcement locks every possible setting" },
+        { "id": "d", "text": "Only change settings after the org owner approves each change" }
+      ],
+      "explanation": "Enforcement blocks changes to enabled/disabled features but *\"features that are not set aren't enforced,\"* so Dependabot alerts (Not set) stay changeable while the two Enabled features are locked (a). Repo admins don't outrank an enforced config (b), enforcement isn't \"lock everything\" (c), and there's no per-change approval workflow (d).",
+      "sourceRefs": ["r-apply-custom", "r-config-concept"]
+    },
+    {
+      "id": "q-d6-5",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The security manager role is assigned by whom, and to whom?",
+      "options": [
+        { "id": "a", "text": "Assigned by an organization owner, to any member or team in the organization", "correct": true },
+        { "id": "b", "text": "Assigned by any repository admin, to any collaborator" },
+        { "id": "c", "text": "Assigned by GitHub Support on request only" },
+        { "id": "d", "text": "Assigned automatically to everyone with write access" }
+      ],
+      "explanation": "Only an organization owner can grant the security manager role, and it can go to any member or a team (a). Repo admins can't assign it (b), it isn't a Support-gated role (c), and it isn't auto-granted by write access (d).",
+      "sourceRefs": ["r-security-managers"]
+    },
+    {
+      "id": "q-d6-6",
+      "domainId": "d6-administration",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which of the following are permissions the built-in security manager role grants? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Read access on all repositories in the organization", "correct": true },
+        { "id": "b", "text": "Write access on all security alerts in the organization", "correct": true },
+        { "id": "c", "text": "The ability to enable or disable GitHub Advanced Security features at the organization level", "correct": true },
+        { "id": "d", "text": "Admin control over the organization's billing and membership settings" }
+      ],
+      "explanation": "The security manager role grants read on all repos, write on all security alerts, and the ability to configure security features (including enabling/disabling GHAS) at org and repo level — so (a), (b), and (c) are correct. It is deliberately scoped to security and does not grant control over non-security org settings such as billing or membership (d).",
+      "sourceRefs": ["r-security-managers"]
+    },
+    {
+      "id": "q-d6-7",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Enterprise policy is set to \"Disallow for all organizations\" for Advanced Security. Which statement is correct?",
+      "options": [
+        { "id": "a", "text": "Repository administrators can't enable the features on new repos, but organization owners and security managers still can, and already-enabled repos keep their features", "correct": true },
+        { "id": "b", "text": "Every repo across every org has its security features immediately disabled" },
+        { "id": "c", "text": "The policy blocks owners, security managers, and repo admins equally" },
+        { "id": "d", "text": "The policy applies only to public repositories" }
+      ],
+      "explanation": "Disallowing prevents *repository administrators* from enabling features on additional repos, does not disable already-enabled ones, and *\"organization owners and security managers can always enable security features regardless of how you set this policy\"* (a). It's not retroactive (b), it doesn't block owners/security managers (c), and it isn't visibility-scoped (d).",
+      "sourceRefs": ["r-enterprise-policy", "r-security-managers"]
+    },
+    {
+      "id": "q-d6-8",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which REST API endpoint applies (attaches) an existing organization security configuration to repositories?",
+      "options": [
+        { "id": "a", "text": "POST /orgs/{org}/code-security/configurations/{configuration_id}/attach", "correct": true },
+        { "id": "b", "text": "PUT /orgs/{org}/code-security/configurations/{configuration_id}/defaults" },
+        { "id": "c", "text": "GET /orgs/{org}/code-security/configurations" },
+        { "id": "d", "text": "DELETE /orgs/{org}/code-security/configurations/{configuration_id}" }
+      ],
+      "explanation": "Attaching a configuration to repos is `POST .../configurations/{id}/attach` with a `scope` (a). The `defaults` endpoint sets the default-for-new-repos rather than attaching (b), the plain GET lists configurations (c), and DELETE removes a configuration entirely (d).",
+      "sourceRefs": ["r-rest-configs"]
+    },
+    {
+      "id": "q-d6-9",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the configurations REST API, which parameter sets whether a configuration becomes the default for newly created repositories, and what are its values?",
+      "options": [
+        { "id": "a", "text": "default_for_new_repos, with values all, none, public, or private_and_internal", "correct": true },
+        { "id": "b", "text": "scope, with values enforced or unenforced" },
+        { "id": "c", "text": "visibility, with values open or restricted" },
+        { "id": "d", "text": "auto_apply, with values true or false" }
+      ],
+      "explanation": "The `defaults` endpoint takes `default_for_new_repos` with values `all`, `none`, `public`, or `private_and_internal` (a). `scope` is the attach parameter and doesn't take enforced/unenforced (b); `visibility` and `auto_apply` aren't the parameters used here (c, d).",
+      "sourceRefs": ["r-rest-configs"]
+    },
+    {
+      "id": "q-d6-10",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pair correctly describes the two GHAS standalone products and what each contains?",
+      "options": [
+        { "id": "a", "text": "GitHub Secret Protection = secret scanning + push protection; GitHub Code Security = code scanning/CodeQL, premium Dependabot features, and dependency review", "correct": true },
+        { "id": "b", "text": "GitHub Secret Protection = code scanning; GitHub Code Security = secret scanning" },
+        { "id": "c", "text": "Both products contain the same features; the names are interchangeable" },
+        { "id": "d", "text": "GitHub Code Security = push protection only; GitHub Secret Protection = dependency review only" }
+      ],
+      "explanation": "Secret Protection covers secret scanning and push protection; Code Security covers code scanning (CodeQL), premium Dependabot features, and dependency review (a). The other options swap or muddle the mapping (b, d) or wrongly claim they're identical (c).",
+      "sourceRefs": ["r-about-ghas"]
+    },
+    {
+      "id": "q-d6-11",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On which repositories are code scanning and secret scanning available for free, without purchasing a GHAS product?",
+      "options": [
+        { "id": "a", "text": "Public repositories", "correct": true },
+        { "id": "b", "text": "Private repositories on the Free plan" },
+        { "id": "c", "text": "Internal repositories in any enterprise" },
+        { "id": "d", "text": "All repositories, regardless of visibility" }
+      ],
+      "explanation": "Code scanning and secret scanning are free on public repositories; to run them on private or internal repos you must purchase the relevant GHAS product (a). Private (b) and internal (c) repos require a license, and it's therefore not free across all visibilities (d).",
+      "sourceRefs": ["r-about-ghas"]
+    },
+    {
+      "id": "q-d6-12",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How is GHAS (Secret Protection / Code Security) billed?",
+      "options": [
+        { "id": "a", "text": "Per active committer — each active committer to at least one repository with the product enabled consumes one license", "correct": true },
+        { "id": "b", "text": "Per repository — a flat fee for each repo with any security feature on" },
+        { "id": "c", "text": "Per alert raised by the scanning tools" },
+        { "id": "d", "text": "Per line of code scanned per month" }
+      ],
+      "explanation": "GHAS products are billed per committer: each active committer to at least one repo with the product enabled uses one license (a). Billing is not per-repository (b), per-alert (c), or per-line-of-code (d).",
+      "sourceRefs": ["r-billing"]
+    },
+    {
+      "id": "q-d6-13",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team leaves several features as \"Not set\" in a security configuration and enforces it. What is the practical effect of the Not-set features?",
+      "options": [
+        { "id": "a", "text": "They remain changeable at the repository level — enforcement covers only enabled/disabled features, not Not-set ones", "correct": true },
+        { "id": "b", "text": "They are automatically enabled because the configuration is enforced" },
+        { "id": "c", "text": "They are automatically disabled for safety" },
+        { "id": "d", "text": "They block the configuration from being applied at all" }
+      ],
+      "explanation": "*\"Features that are not set aren't enforced,\"* so Not-set features stay changeable by repo admins even under an enforced configuration (a). Not set means \"leave alone,\" not auto-enable (b) or auto-disable (c), and it doesn't prevent the configuration from applying (d).",
+      "sourceRefs": ["r-apply-custom", "r-config-concept"]
+    },
+    {
+      "id": "q-d6-14",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Where does an enterprise owner set whether organizations may use Advanced Security features, and what are the choices?",
+      "options": [
+        { "id": "a", "text": "Under Policies → Advanced Security, choosing \"Allow for all organizations,\" \"Disallow for all organizations,\" or \"Allow for selected organizations\"", "correct": true },
+        { "id": "b", "text": "In each repository's Settings → Branches, per repo" },
+        { "id": "c", "text": "By editing a global CODEOWNERS file" },
+        { "id": "d", "text": "Only through GitHub Support tickets" }
+      ],
+      "explanation": "Enterprise-wide enablement policy lives under Policies → Advanced Security with the allow-all / disallow-all / allow-selected choices (a). It isn't a per-repo branch setting (b), has nothing to do with CODEOWNERS (c), and doesn't require Support (d).",
+      "sourceRefs": ["r-enterprise-policy"]
+    },
+    {
+      "id": "q-d6-15",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You need a role that can manage secret scanning results and bypass requests, but nothing else. What's the right approach?",
+      "options": [
+        { "id": "a", "text": "Create a custom organization role with just those security permissions — custom roles let you compose a narrower security role than the built-in security manager", "correct": true },
+        { "id": "b", "text": "Assign the full security manager role and hope they self-limit" },
+        { "id": "c", "text": "Make the person an organization owner and remove other permissions manually" },
+        { "id": "d", "text": "There is no way to scope security permissions below the security manager role" }
+      ],
+      "explanation": "Custom organization roles let you build a reduced security role — for example, one limited to managing secret scanning results and bypass requests (a). The full security manager role grants more than needed (b), making someone an owner over-grants dramatically (c), and scoping below the built-in role is exactly what custom roles enable, so it's not impossible (d).",
+      "sourceRefs": ["r-custom-roles", "r-security-managers"]
+    },
+    {
+      "id": "q-d6-16",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "On GitHub Enterprise Server, why might a GHAS feature not appear in the UI at all?",
+      "options": [
+        { "id": "a", "text": "Only features installed by a site administrator appear, and GHAS features are visible only if the instance or org holds a GHAS license", "correct": true },
+        { "id": "b", "text": "Enterprise Server hides features until the repo reaches 100 stars" },
+        { "id": "c", "text": "The UI only shows features on public repositories" },
+        { "id": "d", "text": "Features appear only during a maintenance window" }
+      ],
+      "explanation": "On Server, *\"only features installed by a site administrator ... will appear in the UI,\"* and GHAS features show only when a GHAS license is held (a). Visibility isn't gated by stars (b), repo visibility in this way (c), or maintenance windows (d).",
+      "sourceRefs": ["r-server-config"]
+    },
+    {
+      "id": "q-d6-17",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is a genuine difference in administering the suites on GitHub Enterprise Server compared with GitHub Enterprise Cloud?",
+      "options": [
+        { "id": "a", "text": "On Enterprise Server, features like Dependabot security updates and code scanning default setup require GitHub Actions to be installed on the instance", "correct": true },
+        { "id": "b", "text": "Enterprise Server does not support security configurations at all" },
+        { "id": "c", "text": "Secret scanning is unavailable on Enterprise Server under any conditions" },
+        { "id": "d", "text": "Enterprise Cloud cannot enforce any organization-level policy" }
+      ],
+      "explanation": "On Server, *\"certain features, like Dependabot security updates and code scanning default setup, also require that GitHub Actions is installed on the GitHub Enterprise Server instance\"* (a). Server does support security configurations in recent versions (b), secret scanning is available on Server with the right license (c), and Cloud absolutely can enforce policies (d).",
+      "sourceRefs": ["r-server-config", "r-about-ghas"]
+    },
+    {
+      "id": "q-d6-18",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "GitHub's recommended sequence for securing an organization at scale is best described as:",
+      "options": [
+        { "id": "a", "text": "Apply the GitHub-recommended configuration first, evaluate the findings on your repos, then build custom configurations if needed", "correct": true },
+        { "id": "b", "text": "Immediately hand-craft a unique custom configuration for every repository before enabling anything" },
+        { "id": "c", "text": "Turn on every feature at the repo level manually, repo by repo" },
+        { "id": "d", "text": "Disable all security features until an audit is scheduled" }
+      ],
+      "explanation": "GitHub recommends applying the recommended configuration, reviewing the resulting findings, then customizing where needed (a). Bespoke-per-repo up front (b) and manual repo-by-repo enablement (c) don't scale, and disabling everything (d) is the opposite of securing at scale.",
+      "sourceRefs": ["r-establish-coverage", "r-config-concept"]
+    },
+    {
+      "id": "q-d6-19",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which two GitHub plans allow you to purchase GitHub Code Security or GitHub Secret Protection?",
+      "options": [
+        { "id": "a", "text": "GitHub Team or GitHub Enterprise", "correct": true },
+        { "id": "b", "text": "GitHub Free or GitHub Pro only" },
+        { "id": "c", "text": "Any personal account, no organization required" },
+        { "id": "d", "text": "Only GitHub Enterprise Server, never Cloud" }
+      ],
+      "explanation": "You must be on a GitHub Team or GitHub Enterprise plan to purchase Code Security or Secret Protection (a). Free/Pro don't allow purchase (b), an org context is required rather than a bare personal account (c), and the products are available on Cloud (Team/Enterprise) as well as Server, not Server-only (d).",
+      "sourceRefs": ["r-about-ghas", "r-billing"]
+    },
+    {
+      "id": "q-d6-20",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "In the configurations REST API, which `advanced_security` value would you use to enable Code Security features (rather than the full GHAS bundle or Secret Protection) in a configuration body?",
+      "options": [
+        { "id": "a", "text": "code_security", "correct": true },
+        { "id": "b", "text": "enabled_all" },
+        { "id": "c", "text": "codeql_only" },
+        { "id": "d", "text": "ghas_full" }
+      ],
+      "explanation": "The `advanced_security` field accepts values including `enabled`, `disabled`, `code_security`, and `secret_protection`; `code_security` selects the Code Security product (a). `enabled_all`, `codeql_only`, and `ghas_full` are not valid values for that field (b, c, d).",
+      "sourceRefs": ["r-rest-configs"]
+    },
+    {
+      "id": "q-d6-21",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A configuration is applied but NOT enforced. A repo admin changes one of its settings on their repo. What is the effect on that repo's relationship to the configuration?",
+      "options": [
+        { "id": "a", "text": "The override changes the repo's status — it no longer cleanly matches the applied configuration for that setting", "correct": true },
+        { "id": "b", "text": "The change is silently reverted on the next sync" },
+        { "id": "c", "text": "The whole org loses the configuration" },
+        { "id": "d", "text": "Nothing changes; unenforced configurations can't be overridden" }
+      ],
+      "explanation": "A repo's relationship to a configuration changes when a repo admin overrides a setting on an *unenforced* configuration — that's precisely what an unenforced config permits (a). There's no auto-revert (b), one repo's override doesn't strip the org's configuration (c), and unenforced configurations are exactly the ones that *can* be overridden (d).",
+      "sourceRefs": ["r-about-enterprise-config", "r-apply-custom"]
+    },
+    {
+      "id": "q-d6-22",
+      "domainId": "d6-administration",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An organization owner wants a trusted security team to run the security program — tune scanning, triage and dismiss alerts across all repos — without giving them control of billing, membership, or repository code. What's the cleanest grant?",
+      "options": [
+        { "id": "a", "text": "Assign the security manager role to that team", "correct": true },
+        { "id": "b", "text": "Make the whole team organization owners" },
+        { "id": "c", "text": "Give the team admin on every repository" },
+        { "id": "d", "text": "Add them as outside collaborators on each repo" }
+      ],
+      "explanation": "The security manager role is exactly this: security settings and alert management across the org, without non-security admin power or code write — and it can be assigned to a team (a). Making them owners over-grants billing/membership control (b), repo admin grants code control they shouldn't have (c), and outside-collaborator access is per-repo and doesn't confer org-wide security management (d).",
+      "sourceRefs": ["r-security-managers", "r-custom-roles"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d6-rollout",
+      "domainIds": ["d6-administration"],
+      "title": "Roll the suites across a 40-org enterprise",
+      "tagline": "Pick the scope, the reach, and the lock for a real rollout.",
+      "context": "You're the platform security lead for an enterprise on GitHub Enterprise Cloud with 40 organizations and thousands of repos. Leadership wants Code Security and Secret Protection on everywhere sensible, with a consistent baseline, minimal manual toil, and no way for individual repo admins to quietly switch protection off on regulated repos. Some orgs already run their own tuned configuration and want to keep it.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "You want a solid baseline live across all 40 orgs fast, without hand-building 40 configurations. What do you reach for first?",
+          "choices": [
+            { "id": "a", "text": "Apply the GitHub-recommended security configuration, then review findings before customizing", "verdict": "best", "rationale": "The recommended configuration is GitHub's ready-made, expert-maintained baseline — the fastest way to broad coverage, and GitHub's own recommended starting point before you customize.", "next": "st2" },
+            { "id": "b", "text": "Hand-craft a bespoke custom configuration for every org before enabling anything", "verdict": "viable", "rationale": "You'll get there eventually, but building 40 configs up front is slow and error-prone when a vetted baseline already exists to start from." },
+            { "id": "c", "text": "Ask each repo admin to enable features on their own repositories", "verdict": "wrong", "rationale": "That's the opposite of securing at scale — inconsistent, unenforceable, and unmanageable across thousands of repos." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "A few orgs already have their own default configuration they want to keep. You set an enterprise-level default. What actually happens for new repos in those orgs?",
+          "choices": [
+            { "id": "a", "text": "Those orgs keep their own default — the enterprise default applies only to orgs that don't already have a default set", "verdict": "best", "rationale": "Org-beats-enterprise precedence: an enterprise default reaches only organizations without their own default, so the tuned orgs are unaffected — exactly what they wanted.", "next": "st3" },
+            { "id": "b", "text": "The enterprise default overrides the org defaults everywhere", "verdict": "wrong", "rationale": "Enterprise scope does not blindly override an org's own default; the org's default takes precedence for its new repos." },
+            { "id": "c", "text": "New repos in those orgs get no configuration until you resolve the conflict manually", "verdict": "wrong", "rationale": "There's no conflict to resolve — the org's existing default simply wins; new repos aren't left unconfigured." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Regulated repos must never have secret scanning or push protection turned off by a repo admin. How do you guarantee it?",
+          "choices": [
+            { "id": "a", "text": "In the configuration those repos use, explicitly Enable secret scanning and push protection, then enforce the configuration", "verdict": "best", "rationale": "Enforcement locks features the configuration *enabled or disabled*; explicitly enabling both and enforcing prevents repo admins from switching them off.", "next": "st4" },
+            { "id": "b", "text": "Enforce the configuration but leave those two features as Not set", "verdict": "wrong", "rationale": "\"Features that are not set aren't enforced\" — leaving them Not set means a repo admin can still change them, defeating the goal." },
+            { "id": "c", "text": "Set the configuration as the default for new repos but don't enforce it", "verdict": "viable", "rationale": "A default gives reach to new repos but, unenforced, a repo admin can still override the settings — reach without the lock you need." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "You need to repeat this attach-and-set-default across 40 orgs reliably and re-run it as new orgs appear. Best mechanism?",
+          "choices": [
+            { "id": "a", "text": "Script it with the code security configurations REST API (create/attach/defaults endpoints)", "verdict": "best", "rationale": "The configurations API is purpose-built for large-scale, repeatable governance — create, attach with a scope, and set defaults programmatically across many orgs." },
+            { "id": "b", "text": "Click through each org's settings by hand every time", "verdict": "wrong", "rationale": "Manual clicking across 40 orgs is slow, inconsistent, and doesn't re-run cleanly as the estate grows." },
+            { "id": "c", "text": "Write a one-off note asking each org owner to mirror your settings", "verdict": "wrong", "rationale": "Delegating to 40 owners guarantees drift; scale governance is exactly what the API automates." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-config-concept", "r-establish-coverage", "r-apply-custom", "r-rest-configs"]
+    },
+    {
+      "id": "s-d6-roles",
+      "domainIds": ["d6-administration"],
+      "title": "Get the roles and policies right",
+      "tagline": "Who can do what, and how enterprise policy interacts with it.",
+      "context": "Your org is standing up a dedicated security function. You must delegate security work without over-granting, decide who may dismiss alerts, and reconcile a new enterprise-wide Advanced Security policy with day-to-day work — all without breaking least privilege.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "A 4-person security team needs to manage scanning and triage alerts across every repo, but must not touch billing, membership, or repo code. What do you grant?",
+          "choices": [
+            { "id": "a", "text": "Assign the security manager role to the team", "verdict": "best", "rationale": "Security manager gives org-wide security settings plus write on all security alerts, with no non-security admin power or code write — and it can be assigned to a team.", "next": "st2" },
+            { "id": "b", "text": "Make all four organization owners", "verdict": "wrong", "rationale": "Owner grants billing, membership, and everything else — a serious least-privilege violation for a security-only mandate." },
+            { "id": "c", "text": "Grant the team admin on every repository individually", "verdict": "viable", "rationale": "It can approximate alert access but adds code-admin power they shouldn't have and doesn't cleanly cover org-level security settings." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Leadership wants developers to see and fix alerts but wants dismissals limited to the security team. How do you approach it?",
+          "choices": [
+            { "id": "a", "text": "Use the security features' controls — e.g. \"prevent direct alert dismissals\" / delegated bypass — and reserve dismissal-capable permissions for the security team", "verdict": "best", "rationale": "Who may dismiss is a separate, configurable lever from who may view; configurations and delegated-bypass settings let you keep dismissal with the security team.", "next": "st3" },
+            { "id": "b", "text": "Turn scanning off for developers so they can't dismiss anything", "verdict": "wrong", "rationale": "That also stops them seeing and fixing findings — the opposite of what leadership asked for." },
+            { "id": "c", "text": "Give every developer full alert-management permissions and trust them not to dismiss", "verdict": "wrong", "rationale": "An honour system isn't a control; dismissal permission should be scoped, not assumed." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The enterprise owner sets Advanced Security policy to \"Disallow for all organizations.\" Your security manager still needs to enable Secret Protection on a new regulated repo. What's true?",
+          "choices": [
+            { "id": "a", "text": "They can — owners and security managers can always enable security features regardless of the policy, which restricts repository admins", "verdict": "best", "rationale": "The disallow policy gates repository administrators; organization owners and security managers can always enable features regardless of how it's set." },
+            { "id": "b", "text": "They can't — \"disallow for all organizations\" blocks absolutely everyone", "verdict": "wrong", "rationale": "It doesn't block owners or security managers — only repo admins are restricted." },
+            { "id": "c", "text": "They must ask the enterprise owner to flip the whole policy to \"allow\" first", "verdict": "viable", "rationale": "Flipping the policy would work but is unnecessary and over-broad — the security manager already has the standing to enable it." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-security-managers", "r-custom-roles", "r-enterprise-policy"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d6-config",
+      "domainId": "d6-administration",
+      "title": "Build, apply, default, and enforce a security configuration",
+      "goal": "Feel the difference between reach (default) and lock (enforce) on a real org.",
+      "steps": "## What you'll do\n\nUsing an organization you own (a free personal org works for the public-repo path), create a configuration and observe default vs enforce behavior.\n\n1. **Open configurations.** Go to your org's **Settings → Advanced Security → Configurations** (formerly \"Code security and analysis\"). Note the **GitHub-recommended** configuration listed there.\n2. **Create a custom configuration.** Click **New configuration**. Set, for example: Dependency graph = **Enabled**, Secret scanning = **Enabled**, Push protection = **Enabled**, Code scanning default setup = **Not set**. Save it.\n3. **Apply it.** On the configuration, choose **Apply to** and pick a repository (or a filtered set). Confirm the repo shows the configuration as applied.\n4. **Set a default.** Edit the configuration and choose **Use as default for newly created repositories → All repositories**. Create a brand-new repo and confirm it inherits the configuration — then confirm an *existing* repo you didn't apply it to did **not** change.\n5. **Enforce it.** Set the configuration to **Enforce**. On an applied repo, open its security settings and confirm you can't turn off the **Enabled** features — but you *can* still change the **Not set** one (code scanning default setup).\n\n## Why it matters\n\nThe exam's core administration instinct is that **default = reach** and **enforce = lock**, and that **Not-set features aren't enforced**. Doing all four back to back makes each distinction concrete.",
+      "checklist": [
+        "You located the GitHub-recommended configuration",
+        "You created a custom configuration with a mix of Enabled and Not-set features",
+        "A newly created repo inherited the default; an existing un-applied repo did not",
+        "Under enforcement, Enabled features were locked but the Not-set feature was still changeable"
+      ]
+    },
+    {
+      "id": "lab-d6-api",
+      "domainId": "d6-administration",
+      "title": "Drive configurations with the REST API",
+      "goal": "Create, attach, and default a configuration entirely from the command line.",
+      "steps": "## Setup\n\nUse the `gh` CLI (authenticated to an org you administer) or `curl` with a token that has the right scope. Replace `YOUR_ORG` throughout.\n\n1. **List existing configurations:**\n\n```\ngh api /orgs/YOUR_ORG/code-security/configurations\n```\n\n2. **Create a configuration** (Secret Protection + dependency graph on, code scanning off):\n\n```\ngh api --method POST /orgs/YOUR_ORG/code-security/configurations \\\n  -f name='api-baseline' \\\n  -f description='Created from the D6 lab' \\\n  -f advanced_security='enabled' \\\n  -f secret_scanning='enabled' \\\n  -f secret_scanning_push_protection='enabled' \\\n  -f dependency_graph='enabled' \\\n  -f code_scanning_default_setup='not_set'\n```\n\nNote the `id` in the response.\n\n3. **Attach it** to all repos that don't already have a configuration (safe, non-clobbering scope):\n\n```\ngh api --method POST /orgs/YOUR_ORG/code-security/configurations/CONFIG_ID/attach \\\n  -f scope='all_without_configurations'\n```\n\n4. **Set it as the default** for newly created private and internal repos:\n\n```\ngh api --method PUT /orgs/YOUR_ORG/code-security/configurations/CONFIG_ID/defaults \\\n  -f default_for_new_repos='private_and_internal'\n```\n\n5. **Verify** on one repo which configuration now governs it:\n\n```\ngh api /repos/YOUR_ORG/SOME_REPO/code-security-configuration\n```\n\n## Why it matters\n\nThe API is the answer to \"how do you do this across hundreds of repos and dozens of orgs.\" Committing the `scope` vocabulary (`all_without_configurations`) and the `default_for_new_repos` vocabulary (`private_and_internal`) to muscle memory is directly exam-relevant.",
+      "checklist": [
+        "You listed configurations via GET",
+        "You created a configuration via POST and captured its id",
+        "You attached it with scope all_without_configurations",
+        "You set default_for_new_repos and verified the governing configuration on a repo"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-study-guide",
+      "title": "GH-500 study guide — skills measured (as of July 2026)",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-500",
+      "kind": "official-doc",
+      "annotation": "The authoritative D6 task list: enable suites at enterprise/org/repo, defaults & inheritance, admin/security-manager/developer roles, Cloud vs Server, and APIs for scale. Read the 'GitHub Security suites administration (10–15%)' section verbatim — it is the blueprint this domain is written to.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-config-concept",
+      "title": "Security configurations (concept)",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/security-at-scale/security-configurations",
+      "kind": "official-doc",
+      "annotation": "Extract: what a configuration bundles (Not set/Enabled/Disabled per feature), the GitHub-recommended vs custom split, the 'Use as default for newly created repositories' scopes (None/Public/Private and internal/All), the 'created in your organization' rule, and the exact enforcement wording.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-apply-custom",
+      "title": "Applying a custom security configuration",
+      "url": "https://docs.github.com/en/code-security/how-tos/secure-at-scale/configure-organization-security/establish-complete-coverage/applying-a-custom-security-configuration",
+      "kind": "official-doc",
+      "annotation": "Extract the enforcement rule verbatim ('repository owners are blocked from changing features that have been enabled or disabled in the configuration, but features that are not set aren't enforced') and the apply/attach flow via Apply configuration.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-establish-coverage",
+      "title": "Establish complete coverage (secure at scale)",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/code-security/how-tos/secure-at-scale/configure-organization-security/establish-complete-coverage",
+      "kind": "official-doc",
+      "annotation": "Extract the recommended rollout order (apply the GitHub-recommended configuration, evaluate findings, then customize) and the create/apply/global-settings workflow for securing an org at scale.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-manage-coverage",
+      "title": "Manage your coverage (secure at scale)",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/code-security/how-tos/secure-at-scale/configure-organization-security/manage-your-coverage",
+      "kind": "official-doc",
+      "annotation": "Extract how to edit, detach, and delete configurations and manage which repos are included — including detaching a repo to return it to individual management.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-about-enterprise-config",
+      "title": "About security configurations (enterprise)",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/admin/managing-code-security/securing-your-enterprise/about-security-configurations",
+      "kind": "official-doc",
+      "annotation": "Extract that configurations apply 'to any repository within an organization or enterprise', the two products (Secret Protection = secret scanning + push protection; Code Security = code scanning + premium Dependabot + dependency review), and the four ways a repo's configuration status can change (repo-admin override on an unenforced config, admin detach, enforcement enabled, failed attach).",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-security-managers",
+      "title": "Managing security managers in your organization",
+      "url": "https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization",
+      "kind": "official-doc",
+      "annotation": "Extract the four verbatim security-manager permissions (read all repos; write all security alerts; configure security features at org level incl enable/disable GHAS; configure at repo level incl enable/disable GHAS), that only owners assign it, and that it goes to a member or team.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-custom-roles",
+      "title": "About custom organization roles",
+      "url": "https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/about-custom-organization-roles",
+      "kind": "official-doc",
+      "annotation": "Extract the exact repo-level security permission names ('View secret scanning alerts', 'Dismiss, reopen, or assign secret scanning alerts', 'View code scanning alerts', 'View Dependabot alerts', etc.) used to compose a narrower security role than the built-in security manager.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-enterprise-policy",
+      "title": "Enforcing policies for code security and analysis for your enterprise",
+      "url": "https://docs.github.com/en/enterprise-cloud@latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-code-security-and-analysis-for-your-enterprise",
+      "kind": "official-doc",
+      "annotation": "Extract the policy options ('Allow for all organizations'/'Disallow for all organizations'/'Allow for selected organizations'), that disallow prevents new enablement but doesn't disable already-enabled repos, and that owners and security managers can always enable regardless of the policy.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-rest-configs",
+      "title": "REST API endpoints for code security configurations",
+      "url": "https://docs.github.com/en/rest/code-security/configurations",
+      "kind": "official-doc",
+      "annotation": "Extract org and enterprise endpoints (create/list/get/update/delete, /attach with scope all|all_without_configurations|public|private_or_internal|selected, /defaults with default_for_new_repos all|none|public|private_and_internal), the feature keys (advanced_security incl code_security/secret_protection, secret_scanning_push_protection, etc.), and the enterprise-admin + admin:enterprise auth requirement.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-about-ghas",
+      "title": "About GitHub Advanced Security",
+      "url": "https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security",
+      "kind": "official-doc",
+      "annotation": "Extract the two standalone products and their contents, that code/secret scanning are free on public repos but need a purchased product on private/internal, the Team-or-Enterprise plan requirement, and the Server note (features visible only if installed by a site admin and licensed; Dependabot security updates and code scanning default setup need Actions installed).",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-server-config",
+      "title": "Security configurations (GitHub Enterprise Server)",
+      "url": "https://docs.github.com/en/enterprise-server@3.16/code-security/concepts/security-at-scale/security-configurations",
+      "kind": "official-doc",
+      "annotation": "Extract the Enterprise Server gating: 'only features installed by a site administrator ... will appear in the UI', GHAS features visible only with a license, and that Dependabot security updates and code scanning default setup require GitHub Actions installed on the instance.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-billing",
+      "title": "GitHub Advanced Security license billing",
+      "url": "https://docs.github.com/en/billing/concepts/product-billing/github-advanced-security",
+      "kind": "official-doc",
+      "annotation": "Extract the per-committer model (each active committer to ≥1 repo with the product enabled uses one license), standalone Secret Protection / Code Security / GHAS billing, and the metered vs volume/subscription options for Enterprise Cloud.",
+      "domainIds": ["d6-administration"]
+    },
+    {
+      "id": "r-mslearn-path",
+      "title": "MS Learn — GitHub Advanced Security Part 1 (learning path)",
+      "url": "https://learn.microsoft.com/en-us/training/paths/github-advanced-security/",
+      "kind": "learning-path",
+      "annotation": "Four-module GHAS foundation path (intro to GHAS, Dependabot, secret scanning, code scanning). Use for the administration framing and hands-on enablement context that underpins D6.",
+      "domainIds": ["d6-administration"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d6-1",
+      "title": "D6 · Scope & configurations — enterprise/org/repo, defaults & enforcement",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d6-administration"],
+      "sourceNotebook": "gh-500 / d6 / scope-and-configurations"
+    },
+    {
+      "id": "v-d6-2",
+      "title": "D6 · Roles, Cloud-vs-Server & the configurations API",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d6-administration"],
+      "sourceNotebook": "gh-500 / d6 / roles-cloud-server-api"
+    }
+  ]
+}

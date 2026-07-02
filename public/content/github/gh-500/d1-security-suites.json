@@ -1,0 +1,766 @@
+{
+  "id": "d1-security-suites",
+  "order": 1,
+  "code": "D1",
+  "name": "Describe GitHub Security suites, features & ecosystem",
+  "weight": 0.18,
+  "tagline": "Three suites, one platform: Secret Protection, Code Security, and Supply Chain Security — where each runs in the SDLC, what's free on public repos vs. what you buy, and how Security Overview ties it all together.",
+  "overview": "The framing domain for GH-500 (15–20%). It tests whether you can *place* every GitHub security feature: which of the three suites owns it, where in the software development lifecycle it acts (prevention-first at the keyboard vs. gate-based in CI/PR), and whether it's free on public repositories or needs a paid Advanced Security product. The July-2026 refresh is a currency trap — GitHub Advanced Security is now sold as two standalone products, **GitHub Secret Protection** and **GitHub Code Security**, and the exam uses the current suite names: Secret Protection (formerly secret scanning), Supply Chain Security (formerly Dependabot/Dependency Review), and Code Security (formerly Code Scanning with CodeQL). You need Security Overview as the cross-cutting reporting surface, security campaigns as the scale-remediation play, and the end-to-end secure SDLC story.",
+  "objectives": [
+    "Contrast the three suites — Secret Protection, Code Security, and Supply Chain Security — and name which feature lives in which, using current July-2026 names (with legacy names mapped once).",
+    "Differentiate feature availability for public repositories vs. private/enterprise, and know that GHAS is now two standalone products (Secret Protection, Code Security) you buy separately.",
+    "Explain what Security Overview provides — detection/remediation/prevention trends, risk and coverage views, and the free secret risk assessment — and at which levels it operates.",
+    "Compare prevention-first controls (push protection at commit/push) against gate-based controls (dependency review and code scanning on pull requests) and place each across the secure SDLC.",
+    "Explain security campaigns, delegated bypass, and the developer/security/admin division of responsibility for alerts and remediation."
+  ],
+  "lessons": [
+    {
+      "id": "l1-three-suites",
+      "title": "The three suites and how they relate",
+      "estMinutes": 16,
+      "objective": "Name the three GitHub security suites, place every headline feature in the right one, and use the current July-2026 names.",
+      "body": "## One platform, three suites\n\nGitHub groups its security capabilities into **three suites**. On GH-500 you must be able to hand a feature to the right one:\n\n- **Secret Protection** — stops credentials leaking. Owns **secret scanning** (alerts), **push protection**, **Copilot secret scanning**, **custom patterns**, and **delegated bypass**.\n- **Code Security** — finds vulnerabilities and weaknesses in *your own* code. Owns **code scanning** (with **CodeQL**), the **CodeQL CLI**, **Copilot Autofix**, **dependency review**, and **custom auto-triage rules for Dependabot**.\n- **Supply Chain Security** — manages risk from your *dependencies*. Covers the **dependency graph**, **Dependabot alerts**, **Dependabot security & version updates**, **SBOM export**, and the **GitHub Advisory Database**.\n\n> **Exam tip:** the single most common D1 distractor is putting a feature under the wrong suite. Anchor on the *object* each suite protects: **secrets** (Secret Protection), **your code** (Code Security), **your dependencies** (Supply Chain Security). Note the deliberate overlap — **dependency review** and **custom auto-triage rules** are supply-chain *tasks* but ship inside the **Code Security** product; and **security campaigns** and **Security Overview** appear in *both* paid products.\n\n## The July-2026 rename (currency trap)\n\nThe exam refreshed in July 2026 and now uses **current** names as primary, with the old name as a parenthetical. Teach the new name; know the old one only to map it:\n\n| Current suite / feature | Formerly |\n|---|---|\n| **Secret Protection** | secret scanning |\n| **Supply Chain Security** | Dependabot / Dependency Review |\n| **Code Security** | Code Scanning with CodeQL |\n\nIf an answer option leans on a legacy name as the *product* (\"buy secret scanning\", \"the Dependabot suite\"), treat it with suspicion — the current product names are **GitHub Secret Protection** and **GitHub Code Security**.\n\n## GHAS is now two products, not one bundle\n\nThe biggest structural change: **\"GitHub has two standalone Advanced Security products\"** — **GitHub Secret Protection** and **GitHub Code Security** — that you purchase *separately*. \"GitHub Advanced Security\" (GHAS) survives as an umbrella term, but there is no longer a single SKU that turns everything on. To buy either product you must be on a **GitHub Team or GitHub Enterprise** plan.\n\nCrucially, the **Supply Chain Security** basics are **not** one of those paid products — the **dependency graph, Dependabot alerts, and Dependabot updates are included in all plans**. Only the *gate-based* and *scale* supply-chain features (**dependency review**, **custom auto-triage rules**) sit inside the paid **Code Security** product.\n\n## Why the exam cares\n\nD1 is the map the rest of the exam is drawn on. If you can instantly say *\"that's Code Security, it runs on the PR, it's free on public repos but paid on private,\"* the scenario questions in D2–D6 fall out easily. Get the suite-ownership and the free-vs-paid split wrong here and you'll compound the error everywhere else.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-1",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Push protection and custom secret patterns belong to which suite?",
+          "options": [
+            { "id": "a", "text": "Secret Protection", "correct": true },
+            { "id": "b", "text": "Code Security" },
+            { "id": "c", "text": "Supply Chain Security" },
+            { "id": "d", "text": "Security Overview" }
+          ],
+          "explanation": "Both stop **credentials** leaking, so they sit in **Secret Protection** alongside secret scanning alerts, Copilot secret scanning, and delegated bypass. Code Security owns code scanning/CodeQL; Supply Chain Security owns dependencies; Security Overview is a reporting surface, not a suite that owns detection features.",
+          "sourceRefs": ["r-ghas-overview", "r-features"]
+        },
+        {
+          "id": "kc-d1-2",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A teammate says 'dependency review is part of the free Supply Chain Security basics, like the dependency graph.' What's the correction?",
+          "options": [
+            { "id": "a", "text": "Dependency review is a supply-chain task but ships inside the paid Code Security product; the free basics are the dependency graph, Dependabot alerts, and Dependabot updates", "correct": true },
+            { "id": "b", "text": "Dependency review is part of Secret Protection, not Supply Chain Security" },
+            { "id": "c", "text": "Nothing — dependency review is free on all plans just like the dependency graph" },
+            { "id": "d", "text": "Dependency review no longer exists after the July-2026 rename" }
+          ],
+          "explanation": "GitHub lists **dependency graph, Dependabot alerts, and Dependabot updates** as **included in all plans**, but **dependency review** (the pre-merge gate) is a **Code Security** feature you pay for. It's not a Secret Protection feature, it isn't free, and it very much still exists — it's just packaged under Code Security.",
+          "sourceRefs": ["r-ghas-overview", "r-features"]
+        },
+        {
+          "id": "kc-d1-3",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "After July 2026, how is GitHub Advanced Security packaged?",
+          "options": [
+            { "id": "a", "text": "As two standalone products — GitHub Secret Protection and GitHub Code Security — purchased separately, on a Team or Enterprise plan", "correct": true },
+            { "id": "b", "text": "As a single GHAS bundle SKU that enables every security feature at once" },
+            { "id": "c", "text": "As three paid products, one per suite, including a paid Supply Chain Security product" },
+            { "id": "d", "text": "As a free add-on automatically enabled for every repository" }
+          ],
+          "explanation": "The current model is **two standalone products** — **GitHub Secret Protection** and **GitHub Code Security** — bought separately (Team or Enterprise required). There is no single all-in bundle SKU anymore, there is no separate *paid* Supply Chain Security product (its basics are free on all plans), and Advanced Security is not free-by-default on every repo.",
+          "sourceRefs": ["r-ghas-overview"]
+        }
+      ]
+    },
+    {
+      "id": "l2-availability",
+      "title": "Public repos vs. enterprise: what's free and what you buy",
+      "estMinutes": 15,
+      "objective": "Decide, for any feature, whether it's free (and where) or needs a paid Advanced Security product — the availability question the exam loves.",
+      "body": "## The one distinction that unlocks the domain\n\nGitHub's business model for security is simple to state and heavily tested: **security features that are paid on private repositories are free on public repositories.** Open source gets the tooling at no cost; you pay to run the same tooling on private/internal code.\n\n### Free on public repositories (no purchase)\n\n- **Code scanning** (including CodeQL) and the **CodeQL CLI**\n- **Secret scanning** alerts and **push protection**\n- **Copilot Autofix**\n\nOn a public repo you can turn these on without buying anything.\n\n### Free on *all* plans and repositories (public and private)\n\nThe Supply Chain Security basics are included everywhere — you don't need a public repo or a paid product:\n\n- **Dependency graph**\n- **Dependabot alerts** (and **Dependabot malware alerts** on supported versions)\n- **Dependabot security & version updates**\n- **SBOM export**, **GitHub Advisory Database**, **security policies**, and **repository rulesets**\n\n### Requires a paid Advanced Security product (mainly for private/internal)\n\n- **GitHub Secret Protection** → Copilot secret scanning, **custom patterns**, **delegated bypass** for push protection, plus secret scanning/push protection on **private** repos.\n- **GitHub Code Security** → **dependency review**, **custom auto-triage rules for Dependabot**, plus code scanning/CodeQL on **private** repos.\n- Both paid products unlock the richer **Security Overview** views and **security campaigns**.\n\n> **Exam tip:** watch for the trap that assumes *everything* is free, or that assumes you need to *buy* Dependabot. The clean rule: **detection basics for dependencies are free everywhere; deep code/secret analysis is free on public and paid on private; the advanced controls (custom patterns, delegated bypass, dependency review, auto-triage) are paid.**\n\n## Cloud vs. Server (a light touch here, heavier in D6)\n\nAvailability also differs between **GitHub Enterprise Cloud** and **GitHub Enterprise Server** — some features are Cloud-only or arrive on Server later. D1 only needs you to know the *dimension* exists (public-vs-enterprise and Cloud-vs-Server both gate features); D6 drills the specifics.\n\n## A worked example\n\nA startup open-sources a library and keeps its billing service private.\n\n- On the **public library**: enable code scanning, secret scanning, and push protection — **free**.\n- On the **private billing service**: the dependency graph and Dependabot alerts work **free**, but to run code scanning and secret scanning there, and to add custom patterns or a dependency-review gate, they must buy **GitHub Code Security** and/or **GitHub Secret Protection**.\n\nThat single example is the shape of a dozen possible exam questions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-4",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "On a public repository, which of these can you enable without purchasing anything?",
+          "options": [
+            { "id": "a", "text": "Code scanning, secret scanning, and push protection", "correct": true },
+            { "id": "b", "text": "Only the dependency graph — everything else is paid" },
+            { "id": "c", "text": "Nothing — all security features require a paid product" },
+            { "id": "d", "text": "Only features bought as part of GitHub Code Security" }
+          ],
+          "explanation": "Code scanning, secret scanning, and push protection are **free on public repositories**. The dependency graph is also free, but it's not the *only* free thing; and it's false that everything requires payment — the whole point is that public repos get the paid features for free.",
+          "sourceRefs": ["r-ghas-overview", "r-features"]
+        },
+        {
+          "id": "kc-d1-5",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team runs a PRIVATE repo and wants Dependabot alerts plus a pre-merge dependency-review gate. What must they buy, if anything?",
+          "options": [
+            { "id": "a", "text": "Nothing for Dependabot alerts (free on all plans), but GitHub Code Security for dependency review", "correct": true },
+            { "id": "b", "text": "GitHub Secret Protection for both" },
+            { "id": "c", "text": "Nothing — both are free on private repos" },
+            { "id": "d", "text": "A single GitHub Advanced Security bundle that includes both" }
+          ],
+          "explanation": "**Dependabot alerts** are included in **all plans**, so they cost nothing even on a private repo. **Dependency review** is a **Code Security** feature, so the gate requires purchasing **GitHub Code Security**. Secret Protection is the wrong product, dependency review isn't free on private repos, and there's no single all-in bundle SKU anymore.",
+          "sourceRefs": ["r-ghas-overview", "r-features", "r-dependabot-alerts"]
+        },
+        {
+          "id": "kc-d1-6",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which capability requires a paid Advanced Security product even on a public repository?",
+          "options": [
+            { "id": "a", "text": "Custom secret patterns and delegated bypass for push protection", "correct": true },
+            { "id": "b", "text": "Basic secret scanning alerts" },
+            { "id": "c", "text": "Push protection for individual pushes" },
+            { "id": "d", "text": "The dependency graph" }
+          ],
+          "explanation": "**Custom patterns** and **delegated bypass** are advanced **Secret Protection** features that need the paid product regardless of repo visibility. Basic secret scanning, push protection, and the dependency graph are all available for free on public repositories.",
+          "sourceRefs": ["r-ghas-overview", "r-push-protection"]
+        }
+      ]
+    },
+    {
+      "id": "l3-security-overview",
+      "title": "Security Overview: the cross-cutting reporting surface",
+      "estMinutes": 14,
+      "objective": "Explain what Security Overview shows, at which levels, and where the free secret risk assessment fits.",
+      "body": "## The one place to see everything\n\nEach suite raises its own alerts, but **Security Overview** is the cross-cutting surface that **rolls them up** so an organization can \"gain insights into the overall security landscape\" and \"identify repositories that require intervention.\" It answers *where is our risk, how well are we covered, and are we trending better?* — across secret scanning, Dependabot, and code scanning together.\n\n## The views you must recognise\n\n- **Overview dashboard** — trends in **Detection, Remediation, and Prevention** of security alerts over time.\n- **Risk view** — where your risk sits, from \"specific vulnerable dependencies, code weaknesses, or leaked secrets.\"\n- **Coverage view** — adoption of security features across repositories (who has what turned on).\n- **Enablement** — how quickly teams are adopting features.\n- **Alert-specific views** — Dependabot (prioritise critical vulnerabilities), Secret Scanning (which secret types are blocked by push protection), and CodeQL pull-request impact.\n- **Security campaigns** — coordinate and measure targeted remediation (covered in the next lesson).\n\n## Levels\n\nSecurity Overview operates at three levels: **repository** (default branches), **organization**, and **enterprise**. The higher you go, the more it's about coverage and governance across many repos.\n\n## Free vs. premium\n\nA **GitHub Team** organization gets a **free secret risk assessment** — \"a free report to scan the code in the organization for leaked secrets\" — to gauge exposure before buying anything. Organizations that purchase **GitHub Secret Protection or GitHub Code Security** unlock the **additional-insight views** beyond that basic assessment.\n\n> **Exam tip:** Security Overview is **reporting and coverage**, not a place that *detects* anything on its own — the suites detect; Overview aggregates. If an option claims Security Overview \"scans code\" or \"blocks pushes,\" it's conflating the reporting surface with the suites. The one thing it *does* offer standalone-free is the **secret risk assessment**.\n\n## Why the exam cares\n\nD1's task list explicitly includes \"Explain features and benefits of the Security Overview.\" Expect a question that hands you a goal — *\"see which repos haven't enabled code scanning\"* (Coverage), *\"show leaked-secret exposure before we buy\"* (free secret risk assessment), *\"track whether remediation is improving\"* (Overview dashboard trends) — and asks which view or surface answers it.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-7",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An org owner wants to see which repositories have NOT yet enabled code scanning. Which Security Overview view fits?",
+          "options": [
+            { "id": "a", "text": "The Coverage view (feature adoption across repositories)", "correct": true },
+            { "id": "b", "text": "The Risk view" },
+            { "id": "c", "text": "The Overview dashboard's remediation trend" },
+            { "id": "d", "text": "The free secret risk assessment" }
+          ],
+          "explanation": "Feature adoption — who has what turned on — is the **Coverage view**. The Risk view is about where vulnerabilities/secrets live, the remediation trend is about how fast alerts are being closed, and the secret risk assessment specifically measures leaked-secret exposure, not code-scanning coverage.",
+          "sourceRefs": ["r-security-overview"]
+        },
+        {
+          "id": "kc-d1-8",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which is a fair description of Security Overview?",
+          "options": [
+            { "id": "a", "text": "A reporting and coverage surface that aggregates alerts from the suites across repo, org, and enterprise levels", "correct": true },
+            { "id": "b", "text": "A scanning engine that detects secrets and vulnerabilities itself" },
+            { "id": "c", "text": "A CI system that blocks pull requests" },
+            { "id": "d", "text": "A billing page for Advanced Security products" }
+          ],
+          "explanation": "Security Overview **aggregates and reports** — the suites do the detecting and the CI gates do the blocking. It runs at repository, organization, and enterprise levels. It isn't itself a scanner, a CI gate, or a billing surface.",
+          "sourceRefs": ["r-security-overview"]
+        },
+        {
+          "id": "kc-d1-9",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A GitHub Team org hasn't bought any Advanced Security product yet but wants a sense of its leaked-secret exposure. What can it use?",
+          "options": [
+            { "id": "a", "text": "The free secret risk assessment in Security Overview", "correct": true },
+            { "id": "b", "text": "Nothing — every Security Overview view requires a paid product" },
+            { "id": "c", "text": "The full Risk view across all alert types, free" },
+            { "id": "d", "text": "Custom secret patterns, which are free on Team plans" }
+          ],
+          "explanation": "GitHub Team orgs get a **free secret risk assessment** — a report scanning the org's code for leaked secrets — without buying anything. The *additional-insight* views do require a paid product (so 'nothing is free' and 'the full Risk view is free' are both wrong), and custom patterns are a paid Secret Protection feature.",
+          "sourceRefs": ["r-security-overview", "r-ghas-overview"]
+        }
+      ]
+    },
+    {
+      "id": "l4-secure-sdlc",
+      "title": "Prevention-first vs. gate-based: the secure SDLC end to end",
+      "estMinutes": 16,
+      "objective": "Place each control across the secure SDLC and distinguish prevention-first (push-time) from gate-based (PR/CI-time) strategies, including campaigns for backlog.",
+      "body": "## Two philosophies, one lifecycle\n\nGitHub's security controls act at different moments, and D1 asks you to compare two strategies:\n\n- **Prevention-first** — stop the problem *at the source*, at the developer's keyboard. The flagship is **push protection**: rather than \"alerting you to credential leaks *after the fact*,\" it **blocks pushes that contain secrets *before* they reach your repository.** Nothing bad ever lands. This is the \"shift-left\" ideal — cheapest possible fix, because there's nothing to clean up.\n- **Gate-based** — let work proceed, then **inspect at a checkpoint** (usually the pull request or a CI run) and block or flag if it fails. **Dependency review** (flagging risky dependency changes on the PR) and **code scanning on pull requests** are gates: the code exists, and the gate decides whether it may advance.\n\nNeither is \"better\" — they compose. Prevention-first catches what it can at push time; gates catch what slips through, at merge time; and detection/alerting (secret scanning alerts, Dependabot alerts) provides the backstop for anything already in the codebase.\n\n## Mapping controls across the SDLC\n\n| Stage | Control | Suite | Strategy |\n|---|---|---|---|\n| Write / commit / **push** | **Push protection** | Secret Protection | Prevention-first |\n| Open **pull request** | **Dependency review** | Code Security | Gate-based |\n| PR / **CI run** | **Code scanning (CodeQL)** | Code Security | Gate-based |\n| Any time (backstop) | **Secret scanning alerts**, **Dependabot alerts** | Secret Protection / Supply Chain | Detection |\n| Backlog burn-down | **Security campaigns** | Code Security / Secret Protection | Coordinated remediation |\n\n> **Exam tip:** the D1 task statement is literally \"Compare prevention-first approaches vs. gate-based security strategies.\" Map the verb: **block at push = prevention-first**; **check on the PR/CI = gate-based**; **alert on existing code = detection**. And note the interplay the guide calls out between **Secret Protection and Code Security** — one guards secrets at the source, the other analyses code quality/vulnerabilities, and together they cover the developer inner loop end to end.\n\n## Campaigns: fixing what already got in\n\nPrevention and gates handle *new* work; they don't clear a **backlog of existing alerts**. That's what **security campaigns** are for — \"fix security alerts at scale\" by grouping related alerts and collaborating with developers to \"burn down your security backlog.\" A **code campaign** even auto-triggers **Copilot Autofix** to suggest resolutions; a **secret campaign** does not. Campaigns are a *response/remediation* strategy, not a detection one — remember that placement.\n\n## Putting it together: one repo, end to end\n\n1. A developer tries to push an AWS key → **push protection blocks it** (prevention-first). \n2. They open a PR bumping a library → **dependency review flags** that the new version has a known vuln (gate). \n3. CI runs **CodeQL code scanning** → a SQL-injection alert appears, with **Copilot Autofix** offering a patch (gate + remediation). \n4. Meanwhile **Dependabot** and **secret scanning alerts** watch the existing codebase (detection). \n5. A quarter's worth of accumulated code-scanning alerts gets cleared through a **security campaign** (scale remediation). \n6. Throughout, **Security Overview** shows the org whether detection, remediation, and prevention are trending the right way.\n\nThat is the secure SDLC the exam wants you to narrate — every suite, at the right moment, under the right strategy.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1-10",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which control is the clearest example of a PREVENTION-FIRST strategy?",
+          "options": [
+            { "id": "a", "text": "Push protection blocking a secret before it reaches the repository", "correct": true },
+            { "id": "b", "text": "Code scanning flagging a vulnerability on the pull request" },
+            { "id": "c", "text": "Dependency review reporting a risky dependency change at merge time" },
+            { "id": "d", "text": "A Dependabot alert on a dependency already in the codebase" }
+          ],
+          "explanation": "**Push protection** stops the problem *at the source* — the secret never lands — which is the definition of prevention-first. Code scanning and dependency review are **gate-based** (they check at the PR/CI checkpoint), and a Dependabot alert on existing code is **detection**, not prevention.",
+          "sourceRefs": ["r-push-protection", "r-features"]
+        },
+        {
+          "id": "kc-d1-11",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You have hundreds of pre-existing code scanning alerts spread across many repos and need to drive them down collaboratively. Which GitHub capability is designed for that?",
+          "options": [
+            { "id": "a", "text": "A security campaign", "correct": true },
+            { "id": "b", "text": "Push protection" },
+            { "id": "c", "text": "The dependency graph" },
+            { "id": "d", "text": "A secret risk assessment" }
+          ],
+          "explanation": "Clearing a **backlog of existing alerts at scale** is exactly what a **security campaign** does — group related alerts, assign a point of contact, and burn them down (with Copilot Autofix on code campaigns). Push protection prevents *new* secrets, the dependency graph inventories dependencies, and a secret risk assessment reports leaked-secret exposure — none drives bulk remediation.",
+          "sourceRefs": ["r-campaigns", "r-security-overview"]
+        },
+        {
+          "id": "kc-d1-12",
+          "domainId": "d1-security-suites",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "How do Secret Protection and Code Security 'interplay' across the developer inner loop, per the exam's framing?",
+          "options": [
+            { "id": "a", "text": "Secret Protection guards credentials at the source (e.g. push protection) while Code Security analyses the code itself for vulnerabilities; together they cover commit-to-merge", "correct": true },
+            { "id": "b", "text": "They are the same product under two names after the July-2026 rename" },
+            { "id": "c", "text": "Code Security handles secrets and Secret Protection handles code — the names are reversed" },
+            { "id": "d", "text": "Only one can be enabled per repository, so they never operate together" }
+          ],
+          "explanation": "The two are complementary: **Secret Protection** keeps secrets out (prevention at push), **Code Security** finds weaknesses in the code (scanning, often at the PR/CI gate). They're distinct **standalone products** — not the same thing, not name-swapped — and can absolutely run on the same repo at once.",
+          "sourceRefs": ["r-ghas-overview", "r-features"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d1-1",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which GitHub security suite owns code scanning with CodeQL?",
+      "options": [
+        { "id": "a", "text": "Code Security", "correct": true },
+        { "id": "b", "text": "Secret Protection" },
+        { "id": "c", "text": "Supply Chain Security" },
+        { "id": "d", "text": "Security Overview" }
+      ],
+      "explanation": "**Code Security** (formerly 'Code Scanning with CodeQL') owns code scanning, the CodeQL CLI, and Copilot Autofix. Secret Protection owns secrets, Supply Chain Security owns dependencies, and Security Overview is a reporting surface, not a suite.",
+      "sourceRefs": ["r-ghas-overview", "r-features"]
+    },
+    {
+      "id": "q-d1-2",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "'Secret Protection' is the current product name for what was formerly called:",
+      "options": [
+        { "id": "a", "text": "Secret scanning", "correct": true },
+        { "id": "b", "text": "Dependabot" },
+        { "id": "c", "text": "Code scanning" },
+        { "id": "d", "text": "Dependency review" }
+      ],
+      "explanation": "The July-2026 refresh renamed **secret scanning** to **Secret Protection** as the product/suite name. Dependabot/Dependency Review became **Supply Chain Security**, and code scanning with CodeQL became **Code Security** — those are the other renames, not this one.",
+      "sourceRefs": ["r-studyguide", "r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-3",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "After the July-2026 change, which statement about buying GitHub Advanced Security is correct?",
+      "options": [
+        { "id": "a", "text": "You buy two standalone products — GitHub Secret Protection and GitHub Code Security — separately", "correct": true },
+        { "id": "b", "text": "You buy a single GHAS bundle that enables all security features" },
+        { "id": "c", "text": "You buy a separate paid Supply Chain Security product for the dependency graph" },
+        { "id": "d", "text": "Advanced Security is free on all private repositories" }
+      ],
+      "explanation": "GitHub now sells **two standalone products** — **Secret Protection** and **Code Security** — purchased separately. There's no single all-in bundle SKU; there's no paid Supply Chain Security product (its basics are free on all plans); and Advanced Security features are paid on private repos, not free.",
+      "sourceRefs": ["r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-4",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which capabilities are free on public repositories without purchasing an Advanced Security product?",
+      "options": [
+        { "id": "a", "text": "Code scanning, secret scanning, and push protection", "correct": true },
+        { "id": "b", "text": "Custom secret patterns and delegated bypass" },
+        { "id": "c", "text": "Dependency review and custom auto-triage rules" },
+        { "id": "d", "text": "Nothing — public repos still require payment" }
+      ],
+      "explanation": "**Code scanning, secret scanning, and push protection** are free on public repositories. Custom patterns, delegated bypass, dependency review, and custom auto-triage are **paid** features in Secret Protection or Code Security, and it's false that public repos require payment for the core scanners.",
+      "sourceRefs": ["r-ghas-overview", "r-features"]
+    },
+    {
+      "id": "q-d1-5",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which supply-chain features are included in ALL GitHub plans, even on private repositories, at no extra cost?",
+      "options": [
+        { "id": "a", "text": "Dependency graph, Dependabot alerts, and Dependabot updates", "correct": true },
+        { "id": "b", "text": "Dependency review and dependency graph" },
+        { "id": "c", "text": "Custom auto-triage rules for Dependabot" },
+        { "id": "d", "text": "Security campaigns for supply-chain alerts" }
+      ],
+      "explanation": "GitHub lists **dependency graph, Dependabot alerts, and Dependabot updates** as included in all plans. **Dependency review** and **custom auto-triage rules** are **Code Security** (paid) features, and **security campaigns** require a paid product too.",
+      "sourceRefs": ["r-ghas-overview", "r-dependabot-alerts"]
+    },
+    {
+      "id": "q-d1-6",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A repository needs secret scanning and push protection on a PRIVATE codebase. What's required?",
+      "options": [
+        { "id": "a", "text": "Purchase GitHub Secret Protection", "correct": true },
+        { "id": "b", "text": "Purchase GitHub Code Security" },
+        { "id": "c", "text": "Nothing — these are free on all repositories" },
+        { "id": "d", "text": "Make the repository public first; there is no paid option" }
+      ],
+      "explanation": "On private repos, secret scanning and push protection require **GitHub Secret Protection**. Code Security is the wrong product (it covers code scanning/dependency review), they aren't free on private repos, and you don't have to make the repo public — buying Secret Protection is the intended path.",
+      "sourceRefs": ["r-ghas-overview", "r-push-protection"]
+    },
+    {
+      "id": "q-d1-7",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which control is prevention-first rather than gate-based?",
+      "options": [
+        { "id": "a", "text": "Push protection blocking a secret before it reaches the repository", "correct": true },
+        { "id": "b", "text": "Dependency review on a pull request" },
+        { "id": "c", "text": "Code scanning running in CI on a pull request" },
+        { "id": "d", "text": "A Dependabot alert raised on an existing dependency" }
+      ],
+      "explanation": "**Push protection** stops the secret *at the source* before it lands — prevention-first. Dependency review and PR-time code scanning are **gates** (checkpoints at merge/CI), and a Dependabot alert on existing code is **detection**.",
+      "sourceRefs": ["r-push-protection", "r-features"]
+    },
+    {
+      "id": "q-d1-8",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is the best description of a gate-based security control?",
+      "options": [
+        { "id": "a", "text": "Dependency review flagging a risky dependency change on a pull request before merge", "correct": true },
+        { "id": "b", "text": "Push protection rejecting a commit that contains a token" },
+        { "id": "c", "text": "A secret risk assessment report" },
+        { "id": "d", "text": "The dependency graph listing installed packages" }
+      ],
+      "explanation": "A **gate** checks at a checkpoint and can block advancement — **dependency review on the PR** is exactly that. Push protection is prevention-first (blocks at push, not at a review gate), a risk assessment is reporting, and the dependency graph is an inventory.",
+      "sourceRefs": ["r-features", "r-security-overview"]
+    },
+    {
+      "id": "q-d1-9",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does Security Overview primarily provide?",
+      "options": [
+        { "id": "a", "text": "Cross-cutting reporting on detection, remediation, prevention, risk, and coverage across repositories", "correct": true },
+        { "id": "b", "text": "A scanning engine that finds vulnerabilities itself" },
+        { "id": "c", "text": "A pull-request merge gate" },
+        { "id": "d", "text": "Automated pull requests to update dependencies" }
+      ],
+      "explanation": "Security Overview **aggregates and reports** — trends, risk, and coverage — across the suites. It doesn't scan (the suites do), it isn't a merge gate (dependency review/code scanning are), and it doesn't open update PRs (that's Dependabot updates).",
+      "sourceRefs": ["r-security-overview"]
+    },
+    {
+      "id": "q-d1-10",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which Security Overview capability is available to a GitHub Team organization WITHOUT purchasing an Advanced Security product?",
+      "options": [
+        { "id": "a", "text": "A free secret risk assessment of the organization's code", "correct": true },
+        { "id": "b", "text": "The full Risk view across all alert types" },
+        { "id": "c", "text": "Security campaigns" },
+        { "id": "d", "text": "Custom auto-triage rules for Dependabot" }
+      ],
+      "explanation": "Team orgs get a **free secret risk assessment** to gauge leaked-secret exposure. The richer views (full Risk view), **security campaigns**, and **custom auto-triage rules** all require a paid product.",
+      "sourceRefs": ["r-security-overview", "r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-11",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What problem do security campaigns solve?",
+      "options": [
+        { "id": "a", "text": "Coordinated remediation of existing alerts at scale — burning down a security backlog with developers", "correct": true },
+        { "id": "b", "text": "Detecting new secrets as they are pushed" },
+        { "id": "c", "text": "Generating the SBOM for a repository" },
+        { "id": "d", "text": "Enforcing branch protection rules" }
+      ],
+      "explanation": "Security campaigns group **existing** alerts and drive **collaborative remediation at scale** (backlog burn-down). Detection of new secrets is push protection/secret scanning, SBOMs come from the dependency graph, and branch protection is a repository ruleset — none is a campaign's job.",
+      "sourceRefs": ["r-campaigns"]
+    },
+    {
+      "id": "q-d1-12",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In a security campaign, which alert type has Copilot Autofix automatically triggered to suggest a resolution?",
+      "options": [
+        { "id": "a", "text": "Code scanning alerts (a 'code campaign')", "correct": true },
+        { "id": "b", "text": "Secret scanning alerts (a 'secret campaign')" },
+        { "id": "c", "text": "Dependabot version-update pull requests" },
+        { "id": "d", "text": "Every alert type in any campaign" }
+      ],
+      "explanation": "For **code campaigns**, **Copilot Autofix is automatically triggered** to suggest a fix. **Secret campaigns** have no such automatic remediation. Version-update PRs aren't campaign alerts, and autofix isn't attached to every alert type.",
+      "sourceRefs": ["r-campaigns"]
+    },
+    {
+      "id": "q-d1-13",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "What is 'delegated bypass' for push protection?",
+      "options": [
+        { "id": "a", "text": "A control where designated actors can bypass push protection and review/approve bypass requests from others, rather than anyone with write access bypassing freely", "correct": true },
+        { "id": "b", "text": "A feature that permanently disables push protection for a repository" },
+        { "id": "c", "text": "A way to auto-merge pull requests that contain secrets" },
+        { "id": "d", "text": "The default behavior on all public repositories" }
+      ],
+      "explanation": "**Delegated bypass** routes bypasses through **designated approvers** who can grant or deny requests — tightening control versus the default where anyone with write access can bypass with a reason. It doesn't disable push protection, doesn't auto-merge secret-bearing PRs, and isn't the default (it's a paid Secret Protection control you configure).",
+      "sourceRefs": ["r-push-protection", "r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-14",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "By default (without delegated bypass configured), who can bypass push protection, and what happens when they do?",
+      "options": [
+        { "id": "a", "text": "Anyone with write access can bypass by giving a reason; GitHub records the event, may open an alert, and notifies admins/security managers", "correct": true },
+        { "id": "b", "text": "No one can ever bypass push protection once it is enabled" },
+        { "id": "c", "text": "Only enterprise owners can bypass, and no record is kept" },
+        { "id": "d", "text": "Anyone can bypass silently with no alert or audit trail" }
+      ],
+      "explanation": "By default **anyone with write access** can bypass by specifying a reason; GitHub then **logs the event, creates an alert (open or closed depending on the reason), and notifies repository admins and security managers**. Bypass is possible (so 'no one can' is wrong), it isn't enterprise-owner-only, and it is never silent — the audit trail is the point.",
+      "sourceRefs": ["r-push-protection"]
+    },
+    {
+      "id": "q-d1-15",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In what format does GitHub export a repository's SBOM?",
+      "options": [
+        { "id": "a", "text": "SPDX (the industry-standard format, version 2.3)", "correct": true },
+        { "id": "b", "text": "CycloneDX only" },
+        { "id": "c", "text": "A proprietary GitHub-only binary format" },
+        { "id": "d", "text": "SARIF" }
+      ],
+      "explanation": "GitHub exports the SBOM in the **industry-standard SPDX** format (v2.3), built from the dependency graph. It's not a proprietary format, and **SARIF** is the format for *code scanning* results, not SBOMs.",
+      "sourceRefs": ["r-sbom"]
+    },
+    {
+      "id": "q-d1-16",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which metric does GitHub surface to help prioritize which Dependabot alerts are most likely to be exploited?",
+      "options": [
+        { "id": "a", "text": "EPSS (Exploit Prediction Scoring System) percentage", "correct": true },
+        { "id": "b", "text": "The SPDX license identifier" },
+        { "id": "c", "text": "The number of GitHub stars on the dependency" },
+        { "id": "d", "text": "The size of the package in kilobytes" }
+      ],
+      "explanation": "**EPSS**, from FIRST, gives a probability (0–1) that a vulnerability will be exploited; GitHub exposes an `epss_percentage` metric/filter so teams can prioritize likely-exploited alerts. License IDs, stars, and package size aren't exploit-likelihood signals.",
+      "sourceRefs": ["r-dependabot-metrics", "r-dependabot-alerts"]
+    },
+    {
+      "id": "q-d1-17",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A 'security configuration' in GitHub is best described as:",
+      "options": [
+        { "id": "a", "text": "A collection of security-feature enablement settings you can apply to repositories across an organization", "correct": true },
+        { "id": "b", "text": "A single on/off switch for all of Advanced Security" },
+        { "id": "c", "text": "A CodeQL query pack" },
+        { "id": "d", "text": "A billing plan for private repositories" }
+      ],
+      "explanation": "A **security configuration** is a reusable **bundle of enablement settings** (which features are on) applied to repos; the **GitHub-recommended** one turns on Code Security and Secret Protection features. It's not a single global switch, not a CodeQL query pack, and not a billing plan.",
+      "sourceRefs": ["r-configurations", "r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-18",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing of task → suite/surface is correct?",
+      "options": [
+        { "id": "a", "text": "Block a hardcoded token at push time → Secret Protection (push protection)", "correct": true },
+        { "id": "b", "text": "Find a SQL-injection flaw in your own code → Supply Chain Security" },
+        { "id": "c", "text": "Inventory your dependencies as an SBOM → Secret Protection" },
+        { "id": "d", "text": "See which repos enabled code scanning → a Dependabot alert" }
+      ],
+      "explanation": "Blocking a token at push is **Secret Protection / push protection**. The others are mis-mapped: a SQL-injection flaw in your code is **Code Security**, the SBOM is **Supply Chain Security** (dependency graph), and feature-adoption reporting is **Security Overview's Coverage view** — not a Dependabot alert.",
+      "sourceRefs": ["r-features", "r-security-overview", "r-sbom"]
+    },
+    {
+      "id": "q-d1-19",
+      "domainId": "d1-security-suites",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about the July-2026 GitHub security suites are correct? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "GitHub Secret Protection and GitHub Code Security are two standalone products bought separately", "correct": true },
+        { "id": "b", "text": "The dependency graph, Dependabot alerts, and Dependabot updates are free on all plans", "correct": true },
+        { "id": "c", "text": "Security Overview aggregates alerts across the suites and is not itself a scanner", "correct": true },
+        { "id": "d", "text": "'Supply Chain Security' is a paid standalone product you must purchase like the other two suites" }
+      ],
+      "explanation": "A, B, and C are all correct: the two paid products are Secret Protection and Code Security; the dependency-graph/Dependabot basics are free on all plans; and Security Overview reports rather than scans. D is wrong — Supply Chain Security is a *conceptual* suite whose basics are free; the only supply-chain features you *pay* for (dependency review, custom auto-triage) live inside the **Code Security** product, not a separate Supply Chain Security SKU.",
+      "sourceRefs": ["r-ghas-overview", "r-features", "r-security-overview"]
+    },
+    {
+      "id": "q-d1-20",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On the GH-500 study guide, 'Supply Chain Security' is the current umbrella name for features formerly known as:",
+      "options": [
+        { "id": "a", "text": "Dependabot / Dependency Review", "correct": true },
+        { "id": "b", "text": "Secret scanning" },
+        { "id": "c", "text": "Code Scanning with CodeQL" },
+        { "id": "d", "text": "Copilot Autofix" }
+      ],
+      "explanation": "The study guide names the domain **'supply chain security (formerly Dependabot/Dependency Review)'**. Secret scanning became Secret Protection, Code Scanning with CodeQL became Code Security, and Copilot Autofix is a Code Security feature — none of those is the supply-chain rename.",
+      "sourceRefs": ["r-studyguide", "r-ghas-overview"]
+    },
+    {
+      "id": "q-d1-21",
+      "domainId": "d1-security-suites",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An architect claims: 'Because we bought GitHub Code Security, our private repos are fully covered — including secret scanning and push protection.' What's the flaw?",
+      "options": [
+        { "id": "a", "text": "Code Security covers code scanning and dependency review, but secret scanning and push protection on private repos need GitHub Secret Protection — a separate product", "correct": true },
+        { "id": "b", "text": "Nothing — Code Security includes secret scanning and push protection" },
+        { "id": "c", "text": "Code Security only works on public repos, so private repos get nothing" },
+        { "id": "d", "text": "Secret scanning is free on private repos, so no purchase was ever needed" }
+      ],
+      "explanation": "The two products are **separate**: **Code Security** unlocks code scanning, CodeQL, and dependency review; **secret scanning and push protection** on private repos require **Secret Protection**. So buying one doesn't cover the other. Code Security does work on private repos (that's what you pay for), and secret scanning is *not* free on private repos.",
+      "sourceRefs": ["r-ghas-overview", "r-features"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d1-adopt-suites",
+      "domainIds": ["d1-security-suites"],
+      "title": "Adopt all three suites on one repository",
+      "tagline": "Place each control in the right suite, at the right SDLC moment.",
+      "context": "You own a private service and want end-to-end coverage: keep secrets out, catch vulnerable dependencies before merge, and find flaws in your own code. Walk the secure SDLC and pick the right control — and the right suite — at each step, minding the current names and what needs buying.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First priority: make it impossible to commit a hardcoded credential in the first place. What do you turn on?",
+          "choices": [
+            { "id": "a", "text": "Push protection (Secret Protection) — it blocks the push before the secret lands", "verdict": "best", "rationale": "Prevention-first: push protection stops the secret at the source, the cheapest possible fix. It's a Secret Protection feature." },
+            { "id": "b", "text": "Secret scanning alerts only — let it flag secrets after they're pushed", "verdict": "viable", "rationale": "Detection is a useful backstop, but it fires *after* the leak; the ask was to prevent the commit, which is push protection's job." },
+            { "id": "c", "text": "Code scanning (CodeQL) — it will catch the secret as a code vulnerability", "verdict": "wrong", "rationale": "Code scanning analyses code for vulnerabilities/weaknesses, not for hardcoded credentials — wrong suite for secrets." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Next: stop a pull request that pulls in a dependency with a known vulnerability, before it merges. What do you add?",
+          "choices": [
+            { "id": "a", "text": "Dependency review (Code Security) as a pre-merge gate on the PR", "verdict": "best", "rationale": "Dependency review is the gate-based control that flags risky dependency changes on the PR before merge. Note it ships inside the paid Code Security product." },
+            { "id": "b", "text": "Rely on Dependabot alerts to notice the vulnerable dependency later", "verdict": "viable", "rationale": "Dependabot alerts (free) will detect it, but *after* it's merged — the step specifically wants a pre-merge gate, which is dependency review." },
+            { "id": "c", "text": "Push protection, so the risky dependency is blocked at push", "verdict": "wrong", "rationale": "Push protection is about secrets, not dependency risk — wrong tool and wrong suite for this checkpoint." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now find security flaws in your OWN source (e.g. SQL injection), ideally with a suggested fix. What do you enable?",
+          "choices": [
+            { "id": "a", "text": "Code scanning with CodeQL (Code Security), which can surface Copilot Autofix suggestions", "verdict": "best", "rationale": "Code Security / CodeQL analyses your code for vulnerabilities and can attach Copilot Autofix — exactly this need." },
+            { "id": "b", "text": "The dependency graph, to inventory what your code imports", "verdict": "wrong", "rationale": "The dependency graph inventories *dependencies*, not flaws in your own code — wrong suite entirely." },
+            { "id": "c", "text": "A secret risk assessment to scan for leaked secrets", "verdict": "wrong", "rationale": "That reports leaked-secret exposure, not code vulnerabilities like SQL injection." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "This is a private repo. Which purchase(s) does this end-to-end setup actually require?",
+          "choices": [
+            { "id": "a", "text": "GitHub Secret Protection (for push protection on private) and GitHub Code Security (for code scanning + dependency review) — bought separately", "verdict": "best", "rationale": "The two products are standalone: Secret Protection covers the push-protection piece on private repos; Code Security covers code scanning and dependency review. Dependabot basics stay free." },
+            { "id": "b", "text": "A single GitHub Advanced Security bundle that turns everything on", "verdict": "wrong", "rationale": "There's no all-in bundle SKU anymore — GHAS is two standalone products." },
+            { "id": "c", "text": "Only GitHub Code Security — it includes secret scanning and push protection too", "verdict": "wrong", "rationale": "Code Security doesn't include the Secret Protection features; secret scanning/push protection on private repos need Secret Protection." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-ghas-overview", "r-features", "r-push-protection"]
+    },
+    {
+      "id": "s-d1-strategy-overview",
+      "domainIds": ["d1-security-suites"],
+      "title": "Choose the strategy and the reporting surface",
+      "tagline": "Prevention-first vs. gate-based vs. remediation — and where Security Overview fits.",
+      "context": "You're the security lead for an org with dozens of repos. Leadership wants fewer leaked secrets, a way to clear a large existing alert backlog, and visibility into whether things are improving. Pick the right strategy and surface at each turn.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Goal: drive leaked secrets toward zero by stopping them at the source across the org. Which strategy leads?",
+          "choices": [
+            { "id": "a", "text": "A prevention-first approach centred on push protection", "verdict": "best", "rationale": "Stopping secrets before they land is prevention-first; push protection is the flagship control for it." },
+            { "id": "b", "text": "A gate-based approach that only checks secrets on the pull request", "verdict": "viable", "rationale": "A PR gate helps, but it's later and leakier than blocking at push; prevention-first is the stronger lead for secrets at the source." },
+            { "id": "c", "text": "Rely solely on after-the-fact secret scanning alerts", "verdict": "wrong", "rationale": "Detection-only means the secret already leaked; it doesn't 'stop them at the source' as asked." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "There's a backlog of hundreds of existing code scanning alerts across many repos. How do you drive them down collaboratively?",
+          "choices": [
+            { "id": "a", "text": "Run a security campaign — group the alerts, assign a point of contact, and let Copilot Autofix suggest fixes", "verdict": "best", "rationale": "Campaigns are purpose-built for coordinated backlog burn-down at scale, and code campaigns auto-trigger Copilot Autofix." },
+            { "id": "b", "text": "Turn on more push protection to prevent new alerts", "verdict": "wrong", "rationale": "Prevention handles *new* issues; it does nothing for the existing backlog the step is about." },
+            { "id": "c", "text": "Ask each team to work through their alerts ad hoc, untracked", "verdict": "viable", "rationale": "Work might happen, but with no coordination, ownership, or measurement — exactly the gaps a campaign closes." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Leadership wants to know whether detection, remediation, and prevention are trending better month over month. Where do you look?",
+          "choices": [
+            { "id": "a", "text": "Security Overview — its dashboard shows detection/remediation/prevention trends across repos", "verdict": "best", "rationale": "Security Overview is the cross-cutting reporting surface for exactly these trends at org/enterprise scope." },
+            { "id": "b", "text": "Each repository's individual alert list, added up by hand", "verdict": "viable", "rationale": "You could reconstruct some of it manually, but that's what Security Overview aggregates for you — the intended surface." },
+            { "id": "c", "text": "The dependency graph for each repo", "verdict": "wrong", "rationale": "The dependency graph inventories packages; it doesn't report security trends across the org." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-security-overview", "r-campaigns", "r-push-protection"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d1-map-suites",
+      "domainId": "d1-security-suites",
+      "title": "Map a real repo's features to the three suites",
+      "goal": "Turn the suite model from theory into a picture of one real repository — and see the free-vs-paid line for yourself.",
+      "steps": "## What you'll do\n\nUse any repository you can open in a browser (a public one works and needs no purchase).\n\n1. Open the repo and go to the **Security** tab. Note the entry points you see (e.g. **Secret scanning alerts**, **Dependabot alerts / Dependency graph**, **Code scanning alerts**).\n2. Open **Settings → (Advanced) Security** (or **Code security** on newer UIs). List every toggle you can see and, next to each, write which **suite** it belongs to — Secret Protection, Code Security, or Supply Chain Security.\n3. For each toggle, mark **F** if it's free here (public repo) and **$** if the UI says it needs a paid product / is greyed out on private repos. Confirm your marks against `r-ghas-overview`'s free-vs-paid lists.\n4. Find one **prevention-first** control (push protection) and one **gate-based** control (dependency review / code scanning on PRs) and note where in the SDLC each acts.\n5. On the **Insights → Dependency graph**, click **Export SBOM** and confirm the format (SPDX). That single click proves the Supply Chain Security basics are free.\n\n## Why it matters\n\nD1 is entirely about placing features. Doing it on a live repo — suite, free-vs-paid, prevention-vs-gate — burns the map in far better than a table does.",
+      "checklist": [
+        "Every visible security toggle is labelled with its suite",
+        "Each feature marked F (free here) or $ (paid), checked against the docs",
+        "One prevention-first and one gate-based control identified with its SDLC stage",
+        "SBOM exported and its format (SPDX) confirmed"
+      ]
+    },
+    {
+      "id": "lab-d1-overview-strategy",
+      "domainId": "d1-security-suites",
+      "title": "Read Security Overview and place the strategies",
+      "goal": "See what Security Overview reports vs. what the suites do, and articulate prevention-first vs. gate-based vs. remediation.",
+      "steps": "## Steps\n\nUse an organization you have access to (a free personal org works for the reporting basics; some views need a paid product — note which are greyed out).\n\n1. Open the org's **Security** tab → **Overview**. Identify the **Overview dashboard** (Detection / Remediation / Prevention trends), the **Risk** view, and the **Coverage** view. Write one sentence on what each answers.\n2. Find the **Coverage** view and note which repos have or haven't enabled a given feature — this is the 'who's covered' question the exam asks.\n3. If your org is on **Team**, locate the **free secret risk assessment** and run it (or note where it would run). Confirm it needs *no* purchase.\n4. Now categorise three controls in writing: **push protection** (prevention-first), **dependency review / PR code scanning** (gate-based), **security campaigns** (coordinated remediation). For each, state *when in the SDLC* it acts.\n5. Note which Overview views are greyed out / marked as needing **Secret Protection** or **Code Security** — that boundary is the free-vs-paid line for reporting.\n\n## Checkpoint\n\nIf you can point at the Coverage view for 'who enabled code scanning', the dashboard for 'are we trending better', and name push-protection/dependency-review/campaigns as prevention/gate/remediation respectively, you've internalised D1's core distinctions.",
+      "checklist": [
+        "Overview dashboard, Risk view, and Coverage view each identified and described",
+        "Located where the free secret risk assessment runs (no purchase needed)",
+        "Three controls correctly labelled prevention-first / gate-based / remediation with their SDLC stage",
+        "Noted which Overview views require a paid product"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-studyguide",
+      "title": "Study guide for Exam GH-500: GitHub Advanced Security",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-500",
+      "kind": "official-doc",
+      "annotation": "The authoritative task list for D1 ('Describe GitHub Security suites, features, and ecosystem', 15–20%). Extract the exact sub-bullets — suite structure, contrast the three suites, public-vs-enterprise availability, Security Overview, secure SDLC, prevention-first vs. gate-based, campaigns — and the July-2026 rename ('formerly ...') that drives the currency trap.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-ghas-overview",
+      "title": "About GitHub Advanced Security",
+      "url": "https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security",
+      "kind": "official-doc",
+      "annotation": "The single most load-bearing page for D1: GHAS is now two standalone products (Secret Protection, Code Security) bought separately on Team/Enterprise; which features fall in each; and the free-vs-paid split — dependency graph/Dependabot alerts/updates free on all plans, code scanning/secret scanning/push protection free on public repos, custom patterns/delegated bypass/dependency review/auto-triage paid.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-features",
+      "title": "GitHub security features",
+      "url": "https://docs.github.com/en/code-security/getting-started/github-security-features",
+      "kind": "official-doc",
+      "annotation": "The full feature inventory grouped by tier — 'available for all plans', 'GitHub Secret Protection', 'GitHub Code Security'. Extract which suite owns each feature and the exact availability wording, to place any feature the exam names.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-security-overview",
+      "title": "About security overview",
+      "url": "https://docs.github.com/en/code-security/security-overview/about-security-overview",
+      "kind": "official-doc",
+      "annotation": "What Security Overview provides: the Overview dashboard (Detection/Remediation/Prevention trends), Risk view, Coverage view, Enablement, and alert-specific views; the three levels (repo/org/enterprise); and the free secret risk assessment for Team orgs vs. premium views under the paid products.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-push-protection",
+      "title": "About push protection",
+      "url": "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection",
+      "kind": "official-doc",
+      "annotation": "The prevention-first flagship: push protection blocks pushes containing secrets 'before they reach your repository' (vs. alerting after the fact). Extract delegated bypass (designated approvers review/approve bypass requests), the default 'anyone with write access can bypass with a reason' behaviour, the audit/alert/notification trail, and on-by-default status for public user repos.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-campaigns",
+      "title": "About security campaigns",
+      "url": "https://docs.github.com/en/code-security/concepts/security-at-scale/about-security-campaigns",
+      "kind": "official-doc",
+      "annotation": "Security campaigns = coordinated remediation of existing alerts at scale ('burn down your security backlog'). Extract the code-campaign vs. secret-campaign distinction, that code campaigns auto-trigger Copilot Autofix (secret campaigns don't), the named point of contact, and template/custom-filter alert selection.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-configurations",
+      "title": "Choosing a security configuration for your repositories",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/introduction-to-securing-your-organization-at-scale/choosing-a-security-configuration-for-your-repositories",
+      "kind": "official-doc",
+      "annotation": "A security configuration is a reusable collection of feature-enablement settings applied to repos; the GitHub-recommended configuration bundles Code Security and Secret Protection features and is the fastest way to cover an org. Extract how configurations apply and that private/internal application incurs cost/licenses.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-dependabot-alerts",
+      "title": "About Dependabot alerts",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+      "kind": "official-doc",
+      "annotation": "Dependabot alerts fire when a reviewed advisory in the GitHub Advisory Database affects a dependency in the dependency graph. Confirms these Supply Chain basics are core (free-on-all-plans per r-ghas-overview) and that malware alerts are a related capability.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-dependabot-metrics",
+      "title": "Prioritizing Dependabot alerts using metrics (EPSS)",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/understanding-your-organizations-exposure-to-vulnerabilities/prioritizing-dependabot-alerts-using-metrics",
+      "kind": "official-doc",
+      "annotation": "EPSS = Exploit Prediction Scoring System (from FIRST), a 0–1 probability that a vulnerability will be exploited, updated daily; GitHub exposes an epss_percentage filter to prioritize likely-exploited alerts. Extract the exact definition and how it combines with severity and patch availability.",
+      "domainIds": ["d1-security-suites"]
+    },
+    {
+      "id": "r-sbom",
+      "title": "Exporting a software bill of materials for your repository",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/exporting-a-software-bill-of-materials-for-your-repository",
+      "kind": "official-doc",
+      "annotation": "GitHub exports the SBOM in industry-standard SPDX (v2.3) from the current dependency graph, via the UI (Insights → Dependency graph → Export SBOM) or the REST API. Contrast SPDX (SBOM) with SARIF (code scanning results).",
+      "domainIds": ["d1-security-suites"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d1-1",
+      "title": "D1 · The three suites — Secret Protection, Code Security & Supply Chain Security",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-security-suites"],
+      "sourceNotebook": "gh-500 / d1 / three-suites-and-ecosystem"
+    },
+    {
+      "id": "v-d1-2",
+      "title": "D1 · Secure SDLC — prevention-first vs. gate-based, Security Overview & campaigns",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-security-suites"],
+      "sourceNotebook": "gh-500 / d1 / secure-sdlc-and-overview"
+    }
+  ]
+}
