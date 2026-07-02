@@ -71,6 +71,28 @@ swap. Fill the placeholder slot in the domain file's `videos[]`:
 }
 ```
 
+## Audio overviews — Deep Dive / Brief / Debate (gym-listen + revision layer)
+
+NotebookLM also generates **Audio Overviews** — the on-the-go + revision layer. Same
+one-notebook-per-objective sourcing as video. Three formats per the roadmap's audio pipeline:
+
+- **Deep Dive** — to *learn* a domain. Load 15–20 substantial sources (source volume drives length,
+  not a toggle) for a 30–60 min listen. Customization prompt: the same `[[BRACKETS]]` as the video,
+  but ask for a two-host conversational walkthrough that teaches the domain's objectives and exam task
+  statements at expert level (skip basics).
+- **Brief** — to *revise* before the exam. A tight 8–12 min recap of the must-know distinctions and
+  the top distractors. Regenerate one per domain in the week before the exam.
+- **Debate / Critique** — for *trade-off* topics (security, governance). Ask the hosts to argue a real
+  tension ("is prompt-injection defense solvable?", "which EU AI Act tier applies?") so the listener
+  hears both sides.
+
+Keep the persona/customization prompt under ~1,500 chars; expertise = expert. Register audio alongside
+the video in the domain's media list (or offer as a downloadable MP3 supplement).
+
+**Per-track media pack = video (~8 min, one per weighted objective) + audio (Deep Dive per domain,
+Brief per domain pre-exam, Debate for trade-off domains).** Free-training tracks (APA, skills tracks)
+use the same media but frame audio as "Deep Dive to learn / Debate for the judgment calls" — no exam Brief.
+
 ## Coverage math — how many videos, where
 
 Target **10–12 videos per track**, allocated by **exam weight** (heaviest domains get the most).
