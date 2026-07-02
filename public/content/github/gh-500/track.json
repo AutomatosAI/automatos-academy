@@ -1,0 +1,100 @@
+{
+  "vendorName": "GitHub",
+  "name": "GitHub Advanced Security — GH-500",
+  "code": "GH-500",
+  "summary": "GitHub & Microsoft's specialty credential for securing the software development lifecycle with GitHub Advanced Security. Validates that you can stand up and operate Secret Protection (secret scanning + push protection), Supply Chain Security (dependency graph, Dependabot, Dependency Review, SBOMs), and Code Security (CodeQL code scanning + SARIF), run security operations end to end — triage, prioritize with severity/EPSS, and remediate at scale with campaigns and rulesets — and administer it all across repository, organization, and enterprise with security configurations, roles, policies, and automation.",
+  "exam": {
+    "questionCount": 60,
+    "durationMinutes": 100,
+    "passingScore": 700,
+    "scoreScale": 1000,
+    "proctored": true,
+    "closedBook": true,
+    "scenarioPool": 12,
+    "scenariosPresented": 4,
+    "recommendedPrep": "MS Learn GitHub Advanced Security paths Parts 1 & 2 + hands-on GHAS on a real repo"
+  },
+  "blueprintNote": "Domains and weights are normalized from the official GH-500 skills-measured ranges (Security suites & ecosystem 15–20%, Secret Protection 15–20%, Supply Chain Security 15–20%, Code Security 10–15%, Security operations 15–20%, Administration 10–15%), each taken inside its band so the six sum to exactly 1.0 — the engine reads weights from data, so a correction is a content edit. Format is modeled as ~60 scored questions, 100 minutes, 700/1000 to pass, proctored via Pearson VUE. The 100-minute duration and 700/1000 passing score ARE stated on the official pages; the ~60 question count is the GitHub/Microsoft exam-family norm and is NOT stated on the official study guide or certification page — flagged, confirm before launch. The scenario drills are an Academy training device: neither official page describes a scenario-based or case-study question format, so scenarios are not represented as an official GH-500 question type.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "https://learn.microsoft.com/credentials/certifications/resources/study-guides/gh-500",
+      "https://learn.microsoft.com/en-us/credentials/certifications/github-advanced-security/"
+    ],
+    "notes": "Canonical study-guide URL is the 301 target of https://aka.ms/GH500-StudyGuide. Live check 2026-07-02 against both official pages (study guide 'Skills measured as of July 2026', ms.date 2026-04-26 / updated_at 2026-05-14; cert page Last Updated 05/04/2026). Confirmed: six domains with ranges D1 15–20% / D2 15–20% / D3 15–20% / D4 10–15% / D5 15–20% / D6 10–15%; 100 minutes; 700 to pass; proctored via Pearson VUE; Intermediate level; roles Administrator/Developer/DevOps Engineer/Solution Architect/Student; languages English, Spanish, Portuguese (BR), Korean, Japanese; exam maintained by GitHub, delivered by Microsoft; change log states the exam changed significantly on July 2026. Neither page states a question count. Neither page describes a scenario/case-study question structure — cert page says only 'You may have interactive components to complete as part of this exam' and the sandbox lets you 'interact with different question types'. A practice assessment exists (assessmentId 590484996) but is an interactive gated tool, not an exam-details page.\n\nDRIFT vs PRD-S0-GH500.md sections 2-3 (verbatim titles / no correction to weights or exam facts needed):\n\n1. Domain TITLES in PRD table (§3) are paraphrased and drop the official \"(formerly ...)\" parentheticals. Use these VERBATIM official titles for currency-trap fidelity:\n   - d4: PRD has \"Configure and use Code Security (CodeQL)\"; official is \"Configure and use Code Security (formerly Code Scanning with CodeQL)\". PRD substituted \"(CodeQL)\" for the official \"(formerly Code Scanning with CodeQL)\".\n   - d5: PRD has \"Security operations — prioritization & remediation\"; official is \"Security operations: best practices, prioritization, and remediation\" (PRD dropped \"best practices\"; colon not em-dash).\n   - d2: official \"Configure and use Secret Protection (formerly secret scanning)\" (PRD dropped the parenthetical).\n   - d3: official \"Configure and use supply chain security (formerly Dependabot/Dependency Review)\" — note official is lowercase \"supply chain security\" (PRD title-cased it).\n   - d1 and d6 titles match official wording (minus casing).\n\n2. WEIGHTS: no correction. All six PRD weights sit INSIDE their official ranges and sum to 1.00 exactly — D1 0.18 in [0.15,0.20]; D2 0.18 in [0.15,0.20]; D3 0.18 in [0.15,0.20]; D4 0.13 in [0.10,0.15]; D5 0.18 in [0.15,0.20]; D6 0.15 in [0.10,0.15] (upper-boundary, inclusive). PRD's \"Sum = 1.00, within range\" claim is verified.\n\n3. EXAM FACTS: PRD §2 states 100 min / 700 to pass / 1000 scale / proctored Pearson VUE / Intermediate / roles (admin, developer, DevOps, solution architect) / languages (English, Spanish, Portuguese BR, Korean, Japanese) — ALL confirmed by the live pages. Note the cert page ALSO lists \"Student\" as a role (PRD omits Student). The 1000 scale is not restated on either page but is standard MS scoring and consistent with the \"700 to pass\" that IS stated.\n\n4. QUESTION COUNT: PRD §2/§3 hardcodes questionCount 60 in track.exam{} while §2 flags it as an assumption (\"not stated on the guide — assume ~60 scored; confirm on the cert page before launch\"). Confirmed: question count is NOT stated on either the study guide or the cert page. The '60' remains an unverified assumption — flag before launch; the official pages do not support hardcoding it.\n\n5. SCENARIO/CASE-STUDY: neither official page describes a scenario-based or case-study question STRUCTURE. Cert page says only \"You may have interactive components to complete as part of this exam\" and the sandbox lets you \"interact with different question types\" — generic, not a named case-study format. PRD §4's \"1-2 branching scenarios\" is authored-content design, not an official exam-format claim, so no conflict — but do not represent scenarios as an official GH-500 question type.\n\n6. REFRESH NAMES current: YES. The 'Skills measured as of July 2026' guide uses Secret Protection / Supply Chain Security / Code Security as PRIMARY domain names with '(formerly ...)' parentheticals, and the change log confirms 'This exam has changed significantly ... on July, 2026.' PRD's currency-trap guidance (§2) is correct.\n\n7. Study guide 'ms.date' 2026-04-26, updated_at 2026-05-14; cert page Last Updated 05/04/2026. Practice assessment exists (assessmentId 590484996) but is an interactive gated tool, not an exam-details page, and states no scored-question count."
+  },
+  "badge": {
+    "completionLabel": "Prep completed — GH-500 (GitHub Advanced Security)",
+    "definition": "Completed the Automatos Academy GH-500 preparation track to the A+ readiness standard: ≥90% blueprint-weighted mastery and a full-length mock passed with margin (≥800/1000). This certifies preparation completion — the GH-500 (GitHub Advanced Security) credential itself is issued only by GitHub/Microsoft."
+  },
+  "domainFiles": [
+    "d1-security-suites.json",
+    "d2-secret-protection.json",
+    "d3-supply-chain.json",
+    "d4-code-security.json",
+    "d5-security-operations.json",
+    "d6-administration.json"
+  ],
+  "officialResources": [
+    {
+      "id": "off-gh500-guide",
+      "title": "GH-500 Study Guide — official (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-500",
+      "kind": "spec",
+      "annotation": "The authoritative blueprint: the six skills-measured domains ('as of July 2026'), their weight ranges, the audience profile, and the July-2026 change log. This curriculum is built directly to it — including the current Secret Protection / Supply Chain Security / Code Security names with their '(formerly …)' parentheticals.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gh500-cert",
+      "title": "GitHub Advanced Security (GH-500) — certification page",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/github-advanced-security/",
+      "kind": "official-doc",
+      "annotation": "Exam overview: 100 minutes, proctored, Intermediate, roles (Administrator/Developer/DevOps/Solution Architect/Student), languages, Pearson VUE scheduling, exam sandbox, and the practice assessment. Notes the exam is maintained by GitHub and delivered by Microsoft.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gh500-lp1",
+      "title": "GitHub Advanced Security Part 1 of 2 (Microsoft Learn path)",
+      "url": "https://learn.microsoft.com/en-us/training/paths/github-advanced-security/",
+      "kind": "learning-path",
+      "annotation": "Official learning path (4 modules): Introduction to GHAS, Dependabot security updates, secret scanning, and code scanning with CodeQL/Actions. Grounds D1–D4. Work it end to end.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gh500-lp2",
+      "title": "GitHub Advanced Security Part 2 of 2 (Microsoft Learn path)",
+      "url": "https://learn.microsoft.com/en-us/training/paths/github-advanced-security-2/",
+      "kind": "learning-path",
+      "annotation": "Official learning path (4 modules): CodeQL codebase analysis, code scanning with CodeQL, GitHub administration for GHAS, and managing sensitive data & security policies. Grounds D4–D6 and the operations/administration domains.",
+      "domainIds": []
+    },
+    {
+      "id": "r-code-security-docs",
+      "title": "GitHub code security documentation (root)",
+      "url": "https://docs.github.com/en/code-security",
+      "kind": "official-doc",
+      "annotation": "Primary source for every product claim on this track: secret scanning & push protection, supply chain (dependency graph, Dependabot, Dependency Review, SBOM), code scanning/CodeQL & SARIF, and security overview / configurations / campaigns. When a community guide and the docs disagree, the docs win.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "The GH-500 blueprint & how to sit it",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [],
+      "sourceNotebook": "gh-500 / overview / blueprint-overview"
+    },
+    {
+      "id": "v-ov-2",
+      "title": "GH-500 exam strategy — pacing, currency traps & scoring",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [],
+      "sourceNotebook": "gh-500 / overview / exam-strategy"
+    }
+  ]
+}

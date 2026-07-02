@@ -1,0 +1,802 @@
+{
+  "id": "d5-security-operations",
+  "order": 5,
+  "code": "D5",
+  "name": "Security operations: best practices, prioritization, and remediation",
+  "weight": 0.18,
+  "tagline": "You can't fix everything at once. Read the vocabulary (CVE, CWE, advisory), rank the queue by severity plus exploit-likelihood, then burn it down with campaigns — shifting left and governing across all three suites.",
+  "overview": "One of the heaviest GH-500 domains (15–20%). The official title is 'Security operations: best practices, prioritization, and remediation'. It tests the security-operator mindset rather than any single feature: understand the vulnerability vocabulary (CVE, CWE, and GitHub Security Advisories), decide what to fix first when the alert queue is bigger than your capacity (CVSS severity vs EPSS exploit-likelihood vs reachability), run campaign-based bulk remediation across many repositories, cut noise responsibly with auto-dismissal and documented exceptions, shift left so problems are prevented at the source, and enforce cross-suite rulesets and governance that treat Secret Protection, Supply Chain Security, and Code Security as one risk picture. July-2026 currency matters here: EPSS scoring and security campaigns are firmly in scope, and the three suites go by their current names (formerly secret scanning, Dependabot/Dependency Review, and Code Scanning with CodeQL).",
+  "objectives": [
+    "Distinguish a CVE, a CWE, and a GitHub Security Advisory, and describe end-to-end remediation across alerts and advisories.",
+    "Prioritize a mixed alert queue using CVSS severity together with EPSS exploit-likelihood and reachability — not first-in-first-out.",
+    "Run a campaign-based bulk-remediation effort: scope it to one vulnerability type, stay within the 1000-alert limit, and assign a campaign manager.",
+    "Reduce alert noise responsibly with auto-dismissal rules and documented dismissal reasons, without hiding real risk.",
+    "Shift left with push protection, dependency scanning, and pre-merge analysis, and govern across suites with rulesets, roles, and delegated exceptions."
+  ],
+  "lessons": [
+    {
+      "id": "l1-vocabulary",
+      "title": "The vocabulary: CVE, CWE, and GitHub Security Advisories",
+      "estMinutes": 14,
+      "objective": "Tell a CVE, a CWE, and an advisory apart, and trace how a vulnerability becomes an alert in your repo.",
+      "body": "## Why this comes first\n\nEvery prioritization and remediation decision on the exam rests on three terms that are easy to blur. Get them straight and the rest of the domain clicks.\n\n## CVE — the specific vulnerability\n\n**CVE = Common Vulnerabilities and Exposures.** A CVE ID (like `CVE-2024-12345`) names *one specific vulnerability in one specific product or package*. GitHub is a **CVE Numbering Authority (CNA)**, so a maintainer can request a CVE ID while drafting a security advisory — GitHub usually reviews the request within **72 hours**. Think of a CVE as the globally-unique label for a single flaw.\n\n## CWE — the class of weakness\n\n**CWE = Common Weakness Enumeration.** A CWE (like `CWE-79`, cross-site scripting) names a *category of weakness* — the kind of mistake, not a specific instance. Many different CVEs share the same CWE. Code scanning alerts are tagged with the CWEs they relate to, which is exactly why a campaign can gather 'all our XSS' by targeting one CWE class.\n\n> **Exam trap — CVE vs CWE:** CVE = one concrete vulnerability (an instance); CWE = the weakness *type* (a class). 'SQL injection in general' is a CWE; 'the SQL-injection bug tracked as CVE-2024-XXXX in package foo 1.2.3' is a CVE.\n\n## GitHub Security Advisory — the record you act on\n\nAn advisory is GitHub's structured record *about* a vulnerability. Two flavours matter:\n\n- **Repository security advisories** — let maintainers *privately discuss, fix, and publish* a vulnerability in their own public repo (coordinated disclosure). The private-vulnerability-reporting flow feeds this. When published, the advisory can also go to the global database.\n- The **GitHub Advisory Database** at `github.com/advisories` — the central catalogue. It holds **GitHub-reviewed advisories** (carefully validated, mapped to a package **ecosystem** like npm/PyPI/RubyGems — these power Dependabot alerts) and **unreviewed advisories** (imported automatically from the National Vulnerability Database / NVD feed, *not* human-checked — Dependabot does **not** raise alerts for these).\n\n## How a flaw reaches your repo\n\nA vulnerability gets a CVE → is written up as a **reviewed** advisory mapped to an ecosystem → **Dependabot** matches it against your dependency graph → you get an alert. Advisories are the bridge between 'a vulnerability exists in the world' and 'an alert exists in your repo'.\n\n## Severity lives on the advisory\n\nAdvisories carry a **CVSS** (Common Vulnerability Scoring System) severity — one of four levels: **Low, Medium/Moderate, High, Critical** (CVSS Section 5). That severity is what you'll weigh against exploit-likelihood in the next lesson.\n\n> **Exam note:** know that GitHub is a CNA (can assign CVEs), that reviewed advisories power Dependabot while unreviewed (NVD-imported) ones do not, and that advisories carry the CVSS severity you prioritize on.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d5-1",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which best describes the difference between a CVE and a CWE?",
+          "options": [
+            { "id": "a", "text": "A CVE identifies one specific vulnerability; a CWE names a class/type of weakness that many CVEs can share", "correct": true },
+            { "id": "b", "text": "A CVE is a GitHub-only concept; a CWE is an industry standard" },
+            { "id": "c", "text": "A CVE is the severity score; a CWE is the exploit probability" },
+            { "id": "d", "text": "They are two names for the same identifier" }
+          ],
+          "explanation": "A **CVE** is a globally-unique label for a *single concrete* vulnerability; a **CWE** is a *category* of weakness (e.g. CWE-79 = XSS) that many CVEs belong to. CVE isn't GitHub-only (GitHub is one CNA among many); neither is a score (CVSS is severity, EPSS is probability); and they are not the same identifier.",
+          "sourceRefs": ["r-advisory-db", "r-repo-advisories"]
+        },
+        {
+          "id": "kc-d5-2",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why does Dependabot raise alerts for GitHub-reviewed advisories but not for unreviewed ones?",
+          "options": [
+            { "id": "a", "text": "Reviewed advisories are validated and mapped to a package ecosystem; unreviewed ones are imported from NVD without human review, so aren't used to alert", "correct": true },
+            { "id": "b", "text": "Unreviewed advisories are always false positives" },
+            { "id": "c", "text": "Reviewed advisories are for private repos only" },
+            { "id": "d", "text": "Dependabot alerts on both equally" }
+          ],
+          "explanation": "GitHub-reviewed advisories are carefully checked and **mapped to a supported ecosystem** (npm, PyPI, …), which is what lets Dependabot match them to your dependency graph. Unreviewed advisories come straight from the **NVD feed** and aren't validated, so Dependabot doesn't create alerts from them. They aren't 'always false positives', aren't private-only, and aren't treated equally.",
+          "sourceRefs": ["r-advisory-db", "r-dependabot-alerts"]
+        },
+        {
+          "id": "kc-d5-3",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A maintainer wants to privately fix a vulnerability in their public repo and obtain a CVE ID before disclosing. What do they use?",
+          "options": [
+            { "id": "a", "text": "A repository security advisory — draft privately, request a CVE (GitHub is a CNA), then publish", "correct": true },
+            { "id": "b", "text": "A public issue tagged 'security'" },
+            { "id": "c", "text": "A Dependabot auto-triage rule" },
+            { "id": "d", "text": "A code scanning custom query" }
+          ],
+          "explanation": "Repository security advisories exist exactly for **coordinated disclosure**: discuss and fix privately, request a CVE ID (GitHub is a CVE Numbering Authority, ~72h review), then publish. A public issue defeats private disclosure; auto-triage rules manage Dependabot alerts; custom queries are a CodeQL detection concern.",
+          "sourceRefs": ["r-repo-advisories"]
+        }
+      ]
+    },
+    {
+      "id": "l2-prioritization",
+      "title": "Prioritization: severity, EPSS, and reachability",
+      "estMinutes": 16,
+      "objective": "Rank a mixed alert queue by combining CVSS severity, EPSS exploit-likelihood, and reachability — and justify the order.",
+      "body": "## The core exam skill\n\nYou can't fix everything at once, so the exam's recurring question is: *given a pile of alerts, which do you fix first and how do you justify it?* Grade for a defensible ranking, not first-in-first-out.\n\n## Two different questions: severity vs likelihood\n\n- **CVSS severity** answers *'how bad is it if exploited?'* — impact. Four levels: **Low, Medium/Moderate, High, Critical**. It says nothing about whether anyone is actually attacking it.\n- **EPSS** answers *'how likely is it to be exploited?'* — probability. **EPSS = Exploit Prediction Scoring System.** It gives a **score from 0 to 100%** = the probability a vulnerability is exploited **in the next 30 days**, plus a **percentile** (relative threat). It comes from **FIRST** (Forum of Incident Response and Security Teams) and is **updated daily**.\n\n> **Worked reading of an EPSS value:** an advisory at **90.534% EPSS, 95th percentile** means: ~90.5% modelled chance of exploitation in the next 30 days, and it's more likely to be exploited than 95% of all modelled vulnerabilities. High severity + high EPSS = fix now; high severity + very low EPSS may reasonably wait.\n\n> **Exam trap — CVSS vs EPSS:** severity ≠ likelihood. A Critical CVSS bug that no one is exploiting (low EPSS) can be lower priority than a High-severity bug that's being actively exploited (high EPSS). The exam rewards using **both**.\n\n## Reachability: is the vulnerable code even called?\n\nA vulnerability you never invoke is lower risk. Dependabot's default **'Most important'** sort already blends **CVSS score, dependency scope (runtime vs development), and whether vulnerable function calls are detected** (reachability). So the built-in ranking is more than raw severity.\n\n## Filtering to the top of the queue\n\nOn Dependabot alerts you can filter to find what matters:\n\n- `severity:critical` / `severity:high` — impact\n- `epss_percentage>=0.10` — alerts with ≥10% exploit probability (likelihood)\n- `scope:runtime` vs `scope:development` — a dev-only dependency is usually lower risk\n- `relationship:direct` vs transitive\n- `has:patch` — a fix exists, so it's actionable now\n\nCombine them: 'critical, runtime, high-EPSS, patch available' is a strong 'fix first' filter.\n\n## Two severities in code scanning\n\nCode scanning distinguishes **`severity`** (`Error`, `Warning`, `Note` — how the rule is graded) from **security severity** (`Critical`, `High`, `Medium`, `Low` — CVSS-based, for security alerts). When a **security severity** is present, code scanning **uses it in preference** to `severity`. Don't confuse the two on the exam.\n\n## The one-line instinct\n\n**Severity says how bad; EPSS says how likely; reachability says whether it can even be hit.** A good operator ranks on all three, then works top-down.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d5-4",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What does an EPSS score of 90% at the 95th percentile tell you?",
+          "options": [
+            { "id": "a", "text": "~90% probability the vulnerability is exploited in the next 30 days, and it's more likely to be exploited than 95% of modelled vulnerabilities", "correct": true },
+            { "id": "b", "text": "The vulnerability's CVSS severity is 9.0 out of 10" },
+            { "id": "c", "text": "90% of your repositories are affected by it" },
+            { "id": "d", "text": "It has been exploited 95 times already" }
+          ],
+          "explanation": "EPSS is a **likelihood** measure: the score is the probability of exploitation in the **next 30 days** (here ~90%), and the **percentile** ranks it against all modelled vulnerabilities (here, above 95% of them). It is not a CVSS severity, not a count of affected repos, and not a tally of past exploits.",
+          "sourceRefs": ["r-epss", "r-dependabot-metrics"]
+        },
+        {
+          "id": "kc-d5-5",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Alert A is Critical severity but essentially never exploited (very low EPSS) and its code path is never called. Alert B is High severity, actively exploited (high EPSS), on a runtime dependency you call directly. Which do you fix first and why?",
+          "options": [
+            { "id": "a", "text": "B first — high exploit-likelihood on reachable, runtime code outranks a higher-severity bug that is neither exploited nor reachable", "correct": true },
+            { "id": "b", "text": "A first — always fix the highest CVSS severity before anything else" },
+            { "id": "c", "text": "Neither — dismiss both since one is unreachable and the other is 'only' High" },
+            { "id": "d", "text": "Fix them in the order the alerts were created" }
+          ],
+          "explanation": "Good prioritization weighs **severity, likelihood, and reachability together**. B combines high EPSS with a reachable runtime dependency, so it's the live risk; A is higher severity but unexploited and unreachable, so it can wait. Fixing strictly by severity ignores EPSS/reachability; dismissing real alerts is wrong; and first-in-first-out isn't risk-based.",
+          "sourceRefs": ["r-dependabot-metrics", "r-epss", "r-dependabot-alerts"]
+        },
+        {
+          "id": "kc-d5-6",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "By default, Dependabot's 'Most important' sort ranks alerts using which combination?",
+          "options": [
+            { "id": "a", "text": "CVSS score, dependency scope (runtime vs development), and whether vulnerable function calls are detected", "correct": true },
+            { "id": "b", "text": "Only the alphabetical package name" },
+            { "id": "c", "text": "Only the date the alert was created" },
+            { "id": "d", "text": "Only whether the repository is public" }
+          ],
+          "explanation": "The default **'Most important'** sort blends **severity (CVSS), scope, and reachability (vulnerable function calls)** — a built-in, multi-factor ranking. It isn't alphabetical, purely chronological, or based on repo visibility.",
+          "sourceRefs": ["r-dependabot-alerts", "r-dependabot-metrics"]
+        }
+      ]
+    },
+    {
+      "id": "l3-campaigns",
+      "title": "Bulk remediation with security campaigns",
+      "estMinutes": 16,
+      "objective": "Decide when a campaign beats repo-by-repo fixing, scope one correctly, and assign the right owner.",
+      "body": "## The problem campaigns solve\n\nOnce you've prioritized, you often face the *same* class of bug scattered across dozens of repos — security debt. Fixing it repo-by-repo is slow and inconsistent. **Security campaigns** let a security team group related alerts and collaborate with developers to *burn down the backlog at scale*, without pulling developers out of their normal workflow.\n\n## What a campaign is\n\nA campaign is a curated set of alerts, with an owner and a deadline, that developers see and fix in place. Key facts to lock in:\n\n- **Alert types:** **code scanning** alerts (default branch only) and **secret scanning** alerts (currently **public preview**, all branches). \n- **Hard limit: up to 1000 alerts per campaign.** If your filter matches more, alerts are **omitted** to bring it within the limit — so narrow by repo, severity, or language, or plan multiple campaigns.\n- **Campaign manager (required):** you must name one or more, and they must be an **organization owner** or **security manager**. This is the named point of contact for questions, reviews, and collaboration.\n- **Required details:** a **name**, a **short description**, and a **due date**.\n- **Autofix:** for code scanning campaigns, alerts are **automatically submitted to GitHub Copilot Autofix** (processed as capacity allows) to suggest resolutions; you can also assign alerts to the Copilot coding agent to open fix PRs. Secret scanning alerts don't get Autofix.\n- **Where you run it:** campaigns live in **Security Overview** at the organization level, which also **tracks remediation progress**.\n\n## Scope to ONE vulnerability type\n\nThe official best practice is **not** 'fix all urgent alerts at once'. Pick a **single vulnerability type** — for example cross-site scripting (**CWE-79**) — so developers *recognise the pattern, apply the learning across many fixes, and build momentum*. Filter with `From code scanning filters` / `From secret scanning filters`, and you can target `autofix:supported` alerts to lean on AI fixes.\n\n> **Exam trap — campaign vs one-off fix:** a campaign is for *many related alerts across repos* that you want fixed as a coordinated push. A single alert, or a one-repo fix, doesn't need a campaign. And a campaign scoped to one CWE beats a campaign that tries to mop up everything at once.\n\n## What makes a campaign succeed\n\n- A responsive **campaign manager** and a visible contact channel (e.g. a Discussion).\n- A **realistic due date** that accounts for developer capacity, deadlines, and holidays.\n- **Copilot Autofix / Chat** made available, and **issue tracking** enabled for visibility (code scanning campaigns support repo issue tracking; secret scanning campaigns do not).\n- Educational/secure-coding guidance in the description.\n\n## The instinct\n\n**One theme, ≤1000 alerts, an accountable owner, a realistic deadline, tracked in Security Overview.** That's a campaign done right.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d5-7",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is the maximum number of alerts a single security campaign can contain, and what happens if your filter matches more?",
+          "options": [
+            { "id": "a", "text": "1000 alerts; any beyond that are omitted, so you narrow filters or plan multiple campaigns", "correct": true },
+            { "id": "b", "text": "There is no limit; all matching alerts are always included" },
+            { "id": "c", "text": "100 alerts; the campaign fails to create if exceeded" },
+            { "id": "d", "text": "500 alerts; extras are auto-dismissed" }
+          ],
+          "explanation": "A campaign holds **up to 1000 alerts**; if more match, alerts are **omitted** to stay within the limit, so you narrow by repository/severity/language or run several campaigns. There is a limit (not unlimited), it is 1000 (not 100 or 500), and exceeding it omits rather than fails-to-create or auto-dismisses.",
+          "sourceRefs": ["r-campaigns-manage", "r-campaigns-best-practice"]
+        },
+        {
+          "id": "kc-d5-8",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Who can be a campaign manager for a security campaign?",
+          "options": [
+            { "id": "a", "text": "A user or team that is an organization owner or security manager", "correct": true },
+            { "id": "b", "text": "Any developer with read access to one repository" },
+            { "id": "c", "text": "Only GitHub staff" },
+            { "id": "d", "text": "Only the person who wrote the vulnerable code" }
+          ],
+          "explanation": "A campaign manager must be an **organization owner or security manager** — the accountable point of contact. It's not any read-only developer, not GitHub staff, and not tied to code authorship.",
+          "sourceRefs": ["r-campaigns-manage"]
+        },
+        {
+          "id": "kc-d5-9",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "You have 4,000 XSS alerts across many repos and want a coordinated fix. What's the recommended way to scope a campaign?",
+          "options": [
+            { "id": "a", "text": "Focus on one vulnerability type (XSS / CWE-79) and narrow filters — by repo, severity, or language — until ≤1000 alerts, then run further campaigns", "correct": true },
+            { "id": "b", "text": "Put all 4,000 alerts of every type into one campaign so nothing is missed" },
+            { "id": "c", "text": "Create 4,000 individual one-alert campaigns" },
+            { "id": "d", "text": "Skip the campaign and dismiss the alerts as too numerous" }
+          ],
+          "explanation": "Best practice is **one vulnerability type** (XSS) with filters narrowed to the **1000-alert** limit, iterating with more campaigns — developers build momentum on a recognisable pattern. Cramming everything in exceeds the limit and loses focus; per-alert campaigns defeat the point; dismissing real alerts hides risk.",
+          "sourceRefs": ["r-campaigns-best-practice", "r-campaigns-manage"]
+        }
+      ]
+    },
+    {
+      "id": "l4-shiftleft-governance",
+      "title": "Shift left, noise control, and cross-suite governance",
+      "estMinutes": 14,
+      "objective": "Prevent problems at the source, cut alert noise responsibly, and govern all three suites as one risk picture.",
+      "body": "## Shift left: prevent, don't just detect\n\nThe cheapest vulnerability is the one that never lands. **Shift-left** means catching issues as early as possible in the SDLC:\n\n- **Push protection** (Secret Protection) — blocks a secret *at push time*, before it ever reaches the remote. Prevention at the source.\n- **Dependency scanning / Dependabot** — flags vulnerable dependencies as they enter the graph.\n- **Pre-merge analysis** — **Dependency Review** on a pull request shows the security impact of dependency changes *before merge*; code scanning on PRs catches new code weaknesses before they land.\n\nContrast **prevention-first** (stop it before it enters) with **gate-based** (catch it at a checkpoint). The exam likes 'where in the lifecycle does this control act?' framing — push protection and pre-merge review are shift-left; triaging an alert after it's on the default branch is later.\n\n## Cut noise without hiding risk\n\nA queue full of low-value alerts is as dangerous as no alerts — real risk gets lost. Two responsible tools:\n\n- **Dependabot auto-triage rules** — apply **before notifications are sent**, and can **auto-dismiss or snooze** low-value alerts. **GitHub preset rules** are curated (e.g. *'Dismiss low impact issues for development-scoped dependencies'* — npm dev-scope, on by default for public repos; *'Dismiss package malware alerts'* for internal-name collisions, off by default). With GHAS you can add **custom rules** keyed on metadata like severity, package, or CWE. Auto-dismissed alerts stay **viewable and reopen** if scope or advisory data changes — nothing is truly lost.\n- **Documented dismissals** — when a human dismisses an alert, record *why* (false positive / used in tests / risk accepted). Dismissal is a judgement call with accountability, not a delete button.\n\n> **Exam trap:** auto-dismiss and 'ignore' aren't 'making risk disappear'. Dismissed alerts remain auditable and can reopen; the point is to *focus attention*, and dismissals should be justified and reversible.\n\n## Govern across the three suites\n\nSecurity operations treats **Secret Protection, Supply Chain Security, and Code Security** as **one** risk picture, not three silos:\n\n- **Cross-suite rulesets, policies, and enforcement** — define and enforce severity/remediation expectations across suites at org/enterprise scope.\n- **Roles and ownership** — administrator, **security manager**, and developer each own a slice of alert response; alerts can be assigned to owners.\n- **Delegated bypass / delegated exceptions** — let a designated approver grant a controlled exception (e.g. a push-protection bypass) instead of a blanket off-switch, so exceptions are governed, logged, and time-boxed.\n- **Security Overview** — the org-wide surface that ties it together: **Overview** (detection/remediation/prevention trends), **Risk** and **Coverage** views, **Enablement**, and **Campaigns** — for reporting coverage and open risk across every suite.\n\n## The instinct\n\n**Prevent early (shift left), focus attention (responsible auto-dismiss), and govern the whole picture (cross-suite rulesets, roles, delegated exceptions, Security Overview).**",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d5-10",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which control is the clearest example of 'shift left' — preventing a problem at the source?",
+          "options": [
+            { "id": "a", "text": "Push protection blocking a secret at push time, before it reaches the remote", "correct": true },
+            { "id": "b", "text": "Triaging a Dependabot alert weeks after it appeared on the default branch" },
+            { "id": "c", "text": "Reading the org's open-risk report in Security Overview" },
+            { "id": "d", "text": "Rotating a secret after it has already been leaked and detected" }
+          ],
+          "explanation": "**Push protection** stops the secret *before it ever lands* — the earliest possible point. Triaging an existing alert, reading a report, or rotating an already-leaked secret all happen *after* the risk has entered; they're detection/response, not prevention at the source.",
+          "sourceRefs": ["r-security-overview", "r-campaigns-about"]
+        },
+        {
+          "id": "kc-d5-11",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is the correct way to think about Dependabot auto-triage rules that auto-dismiss low-impact alerts?",
+          "options": [
+            { "id": "a", "text": "They cut notification noise by dismissing low-value alerts before notifications; dismissed alerts stay viewable and reopen if scope or advisory data changes", "correct": true },
+            { "id": "b", "text": "They permanently delete alerts so the risk can never be reviewed again" },
+            { "id": "c", "text": "They increase severity on every alert" },
+            { "id": "d", "text": "They only work on secret scanning alerts" }
+          ],
+          "explanation": "Auto-triage rules apply **before notifications**, reducing noise on low-value alerts while keeping them **viewable and reopenable** — nothing is truly deleted. They don't delete permanently, don't raise severity, and are a Dependabot (supply chain) feature, not a secret-scanning one.",
+          "sourceRefs": ["r-auto-triage"]
+        },
+        {
+          "id": "kc-d5-12",
+          "domainId": "d5-security-operations",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "An org wants a security team to grant controlled, logged exceptions to push protection rather than turning the feature off. What governance mechanism fits?",
+          "options": [
+            { "id": "a", "text": "Delegated bypass / delegated exceptions, where a designated approver grants a governed exception", "correct": true },
+            { "id": "b", "text": "Disabling Secret Protection for the whole organization" },
+            { "id": "c", "text": "Making every developer an organization owner" },
+            { "id": "d", "text": "Deleting the repository" }
+          ],
+          "explanation": "**Delegated bypass** lets a designated approver grant a controlled, auditable exception — governance without a blanket off-switch. Disabling the feature removes protection entirely; making everyone an owner destroys least-privilege; deleting the repo is absurd.",
+          "sourceRefs": ["r-security-overview"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d5-1",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does a CVE identifier name?",
+      "options": [
+        { "id": "a", "text": "One specific, publicly-known vulnerability", "correct": true },
+        { "id": "b", "text": "A general category of weakness", "correct": false },
+        { "id": "c", "text": "The probability a vulnerability will be exploited", "correct": false },
+        { "id": "d", "text": "A GitHub organization's security policy", "correct": false }
+      ],
+      "explanation": "A **CVE** (Common Vulnerabilities and Exposures) ID labels **one specific vulnerability**. A category of weakness is a **CWE**; exploitation probability is **EPSS**; and a security policy is a governance artifact — none of those is a CVE.",
+      "sourceRefs": ["r-advisory-db", "r-repo-advisories"]
+    },
+    {
+      "id": "q-d5-2",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What does EPSS stand for, and what does it measure?",
+      "options": [
+        { "id": "a", "text": "Exploit Prediction Scoring System — the probability a vulnerability is exploited in the next 30 days", "correct": true },
+        { "id": "b", "text": "Enterprise Policy Security Standard — an org's baseline policy", "correct": false },
+        { "id": "c", "text": "Exposure Point Severity Score — the blast radius of a breach", "correct": false },
+        { "id": "d", "text": "Encrypted Package Signing Service — a supply-chain signing tool", "correct": false }
+      ],
+      "explanation": "**EPSS = Exploit Prediction Scoring System**, a 0–100% probability of exploitation in the **next 30 days** (from FIRST, updated daily). The other expansions are invented; EPSS is about *likelihood*, distinct from CVSS *severity*.",
+      "sourceRefs": ["r-epss", "r-dependabot-metrics"]
+    },
+    {
+      "id": "q-d5-3",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "CVSS and EPSS answer two different questions. Which pairing is correct?",
+      "options": [
+        { "id": "a", "text": "CVSS = how bad it is if exploited (severity); EPSS = how likely it is to be exploited (probability)", "correct": true },
+        { "id": "b", "text": "CVSS = probability of exploitation; EPSS = business impact", "correct": false },
+        { "id": "c", "text": "CVSS = number of affected repos; EPSS = number of dependencies", "correct": false },
+        { "id": "d", "text": "They measure the same thing on different scales", "correct": false }
+      ],
+      "explanation": "**CVSS** scores **impact/severity**; **EPSS** scores **exploit likelihood**. They are complementary, not interchangeable — the whole reason you weigh both when prioritizing. The other options swap or invent the definitions.",
+      "sourceRefs": ["r-epss", "r-advisory-db", "r-dependabot-metrics"]
+    },
+    {
+      "id": "q-d5-4",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which Dependabot alert filter narrows to vulnerabilities most likely to be exploited?",
+      "options": [
+        { "id": "a", "text": "epss_percentage>=0.10", "correct": true },
+        { "id": "b", "text": "scope:development", "correct": false },
+        { "id": "c", "text": "relationship:direct", "correct": false },
+        { "id": "d", "text": "ecosystem:npm", "correct": false }
+      ],
+      "explanation": "`epss_percentage>=0.10` filters by **EPSS exploit-likelihood** (here ≥10% probability). `scope:development` narrows to dev-only dependencies, `relationship:direct` to direct dependencies, and `ecosystem:npm` to a package ecosystem — useful, but not likelihood filters.",
+      "sourceRefs": ["r-epss", "r-dependabot-metrics"]
+    },
+    {
+      "id": "q-d5-5",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Dependabot's default 'Most important' sort considers which factors together?",
+      "options": [
+        { "id": "a", "text": "CVSS score, dependency scope, and whether vulnerable function calls are detected", "correct": true },
+        { "id": "b", "text": "Only the CVSS score", "correct": false },
+        { "id": "c", "text": "Alert age and alphabetical package name", "correct": false },
+        { "id": "d", "text": "Repository star count", "correct": false }
+      ],
+      "explanation": "The default sort is multi-factor: **severity (CVSS), scope, and reachability (vulnerable function calls)**. It's not severity-only, not age/alphabetical, and certainly not star count.",
+      "sourceRefs": ["r-dependabot-alerts", "r-dependabot-metrics"]
+    },
+    {
+      "id": "q-d5-6",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the primary purpose of a security campaign?",
+      "options": [
+        { "id": "a", "text": "To group related security alerts and coordinate developers to remediate them at scale across repositories", "correct": true },
+        { "id": "b", "text": "To scan a single repository for the first time", "correct": false },
+        { "id": "c", "text": "To generate an SBOM for export", "correct": false },
+        { "id": "d", "text": "To rotate an organization's secrets automatically", "correct": false }
+      ],
+      "explanation": "A campaign is a **bulk-remediation** tool: group related alerts and drive a coordinated fix with developers, burning down security debt. Initial scanning, SBOM export, and secret rotation are separate features.",
+      "sourceRefs": ["r-campaigns-about", "r-campaigns-best-practice"]
+    },
+    {
+      "id": "q-d5-7",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the maximum number of alerts in a single security campaign?",
+      "options": [
+        { "id": "a", "text": "1000", "correct": true },
+        { "id": "b", "text": "100", "correct": false },
+        { "id": "c", "text": "10,000", "correct": false },
+        { "id": "d", "text": "Unlimited", "correct": false }
+      ],
+      "explanation": "A campaign can contain **up to 1000 alerts**; matches beyond that are omitted, so you narrow filters or run more campaigns. It isn't 100, 10,000, or unlimited.",
+      "sourceRefs": ["r-campaigns-manage", "r-campaigns-best-practice"]
+    },
+    {
+      "id": "q-d5-8",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A campaign manager must hold which role?",
+      "options": [
+        { "id": "a", "text": "Organization owner or security manager", "correct": true },
+        { "id": "b", "text": "Any user with read access to the repo", "correct": false },
+        { "id": "c", "text": "Billing manager", "correct": false },
+        { "id": "d", "text": "Outside collaborator", "correct": false }
+      ],
+      "explanation": "The campaign manager — the accountable point of contact — must be an **organization owner or security manager**. Read-only users, billing managers, and outside collaborators don't qualify.",
+      "sourceRefs": ["r-campaigns-manage"]
+    },
+    {
+      "id": "q-d5-9",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the recommended way to scope a security campaign for the best remediation outcome?",
+      "options": [
+        { "id": "a", "text": "Target a single vulnerability type (e.g. XSS / CWE-79) so developers recognise the pattern and build momentum", "correct": true },
+        { "id": "b", "text": "Include every open alert of every type in one campaign", "correct": false },
+        { "id": "c", "text": "Pick alerts at random to spread the work", "correct": false },
+        { "id": "d", "text": "Only include alerts with no available fix", "correct": false }
+      ],
+      "explanation": "Best practice is **one vulnerability type** — a recognisable pattern lets developers reuse the fix and build momentum. Mixing everything, choosing randomly, or targeting unfixable alerts all undermine that.",
+      "sourceRefs": ["r-campaigns-best-practice"]
+    },
+    {
+      "id": "q-d5-10",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "For a code scanning security campaign, what happens with GitHub Copilot Autofix?",
+      "options": [
+        { "id": "a", "text": "Alerts are automatically submitted to Copilot Autofix, which suggests resolutions as capacity allows", "correct": true },
+        { "id": "b", "text": "Autofix merges the fixes directly to the default branch", "correct": false },
+        { "id": "c", "text": "Autofix is unavailable in campaigns", "correct": false },
+        { "id": "d", "text": "Autofix deletes the vulnerable files", "correct": false }
+      ],
+      "explanation": "Code scanning campaign alerts are **auto-submitted to Copilot Autofix** for suggested resolutions (processed as capacity allows) — suggestions a human still reviews. It doesn't merge on its own, isn't unavailable, and doesn't delete files.",
+      "sourceRefs": ["r-campaigns-manage", "r-campaigns-about"]
+    },
+    {
+      "id": "q-d5-11",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which alert types can a security campaign include today?",
+      "options": [
+        { "id": "a", "text": "Code scanning alerts (default branch) and secret scanning alerts (public preview)", "correct": true },
+        { "id": "b", "text": "Only Dependabot alerts", "correct": false },
+        { "id": "c", "text": "Only secret scanning alerts", "correct": false },
+        { "id": "d", "text": "Any alert type including Dependabot, with no preview caveats", "correct": false }
+      ],
+      "explanation": "Campaigns cover **code scanning** (default branch) and **secret scanning** (in **public preview**). Dependabot supply-chain alerts are remediated via their own campaign/PR flow; the option claiming 'any type, no caveats' overstates current support.",
+      "sourceRefs": ["r-campaigns-about", "r-campaigns-manage"]
+    },
+    {
+      "id": "q-d5-12",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Where at the organization level do you create campaigns and track remediation progress and open risk?",
+      "options": [
+        { "id": "a", "text": "Security Overview", "correct": true },
+        { "id": "b", "text": "The repository's Actions tab", "correct": false },
+        { "id": "c", "text": "The Insights → Traffic page", "correct": false },
+        { "id": "d", "text": "The user's personal notification settings", "correct": false }
+      ],
+      "explanation": "**Security Overview** is the org-wide surface for campaigns, coverage, and open-risk reporting. Actions runs workflows, Traffic shows repo visits, and notification settings are personal — none is the security reporting surface.",
+      "sourceRefs": ["r-security-overview", "r-campaigns-about"]
+    },
+    {
+      "id": "q-d5-13",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is the clearest 'shift-left' preventive control?",
+      "options": [
+        { "id": "a", "text": "Push protection blocking a secret before it is pushed", "correct": true },
+        { "id": "b", "text": "Dismissing an alert after it appears", "correct": false },
+        { "id": "c", "text": "Reading last month's risk report", "correct": false },
+        { "id": "d", "text": "Rotating a secret after it leaked", "correct": false }
+      ],
+      "explanation": "**Push protection** prevents the secret from landing at all — the earliest point. Dismissing, reporting, and post-leak rotation all happen after the risk exists.",
+      "sourceRefs": ["r-security-overview", "r-campaigns-about"]
+    },
+    {
+      "id": "q-d5-14",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team wants to reduce Dependabot notification noise from low-impact dev-dependency alerts without losing the ability to review them. What fits best?",
+      "options": [
+        { "id": "a", "text": "A Dependabot auto-triage rule (e.g. the preset 'Dismiss low impact issues for development-scoped dependencies') that auto-dismisses before notifying, keeping alerts viewable and reopenable", "correct": true },
+        { "id": "b", "text": "Turning off Dependabot entirely", "correct": false },
+        { "id": "c", "text": "Deleting the alerts from the database", "correct": false },
+        { "id": "d", "text": "Marking every alert Critical so they stand out", "correct": false }
+      ],
+      "explanation": "**Auto-triage rules** apply before notifications and can **auto-dismiss** low-value alerts while keeping them viewable and reopenable — exactly this need. Disabling Dependabot loses all coverage, deletion isn't possible/wise, and inflating severity is counterproductive.",
+      "sourceRefs": ["r-auto-triage"]
+    },
+    {
+      "id": "q-d5-15",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In code scanning, how do 'severity' and 'security severity' relate?",
+      "options": [
+        { "id": "a", "text": "'severity' is Error/Warning/Note; 'security severity' is Critical/High/Medium/Low (CVSS-based) and is used in preference when present", "correct": true },
+        { "id": "b", "text": "They are identical labels", "correct": false },
+        { "id": "c", "text": "'security severity' is Error/Warning/Note; 'severity' is CVSS-based", "correct": false },
+        { "id": "d", "text": "Neither affects how alerts are prioritized", "correct": false }
+      ],
+      "explanation": "Code scanning distinguishes rule **`severity`** (Error/Warning/Note) from **security severity** (Critical/High/Medium/Low, CVSS-based); when a **security severity** exists it's used **in preference**. They aren't identical, aren't swapped, and do influence prioritization.",
+      "sourceRefs": ["r-code-scanning-alerts"]
+    },
+    {
+      "id": "q-d5-16",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which best captures the correct governance stance on dismissing security alerts?",
+      "options": [
+        { "id": "a", "text": "Dismissal is a justified, reversible judgement (with a reason recorded); dismissed alerts remain auditable — it focuses attention, it doesn't erase risk", "correct": true },
+        { "id": "b", "text": "Dismissing an alert permanently deletes it and the underlying risk", "correct": false },
+        { "id": "c", "text": "Only alerts that are false positives may ever be dismissed", "correct": false },
+        { "id": "d", "text": "Dismissal requires no reason and leaves no trace", "correct": false }
+      ],
+      "explanation": "Responsible dismissal is a **documented, reversible judgement** — a reason is recorded and the alert stays auditable/reopenable. It doesn't erase risk, isn't limited strictly to false positives (risk-accepted and used-in-tests are valid too), and shouldn't be reasonless or untracked.",
+      "sourceRefs": ["r-auto-triage", "r-code-scanning-alerts"]
+    },
+    {
+      "id": "q-d5-17",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An organization wants to enforce a consistent remediation and severity expectation across Secret Protection, Supply Chain Security, and Code Security at once. What's the mechanism?",
+      "options": [
+        { "id": "a", "text": "Cross-suite rulesets/policies enforced at org or enterprise scope", "correct": true },
+        { "id": "b", "text": "A single repository's README", "correct": false },
+        { "id": "c", "text": "Asking each developer to remember the standard", "correct": false },
+        { "id": "d", "text": "A one-off code scanning run", "correct": false }
+      ],
+      "explanation": "Consistent enforcement across suites is what **cross-suite rulesets/policies** at org/enterprise scope are for. A README is documentation not enforcement, an honour system doesn't scale, and a single scan enforces nothing.",
+      "sourceRefs": ["r-security-overview"]
+    },
+    {
+      "id": "q-d5-18",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is the correct end-to-end path from a vulnerability in the world to a Dependabot alert in your repo?",
+      "options": [
+        { "id": "a", "text": "Vulnerability → CVE → GitHub-reviewed advisory mapped to an ecosystem → matched against your dependency graph → Dependabot alert", "correct": true },
+        { "id": "b", "text": "Vulnerability → code scanning → SARIF upload → secret scanning alert", "correct": false },
+        { "id": "c", "text": "Vulnerability → push protection → advisory → deployment", "correct": false },
+        { "id": "d", "text": "Vulnerability → unreviewed NVD advisory → automatic Dependabot alert", "correct": false }
+      ],
+      "explanation": "Reviewed advisories mapped to an **ecosystem** are what Dependabot matches against your **dependency graph** to raise alerts. The SARIF/secret-scanning path is unrelated; push protection is for secrets; and **unreviewed** NVD advisories do **not** generate Dependabot alerts.",
+      "sourceRefs": ["r-advisory-db", "r-dependabot-alerts"]
+    },
+    {
+      "id": "q-d5-19",
+      "domainId": "d5-security-operations",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "When triaging a mixed alert queue, which signals legitimately raise an alert's priority? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "High CVSS severity (Critical/High)", "correct": true },
+        { "id": "b", "text": "High EPSS exploit-likelihood", "correct": true },
+        { "id": "c", "text": "The vulnerable code is actually reachable / called at runtime", "correct": true },
+        { "id": "d", "text": "The alert simply arrived earliest (first-in-first-out)", "correct": false }
+      ],
+      "explanation": "Priority is driven by **impact (CVSS)**, **likelihood (EPSS)**, and **reachability** (runtime, called code) — the three signals GitHub's own ranking blends. **Arrival order** is not a risk signal; prioritizing by it is precisely the anti-pattern the domain warns against.",
+      "sourceRefs": ["r-dependabot-metrics", "r-epss", "r-dependabot-alerts"]
+    },
+    {
+      "id": "q-d5-20",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "When is a security campaign the right tool rather than fixing alerts one repository at a time?",
+      "options": [
+        { "id": "a", "text": "When the same class of alert recurs across many repositories and you want a coordinated, tracked burn-down", "correct": true },
+        { "id": "b", "text": "When a single repository has one alert to fix", "correct": false },
+        { "id": "c", "text": "When you want to scan a repo for the first time", "correct": false },
+        { "id": "d", "text": "When you want to export an SBOM", "correct": false }
+      ],
+      "explanation": "Campaigns shine on **recurring, cross-repo** debt where coordination and tracking pay off. A lone alert in one repo is a normal fix, first-time scanning is enablement, and SBOM export is a supply-chain feature — none needs a campaign.",
+      "sourceRefs": ["r-campaigns-best-practice", "r-campaigns-about"]
+    },
+    {
+      "id": "q-d5-21",
+      "domainId": "d5-security-operations",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is a CWE?",
+      "options": [
+        { "id": "a", "text": "A Common Weakness Enumeration — a category/type of weakness (e.g. CWE-79 cross-site scripting)", "correct": true },
+        { "id": "b", "text": "A single, specific vulnerability with a unique ID", "correct": false },
+        { "id": "c", "text": "A GitHub billing plan tier", "correct": false },
+        { "id": "d", "text": "The daily exploit-probability score", "correct": false }
+      ],
+      "explanation": "A **CWE** names a **class of weakness** (CWE-79 = XSS), which many CVEs can share. A single specific vulnerability is a **CVE**; a plan tier is commercial; and the exploit-probability score is **EPSS**.",
+      "sourceRefs": ["r-code-scanning-alerts", "r-advisory-db"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d5-triage-queue",
+      "domainIds": ["d5-security-operations"],
+      "title": "Triage a mixed alert queue, then act",
+      "tagline": "You can't fix everything today — rank it, then pick the right remediation move.",
+      "context": "You're the security engineer for an org with hundreds of open alerts across Secret Protection, Supply Chain Security, and Code Security. Leadership wants the highest-risk items handled first and a plan for the recurring ones. Work the queue.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First you must order the Dependabot queue by real risk, not arrival time. What's the soundest basis?",
+          "choices": [
+            { "id": "a", "text": "Rank by CVSS severity AND EPSS likelihood AND reachability (start from the 'Most important' sort, then refine)", "verdict": "best", "rationale": "Impact + likelihood + reachability is the defensible ranking, and GitHub's default sort already blends CVSS, scope, and vulnerable-function-call reachability.", "next": "st2" },
+            { "id": "b", "text": "Fix strictly by CVSS severity, highest first, ignoring EPSS", "verdict": "viable", "rationale": "Severity matters, but ignoring exploit-likelihood and reachability can send you at a Critical no one is exploiting before an actively-exploited High." },
+            { "id": "c", "text": "Fix in the order the alerts were created (first-in-first-out)", "verdict": "wrong", "rationale": "Arrival order is not a risk signal — this is exactly the anti-pattern the domain warns against." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "One dependency alert is Critical severity but its EPSS is near-zero and the vulnerable function is never called; another is High, actively exploited (high EPSS), on a runtime path you call. Which do you remediate first?",
+          "choices": [
+            { "id": "a", "text": "The High-severity, high-EPSS, reachable runtime alert", "verdict": "best", "rationale": "Live exploit-likelihood on reachable runtime code is the real risk; the unreachable, unexploited Critical can wait.", "next": "st3" },
+            { "id": "b", "text": "The Critical one, because Critical always outranks High", "verdict": "wrong", "rationale": "Severity alone ignores EPSS and reachability — the point of combining signals is to avoid exactly this mistake." },
+            { "id": "c", "text": "Neither; snooze both and revisit next quarter", "verdict": "wrong", "rationale": "An actively-exploited, reachable vulnerability is not something to defer a quarter." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Scanning the queue, you notice ~1,500 cross-site-scripting (CWE-79) code scanning alerts spread across 40 repos. How do you tackle the class?",
+          "choices": [
+            { "id": "a", "text": "Launch a security campaign scoped to XSS, narrowing filters (repo/severity/language) to ≤1000 alerts, with a follow-up campaign for the rest", "verdict": "best", "rationale": "One vulnerability type + the 1000-alert limit is the recommended scoping; developers recognise the pattern and build momentum, and you iterate.", "next": "st4" },
+            { "id": "b", "text": "Open one campaign containing all 1,500 XSS alerts at once", "verdict": "wrong", "rationale": "A campaign holds up to 1000 alerts; beyond that, alerts are omitted — you must narrow or split." },
+            { "id": "c", "text": "File 1,500 individual tickets and fix repo by repo", "verdict": "viable", "rationale": "It would eventually work, but it forfeits the coordination, momentum, and central tracking a campaign gives you for a recurring class." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "You're setting up the XSS campaign. What must you get right for it to succeed and be governed?",
+          "choices": [
+            { "id": "a", "text": "Name it, add a short description with secure-coding guidance and a realistic due date, and assign a campaign manager who is an org owner or security manager", "verdict": "best", "rationale": "Required fields (name/description/due date) plus an accountable campaign manager (owner or security manager) are exactly what makes a campaign work and stay governed." },
+            { "id": "b", "text": "Assign a read-only developer as campaign manager to save the owners' time", "verdict": "wrong", "rationale": "Campaign managers must be organization owners or security managers — a read-only user can't hold that role." },
+            { "id": "c", "text": "Skip the due date and point of contact; developers will get to it eventually", "verdict": "wrong", "rationale": "No deadline and no accountable contact is how campaigns stall — both are core to the best-practice pattern." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-dependabot-metrics", "r-epss", "r-campaigns-best-practice", "r-campaigns-manage"]
+    },
+    {
+      "id": "s-d5-shiftleft-governance",
+      "domainIds": ["d5-security-operations"],
+      "title": "Shift left and govern across the suites",
+      "tagline": "Prevent at the source, cut noise responsibly, and govern the whole risk picture.",
+      "context": "Your org is drowning in after-the-fact alerts and inconsistent handling. As the platform security lead you want to move controls earlier, reduce noise without hiding risk, and enforce one standard across Secret Protection, Supply Chain Security, and Code Security.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Secrets keep landing in the remote before anyone notices. What's the strongest shift-left move?",
+          "choices": [
+            { "id": "a", "text": "Enable push protection so secrets are blocked at push time, before they reach the remote", "verdict": "best", "rationale": "Push protection prevents the secret from landing at all — the earliest, most effective point in the lifecycle.", "next": "st2" },
+            { "id": "b", "text": "Keep detecting leaked secrets after the fact and rotate them faster", "verdict": "viable", "rationale": "Faster rotation limits damage, but it's response, not prevention — the secret still leaked." },
+            { "id": "c", "text": "Turn off Secret Protection because the alerts are annoying", "verdict": "wrong", "rationale": "Disabling the control removes your visibility entirely — the opposite of what's needed." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Developers ignore the queue because it's full of low-impact dev-dependency alerts. How do you cut the noise responsibly?",
+          "choices": [
+            { "id": "a", "text": "Apply a Dependabot auto-triage rule (e.g. the preset for development-scoped dependencies) that auto-dismisses low-impact alerts before notifying, keeping them viewable and reopenable", "verdict": "best", "rationale": "Auto-triage cuts noise at the source while preserving auditability and the ability to reopen — noise down, risk not hidden.", "next": "st3" },
+            { "id": "b", "text": "Tell developers to manually close anything that looks unimportant", "verdict": "viable", "rationale": "Manual dismissal with reasons is legitimate, but it doesn't scale and is inconsistent compared with a rule." },
+            { "id": "c", "text": "Delete the alerts so they stop appearing", "verdict": "wrong", "rationale": "Alerts shouldn't (and can't) simply be deleted to hide risk — dismissed alerts must remain auditable." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Push protection is blocking a few legitimate cases and teams want to bypass it themselves. How do you keep it governed?",
+          "choices": [
+            { "id": "a", "text": "Use delegated bypass so a designated approver grants controlled, logged exceptions", "verdict": "best", "rationale": "Delegated bypass keeps exceptions governed, auditable, and case-by-case — protection stays on while real needs are handled.", "next": "st4" },
+            { "id": "b", "text": "Disable push protection for those repos so no one is blocked", "verdict": "wrong", "rationale": "Turning protection off removes prevention entirely instead of governing the exception." },
+            { "id": "c", "text": "Grant every developer bypass permission", "verdict": "wrong", "rationale": "Blanket bypass defeats the control and abandons least-privilege." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Finally, leadership wants one consistent severity/remediation standard across all three suites, plus an org-wide view of coverage and open risk. What do you put in place?",
+          "choices": [
+            { "id": "a", "text": "Cross-suite rulesets/policies enforced at org/enterprise scope, and use Security Overview for coverage and open-risk reporting", "verdict": "best", "rationale": "Cross-suite rulesets enforce one standard everywhere, and Security Overview is the single surface for coverage and open-risk reporting." },
+            { "id": "b", "text": "Write the standard in a wiki page and hope teams follow it", "verdict": "wrong", "rationale": "Documentation isn't enforcement and gives you no org-wide risk view." },
+            { "id": "c", "text": "Configure each repository independently with its own ad-hoc settings", "verdict": "viable", "rationale": "It can technically work but drifts immediately and gives no consistent, centrally-governed standard or reporting." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-security-overview", "r-auto-triage", "r-campaigns-about"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d5-prioritize",
+      "domainId": "d5-security-operations",
+      "title": "Prioritize a Dependabot queue with severity and EPSS",
+      "goal": "Practise ranking real alerts by impact and exploit-likelihood using GitHub's filters and sort.",
+      "steps": "## What you'll do\n\nUse a repo (or org) that has Dependabot alerts. If you don't have one, enable the dependency graph and Dependabot alerts on a repo with a known-vulnerable dependency (for example an old `lodash` or `log4j` pin) and let alerts populate.\n\n1. Open the **Dependabot alerts** list (repo: **Security → Dependabot alerts**; or org **Security Overview**).\n2. Confirm the default sort is **Most important** — note it blends **CVSS severity, dependency scope, and vulnerable-function-call reachability**.\n3. Filter to impact: add `severity:critical` then `severity:high`. Read a couple of alerts and note their severity.\n4. Filter to likelihood: add `epss_percentage>=0.10` to surface alerts with ≥10% exploit probability. Open one and read its **EPSS** score and percentile.\n5. Narrow to actionable, runtime risk: combine `scope:runtime` and `has:patch`. These are strong 'fix first' candidates.\n6. Write your top-5 list and, next to each, one sentence justifying the rank using **severity + EPSS + reachability** — not arrival order.\n\n## Why it matters\n\nThe exam asks you to justify a fix order. Doing it against the real filters (`severity`, `epss_percentage`, `scope`, `has:patch`) turns the abstract 'severity vs likelihood vs reachability' rule into muscle memory.",
+      "checklist": [
+        "Confirmed the 'Most important' sort and what it blends",
+        "Filtered by severity (critical/high) and read the values",
+        "Used epss_percentage>=0.10 and read an EPSS score + percentile",
+        "Combined scope:runtime and has:patch to find 'fix first' alerts",
+        "Wrote a top-5 list with a severity+EPSS+reachability justification each"
+      ]
+    },
+    {
+      "id": "lab-d5-campaign",
+      "domainId": "d5-security-operations",
+      "title": "Scope and launch a single-vulnerability security campaign",
+      "goal": "Plan a campaign the way the best-practice guidance says to: one vulnerability type, ≤1000 alerts, an accountable owner.",
+      "steps": "## Prerequisites\n\nAn organization with **GitHub Code Security** (GHAS) and some code scanning alerts on default branches. You need to be (or work with) an **organization owner or security manager** to create a campaign.\n\n## Steps\n\n1. In the organization, open **Security Overview → Campaigns**.\n2. Start a new campaign and choose **From code scanning filters** (or use a **template**, e.g. a CWE-based one).\n3. Scope to **one vulnerability type** — for example cross-site scripting (**CWE-79**). Add filters (repository, severity, language) until the matching count is **≤1000 alerts**. If more match, narrow further or plan a follow-up campaign.\n4. Fill the required details: a clear **name**, a **short description** with secure-coding guidance/links, and a realistic **due date** (account for developer capacity and holidays).\n5. Assign one or more **campaign managers** — each must be an **organization owner or security manager** — as the point of contact.\n6. Confirm code scanning alerts will be **submitted to Copilot Autofix** for suggested fixes, and enable **issue tracking** for visibility.\n7. (Optional) Filter to `autofix:supported` to focus first on alerts an AI fix can accelerate.\n8. Publish, then, as a developer, open the campaign view and confirm you can see the highlighted alerts without leaving your normal workflow.\n\n## Self-check\n\nIf you tried to add more than 1000 alerts and saw them omitted, or tried to name a read-only user as campaign manager and couldn't, you've hit the guardrails — that's the point.",
+      "checklist": [
+        "Opened Security Overview → Campaigns and started a campaign",
+        "Scoped to a single vulnerability type (e.g. CWE-79 XSS)",
+        "Narrowed filters to ≤1000 alerts",
+        "Set name, description, and a realistic due date",
+        "Assigned a campaign manager who is an org owner or security manager",
+        "Confirmed Copilot Autofix submission and enabled issue tracking"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-study-guide",
+      "title": "GH-500 study guide — Skills measured (as of July 2026)",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-500",
+      "kind": "official-blueprint",
+      "annotation": "The exam blueprint. Read the 'Security operations: best practices, prioritization, and remediation (15–20%)' group verbatim — it names CVE/CWE/advisory, severity/remediation rulesets, campaign-based remediation, auto-dismissal, shift-left, and cross-suite governance. The task statements are the spec this domain is authored against.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-security-overview",
+      "title": "About Security Overview",
+      "url": "https://docs.github.com/en/code-security/security-overview/about-security-overview",
+      "kind": "official-doc",
+      "annotation": "The org-wide reporting surface. Extract the views — Overview (detection/remediation/prevention trends), Risk, Coverage, Enablement, and Campaigns — and that this is where you report coverage, track open risk, and run campaigns across all three suites.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-campaigns-about",
+      "title": "About security campaigns (concept)",
+      "url": "https://docs.github.com/en/code-security/concepts/security-at-scale/about-security-campaigns",
+      "kind": "official-doc",
+      "annotation": "What campaigns are and the problem they solve (burning down security debt at scale). Extract: supported alert types (code scanning default-branch; secret scanning in public preview), the named point of contact, Copilot Autofix suggestions, and that developers see highlighted alerts in their normal workflow with progress tracked centrally.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-campaigns-manage",
+      "title": "Creating and managing security campaigns",
+      "url": "https://docs.github.com/en/code-security/how-tos/manage-security-alerts/remediate-alerts-at-scale/creating-managing-security-campaigns",
+      "kind": "official-doc",
+      "annotation": "The hard facts: max 1000 alerts (excess omitted), campaign managers must be organization owners or security managers, required name/description/due date, alert selection via 'From code scanning filters' / 'From secret scanning filters', and code scanning alerts auto-submitted to Copilot Autofix.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-campaigns-best-practice",
+      "title": "Best practices for fixing security alerts at scale",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/fixing-security-alerts-at-scale/best-practice-fix-alerts-at-scale",
+      "kind": "official-doc",
+      "annotation": "When and how to run a campaign. Extract the core recommendation: scope to a single vulnerability type (e.g. XSS / CWE-79) so developers recognise the pattern and build momentum, keep to ≤1000 alerts (narrow by repo/severity/language or run multiple), set a realistic due date, and use the autofix:supported filter.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-epss",
+      "title": "Dependabot alerts — filters (EPSS definition)",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-alerts-filters",
+      "kind": "official-doc",
+      "annotation": "The exact EPSS definition and the filter qualifiers. Extract: EPSS = Exploit Prediction Scoring System, a 0–100% probability of exploitation in the next 30 days plus a percentile, from FIRST, updated daily; and filters severity, epss_percentage (e.g. epss_percentage>=0.10), scope, relationship, ecosystem, package, resolution, and has (e.g. has:patch).",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-dependabot-metrics",
+      "title": "Prioritizing Dependabot alerts using metrics",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/understanding-your-organizations-exposure-to-vulnerabilities/prioritizing-dependabot-alerts-using-metrics",
+      "kind": "official-doc",
+      "annotation": "How to actually prioritize: severity, exploitability (EPSS), dependency relationship (direct/transitive) and scope (runtime/development). Extract the worked EPSS reading (e.g. 90.534% at the 95th percentile) and the funnel of filters for narrowing to the highest-risk alerts.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-dependabot-alerts",
+      "title": "About Dependabot alerts",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+      "kind": "official-doc",
+      "annotation": "What an alert is and how it's raised. Extract: alerts come from GitHub-reviewed advisories matched against your dependency graph, the default 'Most important' sort blends CVSS score, dependency scope, and vulnerable-function-call reachability, and auto-triage rules can auto-dismiss low-risk alerts before notifying.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-advisory-db",
+      "title": "About the GitHub Advisory Database",
+      "url": "https://docs.github.com/en/code-security/concepts/vulnerability-reporting-and-management/about-the-github-advisory-database",
+      "kind": "official-doc",
+      "annotation": "The vocabulary source. Extract: CVSS severity has four levels (Low/Medium(Moderate)/High/Critical); 'ecosystem' = a package registry (npm, PyPI, RubyGems…); GitHub-reviewed advisories are validated and mapped to an ecosystem and power Dependabot, while unreviewed advisories are imported from NVD and do NOT generate Dependabot alerts.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-repo-advisories",
+      "title": "About repository security advisories",
+      "url": "https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/about-repository-security-advisories",
+      "kind": "official-doc",
+      "annotation": "Coordinated disclosure and CVEs. Extract: repository advisories let maintainers privately discuss/fix/publish a vulnerability; GitHub is a CVE Numbering Authority (CNA) and can assign a CVE (usually reviewed within 72 hours); published advisories can flow to the global GitHub Advisory Database and drive Dependabot alerts.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-auto-triage",
+      "title": "About Dependabot auto-triage rules",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-auto-triage-rules/about-dependabot-auto-triage-rules",
+      "kind": "official-doc",
+      "annotation": "Responsible noise control. Extract: rules apply before notifications and can auto-dismiss or snooze; GitHub preset rules (e.g. 'Dismiss low impact issues for development-scoped dependencies', on by default for public repos) vs custom rules (GHAS) keyed on severity/package/CWE; dismissed alerts remain viewable and reopen if scope or advisory data changes.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-code-scanning-alerts",
+      "title": "About code scanning alerts (severity & CWE)",
+      "url": "https://docs.github.com/en/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts",
+      "kind": "official-doc",
+      "annotation": "The two-severity distinction and CWE tagging. Extract: 'severity' = Error/Warning/Note; 'security severity' = Critical/High/Medium/Low (CVSS-based) and is used in preference when present; alerts are associated with CWE tags — the hook a campaign uses to gather one weakness class.",
+      "domainIds": ["d5-security-operations"]
+    },
+    {
+      "id": "r-ms-learn-part2",
+      "title": "MS Learn — GitHub Advanced Security Part 2",
+      "url": "https://learn.microsoft.com/en-us/training/paths/github-advanced-security-2/",
+      "kind": "official-learning-path",
+      "annotation": "The recommended training path covering administration and managing sensitive data and security policies. Use its 'GitHub administration for GHAS' and 'Manage sensitive data and security policies' modules to reinforce cross-suite governance, roles, and the response-to-threats mindset behind security operations.",
+      "domainIds": ["d5-security-operations"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d5-1",
+      "title": "D5 · Prioritize the queue — CVE/CWE/advisory, CVSS vs EPSS, reachability",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d5-security-operations"],
+      "sourceNotebook": "gh-500 / d5 / prioritization"
+    },
+    {
+      "id": "v-d5-2",
+      "title": "D5 · Remediate at scale — campaigns, shift-left & cross-suite governance",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d5-security-operations"],
+      "sourceNotebook": "gh-500 / d5 / campaigns-and-governance"
+    }
+  ]
+}

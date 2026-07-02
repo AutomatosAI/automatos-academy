@@ -1,0 +1,848 @@
+{
+  "id": "d3-supply-chain",
+  "order": 3,
+  "code": "D3",
+  "name": "Configure and use supply chain security",
+  "weight": 0.18,
+  "tagline": "The dependency graph as the foundation, SBOM export for audit, Dependabot alerts vs updates, EPSS to prioritise by exploit-likelihood, Dependency Review as the pre-merge gate, and grouping, auto-dismiss, and campaigns to fix at scale.",
+  "overview": "Supply Chain Security (formerly Dependabot / Dependency Review) is 15–20% of GH-500. It tests whether you can secure the code you *depend on*: build the dependency graph, export an SBOM, tell Dependabot alerts from security updates from version updates, prioritise with EPSS alongside CVSS, gate risky changes at the pull request with Dependency Review, and remediate across many repositories with grouping, auto-dismiss, and security campaigns. The July-2026 refresh made EPSS scoring, SBOM export, auto-triage/auto-dismiss, and security campaigns explicit task statements — and renamed the suite to Supply Chain Security, with 'Dependabot/Dependency Review' now the legacy umbrella term (Dependabot is a feature inside the suite, not the suite itself).",
+  "objectives": [
+    "Generate and interpret the dependency graph, and export an SBOM in SPDX format for audit and compliance.",
+    "Distinguish Dependabot alerts, security updates, and version updates, and know what each needs to run.",
+    "Prioritise supply-chain alerts with EPSS (likelihood of exploitation) alongside CVSS severity, and filter/sort alerts by EPSS.",
+    "Use Dependency Review as a pre-merge gate — the rich-diff view and the action — and configure it to fail on severity or on denied licenses.",
+    "Remediate at scale with update grouping, auto-triage/auto-dismiss rules, and security campaigns."
+  ],
+  "lessons": [
+    {
+      "id": "l1-graph-sbom",
+      "title": "The dependency graph and the SBOM",
+      "estMinutes": 15,
+      "objective": "Explain what the dependency graph is, what it feeds, and how to export an SBOM in SPDX format.",
+      "body": "## The foundation everything else stands on\n\nThe **dependency graph** is GitHub's inventory of what a repository depends on. It parses your **manifest and lock files** for supported ecosystems and produces a structured picture of:\n\n- **Dependencies** — the ecosystems and packages your repo depends on, with version and license, and (where the ecosystem supports it) the **transitive** path that brought an indirect dependency in. Use *Show paths* to see why a package you never named is present.\n- **Dependents** — other public repositories and packages that depend on you. This is reported for **public** repositories only.\n\nIt fills two ways: GitHub **automatically parses manifests and lock files**, and you can push data in via the **dependency submission API** (useful for dependencies resolved at build time that aren't in a committed lock file).\n\n> **Exam anchor:** the dependency graph is the **prerequisite** for Dependabot alerts, Dependabot security updates, Dependency Review, and SBOM export. If a question says 'alerts aren't appearing' or 'Dependency Review shows nothing', the dependency graph being off is the classic root cause. When you enable Dependabot on a repo where the graph isn't on, GitHub enables the graph automatically.\n\n## On by default? Depends on visibility\n\nThe dependency graph is **on by default for public repositories**. For **private** repositories it must be **enabled** (Settings → Advanced Security → enable Dependency graph). Enabling it grants GitHub **read-only** access to the repo's manifest and lock files. That public-on / private-enable split is a recurring exam distinction across the whole suite.\n\n## The SBOM: an export, not a scan\n\nAn **SBOM (software bill of materials)** is a transparent inventory of a project's dependencies — the thing auditors and compliance regimes ask for. GitHub lets you **export the current state of the dependency graph as an SBOM in the industry-standard SPDX format (SPDX 2.3)**.\n\n- **In the UI:** repository **Insights** tab → **Dependency graph** → **Dependencies** → **Export SBOM**.\n- **Via REST API:** the dependency-graph SBOM endpoint returns the same document as JSON, so you can wire it into a pipeline or attach it to a release.\n\nThe SBOM includes **versions, package identifiers, licenses, transitive paths, and copyright information**. It does **not** include your *dependents* (an SBOM is about what you consume, not who consumes you).\n\n> **Distractor to reject:** an SBOM is an **export of existing graph data**, not a fresh scan of your code. It doesn't find vulnerabilities by itself — that's Dependabot alerts reading the same graph against the Advisory Database. On the exam, 'run an SBOM to detect vulnerabilities' is wrong; 'export an SBOM in SPDX for an audit' is right.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-1",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "A Dependabot alert never fires on a private repo, and Dependency Review shows no data. What is the most likely root cause?",
+          "options": [
+            { "id": "a", "text": "The dependency graph is not enabled — it's the prerequisite for both, and it's off by default on private repos", "correct": true },
+            { "id": "b", "text": "The repository has no README, so GitHub can't index it" },
+            { "id": "c", "text": "SBOM export was never run, which is what populates alerts" },
+            { "id": "d", "text": "Branch protection is disabled" }
+          ],
+          "explanation": "Dependabot alerts and Dependency Review both **read the dependency graph**, which is **on by default for public repos but must be enabled on private repos**. A README, running an SBOM export (SBOM is an output of the graph, not a source of alerts), and branch protection are unrelated to whether the graph exists.",
+          "sourceRefs": ["r-depgraph", "r-depgraph-config", "r-dependabot-alerts"]
+        },
+        {
+          "id": "kc-d3-2",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Compliance asks for a machine-readable inventory of your app's dependencies in a standard format. What do you give them, and how?",
+          "options": [
+            { "id": "a", "text": "Export an SBOM in SPDX format from Insights → Dependency graph → Export SBOM (or via the REST API)", "correct": true },
+            { "id": "b", "text": "Send a screenshot of the Dependabot alerts page" },
+            { "id": "c", "text": "Run CodeQL and export the SARIF file" },
+            { "id": "d", "text": "Export the list of repository dependents" }
+          ],
+          "explanation": "GitHub exports an **SBOM in the industry-standard SPDX format** from the dependency graph, via the UI or REST API — exactly the audit artifact requested. A screenshot isn't machine-readable; SARIF is a **code-scanning** results format, not a dependency inventory; dependents are who depends on *you*, not what you consume.",
+          "sourceRefs": ["r-sbom", "r-depgraph"]
+        },
+        {
+          "id": "kc-d3-3",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement about the SBOM GitHub exports is correct?",
+          "options": [
+            { "id": "a", "text": "It's a point-in-time export of the dependency graph in SPDX, including transitive paths but not your dependents", "correct": true },
+            { "id": "b", "text": "It scans your source for new vulnerabilities as it runs" },
+            { "id": "c", "text": "It lists every repository that depends on yours" },
+            { "id": "d", "text": "It is emitted only in CycloneDX format" }
+          ],
+          "explanation": "The SBOM is the **current state of the dependency graph** rendered in **SPDX**, and it **includes transitive paths** but **excludes dependents**. It performs no scan of its own, doesn't enumerate who depends on you, and GitHub's native export uses SPDX (not CycloneDX).",
+          "sourceRefs": ["r-sbom"]
+        }
+      ]
+    },
+    {
+      "id": "l2-alerts-updates",
+      "title": "Alerts vs security updates vs version updates",
+      "estMinutes": 16,
+      "objective": "Tell Dependabot's three capabilities apart and know what each requires and produces.",
+      "body": "## Three Dependabot capabilities, one common trap\n\nThe single most-tested distinction in this domain. Dependabot does three different jobs; the exam loves to swap them.\n\n- **Dependabot alerts** — *inform* you about vulnerabilities in the dependencies you use. An alert is created when a **new advisory is added to the GitHub Advisory Database** or when your **dependency graph changes** to include an affected version. An alert is a **notification**; it changes no code.\n- **Dependabot security updates** — *automatically raise pull requests* to update a dependency that has a **known vulnerability** to the **minimum version that includes the patch**. They're **triggered by a Dependabot alert** — no alert, no security-update PR.\n- **Dependabot version updates** — *automatically raise pull requests* to keep dependencies **up to date even when there is no vulnerability**. They're driven by a **`dependabot.yml`** config file in **`.github/`** on a schedule you set, and use semantic versioning to decide what to bump.\n\n> **Say it in one line for the exam:** alerts *tell you*, security updates *fix known vulnerabilities* (alert-driven, minimum fix version), version updates *keep you current* (config-driven, no vulnerability needed).\n\n## What each one needs\n\n- **Alerts** need the **dependency graph** (they read it against the Advisory Database).\n- **Security updates** need the **dependency graph and Dependabot alerts** — they act *on* alerts.\n- **Version updates** need a **`dependabot.yml`** file; that file declares each `package-ecosystem`, the `directory` of the manifest, and a `schedule`.\n\nBecause the graph is on by default for public repos, alerts flow there with little setup; on private repos you enable the graph (and Dependabot) first.\n\n## Why 'minimum version that fixes it' matters\n\nSecurity updates deliberately bump to the **smallest** version that clears the vulnerability, not the newest release. That keeps the change small and reviewable and reduces the risk of an unrelated breaking change riding along with the security fix. If you *also* want to chase latest versions generally, that's what **version updates** are for — a separate, opt-in behaviour.\n\n> **Exam anchor:** 'Dependabot opened a PR' is ambiguous until you know *why*. Vulnerability present + PR to the minimum fix = **security update**. Scheduled PR with no vulnerability = **version update**. And a plain **alert** never opens a PR on its own.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-4",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A dependency has a newly published critical advisory. You want GitHub to open a PR that bumps it just far enough to clear the vulnerability. Which capability?",
+          "options": [
+            { "id": "a", "text": "Dependabot security updates — alert-driven PRs to the minimum patched version", "correct": true },
+            { "id": "b", "text": "Dependabot version updates — scheduled PRs to the latest version" },
+            { "id": "c", "text": "Dependabot alerts — they open the fix PR automatically" },
+            { "id": "d", "text": "SBOM export — it patches as it runs" }
+          ],
+          "explanation": "**Security updates** are triggered by the alert and raise a PR to the **minimum version that includes the patch**. Version updates chase *latest* on a schedule (not vulnerability-driven); a plain **alert** notifies but opens no PR; SBOM export never changes code.",
+          "sourceRefs": ["r-security-updates", "r-dependabot-alerts"]
+        },
+        {
+          "id": "kc-d3-5",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team wants routine PRs that keep libraries current every week, whether or not there's a vulnerability. What do you configure?",
+          "options": [
+            { "id": "a", "text": "Dependabot version updates via a dependabot.yml file with a schedule", "correct": true },
+            { "id": "b", "text": "Dependabot security updates, which cover routine currency too" },
+            { "id": "c", "text": "A security campaign" },
+            { "id": "d", "text": "Nothing — alerts already open weekly PRs" }
+          ],
+          "explanation": "Keeping dependencies current **absent any vulnerability** is **version updates**, configured in **`dependabot.yml`** with a `schedule`. Security updates only act on **known vulnerabilities**; a campaign remediates existing alerts at scale; alerts alone never open PRs.",
+          "sourceRefs": ["r-version-updates", "r-quickstart"]
+        },
+        {
+          "id": "kc-d3-6",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What does a Dependabot alert, on its own, actually do?",
+          "options": [
+            { "id": "a", "text": "Notifies you that a dependency you use is vulnerable — it does not change code", "correct": true },
+            { "id": "b", "text": "Opens a pull request to patch the dependency" },
+            { "id": "c", "text": "Exports an SBOM for the repository" },
+            { "id": "d", "text": "Blocks the pull request that introduced the dependency" }
+          ],
+          "explanation": "An **alert is a notification** about a vulnerable dependency. Opening a fix PR is **security updates**; SBOM export is a separate graph feature; blocking a PR pre-merge is **Dependency Review**.",
+          "sourceRefs": ["r-dependabot-alerts", "r-quickstart"]
+        }
+      ]
+    },
+    {
+      "id": "l3-epss-review",
+      "title": "Prioritising with EPSS, and the pre-merge gate",
+      "estMinutes": 16,
+      "objective": "Use EPSS alongside CVSS to prioritise, and gate risky dependency changes with Dependency Review.",
+      "body": "## Two questions, two scores\n\nWhen you have more alerts than time, you triage on two independent axes:\n\n- **CVSS severity** answers *how bad is it if exploited?* — impact. It's the critical/high/moderate/low label.\n- **EPSS** answers *how likely is it to actually be exploited?* — probability. **EPSS (Exploit Prediction Scoring System)** comes from the global **FIRST (Forum of Incident Response and Security Teams)**. An EPSS score is a **probability from 0 to 1 (0 to 100%)** that a vulnerability will be **exploited in the wild in the next 30 days**. It's paired with a **percentile** — a 90.534% score at the **95th percentile** means a ~90.5% chance of exploitation in the next 30 days and that 95% of other vulnerabilities are *less* likely to be exploited. High EPSS is rare: only about **0.5% of vulnerabilities score above 50%**.\n\n> **The exam's favourite pairing:** a *critical* CVSS vulnerability with a *tiny* EPSS may be less urgent than a *high* CVSS one with EPSS near the top of the range — because something exploited in the wild right now is the fire to put out first. CVSS = severity/impact; EPSS = likelihood. **Combine them** to prioritise; don't treat EPSS as a replacement for CVSS.\n\n## Working EPSS on the alerts list\n\nGitHub surfaces EPSS on Dependabot alerts so you can act on it:\n\n- **Filter:** `epss_percentage` — e.g. `epss_percentage:>0.5` shows alerts with a greater-than-50% exploitation probability. (You'll also see it written `epss_percentage>=0.10`.)\n- **Sort:** `sort:epss-percentage` puts the most-likely-to-be-exploited alerts on top. (The default sort is `sort:most-important`, which blends signals including CVSS, dependency scope, and whether a vulnerable function call is detected.)\n\n## Dependency Review: catch it before it lands\n\nAlerts and updates are about vulnerabilities **already in** the repo. **Dependency Review** shifts left to the **pull request**, showing the security impact of a change **before merge**. There are two forms:\n\n1. **The rich-diff view** — no configuration. On a PR's **Files changed** tab it visualises which dependencies were **added, removed, or updated**, their release dates, how many projects use them, and known **vulnerability data**. Great for a human reviewer; it doesn't *block* anything.\n2. **The dependency review action** — added to a GitHub Actions workflow. It can **fail the check** and, when that check is **required** (branch protection), a failed check **blocks the merge**. Configure it with:\n   - `fail-on-severity` (`critical` | `high` | `moderate` | `low`) — fail if a change introduces a vulnerability at or above that severity.\n   - `allow-licenses` / `deny-licenses` (SPDX identifiers) — enforce license policy; you use **one or the other**, not both.\n   - `fail-on-scopes`, `allow-ghsas` — refine scope and waive specific advisories.\n\n> **Exam anchor:** the rich-diff **informs**; the **action enforces**. 'Block a PR that adds a high-severity vulnerable dependency' = the **dependency review action with `fail-on-severity: high`**, made a **required** check. The passive view alone can't block a merge.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-7",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "How does EPSS complement CVSS when you triage Dependabot alerts?",
+          "options": [
+            { "id": "a", "text": "CVSS rates severity/impact; EPSS estimates the probability of exploitation in the next 30 days — combine them to prioritise", "correct": true },
+            { "id": "b", "text": "EPSS replaces CVSS with a more accurate severity score" },
+            { "id": "c", "text": "EPSS measures how many dependents a package has" },
+            { "id": "d", "text": "CVSS predicts exploitation likelihood; EPSS measures blast radius" }
+          ],
+          "explanation": "**CVSS = severity (impact)**, **EPSS = likelihood of exploitation** (a 0–100% probability over the next 30 days, from FIRST). They're **complementary**, not interchangeable — EPSS doesn't replace CVSS, doesn't count dependents, and the roles in option d are reversed.",
+          "sourceRefs": ["r-epss-metrics", "r-epss-changelog"]
+        },
+        {
+          "id": "kc-d3-8",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want to see only the Dependabot alerts most likely to be exploited soon. What do you use on the alerts list?",
+          "options": [
+            { "id": "a", "text": "Filter with epss_percentage (e.g. epss_percentage:>0.5) and/or sort:epss-percentage", "correct": true },
+            { "id": "b", "text": "Filter with severity:critical only" },
+            { "id": "c", "text": "Sort by newest" },
+            { "id": "d", "text": "Export an SBOM and read it top-to-bottom" }
+          ],
+          "explanation": "**EPSS** is the exploit-likelihood signal, exposed as the **`epss_percentage`** filter and the **`sort:epss-percentage`** sort. `severity:critical` filters by CVSS impact (not likelihood), newest is chronological, and an SBOM lists dependencies, not exploit probability.",
+          "sourceRefs": ["r-epss-filters", "r-epss-metrics"]
+        },
+        {
+          "id": "kc-d3-9",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A PR must be blocked automatically if it introduces a dependency with a high-or-worse vulnerability. What do you set up?",
+          "options": [
+            { "id": "a", "text": "The dependency review action with fail-on-severity: high, made a required status check", "correct": true },
+            { "id": "b", "text": "The dependency review rich-diff view on the Files changed tab" },
+            { "id": "c", "text": "A Dependabot security update" },
+            { "id": "d", "text": "An EPSS filter on the alerts page" }
+          ],
+          "explanation": "Only the **dependency review action** can fail a check, and only a **required** check **blocks the merge**; `fail-on-severity: high` sets the threshold. The rich-diff view **informs but can't block**; security updates fix vulnerabilities already merged; an EPSS filter is for triaging existing alerts.",
+          "sourceRefs": ["r-dep-review", "r-dep-review-action"]
+        }
+      ]
+    },
+    {
+      "id": "l4-scale",
+      "title": "Fixing at scale: grouping, auto-dismiss, and campaigns",
+      "estMinutes": 15,
+      "objective": "Reduce noise and remediate across many repositories with grouping, auto-triage rules, and security campaigns.",
+      "body": "## The problem: too many PRs, too many alerts\n\nAt scale, Dependabot can bury you in single-dependency PRs and low-value alerts. Three features cut the noise and coordinate remediation.\n\n## Grouping updates into one PR\n\nThe **`groups`** key in `dependabot.yml` **consolidates updates for multiple dependencies into a single pull request** — fewer PRs, less review churn. You group by **`dependency-type`** (production vs development), name **`patterns`** / **`exclude-patterns`**, and **`update-types`** (`patch` / `minor` / `major`).\n\n- By default a group applies to **version updates only**. Set **`applies-to: security-updates`** (or `applies-to: version-updates`) to control which stream a group governs.\n- So yes — you can group **security** update PRs too, but only when you opt a group in with `applies-to: security-updates`.\n\n## Auto-triage / auto-dismiss: stop crying wolf\n\n**Dependabot auto-triage rules** decide, **before notifications are sent**, which alerts to **auto-dismiss** (or snooze, or open PRs for) based on metadata — severity, CWE, package, **dependency scope** (development vs runtime), and more. Two kinds:\n\n- **GitHub preset rules.** The headline preset **auto-dismisses low-impact vulnerabilities in npm *development* dependencies** — issues unlikely to be exploitable in a non-production/runtime context (slow builds, long-running tests, and the like). This preset is **on by default for public repositories**.\n- **Custom rules.** You define your own criteria (available on public repos and org repos with Code Security).\n\nCrucially, an alert dismissed by a rule can be **auto-reopened if the metadata changes** — e.g. you move a dependency from **development to production scope**. Auto-dismiss reduces fatigue **without permanently hiding** something that later becomes relevant.\n\n> **Distractor to reject:** auto-dismiss is **rule-based triage of alerts**, not a way to skip a required Dependency Review check or to auto-merge fix PRs.\n\n## Security campaigns: coordinate the fix across the org\n\nWhen you need to drive down **existing** alerts across many repositories, a **security campaign** groups a set of alerts, gives them a **due date** and a named **campaign manager**, and shares them with developers so they can remediate **without leaving their normal workflow**. Key facts:\n\n- A single campaign holds **1000 alerts or fewer**.\n- **Campaign managers must be users or teams that are owners or security managers** in the organisation — campaigns are an org-level, security-manager-driven tool.\n- For code scanning alerts in a campaign, **Copilot Autofix is triggered automatically** to suggest a fix, and alerts can be handed to the Copilot coding agent to open fix PRs — remediation with assistance, not just a to-do list.\n\n> **Exam anchor:** grouping and auto-dismiss reduce **incoming noise**; a **campaign** organises **remediation of the backlog at scale** with ownership and a deadline. Match the tool to whether you're cutting noise or driving a coordinated fix.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d3-10",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You want Dependabot's weekly PRs bundled — all minor and patch updates for production dependencies in one PR. What do you use?",
+          "options": [
+            { "id": "a", "text": "The groups key in dependabot.yml, scoped to production dependency-type and patch/minor update-types", "correct": true },
+            { "id": "b", "text": "A security campaign" },
+            { "id": "c", "text": "Auto-triage rules to dismiss the extra PRs" },
+            { "id": "d", "text": "The dependency review action" }
+          ],
+          "explanation": "Bundling multiple updates into one PR is the **`groups`** key, filtered by `dependency-type` and `update-types`. A campaign remediates existing *alerts*, not PR volume; auto-triage dismisses *alerts* (not PRs); the dependency review action gates PRs, it doesn't combine version-update PRs.",
+          "sourceRefs": ["r-grouping"]
+        },
+        {
+          "id": "kc-d3-11",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "An alert auto-dismissed by the preset dev-dependency rule suddenly matters because the package is now used in production. What happens?",
+          "options": [
+            { "id": "a", "text": "It can be auto-reopened when the metadata changes — e.g. the dependency scope moves from development to production", "correct": true },
+            { "id": "b", "text": "It stays permanently dismissed; auto-dismiss is irreversible" },
+            { "id": "c", "text": "A version update PR opens to re-add the alert" },
+            { "id": "d", "text": "The SBOM must be regenerated to restore it" }
+          ],
+          "explanation": "Auto-triage dismissals are **reversible**: an alert **auto-reopens when its metadata changes**, such as a **development→production scope** change. It isn't permanent, isn't restored by a version-update PR, and has nothing to do with regenerating an SBOM.",
+          "sourceRefs": ["r-auto-triage"]
+        },
+        {
+          "id": "kc-d3-12",
+          "domainId": "d3-supply-chain",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A security manager needs to drive remediation of ~300 existing alerts across several repos, with owners and a deadline. What fits, and who can run it?",
+          "options": [
+            { "id": "a", "text": "A security campaign (up to 1000 alerts, with a due date); campaign managers must be org owners or security managers", "correct": true },
+            { "id": "b", "text": "Grouping in dependabot.yml, run by any developer" },
+            { "id": "c", "text": "Auto-triage rules, which include a deadline field" },
+            { "id": "d", "text": "The rich-diff Dependency Review view across all repos" }
+          ],
+          "explanation": "Coordinating remediation of **existing** alerts at scale with ownership and a due date is a **security campaign** (≤1000 alerts), and **campaign managers must be owners or security managers**. Grouping is about update PRs; auto-triage has no campaign deadline; the rich-diff view is a per-PR informational surface.",
+          "sourceRefs": ["r-campaigns", "r-campaigns-create"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d3-1",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the dependency graph built from?",
+      "options": [
+        { "id": "a", "text": "Parsing the repository's manifest and lock files for supported ecosystems (plus the dependency submission API)", "correct": true },
+        { "id": "b", "text": "Running CodeQL over the source code" },
+        { "id": "c", "text": "Scanning commit history for secrets" },
+        { "id": "d", "text": "Reading the repository's README dependency section" }
+      ],
+      "explanation": "The graph is produced by **parsing manifest and lock files** (and data pushed via the **dependency submission API**). CodeQL is code scanning, secret scanning reads for credentials, and a README isn't a dependency source.",
+      "sourceRefs": ["r-depgraph"]
+    },
+    {
+      "id": "q-d3-2",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "For which repositories is the dependency graph enabled by default?",
+      "options": [
+        { "id": "a", "text": "Public repositories; private repositories must enable it", "correct": true },
+        { "id": "b", "text": "All repositories, public and private, always" },
+        { "id": "c", "text": "Only repositories with GitHub Advanced Security" },
+        { "id": "d", "text": "Only forks" }
+      ],
+      "explanation": "The dependency graph is **on by default for public repos** and **must be enabled on private repos**. It isn't universally on, isn't gated behind GHAS to exist, and isn't fork-only.",
+      "sourceRefs": ["r-depgraph", "r-depgraph-config"]
+    },
+    {
+      "id": "q-d3-3",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In what format does GitHub export an SBOM for a repository?",
+      "options": [
+        { "id": "a", "text": "SPDX (the industry-standard SPDX format)", "correct": true },
+        { "id": "b", "text": "SARIF" },
+        { "id": "c", "text": "CycloneDX only" },
+        { "id": "d", "text": "A proprietary GitHub binary format" }
+      ],
+      "explanation": "GitHub's native SBOM export uses the **industry-standard SPDX** format. SARIF is for **code-scanning** results; GitHub's export is SPDX, not CycloneDX; and it's an open standard, not proprietary.",
+      "sourceRefs": ["r-sbom"]
+    },
+    {
+      "id": "q-d3-4",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which item does a GitHub SBOM NOT include?",
+      "options": [
+        { "id": "a", "text": "Dependents — the projects that rely on your repository", "correct": true },
+        { "id": "b", "text": "Dependency versions and package identifiers" },
+        { "id": "c", "text": "License information" },
+        { "id": "d", "text": "Transitive dependency paths" }
+      ],
+      "explanation": "An SBOM inventories what you **consume** — versions, package identifiers, licenses, and transitive paths — but **not your dependents** (who consumes you). Only the dependents entry is excluded.",
+      "sourceRefs": ["r-sbom"]
+    },
+    {
+      "id": "q-d3-5",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the essential difference between a Dependabot alert and a Dependabot security update?",
+      "options": [
+        { "id": "a", "text": "An alert notifies you of a vulnerable dependency; a security update opens a PR to fix it", "correct": true },
+        { "id": "b", "text": "An alert opens the fix PR; a security update only notifies" },
+        { "id": "c", "text": "They are the same feature under two names" },
+        { "id": "d", "text": "An alert applies to private repos; a security update to public repos" }
+      ],
+      "explanation": "**Alert = notification; security update = the alert-driven fix PR** (to the minimum patched version). The roles aren't reversed, they aren't the same feature, and neither is scoped to a single repo visibility.",
+      "sourceRefs": ["r-dependabot-alerts", "r-security-updates"]
+    },
+    {
+      "id": "q-d3-6",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "To what version does a Dependabot security update bump a vulnerable dependency?",
+      "options": [
+        { "id": "a", "text": "The minimum version that includes the patch for the vulnerability", "correct": true },
+        { "id": "b", "text": "Always the latest available version" },
+        { "id": "c", "text": "The next major version" },
+        { "id": "d", "text": "It downgrades to the last known-safe version" }
+      ],
+      "explanation": "Security updates target the **minimum version that clears the vulnerability**, keeping the change small. That's not the same as chasing latest (version updates), forcing a major bump, or downgrading.",
+      "sourceRefs": ["r-security-updates"]
+    },
+    {
+      "id": "q-d3-7",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How are Dependabot version updates configured?",
+      "options": [
+        { "id": "a", "text": "A dependabot.yml file in .github, declaring ecosystems, directories, and a schedule", "correct": true },
+        { "id": "b", "text": "A codeql.yml workflow" },
+        { "id": "c", "text": "The Security Overview dashboard only" },
+        { "id": "d", "text": "They can't be configured; they run automatically" }
+      ],
+      "explanation": "Version updates are driven by **`dependabot.yml`** in **`.github/`** (ecosystems, directories, schedule). `codeql.yml` is code scanning; the Security Overview is a reporting surface; and version updates are opt-in via that config, not automatic.",
+      "sourceRefs": ["r-version-updates", "r-quickstart"]
+    },
+    {
+      "id": "q-d3-8",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What triggers the creation of a Dependabot alert?",
+      "options": [
+        { "id": "a", "text": "A new advisory in the GitHub Advisory Database, or a dependency-graph change that brings in an affected version", "correct": true },
+        { "id": "b", "text": "Running the dependency review action" },
+        { "id": "c", "text": "Exporting an SBOM" },
+        { "id": "d", "text": "Merging any pull request" }
+      ],
+      "explanation": "Alerts fire on a **new Advisory Database advisory** or a **dependency-graph change** exposing an affected version. The dependency review action gates PRs, SBOM export is unrelated, and merging a PR doesn't by itself create alerts.",
+      "sourceRefs": ["r-dependabot-alerts"]
+    },
+    {
+      "id": "q-d3-9",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does an EPSS score represent?",
+      "options": [
+        { "id": "a", "text": "The probability (0–100%) that a vulnerability will be exploited in the wild in the next 30 days", "correct": true },
+        { "id": "b", "text": "The severity of the vulnerability's technical impact" },
+        { "id": "c", "text": "The number of repositories affected" },
+        { "id": "d", "text": "The count of transitive dependencies involved" }
+      ],
+      "explanation": "**EPSS** (from **FIRST**) is a **probability of exploitation over the next 30 days**. Technical impact is **CVSS severity**; EPSS is neither a count of affected repos nor of transitive dependencies.",
+      "sourceRefs": ["r-epss-changelog", "r-epss-metrics"]
+    },
+    {
+      "id": "q-d3-10",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which filter or sort surfaces the Dependabot alerts most likely to be exploited?",
+      "options": [
+        { "id": "a", "text": "epss_percentage filter (e.g. epss_percentage:>0.5) and sort:epss-percentage", "correct": true },
+        { "id": "b", "text": "severity:high" },
+        { "id": "c", "text": "sort:newest" },
+        { "id": "d", "text": "has:patch" }
+      ],
+      "explanation": "Exploit **likelihood** lives in **EPSS** — the `epss_percentage` filter and `sort:epss-percentage`. `severity:high` is CVSS impact, `sort:newest` is chronological, and `has:patch` filters for a fix being available.",
+      "sourceRefs": ["r-epss-filters"]
+    },
+    {
+      "id": "q-d3-11",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Two alerts: A is CVSS critical with EPSS 0.2%; B is CVSS high with EPSS 92% at the 99th percentile. Using EPSS to inform triage, which is the more urgent to fix first, and why?",
+      "options": [
+        { "id": "a", "text": "B — despite lower severity, its very high EPSS means active exploitation is far more likely right now", "correct": true },
+        { "id": "b", "text": "A — critical CVSS always outranks anything else regardless of EPSS" },
+        { "id": "c", "text": "They are equal; EPSS and CVSS cancel out" },
+        { "id": "d", "text": "B, because higher EPSS means lower impact and lower impact is safer to patch" }
+      ],
+      "explanation": "EPSS adds the **likelihood** axis: B's ~92% exploitation probability makes it the immediate fire even though its CVSS is 'high'. Critical CVSS doesn't *always* win once you weigh likelihood (that's the whole point of adding EPSS); they don't 'cancel out'; and higher EPSS means more likely exploitation, not lower impact. Note EPSS **informs** prioritisation alongside CVSS — real triage also weighs whether the vulnerable code is actually used.",
+      "sourceRefs": ["r-epss-metrics", "r-epss-changelog"]
+    },
+    {
+      "id": "q-d3-12",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "At what point in the workflow does Dependency Review operate?",
+      "options": [
+        { "id": "a", "text": "On a pull request, before the change is merged", "correct": true },
+        { "id": "b", "text": "Nightly, on the default branch after merge" },
+        { "id": "c", "text": "Only at release tagging" },
+        { "id": "d", "text": "When an SBOM is exported" }
+      ],
+      "explanation": "Dependency Review is a **pre-merge** gate on the **pull request** — the shift-left surface for dependency changes. It's not a post-merge nightly job, a release-time step, or tied to SBOM export.",
+      "sourceRefs": ["r-dep-review"]
+    },
+    {
+      "id": "q-d3-13",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the difference between the Dependency Review rich-diff view and the dependency review action?",
+      "options": [
+        { "id": "a", "text": "The rich-diff view informs on the Files changed tab with no config; the action runs in Actions and can fail a check to block a merge", "correct": true },
+        { "id": "b", "text": "The rich-diff view blocks merges; the action only visualises changes" },
+        { "id": "c", "text": "They are the same thing" },
+        { "id": "d", "text": "Only the rich-diff view can enforce a license policy" }
+      ],
+      "explanation": "The **rich-diff view informs** (no configuration); the **action enforces** — it can fail a check and, when required, block the merge, and it's where you set license policy. The roles aren't reversed, they aren't identical, and license enforcement is an **action** feature.",
+      "sourceRefs": ["r-dep-review", "r-dep-review-action"]
+    },
+    {
+      "id": "q-d3-14",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which dependency-review-action setting fails the check when a PR introduces a vulnerability at or above a chosen severity?",
+      "options": [
+        { "id": "a", "text": "fail-on-severity", "correct": true },
+        { "id": "b", "text": "deny-licenses" },
+        { "id": "c", "text": "allow-ghsas" },
+        { "id": "d", "text": "fail-on-scopes" }
+      ],
+      "explanation": "**`fail-on-severity`** (critical/high/moderate/low) is the vulnerability-severity gate. `deny-licenses` blocks on license, `allow-ghsas` waives specific advisories, and `fail-on-scopes` gates by dependency scope — none is the severity threshold.",
+      "sourceRefs": ["r-dep-review-action"]
+    },
+    {
+      "id": "q-d3-15",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "The dependency review action is in the workflow with fail-on-severity: high, yet critical-vulnerability PRs still merge. What's the most likely reason?",
+      "options": [
+        { "id": "a", "text": "The check isn't a required status check, so a failing run doesn't block the merge", "correct": true },
+        { "id": "b", "text": "fail-on-severity: high ignores critical vulnerabilities" },
+        { "id": "c", "text": "The action only works on private repos" },
+        { "id": "d", "text": "SBOM export must be enabled for the action to block" }
+      ],
+      "explanation": "A failing check only **blocks a merge when it's a required check** (branch protection); otherwise it just reports. `fail-on-severity: high` covers **high and above** (so critical is included), the action works on public repos too, and SBOM export is irrelevant to blocking.",
+      "sourceRefs": ["r-dep-review-action", "r-dep-review"]
+    },
+    {
+      "id": "q-d3-16",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does the groups key in dependabot.yml do?",
+      "options": [
+        { "id": "a", "text": "Consolidates updates for multiple dependencies into a single pull request", "correct": true },
+        { "id": "b", "text": "Groups repositories into a security campaign" },
+        { "id": "c", "text": "Assigns alerts to teams" },
+        { "id": "d", "text": "Merges dependency PRs automatically" }
+      ],
+      "explanation": "**`groups`** bundles multiple dependency updates into **one PR** to cut review churn. It doesn't build campaigns, assign alerts, or auto-merge.",
+      "sourceRefs": ["r-grouping"]
+    },
+    {
+      "id": "q-d3-17",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "By default, Dependabot groups apply to version updates. How do you make a group also bundle security-update PRs?",
+      "options": [
+        { "id": "a", "text": "Set applies-to: security-updates on the group", "correct": true },
+        { "id": "b", "text": "Groups can never apply to security updates" },
+        { "id": "c", "text": "Enable a security campaign for the repo" },
+        { "id": "d", "text": "Add fail-on-severity to dependabot.yml" }
+      ],
+      "explanation": "A group defaults to **version updates**; **`applies-to: security-updates`** opts it into the security-update stream. Groups *can* cover security updates, campaigns are a different feature, and `fail-on-severity` belongs to the dependency review action, not `dependabot.yml`.",
+      "sourceRefs": ["r-grouping"]
+    },
+    {
+      "id": "q-d3-18",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does GitHub's preset Dependabot auto-triage (auto-dismiss) rule do out of the box on public repos?",
+      "options": [
+        { "id": "a", "text": "Auto-dismisses low-impact alerts on npm development dependencies unlikely to be exploitable outside runtime", "correct": true },
+        { "id": "b", "text": "Dismisses every critical alert automatically" },
+        { "id": "c", "text": "Deletes the dependency from the manifest" },
+        { "id": "d", "text": "Merges all security-update PRs" }
+      ],
+      "explanation": "The preset targets **low-impact npm *development*-dependency** alerts unlikely to matter in production, and it's on by default for public repos. It doesn't dismiss criticals, edit your manifest, or merge PRs.",
+      "sourceRefs": ["r-auto-triage"]
+    },
+    {
+      "id": "q-d3-19",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Who can be a security campaign manager, and how many alerts can one campaign hold?",
+      "options": [
+        { "id": "a", "text": "Organisation owners or security managers; up to 1000 alerts per campaign", "correct": true },
+        { "id": "b", "text": "Any repository contributor; unlimited alerts" },
+        { "id": "c", "text": "Only GitHub staff; up to 100 alerts" },
+        { "id": "d", "text": "Any developer with write access; up to 10 alerts" }
+      ],
+      "explanation": "Campaign managers **must be org owners or security managers**, and a campaign holds **1000 alerts or fewer**. It isn't open to any contributor/developer, isn't GitHub-staff-only, and the cap is 1000, not 100 or 10.",
+      "sourceRefs": ["r-campaigns", "r-campaigns-create"]
+    },
+    {
+      "id": "q-d3-20",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In July-2026 GHAS naming, which statement is correct?",
+      "options": [
+        { "id": "a", "text": "The suite is Supply Chain Security; Dependabot is a feature within it (the old 'Dependabot/Dependency Review' is a legacy umbrella term)", "correct": true },
+        { "id": "b", "text": "'Dependabot' is the current name of the whole suite" },
+        { "id": "c", "text": "Supply Chain Security replaced Secret Protection" },
+        { "id": "d", "text": "Dependency Review is a separate product from Supply Chain Security" }
+      ],
+      "explanation": "The current suite name is **Supply Chain Security**, with **Dependabot** and **Dependency Review** as features inside it. 'Dependabot' isn't the suite name, Supply Chain Security didn't replace Secret Protection (a different suite), and Dependency Review is part of Supply Chain Security, not a separate product.",
+      "sourceRefs": ["r-study-guide", "r-depgraph"]
+    },
+    {
+      "id": "q-d3-21",
+      "domainId": "d3-supply-chain",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which feature is the right tool to drive down a backlog of existing supply-chain alerts across many repositories, with owners and a deadline?",
+      "options": [
+        { "id": "a", "text": "A security campaign", "correct": true },
+        { "id": "b", "text": "The dependency review action" },
+        { "id": "c", "text": "SBOM export" },
+        { "id": "d", "text": "Update grouping in dependabot.yml" }
+      ],
+      "explanation": "Coordinating remediation of **existing** alerts at scale is a **security campaign** (due date, campaign manager, developer collaboration). The dependency review action gates *new* PRs, SBOM export is an inventory, and grouping reduces update-PR volume — none drives backlog remediation.",
+      "sourceRefs": ["r-campaigns", "r-dep-review-action"]
+    },
+    {
+      "id": "q-d3-22",
+      "domainId": "d3-supply-chain",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about the dependency graph are correct? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "It is the prerequisite for Dependabot alerts, security updates, Dependency Review, and SBOM export", "correct": true },
+        { "id": "b", "text": "It can include transitive (indirect) dependencies where the ecosystem supports it", "correct": true },
+        { "id": "c", "text": "It reports dependents only for public repositories", "correct": true },
+        { "id": "d", "text": "It scans your source code with CodeQL to find vulnerabilities" }
+      ],
+      "explanation": "The graph **underpins** alerts, security updates, Dependency Review, and SBOM; it can show **transitive** dependencies; and **dependents** are reported for **public** repos only. It does **not** run CodeQL — that's code scanning, a different suite.",
+      "sourceRefs": ["r-depgraph", "r-dependabot-alerts"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d3-secure-a-service",
+      "domainIds": ["d3-supply-chain"],
+      "title": "Secure a service's dependencies end to end",
+      "tagline": "Turn on the graph, gate the PR, prioritise the alerts, and cut the noise.",
+      "context": "You inherit a private service with no supply-chain security configured. Dependabot alerts don't appear, PRs merge risky dependencies unchecked, and the backlog of vulnerabilities is unknown. Bring it under control step by step.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First, nothing is reporting. What's the foundational step?",
+          "choices": [
+            { "id": "a", "text": "Enable the dependency graph for the repo — it's off by default on private repos and everything else depends on it", "verdict": "best", "rationale": "Alerts, security updates, Dependency Review, and SBOM all read the graph; on a private repo it must be enabled first." },
+            { "id": "b", "text": "Export an SBOM to start finding vulnerabilities", "verdict": "wrong", "rationale": "An SBOM is an export of the graph, not a scanner — and the graph isn't even on yet, so there's nothing to export." },
+            { "id": "c", "text": "Write a dependabot.yml for version updates", "verdict": "viable", "rationale": "Useful later for currency, but it doesn't fix the fact that the graph and alerts aren't on — version updates aren't the vulnerability signal." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "New PRs keep adding vulnerable and wrongly-licensed dependencies. You want risky ones blocked before merge. What do you set up?",
+          "choices": [
+            { "id": "a", "text": "Add the dependency review action with fail-on-severity and a deny-licenses list, and make the check required", "verdict": "best", "rationale": "The action enforces at the PR; fail-on-severity blocks vulnerable additions and deny-licenses enforces policy — but only a required check blocks the merge." },
+            { "id": "b", "text": "Rely on the Dependency Review rich-diff view on the Files changed tab", "verdict": "viable", "rationale": "It surfaces the risk for a human reviewer, but it can't fail a check or block a merge on its own." },
+            { "id": "c", "text": "Turn on Dependabot security updates and call it done", "verdict": "wrong", "rationale": "Security updates fix vulnerabilities that already landed; they don't gate what a PR introduces." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Alerts now flood in and you can't fix them all at once. How do you decide what to tackle first?",
+          "choices": [
+            { "id": "a", "text": "Sort/filter by EPSS (epss_percentage, sort:epss-percentage) and weigh it with CVSS severity to fix likely-exploited criticals first", "verdict": "best", "rationale": "EPSS adds exploit-likelihood; combining it with CVSS severity targets the true fires, not just the highest-severity labels." },
+            { "id": "b", "text": "Fix strictly in CVSS-severity order, ignoring likelihood", "verdict": "viable", "rationale": "Severity-only is a defensible baseline but misses that a lower-severity, actively-exploited issue can be more urgent." },
+            { "id": "c", "text": "Fix newest alerts first regardless of severity or likelihood", "verdict": "wrong", "rationale": "Recency isn't risk; this deprioritises old, dangerous, actively-exploited vulnerabilities." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The backlog spans several repos and needs owners and a deadline; meanwhile low-value dev-dependency alerts add noise. What's the right combination?",
+          "choices": [
+            { "id": "a", "text": "Open a security campaign for the backlog (owners + due date) and lean on auto-triage/auto-dismiss to quiet low-impact dev-dependency alerts", "verdict": "best", "rationale": "A campaign drives coordinated remediation of existing alerts at scale; auto-triage reduces incoming noise — the right tool for each half of the problem." },
+            { "id": "b", "text": "Just enable update grouping so fewer PRs arrive", "verdict": "viable", "rationale": "Grouping helps PR volume but doesn't organise remediation of the existing alert backlog with ownership and a deadline." },
+            { "id": "c", "text": "Permanently disable Dependabot alerts to stop the noise", "verdict": "wrong", "rationale": "Turning off alerts hides real risk; auto-triage quiets low-value alerts without blinding you (and can auto-reopen if scope changes)." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-depgraph-config", "r-dep-review-action", "r-epss-filters", "r-campaigns", "r-auto-triage"]
+    },
+    {
+      "id": "s-d3-alerts-updates-fit",
+      "domainIds": ["d3-supply-chain"],
+      "title": "Pick the right Dependabot capability",
+      "tagline": "Alert, security update, or version update — match the job.",
+      "context": "You're advising a team that keeps conflating Dependabot's three capabilities. For each situation, choose the capability that actually fits — and reject the plausible near-miss.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "A newly disclosed CVE affects a library you use. You want an automatic PR that bumps it just enough to clear the vulnerability.",
+          "choices": [
+            { "id": "a", "text": "Dependabot security updates — alert-driven PR to the minimum patched version", "verdict": "best", "rationale": "Vulnerability-driven, minimum-fix PR is exactly what security updates do." },
+            { "id": "b", "text": "Dependabot version updates on a schedule", "verdict": "viable", "rationale": "A scheduled version bump might eventually cross the fix, but it isn't vulnerability-driven and won't target the minimum patched version promptly." },
+            { "id": "c", "text": "A Dependabot alert alone", "verdict": "wrong", "rationale": "An alert notifies but never opens the fix PR by itself." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Security and audit want a signed, standard-format inventory of everything the service depends on, transitive included.",
+          "choices": [
+            { "id": "a", "text": "Export an SBOM in SPDX from the dependency graph", "verdict": "best", "rationale": "SPDX SBOM export is the standard-format dependency inventory, transitive paths included." },
+            { "id": "b", "text": "Share the Dependabot alerts list", "verdict": "wrong", "rationale": "Alerts are vulnerabilities, not a full dependency inventory, and aren't a standard SBOM format." },
+            { "id": "c", "text": "Send the repository's dependents graph", "verdict": "wrong", "rationale": "Dependents are who relies on you — the opposite of the consumed-dependencies inventory an SBOM provides." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "There's no known vulnerability, but leadership wants dependencies kept current with routine weekly PRs.",
+          "choices": [
+            { "id": "a", "text": "Dependabot version updates via dependabot.yml with a weekly schedule", "verdict": "best", "rationale": "Currency without a vulnerability is version updates, configured in dependabot.yml on a schedule." },
+            { "id": "b", "text": "Dependabot security updates", "verdict": "wrong", "rationale": "Security updates only act when there's a known vulnerability; they won't drive routine currency." },
+            { "id": "c", "text": "A security campaign", "verdict": "wrong", "rationale": "Campaigns remediate existing alerts, not routine version currency." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Weekly version-update PRs are too numerous to review individually. How do you cut the volume without losing coverage?",
+          "choices": [
+            { "id": "a", "text": "Add a groups block to dependabot.yml to bundle related updates into single PRs", "verdict": "best", "rationale": "Grouping consolidates multiple updates into one PR, cutting review churn while keeping coverage." },
+            { "id": "b", "text": "Auto-dismiss the extra alerts with auto-triage rules", "verdict": "wrong", "rationale": "Auto-triage dismisses alerts, not version-update PRs — wrong target entirely." },
+            { "id": "c", "text": "Reduce the update schedule to monthly", "verdict": "viable", "rationale": "Fewer runs means fewer PRs, but you fall behind on currency; grouping keeps cadence while cutting PR count." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-security-updates", "r-version-updates", "r-sbom", "r-grouping"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d3-graph-sbom",
+      "domainId": "d3-supply-chain",
+      "title": "Turn on the graph and export an SBOM",
+      "goal": "See the dependency graph populate and produce an SPDX SBOM two ways.",
+      "steps": "## What you'll do\n\nUse a repository with at least one manifest (e.g. `package.json`, `requirements.txt`, `pom.xml`, or `go.mod`).\n\n1. **Enable the graph.** On a private repo: **Settings → Advanced Security → Dependency graph → Enable**. On a public repo it's already on. Give it a minute to parse.\n2. **Inspect it.** Go to **Insights → Dependency graph → Dependencies**. Find a direct dependency, then use **Show paths** on an indirect one to see the transitive chain that pulled it in.\n3. **Export via UI.** On that page click **Export SBOM** (top right). Open the downloaded file and confirm it's **SPDX** JSON and lists versions, licenses, and package identifiers.\n4. **Export via API.** Run the REST call for the SBOM and diff it against the UI export:\n\n```\ngh api repos/OWNER/REPO/dependency-graph/sbom > sbom.spdx.json\n```\n\n5. **Prove the exclusion.** Search the SBOM for your *dependents* — confirm they're **not** there (SBOM = what you consume).\n\n## Why it matters\n\nThe graph is the foundation for every other feature in this domain, and 'export an SBOM in SPDX for audit' is a direct task statement. Doing both exports makes the format and contents concrete.",
+      "checklist": [
+        "Dependency graph enabled and populated with dependencies",
+        "Used Show paths to view a transitive dependency chain",
+        "Exported an SBOM from the UI and confirmed it is SPDX",
+        "Exported the same SBOM via the REST API (gh api .../dependency-graph/sbom)",
+        "Confirmed dependents are not present in the SBOM"
+      ]
+    },
+    {
+      "id": "lab-d3-review-gate",
+      "domainId": "d3-supply-chain",
+      "title": "Gate a pull request with the dependency review action",
+      "goal": "Make a risky dependency change fail a required check before it can merge.",
+      "steps": "## What you'll do\n\n1. **Add the workflow.** Create `.github/workflows/dependency-review.yml`:\n\n```\nname: 'Dependency Review'\non: [pull_request]\npermissions:\n  contents: read\njobs:\n  dependency-review:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/dependency-review-action@v4\n        with:\n          fail-on-severity: high\n          deny-licenses: GPL-3.0\n```\n\n2. **Require the check.** In **Settings → Branches** (or a ruleset), add a branch protection rule on your default branch and mark the **Dependency Review** check as **required**.\n3. **Trigger a failure.** Open a PR that adds a dependency with a known high/critical vulnerability (or one under a denied license). Watch the check **fail** and the **merge button** become blocked.\n4. **Read the rich-diff.** On the PR's **Files changed** tab, view the built-in dependency review to see added/updated dependencies and their vulnerability data — no config needed.\n5. **Prove the gate.** Loosen `fail-on-severity` to `critical`, re-run, and observe how the threshold changes what blocks.\n\n## Why it matters\n\nThe exam separates the informational rich-diff from the enforcing action, and stresses that a check only blocks a merge when it's **required**. This lab makes that difference tangible.",
+      "checklist": [
+        "dependency-review-action workflow added and running on PRs",
+        "Check marked as required in branch protection / ruleset",
+        "A high/critical or denied-license PR failed the check and was blocked from merging",
+        "Viewed the rich-diff dependency review on the Files changed tab",
+        "Changed fail-on-severity and observed the threshold change what blocks"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-study-guide",
+      "title": "Study guide for Exam GH-500 (skills measured, July 2026)",
+      "url": "https://learn.microsoft.com/credentials/certifications/resources/study-guides/gh-500",
+      "kind": "official-doc",
+      "annotation": "The authoritative task statements for this domain: 'Configure and use supply chain security (formerly Dependabot/Dependency Review)' (15–20%). Read the sub-bullets on dependency graph, SBOM, EPSS scoring, auto-dismiss, Dependency Review, grouping, and security campaigns — they define scope.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-depgraph",
+      "title": "About the dependency graph",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph",
+      "kind": "official-doc",
+      "annotation": "Extract: the graph parses manifest/lock files and the dependency submission API; direct vs transitive dependencies and Show paths; dependents (public repos only); and that the graph underpins alerts, Dependency Review, and SBOM.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-depgraph-config",
+      "title": "Configuring (enabling) the dependency graph",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-the-dependency-graph",
+      "kind": "official-doc",
+      "annotation": "Extract: on by default for public repos, must be enabled for private repos (Settings → Advanced Security); enabling grants read-only access to manifest/lock files. This is the public-on/private-enable exam trap.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-sbom",
+      "title": "Exporting a software bill of materials (SBOM) for your repository",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/exporting-a-software-bill-of-materials-for-your-repository",
+      "kind": "official-doc",
+      "annotation": "Extract: SBOM is exported in SPDX format from Insights → Dependency graph → Export SBOM, or via the REST API; includes versions, licenses, package identifiers, and transitive paths; excludes dependents.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-quickstart",
+      "title": "Dependabot quickstart guide",
+      "url": "https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide",
+      "kind": "official-doc",
+      "annotation": "Extract: the one-line definitions distinguishing Dependabot alerts, security updates, and version updates; that enabling Dependabot auto-enables the dependency graph; and where dependabot.yml lives for version updates.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-dependabot-alerts",
+      "title": "About Dependabot alerts",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts",
+      "kind": "official-doc",
+      "annotation": "Extract: alerts notify about vulnerable dependencies (no code change); triggered by a new Advisory Database advisory or a dependency-graph change; require the dependency graph; contrast with security updates.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-security-updates",
+      "title": "About Dependabot security updates",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates",
+      "kind": "official-doc",
+      "annotation": "Extract: alert-driven PRs that bump a vulnerable dependency to the minimum version that includes the patch; require dependency graph + Dependabot alerts; explicit contrast with version updates.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-version-updates",
+      "title": "About Dependabot version updates",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates",
+      "kind": "official-doc",
+      "annotation": "Extract: config-driven PRs (dependabot.yml) that keep dependencies current even without a vulnerability; uses semver to decide bumps; distinct from security updates.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-epss-changelog",
+      "title": "EPSS scores for Dependabot alerts (GA changelog)",
+      "url": "https://github.blog/changelog/2025-02-19-dependabot-helps-users-focus-on-the-most-important-alerts-by-including-epss-scores-that-indicate-likelihood-of-exploitation-now-generally-available/",
+      "kind": "official-blog",
+      "annotation": "Extract: EPSS from FIRST; a probability from 0 to 1 (0–100%) of exploitation in the next 30 days; the 90.534%/95th-percentile example; only ~0.5% of vulnerabilities score above 50%.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-epss-metrics",
+      "title": "Prioritizing Dependabot alerts using metrics (EPSS)",
+      "url": "https://docs.github.com/en/code-security/tutorials/manage-security-alerts/prioritizing-dependabot-alerts-using-metrics",
+      "kind": "official-doc",
+      "annotation": "Extract: how to prioritise with EPSS alongside CVSS; the epss_percentage filter (e.g. epss_percentage>=0.10) to surface likely-exploited alerts; likelihood vs severity framing.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-epss-filters",
+      "title": "Dependabot alerts filters (epss_percentage, sort)",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-alerts-filters",
+      "kind": "official-doc",
+      "annotation": "Extract: the epss_percentage filter ('based on their EPSS-predicted probability of exploitation'), sort:epss-percentage, and companion filters severity, ecosystem, package, manifest, scope, has:patch.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-dep-review",
+      "title": "About Dependency Review",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review",
+      "kind": "official-doc",
+      "annotation": "Extract: pre-merge gate on pull requests; the rich-diff view on Files changed (no config) vs the dependency review action (fails a check to block a merge); relies on the dependency graph; available on public repos and private repos with Code Security/GHAS.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-dep-review-action",
+      "title": "Configuring the dependency review action",
+      "url": "https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-the-dependency-review-action",
+      "kind": "official-doc",
+      "annotation": "Extract: fail-on-severity (critical/high/moderate/low), allow-licenses vs deny-licenses (mutually exclusive, SPDX), fail-on-scopes, allow-ghsas; a failing check only blocks a merge when it is a required status check.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-grouping",
+      "title": "Optimizing PR creation for version updates (groups)",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/optimizing-pr-creation-version-updates",
+      "kind": "official-doc",
+      "annotation": "Extract: the groups key consolidates multiple updates into one PR; group by dependency-type, patterns, update-types; applies-to defaults to version-updates and can be set to security-updates.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-auto-triage",
+      "title": "About Dependabot auto-triage rules (auto-dismiss)",
+      "url": "https://docs.github.com/en/code-security/dependabot/dependabot-auto-triage-rules/about-dependabot-auto-triage-rules",
+      "kind": "official-doc",
+      "annotation": "Extract: rules auto-dismiss/snooze alerts before notifications, by severity/CWE/package/scope; the preset auto-dismisses low-impact npm dev-dependency alerts (on by default for public repos); dismissed alerts auto-reopen if metadata (e.g. scope) changes.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-campaigns",
+      "title": "About security campaigns",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/fixing-security-alerts-at-scale/about-security-campaigns",
+      "kind": "official-doc",
+      "annotation": "Extract: campaigns group alerts and share them with developers to remediate at scale; a named campaign manager as point of contact; Copilot Autofix is triggered automatically for code scanning alerts in a campaign.",
+      "domainIds": ["d3-supply-chain"]
+    },
+    {
+      "id": "r-campaigns-create",
+      "title": "Creating and tracking security campaigns",
+      "url": "https://docs.github.com/en/code-security/securing-your-organization/fixing-security-alerts-at-scale/creating-tracking-security-campaigns",
+      "kind": "official-doc",
+      "annotation": "Extract: choose 1000 alerts or fewer; set a campaign due date; campaign managers must be users or teams that are owners or security managers in the organisation.",
+      "domainIds": ["d3-supply-chain"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d3-1",
+      "title": "D3 · Dependency graph, SBOM & Dependabot — alerts vs updates",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d3-supply-chain"],
+      "sourceNotebook": "gh-500 / d3 / graph-sbom-dependabot"
+    },
+    {
+      "id": "v-d3-2",
+      "title": "D3 · EPSS prioritisation, Dependency Review gate & fixing at scale",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d3-supply-chain"],
+      "sourceNotebook": "gh-500 / d3 / epss-review-campaigns"
+    }
+  ]
+}
