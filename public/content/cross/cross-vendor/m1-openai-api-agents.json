@@ -1,0 +1,873 @@
+{
+  "id": "m1-openai-api-agents",
+  "order": 1,
+  "code": "M1",
+  "name": "OpenAI — the API & Agents SDK",
+  "tagline": "Learn OpenAI as one platform, not a pile of endpoints. The mental model is small: one request can trigger tool calls and come back with a schema-shaped answer, and an agent is just that request run in a loop until the model stops calling tools. This module separates the two things people constantly conflate — function calling (the model asks YOUR code to run something) versus structured outputs (the model's answer is forced to match a JSON schema) — then walks the Agents SDK loop (agents, handoffs, guardrails, tracing) so you can judge when the SDK earns its keep and when a thin loop over the raw API is the wiser, more portable call.",
+  "overview": "This is a judgment module, not an API tour. Anyone can copy a curl example; the skill this track is building is knowing which primitive fits a problem and where the seams for portability go, so the same application can later move to Google or an open-weight endpoint as a config change rather than a rewrite. It builds in three moves. First, the platform mental model: an OpenAI request is not always a single question-and-answer — the model can respond by asking to call one of the tools you defined, and the loop of (call model → run the tool it asked for → hand the result back → call the model again) continues until the model produces a final answer with no more tool calls. Get that one picture and function calling, structured outputs, and agents all become the same picture at different scales. Second, the two features people most often confuse. Function calling is the model examining a prompt and deciding it needs one of your tools, then returning the tool's name and arguments for YOUR code to execute — the model never runs anything itself. Structured outputs is a separate guarantee: with strict mode, the model's response is constrained to exactly match a JSON Schema you supply, so keys are never missing and enums never invalid — the reliable replacement for 'please answer in JSON and I'll parse it.' They can combine (strict function arguments) but they answer different questions: 'do something in my system' versus 'give me back a shape I can trust.' Third, the OpenAI Agents SDK, which formalises the loop you would otherwise hand-roll: an Agent is an LLM with instructions and tools; the Runner runs the agent loop; handoffs let one agent delegate to a specialist by transferring the conversation; guardrails validate inputs and outputs and can trip a wire that halts the run before an expensive model wastes money; and tracing records every LLM call, tool call, handoff, and guardrail for debugging. Throughout, the design decisions are made explicit — structured outputs versus a parsing prompt, one agent with many tools versus handoffs to specialists, and the anchor judgment of the whole module: use the SDK to move fast, but keep your tool definitions and prompts provider-portable so a later swap stays cheap. The lab makes it concrete: a tool-using agent that calls a function and returns a schema-shaped result, then a short reflection on which parts are OpenAI-specific and which are portable — the exact instinct Modules 4 and 5 of this track pay off. Note on scope: OpenAI has no self-enrollable proctored exam — OpenAI Academy is courses, referenced here only as context — so this is pure skills content, no exam gate.",
+  "objectives": [
+    "Hold the OpenAI platform mental model — a single request can return tool calls, and the loop (call model → run tool → return result → call model) continues until the model emits a final answer with no tool calls — and use it to explain function calling, structured outputs, and agents as one idea at different scales.",
+    "Distinguish function calling from structured outputs precisely: function calling returns a request for YOUR code to run a tool (the model executes nothing itself), while structured outputs constrains the model's response to exactly match a supplied JSON Schema — and state when to reach for each, and when they combine.",
+    "Choose structured outputs (strict mode) over a 'please reply in JSON' parsing prompt when you need a guaranteed shape, knowing that JSON mode yields valid JSON but does NOT guarantee schema adherence, and that only a subset of JSON Schema is supported under strict.",
+    "Describe the OpenAI Agents SDK primitives — agents (LLM + instructions + tools), the Runner-driven agent loop, handoffs (delegate by transferring the conversation), guardrails (input/output validation with tripwires), and tracing — and know that the loop stops on final output, a handoff, or hitting max_turns (which raises MaxTurnsExceeded).",
+    "Decide when a handoff to a specialist agent beats one agent carrying many tools (and one mega-prompt), and distinguish a handoff — which transfers the whole conversation — from calling an agent as a tool, which is a scoped subroutine that does not transfer control.",
+    "Make the build-vs-buy judgment for agents — the Agents SDK (built-in loop, handoffs, guardrails, tracing, less boilerplate) versus a thin DIY loop over the Responses/Chat Completions API (full control, thinner dependency, easier to port) — and keep tool definitions and prompts provider-portable so switching providers stays a config change, not a rewrite."
+  ],
+  "lessons": [
+    {
+      "id": "m1-l1-platform-mental-model",
+      "title": "The platform mental model: one request, a tool loop, a shaped answer",
+      "estMinutes": 14,
+      "objective": "Build the single mental model the rest of OpenAI hangs off — a request that can return tool calls, a loop that runs until the model stops calling tools, and an answer you can force into a schema — and use it to see function calling, structured outputs, and agents as one picture at three scales.",
+      "body": "## Stop learning endpoints; learn the loop\n\nMost people meet OpenAI as a menu of endpoints — Chat Completions, the Responses API, function calling, structured outputs, the Agents SDK — and try to memorise each one. That is the slow road, and it leaves you unable to judge which to use. There is a faster mental model, and once you have it the whole platform collapses into one picture at different scales.\n\nHere is the picture. You send the model a prompt **and a list of tools it is allowed to use**. The model reads the prompt and does one of two things: it answers, or it says *\"to do this, I need to call one of those tools\"* and hands back the tool's name and the arguments to call it with. If it asked for a tool, **your code runs the tool**, you hand the result back to the model, and you ask it again. It might now answer — or ask for another tool. You repeat until the model responds with a final answer and no more tool calls.\n\nThat repeating cycle — **call the model → run the tool it asked for → hand back the result → call the model again → … until it stops asking** — is *the loop*. It is the single most important thing in this module. Function calling is one turn of it. An agent is the whole loop, automated. Structured outputs is a constraint on the final answer. Learn the loop and you have learned the shape of everything else.\n\n## The two API surfaces (and why the difference barely matters yet)\n\nOpenAI exposes this over two request surfaces, and you should know both names without agonising over them:\n\n- **Chat Completions** is the long-standing, widely-copied, industry-standard shape — a list of messages in, a message out. Nearly every other provider and tool speaks a Chat-Completions-compatible dialect, which is exactly why it matters for *portability* (a theme we return to in Module 4).\n- **The Responses API** is OpenAI's newer surface for the same job, designed for agentic, tool-using, stateful interactions. The Agents SDK **uses the Responses API by default for OpenAI models**, and falls back to Chat Completions where Responses is not available.\n\nFor the mental model, treat them as two doors into the same room: both let you send a prompt and tools and get back either an answer or a tool call. The differences are real but they are not what makes agents work — the *loop* is. Reach for Responses when you are building agentic flows on OpenAI; reach for Chat Completions when you value the broad compatibility that makes a later provider swap cheap.\n\n## The same picture at three scales\n\nWatch the loop reappear as we zoom out:\n\n- **One turn — function calling.** You ask a question, the model returns a single tool call, you run it. That is the atom.\n- **A few turns, by hand — a DIY agent.** You wrap that atom in a `while` loop: keep running tools and re-calling the model until it stops asking. You have just built an agent out of the raw API. Hold that thought — it is the whole build-vs-buy debate in Lesson 3.\n- **The loop, formalised — the Agents SDK.** Instead of writing the `while` loop yourself, you hand the SDK an agent (instructions + tools) and it runs the loop for you: *\"a built-in agent loop that handles tool invocation, sends results back to the LLM, and continues until the task is complete.\"* Same picture, someone else's plumbing.\n\nNothing new appears as you scale up. There is one loop; the only question is who writes it and how much it does for you.\n\n## Where the 'shaped answer' fits\n\nThe loop decides *what the model does*. A separate lever decides *what the final answer looks like*: **structured outputs** lets you constrain that answer to a JSON Schema you supply, so it comes back in a shape your code can rely on. It is orthogonal to the loop — you can use it on a plain one-shot call or on the final answer of a long agent run. We give it a full lesson next, because confusing it with function calling is the single most common mistake people make on this platform. For now, just file it as: *the loop is behaviour; structured outputs is shape.*\n\n## Why the mental model is the real skill\n\nHolding this picture is what lets you make decisions instead of copying snippets. Should this be a single call or an agent? (How many loop turns does the task need?) Do I need function calling or structured outputs? (Am I asking the model to *do something in my system*, or to *give me back a shape*?) Should I use the SDK or write the loop myself? (Do the built-in loop, handoffs, and guardrails earn their dependency, or do I want the thin, portable version?) Every one of those is a question about the same loop. The rest of this module is you learning to answer them well.\n\n## What this buys you\n\nYou now have the frame. Next we settle the confusion that trips up almost everyone — function calling versus structured outputs — because getting that boundary clear is what turns the mental model into correct code.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l1-1",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In the OpenAI platform mental model, what is 'the loop'?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Call the model with a prompt and tools; if it asks for a tool, your code runs the tool and hands the result back; call the model again — repeating until it returns a final answer with no more tool calls",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The model calls itself repeatedly, running its own tools internally, until it decides to stop and print an answer",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A retry loop that re-sends the same prompt until the API returns a non-error response",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A background training loop that fine-tunes the model on each request before answering",
+              "correct": false
+            }
+          ],
+          "explanation": "The loop is the cycle of call-model, run-the-tool-it-asked-for in YOUR code, return the result, call again, until the model emits a final answer with no tool calls — this is exactly what function calling does per turn and what an agent automates. Option b gets the ownership wrong: the model does not run tools itself; it returns a request for your code to run them. Option c describes network retries, a different concern entirely. Option d invents per-request training, which is not what happens — the loop is about tool calls, not fine-tuning.",
+          "sourceRefs": [
+            "r-openai-api-guides",
+            "r-agents-sdk-home"
+          ]
+        },
+        {
+          "id": "kc-m1-l1-2",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Which statement about the Chat Completions API and the Responses API is accurate?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Both let you send a prompt and tools and get back either an answer or a tool call; the Agents SDK uses the Responses API by default for OpenAI models, while Chat Completions is the widely-compatible shape most other providers speak",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Chat Completions cannot do function calling; you must use the Responses API for any tool use",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The Responses API replaced Chat Completions, which has been removed from the platform",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "They are unrelated products — Chat Completions is for text and the Responses API is only for images",
+              "correct": false
+            }
+          ],
+          "explanation": "Both surfaces serve the same core job (prompt plus tools in, answer or tool call out); the Agents SDK defaults to Responses for OpenAI models, and Chat Completions' broad compatibility is what makes it valuable for portability. Option b is false — function calling works on Chat Completions and is where it was long established. Option c overstates the situation: Responses is newer but Chat Completions remains, and its compatibility is a deliberate portability asset. Option d invents a text-vs-images split that does not exist.",
+          "sourceRefs": [
+            "r-agents-sdk-models",
+            "r-openai-api-guides"
+          ]
+        },
+        {
+          "id": "kc-m1-l1-3",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Using the mental model, what is the cleanest way to describe how an agent relates to a single function-calling request?",
+          "options": [
+            {
+              "id": "a",
+              "text": "An agent is the same request run in a loop — keep running the tools the model asks for and re-calling it — until the model stops calling tools; a single function-calling request is one turn of that loop",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "An agent and a function-calling request are unrelated; an agent never uses tools",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "An agent is a smaller, cheaper version of a single request that skips the tool step entirely",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "An agent replaces the API request with a direct database query, so no model call is involved",
+              "correct": false
+            }
+          ],
+          "explanation": "The whole point of the mental model is that an agent is just the tool-calling loop automated — the atom (one function-calling turn) wrapped in a repeat-until-done cycle. Option b is the opposite of the truth: tools are central to what an agent does. Option c inverts the relationship — an agent typically does more turns and more tool use, not fewer. Option d removes the model from the loop, which contradicts the definition of an agent as an LLM running the loop.",
+          "sourceRefs": [
+            "r-agents-sdk-home",
+            "r-openai-api-guides"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m1-l2-function-calling-vs-structured-outputs",
+      "title": "The confusion that trips everyone: function calling vs structured outputs",
+      "estMinutes": 15,
+      "objective": "Separate the two features people constantly conflate — function calling (the model asks YOUR code to act) and structured outputs (the model's answer is forced to a schema) — decide which to reach for on a given problem, and know why structured outputs beats a 'reply in JSON' parsing prompt.",
+      "body": "## Two features, one endless mix-up\n\nAsk a room of developers the difference between function calling and structured outputs and you will get confident, contradictory answers. Both involve JSON schemas, so people assume they are the same knob. They are not. They answer two different questions, and getting the boundary crisp is what turns the mental model into correct, cheap-to-maintain code.\n\n- **Function calling answers: *\"do something in my system.\"*** \n- **Structured outputs answers: *\"give me back a shape I can trust.\"***\n\nHold those two sentences. Everything below is detail hanging off them.\n\n## Function calling: the model asks; your code acts\n\nHere is the precise definition, and the word that matters is *request*. In OpenAI's framing, a function call *\"refers to a special kind of response we can get from the model if it examines a prompt, and then determines that in order to follow the instructions in the prompt, it needs to call one of the tools we made available to it.\"* The model does **not** run anything. It examines the prompt, decides a tool is needed, and returns the tool's **name** and **arguments**. **Your application executes the actual function** and hands the result back.\n\nA function tool is defined by three pieces:\n\n1. **name** — the identifier the model uses to pick it (e.g. `get_weather`).\n2. **description** — when and how to use it; this is how the model decides *whether* to call it, so it is prompt engineering, not a comment.\n3. **parameters** — a **JSON Schema** of the arguments, so the model knows what to fill in.\n\nAnd the lifecycle is exactly the loop from Lesson 1: you send the prompt with tools defined → the model returns a tool call → your code runs it → you send the output back → the model produces a final answer (or asks for another tool). The critical safety point, which Module 6-style thinking will hammer: **the model choosing to call `delete_account` is not the same as your code running it.** You own the execution step, which is where you put permission checks, confirmations, and validation. Function calling gives the model a *say*, never the *keys*.\n\n**strict mode for function calling.** By default the arguments the model returns are best-effort — usually right, occasionally malformed. Setting `strict` to `true` changes that: per the docs, it *\"will ensure function calls reliably adhere to the function schema, instead of being best effort.\"* Under the hood this is structured outputs applied to the arguments (which is the bridge to the next section), and it comes with rules — every field `required`, `additionalProperties: false`, optional fields modelled as nullable.\n\n## Structured outputs: force the final answer into a schema\n\nNow the other question — not *\"do something\"* but *\"answer me in a shape I can rely on.\"* **Structured Outputs** is a guarantee about the model's response. In OpenAI's words, it ensures *\"the model will always generate responses that adhere to your supplied JSON Schema,\"* so you stop worrying about missing keys or invalid enum values. You hand it a schema; the answer comes back matching it.\n\nThe contrast that makes it click is with the old **JSON mode**. JSON mode gets you *valid JSON* — but, crucially, it *\"does not guarantee schema adherence.\"* You could ask for `{name, age}` and get valid JSON that omits `age` or renames it. Structured outputs closes that gap: *\"only Structured Outputs ensure schema adherence.\"* That single difference is why structured outputs is the grown-up replacement for the pattern everyone starts with — *\"please reply in JSON and I'll parse it\"* — a parsing prompt that works until the day the model improvises a field and your parser throws in production.\n\nOne honest limit: only a **subset of JSON Schema** is supported under strict — some features are off the table *\"for performance or technical reasons.\"* So you design your schema within that subset; you do not get the entire JSON Schema spec.\n\n## The decision rule (this is the exam-of-life question)\n\nBoth use schemas, so the tell is *what you want the model to do*, and OpenAI states the rule almost verbatim:\n\n- **\"If you are connecting the model to tools, functions, data, etc. in your system, then you should use function calling.\"** You want an *action* — fetch a record, send a message, hit an API.\n- **\"If you want to structure the model's output when it responds to the user, then you should use a structured `response_format`.\"** You want a *shaped answer* — extract fields from a contract, classify a ticket into a fixed set of labels, return a typed object your UI can render.\n\nAnd they combine: strict function calling is structured outputs *applied to the arguments of a tool call*. That is not a third feature to memorise — it is the two ideas meeting, exactly as the mental model predicts. A worked pair to lock it in: *\"Book the meeting for Thursday\"* wants **function calling** (an action: call `create_event`). *\"Pull the vendor, amount, and due date out of this invoice into a typed object\"* wants **structured outputs** via `response_format` (a shape, no action). Confusing them is how people end up defining a fake `return_data` tool just to get structured data back — the classic anti-pattern the decision rule dissolves.\n\n## What this buys you\n\nYou can now look at any task and route it correctly in one sentence: *action in my system* → function calling; *trustworthy shape back* → structured outputs; *both* → strict function calling. Next we take the loop you have been picturing and hand it to a framework — the Agents SDK — and ask the harder question of when that framework is worth its keep.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l2-1",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "When the model 'makes a function call', what has actually happened?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The model has returned a request — the tool's name and arguments — for your application to execute; the model itself runs nothing",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The model has executed the function on OpenAI's servers and is returning the function's return value",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The model has permanently added the function to its training data",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The model has refused the prompt because a tool was involved",
+              "correct": false
+            }
+          ],
+          "explanation": "A function call is a special kind of response: the model decides a tool is needed and returns its name and arguments, and YOUR code executes it — the model never runs the function. That ownership of the execution step is exactly where you place permission and validation checks. Option b is the core misconception; the model does not run your functions. Option c confuses a per-request tool call with training. Option d is wrong — a tool call is the model engaging with the task, not refusing it.",
+          "sourceRefs": [
+            "r-openai-api-guides"
+          ]
+        },
+        {
+          "id": "kc-m1-l2-2",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You need the model to extract a vendor name, amount, and due date from an invoice and return them as a typed object your UI can render directly — no external action required. Which feature fits, and why?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Structured outputs via response_format — you want the answer forced into a supplied JSON Schema (a shape you can trust), not an action in your system",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Function calling — because any time a JSON schema is involved you must define a tool",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "JSON mode — because it guarantees the response matches your exact schema",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A plain 'please reply in JSON' prompt — because it is equivalent to structured outputs and simpler",
+              "correct": false
+            }
+          ],
+          "explanation": "The task is 'structure the model's output when it responds to the user' — no tool, just a trustworthy shape — which is exactly what a structured response_format is for. Option b applies function calling to a case with no action; the presence of a schema alone does not call for a tool, and inventing a return-data tool is the classic anti-pattern. Option c is the JSON-mode trap: JSON mode yields valid JSON but does NOT guarantee schema adherence. Option d is the fragile parsing prompt that structured outputs exists to replace — it offers no schema guarantee.",
+          "sourceRefs": [
+            "r-openai-api-guides"
+          ]
+        },
+        {
+          "id": "kc-m1-l2-3",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A developer says: 'I'll just use JSON mode — it guarantees the model returns exactly my {name, age, status} schema every time.' What is the accurate correction?",
+          "options": [
+            {
+              "id": "a",
+              "text": "JSON mode only guarantees the output is valid JSON, not that it adheres to your schema; for a schema guarantee you need Structured Outputs (strict mode) — and even then only a subset of JSON Schema is supported",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "JSON mode and Structured Outputs are identical; the developer is entirely correct",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Neither JSON mode nor Structured Outputs can produce JSON; you must parse free text yourself",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "JSON mode guarantees the schema, but Structured Outputs does not — the developer has them backwards",
+              "correct": false
+            }
+          ],
+          "explanation": "The precise distinction: JSON mode produces valid JSON but does not guarantee schema adherence, whereas only Structured Outputs ensures the response matches the supplied schema — subject to the subset-of-JSON-Schema limitation. Option b erases the exact difference that matters here. Option c is false — both features produce JSON; the question is schema adherence. Option d reverses the two; Structured Outputs is the one that enforces the schema.",
+          "sourceRefs": [
+            "r-openai-api-guides"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m1-l3-agents-sdk-and-build-vs-buy",
+      "title": "The Agents SDK loop — and when to build it yourself",
+      "estMinutes": 16,
+      "objective": "Describe the Agents SDK primitives (agents, the Runner loop, handoffs, guardrails, tracing) and their stop conditions, then make the anchor judgment of the module — SDK versus a thin DIY loop — while keeping tool definitions and prompts provider-portable.",
+      "body": "## The loop, formalised\n\nIn Lesson 1 you built an agent by hand: wrap a function-calling request in a `while` loop and keep going until the model stops asking for tools. The **OpenAI Agents SDK** is that `while` loop, written and maintained for you, plus the pieces you would eventually have to add anyway. It is deliberately small — a handful of primitives — and each one maps onto something you already understand.\n\n**Agent.** *\"LLMs equipped with instructions and tools.\"* That is the entire definition: an identity and behaviour (instructions) plus the tools it may call. Nothing exotic — it is the thing that sits inside the loop.\n\n**The Runner and the agent loop.** You do not write the loop; you call the Runner and it runs *\"a built-in agent loop that handles tool invocation, sends results back to the LLM, and continues until the task is complete.\"* On each turn the Runner calls the model, then looks at what came back and does one of three things — and these three are the **stop-and-continue rules** worth memorising:\n\n1. **Final output** → *\"the loop ends and we return the result\"* (the model produced its answer with no tool calls).\n2. **A handoff** → *\"we update the current agent and input, and re-run the loop\"* (control passes to another agent — see below).\n3. **Tool calls** → *\"we run those tool calls, append the results, and re-run the loop.\"*\n\nAnd a crucial guardrail against runaway loops: if the run exceeds **`max_turns`**, the SDK *\"raise[s] a `MaxTurnsExceeded` exception.\"* That single limit is what stops a confused agent from calling tools forever and burning your budget. (You can set `max_turns=None` to disable it — rarely a good idea in production.)\n\n**Function tools, for free.** You do not hand-write JSON schemas. Decorate a Python function with `@function_tool` and the SDK derives the tool from the code: the **name** from the function name, the **description** from its docstring, and the **parameter schema** from the type hints (via `inspect` + Pydantic). Your typed Python function *is* the tool definition — less boilerplate, fewer drift bugs between schema and code.\n\n## Handoffs: delegate to a specialist\n\nAs tasks grow, one agent with fifteen tools and a sprawling system prompt becomes a mess — the model juggles too much and the prompt tries to be everything. **Handoffs** are the SDK's answer: *\"Handoffs allow an agent to delegate tasks to another agent.\"* They are exposed to the model as tools named `transfer_to_<agent_name>`, so the model 'calls' a handoff the way it calls any tool — and the canonical use is specialisation: *\"a customer support app might have agents that each specifically handle tasks like order status, refunds, FAQs, etc.\"*\n\nThe distinction that matters for design: a **handoff transfers the conversation** — *\"the new agent takes over the conversation, and gets to see the entire previous conversation history.\"* Contrast that with calling an **agent as a tool** (`Agent.as_tool()`), which runs a *\"nested specialist without transferring the conversation\"* — a scoped subroutine that answers and returns control to the caller. Rule of thumb: **hand off** when the specialist should *take over* the interaction (the refund agent now owns the conversation); use **agent-as-tool** when you want a specialist's answer *folded back into* the current agent's flow (translate this passage, then I'll continue). Both beat one mega-prompt; which one depends on whether control should move or come back.\n\n## Guardrails: validate cheaply, fail fast\n\n**Guardrails** *\"enable validation of agent inputs and outputs.\"* Input guardrails run first (on the first agent), output guardrails run on the final output. Each can raise a **tripwire**: when triggered, the SDK *\"immediately raise[s] a `{Input,Output}GuardrailTripwireTriggered` exception and halt[s] the Agent execution.\"* The economic argument is the point OpenAI makes explicitly — if your main agent uses a *\"very smart (and hence slow/expensive) model,\"* a fast guardrail can catch bad or off-topic input and *\"prevent the expensive model from running, saving you time and money.\"* Guardrails are where 'is this even in scope?' and 'is this output safe to return?' live — cheaply, before the expensive work.\n\n## Tracing: see what the loop did\n\nWhen an agent misbehaves you need to see *inside* the loop. **Tracing** collects *\"a comprehensive record of events during an agent run: LLM generations, tool calls, handoffs, guardrails, and even custom events.\"* A **trace** is one end-to-end run of a workflow; **spans** are the timed operations inside it. It is *\"enabled by default\"* (disable via `set_tracing_disabled(True)`, `RunConfig.tracing_disabled`, or the `OPENAI_AGENTS_DISABLE_TRACING` env var; note it is unavailable under Zero Data Retention), and it exists to *\"debug, visualize, and monitor your workflows during development and in production.\"* This is the difference between guessing why an agent looped and *reading* why it looped.\n\n## The anchor judgment: SDK, or roll your own?\n\nNow the decision this whole module is really about. You can build agents two ways:\n\n- **The Agents SDK** — you get the maintained agent loop, handoffs, guardrails, tracing, and `@function_tool` schema generation out of the box. You write far less plumbing and inherit `max_turns`, tripwires, and a traces dashboard for free. The cost is a dependency and some OpenAI-shaped conventions.\n- **A thin DIY loop over Responses / Chat Completions** — you write the `while` loop yourself. More code, but *full control*, a *thinner dependency*, and — the part that matters for this track — it is *easier to keep provider-portable*, because nothing ties you to one framework's abstractions.\n\nThe honest rule of thumb, and the sentence to leave the module with: **use the SDK to move fast, but keep your tool definitions and prompts provider-portable so a later swap stays cheap.** These are not in tension. Even within the SDK you are not locked to OpenAI's models — it exposes provider integration points and a **LiteLLM** adapter (on a best-effort basis) to run non-OpenAI models, and it uses the Responses API by default but supports the widely-compatible Chat Completions shape. Portability is a discipline, not a framework choice: define tools as plain typed functions, write prompts that do not lean on one vendor's quirks, and keep the provider behind a seam. Do that, and moving this agent to Gemini or an open-weight endpoint in Module 5 is a config change — which is the entire promise of this track.\n\n## What this buys you\n\nYou can now name every primitive the SDK gives you, state exactly when its loop stops, choose handoff-versus-tool for a multi-agent design, and — most importantly — decide *whether the SDK is worth it at all* for a given build without losing your escape route to another provider. The lab puts it to work: a small tool-using agent, then a portability check on what you wrote.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m1-l3-1",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "In the Agents SDK, the Runner's loop stops or continues based on what the model returns. Which set of conditions is correct?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Final output ends the loop; a handoff updates the current agent and re-runs; tool calls are executed with their results appended and the loop re-runs; exceeding max_turns raises MaxTurnsExceeded",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The loop only ever stops when a fixed timer expires, regardless of what the model returns",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The loop stops the moment any tool is called, because a tool call is always the final step",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The loop runs exactly twice — once for the prompt and once for the answer — then always stops",
+              "correct": false
+            }
+          ],
+          "explanation": "Those are the SDK's stated rules: final output returns the result; a handoff swaps the agent and re-runs; tool calls run, get appended, and re-run; and hitting max_turns raises MaxTurnsExceeded to prevent runaway loops. Option b invents a timer as the sole stop condition. Option c is backwards — a tool call causes the loop to continue (run tool, append result, re-run), not stop. Option d hard-codes two turns, but the loop runs as many turns as the task needs until a final output or the turn limit.",
+          "sourceRefs": [
+            "r-agents-sdk-home"
+          ]
+        },
+        {
+          "id": "kc-m1-l3-2",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A support system has a general agent and a specialist refund agent. You want the refund agent to TAKE OVER the conversation (seeing the full history) when a refund is requested. Which SDK mechanism fits, and how does it differ from the alternative?",
+          "options": [
+            {
+              "id": "a",
+              "text": "A handoff — it transfers the conversation so the new agent takes over and sees the entire history; calling the agent as a tool would instead run it as a scoped subroutine without transferring control",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Calling the refund agent as a tool — because agent-as-tool always transfers the whole conversation to the callee",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A guardrail — because guardrails are how one agent hands control to another",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Neither; the SDK cannot pass work between agents, so you must merge them into one mega-prompt",
+              "correct": false
+            }
+          ],
+          "explanation": "A handoff is precisely control transfer: the new agent takes over the conversation and sees the entire prior history, whereas agent-as-tool runs a nested specialist without transferring the conversation. Option b reverses the two — agent-as-tool is the scoped, control-returning option, not the takeover. Option c misassigns guardrails, which validate inputs/outputs, not route control between agents. Option d is false and is the very anti-pattern (one mega-prompt) that handoffs exist to avoid.",
+          "sourceRefs": [
+            "r-agents-sdk-handoffs",
+            "r-agents-sdk-tools"
+          ]
+        },
+        {
+          "id": "kc-m1-l3-3",
+          "domainId": "m1-openai-api-agents",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Your team wants to move fast with the Agents SDK but is worried about being locked to OpenAI if pricing or policy shifts later. What is the module's rule-of-thumb resolution?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Use the SDK to move fast, but keep tool definitions and prompts provider-portable — plain typed functions and vendor-neutral prompts behind a provider seam — so a later swap stays a config change, not a rewrite",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Never use the SDK; any framework guarantees permanent lock-in with no escape",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Use the SDK and hard-code OpenAI-specific prompt tricks everywhere, since portability is impossible anyway",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Portability is automatic — whatever you build on the SDK runs unchanged on any provider with no design effort",
+              "correct": false
+            }
+          ],
+          "explanation": "The resolution treats velocity and portability as compatible: adopt the SDK for speed while keeping tools as plain typed functions and prompts vendor-neutral behind a seam, so switching providers is a config change. Option b overreacts — the SDK even offers provider integration points and a LiteLLM adapter, so it is not a lock-in trap. Option c actively creates lock-in by baking in vendor quirks, the opposite of the advice. Option d is naive: portability is a discipline you design for, not a free property of the framework.",
+          "sourceRefs": [
+            "r-agents-sdk-models",
+            "r-agents-sdk-home"
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m1-1",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is an 'Agent' in the OpenAI Agents SDK?",
+      "options": [
+        {
+          "id": "a",
+          "text": "An LLM equipped with instructions and tools",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A fine-tuned model checkpoint stored on OpenAI's servers",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A background job scheduler that runs prompts on a cron timer",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A database that stores conversation history between sessions",
+          "correct": false
+        }
+      ],
+      "explanation": "The SDK defines an agent minimally as an LLM equipped with instructions and tools — an identity/behaviour plus the tools it may call. Option b confuses an agent with a fine-tuned model; instructions-plus-tools is a runtime configuration, not a trained checkpoint. Option c describes a scheduler, which is orchestration around an agent, not the agent itself. Option d describes a memory/session store; that is a separate concern (sessions), not the definition of an agent.",
+      "sourceRefs": [
+        "r-agents-sdk-home"
+      ]
+    },
+    {
+      "id": "q-m1-2",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In OpenAI function calling, who actually executes the function the model 'calls'?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Your application — the model returns the tool's name and arguments, and your code runs it and returns the result",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model runs it internally and returns the function's output directly",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "OpenAI runs every developer function automatically in a sandbox",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Nobody runs it; a function call is just a comment the model adds to its answer",
+          "correct": false
+        }
+      ],
+      "explanation": "Function calling returns a request (name plus arguments); your application executes the function and sends the result back — the model itself runs nothing. Option b is the most common misconception and is wrong. Option c overstates the platform's role; arbitrary developer functions are executed by your code, not by OpenAI. Option d trivialises a tool call, but it is an actionable request your code fulfils, not a comment.",
+      "sourceRefs": [
+        "r-openai-api-guides"
+      ]
+    },
+    {
+      "id": "q-m1-3",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What guarantee does Structured Outputs provide that JSON mode does not?",
+      "options": [
+        {
+          "id": "a",
+          "text": "That the model's response adheres to a supplied JSON Schema; JSON mode only guarantees valid JSON, not schema adherence",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "That the response is written in valid JSON; JSON mode returns plain text instead",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "That the response is factually correct; JSON mode returns hallucinations",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "That the response is encrypted; JSON mode returns plaintext",
+          "correct": false
+        }
+      ],
+      "explanation": "Structured Outputs ensures the response adheres to your supplied JSON Schema, whereas JSON mode yields valid JSON but does not guarantee it matches any particular schema. Option b is backwards on JSON mode, which does produce valid JSON. Option c overclaims — neither feature guarantees factual accuracy; the guarantee is structural, about shape. Option d invents an encryption property that neither feature provides.",
+      "sourceRefs": [
+        "r-openai-api-guides"
+      ]
+    },
+    {
+      "id": "q-m1-4",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "OpenAI's own decision rule says to use function calling when you are connecting the model to tools, functions, or data in your system. When does it say to use a structured response_format instead?",
+      "options": [
+        {
+          "id": "a",
+          "text": "When you want to structure the model's output as it responds to the user — a shaped answer, with no external action required",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "When the prompt is longer than a certain token count",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "When you want the model to call more than one tool at a time",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "When you are using Chat Completions but never when using the Responses API",
+          "correct": false
+        }
+      ],
+      "explanation": "The rule is symmetric: function calling for connecting to tools/functions/data (an action), and a structured response_format for shaping the model's direct answer to the user (a shape, no action). Option b invents a token-length trigger that is not part of the rule. Option c is about parallel tool calls, which is a function-calling concern, not what response_format is for. Option d ties the choice to an API surface, but the action-versus-shape distinction is what decides it, not which endpoint you use.",
+      "sourceRefs": [
+        "r-openai-api-guides"
+      ]
+    },
+    {
+      "id": "q-m1-5",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The Agents SDK Runner runs the agent loop. What happens on a turn where the model returns tool calls (rather than a final answer)?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The SDK runs those tool calls, appends their results, and re-runs the loop",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The SDK ends the loop immediately and returns the tool call as the final result",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The SDK discards the tool calls and asks the user to run them manually",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The SDK switches to a different model and starts the run over from scratch",
+          "correct": false
+        }
+      ],
+      "explanation": "On tool calls the loop continues: run the tools, append the results, re-run — the model then decides its next step. Option b describes the final-output case, not the tool-call case; a tool call means continue, not stop. Option c contradicts the SDK's automation of the loop, whose whole purpose is to run tools for you. Option d invents a model-swap-and-restart behaviour that is not how the loop works.",
+      "sourceRefs": [
+        "r-agents-sdk-home"
+      ]
+    },
+    {
+      "id": "q-m1-6",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why might you set a max_turns limit on an agent run, and what happens when it is exceeded?",
+      "options": [
+        {
+          "id": "a",
+          "text": "To stop a runaway loop from calling tools indefinitely; exceeding it raises a MaxTurnsExceeded exception",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "To cap the response length in tokens; exceeding it truncates the final answer silently",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "To limit how many users can share the agent; exceeding it returns a rate-limit error",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "To set the temperature of the model; exceeding it makes the model more random",
+          "correct": false
+        }
+      ],
+      "explanation": "max_turns bounds how many loop iterations an agent may take, guarding against a confused agent that keeps calling tools forever; crossing it raises MaxTurnsExceeded. Option b confuses turns with token length; max_turns counts loop iterations, not tokens. Option c invents a concurrency/user cap unrelated to the loop. Option d conflates max_turns with the temperature sampling parameter, which is a different knob entirely.",
+      "sourceRefs": [
+        "r-agents-sdk-home"
+      ]
+    },
+    {
+      "id": "q-m1-7",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does the @function_tool decorator build a tool from a Python function?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It derives the tool name from the function name, the description from the docstring, and the argument schema from the type hints",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It requires you to write a separate JSON Schema file and passes it through unchanged",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It sends the function's source code to OpenAI to be executed remotely",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It only works on functions that take no arguments",
+          "correct": false
+        }
+      ],
+      "explanation": "The decorator inspects the function: name from the function name, description from the docstring, and the parameter schema generated from the type hints — so your typed Python function is the tool definition. Option b is the opposite of the point; the decorator removes the need to hand-write a schema. Option c is false — the function runs in your environment; the model only requests it. Option d is wrong — function tools routinely take typed arguments, which is exactly what the schema is built from.",
+      "sourceRefs": [
+        "r-agents-sdk-tools"
+      ]
+    },
+    {
+      "id": "q-m1-8",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A guardrail is configured on an agent that uses an expensive, slow model. The guardrail runs a cheap model, detects out-of-scope input, and trips its wire. What is the documented benefit of this arrangement?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The tripwire raises a GuardrailTripwireTriggered exception and halts execution before the expensive model runs, saving time and money",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The expensive model runs anyway, but its output is logged for later review",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The guardrail retrains the expensive model to avoid the input in future",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The guardrail silently rewrites the user's input so the expensive model accepts it",
+          "correct": false
+        }
+      ],
+      "explanation": "The documented economic argument is exactly this: a fast guardrail can catch bad input and prevent the expensive model from running, and a tripped wire raises a GuardrailTripwireTriggered exception that halts execution, saving time and money. Option b defeats the purpose — the whole point is to avoid running the expensive model. Option c invents retraining, which guardrails do not do. Option d describes silent input rewriting, which is not the tripwire mechanism (it halts, it does not covertly edit input).",
+      "sourceRefs": [
+        "r-agents-sdk-guardrails"
+      ]
+    },
+    {
+      "id": "q-m1-9",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A handoff and calling an agent as a tool both let one agent involve another. What is the key difference?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A handoff transfers the conversation so the new agent takes over and sees the full history; agent-as-tool runs a nested specialist without transferring the conversation and returns control to the caller",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A handoff is faster because it skips the model call; agent-as-tool always makes two model calls",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A handoff can only pass a single string; agent-as-tool can pass structured data, otherwise they are identical",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A handoff works only in the Responses API; agent-as-tool works only in Chat Completions",
+          "correct": false
+        }
+      ],
+      "explanation": "The defining difference is control: a handoff transfers the conversation (the new agent takes over with full history), while agent-as-tool is a scoped subroutine that answers and hands control back. Option b invents a performance claim that misrepresents both (a handoff still involves model calls). Option c reduces the distinction to payload type, missing the control-transfer point. Option d ties each to an API surface, which is not what separates them.",
+      "sourceRefs": [
+        "r-agents-sdk-handoffs",
+        "r-agents-sdk-tools"
+      ]
+    },
+    {
+      "id": "q-m1-10",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What does tracing record in the Agents SDK, and is it on by default?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A comprehensive record of events during a run — LLM generations, tool calls, handoffs, guardrails, and custom events — and it is enabled by default",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Only the final answer text, and it is off by default",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The user's billing details, and it is on by default",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Nothing is recorded automatically; you must build your own logging from scratch",
+          "correct": false
+        }
+      ],
+      "explanation": "Tracing collects a comprehensive record of run events (LLM generations, tool calls, handoffs, guardrails, custom events) and is enabled by default, so you can debug, visualize, and monitor workflows. Option b understates it — tracing captures the whole event stream, not just the final text, and it is on by default. Option c invents billing capture, which is not what tracing does. Option d is false — tracing is built in and automatic (and can be disabled), not something you must hand-roll.",
+      "sourceRefs": [
+        "r-agents-sdk-tracing"
+      ]
+    },
+    {
+      "id": "q-m1-11",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which API surface does the Agents SDK use by default for OpenAI models, and why does the other surface still matter?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It uses the Responses API by default; Chat Completions still matters because its broad compatibility across providers and tools makes a later provider swap cheaper",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It uses Chat Completions by default; the Responses API only works for image generation",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It uses neither; the SDK talks to a private endpoint with no public API",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It uses the Responses API exclusively and cannot fall back to Chat Completions under any circumstances",
+          "correct": false
+        }
+      ],
+      "explanation": "The SDK defaults to the Responses API for OpenAI models, while Chat Completions remains valuable because most providers speak a compatible dialect, aiding portability. Option b reverses the default and wrongly restricts Responses to images. Option c invents a private-only endpoint. Option d overstates exclusivity — the SDK can use the Chat Completions model where Responses is not available.",
+      "sourceRefs": [
+        "r-agents-sdk-models",
+        "r-openai-api-guides"
+      ]
+    },
+    {
+      "id": "q-m1-12",
+      "domainId": "m1-openai-api-agents",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team debates: 'Build our agent with the Agents SDK, or roll our own loop over the raw API?' Which framing best captures the honest trade-off this module lands on?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The SDK moves you fast with a maintained loop, handoffs, guardrails, and tracing; a DIY loop gives more control and a thinner, easier-to-port dependency — so use the SDK for speed but keep tools and prompts portable behind a provider seam",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The SDK is always wrong because frameworks are inherently slower at runtime than hand-written loops",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The DIY loop is always wrong because you can never replicate a tool-calling loop without the SDK",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "There is no trade-off; the two approaches produce byte-identical systems, so the choice is arbitrary",
+          "correct": false
+        }
+      ],
+      "explanation": "The module's landing is a genuine trade-off: the SDK buys velocity and built-in features (loop, handoffs, guardrails, tracing) at the cost of a dependency, while DIY buys control and portability at the cost of more code — resolved by using the SDK while keeping tools/prompts portable. Option b invents a blanket runtime-speed claim that is not the argument. Option c is false — you can absolutely hand-roll the loop over the raw API (that is the DIY option). Option d denies the trade-off entirely, erasing the real differences in control, dependency weight, and portability.",
+      "sourceRefs": [
+        "r-agents-sdk-home",
+        "r-agents-sdk-models"
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m1-tool-using-agent",
+      "domainId": "m1-openai-api-agents",
+      "title": "Build a tool-using agent — and mark what's portable",
+      "goal": "Produce your signature artifact for this module: a small, working tool-using agent that calls a function and returns a schema-shaped result, plus a short portability note marking which parts are OpenAI-specific and which would survive a provider swap. You'll build it with the OpenAI Agents SDK so the loop is done for you, then reason about the seams — the exact instinct Modules 4 and 5 of this track pay off.",
+      "steps": "## What you'll do\n\nYou'll stand up the smallest honest version of everything this module taught: one agent, one tool it calls, one schema-shaped answer, running the SDK's agent loop. Then you'll do the part that makes this a *cross-vendor* lab — write down what you'd have to change to move it to another provider. Keep it tiny; the learning is in the seams, not the size.\n\n### Before you start\n\n- **Get the SDK docs open.** The source of truth for every step is `https://openai.github.io/openai-agents-python/` (verified live). Follow the docs' own quick start rather than any snippet from memory — API surfaces move, and the docs are canonical.\n- **Have an API key ready** (bring-your-own-key). You supply an OpenAI key as an environment variable; the docs' quick start shows the exact variable name. Costs here are trivial — a handful of short calls — but note now that this is real usage against your own key.\n- **Python environment.** Install the SDK per the docs (a virtual environment plus the documented install command). Do not copy a version string from anywhere but the docs.\n\n### Build it\n\n1. **Define ONE function tool.** Write a plain, typed Python function and decorate it with `@function_tool`. Keep it deterministic and free — e.g. `word_count(text: str) -> int`, or a tiny lookup over a hard-coded dict (say, `unit_price(sku: str) -> float`). Give it a real docstring: remember the SDK takes the tool's **description from the docstring** and its **schema from the type hints**, so this is prompt engineering, not decoration. No network, no secrets, no side effects.\n2. **Define ONE agent.** Create an `Agent` with clear `instructions` (its job, in a sentence or two) and your one tool. This is the whole 'LLM + instructions + tools' definition — nothing more.\n3. **Ask for a schema-shaped answer.** Set the agent's output to a typed structure (a Pydantic model / `output_type`, per the docs) so the final answer comes back as a trustworthy shape, not free text — structured outputs in action. Model it inside the supported subset (simple typed fields).\n4. **Run the loop.** Use the `Runner` to run the agent on an input that *requires* the tool (e.g. 'How many words are in this paragraph: …' or 'What's the price of SKU X?'). Confirm from the result that the model chose to call your tool, your function ran, and the final answer matches your schema. You just watched call-model → run-tool → return-result → final-answer happen for real.\n5. **Set a guard and peek at the trace.** Set a small `max_turns` and confirm you understand it would raise `MaxTurnsExceeded` on a runaway loop. Then open the traces dashboard (tracing is on by default) and read the recorded run — find the LLM call and the tool call in the trace. Seeing the loop is the point.\n\n### The cross-vendor part (don't skip — this is the module's payoff)\n\n6. **Write a 6–10 line portability note.** For your agent, list which pieces are **OpenAI-specific** and which are **portable**, and what a swap to Gemini or an open-weight endpoint would actually cost. Use these prompts:\n   - The **tool** is a plain typed Python function — how much of it changes on a provider swap? (Almost none — that's the point.)\n   - The **instructions/prompt** — do they lean on any OpenAI-specific phrasing or feature? Rewrite any part that does to be vendor-neutral.\n   - The **loop** — you used the SDK's. If you moved providers, would you keep the SDK (it exposes provider integration points and a LiteLLM adapter) or hand-roll a thin loop? State your call and why.\n   - The **structured output** — is 'force the answer into a schema' a portable idea, or an OpenAI feature? (The *idea* is portable; the exact mechanism differs per provider — note that.)\n7. **Save the artifact.** Keep your code plus the portability note together in one place (a repo folder, a gist, a doc). This is your Module 1 deliverable and the reference you'll extend when Module 5 has you ship the *same* app on two providers.\n\n### Why it matters\n\nAlmost anyone can paste a quick-start and get an agent to run once. The skill this track is building is different: you now have a working agent *and* a written account of where the provider-portability seams are — which parts are yours (portable) and which are the vendor's. That note is the seed of the whole cross-vendor thesis: the same application should move between OpenAI, Google, and open weights as a config change, not a rewrite. You've just proven, in miniature, that it can.\n\n### A note on scope\n\nOpenAI has no self-enrollable proctored exam — OpenAI Academy is *courses* (AI Foundations, Applied AI Foundations, Agents and Workflows), not a certification test — so there's nothing to 'pass' here. The artifact *is* the assessment: a running tool-using agent plus an honest portability note.",
+      "checklist": [
+        "Installed the Agents SDK and set your API key following the official docs (not a remembered snippet)",
+        "Defined exactly one @function_tool as a plain typed Python function with a real docstring (description from docstring, schema from type hints)",
+        "Defined one Agent with clear instructions and that single tool",
+        "Set a typed/structured output so the final answer comes back schema-shaped, not free text",
+        "Ran the agent via the Runner on an input that forces the tool call, and confirmed from the result that the tool ran and the output matched the schema",
+        "Set a max_turns limit and located the LLM call and tool call in the tracing dashboard",
+        "PORTABILITY NOTE written (6–10 lines): each piece marked OpenAI-specific vs portable, with the real cost of swapping to another provider",
+        "ARTIFACT SAVED: agent code + portability note kept together for reuse in Module 5"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-agents-sdk-home",
+      "title": "OpenAI Agents SDK — documentation home (core concepts)",
+      "url": "https://openai.github.io/openai-agents-python/",
+      "kind": "official-doc",
+      "annotation": "The canonical, live-verified entry point. Read it for the primitive definitions used throughout this module: an Agent is 'an LLM equipped with instructions and tools', handoffs let agents delegate, guardrails validate inputs and outputs, and there is 'a built-in agent loop that handles tool invocation, sends results back to the LLM, and continues until the task is complete.' It is also the source for the stop-and-continue rules of the loop (see the linked 'Running agents' section): a final output ends the loop, a handoff swaps the current agent and re-runs, tool calls are executed with results appended and the loop re-runs, and exceeding max_turns raises MaxTurnsExceeded. Start here before any code.",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-agents-sdk-tools",
+      "title": "OpenAI Agents SDK — Tools (function tools & hosted tools)",
+      "url": "https://openai.github.io/openai-agents-python/tools/",
+      "kind": "official-doc",
+      "annotation": "How tools work in the SDK. Grounds the lab step where the @function_tool decorator turns a typed Python function into a tool — name from the function, description from the docstring, schema from the type hints (inspect + Pydantic) — and covers agents-as-tools (a scoped subroutine that does not transfer the conversation) versus a handoff. Also lists hosted tools like WebSearchTool and FileSearchTool.",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-agents-sdk-handoffs",
+      "title": "OpenAI Agents SDK — Handoffs (delegating to specialists)",
+      "url": "https://openai.github.io/openai-agents-python/handoffs/",
+      "kind": "official-doc",
+      "annotation": "The source for the handoff-versus-mega-prompt judgment. Handoffs 'allow an agent to delegate tasks to another agent', are exposed to the model as transfer_to_<agent> tools, and — the key design point — transfer the conversation so the new agent 'takes over the conversation, and gets to see the entire previous conversation history.' The canonical use is specialist agents (order status, refunds, FAQs).",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-agents-sdk-guardrails",
+      "title": "OpenAI Agents SDK — Guardrails (input/output validation & tripwires)",
+      "url": "https://openai.github.io/openai-agents-python/guardrails/",
+      "kind": "official-doc",
+      "annotation": "Grounds the guardrail material: input guardrails run first, output guardrails run on the final output, and a triggered tripwire 'immediately raise[s] a {Input,Output}GuardrailTripwireTriggered exception and halt[s] the Agent execution.' Read the cost argument — running a cheap guardrail first can 'prevent the expensive model from running, saving you time and money.'",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-agents-sdk-tracing",
+      "title": "OpenAI Agents SDK — Tracing (debugging the loop)",
+      "url": "https://openai.github.io/openai-agents-python/tracing/",
+      "kind": "official-doc",
+      "annotation": "How to see inside a run. Tracing collects 'a comprehensive record of events during an agent run: LLM generations, tool calls, handoffs, guardrails, and even custom events', is 'enabled by default' (disable via set_tracing_disabled, RunConfig.tracing_disabled, or OPENAI_AGENTS_DISABLE_TRACING), and exists to 'debug, visualize, and monitor your workflows.' A trace is one end-to-end run; spans are the timed operations within it. Used in the lab's trace-reading step.",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-agents-sdk-models",
+      "title": "OpenAI Agents SDK — Models (Responses vs Chat Completions, other providers)",
+      "url": "https://openai.github.io/openai-agents-python/models/",
+      "kind": "official-doc",
+      "annotation": "The portability seam and the source for the build-vs-buy nuance. The SDK uses the Responses API by default for OpenAI models and can use the Chat Completions model where Responses is unavailable; it also exposes provider integration points and a LiteLLM adapter (best-effort) to run non-OpenAI models. Read it for why keeping tools and prompts provider-portable turns a later swap into a config change.",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-openai-api-guides",
+      "title": "OpenAI API — Function calling & Structured Outputs guides",
+      "url": "https://developers.openai.com/api/docs/guides/function-calling",
+      "kind": "official-doc",
+      "annotation": "The two platform guides behind Lesson 2, read as a pair. FUNCTION CALLING: a function call is 'a special kind of response' where the model determines it needs one of your tools and returns the tool name and arguments — 'your application executes the actual function' and returns the result; strict mode 'will ensure function calls reliably adhere to the function schema, instead of being best effort.' STRUCTURED OUTPUTS: it ensures 'the model will always generate responses that adhere to your supplied JSON Schema' (unlike JSON mode, which does not guarantee schema adherence), and the decision rule is explicit — function calling when 'connecting the model to tools, functions, data', a structured response_format when you 'want to structure the model's output when it responds to the user'; only a subset of JSON Schema is supported under strict. URLs: https://developers.openai.com/api/docs/guides/function-calling and https://developers.openai.com/api/docs/guides/structured-outputs (both reached via 301 from platform.openai.com; live-verified 2026-07-02).",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    },
+    {
+      "id": "r-openai-academy",
+      "title": "OpenAI Academy (context only — courses, not an exam)",
+      "url": "https://academy.openai.com/",
+      "kind": "reference",
+      "annotation": "Context for why this is a skills module with no exam gate. OpenAI Academy is a set of COURSES — AI Foundations, Applied AI Foundations, and Agents and Workflows — plus live and on-demand events, not a self-enrollable proctored certification exam. Live-verified 2026-07-02: there is no published MCQ exam here, so this track teaches OpenAI as skills, not exam prep.",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m1-1",
+      "title": "M1 · OpenAI mental model — the tool loop, function calling vs structured outputs, and the Agents SDK",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ],
+      "sourceNotebook": "cross-vendor / m1 / openai-api-and-agents-sdk-mental-model"
+    },
+    {
+      "id": "v-m1-2",
+      "title": "M1 · Build agents with the Agents SDK, or roll your own loop over the raw API? (debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": [
+        "m1-openai-api-agents"
+      ],
+      "sourceNotebook": "cross-vendor / m1 / debate-agents-sdk-vs-diy-loop"
+    }
+  ]
+}

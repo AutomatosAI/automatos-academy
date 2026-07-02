@@ -1,0 +1,876 @@
+{
+  "id": "d1-fundamentals",
+  "order": 1,
+  "code": "D1",
+  "name": "Fundamentals of gen AI",
+  "weight": 0.3,
+  "tagline": "The vocabulary a leader is graded on: what generative AI actually is, how a foundation model turns a prompt into an answer (and why that answer can be confidently wrong), machine learning vs. gen AI, the five-layer AI landscape, and how to match a business need to the right model — Gemini, Gemma, Imagen, or Veo.",
+  "overview": "This is the largest single section of the Generative AI Leader exam (~30%) and the conceptual base the other three sections build on. It is a *business-leader* exam — 'strategic leadership and influence, not technical implementation' — so it tests whether you can hold a credible conversation with both technical and non-technical teams and spot a good gen-AI use case, not whether you can train a model. The official guide's Section 1 has four parts: (1.1) core concepts and use cases — AI, NLP, machine learning, generative AI, foundation models, multimodal and diffusion models, LLMs, the machine-learning lifecycle, and how to choose a foundation model for a business need; (1.2) how data types are used and why data quality and accessibility matter (structured vs. unstructured, labeled vs. unlabeled); (1.3) the five core layers of the gen-AI landscape — infrastructure, models, platforms, agents, applications; and (1.4) the use cases and strengths of Google's own foundation models — Gemini, Gemma, Imagen, and Veo. Teach the CURRENT Google branding the guide uses — Gemini, Gemini Enterprise, Agent Platform, Agent Studio, Model Garden — not the older 'Vertex AI / Agent Builder' names. One currency note the exam guide makes explicit: hallucinations and other model *limitations* are formally examined in Section 3, not here — Section 1 is about the concepts, capabilities, and the data that feeds them.",
+  "objectives": [
+    "Define the core gen-AI vocabulary a leader is expected to use fluently — AI, machine learning, generative AI, foundation models, LLMs, multimodal and diffusion models — and place them in the right relationship (ML is a subset of AI; gen AI is a class of ML models that creates content).",
+    "Explain in plain terms how a large language model produces text (next-token prediction over probabilities) and why a fluent answer can still be wrong — enough to reason about capabilities and limits without engineering depth.",
+    "Distinguish machine-learning approaches (supervised, unsupervised, reinforcement) and data types (structured vs. unstructured, labeled vs. unlabeled), and explain why data quality and accessibility make or break a gen-AI initiative.",
+    "Identify strong business use cases for gen AI across the create / summarize / discover / automate pattern, and recognise the five layers of the gen-AI landscape — infrastructure, models, platforms, agents, applications.",
+    "Choose the appropriate Google foundation model for a business need using the guide's selection factors — modality, context window, security, availability/reliability, cost, performance, fine-tuning/customization — and match Gemini, Gemma, Imagen, and Veo to what each does best."
+  ],
+  "lessons": [
+    {
+      "id": "l1-what-is-gen-ai",
+      "title": "What gen AI is — and how a foundation model turns a prompt into an answer",
+      "estMinutes": 14,
+      "objective": "Define AI, machine learning, generative AI, foundation models and LLMs in the right relationship, and explain plainly how an LLM generates text — and why a confident answer can still be wrong.",
+      "body": "## The words a leader is graded on\n\nThe Generative AI Leader exam opens by checking that you can use the core vocabulary *correctly*. You are being certified as \"a visionary professional\" with \"business-level knowledge\" whose \"expertise is in strategic leadership and influence, not technical implementation.\" So the bar is *fluent and precise*, not *deep*. Nest these four terms correctly and most of Section 1 falls into place:\n\n- **Artificial intelligence (AI)** — the broad field of building systems that perform tasks we'd call intelligent. The widest circle.\n- **Machine learning (ML)** — a *subset* of AI. Google defines it as \"the process of training a piece of software, called a model, to make useful predictions or generate content ... from data.\" Instead of hand-coding rules, you learn the rules from examples.\n- **Generative AI (gen AI)** — Google calls it \"a class of models that creates content from user input.\" It doesn't just classify or predict a number; it *produces* new text, images, code, audio, or video. Gen AI sits *inside* machine learning.\n- **Foundation model** — a large model \"trained on vast amounts of data that can be adapted for numerous downstream tasks.\" One general-purpose model, many jobs — that's why it's a \"foundation\" you build on rather than a single-task tool.\n\n> **Say it as a hierarchy:** AI ⊃ machine learning ⊃ (among other things) generative AI, and today's gen AI is powered by **foundation models**. A **large language model (LLM)** is a foundation model specialised for language.\n\n## How an LLM actually answers you (the plain version)\n\nYou don't need the maths, but you must be able to explain the mechanism in one breath, because it explains both the power *and* the failure modes the exam cares about.\n\nAn LLM works by **next-token prediction**. Given your prompt, it calculates, across its whole vocabulary, the probability of what word (or word-piece, called a *token*) comes next. It picks one, appends it, and repeats — token by token — until the answer is complete. That is the entire trick: a very good guess at \"what comes next,\" run over and over.\n\nTwo consequences a leader must internalise:\n\n1. **Fluency is not truth.** The model optimises for *plausible* continuations, not *correct* ones. It can produce a confident, well-formed answer that is simply wrong or invented — the industry calls this a **hallucination**. (The exam formally examines hallucinations and other limitations, and the fixes for them, in Section 3 — but you should already understand *why* they happen from this mechanism.)\n2. **The model only knows what it was trained on.** Its knowledge is frozen at a **training cutoff** and it has no live access to your company's data unless you give it some. This is exactly why the later techniques — grounding, retrieval-augmented generation, fine-tuning — exist.\n\n## Multimodal and diffusion — two more terms to place\n\nThe guide lists two model types you should recognise by name:\n\n- **Multimodal foundation model** — one that handles more than one *modality* (data type) — e.g. text *and* images *and* audio *and* video together. Google's **Gemini** is described as having \"advanced multimodal understanding,\" able to work across text, images, video, and audio.\n- **Diffusion model** — the family of models behind most high-quality *image* generation. They learn to turn random noise into a coherent image that matches a prompt. Google's **Imagen** (\"our leading text-to-image model\") is the example to associate here.\n\n## Why the exam leads with this\n\nEverything downstream is a variation on these concepts. \"Which offering fits this need?\" (Section 2), \"grounding vs. fine-tuning\" (Section 3), \"is this a responsible use?\" (Section 4) — all of it assumes you can already say what a foundation model is, how it generates, and why it can be wrong. Get this lesson solid and the rest of the exam is applying it.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1f-1",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which statement places the terms in the correct relationship?",
+          "options": [
+            { "id": "a", "text": "Machine learning is a subset of AI, and generative AI is a class of machine-learning models that creates new content", "correct": true },
+            { "id": "b", "text": "Generative AI is the broad field, and machine learning is one narrow application of it" },
+            { "id": "c", "text": "Machine learning and artificial intelligence are two unrelated fields" },
+            { "id": "d", "text": "A foundation model is a type of hardware that AI runs on" }
+          ],
+          "explanation": "Correct nesting: **AI ⊃ machine learning ⊃ generative AI**. Google defines ML as training a model to make predictions or generate content from data, and gen AI as a *class of models that creates content*. (b) inverts the hierarchy — gen AI is inside ML, not above it. (c) is false; ML is a subset of AI. (d) confuses a model (software/maths) with infrastructure — a foundation model is a trained model, not hardware.",
+          "sourceRefs": ["r-what-is-ml", "r-vertex-overview"]
+        },
+        {
+          "id": "kc-d1f-2",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A leader asks why a chatbot gave a fluent but completely made-up answer. What is the best plain-language explanation?",
+          "options": [
+            { "id": "a", "text": "The model predicts the most plausible next words, so it optimises for fluent continuations rather than verified truth — a confident answer can still be invented", "correct": true },
+            { "id": "b", "text": "The model looked the answer up in a database and the database was wrong" },
+            { "id": "c", "text": "The model is deliberately programmed to deceive users" },
+            { "id": "d", "text": "Fluent answers are always correct; the user must have misread it" }
+          ],
+          "explanation": "An LLM works by **next-token prediction** — it chooses plausible continuations, which is why a well-formed answer can still be fabricated (a *hallucination*). (b) is wrong: a base LLM isn't querying a database; it generates from learned patterns. (c) anthropomorphises — there is no intent to deceive, just an optimisation for plausibility. (d) is the exact misconception the question targets: fluency is not truth.",
+          "sourceRefs": ["r-vertex-overview", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-3",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What makes a model a 'foundation model'?",
+          "options": [
+            { "id": "a", "text": "It is trained on a broad range of data and can be adapted to many different downstream tasks", "correct": true },
+            { "id": "b", "text": "It is trained for exactly one narrow task and cannot be reused" },
+            { "id": "c", "text": "It runs only on Google's custom hardware and nowhere else" },
+            { "id": "d", "text": "It is any model small enough to run on a phone" }
+          ],
+          "explanation": "A foundation model is trained on **vast, broad data** and is **adaptable to numerous downstream tasks** — that generality is why it's a 'foundation' to build on. (b) describes a task-specific model, the opposite. (c) is false — foundation models run on many platforms and even devices. (d) confuses size with the concept; small open models (like Gemma) can also be foundation models.",
+          "sourceRefs": ["r-vertex-overview"]
+        }
+      ]
+    },
+    {
+      "id": "l2-ml-vs-gen-ai",
+      "title": "Machine learning vs. gen AI: approaches, the ML lifecycle, and data types",
+      "estMinutes": 13,
+      "objective": "Distinguish supervised, unsupervised, and reinforcement learning; walk the machine-learning lifecycle; and tell structured from unstructured and labeled from unlabeled data.",
+      "body": "## Not all machine learning is generative\n\nGenerative AI is the newest, most visible corner of machine learning — but the exam expects you to know the wider map, because leaders are asked \"is this even a gen-AI problem, or ordinary ML?\" Google names **three machine-learning approaches**:\n\n- **Supervised learning** — the model learns from data that already has the *correct answers* attached. Google: supervised models \"make predictions after seeing lots of data with the correct answers and then discovering the connections\" that produce them. Think: predict churn from past customers *labeled* churned / retained.\n- **Unsupervised learning** — no answers are provided; the model \"aims to identify meaningful patterns in a dataset,\" typically by *clustering* similar items. Think: group customers into segments no one pre-defined.\n- **Reinforcement learning** — the model learns by trial and error, \"getting rewards or penalties based on actions performed within an environment.\" Think: an agent that improves by being rewarded for good outcomes.\n\n> **Gen AI vs. traditional ML in one line:** traditional (predictive) ML usually *classifies or predicts a value* about existing data; **generative** models \"learn patterns in data with the goal to produce new but similar data\" — they *create*. If the deliverable is a number or a category, it's often predictive ML; if it's new content, it's gen AI.\n\n## The machine-learning lifecycle (know the stages, not the code)\n\nThe guide asks you to \"identify the stages of the machine-learning lifecycle ... and the Google Cloud tools for each stage.\" As a leader, memorise the five stages in order and what each *means*:\n\n1. **Data ingestion** — gather and bring in the raw data.\n2. **Data preparation** — clean, format, and label it so it's usable.\n3. **Model training** — the model learns patterns from the prepared data.\n4. **Model deployment** — put the trained model into production so it can serve predictions/outputs.\n5. **Model management** — monitor, version, retrain, and govern it over time.\n\nThe exam won't ask you to *run* these; it asks you to recognise the sequence and appreciate that most of the effort — and most of the risk — lives in the *data* stages, not the training. That connects directly to data quality below.\n\n## Data types: structured vs. unstructured, labeled vs. unlabeled\n\nTwo distinctions the guide calls out explicitly:\n\n- **Structured vs. unstructured data.** *Structured* data lives in neat rows and columns — a database, a spreadsheet of transactions. *Unstructured* data has no fixed schema — free-text emails, PDFs, images, audio, video. The business point: the vast majority of enterprise data is *unstructured*, and gen AI is uniquely good at making sense of it, which is much of its value.\n- **Labeled vs. unlabeled data.** *Labeled* data carries the answer/annotation (this email = spam); *unlabeled* data does not. Supervised learning needs *labeled* data; unsupervised works on *unlabeled*. Labeling is often the expensive, slow bottleneck — a real business constraint a leader should anticipate.\n\n## Why the exam cares\n\nExpect questions that hand you a scenario and ask which ML approach or data type fits — 'group customers with no predefined categories' (unsupervised), 'predict next quarter's demand from labeled history' (supervised), 'a folder of scanned contracts' (unstructured, unlabeled). Knowing the map lets you place the scenario instantly, and it sets up Section 1's data-quality material next.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1f-4",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team wants to group customers into natural segments that no one has defined in advance, with no pre-assigned answers. Which machine-learning approach fits?",
+          "options": [
+            { "id": "a", "text": "Unsupervised learning (it finds patterns/clusters in unlabeled data)", "correct": true },
+            { "id": "b", "text": "Supervised learning (it needs the correct answers provided up front)" },
+            { "id": "c", "text": "Reinforcement learning (it learns from rewards and penalties in an environment)" },
+            { "id": "d", "text": "None — clustering is not machine learning" }
+          ],
+          "explanation": "Finding structure with **no predefined answers** is **unsupervised learning**, which 'identifies meaningful patterns' via clustering. (b) supervised needs labeled correct answers — the opposite of 'no answers provided'. (c) reinforcement learning is about actions/rewards in an environment, not segmenting a static dataset. (d) is false — clustering is a classic ML task.",
+          "sourceRefs": ["r-what-is-ml"]
+        },
+        {
+          "id": "kc-d1f-5",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which is the best example of UNSTRUCTURED data?",
+          "options": [
+            { "id": "a", "text": "A folder of scanned PDF contracts and free-text customer emails", "correct": true },
+            { "id": "b", "text": "A relational table of transactions with typed columns" },
+            { "id": "c", "text": "A spreadsheet of monthly sales figures by region" },
+            { "id": "d", "text": "A CSV of product IDs, prices, and quantities" }
+          ],
+          "explanation": "Free-text emails and scanned PDFs have **no fixed schema** — that's unstructured data. (b), (c), and (d) are all **structured** — rows/columns with a defined schema (a table, a spreadsheet, a typed CSV). The business insight the exam wants: most enterprise data is unstructured, and gen AI's ability to read it is much of its value.",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-6",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Put the machine-learning lifecycle stages in the correct order.",
+          "options": [
+            { "id": "a", "text": "Data ingestion → data preparation → model training → model deployment → model management", "correct": true },
+            { "id": "b", "text": "Model training → data ingestion → data preparation → model management → model deployment" },
+            { "id": "c", "text": "Model deployment → model training → data preparation → data ingestion → model management" },
+            { "id": "d", "text": "Data preparation → data ingestion → model deployment → model training → model management" }
+          ],
+          "explanation": "The guide's order is **ingestion → preparation → training → deployment → management**. You must have data before you can prepare it, prepare it before training, train before deploying, and manage/monitor after it's live. Every other option scrambles this dependency chain — you can't train before you have and prepare data, and you can't deploy before you train.",
+          "sourceRefs": ["r-exam-guide"]
+        }
+      ]
+    },
+    {
+      "id": "l3-data-quality-landscape",
+      "title": "Data quality, and the five layers of the gen-AI landscape",
+      "estMinutes": 12,
+      "objective": "Explain why data quality and accessibility determine gen-AI success, and identify the five core layers of the gen-AI landscape and what each means for a business.",
+      "body": "## 'Garbage in, garbage out' is an exam answer\n\nSection 1 devotes an entire sub-topic (1.2) to data, because for a leader, *data is the decision*. The guide names the characteristics of **data quality and accessibility** you should be able to reason about:\n\n- **Completeness** — are important values missing? Gaps skew what the model learns.\n- **Consistency** — is the same thing recorded the same way everywhere? Contradictions confuse the model.\n- **Relevance** — does the data actually pertain to the problem? Irrelevant data adds noise.\n- **Availability / accessibility** — can you *get* to the data when you need it, or is it locked in silos?\n- **Cost** — acquiring, cleaning, storing, and labeling data all cost money and time.\n- **Format** — is it in a usable shape (structured vs. unstructured; the labeling question from the last lesson)?\n\n> **The leader's takeaway:** a gen-AI initiative rarely fails because the *model* is bad — it fails because the *data* feeding it is incomplete, inconsistent, irrelevant, inaccessible, or too costly to prepare. When the exam frames a stalled or disappointing initiative, poor data quality/accessibility is very often the intended root cause. Better data usually beats a fancier model.\n\n## The five layers of the gen-AI landscape\n\nThe guide (1.3) asks you to \"identify the core layers of the gen-AI landscape and the business implications.\" There are **five**, and it helps to picture them as a stack from the ground up:\n\n1. **Infrastructure** — the compute and networking underneath: chips (Google's custom **TPUs**, plus GPUs), data centres, the cloud. This is where models are actually trained and run.\n2. **Models** — the foundation models themselves (Gemini, Gemma, Imagen, Veo, and partner models). The 'brains'.\n3. **Platforms** — the tooling to build, tune, deploy, and manage models and agents (Google's **Agent Platform**, **Model Garden**, **Agent Studio**). Where builders work.\n4. **Agents** — systems that use a model plus *tools* to take actions and complete tasks, not just answer questions.\n5. **Applications** — the end-user products people actually touch (e.g. the **Gemini app**, **Gemini for Google Workspace**).\n\n> **Why the layering matters to a leader:** it tells you *where a decision lives*. Choosing a chip is an infrastructure decision; choosing Gemini vs. Gemma is a model decision; standing up a custom agent is a platform/agent decision; rolling out Gemini in Workspace is an application decision. The exam uses these layers to test whether you can locate a business question at the right altitude.\n\n## Tying it together\n\nData quality is the fuel; the five layers are the machine. A leader who can say 'our problem is a *data* problem at the ingestion layer, not a *model* problem' — or 'this is an *application*-layer rollout, we don't need to touch models' — is demonstrating exactly the strategic fluency this certification is about.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1f-7",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A gen-AI pilot is underperforming. The model is a strong, current foundation model, but the training data is riddled with missing fields and the same product is recorded three different ways. Which data-quality characteristics are most at fault?",
+          "options": [
+            { "id": "a", "text": "Completeness (missing values) and consistency (the same thing recorded differently)", "correct": true },
+            { "id": "b", "text": "The model's context window is too small" },
+            { "id": "c", "text": "The choice of TPUs vs. GPUs in the infrastructure layer" },
+            { "id": "d", "text": "The application layer's user interface design" }
+          ],
+          "explanation": "Missing fields = **completeness**; the same product recorded three ways = **consistency**. These are the named culprits. (b), (c), and (d) are all real concepts but unrelated to *this* symptom — the problem is described purely as data defects, and the exam's frequent lesson is that a disappointing initiative is usually a data problem, not a model or hardware one.",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-8",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which list correctly names the five core layers of the gen-AI landscape from the exam guide?",
+          "options": [
+            { "id": "a", "text": "Infrastructure, models, platforms, agents, applications", "correct": true },
+            { "id": "b", "text": "Hardware, software, networking, storage, security" },
+            { "id": "c", "text": "Data, training, deployment, monitoring, governance" },
+            { "id": "d", "text": "Prompting, grounding, fine-tuning, evaluation, deployment" }
+          ],
+          "explanation": "The guide lists exactly five landscape layers: **infrastructure, models, platforms, agents, applications**. (b) is a generic IT stack, not the guide's layers. (c) lists ML-lifecycle stages, a different concept. (d) lists output-improvement techniques from Section 3 — also a different list. Only (a) matches the guide.",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-9",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Rolling out the Gemini app across the company's Google Workspace so staff get AI help in Docs and Gmail is a decision at which layer of the gen-AI landscape?",
+          "options": [
+            { "id": "a", "text": "The applications layer (an end-user product people directly use)", "correct": true },
+            { "id": "b", "text": "The infrastructure layer (chips and data centres)" },
+            { "id": "c", "text": "The models layer (choosing which foundation model to train)" },
+            { "id": "d", "text": "The agents layer (building a tool-using autonomous agent)" }
+          ],
+          "explanation": "An end-user product staff touch directly — Gemini in Workspace — is the **applications** layer. (b) infrastructure is the compute beneath everything. (c) models is about picking/adapting the foundation model itself, which you don't do to enable Workspace AI. (d) agents is about tool-using systems that take actions, not a productivity rollout. Locating the decision at the right layer is the skill being tested.",
+          "sourceRefs": ["r-exam-guide", "r-vertex-overview"]
+        }
+      ]
+    },
+    {
+      "id": "l4-choose-model-use-cases",
+      "title": "Choosing a foundation model, and matching gen AI to business use cases",
+      "estMinutes": 13,
+      "objective": "Apply the guide's factors for choosing a foundation model and match Google's models — Gemini, Gemma, Imagen, Veo — plus the create/summarize/discover/automate use-case pattern to real business needs.",
+      "body": "## The exam's model-selection checklist\n\nSection 1.1 asks you to identify \"how to choose the appropriate foundation model for a business use case.\" This is pure leader territory — a *decision*, not an implementation. Memorise the guide's factors and what each means in business terms:\n\n- **Modality** — which data types must it handle? Text only, or images, audio, video too? Pick a model whose modalities match the job (a video task needs a video model).\n- **Context window** — how much text/content the model can consider at once. A big context window lets it read a long contract or many documents in a single go; a small one can't.\n- **Security** — data residency, privacy, and control requirements (heavily a Section 4 theme, but a selection factor here).\n- **Availability & reliability** — will it be up and consistent enough for a production workload?\n- **Cost** — larger, more capable models generally cost more per use; match capability to need, don't over-buy.\n- **Performance** — quality *and* speed (latency). A real-time chat needs low latency; an overnight batch job can trade speed for quality.\n- **Fine-tuning & customization** — can you adapt it to your domain, and do you need to?\n\n> **The leader's instinct:** there is rarely one 'best' model — there's the *right* model for *this* need. Over-specifying (a giant multimodal model for a simple text task) wastes money; under-specifying (a text-only model for a video need) simply can't do the job. The exam rewards matching, not maximising.\n\n## Google's four foundation models — what each is for\n\nSection 1.4 names four Google models. Associate each with its sweet spot:\n\n| Model | What it does best |\n|---|---|\n| **Gemini** | Google's flagship **multimodal** family — text, images, audio, video, and code together. The default for general reasoning, chat, and multimodal tasks. |\n| **Gemma** | Google's family of **open, lightweight** models — build responsibly at scale, run in more places (including your own environment) when you want openness or a smaller footprint. |\n| **Imagen** | Google's leading **text-to-image** model — generate and edit images from a prompt (a diffusion-style image model). |\n| **Veo** | Google's leading **text-to-video** model — generate video (with audio) from a prompt or reference material. |\n\n> **Exam tip — match modality to model:** 'generate a marketing image' → **Imagen**; 'produce a short promo video' → **Veo**; 'a multimodal assistant that reasons over text and screenshots' → **Gemini**; 'we need an open model we can run ourselves' → **Gemma**. Picking Veo for an image task, or Imagen for text reasoning, is the classic distractor.\n\n## Where gen AI creates value: create, summarize, discover, automate\n\nThe guide frames business use cases around four verbs — a genuinely useful lens for spotting good opportunities:\n\n- **Create** — generate new content: marketing copy, images (**Imagen**), video (**Veo**), code, drafts.\n- **Summarize** — condense long or many documents into the essentials: reports, meeting notes, research, contracts.\n- **Discover** — find and surface information buried in large, often unstructured data: search over documents, answer questions, extract insights.\n- **Automate** — take repetitive, language-heavy work off people: draft-and-route emails, triage tickets, populate forms.\n\n> **How the exam uses this:** it hands you a business situation — 'a support team drowning in tickets', 'legal needs the gist of 500 contracts', 'marketing wants fresh ad visuals' — and asks whether/how gen AI helps. Name the verb (automate / summarize / create) and, where relevant, the model (Imagen for the visuals). A *strong* gen-AI use case involves language or content at volume; a *weak* one is a precise numeric calculation better handled by ordinary software or predictive ML.\n\n## Putting Section 1 together\n\nYou can now: define the vocabulary, explain how a model generates and why it errs, tell ML approaches and data types apart, reason about data quality, place a decision on the five-layer landscape, and match a need to the right model and use-case pattern. That is the whole of 'Fundamentals of gen AI' — the 30% foundation the rest of the exam stands on.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d1f-10",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Marketing needs to generate a set of original promotional IMAGES from text descriptions. Which Google foundation model is the best fit?",
+          "options": [
+            { "id": "a", "text": "Imagen (Google's leading text-to-image model)", "correct": true },
+            { "id": "b", "text": "Veo (Google's leading text-to-video model)" },
+            { "id": "c", "text": "Gemma (Google's open, lightweight models)" },
+            { "id": "d", "text": "A structured-data forecasting model" }
+          ],
+          "explanation": "Text-to-**image** generation is **Imagen's** purpose. (b) Veo generates *video*, not still images — the classic wrong-modality distractor. (c) Gemma is a general open text model, not an image generator. (d) forecasting is predictive ML over structured data, unrelated to creating images. Match the modality to the model.",
+          "sourceRefs": ["r-imagen", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-11",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A legal team must feed a single very long contract to a model and have it reasoned over in one pass. Which selection factor is most directly decisive?",
+          "options": [
+            { "id": "a", "text": "Context window — how much content the model can consider at once", "correct": true },
+            { "id": "b", "text": "Modality — whether it handles video" },
+            { "id": "c", "text": "The colour scheme of the user interface" },
+            { "id": "d", "text": "Whether the model is open-source" }
+          ],
+          "explanation": "Handling a very long document in one pass is precisely what a large **context window** enables. (b) modality (video) is irrelevant to a text contract. (c) UI colour is not a model-selection factor. (d) openness (open-source) is a real consideration in general but doesn't determine whether a long document fits in one pass — context window does.",
+          "sourceRefs": ["r-model-selection", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d1f-12",
+          "domainId": "d1-fundamentals",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "Which scenario is the WEAKEST fit for generative AI, and better handled by ordinary software or predictive ML?",
+          "options": [
+            { "id": "a", "text": "Computing an exact loan repayment schedule from fixed interest formulas", "correct": true },
+            { "id": "b", "text": "Summarising 500 free-text customer reviews into key themes" },
+            { "id": "c", "text": "Drafting personalised outreach emails at scale" },
+            { "id": "d", "text": "Generating product description variants for an online store" }
+          ],
+          "explanation": "An **exact, deterministic calculation** from fixed formulas is best done by ordinary software (or predictive ML) — you want a guaranteed correct number, not a plausible generated one. (b) summarising unstructured text, (c) drafting language at scale, and (d) creating content variants are all strong gen-AI use cases (summarize / automate / create). The exam wants you to see that precise numeric certainty is gen AI's weak spot.",
+          "sourceRefs": ["r-exam-guide", "r-what-is-ml"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d1f-1",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which best describes generative AI as Google defines it?",
+      "options": [
+        { "id": "a", "text": "A class of models that creates content (text, images, code, audio, video) from user input", "correct": true },
+        { "id": "b", "text": "A rules engine that follows hand-coded if-then logic" },
+        { "id": "c", "text": "A database that stores and retrieves existing documents" },
+        { "id": "d", "text": "A type of physical server optimised for AI" }
+      ],
+      "explanation": "Google defines gen AI as 'a class of models that creates content from user input' — it *generates* new output. (b) rule engines are the pre-ML approach gen AI moves away from. (c) a database retrieves; it doesn't generate novel content. (d) confuses a model with hardware/infrastructure.",
+      "sourceRefs": ["r-what-is-ml", "r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-2",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How does a large language model generate its response?",
+      "options": [
+        { "id": "a", "text": "By predicting the most likely next token repeatedly, one piece at a time, until the answer is complete", "correct": true },
+        { "id": "b", "text": "By copying the closest matching sentence from its training set verbatim" },
+        { "id": "c", "text": "By querying a live search index for every word it writes" },
+        { "id": "d", "text": "By selecting from a fixed list of pre-written answers" }
+      ],
+      "explanation": "LLMs work by **next-token prediction** — computing probabilities for the next token and generating iteratively. (b) it doesn't copy a stored sentence; it composes token by token. (c) a base model isn't querying live search (that's grounding, a Section 3 technique). (d) it isn't picking from canned answers; it constructs each response.",
+      "sourceRefs": ["r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-3",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A foundation model differs from a traditional task-specific model chiefly because it:",
+      "options": [
+        { "id": "a", "text": "Is trained on broad data and can be adapted to many downstream tasks", "correct": true },
+        { "id": "b", "text": "Can only ever perform the single task it was built for" },
+        { "id": "c", "text": "Requires no data to be trained" },
+        { "id": "d", "text": "Is a hardware accelerator rather than software" }
+      ],
+      "explanation": "The defining trait is **generality** — broad training data, adaptable to many tasks. (b) is the task-specific model it's contrasted with. (c) is impossible — foundation models are trained on *vast* data. (d) confuses a model with infrastructure (chips).",
+      "sourceRefs": ["r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-4",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Machine learning is best described as:",
+      "options": [
+        { "id": "a", "text": "Training a model to make predictions or generate content from data, rather than hand-coding rules", "correct": true },
+        { "id": "b", "text": "A synonym for any computer program" },
+        { "id": "c", "text": "A field entirely separate from and unrelated to artificial intelligence" },
+        { "id": "d", "text": "The manual writing of if-then rules for every case" }
+      ],
+      "explanation": "Google defines ML as training a model to make predictions or generate content **from data**. (b) not every program learns from data. (c) ML is a *subset* of AI, not separate. (d) hand-writing rules is the pre-ML approach ML replaces.",
+      "sourceRefs": ["r-what-is-ml"]
+    },
+    {
+      "id": "q-d1f-5",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which pairing of machine-learning approach to scenario is correct?",
+      "options": [
+        { "id": "a", "text": "Supervised learning → predict churn from historical customers labeled churned/retained", "correct": true },
+        { "id": "b", "text": "Unsupervised learning → predict a value using data with the correct answers provided" },
+        { "id": "c", "text": "Reinforcement learning → cluster unlabeled records into segments" },
+        { "id": "d", "text": "Supervised learning → learn purely from rewards and penalties in an environment" }
+      ],
+      "explanation": "Supervised learning uses **labeled** examples with correct answers — churn prediction fits. (b) describes supervised learning but calls it unsupervised. (c) clustering unlabeled data is *unsupervised*, not reinforcement. (d) rewards/penalties in an environment is *reinforcement* learning, not supervised.",
+      "sourceRefs": ["r-what-is-ml"]
+    },
+    {
+      "id": "q-d1f-6",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which is an example of LABELED data?",
+      "options": [
+        { "id": "a", "text": "Emails each already tagged 'spam' or 'not spam'", "correct": true },
+        { "id": "b", "text": "A pile of raw emails with no tags at all" },
+        { "id": "c", "text": "A stream of sensor readings with nothing annotated" },
+        { "id": "d", "text": "A folder of unsorted photos" }
+      ],
+      "explanation": "Labeled data carries the answer/annotation — emails tagged spam/not-spam. (b), (c), and (d) are all **unlabeled**: raw emails, unannotated sensor data, and unsorted photos have no attached answers. Supervised learning needs the labeled kind.",
+      "sourceRefs": ["r-supervised-ml", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-7",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which of these is STRUCTURED data?",
+      "options": [
+        { "id": "a", "text": "A relational database table of transactions with typed columns", "correct": true },
+        { "id": "b", "text": "A collection of scanned contract PDFs" },
+        { "id": "c", "text": "A set of customer support call recordings" },
+        { "id": "d", "text": "A library of marketing videos" }
+      ],
+      "explanation": "A typed database table has a fixed schema — **structured**. (b) scanned PDFs, (c) audio recordings, and (d) video are all **unstructured** (no fixed schema). The leader's insight: most enterprise data is unstructured, and reading it is a core gen-AI strength.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-8",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the machine-learning lifecycle, which stage immediately follows data preparation?",
+      "options": [
+        { "id": "a", "text": "Model training", "correct": true },
+        { "id": "b", "text": "Data ingestion" },
+        { "id": "c", "text": "Model deployment" },
+        { "id": "d", "text": "Model management" }
+      ],
+      "explanation": "The order is ingestion → preparation → **training** → deployment → management, so training follows preparation. (b) ingestion comes *before* preparation. (c) deployment comes after training. (d) management is the final, ongoing stage.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-9",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which are the five core layers of the gen-AI landscape per the exam guide?",
+      "options": [
+        { "id": "a", "text": "Infrastructure, models, platforms, agents, applications", "correct": true },
+        { "id": "b", "text": "Ingestion, preparation, training, deployment, management" },
+        { "id": "c", "text": "Prompting, grounding, RAG, fine-tuning, evaluation" },
+        { "id": "d", "text": "Compute, storage, networking, identity, billing" }
+      ],
+      "explanation": "The guide's five landscape layers are **infrastructure, models, platforms, agents, applications**. (b) is the ML lifecycle. (c) is Section 3's output-improvement techniques. (d) is a generic cloud-services list. Only (a) is the landscape.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-10",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which Google foundation model is the flagship MULTIMODAL family handling text, images, audio, and video together?",
+      "options": [
+        { "id": "a", "text": "Gemini", "correct": true },
+        { "id": "b", "text": "Imagen" },
+        { "id": "c", "text": "Veo" },
+        { "id": "d", "text": "Gemma" }
+      ],
+      "explanation": "**Gemini** is Google's flagship multimodal model, working across text, images, audio, and video. (b) Imagen is text-to-image only. (c) Veo is text-to-video. (d) Gemma is Google's open, lightweight text model family — not the flagship multimodal one.",
+      "sourceRefs": ["r-gemini", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-11",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A startup wants an OPEN, lightweight model it can run in its own environment. Which Google model family fits best?",
+      "options": [
+        { "id": "a", "text": "Gemma (Google's open, lightweight models)", "correct": true },
+        { "id": "b", "text": "Imagen (text-to-image)" },
+        { "id": "c", "text": "Veo (text-to-video)" },
+        { "id": "d", "text": "The Gemini app for Workspace" }
+      ],
+      "explanation": "**Gemma** is Google's family of open, lightweight models designed to run in many places — the fit for wanting openness and a small footprint. (b) Imagen and (c) Veo are content-generation models for images/video, not general open text models. (d) the Gemini Workspace app is an end-user application, not an open model you self-host.",
+      "sourceRefs": ["r-gemma", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-12",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The business needs to generate short promotional VIDEOS from text prompts. Which Google model is designed for that?",
+      "options": [
+        { "id": "a", "text": "Veo", "correct": true },
+        { "id": "b", "text": "Imagen" },
+        { "id": "c", "text": "Gemma" },
+        { "id": "d", "text": "A supervised tabular model" }
+      ],
+      "explanation": "**Veo** is Google's leading text-to-video model. (b) Imagen generates still images, not video. (c) Gemma is a general open text model. (d) a supervised tabular model predicts values from structured data — it can't generate video. Match modality to model.",
+      "sourceRefs": ["r-veo", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-13",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which factor from the exam guide's model-selection list is about how much content a model can consider in a single pass?",
+      "options": [
+        { "id": "a", "text": "Context window", "correct": true },
+        { "id": "b", "text": "Modality" },
+        { "id": "c", "text": "Fine-tuning" },
+        { "id": "d", "text": "Availability" }
+      ],
+      "explanation": "**Context window** is the amount of content the model can take in at once. (b) modality is *which data types* it handles. (c) fine-tuning is adapting a model to your domain. (d) availability is about uptime/reliability. Only context window describes single-pass capacity.",
+      "sourceRefs": ["r-model-selection", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-14",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader must pick a model for a real-time customer-chat feature where fast responses matter most. Which selection factor is most decisive?",
+      "options": [
+        { "id": "a", "text": "Performance, including latency (speed of response)", "correct": true },
+        { "id": "b", "text": "Whether it can generate video" },
+        { "id": "c", "text": "How large the marketing budget is" },
+        { "id": "d", "text": "The number of colours in the brand palette" }
+      ],
+      "explanation": "Real-time chat is dominated by **performance/latency** — responses must be fast. (b) video modality is irrelevant to a text chat. (c) marketing budget isn't a model-selection factor (though cost is, that's different). (d) is unrelated to model choice. Match the factor to what the workload demands.",
+      "sourceRefs": ["r-model-selection", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-15",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under the create / summarize / discover / automate pattern, condensing 500 long research reports into key points is best described as which?",
+      "options": [
+        { "id": "a", "text": "Summarize", "correct": true },
+        { "id": "b", "text": "Create" },
+        { "id": "c", "text": "Discover" },
+        { "id": "d", "text": "Automate" }
+      ],
+      "explanation": "Condensing long content into essentials is **summarize**. (b) create is generating *new* content. (c) discover is finding/surfacing buried information (search-like). (d) automate is taking repetitive work off people. Summarising reports is squarely the summarize verb.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-16",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which situation is the STRONGEST candidate for a generative-AI solution?",
+      "options": [
+        { "id": "a", "text": "Turning thousands of free-text support tickets into drafted, categorised responses", "correct": true },
+        { "id": "b", "text": "Computing precise monthly payroll totals from fixed tax tables" },
+        { "id": "c", "text": "Enforcing an exact accounting rule with zero tolerance for error" },
+        { "id": "d", "text": "Sorting a numeric column from smallest to largest" }
+      ],
+      "explanation": "Language-heavy work at volume — drafting and categorising unstructured tickets — is an ideal gen-AI use case (automate + create). (b) precise payroll and (c) exact accounting demand deterministic correctness, gen AI's weak spot. (d) sorting numbers is trivial conventional software. Gen AI shines on content/language at scale, not exact arithmetic.",
+      "sourceRefs": ["r-exam-guide", "r-what-is-ml"]
+    },
+    {
+      "id": "q-d1f-17",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team blames 'a weak model' for a disappointing gen-AI pilot, but the data has large gaps and inconsistent records and is locked in silos they can't reach. What is the more likely root cause?",
+      "options": [
+        { "id": "a", "text": "Poor data quality and accessibility — completeness, consistency, and availability problems", "correct": true },
+        { "id": "b", "text": "The model's tagline is out of date" },
+        { "id": "c", "text": "There are too many colours in the dashboard" },
+        { "id": "d", "text": "The company used a foundation model instead of a spreadsheet" }
+      ],
+      "explanation": "Gaps = completeness, inconsistency = consistency, siloed/unreachable = availability/accessibility — classic **data-quality** failure, the usual real culprit behind stalled initiatives. (b) and (c) are irrelevant. (d) is nonsensical — the problem is the data feeding the model, not the choice of a foundation model per se.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-18",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is a multimodal foundation model?",
+      "options": [
+        { "id": "a", "text": "One that can work with more than one data type — e.g. text, images, audio, and video together", "correct": true },
+        { "id": "b", "text": "One that can only process plain text" },
+        { "id": "c", "text": "One that runs on multiple servers at once" },
+        { "id": "d", "text": "One trained by multiple companies jointly" }
+      ],
+      "explanation": "'Multimodal' means multiple **modalities** (data types) — text, images, audio, video — as with Gemini. (b) text-only is *unimodal*. (c) confuses modality with distributed compute. (d) confuses it with joint training/ownership. Modality = data type.",
+      "sourceRefs": ["r-gemini", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-19",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which statement correctly distinguishes a diffusion model in the exam-guide vocabulary?",
+      "options": [
+        { "id": "a", "text": "It is the model family typically behind high-quality image generation, e.g. Google's Imagen", "correct": true },
+        { "id": "b", "text": "It is a hardware chip that speeds up training" },
+        { "id": "c", "text": "It is a technique for storing structured data in tables" },
+        { "id": "d", "text": "It is the same thing as a large language model" }
+      ],
+      "explanation": "Diffusion models are the family behind much high-quality **image** generation — associate them with **Imagen**. (b) confuses a model type with hardware. (c) has nothing to do with data storage. (d) is wrong — an LLM is a *language* model; diffusion models are image models. The exam lists both terms separately.",
+      "sourceRefs": ["r-imagen", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-20",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Why can a large language model give a confident answer that is factually wrong, and where on the Generative AI Leader exam is fixing this formally examined?",
+      "options": [
+        { "id": "a", "text": "Because it predicts plausible next tokens rather than verifying facts; the fixes (grounding, RAG, fine-tuning) are examined in Section 3, not Section 1", "correct": true },
+        { "id": "b", "text": "Because it has a live internet connection that failed; the fixes are in Section 1" },
+        { "id": "c", "text": "Because it stores wrong facts in a spreadsheet; the fixes are in Section 4 only" },
+        { "id": "d", "text": "It never gives wrong answers, so nothing needs fixing" }
+      ],
+      "explanation": "The mechanism (next-token prediction of *plausible* continuations) causes hallucinations, and the guide places limitations and their remedies — grounding, RAG, fine-tuning, human-in-the-loop — in **Section 3**. (b) a base LLM has no live connection, and this isn't fixed in Section 1. (c) it doesn't use a spreadsheet, and Section 4 covers business strategy/responsible AI, not the technical remedies. (d) is false — hallucinations are real and explicitly examined.",
+      "sourceRefs": ["r-vertex-overview", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-21",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which Google model is the leading TEXT-TO-IMAGE model, and which is the leading TEXT-TO-VIDEO model?",
+      "options": [
+        { "id": "a", "text": "Imagen for images; Veo for video", "correct": true },
+        { "id": "b", "text": "Veo for images; Imagen for video" },
+        { "id": "c", "text": "Gemma for images; Gemini for video" },
+        { "id": "d", "text": "Gemini for images; Gemma for video" }
+      ],
+      "explanation": "**Imagen** = text-to-image; **Veo** = text-to-video. (b) swaps them. (c) and (d) miscast Gemma (open text models) and Gemini (multimodal flagship) as dedicated image/video generators. Keep Imagen↔image and Veo↔video straight.",
+      "sourceRefs": ["r-imagen", "r-veo"]
+    },
+    {
+      "id": "q-d1f-22",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is the clearest example of an UNSUPERVISED-learning outcome?",
+      "options": [
+        { "id": "a", "text": "Discovering natural clusters among customers when no groups were defined beforehand", "correct": true },
+        { "id": "b", "text": "Predicting house prices from a dataset where each house's sale price is provided" },
+        { "id": "c", "text": "Learning to play a game by receiving rewards for winning moves" },
+        { "id": "d", "text": "Following a fixed set of hand-written business rules" }
+      ],
+      "explanation": "Finding clusters with **no predefined labels** is unsupervised learning. (b) predicting from data with the answers (prices) provided is *supervised*. (c) learning via rewards is *reinforcement* learning. (d) hand-written rules aren't machine learning at all. Only (a) matches the unsupervised definition.",
+      "sourceRefs": ["r-what-is-ml"]
+    },
+    {
+      "id": "q-d1f-23",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader says: 'Our gen-AI assistant can answer anything, so we don't need to give it any of our internal data.' What's the best correction?",
+      "options": [
+        { "id": "a", "text": "A base model only knows its training data up to a cutoff and has no access to your internal data — to answer about your business it must be given that data (e.g. via grounding)", "correct": true },
+        { "id": "b", "text": "Correct — foundation models already contain every company's private data" },
+        { "id": "c", "text": "Correct — models continuously read your systems in real time by default" },
+        { "id": "d", "text": "The assistant should be replaced with a spreadsheet" }
+      ],
+      "explanation": "A base LLM's knowledge is frozen at a **training cutoff** and it has **no** access to your private data unless supplied — hence grounding/RAG (Section 3). (b) is false and a security misconception — models don't contain your private data. (c) is false — there's no default real-time system access. (d) is a non-sequitur. The correction is about the model's knowledge boundary.",
+      "sourceRefs": ["r-vertex-overview", "r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-24",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Choosing between Google's custom TPUs and GPUs for training a model is a decision at which layer of the gen-AI landscape?",
+      "options": [
+        { "id": "a", "text": "Infrastructure", "correct": true },
+        { "id": "b", "text": "Applications" },
+        { "id": "c", "text": "Agents" },
+        { "id": "d", "text": "Models" }
+      ],
+      "explanation": "Chips (TPUs/GPUs), data centres, and compute are the **infrastructure** layer. (b) applications are end-user products. (c) agents are tool-using systems built on models. (d) the models layer is the foundation models themselves, not the hardware they run on. Locating the decision at the right layer is the tested skill.",
+      "sourceRefs": ["r-exam-guide", "r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-25",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which statement correctly nests the core terms a leader must use?",
+      "options": [
+        { "id": "a", "text": "Machine learning is a subset of AI, and generative AI is a class of machine-learning models that creates content", "correct": true },
+        { "id": "b", "text": "Generative AI is the broad field, and artificial intelligence is a narrow subset of it" },
+        { "id": "c", "text": "Machine learning and artificial intelligence are unrelated fields" },
+        { "id": "d", "text": "A foundation model is a subset of a large language model" }
+      ],
+      "explanation": "The correct hierarchy is AI ⊃ machine learning ⊃ generative AI, with gen AI being a class of ML models that *creates* content. Option b inverts the nesting. Option c is wrong — ML is a subset of AI, not a separate field. Option d reverses the relationship: an LLM is a *type of* foundation model specialised for language, not the other way round.",
+      "sourceRefs": ["r-exam-guide", "r-what-is-ml"]
+    },
+    {
+      "id": "q-d1f-26",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the machine-learning lifecycle, which is the correct order of the first three stages?",
+      "options": [
+        { "id": "a", "text": "Data ingestion → data preparation → model training", "correct": true },
+        { "id": "b", "text": "Model training → data ingestion → data preparation" },
+        { "id": "c", "text": "Data preparation → model deployment → data ingestion" },
+        { "id": "d", "text": "Model deployment → model training → data ingestion" }
+      ],
+      "explanation": "The guide's lifecycle runs data ingestion (gather the raw data), then data preparation (clean, format, label it), then model training (the model learns patterns), before deployment and monitoring. The other orders put training or deployment before the data even exists in usable form, which is impossible — you cannot train on data you have not yet ingested and prepared.",
+      "sourceRefs": ["r-exam-guide", "r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-27",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A dataset records the same customer's country as 'UK', 'U.K.', and 'United Kingdom' in different rows. Which data-quality characteristic is most directly failing?",
+      "options": [
+        { "id": "a", "text": "Consistency — the same thing is recorded in different ways, which confuses what the model learns", "correct": true },
+        { "id": "b", "text": "Completeness — a required value is missing" },
+        { "id": "c", "text": "Availability — the data cannot be reached when needed" },
+        { "id": "d", "text": "Cost — the data is too expensive to prepare" }
+      ],
+      "explanation": "Recording the same real-world value three different ways is a **consistency** failure — contradictory encodings the model must reconcile. Completeness is about *missing* values (the country is present here, just inconsistent); availability is about whether you can *access* the data (you can); and cost is about the expense of acquiring/cleaning it, not the contradiction itself.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d1f-28",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why is a foundation model called a 'foundation' rather than a single-task tool?",
+      "options": [
+        { "id": "a", "text": "It is trained on vast data and can be adapted for numerous downstream tasks, so one general-purpose model supports many jobs", "correct": true },
+        { "id": "b", "text": "It can only ever perform the one narrow task it was trained for" },
+        { "id": "c", "text": "It is the physical hardware layer that other models are built on top of" },
+        { "id": "d", "text": "It is a small model that must be combined with dozens of others to work" }
+      ],
+      "explanation": "Google defines a foundation model as one trained on vast data that can be *adapted for numerous downstream tasks* — one general model, many jobs, which is why you build on it. Option b describes a traditional task-specific model, the opposite. Option c confuses it with the infrastructure layer. Option d is wrong — foundation models are large and general, not small single-purpose components.",
+      "sourceRefs": ["r-exam-guide", "r-model-selection"]
+    },
+    {
+      "id": "q-d1f-29",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer wants to segment its customers into groups that no one has pre-defined, discovering natural clusters in the data. Which machine-learning approach fits?",
+      "options": [
+        { "id": "a", "text": "Unsupervised learning — it identifies meaningful patterns (e.g. clusters) in data with no correct answers attached", "correct": true },
+        { "id": "b", "text": "Supervised learning — because every customer already has a labelled segment" },
+        { "id": "c", "text": "Reinforcement learning — because the model earns rewards for each customer" },
+        { "id": "d", "text": "Generative modelling — because it must create new customers" }
+      ],
+      "explanation": "Discovering groupings no one pre-labelled is **unsupervised learning** — clustering to find patterns without correct answers. Supervised learning needs labelled answers, which the scenario explicitly lacks. Reinforcement learning is trial-and-error against rewards in an environment, not segmentation. Generative modelling *creates* new content, not clusters of existing customers.",
+      "sourceRefs": ["r-exam-guide", "r-supervised-ml"]
+    },
+    {
+      "id": "q-d1f-30",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the five-layer gen-AI landscape, the tooling used to build, tune, deploy, and manage models and agents (e.g. Agent Platform, Model Garden) sits at which layer?",
+      "options": [
+        { "id": "a", "text": "Platforms", "correct": true },
+        { "id": "b", "text": "Infrastructure" },
+        { "id": "c", "text": "Models" },
+        { "id": "d", "text": "Applications" }
+      ],
+      "explanation": "Build/tune/deploy/manage tooling is the **platforms** layer (Agent Platform, Model Garden). Infrastructure is the compute/networking beneath it (TPUs, GPUs, data centres); models is the foundation models themselves; applications is the end-user products on top. The stack runs infrastructure → models → platforms → agents → applications.",
+      "sourceRefs": ["r-exam-guide", "r-vertex-overview"]
+    },
+    {
+      "id": "q-d1f-31",
+      "domainId": "d1-fundamentals",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A leader must process entire 200-page contracts in a single request so the model can reason across the whole document at once. Which model-selection factor should weigh most heavily?",
+      "options": [
+        { "id": "a", "text": "Context window — how much content the model can consider at once, which determines whether a long contract fits in one pass", "correct": true },
+        { "id": "b", "text": "Modality — because contracts require a video-capable model" },
+        { "id": "c", "text": "Fine-tuning — because only a fine-tuned model can read long text" },
+        { "id": "d", "text": "Cost alone — always pick the cheapest model regardless of the task" }
+      ],
+      "explanation": "Reading a whole long document in one request is exactly what the **context window** governs — a large window fits the 200 pages; a small one cannot. Modality is about data types (text/image/audio/video) and a contract is text, not video. Fine-tuning adapts a model to a domain but does not set how much it can read at once. Cost matters, but 'cheapest regardless of task' ignores the fit the exam rewards.",
+      "sourceRefs": ["r-exam-guide", "r-model-selection"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d1f-adoption-decision",
+      "domainIds": ["d1-fundamentals"],
+      "title": "A leader's first gen-AI adoption call",
+      "tagline": "Frame the problem, judge the data, place it on the landscape, and pick the right model — the way the exam asks a leader to reason.",
+      "context": "You lead operations at a mid-size insurer. The support team is overwhelmed by inbound customer emails; leadership wants to 'use AI' to help. You have no engineering background — your job is to reason about it strategically the way the Generative AI Leader exam expects. Walk the decision step by step, choosing the single best option each time.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First: is this even a good generative-AI use case, and how would you frame it?",
+          "choices": [
+            { "id": "a", "text": "Yes — it's language-heavy work at volume (reading and drafting email responses), which fits the 'automate' and 'summarize' pattern gen AI is strong at", "verdict": "best", "rationale": "Unstructured language at scale — reading, summarising, and drafting replies — is exactly where gen AI creates value. Framing it by the create/summarize/discover/automate lens is the leader's move." },
+            { "id": "b", "text": "Only if the goal is to compute exact premium figures with zero error", "verdict": "wrong", "rationale": "Exact, deterministic numeric calculation is gen AI's weak spot — better handled by conventional software or predictive ML. That's not what this problem is." },
+            { "id": "c", "text": "No — gen AI can't work with email because email is unstructured", "verdict": "wrong", "rationale": "The opposite is true: reading unstructured text like email is a core gen-AI strength, and most enterprise data is unstructured." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Before building anything, what should you scrutinise first to de-risk the initiative?",
+          "choices": [
+            { "id": "a", "text": "Data quality and accessibility — is the ticket history complete, consistent, relevant, and actually reachable?", "verdict": "best", "rationale": "Initiatives fail on data far more than on models. Checking completeness, consistency, relevance, and availability up front is the highest-leverage leader action." },
+            { "id": "b", "text": "The exact chip architecture (TPU vs. GPU) the model will train on", "verdict": "viable", "rationale": "Infrastructure matters eventually, but it's not the first-order risk for a leader — and for a prebuilt offering you may never touch it. Data comes first." },
+            { "id": "c", "text": "Nothing — just pick the biggest, most expensive model and start", "verdict": "wrong", "rationale": "Over-buying a giant model doesn't fix bad data, and 'maximise, don't match' is the anti-pattern the exam penalises." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "The team wants the assistant to answer questions using YOUR policy documents and past tickets. What must you recognise about the model's knowledge?",
+          "choices": [
+            { "id": "a", "text": "A base model knows only its training data up to a cutoff and has no access to your internal data — you must supply that data to it (this is what grounding/RAG will do)", "verdict": "best", "rationale": "The knowledge-boundary point is the crux: the model can't answer about your business unless given your data. This sets up the Section 3 techniques correctly." },
+            { "id": "b", "text": "The model already contains your company's private documents, so nothing extra is needed", "verdict": "wrong", "rationale": "False and a security misconception — foundation models do not contain your private data." },
+            { "id": "c", "text": "The model reads your systems live by default, so it's always current", "verdict": "wrong", "rationale": "There is no default real-time access to your systems; a base model's knowledge is frozen at training time." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Marketing now asks you to also generate promotional IMAGES for the new policy launch. Which Google model do you point them to?",
+          "choices": [
+            { "id": "a", "text": "Imagen — Google's leading text-to-image model", "verdict": "best", "rationale": "Text-to-image generation is Imagen's job. Matching the modality (image) to the model is the exact skill 1.4 tests." },
+            { "id": "b", "text": "Veo — because it also makes visual content", "verdict": "wrong", "rationale": "Veo generates video, not still images. Wrong modality — the classic distractor." },
+            { "id": "c", "text": "Gemma — because it's a Google model", "verdict": "wrong", "rationale": "Gemma is an open, lightweight text model family, not an image generator. Being 'a Google model' isn't the selection criterion." }
+          ]
+        },
+        {
+          "id": "st5",
+          "prompt": "Finally, you must choose the model for the customer-facing chat itself, which must respond fast and reason over text and the occasional screenshot. Which selection factors lead your decision?",
+          "choices": [
+            { "id": "a", "text": "Modality (text + images, so multimodal like Gemini) and performance/latency (fast responses) — matched to the need, not simply the largest model", "verdict": "best", "rationale": "Real-time, multimodal chat is driven by modality and latency; Gemini fits the multimodal part. Matching capability to need — not maximising — is the leader's discipline." },
+            { "id": "b", "text": "Pick the single most powerful, most expensive model regardless of the workload", "verdict": "wrong", "rationale": "Over-specifying wastes cost and can hurt latency. The exam rewards matching the model to the need." },
+            { "id": "c", "text": "Choose a text-only model to keep it simple, even though screenshots must be understood", "verdict": "wrong", "rationale": "Under-specifying: a text-only model literally cannot handle the screenshot (image) modality the use case requires." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-exam-guide", "r-vertex-overview", "r-imagen", "r-gemini", "r-model-selection"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d1f-use-case-brief",
+      "domainId": "d1-fundamentals",
+      "title": "Draft a one-page gen-AI use-case and model-fit brief",
+      "goal": "Produce the exact strategy artifact a Generative AI Leader is expected to create — a crisp, defensible one-pager that frames a business problem, judges its data, places it on the gen-AI landscape, and recommends a Google model — using only the Section 1 concepts. No code.",
+      "steps": "## What you'll produce\n\nA single-page brief (a document or slide) that a real executive committee could read in five minutes. Pick any real or realistic business problem from your own world (support backlog, contract review, content production, internal search, etc.).\n\n1. **State the problem and the verb.** In two sentences, describe the business problem. Then label it with the gen-AI value pattern — **create / summarize / discover / automate** — and justify why gen AI (not ordinary software or predictive ML) is the right tool. If the honest answer is 'this is really a deterministic calculation', say so — recognising a *poor* fit is itself a passing-level judgement.\n2. **Judge the data.** List the data the solution would rely on and grade it against the guide's data-quality characteristics — **completeness, consistency, relevance, availability, cost, format**. Note whether it's **structured or unstructured** and **labeled or unlabeled**. Call out the single biggest data risk and how you'd de-risk it.\n3. **Place it on the landscape.** Say which of the five layers — **infrastructure, models, platforms, agents, applications** — your decision actually lives at. (Most business rollouts are application- or platform/agent-level; you rarely touch infrastructure or models directly.)\n4. **Recommend a model and defend it.** Choose from **Gemini, Gemma, Imagen, Veo** and justify it against the selection factors that matter for *this* need — **modality, context window, security, availability/reliability, cost, performance, fine-tuning/customization**. Explicitly note what you're *matching* and what you're *not over-buying*.\n5. **State the knowledge boundary.** Add one line acknowledging that a base model won't know your internal data by default, and flag that grounding/RAG (a Section 3 technique) will be needed — showing you understand the limit before you're asked to fix it.\n\n## Why it matters\n\nThis is Section 1 in one page, and it mirrors what the exam actually tests: not building, but *reasoning* — framing, judging data, locating the decision, and matching a model. If you can defend every line of this brief to a skeptical CFO, you've internalised 'Fundamentals of gen AI'.",
+      "checklist": [
+        "Problem stated in two sentences and labelled with the correct value verb (create/summarize/discover/automate), with a justification that gen AI beats ordinary software/predictive ML for it",
+        "Data graded against all six quality characteristics, classified structured/unstructured and labeled/unlabeled, with the top data risk named",
+        "The decision correctly located on one of the five landscape layers, with a reason",
+        "A specific Google model (Gemini/Gemma/Imagen/Veo) recommended and defended against the guide's selection factors — matching, not maximising",
+        "A one-line acknowledgement of the model's knowledge boundary and the need for grounding/RAG"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-exam-guide",
+      "title": "Generative AI Leader certification exam guide (PDF)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The source of truth for Section 1 'Fundamentals of gen AI (~30%)'. Read sub-sections 1.1–1.4 verbatim: the core-concept vocabulary (AI, NLP, ML, gen AI, foundation models, multimodal and diffusion models, LLMs, prompt tuning/engineering); the three ML approaches (supervised/unsupervised/reinforcement); the ML lifecycle (ingestion → preparation → training → deployment → management); the model-selection factors (modality, context window, security, availability/reliability, cost, performance, fine-tuning/customization); data quality (completeness, consistency, relevance, availability, cost, format); structured-vs-unstructured and labeled-vs-unlabeled data; the five landscape layers (infrastructure, models, platforms, agents, applications); and Google's four foundation models (Gemini, Gemma, Imagen, Veo). Note: hallucinations/limitations are examined in Section 3, not here.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-cert-page",
+      "title": "Generative AI Leader certification (overview & logistics)",
+      "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "kind": "official-doc",
+      "annotation": "The certification home page and the source for exam logistics: $99 (plus tax), 90 minutes, 50–60 multiple-choice questions, online- or onsite-proctored, valid 3 years, no prerequisites. Google does not publish a passing score here — leave it unset and train to the Academy's own bar. Also the current-branding reference: it surfaces Gemini, Gemini Enterprise, Agent Platform, Agent Search, Model Garden, and Customer Experience Agent Studio.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-what-is-ml",
+      "title": "Machine Learning Crash Course — What is Machine Learning?",
+      "url": "https://developers.google.com/machine-learning/intro-to-ml/what-is-ml",
+      "kind": "official-doc",
+      "annotation": "Google's plain-language definitions used throughout this domain: ML is 'the process of training a piece of software, called a model, to make useful predictions or generate content ... from data'; supervised models learn from data 'with the correct answers'; unsupervised models 'identify meaningful patterns in a dataset' (clustering); reinforcement models learn 'by getting rewards or penalties'; and gen AI is 'a class of models that creates content from user input' where 'generative models learn patterns in data with the goal to produce new but similar data'. The cleanest source for ML-vs-gen-AI and the three approaches.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-supervised-ml",
+      "title": "Machine Learning Crash Course — Supervised learning (labels & features)",
+      "url": "https://developers.google.com/machine-learning/intro-to-ml/supervised",
+      "kind": "official-doc",
+      "annotation": "Grounds the labeled-data vocabulary: 'The label is the answer, or the value we want the model to predict'; 'Features are the values that a supervised model uses to predict the label'; and examples containing both features and a label 'are called labeled examples'. Use for the labeled-vs-unlabeled distinction and why supervised learning needs labeled data.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-vertex-overview",
+      "title": "Generative AI on Google Cloud — overview",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "Google's overview of generative AI and foundation models: foundation models are large models trained on vast data and adaptable to many downstream tasks; LLMs generate via next-token prediction (calculating probabilities for the next token and generating iteratively); and the platform's capabilities span text, code, image, video, audio, and multimodal work. Also shows current branding — Gemini, Gemini Enterprise Agent Platform, Model Garden, Agent Studio. The basis for how-a-model-works and the knowledge-boundary points.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-model-selection",
+      "title": "Choose a model — Generative AI on Google Cloud",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
+      "kind": "official-doc",
+      "annotation": "Grounds Section 1.1's model-selection factors: models are chosen on modality, context window, cost, latency, and capability, and the page lists the current model line-up (Gemini variants, Imagen, Veo, plus partner models in Model Garden). Use for the 'match the model to the need' reasoning — modality, context window, performance/latency, and cost.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-gemini",
+      "title": "Gemini — Google DeepMind",
+      "url": "https://deepmind.google/models/gemini/",
+      "kind": "official-doc",
+      "annotation": "Google DeepMind's page for Gemini, the flagship multimodal foundation model with 'advanced multimodal understanding' across text, images, video, and audio (plus code). Use to justify Gemini as the multimodal default and to distinguish it from the image-only (Imagen) and video-only (Veo) models.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-gemma",
+      "title": "Gemma — Google DeepMind (open models)",
+      "url": "https://deepmind.google/models/gemma/",
+      "kind": "official-doc",
+      "annotation": "Google DeepMind's page for Gemma, its family of open, lightweight models designed to build AI applications 'at scale' and run across many environments (cloud to laptop). Use for the 'open / lightweight / self-hostable' selection lane that distinguishes Gemma from the proprietary Gemini flagship.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-imagen",
+      "title": "Imagen — Google DeepMind (text-to-image)",
+      "url": "https://deepmind.google/models/imagen/",
+      "kind": "official-doc",
+      "annotation": "Google DeepMind's page for Imagen, described as its 'leading text-to-image model'. The anchor for image-generation use cases and for the diffusion-model concept — pair 'generate an image' with Imagen, not Veo.",
+      "domainIds": ["d1-fundamentals"]
+    },
+    {
+      "id": "r-veo",
+      "title": "Veo — Google DeepMind (text-to-video)",
+      "url": "https://deepmind.google/models/veo/",
+      "kind": "official-doc",
+      "annotation": "Google DeepMind's page for Veo, its 'leading video generation model' that produces video (with audio) from text prompts and reference material. The anchor for video-generation use cases — pair 'generate a video' with Veo, not Imagen.",
+      "domainIds": ["d1-fundamentals"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d1-1",
+      "title": "D1 · What gen AI is — foundation models, LLMs, and why a fluent answer can be wrong",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-fundamentals"],
+      "sourceNotebook": "gen-ai-leader / d1 / concepts-and-how-models-work"
+    },
+    {
+      "id": "v-d1-2",
+      "title": "D1 · From concept to choice — ML vs gen AI, the five layers, and picking Gemini/Gemma/Imagen/Veo",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d1-fundamentals"],
+      "sourceNotebook": "gen-ai-leader / d1 / landscape-and-model-selection"
+    }
+  ]
+}

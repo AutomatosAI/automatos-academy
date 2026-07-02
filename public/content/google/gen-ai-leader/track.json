@@ -1,0 +1,98 @@
+{
+  "vendorName": "Google Cloud",
+  "name": "Generative AI Leader",
+  "code": "GAL",
+  "summary": "Google Cloud's business-leader credential for generative AI. Validates that a non-technical leader can explain gen-AI fundamentals, map Google Cloud's gen-AI offerings (Gemini, Gemini Enterprise, the Customer Engagement Suite, Agent Platform, Agent Studio, Model Garden, NotebookLM) to real problems, choose techniques to improve model output (prompting, grounding, RAG, tuning, evaluation), and drive a successful gen-AI strategy — value, risk, responsible AI, and KPIs. No prerequisites; four weighted domains straight from the official exam guide.",
+  "exam": {
+    "questionCount": 60,
+    "durationMinutes": 90,
+    "scoreScale": 100,
+    "scoreFloor": 0,
+    "passingScore": 70,
+    "aPlusScore": 80,
+    "proctored": true,
+    "closedBook": true,
+    "scenarioPool": 4,
+    "scenariosPresented": 4,
+    "recommendedPrep": "The official Generative AI Leader exam guide + the Google Cloud generative-AI learning path. Pitched at a business-leader audience with no prerequisites — no hands-on technical experience required."
+  },
+  "blueprintNote": "Domains and weights are the official four sections from the Generative AI Leader exam guide PDF, verbatim and un-normalized: D1 Fundamentals of gen AI ~30%, D2 Google Cloud's gen AI offerings ~35%, D3 Techniques to improve gen AI model output ~20%, D4 Business strategies for a successful gen AI solution ~15% (sum 1.00). The cert page states 50-60 multiple-choice questions and 90 minutes; the Academy models the exam at 60 questions. Google does NOT publish a passing score anywhere on the cert page or in the exam guide — the 70/100 here is the Academy's own training bar (with 80/100 as the A+ margin), NOT Google's cut score. Branding is kept current to the live guide: the guide uses Gemini / Gemini Enterprise / Agent Platform / Agent Studio / Model Garden and contains NO 'Vertex AI' or 'Agent Builder' and NO 'recently updated to reflect branding changes' statement (that sentence lives on the cert page, not in the PDF) — the dated names are taught only as distractors. The scenario drills are an Academy training device: neither the cert page nor the exam guide describes a scenario/case-study question format, so scenarios are not represented as an official Gen-AI-Leader question type.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf"
+    ],
+    "notes": "Live-checked 2026-07-02. Cert page (verbatim): 90 minutes; 50-60 multiple-choice questions; $99 registration; online- or onsite-proctored; languages English/Japanese/Spanish/Portuguese; validity 3 years; prerequisites None; audience 'Anyone in any job role, with or without hands-on technical experience'; NO passing score stated. Exam guide PDF is binary/compressed (WebFetch cannot parse it) and was extracted with pdftotext -layout: it is a 5-page guide whose four section titles and weights read verbatim 'Section 1: Fundamentals of gen AI (~30% of the exam)', 'Section 2: Google Cloud's gen AI offerings (~35% of the exam)', 'Section 3: Techniques to improve gen AI model output (~20% of the exam)', 'Section 4: Business strategies for a successful gen AI solution (~15% of the exam)' — matching the four domain files' weights 0.30/0.35/0.20/0.15 (sum 1.00). PRD-S4 §7 drift confirmed and corrected in content: an offline agent's claim that this certification 'doesn't exist' is FALSE (it is a real, self-enrollable, proctored exam); and the 'recently updated to reflect branding changes' quote is on the CERT PAGE, not inside the guide — the guide simply uses current names (Gemini / Gemini Enterprise / Agent Platform / Agent Studio / Model Garden) with zero occurrences of 'Vertex AI' or 'Agent Builder', so the modules teach the current names and use the dated ones only as distractors. Passing score left unset from Google and supplied only as the Academy's 70/100 training bar. Scope note: the guide places hallucinations and other foundation-model limitations formally in Section 3 (3.1); D1 teaches hallucination only as a 'why fluent answers can be wrong' concept and points learners to Section 3 for the fixes."
+  },
+  "badge": {
+    "completionLabel": "Prep completed — Generative AI Leader (Google Cloud)",
+    "definition": "Completed the Automatos Academy Generative AI Leader preparation track to the A+ readiness standard: ≥90% blueprint-weighted mastery and a full-length mock passed with margin (≥80/100 on the Academy's own scale). This certifies preparation completion — the Generative AI Leader credential itself is issued only by Google Cloud, and Google does not publish an official passing score."
+  },
+  "domainFiles": [
+    "d1-fundamentals.json",
+    "d2-google-offerings.json",
+    "d3-improve-output.json",
+    "d4-business-strategy.json"
+  ],
+  "officialResources": [
+    {
+      "id": "off-gal-cert",
+      "title": "Generative AI Leader — certification page (Google Cloud)",
+      "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "kind": "official-doc",
+      "annotation": "Exam overview: 90 minutes, 50-60 multiple-choice questions, $99, online- or onsite-proctored, no prerequisites, 3-year validity, business-leader audience. Note it states NO passing score. This page (not the guide PDF) also carries the 'reflect branding changes' note.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gal-exam-guide",
+      "title": "Generative AI Leader — official exam guide (PDF)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "spec",
+      "annotation": "The authoritative blueprint: the four exam sections and their verbatim weights — D1 Fundamentals ~30%, D2 Google Cloud's gen AI offerings ~35%, D3 Techniques to improve output ~20%, D4 Business strategies ~15%. The domain files are built directly to its task statements and current product names (no 'Vertex AI' / 'Agent Builder' appear in it).",
+      "domainIds": []
+    },
+    {
+      "id": "off-gal-registration",
+      "title": "Generative AI Leader — exam registration (CertMetrics / Google)",
+      "url": "https://cp.certmetrics.com/google/en/login",
+      "kind": "official-doc",
+      "annotation": "Where you actually schedule and sit the exam (Google's certification portal via Kryterion/CertMetrics). Register here once you've hit the A+ readiness bar on this track.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gal-vertex-genai-docs",
+      "title": "Google Cloud — generative-AI documentation (overview)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "The gen-AI docs root the authors grounded product claims on: Gemini models, model selection, Model Garden, grounding/RAG. Mid-rebrand (surfaced as 'Gemini Enterprise Agent Platform'), so the modules teach the current names the exam guide uses.",
+      "domainIds": []
+    },
+    {
+      "id": "off-gal-ml-crash-course",
+      "title": "Google — Machine Learning Crash Course",
+      "url": "https://developers.google.com/machine-learning/crash-course",
+      "kind": "learning-path",
+      "annotation": "The clean, official grounding for D1's ML/AI definitions (supervised learning, models, training) that rendered fully where the marketing 'what-is' pages 404'd or truncated. Business-audience friendly.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "The Generative AI Leader blueprint & how to sit it",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "Exam strategy — the 30/35/20/15 weighting, current-branding traps & the Academy scoring bar",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
+}

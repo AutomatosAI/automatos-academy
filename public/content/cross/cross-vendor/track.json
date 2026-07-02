@@ -1,0 +1,103 @@
+{
+  "vendorName": "Cross-Domain",
+  "name": "Cross-Vendor Fluency",
+  "code": "CVF",
+  "summary": "Provider-agnostic judgement for people who will have to choose. Four modules cover OpenAI (the API + Agents SDK), Google (Gemini & Vertex AI), open-weight literacy (Llama, Ollama, Hugging Face), and the portability decision — closing with a capstone that ships the same small app on ≥2 providers behind one interface so you can swap via config, not a rewrite.",
+  "blueprintNote": "Skills track (Practitioner lane) per PRD-S4 — no external exam, no weights, no readiness gate. It is deliberately provider-agnostic: OpenAI has no certification exam and stays parked (PRD-OPENAI-PARKED — do not build an OpenAI exam track here), and Google's one real, self-enrollable exam in this space, Generative AI Leader, ships as its OWN exam track (google/gen-ai-leader) rather than being folded in here. This track teaches OpenAI, Google, and open weights as engineering skills and ends on the architect's cross-provider judgement: a cost/capability/latency/data-residency comparison and a ≥2-provider portability capstone. PRD-S4 §3 lists five module slugs (m1-openai … m5-portability); the authored track folds comparison and portability into a single m4 capstone module, so this track ships four domain files (m1–m4).",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "https://openai.github.io/openai-agents-python/",
+      "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "https://ollama.com/",
+      "https://huggingface.co/docs"
+    ],
+    "notes": "PRD-S4 §5 sources spot-checked live 2026-07-02. Reachable and current: the OpenAI Agents SDK docs (agents/handoffs/guardrails/tracing all present); the Vertex AI generative-AI docs overview (301 from cloud.google.com, now titled 'Gemini Enterprise Agent Platform' — the platform is mid-rebrand, so modules teach the durable tier architecture Pro/Flash/Flash-Lite and the GA-verified Gemini 2.5 family rather than bleeding-edge version integers a nav sidebar surfaced); ollama.com; and huggingface.co/docs (Hub, Transformers, Inference all listed). Correction to the PRD's fetch warnings: platform.openai.com/docs/ no longer 403s to our fetcher — it now 301-redirects to developers.openai.com (HTTP 200), and platform.openai.com/docs/api-reference/chat still 403s; both the function-calling and structured-outputs facts were therefore grounded on the live developers.openai.com guide (the 301 target of the platform.openai.com function-calling path), not memory. Two Google doc URLs 404'd on direct fetch mid-rebrand (data-governance / data-residency and the model name-changes page), so those specific claims were corroborated via search restricted to the official cloud.google.com / docs.cloud.google.com domains rather than a direct page read. Marketing/version claims that could not be confirmed against a page body were deliberately excluded (e.g. the Agents SDK '100+ LLMs' figure, and speculative next-gen model version integers on Model Garden). No claim in any module rests on an unverifiable source."
+  },
+  "badge": {
+    "completionLabel": "Completed — Cross-Vendor Fluency",
+    "definition": "Completed the Automatos Academy Cross-Vendor Fluency track, including the ≥2-provider portability capstone: shipped the same small app on two or more providers (OpenAI plus Gemini/Vertex or an open-weight Ollama endpoint) behind one interface and can reason about the cost/capability/latency/data-residency trade-offs when choosing between them. Provider-agnostic engineering judgement — no vendor credential is implied, and this track carries no exam anchor."
+  },
+  "domainFiles": [
+    "m1-openai-api-agents.json",
+    "m2-google-gemini-vertex.json",
+    "m3-open-weight.json",
+    "m4-cross-provider-portability.json"
+  ],
+  "officialResources": [
+    {
+      "id": "off-openai-api-docs",
+      "title": "OpenAI API documentation",
+      "url": "https://developers.openai.com/api/docs/overview",
+      "kind": "official-doc",
+      "annotation": "The live OpenAI API docs (301 target of platform.openai.com/docs/): the Responses/Chat API, function calling, and structured outputs that ground module 1. The older platform.openai.com/docs/api-reference paths 403 to automated fetchers, so cite this developers.openai.com surface.",
+      "domainIds": []
+    },
+    {
+      "id": "off-openai-agents-sdk",
+      "title": "OpenAI Agents SDK (Python)",
+      "url": "https://openai.github.io/openai-agents-python/",
+      "kind": "official-doc",
+      "annotation": "The Agents SDK reference behind module 1's agent loop: agents, tools, handoffs, guardrails, and built-in tracing. Verified live; the source repo is github.com/openai/openai-agents-python.",
+      "domainIds": []
+    },
+    {
+      "id": "off-vertex-genai-overview",
+      "title": "Google Cloud — Vertex AI generative-AI docs (overview)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "The managed-platform view behind module 2: Gemini models, Model Garden (including partner models — Claude, Llama, Mistral served as managed MaaS), grounding/RAG, and the agent tooling. Mid-rebrand (now surfaced as 'Gemini Enterprise Agent Platform'), so teach the durable tiers (Pro/Flash/Flash-Lite) and the GA Gemini 2.5 family; the version rolls forward.",
+      "domainIds": []
+    },
+    {
+      "id": "off-ollama",
+      "title": "Ollama — run open models locally",
+      "url": "https://ollama.com/",
+      "kind": "official-doc",
+      "annotation": "The local-serving half of module 3: pull and run open-weight models on your own machine and expose them behind an OpenAI-compatible endpoint. Source repo github.com/ollama/ollama.",
+      "domainIds": []
+    },
+    {
+      "id": "off-huggingface-docs",
+      "title": "Hugging Face — documentation (Hub, Transformers, Inference)",
+      "url": "https://huggingface.co/docs",
+      "kind": "official-doc",
+      "annotation": "The open-weight ecosystem behind module 3: the Hub (model cards, licences), Transformers, and Inference Providers/Endpoints. Llama family model cards and versioned licences live under huggingface.co/meta-llama.",
+      "domainIds": []
+    },
+    {
+      "id": "off-openai-academy",
+      "title": "OpenAI Academy (context — courses, not an exam)",
+      "url": "https://academy.openai.com/",
+      "kind": "reference",
+      "annotation": "Context only: OpenAI offers courses, not a self-enrollable certification exam — which is why OpenAI stays parked as a skills topic here (PRD-OPENAI-PARKED) and gets no exam track.",
+      "domainIds": []
+    },
+    {
+      "id": "off-genai-leader-cert",
+      "title": "Google Cloud — Generative AI Leader (the real exam, its own track)",
+      "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "kind": "reference",
+      "annotation": "Pointer only: the one real, proctored certification in this cross-vendor space ships as its own exam-prep track (google/gen-ai-leader), not inside this skills track. Follow it there if you want the credential.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "Provider-agnostic thinking — the same job across OpenAI, Google & open weights",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "The portability decision — one interface, ≥2 providers, swap by config",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
+}

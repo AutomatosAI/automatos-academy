@@ -1,0 +1,538 @@
+{
+  "id": "m4-cross-provider-portability",
+  "order": 4,
+  "code": "M4",
+  "name": "The portability decision & capstone",
+  "tagline": "You have met OpenAI, Gemini/Vertex, and open weights. This module is the architect's judgement that sits above all three: a cost/capability/latency/data-residency matrix you actually fill in, a per-workload rule for hosted vs open-weight, and the portability build that makes the answer changeable — the same small app on two providers behind one interface, the provider chosen by config, with an eval that catches drift the moment you swap. Standardise the plumbing; keep the model swappable.",
+  "overview": "The three earlier modules taught you each provider on its own terms. This one refuses to pick a favourite. A provider-agnostic architect does not ask 'which vendor is best' — that answer expires the day prices move or a policy changes. They ask 'which provider does THIS workload's trade-offs demand, and how do I keep the ability to change my mind cheaply.' You will build that judgement in three passes. First, the decision matrix: the four axes an architect weighs — cost (unit economics per token and at volume), capability (does the model clear the quality bar for the task), latency (do you have an SLA and does the provider meet it), and data-residency (where is the data allowed to be processed, and what does the provider commit) — assembled into a filled comparison matrix that is itself the artifact, because the discipline is in filling it honestly, not in memorising a winner. Second, the anchor decision of the whole track: hosted managed APIs (OpenAI, Gemini/Vertex — velocity, frontier capability, someone else runs the GPUs and patches the model) versus open-weight models run yourself (Llama/Gemma via Ollama or Hugging Face — data never leaves your boundary, cost-at-scale, full control, no lock-in, offline capability), decided per workload rather than once for the company. Third, the portability build that operationalises all of it: an adapter interface over two or more providers so the rest of your app never imports a vendor SDK directly; config-driven routing so switching provider is a config change, not a code change; prompt and tool PARITY, because the same prompt and the same tool schema can behave differently across providers and that difference is a bug you must design against; and an eval harness that runs a fixed set of cases against whichever provider is wired in, so behavioural drift on a swap is caught by a failing check instead of shipped silently to users. Automatos is the reference architecture here — it selects the model provider per agent via config — so the capstone is native: stand up the same task on two providers behind that per-agent selection, swap by config, and prove with an eval that behaviour holds. The recurring warning throughout: an abstraction earns its cost where it lets you change providers, and it leaks where you pretend two providers are identical when they are not. Every claim in this module is grounded in the providers' own live documentation.",
+  "objectives": [
+    "Fill a provider comparison matrix on the four architect axes — cost (unit economics), capability (quality-for-task), latency (against an SLA), and data-residency (where processing is allowed and what the provider commits) — and read a filled matrix as a decision, not a scoreboard.",
+    "Apply a per-workload rule for hosted managed APIs versus self-run open-weight models, justifying the call from residency, unit economics at volume, fine-tune/model ownership, model-update risk, latency, and team/ops capacity — not from vendor loyalty.",
+    "Explain why the same prompt and the same tool/function schema can behave differently across providers (prompt and tool parity), and why an unverified swap can regress behaviour even when the code compiles.",
+    "Design a provider-portability architecture: a thin adapter interface over two or more providers, config-driven model routing so a swap is a config change, and the standardisation of the OpenAI Chat Completions request/response shape that most adapters converge on.",
+    "Specify an eval harness that runs a fixed set of graded cases against whichever provider is wired in, so behavioural drift is caught by a failing check on swap rather than reaching users — and know what the eval must assert (task success, tool-call correctness, format, refusal/latency budgets).",
+    "Locate where a portability abstraction earns its cost (swappability, no lock-in, per-workload routing) and where it leaks (provider-specific features, tool-format quirks, structured-output modes) so you neither over-abstract nor hard-code a single provider."
+  ],
+  "lessons": [
+    {
+      "id": "m4-l1-the-decision-matrix",
+      "title": "The decision matrix: cost, capability, latency, residency",
+      "estMinutes": 15,
+      "objective": "Fill and read a provider comparison matrix on the four architect axes — cost, capability, latency, and data-residency — as a per-workload decision rather than a search for a single best vendor.",
+      "body": "## The question a provider-agnostic architect actually asks\n\nBy now you have met three providers on their own terms — OpenAI's API and Agents SDK, Google's Gemini on Vertex AI, and open weights via Ollama and Hugging Face. The temptation is to leave with a favourite. Resist it. 'Which provider is best' is a question with a shelf life of about a quarter: it expires the day a price changes, a faster model ships, or your data-protection officer asks where the prompts are being processed. The durable question is narrower and repeatable: **'which provider does THIS workload's trade-offs demand?'** — asked once per workload, and re-asked when the facts move.\n\nTo answer it you weigh four axes. They are not a ranking you sum into a score; they are constraints you check against the specific job.\n\n## The four axes\n\n**1. Cost — unit economics, not sticker price.** What does one unit of the work cost, and what does it cost at your real volume? Hosted APIs bill per token (input and output priced separately, and generally differently); a cheap-looking model can be expensive if the task is high-volume or generates long outputs. A self-run open-weight model has little or no per-token charge but you pay for the GPU/infrastructure whether it is busy or idle. The axis is not 'which is cheaper per call' — it is 'which is cheaper for the shape and volume of THIS workload.' A spiky, low-volume task and a steady, high-volume task can land on opposite providers on this axis alone.\n\n**2. Capability — quality for the task, not the leaderboard.** Does the model clear the quality bar THIS task needs? A frontier hosted model may be overkill (and overpriced) for classifying support tickets, and underused for drafting a tweet — while a smaller open model handles both fine. Conversely, a genuinely hard reasoning or long-context job may need a frontier model that only the hosted providers offer today. Capability is judged against the task's bar, not in the abstract: 'good enough, reliably' beats 'highest score on a benchmark you will never run.'\n\n**3. Latency — against a stated SLA.** How fast must the answer arrive, and does the provider meet that under your load? A user-facing autocomplete has a tight latency budget; an overnight batch summariser has almost none. Hosted providers give you autoscaling and, for some, region/endpoint choices that affect round-trip time; a self-run model's latency is whatever your own hardware and queue deliver. The axis only means something once you have written down the SLA — 'fast' is not a number.\n\n**4. Data-residency — where processing is allowed, and what is committed.** Is the data allowed to leave your boundary at all, and if it goes to a provider, where is it processed and what does the provider commit about using it? This is where open-weight self-hosting is categorically different: run the model yourself and the data never leaves your environment. Hosted providers answer this with explicit commitments and controls instead — Google Cloud, for example, states that customer data used in its AI/ML services is not used to train its foundation models and is not leaked to other customers (its AI/ML Privacy Commitment), and offers regional endpoints that keep ML processing within a chosen geography (its AI/ML data-location commitment is supported in US and EU locations), plus controls like VPC Service Controls and customer-managed encryption keys. The residency axis is often the one that overrides all the others: if the data legally cannot be processed outside a boundary, cost and capability do not get a vote until that constraint is met.\n\n## The matrix is the artifact — because filling it is the discipline\n\nPut the axes down one side and the candidate providers across the top, and fill each cell for the SPECIFIC workload. The value is not a final number in a corner; it is the honesty the exercise forces. You cannot fill the residency row without reading the provider's actual data-governance commitment. You cannot fill the cost row without knowing your volume and the token pricing. You cannot fill the latency row without an SLA. The empty cells are the questions you had not answered yet — which is exactly why the filled matrix, not a gut feeling, is the deliverable.\n\nAnd read the filled matrix correctly: it is a **decision, not a scoreboard.** Providers do not 'win' overall; a provider wins THIS workload because it satisfies the binding constraint (often residency or latency) while being acceptable on the rest. The same matrix, re-filled for a different workload in the same company, can point at a different provider — and that is the correct outcome, not an inconsistency.\n\n## Worked example: two workloads, one company, two providers\n\nA company has two AI jobs. Job A is a customer-facing support assistant handling thousands of routine questions an hour; the data is ordinary support text with no special residency rule; the latency budget is tight because a person is waiting. Job B summarises internal HR case files overnight; the volume is modest; the latency budget is generous; the data is regulated personal data that policy says must stay inside the EU boundary.\n\nFill the matrix per job and the answer separates cleanly. Job A: high volume makes per-token cost matter, the task is routine so a mid-tier model clears the capability bar, latency is tight so autoscaling helps, and residency is unconstrained — a hosted API with a small fast model reads well. Job B: volume is low so per-token cost barely matters, latency is a non-issue, but residency is binding — the data must not leave the EU boundary, which either forces a regional hosted endpoint with the right commitment or points at a self-run open-weight model where the data never leaves at all. Same company, same week, two honestly-filled matrices, two different providers. That is the axis discipline doing its job: it stops you standardising on one vendor for reasons that do not survive contact with the second workload.\n\n## What this buys you\n\nYou now have the instrument the rest of the module runs on. In the next lesson we sharpen the single most consequential cell — the hosted-versus-open-weight call — into a per-workload rule. Then we build the machinery that lets the matrix's answer CHANGE cheaply, because the one certainty is that the facts in these cells will move.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m4-l1-1",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The module frames the provider decision around four axes. Which set names them?",
+          "options": [
+            { "id": "a", "text": "Cost, capability, latency, and data-residency", "correct": true },
+            { "id": "b", "text": "Brand, popularity, community size, and marketing spend" },
+            { "id": "c", "text": "Token limit, temperature, top-p, and system-prompt length" },
+            { "id": "d", "text": "Uptime, logo, pricing page clarity, and sales responsiveness" }
+          ],
+          "explanation": "The four architect axes are cost (unit economics), capability (quality for the task), latency (against an SLA), and data-residency (where processing is allowed and what is committed). Option b lists popularity signals, which are not decision axes for a provider-agnostic architect. Option c lists request parameters you tune within a provider, not the axes for choosing between providers. Option d mixes one real concern (uptime) with vendor-sales trivia; it is not the module's framework.",
+          "sourceRefs": ["r-vertex-genai-overview", "r-vertex-data-governance"]
+        },
+        {
+          "id": "kc-m4-l1-2",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A workload processes regulated personal data that policy says must never leave the EU boundary. How should this fact enter the matrix decision?",
+          "options": [
+            { "id": "a", "text": "As a binding constraint on the data-residency axis that must be satisfied before cost and capability get a vote — pointing at a regional hosted endpoint with the right commitment or a self-run open-weight model", "correct": true },
+            { "id": "b", "text": "As a tie-breaker used only if two providers score exactly equal on cost and capability", "correct": false },
+            { "id": "c", "text": "As irrelevant, because all major providers process data identically wherever it is sent", "correct": false },
+            { "id": "d", "text": "As a reason to always pick the cheapest provider, since residency and price are the same axis", "correct": false }
+          ],
+          "explanation": "Residency is frequently the overriding axis: if data legally cannot leave a boundary, that constraint must be met first, and only then do cost and capability choose among the options that satisfy it — self-hosting an open model (data never leaves) or a regional hosted endpoint with the right commitment. Option b under-weights it — residency is a hard constraint here, not a tie-breaker. Option c is false: providers differ on where and how they process data, which is exactly why the axis exists. Option d conflates two distinct axes; residency and cost are separate, and cheapness cannot buy compliance.",
+          "sourceRefs": ["r-vertex-data-governance", "r-vertex-data-residency", "r-ollama-home"]
+        },
+        {
+          "id": "kc-m4-l1-3",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why does the module call the filled comparison matrix 'a decision, not a scoreboard'?",
+          "options": [
+            { "id": "a", "text": "Because a provider does not win overall — it wins a specific workload by satisfying that workload's binding constraint while being acceptable on the rest, so a different workload can correctly point at a different provider", "correct": true },
+            { "id": "b", "text": "Because you should sum the four axes into a single score and pick the highest total for the whole company", "correct": false },
+            { "id": "c", "text": "Because the matrix is decorative and the real choice is made by whichever provider has the best documentation", "correct": false },
+            { "id": "d", "text": "Because once you fill it for one workload the same provider must be used for every workload for consistency", "correct": false }
+          ],
+          "explanation": "The matrix is read per workload: the winner is the provider that meets the binding constraint (often residency or latency) and is acceptable elsewhere, so two workloads in one company can justifiably resolve to two providers. Option b is the scoreboard error the module warns against — summing axes hides which constraint is actually binding. Option c dismisses the instrument that forces the honest questions. Option d is the standardise-on-one-vendor trap; consistency across workloads is not a goal when their constraints differ.",
+          "sourceRefs": ["r-vertex-genai-overview"]
+        }
+      ]
+    },
+    {
+      "id": "m4-l2-hosted-vs-open-weight",
+      "title": "Hosted vs open-weight, decided per workload",
+      "estMinutes": 14,
+      "objective": "Turn the hosted-versus-open-weight choice into a per-workload rule justified by residency, unit economics at volume, model ownership, model-update risk, latency, and ops capacity — the track's anchor trade-off.",
+      "body": "## The anchor decision of the track\n\nEvery cell in the matrix matters, but one dominates the others often enough to deserve its own lesson: **hosted managed API versus self-run open-weight model.** This is the track's anchor trade-off, and the whole point of the way we frame it is that it is decided **per workload**, not once for the company. Get this right and most of the rest of the matrix falls into place.\n\n## What each side actually offers\n\n**Hosted managed APIs — OpenAI, Google Gemini on Vertex.** You call an endpoint; someone else runs the GPUs, autoscales them, and patches the model. The case for hosted is velocity and reach: you ship today with no MLOps, you get frontier capability the moment it is released, and operational burden — capacity, uptime, model updates — is the provider's problem. Vertex illustrates the hosted platform breadth: it serves Google's own Gemini models (Pro and Flash tiers), and through Model Garden it also offers partner models (including Anthropic's Claude, Meta's Llama, and Mistral) and open models as a managed 'Model-as-a-Service', plus grounding options (grounding with Google Search, with your own data, and RAG) — a lot of capability you did not have to operate. Hosted's honest costs: you pay per token, which can bite at high volume; you are exposed to the provider's pricing and model-deprecation decisions (model-update risk); and your data goes to the provider, so residency depends on their commitments and controls rather than on physics.\n\n**Self-run open-weight models — Llama, Gemma, Mistral and peers, via Ollama or Hugging Face.** You run the model on infrastructure you control. Ollama runs open models locally and states plainly that with it 'your data is never trained on' and it can 'run entirely offline for mission critical work'; Hugging Face gives you the Hub of open models plus the Transformers library and serving paths (Text Generation Inference, dedicated Inference Endpoints) when you want managed hosting of an open model. The case for open-weight is control: the data never leaves your boundary (the strongest possible residency answer), the unit economics can be far better at steady high volume because there is no per-token charge, you own the model and any fine-tune so it cannot be deprecated out from under you, and you can run offline. Open-weight's honest costs are equally real: you carry the GPU bill whether busy or idle, you own the MLOps — serving, scaling, on-call, upgrades — you own the evaluation burden, and the very best frontier capability may still sit with the hosted providers.\n\n## The per-workload rule\n\nHold both columns against the workload and let its binding constraints choose. As a starting rule of thumb:\n\n- **High-volume + residency-bound + cost-sensitive → lean open-weight.** Steady heavy traffic makes per-token pricing hurt and a fixed GPU cheap-per-call; a hard residency boundary is answered outright by the data never leaving; and you have the volume to justify running the ops. This is the profile where owning the stack pays for itself.\n- **Spiky + frontier-quality + small-team → lean hosted.** Bursty or low volume makes idle GPUs wasteful and per-token elastic pricing efficient; a task that genuinely needs frontier capability is served now by the hosted providers; and a small team without an MLOps function should not be running GPUs on-call. This is the profile where someone else operating the model is the whole value.\n\nThese are defaults, not laws. A residency rule can drag a spiky small-team workload onto open weights despite the ops cost, because compliance is non-negotiable. A genuine need for a capability only a frontier hosted model delivers can pull a high-volume workload back to hosted despite the token bill. The rule is a starting point that the workload's specific constraints then bend — which is precisely why you decide per workload and not once.\n\n## The meta-move: keep the answer changeable\n\nHere is the resolution that stops this being a religious war. Because the honest answer is 'it depends on the workload' AND 'the facts will move' — prices fall, open models close the capability gap, a new residency rule lands — the correct engineering response is to **keep the model behind a swappable interface so the answer can change per workload and over time without a rewrite.** You do not marry a provider. You make the provider a decision you can revisit cheaply. That build is the whole of the next lesson and the capstone. Note that Automatos is designed exactly this way: it selects the model provider per agent via config, so one agent can run on a hosted API and another on a local open-weight endpoint, each routed to the provider its trade-offs demand.\n\n## Worked example: the same company, both columns\n\nReturn to the two workloads from Lesson 1. The high-volume support assistant with no residency constraint and a tight latency budget fits the 'spiky/frontier/small-team-leaning-hosted' logic partially — but its defining feature is high volume, so if the volume is steady and large the cost axis may still argue for a self-run small open model behind autoscaling you own; if the volume is genuinely spiky, hosted's elastic pricing wins. The EU-bound overnight HR summariser has a binding residency constraint and generous latency: open-weight self-hosting answers residency outright and the low volume means you are not drowning in ops, so it leans open-weight — unless a compliant regional hosted endpoint is simpler for your team to operate, in which case hosted-with-the-right-commitment is legitimate too. Notice what makes both calls defensible: you can name the binding constraint and the trade-off you accepted. And notice the safety net — because both run behind one interface, if next quarter an open model gets cheap and good enough for the support assistant, moving it is a config change, not a project.\n\n## What this buys you\n\nYou can now make the hosted-versus-open-weight call for a given workload and defend it from constraints rather than loyalty, and you understand why the smart move is to keep that call reversible. The next lesson builds the machinery that makes reversible real: the adapter, the config-driven routing, prompt and tool parity, and the eval that guards the swap.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m4-l2-1",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A workload has steady, very high volume, a hard requirement that data never leave the company boundary, and strong cost sensitivity. Which way does the module's per-workload rule of thumb lean, and why?",
+          "options": [
+            { "id": "a", "text": "Lean open-weight self-hosting: high steady volume makes a fixed GPU cheap-per-call versus per-token pricing, and self-hosting answers the residency boundary outright by keeping data in-house", "correct": true },
+            { "id": "b", "text": "Lean hosted API, because hosted is always cheaper and residency is never a real constraint", "correct": false },
+            { "id": "c", "text": "Lean hosted API, because high volume is exactly where per-token pricing is most economical", "correct": false },
+            { "id": "d", "text": "It cannot be decided, because hosted and open-weight are interchangeable in every respect", "correct": false }
+          ],
+          "explanation": "High-volume + residency-bound + cost-sensitive is the module's canonical open-weight profile: steady heavy traffic makes a fixed GPU cheaper per call than per-token billing, and running the model yourself keeps data inside the boundary, answering residency directly. Option b is doubly wrong — hosted is not always cheaper (per-token bites at volume) and residency is often binding. Option c inverts the economics: per-token pricing is efficient for spiky/low volume, not steady high volume. Option d denies the real trade-offs the lesson draws out.",
+          "sourceRefs": ["r-ollama-home", "r-hf-docs"]
+        },
+        {
+          "id": "kc-m4-l2-2",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "According to the module, what is the strongest argument in favour of HOSTED managed APIs for a spiky, low-volume workload run by a small team?",
+          "options": [
+            { "id": "a", "text": "You ship without running GPUs or MLOps, elastic per-token pricing suits bursty load, and frontier capability is available immediately — the provider carries operations and model updates", "correct": true },
+            { "id": "b", "text": "Hosted APIs guarantee your data physically never leaves your own servers", "correct": false },
+            { "id": "c", "text": "Hosted APIs remove all per-call cost, so volume never affects the bill", "correct": false },
+            { "id": "d", "text": "Hosted APIs let you own the model weights and any fine-tune so they can never be deprecated", "correct": false }
+          ],
+          "explanation": "For a spiky/small-team workload, hosted's value is exactly that someone else runs and patches the model, elastic per-token pricing fits bursty demand, and frontier capability is available with no ops. Option b describes the open-weight self-hosting property (data stays in your boundary), which is the opposite of a hosted API. Option c is false — hosted APIs bill per token, so volume very much affects cost. Option d is again an open-weight advantage (you own the weights/fine-tune); hosted models can be deprecated by the provider, which is the model-update risk.",
+          "sourceRefs": ["r-vertex-genai-overview", "r-openai-agents-sdk"]
+        },
+        {
+          "id": "kc-m4-l2-3",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "The module resolves the hosted-vs-open-weight debate without declaring a permanent winner. What is the 'meta-move' it lands on?",
+          "options": [
+            { "id": "a", "text": "Keep the model behind a swappable interface so the per-workload answer can change over time and providers can be switched cheaply as prices, capability, and rules move", "correct": true },
+            { "id": "b", "text": "Pick hosted for the whole company now and never reconsider, to avoid the complexity of choice", "correct": false },
+            { "id": "c", "text": "Pick open-weight for the whole company now and never reconsider, because self-hosting is always superior", "correct": false },
+            { "id": "d", "text": "Refuse to choose and run every request against all providers simultaneously forever", "correct": false }
+          ],
+          "explanation": "The meta-move is architectural, not partisan: because the honest answer is per-workload and the facts will move, keep the model behind a swappable interface so the decision stays cheap to revisit. Options b and c are the two company-wide commitments the lesson explicitly rejects — both freeze a decision the module says must stay changeable. Option d is not a resolution; running everything everywhere forever multiplies cost and operational burden without making any decision.",
+          "sourceRefs": ["r-openai-agents-sdk", "r-ollama-home"]
+        }
+      ]
+    },
+    {
+      "id": "m4-l3-portability-patterns",
+      "title": "Portability patterns: adapter, config routing, parity, eval",
+      "estMinutes": 16,
+      "objective": "Design a provider-portability architecture — adapter interface, config-driven routing, prompt/tool parity, and a drift-catching eval harness — and know where the abstraction earns its cost and where it leaks.",
+      "body": "## From 'it depends' to a build\n\nThe last two lessons landed on a promise: keep the model behind a swappable interface so the per-workload answer can change cheaply. This lesson is how you actually build that. Four patterns, in order — an adapter interface, config-driven routing, prompt and tool parity, and an eval harness — and a running note on where the abstraction is worth its cost and where it leaks.\n\n## Pattern 1 — the adapter interface\n\nThe core move is to stop the rest of your application from importing a vendor's SDK directly. Instead, define one narrow interface your app talks to — something like `complete(messages, tools) -> result` — and write a thin **adapter** per provider behind it. The OpenAI adapter calls OpenAI; the Gemini/Vertex adapter calls Vertex; the open-weight adapter calls your Ollama or Hugging Face endpoint. Your business logic depends on the interface, never on the concrete provider — the classic move of depending on an abstraction, not an implementation.\n\nA large practical help here: most adapters converge on the **OpenAI Chat Completions request/response shape** as the lingua franca, because so much tooling already speaks it. That shape is concrete and worth knowing: a request carries a `model` and a list of `messages` (each with a `role` and `content`), plus optional `tools` where each tool is `{\"type\": \"function\", ...}` with a `name`, a `description`, and a `parameters` JSON schema; the response comes back with `tool_calls`, each having an `id`, a `function.name`, and JSON-encoded `function.arguments`. The reason this matters for portability is that open-weight serving deliberately mirrors it: Ollama 'provides compatibility with parts of the OpenAI API to help connect existing applications', so you point the standard OpenAI client at `http://localhost:11434/v1/` with an api_key of `'ollama'` ('required but ignored') and your existing `/v1/chat/completions` code runs against a local model unchanged. That single design choice — standardise on the widely-spoken shape — is what makes many swaps a base-URL change rather than a rewrite.\n\n## Pattern 2 — config-driven routing\n\nWith adapters in place, which provider runs is a **configuration** decision, not a code decision. A config value ('provider: openai' or 'provider: ollama', plus the model name and endpoint) selects the adapter at run time. Swapping providers — for a whole app, or per workload, or per agent — becomes editing config and redeploying, with no change to business logic. This is exactly how Automatos works: it selects the model provider per agent via config, so one agent runs hosted and another runs on a local open-weight endpoint, each routed to the provider its trade-offs demand. Config-driven routing is what turns the Lesson 2 'keep it changeable' promise into an operational reality: the matrix's answer moved? Change a line of config.\n\n## Pattern 3 — prompt and tool parity (the part people get wrong)\n\nHere is the trap that sinks naive portability: assuming a prompt and a tool schema port **1:1** across providers. They do not, reliably. The same system prompt can produce different formatting, different verbosity, different refusal behaviour, and different willingness to call a tool on a different provider's model — because they were trained differently. Tool/function calling is broadly similar in shape (define a function with a name, description, and JSON-schema parameters; receive back a structured call to execute and feed the result back) but the details differ: how strictly the arguments adhere to your schema, whether a strict/structured-output mode exists (OpenAI, for instance, offers `strict: true` so calls 'reliably adhere to the function schema', with rules like `additionalProperties: false` and all properties `required`), how tools are surfaced, and how the model decides to use them. **Parity is not free — it is engineered.** You keep the prompt and tool schema as close as possible across adapters, and where a provider needs a tweak (a phrasing that only one model respects, a schema mode only one supports) you localise that tweak inside that provider's adapter so it does not leak into your app. And critically, you never trust that behaviour ported correctly just because the code ran — which is what the eval is for.\n\n## Pattern 4 — the eval harness that catches drift on swap\n\nThe swap compiled. The tests are green. The demo works. And the summaries are now subtly worse, the tool gets called slightly less often, one class of request now gets refused. That is **behavioural drift**, and without an eval it ships silently to users. The guard is a small **eval harness**: a fixed set of representative cases with graded expectations, run against whichever provider is currently wired in. It asserts the things that actually matter for the task — did it produce the right answer or a good-enough one (task success), did it call the right tool with the right arguments (tool-call correctness), is the output in the required format/JSON shape, did it stay inside the latency and refusal budgets. Run it before a swap to record the baseline, run it after to confirm behaviour held; a regression shows up as a **failing check, not a user complaint.** The Agents SDK reflects the same instinct at the observability layer — it ships built-in tracing 'for visualizing, debugging, and monitoring workflows, with support for the OpenAI suite of evaluation, fine-tuning, and distillation tools' — because seeing and grading behaviour across runs is how you catch drift. The eval is the difference between 'portable' as a slogan and 'portable' as a property you can prove.\n\n## Where the abstraction earns its cost, and where it leaks\n\nAn adapter layer is not free, so be honest about its economics. It **earns its cost** when it buys you real swappability: no lock-in, the ability to route each workload to the provider its trade-offs demand, and the ability to move when prices or rules shift — the whole reason this track exists. It **leaks** at the edges where providers are genuinely not identical: a provider-specific feature (a particular structured-output mode, a grounding capability, a unique model) that has no equivalent behind the common interface; tool-format and strictness quirks; capabilities on one side and not the other. The engineering judgement is to keep the interface thin and common for the 90% that ports, push the unavoidable provider-specific bits down into the individual adapters where they are contained, and resist two opposite failures — over-abstracting until you cannot use any provider's best feature, and hard-coding one provider until you cannot leave it. Standardise the plumbing; keep the model swappable; and let the eval tell you the truth about whether behaviour actually held.\n\n## What this buys you\n\nYou now have the full portability pattern: talk to an adapter interface, select the provider by config, engineer prompt and tool parity rather than assuming it, and guard every swap with an eval that catches drift. That is precisely what the capstone lab has you build — the same small app on two providers behind one interface, provider selectable by config, with an eval that proves behaviour holds on the swap.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m4-l3-1",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is the primary purpose of the adapter interface in a provider-portability design?",
+          "options": [
+            { "id": "a", "text": "So the rest of the application depends on one narrow interface and never imports a vendor SDK directly, letting each provider sit behind its own thin adapter", "correct": true },
+            { "id": "b", "text": "So every provider is forced to return byte-identical outputs for the same input", "correct": false },
+            { "id": "c", "text": "So you can delete all provider SDKs and call the models over raw sockets", "correct": false },
+            { "id": "d", "text": "So the application always uses whichever provider is cheapest at the moment, automatically", "correct": false }
+          ],
+          "explanation": "The adapter isolates the app from concrete providers: business logic talks to one interface (e.g. complete(messages, tools)) and each provider is a thin adapter behind it, so swapping a provider does not touch business logic. Option b is impossible and not the goal — providers differ in output, which is why parity is engineered and evals exist. Option c misunderstands adapters; they typically wrap the provider SDKs, not replace transport. Option d describes automated cost routing, a possible policy on top, not the purpose of the interface itself.",
+          "sourceRefs": ["r-openai-agents-sdk", "r-ollama-openai-compat"]
+        },
+        {
+          "id": "kc-m4-l3-2",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why does the module insist that prompt and tool 'parity' across providers must be engineered rather than assumed?",
+          "options": [
+            { "id": "a", "text": "Because the same prompt and tool schema can produce different formatting, verbosity, refusals, and tool-calling behaviour on differently-trained models, so a swap can regress behaviour even when the code runs", "correct": true },
+            { "id": "b", "text": "Because prompts are illegal to reuse across providers for licensing reasons", "correct": false },
+            { "id": "c", "text": "Because every provider requires a completely different programming language for prompts", "correct": false },
+            { "id": "d", "text": "Because tool schemas are identical everywhere, so there is nothing to engineer", "correct": false }
+          ],
+          "explanation": "Parity is engineered because models trained differently respond differently to the same prompt and tool schema — formatting, verbosity, refusal, and how strictly arguments follow the schema all vary — so an unverified swap can silently regress behaviour. Option b invents a licensing rule that does not exist. Option c is false; prompts are text, not a per-provider language. Option d contradicts the lesson — tool-calling shape is broadly similar but the details (strict modes, adherence, surfacing) differ, which is exactly why you cannot assume 1:1.",
+          "sourceRefs": ["r-openai-function-calling", "r-openai-agents-sdk"]
+        },
+        {
+          "id": "kc-m4-l3-3",
+          "domainId": "m4-cross-provider-portability",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "You swap a workload from a hosted API to a self-run open model. The code compiles, unit tests pass, and a quick demo looks fine — but summaries are subtly worse and one class of request is now refused. What does the module say catches this, and how?",
+          "options": [
+            { "id": "a", "text": "An eval harness — a fixed set of graded cases (task success, tool-call correctness, format, latency/refusal budgets) run against the wired-in provider before and after the swap, so drift shows up as a failing check rather than a user complaint", "correct": true },
+            { "id": "b", "text": "Nothing can catch it; behavioural drift on a provider swap is impossible to detect before users report it", "correct": false },
+            { "id": "c", "text": "The compiler catches it, because behavioural changes always produce type errors", "correct": false },
+            { "id": "d", "text": "Config-driven routing catches it automatically by refusing to switch to a worse provider", "correct": false }
+          ],
+          "explanation": "This is textbook behavioural drift, and the eval harness is the guard: run a fixed set of graded cases against whichever provider is wired in, before and after, and a regression surfaces as a failing check. Option b is the complacency the lesson attacks — drift is exactly what an eval detects. Option c is false; behaviour (worse summaries, new refusals) does not manifest as compile errors, which is why green tests are not enough. Option d misassigns the role — routing chooses the provider; it does not grade output quality, and cannot know a provider is 'worse' without an eval.",
+          "sourceRefs": ["r-openai-agents-sdk", "r-ollama-openai-compat"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m4-1",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A provider-agnostic architect avoids asking 'which vendor is best overall.' What question does the module say they ask instead?",
+      "options": [
+        { "id": "a", "text": "Which provider does THIS workload's trade-offs demand — asked per workload and re-asked when the facts move", "correct": true },
+        { "id": "b", "text": "Which vendor has the largest market share this year", "correct": false },
+        { "id": "c", "text": "Which vendor my competitors have standardised on", "correct": false },
+        { "id": "d", "text": "Which vendor's marketing promises the most capability", "correct": false }
+      ],
+      "explanation": "The durable question is per-workload and revisable: match the provider to this workload's trade-offs, and re-decide when prices or policies change. Option b treats market share as a decision axis, which it is not for an architect weighing cost/capability/latency/residency. Option c outsources judgement to competitors rather than to the workload's constraints. Option d trusts marketing over the workload's actual bar, the opposite of the module's discipline.",
+      "sourceRefs": ["r-vertex-genai-overview"]
+    },
+    {
+      "id": "q-m4-2",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "On the COST axis, why is 'sticker price per token' an incomplete way to compare providers?",
+      "options": [
+        { "id": "a", "text": "Because the real question is cost for the shape and volume of the specific workload — hosted per-token billing can bite at high volume, while a self-run model's fixed GPU cost is paid whether busy or idle", "correct": true },
+        { "id": "b", "text": "Because token prices are secret and can never be known", "correct": false },
+        { "id": "c", "text": "Because cost is irrelevant once capability is high enough", "correct": false },
+        { "id": "d", "text": "Because all providers charge exactly the same per token", "correct": false }
+      ],
+      "explanation": "Cost is unit economics for THIS workload's shape and volume: per-token pricing can be efficient for spiky low volume but expensive at steady high volume, and a self-hosted model's GPU is a fixed cost regardless of load. Option b is false — token pricing is published. Option c dismisses an axis the module treats as first-class. Option d is false; providers price differently, and input and output tokens are typically priced differently too.",
+      "sourceRefs": ["r-ollama-home", "r-vertex-genai-overview"]
+    },
+    {
+      "id": "q-m4-3",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about data-residency and hosted providers is accurate, per the module's grounding in Google's documentation?",
+      "options": [
+        { "id": "a", "text": "Hosted providers answer residency with explicit commitments and controls — Google states customer data in its AI/ML services is not used to train its foundation models, and offers regional endpoints that keep ML processing within a chosen geography (US/EU)", "correct": true },
+        { "id": "b", "text": "Hosted providers cannot make any commitment about data use or processing location", "correct": false },
+        { "id": "c", "text": "Using a hosted API guarantees data physically never leaves your own data centre", "correct": false },
+        { "id": "d", "text": "Residency only matters for open-weight models, never for hosted APIs", "correct": false }
+      ],
+      "explanation": "Google Cloud documents an AI/ML Privacy Commitment (customer data is not used to train its foundation models and is not leaked to other customers) and an AI/ML data-location commitment with regional endpoints keeping ML processing in a chosen US/EU geography — so hosted providers answer residency with commitments and controls. Option b is false given those documented commitments. Option c is the self-hosting property, not a hosted-API guarantee — hosted data goes to the provider. Option d inverts reality: residency is a live question precisely for hosted APIs, where data leaves your boundary.",
+      "sourceRefs": ["r-vertex-data-governance", "r-vertex-data-residency"]
+    },
+    {
+      "id": "q-m4-4",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the single strongest data-residency property of running an open-weight model yourself (e.g. via Ollama)?",
+      "options": [
+        { "id": "a", "text": "The data never leaves your environment at all, which is the strongest possible answer to a hard residency boundary", "correct": true },
+        { "id": "b", "text": "The provider signs a contract promising not to read your prompts", "correct": false },
+        { "id": "c", "text": "The data is encrypted in transit to the vendor and back", "correct": false },
+        { "id": "d", "text": "The model is guaranteed to be more capable than any hosted model", "correct": false }
+      ],
+      "explanation": "Self-hosting means the data stays inside your boundary — Ollama runs models locally and states 'your data is never trained on' and can 'run entirely offline' — which is categorically stronger than any external commitment because nothing is sent out. Options b and c both describe protections for data that still leaves your boundary to a hosted provider, which is a weaker posture than never sending it. Option d is false and off-axis: self-hosting is a residency/control advantage, not a guarantee of superior capability — frontier capability may still favour hosted.",
+      "sourceRefs": ["r-ollama-home", "r-ollama-openai-compat"]
+    },
+    {
+      "id": "q-m4-5",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which workload profile most cleanly fits leaning toward HOSTED managed APIs?",
+      "options": [
+        { "id": "a", "text": "Spiky, low or bursty volume, needing frontier capability, run by a small team with no MLOps function", "correct": true },
+        { "id": "b", "text": "Steady very high volume, cost-sensitive, with a hard boundary that data cannot leave", "correct": false },
+        { "id": "c", "text": "Fully offline operation required, with no external network access permitted", "correct": false },
+        { "id": "d", "text": "A regulator mandates the model weights and fine-tune be owned in-house and never deprecated", "correct": false }
+      ],
+      "explanation": "Spiky/frontier/small-team is the module's hosted profile: elastic per-token pricing suits bursty load, frontier capability is available immediately, and a small team avoids running GPUs on-call. Option b is the open-weight profile (high steady volume + residency + cost). Option c mandates offline, which self-hosting answers and a hosted API cannot. Option d requires owning weights and freedom from deprecation, which is an open-weight ownership advantage, not a hosted one.",
+      "sourceRefs": ["r-vertex-genai-overview", "r-openai-agents-sdk"]
+    },
+    {
+      "id": "q-m4-6",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Vertex AI's Model Garden is relevant to a cross-provider architect because it does what?",
+      "options": [
+        { "id": "a", "text": "Offers, alongside Google's own Gemini models, partner models such as Anthropic Claude, Meta Llama, and Mistral, plus open models as a managed Model-as-a-Service", "correct": true },
+        { "id": "b", "text": "Runs only Google's Gemini models and refuses any third-party or open model", "correct": false },
+        { "id": "c", "text": "Is a local desktop tool for running open models entirely offline", "correct": false },
+        { "id": "d", "text": "Is a benchmark leaderboard that ranks every provider by a single score", "correct": false }
+      ],
+      "explanation": "Model Garden broadens the hosted platform: it serves Google's Gemini models and also partner models (Claude, Llama, Mistral) and open models as a managed Model-as-a-Service, which matters when weighing what a single hosted platform can cover. Option b is false — the whole point is that it includes partner and open models. Option c describes Ollama (local/offline), not Model Garden (a managed cloud catalogue). Option d invents a leaderboard; Model Garden is a model catalogue/serving surface, not a ranking.",
+      "sourceRefs": ["r-vertex-genai-overview"]
+    },
+    {
+      "id": "q-m4-7",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why do so many portability adapters standardise on the OpenAI Chat Completions request/response shape?",
+      "options": [
+        { "id": "a", "text": "Because a large amount of tooling already speaks it, and open-weight servers deliberately mirror it — e.g. Ollama exposes an OpenAI-compatible /v1 endpoint — so many swaps become a base-URL change rather than a rewrite", "correct": true },
+        { "id": "b", "text": "Because OpenAI legally requires all providers to use its exact API shape", "correct": false },
+        { "id": "c", "text": "Because it is the only API shape that supports tools or function calling", "correct": false },
+        { "id": "d", "text": "Because that shape makes every provider produce identical outputs", "correct": false }
+      ],
+      "explanation": "The Chat Completions shape is a de-facto lingua franca: tooling already speaks it and open-weight servers mirror it (Ollama provides an OpenAI-compatible endpoint at http://localhost:11434/v1/), so pointing the standard client at a new base URL runs existing code against a different model. Option b invents a legal mandate. Option c is false — other API shapes support tools too. Option d confuses interface compatibility with behavioural identity; the same shape does not make models behave the same, which is why parity is engineered and evals exist.",
+      "sourceRefs": ["r-ollama-openai-compat", "r-openai-function-calling"]
+    },
+    {
+      "id": "q-m4-8",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In a config-driven routing design, what does swapping the active model provider require?",
+      "options": [
+        { "id": "a", "text": "Editing a configuration value (provider, model, endpoint) and redeploying — with no change to business logic", "correct": true },
+        { "id": "b", "text": "Rewriting the application's business logic against the new vendor's SDK", "correct": false },
+        { "id": "c", "text": "Retraining the model from scratch on your own data", "correct": false },
+        { "id": "d", "text": "Migrating the entire application to a different programming language", "correct": false }
+      ],
+      "explanation": "With adapters behind an interface, the provider is selected by configuration, so a swap is a config change plus redeploy and business logic is untouched — this is how Automatos selects a provider per agent. Option b is the very coupling adapters exist to remove. Option c confuses swapping an inference provider with training a model — unrelated. Option d is nonsensical; changing a config value does not require a language migration.",
+      "sourceRefs": ["r-openai-agents-sdk", "r-ollama-openai-compat"]
+    },
+    {
+      "id": "q-m4-9",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "OpenAI's function-calling documentation describes a tool as which structure?",
+      "options": [
+        { "id": "a", "text": "type: function, with a name, a description of when/how to use it, and parameters expressed as a JSON schema — with the model returning tool_calls carrying id, function.name, and JSON-encoded function.arguments", "correct": true },
+        { "id": "b", "text": "A free-text instruction the model interprets with no schema", "correct": false },
+        { "id": "c", "text": "A compiled binary the provider executes on its own servers", "correct": false },
+        { "id": "d", "text": "A fixed list of allowed answers the model must choose from verbatim", "correct": false }
+      ],
+      "explanation": "Per OpenAI's docs, a tool is type function with name, description, and parameters as a JSON schema, and the model returns tool_calls each with an id, function.name, and JSON-encoded function.arguments that your app executes and feeds back. Option b ignores the JSON-schema definition that structures the call. Option c is wrong — the app executes the function; the provider does not run your binary. Option d describes a constrained answer set, not the function-calling contract.",
+      "sourceRefs": ["r-openai-function-calling"]
+    },
+    {
+      "id": "q-m4-10",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What must a drift-catching eval harness assert to be useful when swapping providers?",
+      "options": [
+        { "id": "a", "text": "The things that matter for the task — task success, tool-call correctness (right tool, right arguments), output format/JSON shape, and latency/refusal budgets — run against the wired-in provider before and after the swap", "correct": true },
+        { "id": "b", "text": "Only that the code compiles and the process starts without crashing", "correct": false },
+        { "id": "c", "text": "Only that the new provider is cheaper than the old one", "correct": false },
+        { "id": "d", "text": "Nothing specific; running the demo once is a sufficient eval", "correct": false }
+      ],
+      "explanation": "A useful eval grades the behaviours that define task quality — did it succeed, did it call the right tool with the right arguments, is the format correct, did it stay within latency/refusal budgets — measured before and after the swap so drift surfaces as a failing check. Option b tests only that it runs, which misses behavioural regressions entirely. Option c measures cost, not behaviour, so it cannot detect quality drift. Option d is the complacency the module warns against — a one-off demo does not systematically catch drift.",
+      "sourceRefs": ["r-openai-agents-sdk"]
+    },
+    {
+      "id": "q-m4-11",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Where does the module say a provider-portability abstraction LEAKS, and how should you handle it?",
+      "options": [
+        { "id": "a", "text": "At genuinely provider-specific features (a unique structured-output mode, a grounding capability, a one-of-a-kind model) — keep the shared interface thin for what ports and push the unavoidable provider-specific bits down into the individual adapters where they are contained", "correct": true },
+        { "id": "b", "text": "It never leaks — a good adapter makes all providers perfectly interchangeable in every feature", "correct": false },
+        { "id": "c", "text": "It leaks everywhere, so you should hard-code a single provider and abandon portability", "correct": false },
+        { "id": "d", "text": "It leaks only in the config file, which you should therefore delete", "correct": false }
+      ],
+      "explanation": "The abstraction leaks precisely where providers are not identical — unique features, structured-output modes, tool quirks — and the fix is containment: keep the common interface thin for the portable 90% and localise provider-specific behaviour inside that provider's adapter. Option b denies the leak the lesson is explicit about. Option c over-corrects into the hard-coding trap the module rejects. Option d misidentifies the leak — config-driven routing is a strength, not the leak point, and deleting it removes swappability.",
+      "sourceRefs": ["r-vertex-genai-overview", "r-openai-function-calling"]
+    },
+    {
+      "id": "q-m4-12",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How is Automatos itself an example of the portability pattern taught in this module?",
+      "options": [
+        { "id": "a", "text": "It selects the model provider per agent via config, so one agent can run on a hosted API and another on a local open-weight endpoint, each routed to the provider its trade-offs demand", "correct": true },
+        { "id": "b", "text": "It hard-codes a single provider into every agent so behaviour is guaranteed identical", "correct": false },
+        { "id": "c", "text": "It forbids open-weight models and only permits hosted APIs", "correct": false },
+        { "id": "d", "text": "It requires rewriting each agent's code to change which provider it uses", "correct": false }
+      ],
+      "explanation": "Automatos is the reference architecture for this pattern: per-agent provider selection via config means a swap is a config change and different agents can run on different providers matched to their workloads. Option b is the opposite of portability — hard-coding removes swappability. Option c invents a restriction; the design routes to whichever provider fits, hosted or open-weight. Option d describes exactly the code-coupling that config-driven routing eliminates.",
+      "sourceRefs": ["r-openai-agents-sdk", "r-ollama-openai-compat"]
+    },
+    {
+      "id": "q-m4-13",
+      "domainId": "m4-cross-provider-portability",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A team's swap from Provider A to Provider B passes all unit tests and a demo, so they ship it. Users soon report the assistant now refuses a category of legitimate requests it used to handle. Which single decision most directly caused this to reach users?",
+      "options": [
+        { "id": "a", "text": "They shipped the swap without a behavioural eval, so a refusal-behaviour regression (a parity difference between the models) surfaced as user complaints instead of a failing check", "correct": true },
+        { "id": "b", "text": "They used config-driven routing, which inevitably introduces refusals", "correct": false },
+        { "id": "c", "text": "They put the providers behind an adapter interface, which caused the refusals", "correct": false },
+        { "id": "d", "text": "They wrote the tool schema as JSON, which is what changed the refusal behaviour", "correct": false }
+      ],
+      "explanation": "Refusal behaviour is part of parity and can differ between differently-trained models; the decision that let it reach users was shipping without a behavioural eval to catch the regression before release — unit tests and a demo do not systematically detect drift. Option b blames routing, which selects the provider but does not create refusals. Option c blames the adapter interface, which isolates providers and did not cause the behaviour change. Option d blames JSON tool schemas, which are unrelated to a model's refusal tendencies; the schema shape is not why the model refuses.",
+      "sourceRefs": ["r-openai-agents-sdk", "r-openai-function-calling"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-m4-hosted-vs-open-weight",
+      "domainIds": ["m4-cross-provider-portability"],
+      "title": "The residency call: hosted or open-weight for the claims summariser?",
+      "tagline": "The anchor judgement of the track — hosted managed API versus self-run open-weight, decided per workload from binding constraints, not vendor loyalty.",
+      "context": "You are the architect for an insurer building an internal assistant that summarises claims files for adjusters. The files contain regulated personal data that the insurer's policy says must be processed only inside the EU boundary. Volume is steady and high (tens of thousands of summaries a day), the latency budget is comfortable (adjusters read summaries in a work queue, not in real time), and the task is a well-scoped summarisation that a mid-tier model handles reliably. A hosted frontier API and a self-run open-weight model (Llama-class, served in-region) are both on the table. Leadership wants a defensible recommendation, and they want to know they are not locking themselves in. Walk the decision.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "The product owner opens with: 'Just use the best hosted frontier model — it will be highest quality and we ship fastest.' What is your first move?",
+          "choices": [
+            { "id": "a", "text": "Fill the four-axis matrix for THIS workload before choosing — and surface that the residency rule is a binding constraint on the data-residency axis that must be satisfied before cost, capability, or speed get a vote", "verdict": "best", "rationale": "The method is to decide per workload against the axes, and here residency is the constraint that binds first: regulated data must stay in the EU boundary, so any option is only admissible if it meets that. Filling the matrix makes the binding constraint explicit instead of defaulting to 'best model' on capability alone." },
+            { "id": "b", "text": "Agree the frontier model is likely best on capability, but insist on checking whether it offers a compliant EU regional endpoint with the right data commitment before committing", "verdict": "viable", "rationale": "The instinct to verify residency is right and might even land on a compliant hosted endpoint — but leading with 'frontier is best' skips the step of naming residency as the binding constraint, and this workload's capability bar is only mid-tier, so 'best model' is not actually the deciding factor. Right check, slightly wrong framing." },
+            { "id": "c", "text": "Agree immediately and pick the hosted frontier model, because the highest benchmark capability always wins the decision", "verdict": "wrong", "rationale": "This ignores the binding residency constraint and mis-weights capability: the task only needs a mid-tier model, and sending regulated EU data to a non-compliant frontier endpoint could breach policy outright. Capability does not get to decide until residency is satisfied." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "You confirm the residency rule is hard: this personal data must be processed only inside the EU boundary. Two admissible options remain — a self-run open-weight model served in-region, and a hosted API using a compliant EU regional endpoint. Given steady high volume, a comfortable latency budget, and a mid-tier capability bar, how do you weigh them?",
+          "choices": [
+            { "id": "a", "text": "Lean open-weight self-hosting on the economics and control — steady high volume makes a fixed in-region GPU cheap-per-call and self-hosting answers residency outright by keeping data in-house — while keeping the compliant hosted endpoint as a legitimate alternative if the team lacks MLOps capacity", "verdict": "best", "rationale": "This is the module's canonical open-weight profile (high steady volume + residency-bound + cost-sensitive), and it names the real trade-off honestly: open-weight wins on cost-at-scale and control here, but a compliant hosted endpoint is defensible if operating GPUs is beyond the team. Constraint-driven, with the accepted trade-off stated." },
+            { "id": "b", "text": "Pick the compliant hosted EU endpoint to avoid running GPUs, accepting the per-token cost at this volume as the price of lower operational burden", "verdict": "viable", "rationale": "Legitimate — it satisfies residency and offloads ops — but at tens of thousands of summaries a day the per-token bill is exactly where hosted gets expensive, so choosing it should be a conscious ops-capacity decision, not a default. You are trading cost-at-scale for less MLOps; name that." },
+            { "id": "c", "text": "Send a sample of the real claims files to the non-EU hosted frontier endpoint to benchmark quality first, then decide on residency afterwards", "verdict": "wrong", "rationale": "This breaches the binding constraint during the very test meant to inform the decision — regulated EU data must not leave the boundary, and 'just for benchmarking' is still a violation. You benchmark with synthetic or non-regulated data, never by sending protected data to a non-compliant endpoint." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Leadership approves the in-region open-weight build but asks: 'What if an open model gets cheaper and better than our choice next year, or the residency rules change again? Are we locked in?' How do you answer?",
+          "choices": [
+            { "id": "a", "text": "Build it behind an adapter interface with config-driven provider selection and a drift-catching eval, so moving to a different model or a compliant hosted endpoint later is a config change guarded by an eval — the per-workload answer stays cheap to revisit", "verdict": "best", "rationale": "This is the meta-move that resolves the whole debate: you are not marrying a provider, you are making the choice reversible. The adapter plus config routing makes a future swap a config change, and the eval guarantees you would catch behavioural drift on that swap before it reached adjusters." },
+            { "id": "b", "text": "Reassure them that you can always migrate later by rewriting the integration against whatever the new best provider is when the time comes", "verdict": "viable", "rationale": "Technically true — you can always rewrite — but it concedes exactly the lock-in cost the portability pattern exists to avoid. A rewrite-later answer means every future re-decision is a project, when an adapter would make it a config change. The direction is right; the engineering is a rung too low." },
+            { "id": "c", "text": "Tell them lock-in is unavoidable, so they should commit fully to this open-weight stack now and stop worrying about future changes", "verdict": "wrong", "rationale": "This is the false premise the module rejects: lock-in is not unavoidable — a swappable interface is precisely how you keep the answer changeable as prices, capability, and rules move. Committing 'fully, forever' throws away the one property that makes the earlier per-workload decision safe." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-ollama-home", "r-vertex-data-governance", "r-vertex-data-residency", "r-openai-agents-sdk"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-m4-decision-matrix",
+      "domainId": "m4-cross-provider-portability",
+      "title": "Fill the provider decision matrix for three real workloads",
+      "goal": "Produce the module's first artifact: a filled cost/capability/latency/data-residency comparison matrix for THREE workloads of your own, each ending in a justified hosted-vs-open-weight recommendation that names the binding constraint. You build it by interrogating the providers' own documentation and arguing the calls out with the AI in Automatos chat — the honesty is in filling the cells from sources, not from memory.",
+      "steps": "## What you'll do\n\nYou'll assemble a decision matrix — the artifact the whole track's 'Decide' step is graded on — by pulling real facts from each provider's official docs and pressure-testing your reasoning in ordinary Automatos chat. No agents or tools to build here; this is judgement work.\n\n### Before you start\n\n- **Sign in** to the free Automatos platform; a personal workspace is created for you on first login, so every step is solo-achievable.\n- **Open Chat** and type — the Universal Router sends your message to a suitable agent automatically.\n- **Open the three source tabs** you'll cite: the Ollama site (open-weight, local, offline), Google's Vertex generative-AI overview and its data-governance/residency pages (the hosted platform + its commitments), and OpenAI's function-calling guide (the hosted API + tool shape). You will fill cells FROM these, not from guesses.\n\n### Pick three workloads that genuinely differ\n\n1. **Choose three real (or realistic) AI workloads that pull in different directions** — deliberately vary them so the matrix separates. A good set: (a) a high-volume, no-residency-constraint, latency-tight user-facing task; (b) a regulated-data task with a hard residency boundary and a relaxed latency budget; (c) a low-volume, occasional, frontier-quality-needing task. Write one sentence each: what it does, its volume, its latency budget, and any residency rule.\n\n### Fill the matrix from sources\n\n2. **Draw the grid:** four rows (cost / capability / latency / data-residency) by your candidate providers across the top (at minimum one hosted — OpenAI or Vertex — and one open-weight — Ollama/Hugging Face-served). Do this once per workload (three grids), because the cells change per workload.\n3. **Fill the data-residency row FROM the docs.** For the hosted column, capture the actual commitment (e.g. Google's statement that customer data in its AI/ML services is not used to train its foundation models, and its regional-endpoint / US-EU data-location commitment). For the open-weight column, capture the physical property (data never leaves your environment; Ollama's 'your data is never trained on' / offline capability). Cite the page for each cell — a cell without a source is an unanswered question, not a fact.\n4. **Fill cost, capability, latency** for each workload's shape: per-token vs fixed-GPU economics at THIS volume; whether a mid-tier or frontier model clears the bar; whether the latency budget is tight or generous and what each option offers. Where you don't know a number, write the QUESTION in the cell rather than a guess.\n5. **Ask the AI to challenge your matrix.** Paste a grid into chat and prompt roughly: *\"Here is my filled provider matrix for this workload. Which cell is weakest or unsupported? Where am I treating a preference as a constraint, or a benchmark score as a capability requirement this task actually needs? Push back.\"* Make it find your soft cells; fix them against the docs. You own the judgement, but it's a good adversary.\n\n### Turn each matrix into a decision\n\n6. **For each workload, write the recommendation as a decision, not a score:** name the BINDING constraint (often residency or latency), state which provider you'd use and why it satisfies that constraint while being acceptable on the rest, and name the trade-off you accepted. Confirm the three recommendations are allowed to differ — if all three came out identical, your workloads probably weren't different enough; revisit step 1.\n7. **Save the artifact.** Copy the three filled matrices and their recommendations into a document you keep. This is the 'Articulate the trade-offs' deliverable from the track's acceptance bar, and it's the input your capstone build (next lab) makes real.\n\n### Why it matters\n\nThe filled matrix is where a provider-agnostic architect is actually made. It forces you to read the providers' real commitments instead of trusting reputation, to separate a task's true capability bar from leaderboard noise, and to see — in your own three examples — how the same axes point at different providers for different workloads. That is the judgement the capstone then operationalises.\n\n### A note on cost\n\nThe chat you use to pressure-test the matrix runs on a model, and models cost per use. The realistic operator model is bring-your-own-key: supply your provider key in Settings and pay the provider directly. This exercise is short and cheap; you'll cover cost properly when you plan the capstone.",
+      "checklist": [
+        "Signed in and working in your own personal workspace",
+        "Chose THREE workloads that genuinely differ on volume, latency budget, and residency, each described in a sentence",
+        "Built one four-row matrix (cost / capability / latency / data-residency) per workload with at least one hosted and one open-weight provider as columns",
+        "Filled the data-residency row FROM official docs (hosted commitment for the hosted column; data-never-leaves property for the open-weight column), with a source cited per cell",
+        "Filled cost / capability / latency for each workload's specific shape and volume, writing the open QUESTION in any cell you couldn't source rather than guessing",
+        "Argued at least one matrix with the AI and hardened the weakest cell against the docs",
+        "Wrote each workload's recommendation as a DECISION that names the binding constraint and the accepted trade-off — and confirmed the three recommendations are allowed to differ",
+        "ARTIFACT SAVED: three filled matrices + three justified hosted-vs-open-weight recommendations, kept for the capstone"
+      ]
+    },
+    {
+      "id": "lab-m4-portability-capstone",
+      "domainId": "m4-cross-provider-portability",
+      "title": "CAPSTONE — ship one small app on two providers behind one interface, swapped by config, guarded by an eval",
+      "goal": "The track capstone and 'Prove' portfolio piece: build the SAME small app so it runs on TWO providers behind a single adapter interface, with the active provider selected by CONFIG (no code change to swap), and an EVAL harness that runs a fixed set of graded cases so behavioural drift is caught the moment you switch providers. Ship it, swap it, and prove behaviour holds.",
+      "steps": "## What you'll do\n\nThis is the portability pattern from Lesson 3, made real: adapter interface → config-driven routing → prompt/tool parity → drift-catching eval. Keep the app deliberately SMALL — the point is the plumbing, not the feature. Automatos is the reference architecture here: it selects the model provider per agent via config, so you can build this natively on the platform, or build it as a small standalone script; both satisfy the capstone.\n\n### Scope the app small\n\n1. **Pick one tiny task** with a checkable output — e.g. 'extract the invoice total and due date from a pasted email as JSON', or 'classify a support message into one of four categories', or 'summarise a short article into three bullet points.' It should exercise a prompt and, ideally, one tool/function call so you test tool parity too. Write down what 'correct' looks like for five to ten example inputs — you'll need these for the eval.\n\n### Build the adapter interface (Pattern 1)\n\n2. **Define ONE narrow interface** your app calls — conceptually `complete(messages, tools) -> result`. Your app logic talks only to this; it must not import a provider SDK directly.\n3. **Write two thin adapters** behind it, for two DIFFERENT providers. The cheapest route to a genuine second provider is the OpenAI-compatible shape both speak: use a hosted OpenAI-compatible endpoint as Provider A, and a local open-weight model via Ollama as Provider B — point the standard OpenAI client at Ollama's `http://localhost:11434/v1/` with api_key `'ollama'` ('required but ignored'), and the same `/v1/chat/completions` call runs against a local model. (On Automatos, the equivalent is standing up two agents with two provider configs.) Keep the request/response mapping in the adapter so the rest of the app never sees the difference.\n\n### Make the provider config-driven (Pattern 2)\n\n4. **Add a single config value** — provider (A or B), model name, endpoint — that selects which adapter runs at start-up. Swapping providers must be editing this config and restarting/redeploying, with ZERO change to app logic. On Automatos, this is literally the per-agent provider selection; in a script, it's one config/env value your factory reads.\n\n### Engineer parity, don't assume it (Pattern 3)\n\n5. **Keep the prompt and the tool schema identical across both adapters** as your starting point. Where one provider needs a tweak to behave (a phrasing only one model respects, or a structured-output/strict mode only one supports — recall OpenAI's `strict: true` for schema-adhering tool calls), localise that tweak INSIDE that provider's adapter so it never leaks into your app. Note in your write-up any place the two providers did not behave 1:1 — that observation is part of the deliverable.\n\n### Build the eval harness (Pattern 4)\n\n6. **Write a small eval** that runs your five-to-ten fixed cases against whichever provider is currently wired in and grades them: task success (right answer / good-enough), tool-call correctness (right tool, right arguments) if you used a tool, output format (valid JSON / correct shape), and a simple latency check. Make it print a pass/fail summary.\n7. **Run the eval on Provider A and record the baseline. Then flip the config to Provider B, run the SAME eval, and compare.** Any case that regresses is behavioural drift caught as a failing check — exactly what stops drift reaching users. If B fails a case A passed, that's a real finding: fix it via parity tweaks in B's adapter, or record it as a known difference and, if it's disqualifying, as a reason B isn't suitable for this workload.\n\n### Prove it\n\n8. **Capture the proof:** (a) the app running on Provider A, (b) the SAME app running on Provider B after only a config change, and (c) the eval output for both providers side by side showing whether behaviour held. That trio is the capstone artifact and the track's 'Prove' portfolio piece.\n\n### Why it matters\n\nThis is the entire track in one build: you've standardised the plumbing (adapter + config routing), kept the model swappable (two providers, config-selected), refused to assume prompts/tools port 1:1 (parity engineered and observed), and guarded the swap with an eval (drift caught, not shipped). You've proven — not asserted — that the same app is portable across a hosted and an open-weight provider, which is precisely the capability an enterprise pays a provider-agnostic architect for.\n\n### A note on cost and setup\n\nProvider A (hosted) bills per token via your own key (bring-your-own-key, set in Settings, pay the provider directly). Provider B (Ollama, local) has no per-token charge but needs the model pulled to your machine and enough local resources to run it — that's the open-weight trade-off from Lesson 2 made tangible: no per-call cost, but you supply the hardware. Keep the model small so it runs comfortably.",
+      "checklist": [
+        "Scoped a deliberately SMALL task with a checkable output and wrote 5-10 example inputs with their correct answers",
+        "Defined ONE narrow adapter interface the app calls; app logic imports no provider SDK directly",
+        "Implemented TWO thin adapters for two different providers (e.g. a hosted OpenAI-compatible endpoint and a local Ollama /v1 endpoint), each mapping request/response inside the adapter",
+        "Made the active provider a single CONFIG value; verified a provider swap is a config edit + restart with ZERO app-logic change",
+        "Kept prompt and tool schema identical across adapters, localising any provider-specific tweak inside that provider's adapter and noting where the two did not behave 1:1",
+        "Built an eval harness grading task success, tool-call correctness, output format, and a latency check over the fixed cases",
+        "Ran the eval on BOTH providers and compared: baseline on A, same eval on B after the config swap, with any regression identified as drift",
+        "PROVEN: captured the app on Provider A, the same app on Provider B after only a config change, and the side-by-side eval output showing whether behaviour held"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-vertex-genai-overview",
+      "title": "Generative AI on Vertex AI — overview (Gemini Enterprise Agent Platform)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "The hosted-platform side of the matrix, from Google's own docs. Read it for the breadth a single managed provider can cover: Google's Gemini models (Pro and Flash tiers) plus Model Garden, which serves partner models (Anthropic Claude, Meta Llama, Mistral) and open models as a managed 'Model-as-a-Service', and grounding options (Google Search, your own data, RAG). Note the 2026 rebrand toward 'Gemini Enterprise Agent Platform' / 'Agent Studio' — teach the current names. Use it to fill the hosted column's capability and platform-reach cells.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-vertex-data-governance",
+      "title": "Data governance and generative AI — Google Cloud (AI/ML Privacy Commitment)",
+      "url": "https://cloud.google.com/transform/google-cloud-enterprise-ready-generative-ai",
+      "kind": "official-doc",
+      "annotation": "The evidence for the hosted column's data-residency cell. Google Cloud states that customer data used in its AI/ML services is not used to train its foundation models and is not leaked to other customers (its AI/ML Privacy Commitment), and that organisations keep control over where data is stored and whether it is used. This is exactly the kind of explicit commitment a hosted provider answers residency with — as opposed to the physical guarantee of self-hosting. Cite it when you fill the residency row for a hosted provider; do not paraphrase the commitment from memory.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-vertex-data-residency",
+      "title": "Data residency & deployment locations — Generative AI on Vertex AI",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/data-residency",
+      "kind": "official-doc",
+      "annotation": "The regional-control detail behind the residency axis. Google documents an AI/ML data-location commitment (supported in US and EU locations) and the difference between regional endpoints — which keep ML processing within a chosen geography for data-residency requirements — and the global endpoint, which does NOT guarantee where ML processing happens. This is the concrete mechanism a hosted provider offers to meet a residency boundary, and the reason 'which endpoint' is itself a residency decision. Read alongside the data-governance page when the workload has a hard boundary.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-ollama-home",
+      "title": "Ollama — run open models locally, offline, private",
+      "url": "https://ollama.com/",
+      "kind": "official-doc",
+      "annotation": "The open-weight side of the matrix. Ollama runs open models on hardware you control and states plainly that 'your data is never trained on' and that you can 'run entirely offline for mission critical work' — the strongest possible answer to a residency boundary, because the data never leaves your environment, and the reason self-hosting changes the cost axis (no per-token charge; you own the GPU). Use it to fill the open-weight column's residency and cost cells, and as the anchor for the 'lean open-weight' half of the hosted-vs-open-weight rule.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-ollama-openai-compat",
+      "title": "Ollama — OpenAI compatibility (the swap-cheaply endpoint)",
+      "url": "https://github.com/ollama/ollama/blob/main/docs/api/openai-compatibility.mdx",
+      "kind": "official-doc",
+      "annotation": "The single fact that makes many provider swaps a base-URL change: Ollama 'provides compatibility with parts of the OpenAI API to help connect existing applications to Ollama.' Point the standard OpenAI client at base_url 'http://localhost:11434/v1/' with api_key 'ollama' ('required but ignored') and your existing /v1/chat/completions code runs against a local open model unchanged. Supported endpoints include /v1/chat/completions, /v1/completions, /v1/embeddings, and /v1/models. This is the concrete lever behind the adapter + config-routing capstone — read it before you build Provider B.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-openai-function-calling",
+      "title": "OpenAI — function calling (tool shape most adapters standardise on)",
+      "url": "https://developers.openai.com/api/docs/guides/function-calling",
+      "kind": "official-doc",
+      "annotation": "The tool/function-calling contract that portability adapters converge on. A tool is 'type: function' with a name, a description of when/how to use it, and 'parameters' as a JSON schema; the model returns tool_calls carrying an id, function.name, and JSON-encoded function.arguments that your app executes and feeds back. Note 'strict: true' makes calls 'reliably adhere to the function schema' (with rules like additionalProperties:false and all properties required) — a provider-specific structured-output mode you localise inside its adapter. Read it to understand both the common shape and where tool parity leaks across providers.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-openai-agents-sdk",
+      "title": "OpenAI Agents SDK — agents, tools, tracing (and multi-provider models)",
+      "url": "https://openai.github.io/openai-agents-python/",
+      "kind": "official-doc",
+      "annotation": "A concrete example of the portability primitives in a real SDK. Its core pieces are Agents (LLMs with instructions and tools), Handoffs, Guardrails, Sessions, and a Runner that runs the agent loop; function tools are generated from Python functions with schema + Pydantic validation, and MCP server tools work the same way. Crucially it is NOT OpenAI-only — it exposes LiteLLM / Any-LLM / multi-provider model interfaces so the same agent code can target other providers, and ships built-in tracing 'for visualizing, debugging, and monitoring workflows' with evaluation/fine-tuning/distillation support. Read it for the model-interface abstraction and the observability that catches drift across runs.",
+      "domainIds": ["m4-cross-provider-portability"]
+    },
+    {
+      "id": "r-hf-docs",
+      "title": "Hugging Face — docs (Hub, Transformers, Inference)",
+      "url": "https://huggingface.co/docs",
+      "kind": "official-doc",
+      "annotation": "The open-weight ecosystem side of the matrix. The Hub hosts Git-based models, datasets, and Spaces; Transformers provides 'state-of-the-art AI models for PyTorch'; and serving paths include Text Generation Inference (an optimised serving toolkit), dedicated Inference Endpoints (models on fully managed HF infrastructure), and Inference Providers (call 200k+ models via partner providers). Use it to fill the open-weight column when the choice is 'self-host or managed-open-model hosting' rather than local-only — it shows open weights are not only a laptop story but also a managed-serving option.",
+      "domainIds": ["m4-cross-provider-portability"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m4-1",
+      "title": "M4 · The portability build — one app, two providers, config-swapped, eval-guarded",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m4-cross-provider-portability"],
+      "sourceNotebook": "cross-vendor / m4 / portability-build-adapter-config-eval"
+    },
+    {
+      "id": "v-m4-2",
+      "title": "M4 · Hosted managed APIs vs open-weight for enterprise (anchor debate)",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m4-cross-provider-portability"],
+      "sourceNotebook": "cross-vendor / m4 / debate-hosted-vs-open-weight"
+    }
+  ]
+}

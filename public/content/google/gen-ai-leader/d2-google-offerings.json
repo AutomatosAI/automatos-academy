@@ -1,0 +1,919 @@
+{
+  "id": "d2-google-offerings",
+  "order": 2,
+  "code": "D2",
+  "name": "Google Cloud's gen AI offerings",
+  "weight": 0.35,
+  "tagline": "The heaviest domain (~35%): the map of Google's gen AI stack a leader must be able to read — the Gemini models and apps, the Agent Platform (Model Garden, Agent Search, RAG), the customer-experience agents, NotebookLM, and knowing which offering fits which business need using current branding.",
+  "overview": "This is the largest section of the Generative AI Leader exam (~35% — more than any other), and it is a naming-and-matching domain: given a business need, choose the right Google Cloud gen AI offering, and recognise every product by its current name. The exam guide's Section 2 has five task groups — 2.1 Google Cloud's strengths (AI-first, enterprise-ready, open, AI-optimised infrastructure), 2.2 prebuilt offerings for AI-powered work (the Gemini app and Gemini Advanced with Gems, Gemini Enterprise with the Cloud NotebookLM API, Gemini for Google Workspace), 2.3 customer-experience offerings (Agent Search on the Gemini Enterprise Agent Platform, and the Customer Engagement Suite — Conversational Agents, Agent Assist, Conversational Insights, CCaaS), 2.4 building with AI (Agent Platform, including Model Garden, Agent Search and Agent Platform AutoML, plus the RAG offerings), and 2.5 agent tooling (extensions, functions, data stores, plugins, the pre-built AI APIs, and when to use Agent Studio versus Google AI Studio). Currency is the trap: the guide's Section 2 text uses current Google branding — Agent Platform, Gemini Enterprise Agent Platform, Agent Search, Agent Studio — not the older 'Vertex AI' or 'Agent Builder' labels, which appear in neither the guide nor the certification page. Teach the current names; know the offering-to-need mapping cold. You are a business leader here, not an engineer: you are asked to recognise what each product is for and to recommend the right one — never to configure it.",
+  "objectives": [
+    "State why D2 carries the most weight and describe Google Cloud's gen AI strengths — AI-first approach, an enterprise-ready platform (responsible, secure, private, reliable, scalable), an open approach, and AI-optimised infrastructure (the AI Hypercomputer, custom TPUs, GPUs, data centres).",
+    "Distinguish Google's prebuilt, ready-to-use gen AI offerings for AI-powered work: the consumer Gemini app and Gemini Advanced (with Gems), Gemini Enterprise (including the Cloud NotebookLM API and custom agents), and Gemini for Google Workspace.",
+    "Recognise Google Cloud's customer-experience offerings — Agent Search on the Gemini Enterprise Agent Platform and the Customer Engagement Suite (Conversational Agents, Agent Assist, Conversational Insights, Contact Center as a Service) — and match each to who it serves.",
+    "Explain the developer-facing Agent Platform and its parts — Model Garden (Google, partner and open models), Agent Search, Agent Platform AutoML, the RAG offerings, and building custom agents — using current names, and place NotebookLM as a source-grounded research tool.",
+    "Match a business need to the correct Google Cloud gen AI offering and know when to use Agent Studio (enterprise, on the Agent Platform) versus Google AI Studio (developer prototyping with the Gemini API)."
+  ],
+  "lessons": [
+    {
+      "id": "l1-strengths-and-stack",
+      "title": "Why D2 is the heaviest — and how Google's gen AI stack is laid out",
+      "estMinutes": 13,
+      "objective": "Explain why Section 2 is the largest domain, describe Google Cloud's four stated gen AI strengths, and place the stack in layers so every later product has a home.",
+      "body": "## The domain that decides the exam\n\nSection 2, **\"Google Cloud's gen AI offerings,\"** is **~35% of the exam** — the single largest section, ahead of Fundamentals (~30%), Techniques (~20%), and Business strategy (~15%). Roughly one in three questions lives here. The reason is simple: this is a **Google Cloud** credential, and the certification is explicitly for a leader with **\"business-level knowledge of Google Cloud's gen AI products and services.\"** You will not be asked to build anything; you will be asked to **recognise each offering and recommend the right one for a business need**. Get the product map right and a third of the exam falls out.\n\n## Google Cloud's four stated strengths (task 2.1)\n\nBefore the individual products, the guide asks you to describe **why Google Cloud** — its strengths in gen AI. Learn these as a leader's talking points:\n\n- **AI-first approach.** Google's long-running, research-led investment in AI \"translates into cutting-edge gen AI solutions\" — the same technology that powers Google products is offered to enterprises.\n- **An enterprise-ready AI platform.** The guide's five words: **responsible, secure, private, reliable, scalable.** This is the promise that a business can adopt gen AI without giving up control of its data, security, or governance.\n- **A comprehensive, integrated ecosystem, and an open approach.** Gen AI is integrated across Google's products and services, and Google Cloud takes an **open approach** — you are not locked to a single model. (You will see this concretely in Model Garden, which offers Google, partner, and open models side by side.)\n- **AI-optimised infrastructure.** The guide names the **AI Hypercomputer**, Google's **custom-designed TPUs**, **GPUs**, and **data centres** as the foundation that makes the rest fast and cost-effective. A leader should know these exist and why they matter (performance and unit economics at scale), not their engineering detail.\n\n> **Exam tip:** 2.1 is about *positioning*, not features. If an option says Google Cloud's strength is \"one proprietary model you must use,\" it contradicts the **open approach**; if it says \"you hand over your data,\" it contradicts **enterprise-ready** (private, secure, governed). The five words — responsible, secure, private, reliable, scalable — are worth memorising verbatim.\n\n## The layers of the stack (a leader's map)\n\nThe Fundamentals section frames the gen AI landscape as layers — **infrastructure, models, platforms, agents, applications** — and Google's offerings slot cleanly onto them. Hold this picture; every product in the rest of D2 hangs off it:\n\n| Layer | What it is | Google offerings you must know |\n|---|---|---|\n| **Infrastructure** | The compute the models run on | AI Hypercomputer, TPUs, GPUs, data centres |\n| **Models** | The foundation models themselves | **Gemini** (multimodal flagship), **Gemma** (open), **Imagen** (images), **Veo** (video) — offered through **Model Garden** alongside partner models |\n| **Platform** | Where you build and manage gen AI | **Agent Platform** (the Gemini Enterprise Agent Platform) — Model Garden, grounding/RAG, Agent Studio, tuning |\n| **Agents** | Reasoning systems that use tools to act | Custom agents built on the Agent Platform; prebuilt **Agent Search**; the **Customer Engagement Suite** agents |\n| **Applications** | Ready-to-use products | The **Gemini app**, **Gemini Advanced**, **Gemini for Google Workspace**, **Gemini Enterprise**, **NotebookLM** |\n\n## Google's four foundation models (the models layer)\n\nTask 1.4 names the four Google foundation models by strength — expect them referenced throughout D2:\n\n- **Gemini** — the multimodal flagship family (text, images, audio, video, code) used across Google's products and the Agent Platform.\n- **Gemma** — Google's family of **open** models you can run and customise yourself (the 'open approach' made concrete).\n- **Imagen** — **image** generation.\n- **Veo** — **video** generation.\n\n> **Exam tip:** map model to modality — **Imagen = images, Veo = video, Gemini = multimodal, Gemma = open.** A classic distractor swaps these (e.g. 'Veo for images') or calls Gemma a closed/paid-only model. The one you will decide on most often is **Gemini**, because it is the model behind the apps and the Agent Platform.\n\n## Why the exam cares\n\nThis lesson is the scaffolding for the other three. If you can say *'that's an application, that's the platform, that's a model, that's an agent'* and *'Google's pitch is AI-first, enterprise-ready, open, on optimised infrastructure,'* the matching questions that make up most of D2 become recognition, not recall.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-1",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Roughly what share of the Generative AI Leader exam is Section 2, 'Google Cloud's gen AI offerings,' and how does it rank against the other sections?",
+          "options": [
+            { "id": "a", "text": "About 35% — the largest single section, ahead of Fundamentals (~30%), Techniques (~20%), and Business strategy (~15%)", "correct": true },
+            { "id": "b", "text": "About 15% — the smallest section" },
+            { "id": "c", "text": "About 50% — it is half the exam on its own" },
+            { "id": "d", "text": "About 20% — tied with Techniques as a mid-weight section" }
+          ],
+          "explanation": "The exam guide weights Section 2 at **~35%**, the heaviest of the four (30/35/20/15). It is not 15% (that is Business strategy, the smallest), not 50% (no section is half), and not 20% (that is Techniques). Knowing D2 is the biggest tells you where to spend study time.",
+          "sourceRefs": ["r-exam-guide", "r-cert-page"]
+        },
+        {
+          "id": "kc-d2-2",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "The exam guide describes Google Cloud's gen AI platform as 'enterprise-ready.' Which set of words does it use to characterise that?",
+          "options": [
+            { "id": "a", "text": "Responsible, secure, private, reliable, scalable", "correct": true },
+            { "id": "b", "text": "Cheap, fast, proprietary, closed, exclusive" },
+            { "id": "c", "text": "Open-source-only, unmanaged, self-hosted, offline" },
+            { "id": "d", "text": "Experimental, beta, best-effort, community-supported" }
+          ],
+          "explanation": "The guide's five characteristics of the enterprise-ready platform are **responsible, secure, private, reliable, scalable** — the promise a leader can repeat to a risk-averse board. The other options invert that promise (proprietary/closed contradicts Google's stated open approach; experimental/best-effort contradicts reliable; unmanaged/offline-only contradicts a managed enterprise platform).",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d2-3",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A leader wants Google's model for generating marketing VIDEO clips. Which foundation model is the right match?",
+          "options": [
+            { "id": "a", "text": "Veo", "correct": true },
+            { "id": "b", "text": "Imagen" },
+            { "id": "c", "text": "Gemma" },
+            { "id": "d", "text": "Gemini Nano" }
+          ],
+          "explanation": "**Veo** is Google's **video**-generation model. **Imagen** generates **images** (not video), **Gemma** is Google's family of **open** models (a general model, not a video generator), and 'Gemini Nano' is not one of the four foundation models the guide asks you to know (Gemini, Gemma, Imagen, Veo). Match model to modality: Veo = video.",
+          "sourceRefs": ["r-exam-guide"]
+        }
+      ]
+    },
+    {
+      "id": "l2-prebuilt-and-workspace",
+      "title": "Prebuilt offerings: the Gemini app, Gemini Advanced, Gemini Enterprise & Workspace",
+      "estMinutes": 14,
+      "objective": "Tell apart Google's ready-to-use gen AI products — the consumer Gemini app and Gemini Advanced (Gems), enterprise Gemini Enterprise (with NotebookLM), and Gemini for Google Workspace — and match each to who uses it.",
+      "body": "## 'Prebuilt' means ready to use, no building required\n\nTask 2.2 covers offerings that **already work out of the box** — a leader adopts them, they don't commission a build. The exam's favourite trap here is mixing up the **consumer** Gemini products with the **enterprise** ones, so anchor on the audience each serves.\n\n## The Gemini app and Gemini Advanced (with Gems)\n\n- **The Gemini app** is Google's **personal AI assistant** — the chat app (web and mobile) an individual uses to write, summarise, brainstorm, and analyse. It is the consumer front door to Gemini.\n- **Gemini Advanced** is the **paid, higher-capability tier** of that app — access to Google's most capable models and larger usage, sold through Google's consumer AI subscriptions. A leader should read it as *'the upgraded Gemini app for power users.'*\n- **Gems** are **custom versions of Gemini you create for repeated tasks** — you give a Gem a role and instructions once (say, 'act as our brand copy editor') and reuse it. Think of a Gem as a saved, personalised assistant for a recurring job.\n\n> **Exam tip:** the Gemini app and Gemini Advanced are **individual/consumer** productivity tools. If a scenario needs company-wide deployment, data connected to enterprise systems, governance, or custom agents for the whole business, that is **Gemini Enterprise** or the **Agent Platform**, not the consumer app. Don't answer an enterprise-governance question with 'the Gemini app.'\n\n## Gemini Enterprise (the business platform for AI at work)\n\n**Gemini Enterprise** is Google's **enterprise** offering that brings gen AI, agents, and a company's own data together for the whole organisation. The guide specifically names three things under it: the **Cloud NotebookLM API**, **multimodal search**, and **custom agent capabilities**. Read Gemini Enterprise as *'AI and agents for the business, grounded in the company's data, with enterprise controls'* — the governed, org-wide counterpart to the consumer app. It is also the **parent product** that includes **NotebookLM Enterprise** (see below) and can be bought in editions.\n\n### NotebookLM and the Cloud NotebookLM API\n\n**NotebookLM** is a **source-grounded research and learning tool**: you upload your own documents, and it answers **only from those sources**, with citations — plus it can generate summaries, briefing docs, and **Audio Overviews**. **NotebookLM Enterprise** is described by Google as \"a highly compliant, enterprise-ready version of NotebookLM\" whose AI \"grounds its responses in these documents,\" available **standalone or as part of Gemini Enterprise**, and reachable via an **API** (the guide's **Cloud NotebookLM API**). For a leader, NotebookLM is the answer to *'help my team understand a big pile of our own documents, without the model making things up.'*\n\n## Gemini for Google Workspace\n\n**Gemini for Google Workspace** puts Gemini **inside the Workspace apps** — Docs, Gmail, Sheets, Slides, Meet — so employees get AI help (drafting, summarising, generating) **in the tools they already use every day**. The distinction the exam wants: this is Gemini **embedded in Workspace productivity apps**, not the standalone Gemini app and not the developer platform.\n\n> **Exam tip:** three easily-confused 'Gemini' offerings — **Gemini app** (standalone personal assistant), **Gemini for Google Workspace** (Gemini inside Docs/Gmail/etc.), and **Gemini Enterprise** (the org-wide business platform with data, agents, NotebookLM). Match by *where the AI lives and who it serves*: my chat window, my office apps, or my whole company's platform.\n\n## A worked match\n\n- *'An analyst wants a smarter personal chatbot to draft emails'* → **Gemini app / Gemini Advanced**.\n- *'Everyone should get AI drafting inside Gmail and Docs'* → **Gemini for Google Workspace**.\n- *'Give the company a governed AI platform that reasons over our own documents and runs custom agents'* → **Gemini Enterprise** (with **NotebookLM** for source-grounded research).\n\nThat trio of matches is the shape of many 2.2 questions.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-4",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What are 'Gems' in the Gemini app?",
+          "options": [
+            { "id": "a", "text": "Custom, reusable versions of Gemini you configure once for a repeated task (e.g. a brand copy editor)", "correct": true },
+            { "id": "b", "text": "Google's video-generation foundation model" },
+            { "id": "c", "text": "The paid enterprise licence that connects Gemini to company databases" },
+            { "id": "d", "text": "A hardware accelerator in Google's data centres" }
+          ],
+          "explanation": "**Gems** are **customised, reusable versions of Gemini** you set up for recurring tasks. They are not a model (that would be Veo for video), not an enterprise data licence (that is closer to Gemini Enterprise), and not hardware (TPUs/GPUs are the accelerators). A Gem is a saved, personalised assistant.",
+          "sourceRefs": ["r-exam-guide", "r-cert-page"]
+        },
+        {
+          "id": "kc-d2-5",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A team must make sense of a large set of the company's own internal reports, and it is critical the assistant answers ONLY from those documents (no invented facts) and can produce summaries and an audio overview. Which offering fits best?",
+          "options": [
+            { "id": "a", "text": "NotebookLM (the source-grounded research tool, available enterprise-ready via Gemini Enterprise / the Cloud NotebookLM API)", "correct": true },
+            { "id": "b", "text": "The consumer Gemini app on its free tier" },
+            { "id": "c", "text": "Imagen, to generate images of the reports" },
+            { "id": "d", "text": "Google AI Studio, to fine-tune a model on the reports" }
+          ],
+          "explanation": "**NotebookLM** is purpose-built for source-grounded work — it \"grounds its responses in these documents,\" answering only from what you upload, and it generates summaries and **Audio Overviews**; NotebookLM Enterprise / the Cloud NotebookLM API brings it into the enterprise. The generic Gemini app is not source-restricted to your documents; **Imagen** makes images, not document answers; and **Google AI Studio** is a developer prototyping tool, not a document-research product (and grounding, not fine-tuning, is the right technique to stick to sources).",
+          "sourceRefs": ["r-notebooklm", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d2-6",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Leadership wants every employee to get AI drafting and summarising directly inside Docs, Gmail, Sheets, and Slides. Which offering is this?",
+          "options": [
+            { "id": "a", "text": "Gemini for Google Workspace", "correct": true },
+            { "id": "b", "text": "The standalone Gemini app" },
+            { "id": "c", "text": "Model Garden" },
+            { "id": "d", "text": "Agent Search" }
+          ],
+          "explanation": "**Gemini for Google Workspace** embeds Gemini **inside the Workspace apps** employees already use. The standalone **Gemini app** is a separate chat product, not AI inside Docs/Gmail; **Model Garden** is the developer catalogue of models; and **Agent Search** is an enterprise search/agent offering — neither puts AI into the office apps.",
+          "sourceRefs": ["r-exam-guide"]
+        }
+      ]
+    },
+    {
+      "id": "l3-agent-platform-and-cx",
+      "title": "Building with AI: the Agent Platform, Model Garden, RAG — and customer-experience agents",
+      "estMinutes": 15,
+      "objective": "Explain the developer-facing Agent Platform and its parts (Model Garden, Agent Search, RAG, custom agents) using current names, and place the customer-experience offerings — Agent Search and the Customer Engagement Suite.",
+      "body": "## The platform where teams build (tasks 2.4 and 2.5)\n\nWhen a business needs to **build its own** gen AI applications and agents — not just use a prebuilt app — it uses the **Agent Platform**, which Google now brands the **Gemini Enterprise Agent Platform**. This is the umbrella for building, deploying, and managing gen AI on Google Cloud. The guide names its parts explicitly: **Model Garden**, **Agent Search**, and **Agent Platform AutoML**, plus **RAG offerings** and the ability to **build custom agents**.\n\n> **Currency trap (important):** the exam guide and the certification page use the **current** names — **Agent Platform / Gemini Enterprise Agent Platform**, **Agent Search**, **Agent Studio**. The older labels **'Vertex AI'** and **'Agent Builder'** appear in **neither** source. If an answer option leans on 'Vertex AI' or 'Agent Builder' as the current product name, treat it as the dated distractor and prefer the current Agent Platform naming.\n\n## Model Garden — choose your model (the open approach, made real)\n\n**Model Garden** is Google Cloud's **catalogue of models** you can discover, test, and use. It is where the **open approach** becomes concrete: it holds **Google's own first-party models** (Gemini, Imagen, Veo, Gemma), **partner models** (including **Claude** from Anthropic, **Llama** from Meta, and **Mistral**), and **open models** — and you can consume many of them as **managed APIs** or **self-deploy** open ones. For a leader, the point is *'Google Cloud lets you pick the best model for the job — Google's or a partner's — in one place,'* which is the anti-lock-in story.\n\n## RAG and grounding offerings (previewed here, drilled in D3)\n\nThe Agent Platform includes **RAG offerings** so an application can answer from **your** data. The guide lists Google Cloud's grounding offerings as **prebuilt RAG with Agent Search**, **RAG APIs**, and **Grounding with Google Search**. At a leader level: **grounding/RAG connects the model to a source of truth** (your documents or the live web) so answers are current and cited — this is how you fight hallucinations without retraining the model. (D3 covers the technique in depth; in D2 you just need to know these are the Google *offerings* for it.)\n\n## Agent Search and building custom agents\n\n**Agent Search** (on the Gemini Enterprise Agent Platform) is Google's **enterprise search offering** — it lets people find and get answers from across the organisation's content, and it provides **prebuilt RAG**. Beyond search, the Agent Platform lets teams **build custom agents** — reasoning systems that use **tools** to act. Task 2.5 lists the tool types an agent uses — **extensions, functions, data stores, and plugins** — and the **pre-built AI APIs** available for tooling: **Speech-to-Text**, **Text-to-Speech**, **Translation**, **Document AI**, **Cloud Vision**, **Video Intelligence**, and **Natural Language**, among others. A leader doesn't wire these up, but should recognise that agents reach the outside world through such tools and APIs.\n\n## Agent Studio vs Google AI Studio (a named 2.5 decision)\n\nThe guide explicitly asks you to **determine when to use Agent Studio and Google AI Studio** — a distinction the exam will test:\n\n- **Agent Studio** is the **enterprise** authoring surface **on the Agent Platform** — for building agents within Google Cloud, with enterprise context and controls.\n- **Google AI Studio** is the **developer, prototyping** tool — a fast, browser-based way to *\"quickly try out models and experiment with different prompts\"* against the **Gemini API**, then export code. It is where a developer *prototypes*; it is not the governed enterprise build environment.\n\n> **Exam tip:** decision rule — **prototyping/experimenting with the Gemini API → Google AI Studio; building agents for the enterprise on the platform → Agent Studio.** Watch for options that swap these two.\n\n## Customer experience: Agent Search + the Customer Engagement Suite (task 2.3)\n\nTask 2.3 covers offerings that **improve the customer experience**. Two families:\n\n- **External search** — **Agent Search on the Gemini Enterprise Agent Platform** and **Google Search** — so customers (or staff) can find answers across content.\n- **The Customer Engagement Suite** (Google's contact-centre AI), which the guide names by its parts: **Conversational Agents** (AI **virtual agents** that talk to *customers*), **Agent Assist** (real-time suggestions to *human* support agents while they work), **Conversational Insights** (analytics that mine *conversations* for trends), and **Contact Center as a Service (CCaaS)** (the managed contact-centre platform). The certification page also surfaces a **Customer Experience Agent Studio** for building these customer-facing agents.\n\n> **Exam tip:** match the Customer Engagement Suite parts by *who they help*: **Conversational Agents** serve the **customer** (the bot), **Agent Assist** serves the **human agent** (help in real time), **Conversational Insights** serves the **analyst/manager** (what are calls telling us). A distractor will use Agent Assist where the need is a customer-facing bot, or vice versa.\n\n## Why the exam cares\n\nTasks 2.4/2.5 are the technical heart of a non-technical exam: recognise the **Agent Platform** and its parts by current name, know **Model Garden** is the multi-vendor model catalogue, know **RAG/Agent Search** is how you ground on your data, and know the **Agent Studio vs Google AI Studio** and **Customer Engagement Suite** distinctions. This is where most of D2's matching questions concentrate.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-7",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team wants to compare and use several models — Google's Gemini, plus Anthropic's Claude and Meta's Llama — from one place on Google Cloud. Which offering is that?",
+          "options": [
+            { "id": "a", "text": "Model Garden (the catalogue of Google, partner, and open models)", "correct": true },
+            { "id": "b", "text": "Gemini for Google Workspace" },
+            { "id": "c", "text": "Conversational Agents" },
+            { "id": "d", "text": "NotebookLM" }
+          ],
+          "explanation": "**Model Garden** is Google Cloud's model catalogue holding Google's first-party models **and** partner models such as **Claude** and **Llama**, plus open models — the 'open approach' in one place. **Gemini for Google Workspace** is AI inside office apps, **Conversational Agents** are contact-centre bots, and **NotebookLM** is a source-grounded research tool — none is a multi-vendor model catalogue.",
+          "sourceRefs": ["r-model-garden", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d2-8",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "In the Customer Engagement Suite, which component provides real-time suggestions to HUMAN support agents while they handle a case (rather than a bot that talks to customers)?",
+          "options": [
+            { "id": "a", "text": "Agent Assist", "correct": true },
+            { "id": "b", "text": "Conversational Agents" },
+            { "id": "c", "text": "Conversational Insights" },
+            { "id": "d", "text": "Model Garden" }
+          ],
+          "explanation": "**Agent Assist** helps the **human agent** in real time with suggested responses and knowledge. **Conversational Agents** are the AI **virtual agents** that talk directly to **customers**; **Conversational Insights** analyses conversations after the fact for trends; and **Model Garden** is a model catalogue, not a contact-centre feature. Match by who is helped: Agent Assist = the human agent.",
+          "sourceRefs": ["r-exam-guide", "r-cert-page"]
+        },
+        {
+          "id": "kc-d2-9",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A developer wants to quickly prototype and experiment with prompts against the Gemini API in the browser, then grab the code. Which tool does the guide point to for that, versus building an enterprise agent on the platform?",
+          "options": [
+            { "id": "a", "text": "Google AI Studio for prototyping; Agent Studio for building enterprise agents on the Agent Platform", "correct": true },
+            { "id": "b", "text": "Agent Studio for prototyping; Google AI Studio for enterprise agents" },
+            { "id": "c", "text": "Model Garden for both" },
+            { "id": "d", "text": "NotebookLM for prototyping; Gems for enterprise agents" }
+          ],
+          "explanation": "The guide's decision rule: **Google AI Studio** is the developer/prototyping tool to \"quickly try out models and experiment with different prompts\" against the Gemini API; **Agent Studio** is the enterprise surface for building agents on the Agent Platform. Option b swaps them; **Model Garden** is a model catalogue, not an authoring studio; and NotebookLM/Gems are research and personalisation tools, not the prototyping-vs-enterprise pairing the guide names.",
+          "sourceRefs": ["r-ai-studio", "r-exam-guide", "r-agentplatform-overview"]
+        }
+      ]
+    },
+    {
+      "id": "l4-matching-and-currency",
+      "title": "Matching offering to need — and not getting caught by dated names",
+      "estMinutes": 12,
+      "objective": "Turn D2 into a fast decision: pick the right Google Cloud gen AI offering for a stated business need, and reject dated-branding and wrong-offering distractors on sight.",
+      "body": "## The one skill D2 rewards: match need → offering\n\nAlmost every D2 question is a disguised matching exercise: here is a **business need**, which **Google Cloud gen AI offering** is right? Build a fast lookup and the domain becomes mechanical. Anchor on the *primary verb of the need*.\n\n| The business need (verb) | Best-fit offering | Why |\n|---|---|---|\n| Give an **individual** a smarter personal assistant / chatbot | **Gemini app** (paid: **Gemini Advanced**, with **Gems**) | Consumer productivity, single user |\n| Put AI **inside the office apps** everyone uses | **Gemini for Google Workspace** | Gemini embedded in Docs/Gmail/Sheets/Slides |\n| Give the **whole company** a governed AI platform over **our own data**, with agents | **Gemini Enterprise** | Org-wide, data-connected, custom agents, NotebookLM |\n| Understand a pile of **our own documents**, answers **only from sources** | **NotebookLM** (Enterprise / Cloud NotebookLM API) | Source-grounded research, summaries, Audio Overviews |\n| **Choose / compare models** (Google, Claude, Llama, Mistral, open) | **Model Garden** | The multi-vendor model catalogue |\n| **Build custom agents / apps** on the platform | **Agent Platform** (Gemini Enterprise Agent Platform) + **Agent Studio** | The enterprise build surface |\n| **Prototype** quickly against the **Gemini API** | **Google AI Studio** | Developer experimentation, then export code |\n| **Ground** answers on our data or the live web | **RAG offerings** — prebuilt **RAG with Agent Search**, **RAG APIs**, **Grounding with Google Search** | Connect the model to a source of truth |\n| **Enterprise search** across our content | **Agent Search** | Find/answer across org content; prebuilt RAG |\n| A **customer-facing** support bot | **Conversational Agents** (Customer Engagement Suite) | Virtual agent that talks to customers |\n| **Help human support agents** in real time | **Agent Assist** | Real-time suggestions to the human |\n| **Analyse** contact-centre conversations | **Conversational Insights** | Trends/analytics from conversations |\n| Generate **images** / **video** | **Imagen** / **Veo** | Image model / video model |\n\n## Currency: teach the current names, reject the dated ones\n\nThe guide's Section 2 text is written in **current Google branding**. The names you should treat as correct:\n\n- **Agent Platform** and **Gemini Enterprise Agent Platform** (the build-and-manage platform)\n- **Agent Search** (enterprise search / prebuilt RAG)\n- **Agent Studio** (enterprise agent authoring) and, for customer-facing work, **Customer Experience Agent Studio**\n- **Gemini Enterprise** (the org-wide business platform)\n- **Model Garden**, **Agent Platform AutoML**, **Agent Platform Feature Store**\n\nThe names that do **not** appear in the exam guide or the certification page — and so should be viewed as **dated distractors** if presented as the current product:\n\n- **'Vertex AI'** — the older umbrella name; not used in the guide's Section 2 text.\n- **'Agent Builder'** — not used in the guide or the cert page.\n\n> **Exam tip:** you are not being asked to prove a rename happened — the guide makes no statement that it 'recently rebranded.' It simply **uses the current names**. Your job is to *recognise* the current names and not be pulled toward an option just because it says a term you remember from a year ago. When two options describe the same capability and one uses **Agent Platform / Agent Search / Agent Studio** while the other uses **Vertex AI / Agent Builder**, prefer the current naming.\n\n## The three distractor families to expect\n\n1. **Dated branding.** An option names a real capability under an old label ('build it in Vertex AI Agent Builder'). Prefer the current-name option.\n2. **Grounding vs fine-tuning confusion.** An option says 'fine-tune the model on our documents' when the need is *stick to our sources / stay current* — that is **grounding/RAG**, not fine-tuning. (Grounding connects at answer time; fine-tuning retrains weights. D3 drills this — but it surfaces in D2 matching too.)\n3. **Wrong offering for the need.** An option picks a real product that solves a *different* problem — the consumer Gemini app for an enterprise-governance need, Agent Assist for a customer-facing bot, Imagen for a video task, Model Garden for 'put AI in Gmail.' Match on the *primary verb* and the *audience* and these fall away.\n\n## Why the exam cares\n\nD2 is 35% of the exam and it is almost entirely recognition. If you can run the need→offering table in your head and instantly discount dated names, wrong-audience products, and grounding/fine-tuning mix-ups, you convert the largest section into your strongest.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d2-10",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Two answer options describe the same 'build custom agents on Google Cloud' capability. One says 'use Vertex AI Agent Builder'; the other says 'use the Agent Platform (Agent Studio).' For this exam, which should you prefer and why?",
+          "options": [
+            { "id": "a", "text": "The Agent Platform / Agent Studio option — the exam guide and cert page use the current Agent Platform naming, not 'Vertex AI' or 'Agent Builder'", "correct": true },
+            { "id": "b", "text": "The 'Vertex AI Agent Builder' option — it is the only correct product name" },
+            { "id": "c", "text": "Neither — Google Cloud does not offer agent-building tools" },
+            { "id": "d", "text": "Either is equally correct; the exam accepts both names interchangeably" }
+          ],
+          "explanation": "The guide's Section 2 and the certification page use **current** names — **Agent Platform / Gemini Enterprise Agent Platform** and **Agent Studio** — and do **not** use 'Vertex AI' or 'Agent Builder.' So prefer the current-name option. It is false that only 'Agent Builder' is correct (b) or that Google offers no agent tooling (c); and the exam is written in current branding, so treating the dated label as equivalent (d) is the trap.",
+          "sourceRefs": ["r-exam-guide", "r-cert-page", "r-agentplatform-overview"]
+        },
+        {
+          "id": "kc-d2-11",
+          "domainId": "d2-google-offerings",
+          "type": "single",
+          "difficulty": 3,
+          "stem": "A retailer wants its assistant to answer customers using the company's LIVE product catalogue and policies so replies stay current and cite a source. Which Google Cloud approach fits, and which is the classic wrong answer?",
+          "options": [
+            { "id": "a", "text": "Use grounding / RAG offerings (e.g. RAG with Agent Search, RAG APIs) to connect the model to the company's data; do NOT fine-tune the model on the catalogue", "correct": true },
+            { "id": "b", "text": "Fine-tune the model on the catalogue; grounding is unnecessary" },
+            { "id": "c", "text": "Use Imagen to generate the answers" },
+            { "id": "d", "text": "Use the free Gemini app with no data connection" }
+          ],
+          "explanation": "Staying **current and cited** against changing company data is exactly what **grounding/RAG** is for — it connects the model to a source of truth at answer time. **Fine-tuning** bakes knowledge into weights and would go stale as the catalogue changes (the classic distractor). **Imagen** generates images, not catalogue answers, and the **free Gemini app** with no data connection can't see the company's live catalogue.",
+          "sourceRefs": ["r-grounding", "r-exam-guide"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d2-1",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which section of the Generative AI Leader exam carries the most weight?",
+      "options": [
+        { "id": "a", "text": "Section 2 — Google Cloud's gen AI offerings (~35%)", "correct": true },
+        { "id": "b", "text": "Section 1 — Fundamentals of gen AI (~30%)" },
+        { "id": "c", "text": "Section 3 — Techniques to improve gen AI model output (~20%)" },
+        { "id": "d", "text": "Section 4 — Business strategies for a successful gen AI solution (~15%)" }
+      ],
+      "explanation": "**Section 2 (~35%)** is the heaviest. Section 1 is ~30%, Section 3 is ~20%, and Section 4 is ~15%. Because D2 is the largest, the product map it tests deserves the most study time.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-2",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The exam guide characterises Google Cloud's enterprise-ready AI platform with five words. Which are they?",
+      "options": [
+        { "id": "a", "text": "Responsible, secure, private, reliable, scalable", "correct": true },
+        { "id": "b", "text": "Fast, cheap, closed, proprietary, exclusive" },
+        { "id": "c", "text": "Free, open-source-only, offline, unmanaged, experimental" },
+        { "id": "d", "text": "Local, air-gapped, single-model, fixed-price, legacy" }
+      ],
+      "explanation": "The guide's five words are **responsible, secure, private, reliable, scalable**. The other sets contradict Google's stated positioning — 'closed/proprietary/exclusive' fights the open approach, 'unmanaged/experimental' fights reliability, and 'single-model' fights Model Garden's multi-vendor catalogue.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-3",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is Google's family of OPEN foundation models that a business can run and customise itself?",
+      "options": [
+        { "id": "a", "text": "Gemma", "correct": true },
+        { "id": "b", "text": "Gemini" },
+        { "id": "c", "text": "Imagen" },
+        { "id": "d", "text": "Veo" }
+      ],
+      "explanation": "**Gemma** is Google's family of **open** models. **Gemini** is the multimodal flagship (offered as a managed model), **Imagen** generates images, and **Veo** generates video — none of those is the 'open model' answer the guide points to.",
+      "sourceRefs": ["r-exam-guide", "r-model-garden"]
+    },
+    {
+      "id": "q-d2-4",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which Google foundation model is for IMAGE generation?",
+      "options": [
+        { "id": "a", "text": "Imagen", "correct": true },
+        { "id": "b", "text": "Veo" },
+        { "id": "c", "text": "Gemma" },
+        { "id": "d", "text": "Gemini" }
+      ],
+      "explanation": "**Imagen** generates images. **Veo** generates video, **Gemma** is Google's open-model family, and **Gemini** is the multimodal flagship. Match model to modality: Imagen = images.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-5",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How is the standalone consumer 'Gemini app' best described for a business leader?",
+      "options": [
+        { "id": "a", "text": "A personal AI assistant (chat app) for an individual — with a higher-capability paid tier, Gemini Advanced", "correct": true },
+        { "id": "b", "text": "An org-wide platform that connects to company databases and runs custom agents" },
+        { "id": "c", "text": "A catalogue of Google and partner models for developers" },
+        { "id": "d", "text": "A contact-centre product that talks to customers" }
+      ],
+      "explanation": "The **Gemini app** is an individual's **personal AI assistant**, with **Gemini Advanced** as the paid upgrade. The org-wide, data-connected platform is **Gemini Enterprise**; the model catalogue is **Model Garden**; and the customer-talking product is **Conversational Agents** — those are different offerings.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page"]
+    },
+    {
+      "id": "q-d2-6",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What are 'Gems'?",
+      "options": [
+        { "id": "a", "text": "Custom, reusable versions of Gemini configured for a specific repeated task", "correct": true },
+        { "id": "b", "text": "Google's custom AI accelerator chips (TPUs)" },
+        { "id": "c", "text": "The RAG API used to ground on your data" },
+        { "id": "d", "text": "Prebuilt contact-centre virtual agents" }
+      ],
+      "explanation": "**Gems** are **customised, reusable versions of Gemini** for recurring tasks. TPUs are Google's accelerator chips, RAG APIs are grounding offerings, and prebuilt virtual agents are Conversational Agents — none of those is a Gem.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page"]
+    },
+    {
+      "id": "q-d2-7",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which offering embeds Gemini directly inside Google Workspace apps like Docs, Gmail, Sheets, and Slides?",
+      "options": [
+        { "id": "a", "text": "Gemini for Google Workspace", "correct": true },
+        { "id": "b", "text": "Gemini Enterprise" },
+        { "id": "c", "text": "The standalone Gemini app" },
+        { "id": "d", "text": "Agent Search" }
+      ],
+      "explanation": "**Gemini for Google Workspace** puts Gemini **inside the Workspace apps**. **Gemini Enterprise** is the broader org-wide platform (data, agents, NotebookLM); the **standalone Gemini app** is a separate chat product; and **Agent Search** is enterprise search — none of those is 'AI inside Docs/Gmail.'",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-8",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The exam guide names the 'Cloud NotebookLM API' under which offering?",
+      "options": [
+        { "id": "a", "text": "Gemini Enterprise", "correct": true },
+        { "id": "b", "text": "The consumer Gemini app" },
+        { "id": "c", "text": "Model Garden" },
+        { "id": "d", "text": "Google AI Studio" }
+      ],
+      "explanation": "The guide lists the **Cloud NotebookLM API**, multimodal search, and custom agent capabilities under **Gemini Enterprise**. It is not a feature of the consumer Gemini app, the model catalogue (Model Garden), or the developer prototyping tool (Google AI Studio).",
+      "sourceRefs": ["r-exam-guide", "r-notebooklm"]
+    },
+    {
+      "id": "q-d2-9",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is the defining behaviour of NotebookLM as a research tool?",
+      "options": [
+        { "id": "a", "text": "It grounds its responses in the sources you provide, answering from your documents (with summaries and Audio Overviews)", "correct": true },
+        { "id": "b", "text": "It generates photorealistic images from text prompts" },
+        { "id": "c", "text": "It hosts and compares third-party models like Claude and Llama" },
+        { "id": "d", "text": "It automatically fine-tunes a model on the open web" }
+      ],
+      "explanation": "**NotebookLM** is **source-grounded** — it answers from the documents you supply and can produce summaries and **Audio Overviews**. Image generation is **Imagen**, hosting/comparing partner models is **Model Garden**, and NotebookLM does not fine-tune on the open web (its whole value is staying within your sources).",
+      "sourceRefs": ["r-notebooklm", "r-exam-guide"]
+    },
+    {
+      "id": "q-d2-10",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Under current branding, what is the developer platform for building, deploying, and managing gen AI on Google Cloud called in the exam guide?",
+      "options": [
+        { "id": "a", "text": "The Agent Platform (Gemini Enterprise Agent Platform)", "correct": true },
+        { "id": "b", "text": "Vertex AI" },
+        { "id": "c", "text": "Agent Builder" },
+        { "id": "d", "text": "Gemini for Google Workspace" }
+      ],
+      "explanation": "The guide uses **Agent Platform / Gemini Enterprise Agent Platform**. The older labels **'Vertex AI'** and **'Agent Builder'** do not appear in the guide's Section 2 or on the cert page, so they are the dated distractors; **Gemini for Google Workspace** is AI inside office apps, not the build platform.",
+      "sourceRefs": ["r-exam-guide", "r-agentplatform-overview", "r-cert-page"]
+    },
+    {
+      "id": "q-d2-11",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What is Model Garden?",
+      "options": [
+        { "id": "a", "text": "Google Cloud's catalogue of models — Google's own plus partner and open models — to discover, test, and use", "correct": true },
+        { "id": "b", "text": "A tool that embeds Gemini into Gmail and Docs" },
+        { "id": "c", "text": "A source-grounded document-research product" },
+        { "id": "d", "text": "The contact-centre analytics product" }
+      ],
+      "explanation": "**Model Garden** is the **model catalogue** (first-party, partner, and open models). Embedding Gemini in office apps is **Gemini for Google Workspace**, source-grounded research is **NotebookLM**, and contact-centre analytics is **Conversational Insights** — none is a model catalogue.",
+      "sourceRefs": ["r-model-garden", "r-exam-guide"]
+    },
+    {
+      "id": "q-d2-12",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Model Garden reflects Google Cloud's 'open approach.' Which set of partner (third-party) models does it offer alongside Google's own?",
+      "options": [
+        { "id": "a", "text": "Claude (Anthropic), Llama (Meta), and Mistral", "correct": true },
+        { "id": "b", "text": "Only Google's Gemini — no third-party models are available" },
+        { "id": "c", "text": "Only image models, no language models" },
+        { "id": "d", "text": "Microsoft Copilot and Amazon Titan exclusively" }
+      ],
+      "explanation": "Model Garden offers partner models including **Claude, Llama, and Mistral** next to Google's first-party models. It is not Gemini-only (that would contradict the open approach), it is not restricted to image models, and the named partners are Anthropic/Meta/Mistral (not the vendors in option d).",
+      "sourceRefs": ["r-model-garden"]
+    },
+    {
+      "id": "q-d2-13",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The exam guide lists Google Cloud's grounding offerings. Which set matches?",
+      "options": [
+        { "id": "a", "text": "Prebuilt RAG with Agent Search, RAG APIs, and Grounding with Google Search", "correct": true },
+        { "id": "b", "text": "Fine-tuning, quantisation, and distillation" },
+        { "id": "c", "text": "Imagen, Veo, and Gemma" },
+        { "id": "d", "text": "Docs, Gmail, and Sheets add-ons" }
+      ],
+      "explanation": "The guide names **prebuilt RAG with Agent Search**, **RAG APIs**, and **Grounding with Google Search** as the grounding offerings. Fine-tuning/quantisation/distillation are model-customisation techniques (not grounding offerings), Imagen/Veo/Gemma are models, and Docs/Gmail/Sheets are Workspace apps.",
+      "sourceRefs": ["r-exam-guide", "r-grounding"]
+    },
+    {
+      "id": "q-d2-14",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A business wants enterprise search that lets staff find and get answers from across the company's content, with prebuilt RAG. Which offering is that?",
+      "options": [
+        { "id": "a", "text": "Agent Search (on the Gemini Enterprise Agent Platform)", "correct": true },
+        { "id": "b", "text": "Gemini Advanced" },
+        { "id": "c", "text": "Veo" },
+        { "id": "d", "text": "Agent Assist" }
+      ],
+      "explanation": "**Agent Search** is Google's enterprise search offering with prebuilt RAG. **Gemini Advanced** is the paid consumer app tier, **Veo** is a video model, and **Agent Assist** helps human contact-centre agents — none is enterprise search across company content.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page"]
+    },
+    {
+      "id": "q-d2-15",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "In the Customer Engagement Suite, which component is the AI VIRTUAL AGENT that converses directly with customers?",
+      "options": [
+        { "id": "a", "text": "Conversational Agents", "correct": true },
+        { "id": "b", "text": "Agent Assist" },
+        { "id": "c", "text": "Conversational Insights" },
+        { "id": "d", "text": "Agent Search" }
+      ],
+      "explanation": "**Conversational Agents** are the customer-facing AI **virtual agents**. **Agent Assist** supports the **human** agent in real time, **Conversational Insights** analyses conversations for trends, and **Agent Search** is enterprise search — none is the customer-facing bot.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-16",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A support manager wants to mine thousands of past customer conversations to spot recurring issues and trends. Which Customer Engagement Suite component fits?",
+      "options": [
+        { "id": "a", "text": "Conversational Insights", "correct": true },
+        { "id": "b", "text": "Conversational Agents" },
+        { "id": "c", "text": "Agent Assist" },
+        { "id": "d", "text": "Model Garden" }
+      ],
+      "explanation": "**Conversational Insights** provides analytics over conversations — exactly 'spot trends across past conversations.' **Conversational Agents** talk to customers, **Agent Assist** helps human agents live, and **Model Garden** is a model catalogue — none is the analytics surface.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-17",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The exam guide asks you to determine when to use Agent Studio versus Google AI Studio. Which statement is correct?",
+      "options": [
+        { "id": "a", "text": "Google AI Studio is the developer tool to quickly prototype and experiment with prompts against the Gemini API; Agent Studio is the enterprise surface for building agents on the Agent Platform", "correct": true },
+        { "id": "b", "text": "Agent Studio is a free consumer chatbot; Google AI Studio is a contact-centre product" },
+        { "id": "c", "text": "They are two names for the same tool" },
+        { "id": "d", "text": "Google AI Studio is for building enterprise agents; Agent Studio is only for image generation" }
+      ],
+      "explanation": "**Google AI Studio** = developer **prototyping** against the Gemini API; **Agent Studio** = **enterprise** agent building on the Agent Platform. They are distinct tools (not the same thing), neither is a consumer chatbot or contact-centre product, and option d reverses their roles.",
+      "sourceRefs": ["r-ai-studio", "r-exam-guide", "r-agentplatform-overview"]
+    },
+    {
+      "id": "q-d2-18",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Per the guide, agents interact with the external environment through 'tools.' Which list matches the tool types it names?",
+      "options": [
+        { "id": "a", "text": "Extensions, functions, data stores, and plugins", "correct": true },
+        { "id": "b", "text": "TPUs, GPUs, data centres, and networks" },
+        { "id": "c", "text": "Docs, Sheets, Slides, and Gmail" },
+        { "id": "d", "text": "Imagen, Veo, Gemma, and Gemini" }
+      ],
+      "explanation": "The guide names **extensions, functions, data stores, and plugins** as the tool types agents use. The others are infrastructure (TPUs/GPUs), Workspace apps, or foundation models — not agent tool types.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-19",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which are pre-built Google Cloud AI APIs a leader might recognise as tooling for agents?",
+      "options": [
+        { "id": "a", "text": "Speech-to-Text, Text-to-Speech, Translation, Document AI, Vision, and Natural Language APIs", "correct": true },
+        { "id": "b", "text": "Gemini app, Gemini Advanced, and Gems" },
+        { "id": "c", "text": "Conversational Agents, Agent Assist, and Conversational Insights" },
+        { "id": "d", "text": "AI Hypercomputer, TPUs, and Spot VMs" }
+      ],
+      "explanation": "The guide lists pre-built AI APIs such as **Speech-to-Text, Text-to-Speech, Translation, Document AI, Cloud Vision, and Natural Language** for agent tooling. Option b lists consumer apps, option c lists Customer Engagement Suite components, and option d lists infrastructure — not the pre-built AI APIs.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-20",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which term, if presented as the CURRENT Google product name, is the dated distractor to be wary of on this exam?",
+      "options": [
+        { "id": "a", "text": "'Vertex AI' / 'Agent Builder' — neither appears in the exam guide's Section 2 or the cert page", "correct": true },
+        { "id": "b", "text": "'Agent Platform' — the current umbrella name" },
+        { "id": "c", "text": "'Model Garden' — the current model catalogue" },
+        { "id": "d", "text": "'Agent Search' — the current enterprise search offering" }
+      ],
+      "explanation": "The exam is written in current branding; **'Vertex AI'** and **'Agent Builder'** do not appear in the guide's Section 2 or on the cert page, so an option pushing them as the current product is the dated distractor. **Agent Platform**, **Model Garden**, and **Agent Search** are the current names you should recognise as correct.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page", "r-agentplatform-overview"]
+    },
+    {
+      "id": "q-d2-21",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A company wants a governed, organisation-wide AI platform that connects to its own data, offers multimodal search, and lets it build custom agents. Which offering is the best match?",
+      "options": [
+        { "id": "a", "text": "Gemini Enterprise", "correct": true },
+        { "id": "b", "text": "The consumer Gemini app (Gemini Advanced)" },
+        { "id": "c", "text": "Google AI Studio" },
+        { "id": "d", "text": "Imagen" }
+      ],
+      "explanation": "**Gemini Enterprise** is the org-wide business offering — the guide names the Cloud NotebookLM API, **multimodal search**, and **custom agent capabilities** under it. The **consumer Gemini app** is for individuals, **Google AI Studio** is a developer prototyping tool, and **Imagen** is an image model — none is the governed org-wide platform.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page"]
+    },
+    {
+      "id": "q-d2-22",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which pairing of business need → Google Cloud offering is CORRECT?",
+      "options": [
+        { "id": "a", "text": "Compare and use Google, Claude, and Llama models in one place → Model Garden", "correct": true },
+        { "id": "b", "text": "Put AI drafting inside Gmail and Docs → Model Garden" },
+        { "id": "c", "text": "A customer-facing support bot → Agent Assist" },
+        { "id": "d", "text": "Generate a marketing video → Imagen" }
+      ],
+      "explanation": "Comparing/using multiple vendors' models is **Model Garden** — correct. The others are mis-mapped: AI inside Gmail/Docs is **Gemini for Google Workspace** (not Model Garden), a **customer-facing** bot is **Conversational Agents** (Agent Assist helps human agents), and a marketing **video** is **Veo** (Imagen makes images).",
+      "sourceRefs": ["r-exam-guide", "r-model-garden"]
+    },
+    {
+      "id": "q-d2-23",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader needs to keep an assistant's answers current and citing the company's own knowledge base as it changes weekly. Which approach does the exam favour, and which is the trap?",
+      "options": [
+        { "id": "a", "text": "Ground the model with RAG (e.g. RAG with Agent Search / RAG APIs); the trap is choosing to fine-tune the model on the knowledge base", "correct": true },
+        { "id": "b", "text": "Fine-tune the model weekly; grounding is not offered by Google Cloud" },
+        { "id": "c", "text": "Switch to Imagen so answers include pictures" },
+        { "id": "d", "text": "Use Gems in the free Gemini app with no data connection" }
+      ],
+      "explanation": "Keeping answers **current and cited** against changing data is **grounding/RAG** — connect at answer time to the source of truth. **Fine-tuning** bakes knowledge into the model and goes stale (the trap), Google Cloud does offer grounding (so b is false), **Imagen** is an image model, and **Gems** with no data connection can't see the live knowledge base.",
+      "sourceRefs": ["r-grounding", "r-exam-guide"]
+    },
+    {
+      "id": "q-d2-24",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The exam guide lists Agent Platform AutoML and Agent Platform Feature Store. What do these names tell you for the exam?",
+      "options": [
+        { "id": "a", "text": "They are capabilities under the current 'Agent Platform' branding — recognise the Agent Platform naming rather than older 'Vertex AI AutoML / Feature Store' labels", "correct": true },
+        { "id": "b", "text": "They are consumer features of the Gemini app" },
+        { "id": "c", "text": "They are contact-centre products for customer conversations" },
+        { "id": "d", "text": "They are open foundation models like Gemma" }
+      ],
+      "explanation": "**Agent Platform AutoML** and **Agent Platform Feature Store** are named under the current **Agent Platform** branding — the point is to recognise the Agent Platform naming (not the older Vertex AI labels). They are not consumer Gemini-app features, not contact-centre products, and not foundation models.",
+      "sourceRefs": ["r-exam-guide", "r-agentplatform-overview"]
+    },
+    {
+      "id": "q-d2-25",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The exam guide says Google Cloud 'democratizes AI development.' Which example does it give?",
+      "options": [
+        { "id": "a", "text": "Low-code and no-code tools, pre-trained models, and APIs", "correct": true },
+        { "id": "b", "text": "Requiring every team to train models from scratch" },
+        { "id": "c", "text": "Restricting AI to a single proprietary model" },
+        { "id": "d", "text": "Removing all governance and security controls" }
+      ],
+      "explanation": "The guide cites **low-code and no-code tools, pre-trained models, and APIs** as how Google Cloud democratizes AI development — lowering the barrier to build. Training from scratch, single-model restriction, and removing governance all contradict that (and the enterprise-ready, open positioning).",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-26",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which items are part of Google Cloud's AI-optimised infrastructure, as the guide frames its strengths?",
+      "options": [
+        { "id": "a", "text": "The AI Hypercomputer, custom-designed TPUs, GPUs, and data centres", "correct": true },
+        { "id": "b", "text": "Gemini Advanced, Gems, and the Gemini app" },
+        { "id": "c", "text": "Conversational Agents, Agent Assist, and CCaaS" },
+        { "id": "d", "text": "NotebookLM, Model Garden, and Agent Search" }
+      ],
+      "explanation": "The guide names the **AI Hypercomputer, TPUs, GPUs, and data centres** as the AI-optimised infrastructure. The other options list consumer apps, contact-centre products, and platform/application offerings — they sit on top of the infrastructure, they are not the infrastructure itself.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-27",
+      "domainId": "d2-google-offerings",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which statements about Google Cloud's gen AI offerings, in current branding, are correct? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Model Garden offers Google, partner (e.g. Claude, Llama, Mistral), and open models in one catalogue", "correct": true },
+        { "id": "b", "text": "NotebookLM answers from the sources you provide and can generate summaries and Audio Overviews", "correct": true },
+        { "id": "c", "text": "The exam guide's Section 2 uses 'Agent Platform' and 'Agent Search'; it does not use 'Vertex AI' or 'Agent Builder'", "correct": true },
+        { "id": "d", "text": "Gemini for Google Workspace is a catalogue of third-party models for developers" }
+      ],
+      "explanation": "A, B, and C are correct: Model Garden is the multi-vendor model catalogue; NotebookLM is source-grounded with summaries and Audio Overviews; and the guide's Section 2 uses the current Agent Platform / Agent Search names, not Vertex AI / Agent Builder. D is wrong — **Gemini for Google Workspace** embeds Gemini in the office apps; the developer model catalogue is **Model Garden**.",
+      "sourceRefs": ["r-exam-guide", "r-model-garden", "r-notebooklm", "r-agentplatform-overview"]
+    },
+    {
+      "id": "q-d2-28",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An executive says: 'We bought the consumer Gemini app for a few analysts, so we're covered for a company-wide, governed AI platform that reasons over our internal data and runs custom agents.' What's the flaw?",
+      "options": [
+        { "id": "a", "text": "The consumer Gemini app is an individual productivity tool; a governed, org-wide platform with company data and custom agents is Gemini Enterprise (and the Agent Platform) — a different offering", "correct": true },
+        { "id": "b", "text": "Nothing — the consumer Gemini app is Google's enterprise data-and-agents platform" },
+        { "id": "c", "text": "They should have bought Imagen for the enterprise platform" },
+        { "id": "d", "text": "The consumer Gemini app only works offline, so it can't help analysts" }
+      ],
+      "explanation": "The consumer **Gemini app** (even Gemini Advanced) serves **individuals**; it is not the governed, data-connected, agent-running **enterprise** platform — that is **Gemini Enterprise** (built on the **Agent Platform**). So they are not 'covered.' The app is not the enterprise platform (b), **Imagen** is an image model not a platform (c), and the app is an online assistant, not offline-only (d).",
+      "sourceRefs": ["r-exam-guide", "r-cert-page", "r-agentplatform-overview"]
+    },
+    {
+      "id": "q-d2-29",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How is 'Gemini Advanced' best described to a business leader?",
+      "options": [
+        { "id": "a", "text": "The paid, higher-capability tier of the Gemini app — the most capable models and larger usage for power users", "correct": true },
+        { "id": "b", "text": "The governed, organisation-wide enterprise platform for building custom agents over company data" },
+        { "id": "c", "text": "Google Cloud's catalogue of first-party, partner, and open models" },
+        { "id": "d", "text": "A text-to-image generation model" }
+      ],
+      "explanation": "Gemini Advanced is the **paid upgrade tier** of the consumer Gemini app — more capable models and greater usage for an individual power user. The org-wide governed platform is **Gemini Enterprise** (b); the model catalogue is **Model Garden** (c); and a text-to-image model is **Imagen** (d). Advanced is still an individual/consumer product, not an enterprise platform.",
+      "sourceRefs": ["r-exam-guide", "r-gemini-cloud"]
+    },
+    {
+      "id": "q-d2-30",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which is one of Google Cloud's stated strengths in gen AI (task 2.1), as a leader's positioning point?",
+      "options": [
+        { "id": "a", "text": "An open approach with a comprehensive, integrated ecosystem — you are not locked to a single model", "correct": true },
+        { "id": "b", "text": "A single proprietary model that every customer is required to use" },
+        { "id": "c", "text": "A guarantee that gen-AI output is always 100% factually correct" },
+        { "id": "d", "text": "A promise that no data preparation is ever required" }
+      ],
+      "explanation": "Google Cloud's stated strengths include an **AI-first approach, an enterprise-ready platform (responsible, secure, private, reliable, scalable), a comprehensive integrated ecosystem with an open approach, and AI-optimised infrastructure** — the open, no-lock-in story is a core one (made concrete in Model Garden). A single mandatory model (b) is the opposite of the open approach; and no framework promises perfect output (c) or zero data prep (d).",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-31",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the Customer Engagement Suite, which component provides REAL-TIME suggestions to a HUMAN support agent during a live conversation?",
+      "options": [
+        { "id": "a", "text": "Agent Assist", "correct": true },
+        { "id": "b", "text": "Conversational Agents" },
+        { "id": "c", "text": "Conversational Insights" },
+        { "id": "d", "text": "Model Garden" }
+      ],
+      "explanation": "**Agent Assist** helps the *human* agent in real time with suggested responses and information. **Conversational Agents** is the AI virtual agent that talks *directly to customers* (no human); **Conversational Insights** analyses past conversations for trends after the fact; and **Model Garden** is the model catalogue, not a contact-centre tool.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d2-32",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A developer wants to prototype quickly against the Gemini API and then export code. Which Google offering is the intended fit?",
+      "options": [
+        { "id": "a", "text": "Google AI Studio", "correct": true },
+        { "id": "b", "text": "Gemini for Google Workspace" },
+        { "id": "c", "text": "Conversational Insights" },
+        { "id": "d", "text": "The consumer Gemini app" }
+      ],
+      "explanation": "**Google AI Studio** is the developer experimentation surface for prototyping against the Gemini API and exporting code. **Gemini for Google Workspace** embeds Gemini in office apps for end users; **Conversational Insights** analyses contact-centre conversations; and the **consumer Gemini app** is a personal assistant, not a developer/API prototyping tool.",
+      "sourceRefs": ["r-exam-guide", "r-ai-studio"]
+    },
+    {
+      "id": "q-d2-33",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A team must summarise and answer questions over a pile of the company's own documents, with answers grounded ONLY in those sources. Which offering fits best?",
+      "options": [
+        { "id": "a", "text": "NotebookLM (Enterprise / Cloud NotebookLM API) — source-grounded research and summaries over your own documents", "correct": true },
+        { "id": "b", "text": "Imagen, to generate images of the documents" },
+        { "id": "c", "text": "Gemma, run locally with no data connected" },
+        { "id": "d", "text": "Agent Assist, to coach human agents" }
+      ],
+      "explanation": "**NotebookLM** is the source-grounded tool: it researches, summarises, and answers strictly from the documents you give it (available as NotebookLM Enterprise / the Cloud NotebookLM API under Gemini Enterprise). **Imagen** generates images (b); **Gemma** is an open model, not a document-grounded research tool (c); and **Agent Assist** helps human support agents in a contact centre (d).",
+      "sourceRefs": ["r-exam-guide", "r-notebooklm"]
+    },
+    {
+      "id": "q-d2-34",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "At a leader level, what does grounding/RAG on the Agent Platform do for an application's answers?",
+      "options": [
+        { "id": "a", "text": "Connects the model to a source of truth (your documents or the live web) so answers are current and can be cited", "correct": true },
+        { "id": "b", "text": "Permanently retrains the model's weights on every user query" },
+        { "id": "c", "text": "Replaces the need for any foundation model at all" },
+        { "id": "d", "text": "Guarantees the model can never produce an incorrect answer" }
+      ],
+      "explanation": "Grounding/RAG **connects the model to a source of truth** — your data or Google Search — so answers stay current and citable; that is how you fight hallucinations without retraining. It does not retrain weights per query (that would be fine-tuning, and not per-query) (b); it *uses* a foundation model rather than replacing it (c); and it reduces but never *guarantees* against wrong answers (d).",
+      "sourceRefs": ["r-exam-guide", "r-grounding"]
+    },
+    {
+      "id": "q-d2-35",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A business wants to compare and choose between Google's own models, Anthropic's Claude, Meta's Llama, and open models in one place. Which offering is that?",
+      "options": [
+        { "id": "a", "text": "Model Garden — the multi-vendor catalogue of first-party, partner, and open models", "correct": true },
+        { "id": "b", "text": "Gemini for Google Workspace" },
+        { "id": "c", "text": "Conversational Agents" },
+        { "id": "d", "text": "Gems" }
+      ],
+      "explanation": "**Model Garden** is Google Cloud's model catalogue where first-party (Gemini, Imagen, Veo, Gemma), partner (Claude, Llama, Mistral), and open models sit side by side — the open-approach, anti-lock-in story. Workspace embeds Gemini in office apps (b); Conversational Agents is a customer virtual agent (c); and Gems are reusable custom versions of the consumer Gemini app (d).",
+      "sourceRefs": ["r-exam-guide", "r-model-garden"]
+    },
+    {
+      "id": "q-d2-36",
+      "domainId": "d2-google-offerings",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An option in the exam presents 'Vertex AI Agent Builder' as the current Google product name for the enterprise build surface. How should a prepared leader treat it?",
+      "options": [
+        { "id": "a", "text": "As the dated distractor — the current names are the Agent Platform (Gemini Enterprise Agent Platform) and Agent Studio; 'Vertex AI' and 'Agent Builder' appear in neither the guide nor the cert page", "correct": true },
+        { "id": "b", "text": "As the correct current name, since it sounds official" },
+        { "id": "c", "text": "As a responsible-AI framework rather than a build surface" },
+        { "id": "d", "text": "As a foundation model for image generation" }
+      ],
+      "explanation": "The exam's currency trap plants retired labels: **'Vertex AI'** and **'Agent Builder'** are not used in the current exam guide or certification page, so an option leaning on them is the **dated distractor** — the current build surface is the **Agent Platform / Agent Studio**. It is not a responsible-AI framework (c) and certainly not an image model (d); the tested skill is recognising current versus dated branding.",
+      "sourceRefs": ["r-exam-guide", "r-cert-page", "r-agentplatform-overview"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d2-adoption-decision",
+      "domainIds": ["d2-google-offerings"],
+      "title": "A leader's adoption decision: pick the right Google Cloud gen AI offering at each step",
+      "tagline": "One business, five decisions — match each need to the correct current-branding offering.",
+      "context": "You lead digital transformation at a mid-sized insurer. Over one planning cycle you face a sequence of gen AI decisions — for individuals, for the office, for research over your own documents, for building agents, and for customers. At each step, choose the Google Cloud offering that best fits the stated need, using current product names. There is one best answer per step.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "First: a handful of analysts want a smarter personal assistant to draft and summarise on their own — nothing connected to company systems yet. What do you point them to?",
+          "choices": [
+            { "id": "a", "text": "The Gemini app (and Gemini Advanced for the power users, with Gems for recurring tasks)", "verdict": "best", "rationale": "For individual productivity with no enterprise data connection, the consumer Gemini app — paid Gemini Advanced for more capability, Gems for repeated tasks — is exactly right." },
+            { "id": "b", "text": "Stand up the full Gemini Enterprise platform for the whole company", "verdict": "viable", "rationale": "It would work, but it's far more than a few analysts need right now; Gemini Enterprise is the answer when you want org-wide, governed, data-connected AI — not this step's ask." },
+            { "id": "c", "text": "Google AI Studio, so they can prototype against the Gemini API", "verdict": "wrong", "rationale": "Google AI Studio is a developer prototyping tool, not a personal assistant for analysts to draft and summarise." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Next: leadership wants everyone to get AI help drafting and summarising directly inside Gmail, Docs, and Sheets. Which offering?",
+          "choices": [
+            { "id": "a", "text": "Gemini for Google Workspace", "verdict": "best", "rationale": "This is precisely Gemini embedded inside the Workspace apps employees already use — the definition of Gemini for Google Workspace." },
+            { "id": "b", "text": "The standalone Gemini app for each person", "verdict": "viable", "rationale": "People could paste between a separate chat app and their documents, but that isn't 'AI inside Gmail/Docs' — Gemini for Google Workspace delivers it in-place." },
+            { "id": "c", "text": "Model Garden", "verdict": "wrong", "rationale": "Model Garden is a developer catalogue of models; it does not put AI into the office apps." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Now: your underwriting team must get accurate answers from hundreds of your OWN policy and compliance documents, and it's critical the tool answers only from those sources and can produce summaries. What fits best?",
+          "choices": [
+            { "id": "a", "text": "NotebookLM (enterprise-ready via Gemini Enterprise / the Cloud NotebookLM API) — source-grounded answers from your documents, with summaries and Audio Overviews", "verdict": "best", "rationale": "NotebookLM grounds strictly in the sources you provide and generates summaries/Audio Overviews — the exact 'answer only from our documents' need." },
+            { "id": "b", "text": "Ground answers with RAG over those documents on the Agent Platform", "verdict": "viable", "rationale": "RAG/grounding would also connect answers to those documents and is a perfectly sound approach, but for a research-and-comprehension tool over a document set, NotebookLM is the offering the guide points to by name." },
+            { "id": "c", "text": "Fine-tune a model on the policy documents", "verdict": "wrong", "rationale": "Fine-tuning bakes knowledge into weights, doesn't guarantee answering only from sources, and goes stale as documents change — the wrong technique for source-grounded document Q&A." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "The claims team now wants a CUSTOM agent that reasons over your data and takes actions via tools — a real build, governed inside Google Cloud. Where do you build it?",
+          "choices": [
+            { "id": "a", "text": "The Agent Platform (Gemini Enterprise Agent Platform), authoring in Agent Studio, with Model Garden for model choice and RAG/Agent Search for grounding", "verdict": "best", "rationale": "Building governed custom agents on Google Cloud is the Agent Platform's job; Agent Studio is its enterprise authoring surface, with Model Garden and RAG/Agent Search alongside." },
+            { "id": "b", "text": "Prototype it in Google AI Studio and ship that prototype as the production agent", "verdict": "viable", "rationale": "Google AI Studio is fine for prototyping against the Gemini API, but it isn't the governed enterprise build surface — you'd move to the Agent Platform / Agent Studio to build for the enterprise." },
+            { "id": "c", "text": "Use Vertex AI Agent Builder", "verdict": "wrong", "rationale": "'Vertex AI' and 'Agent Builder' are the dated labels that don't appear in the current guide — the current-branding answer is the Agent Platform / Agent Studio." }
+          ]
+        },
+        {
+          "id": "st5",
+          "prompt": "Finally, for customers: you want a virtual agent that handles common customer queries 24/7, and separately you want to give your human support reps real-time help on tough cases. Which do you choose?",
+          "choices": [
+            { "id": "a", "text": "Conversational Agents for the customer-facing virtual agent, and Agent Assist to help the human reps in real time (both in the Customer Engagement Suite)", "verdict": "best", "rationale": "Conversational Agents serve customers directly; Agent Assist supports human agents live — the two Customer Engagement Suite parts matched to the two needs." },
+            { "id": "b", "text": "Conversational Insights for both — it analyses conversations", "verdict": "wrong", "rationale": "Conversational Insights is analytics over conversations; it neither talks to customers nor assists reps live." },
+            { "id": "c", "text": "Use Agent Assist as the customer-facing bot and Conversational Agents to help the human reps", "verdict": "wrong", "rationale": "This reverses their roles: Agent Assist helps humans, Conversational Agents talk to customers — the match is backwards." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-exam-guide", "r-cert-page", "r-notebooklm", "r-model-garden", "r-agentplatform-overview"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d2-offering-map",
+      "domainId": "d2-google-offerings",
+      "title": "Build your 'need → Google Cloud gen AI offering' decision map",
+      "goal": "Produce a one-page reference matrix that turns Section 2's products into an at-a-glance need→offering lookup in current branding — the strategy artifact you can quote in the exam and to a real leadership team. No code required.",
+      "steps": "## What you'll produce\n\nA single-page table (a doc or spreadsheet) that maps common business needs to the correct Google Cloud gen AI offering, using current names, with a one-line reason and the exam task it maps to. This is a *decision/assessment artifact*, not an implementation.\n\n## Steps\n\n1. **Set up the columns:** *Business need (the verb)* | *Best-fit offering (current name)* | *One-line why* | *Audience it serves* | *Exam task (2.1–2.5)*.\n2. **Fill the rows** for each of these needs, choosing the offering yourself first, then checking against the lesson's matching table and `r-exam-guide`:\n   - A smarter personal assistant for one person → (Gemini app / Gemini Advanced, Gems)\n   - AI inside Gmail/Docs/Sheets for everyone → (Gemini for Google Workspace)\n   - Org-wide governed platform over our data, with agents → (Gemini Enterprise)\n   - Answer only from our own documents, with summaries → (NotebookLM)\n   - Choose/compare models incl. Claude/Llama/Mistral → (Model Garden)\n   - Build custom agents on the platform → (Agent Platform / Agent Studio)\n   - Prototype against the Gemini API → (Google AI Studio)\n   - Keep answers current & cited on our data / the web → (RAG offerings — RAG with Agent Search, RAG APIs, Grounding with Google Search)\n   - Enterprise search across our content → (Agent Search)\n   - A customer-facing support bot → (Conversational Agents)\n   - Real-time help for human support agents → (Agent Assist)\n   - Analyse contact-centre conversations → (Conversational Insights)\n   - Generate images / video → (Imagen / Veo)\n3. **Add a 'dated-name watch' box:** list the labels to distrust as *current* product names — **Vertex AI**, **Agent Builder** — with the current replacement next to each (Agent Platform; Agent Platform / Agent Studio). Confirm against `r-exam-guide` and `r-cert-page` that neither dated term appears there.\n4. **Add a 'grounding vs fine-tuning' note:** one line each — grounding/RAG connects the model to a source of truth at answer time (stays current, cites sources); fine-tuning retrains weights (bakes knowledge in, can go stale). This is the most common technique distractor.\n5. **Pressure-test it:** write three of your own one-sentence business needs and, without looking, name the offering. If you hesitate, the row's 'why' isn't sharp enough — tighten it.\n\n## Why it matters\n\nD2 is ~35% of the exam and almost entirely recognition. A crisp need→offering map, in current names, is the single highest-leverage revision artifact for this domain — and it doubles as a genuine leadership deliverable for choosing Google Cloud gen AI products.",
+      "checklist": [
+        "Every listed need has a best-fit offering in CURRENT branding, a one-line why, an audience, and the mapped exam task (2.1–2.5)",
+        "The 'dated-name watch' box lists Vertex AI and Agent Builder with their current replacements, confirmed absent from the guide and cert page",
+        "A one-line grounding-vs-fine-tuning distinction is included",
+        "Three self-written business needs are each matched to the correct offering without hesitation"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-exam-guide",
+      "title": "Generative AI Leader — official certification exam guide (PDF)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The source of truth for D2. Read Section 2 'Google Cloud's gen AI offerings (~35%)' verbatim: 2.1 strengths (AI-first, enterprise-ready [responsible/secure/private/reliable/scalable], open approach, AI Hypercomputer/TPUs/GPUs); 2.2 Gemini app + Gemini Advanced (Gems), Gemini Enterprise (Cloud NotebookLM API, multimodal search, custom agents), Gemini for Google Workspace; 2.3 Agent Search on the Gemini Enterprise Agent Platform + Customer Engagement Suite (Conversational Agents, Agent Assist, Conversational Insights, CCaaS); 2.4 Agent Platform (Model Garden, Agent Search, Agent Platform AutoML) + RAG offerings + custom agents; 2.5 agent tooling (extensions/functions/data stores/plugins, pre-built AI APIs) and Agent Studio vs Google AI Studio. The guide uses current branding (Agent Platform / Agent Studio / Agent Search) and does NOT use 'Vertex AI' or 'Agent Builder' — that gap drives the currency trap.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-cert-page",
+      "title": "Google Cloud Certified — Generative AI Leader (certification page)",
+      "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "kind": "official-doc",
+      "annotation": "Confirms the exam logistics ($99, 90 minutes, 50–60 multiple-choice, online- or onsite-proctored, valid 3 years, no prerequisites; English/Japanese/Spanish/Portuguese) and — critically — publishes NO passing score. Also surfaces current product branding a leader must recognise: Gemini Enterprise, Agent Platform, Gemini Enterprise for Customer Experience / Customer Experience Agent Studio, Agent Search, and Model Garden. Use it to corroborate the offering names in the guide and to see the products framed for a business audience.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-agentplatform-overview",
+      "title": "Generative AI on the Gemini Enterprise Agent Platform — overview (docs)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/overview",
+      "kind": "official-doc",
+      "annotation": "The developer/enterprise platform overview, now branded 'Gemini Enterprise Agent Platform' (the current umbrella that replaces the older 'Vertex AI' label — useful proof for the currency trap). Extract the building blocks a leader should recognise by name: Model Garden, the grounding options, Agent Studio for building agents, embeddings, and model tuning. This is where 'Agent Platform' becomes concrete without needing engineering depth.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-model-garden",
+      "title": "Model Garden — overview (docs)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
+      "kind": "official-doc",
+      "annotation": "Model Garden is Google Cloud's catalogue of models — Google's first-party models (Gemini, Veo, Lyria, Gemma), partner models (Claude/Anthropic, Llama/Meta, Mistral, and more), and open models — consumable as managed APIs or self-deployed. This page is the concrete proof of Google Cloud's 'open approach' the guide cites, and the answer to any 'compare/choose models in one place' question.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-grounding",
+      "title": "Grounding overview & Grounding with Google Search (docs)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
+      "kind": "official-doc",
+      "annotation": "Google's grounding surface: grounding connects a model's answers to external sources at inference time (rather than fine-tuning, which retrains weights), reducing hallucinations and adding citations. Note the grounding sources a leader should recognise — Grounding with Google Search (world/public data), Grounding with Agent Search / your own data (first-party enterprise data), and RAG. Maps to the guide's 2.4 RAG offerings and previews D3.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-notebooklm",
+      "title": "NotebookLM Enterprise — overview (docs)",
+      "url": "https://docs.cloud.google.com/agentspace/notebooklm-enterprise/docs/overview",
+      "kind": "official-doc",
+      "annotation": "NotebookLM Enterprise is 'a highly compliant, enterprise-ready version of NotebookLM' whose AI 'grounds its responses in these documents' — answering only from the sources you provide and generating summaries, reports, and Audio/Video Overviews. Available standalone or as part of Gemini Enterprise, and reachable via an API (the guide's 'Cloud NotebookLM API'). The offering to match to any 'understand our own documents, no invented facts' need.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-ai-studio",
+      "title": "Google AI Studio — quickstart (docs)",
+      "url": "https://ai.google.dev/gemini-api/docs/ai-studio-quickstart",
+      "kind": "official-doc",
+      "annotation": "Google AI Studio lets you 'quickly try out models and experiment with different prompts' against the Gemini API in the browser, then 'Get code' to build — the developer prototyping tool. Use it to nail the guide's 2.5 decision: Google AI Studio for prototyping/experimentation vs. Agent Studio for building agents for the enterprise on the Agent Platform.",
+      "domainIds": ["d2-google-offerings"]
+    },
+    {
+      "id": "r-gemini-cloud",
+      "title": "Gemini for Google Cloud — overview (docs)",
+      "url": "https://docs.cloud.google.com/gemini/docs/overview",
+      "kind": "official-doc",
+      "annotation": "Context for the 'many Geminis' a leader must not confuse. 'Gemini for Google Cloud offers generative AI-powered assistance to a wide range of Google Cloud users, including developers and data scientists' — e.g. Gemini Code Assist (build/debug code), Gemini Cloud Assist (design/operate cloud apps), and Gemini in BigQuery. Distinct from the consumer Gemini app, Gemini for Google Workspace (office apps), and Gemini Enterprise (the org-wide platform).",
+      "domainIds": ["d2-google-offerings"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d2-1",
+      "title": "D2 · The Google Cloud gen AI stack — matching a business need to the right offering",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d2-google-offerings"],
+      "sourceNotebook": "gen-ai-leader / d2 / offerings-map-and-strengths"
+    },
+    {
+      "id": "v-d2-2",
+      "title": "D2 · Agent Platform, Model Garden, grounding & NotebookLM — current branding, no dated names",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d2-google-offerings"],
+      "sourceNotebook": "gen-ai-leader / d2 / agent-platform-and-currency"
+    }
+  ]
+}

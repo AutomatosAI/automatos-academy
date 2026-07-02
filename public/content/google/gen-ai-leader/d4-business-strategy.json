@@ -1,0 +1,647 @@
+{
+  "id": "d4-business-strategy",
+  "order": 4,
+  "code": "D4",
+  "name": "Business strategies for a successful gen AI solution",
+  "weight": 0.15,
+  "tagline": "The leader's domain: pick the use case worth doing, decide build-vs-buy, get the data ready, secure the system (SAIF), keep it responsible, and prove the value with the right KPIs — the ~15% that asks you to DECIDE, not define.",
+  "overview": "Section 4 of the Generative AI Leader guide (~15% of the exam) is where the strategy lives. It has three task groups: (4.1) the Google Cloud-recommended steps to implement a transformational gen AI solution — recognising solution types, weighing the factors that drive gen-AI needs, choosing the right solution for a business need, integrating it into the organisation, and measuring impact; (4.2) secure AI — security across the ML lifecycle, Google's Secure AI Framework (SAIF), and the Google Cloud security tools (secure-by-design infrastructure, IAM, Security Command Center, workload monitoring); and (4.3) responsible AI in business — transparency, privacy, data quality, bias and fairness, accountability and explainability. Every question here hands a leader a decision: is this a good first use case, do we build or buy, is our data ready, is this secure and responsible, and how do we prove it paid off. The exam is business-audience — no code — so answers reward sound judgement and current Google product names (Agent Platform, Gemini Enterprise, Agent Studio), not deep implementation detail.",
+  "objectives": [
+    "Follow the Google Cloud-recommended path to a transformational gen AI solution: recognise solution types, identify the factors that drive gen-AI needs, choose the right solution for a business need, integrate it into the organisation, and measure impact.",
+    "Distinguish build (custom) from buy (ready-made/managed) options and judge when each fits — cost, control, time-to-value, data-residency, and in-house skill.",
+    "Explain why data readiness (quality, accessibility, governance) is the precondition for a successful gen AI initiative, and connect it to change management and skills.",
+    "Describe secure AI: security across the ML lifecycle, the purpose and six core elements of Google's Secure AI Framework (SAIF), and the role of IAM, Security Command Center, and Model Armor.",
+    "Explain responsible AI at a leadership level — transparency, privacy (anonymisation/pseudonymisation), data quality, bias and fairness, accountability and explainability — and why it is a business concern.",
+    "Select the right way to measure gen-AI impact using Google Cloud's KPI framework (model quality, system quality, business operational, adoption, and business value) and translate it into ROI."
+  ],
+  "lessons": [
+    {
+      "id": "l1-usecase-and-value",
+      "title": "From idea to impact: choosing the use case and proving the value",
+      "estMinutes": 14,
+      "objective": "Walk the Google Cloud-recommended steps to a transformational gen AI solution and match a business need to the right solution and the right success measure.",
+      "body": "## The exam's own checklist (Section 4.1)\n\nThe guide is explicit about the steps a leader should follow to \"successfully implement a transformational gen AI solution.\" Learn them as a sequence, because the exam tests each link:\n\n1. **Recognise the type of gen-AI solution** the need calls for — *text generation, image generation, code generation,* or something tailored to a *personalized user need*. Naming the solution type is the first filter.\n2. **Identify the factors that drive the gen-AI need** — *business requirements* (what outcome, for whom, by when) and *technical constraints* (data, latency, integration, budget).\n3. **Choose the right gen-AI solution for that specific business need** — match capability to requirement rather than reaching for the most powerful or most fashionable model.\n4. **Integrate gen AI into the organisation** — this is a change-management step, not just a deployment: people, process, and workflow, not only the model.\n5. **Measure the impact** of the initiative — decide *before* you launch how you will know it worked.\n\n> **Exam tip:** the trap is skipping straight to \"which model.\" The recommended path starts from the *business need* and the *solution type*, then chooses the solution, then integrates, then measures. If an answer picks a tool before the need is defined, it's inverting the steps.\n\n## Start where the value is: good first use cases\n\nGen AI creates value when it lets people **create, summarise, discover, or automate** at a scale or speed humans can't match. A strong first use case is one where the value is clear, the data exists, the risk is contained, and success is measurable — for example, summarising support tickets, drafting first-pass content, or surfacing answers from a document store. A weak first use case is one chosen because the technology is exciting rather than because it solves a costed problem.\n\nA leader's job is to **prioritise** — pick the use case with the best ratio of business value to effort and risk, not the flashiest demo.\n\n## Prove it paid off: Google Cloud's KPI framework\n\nYou can't call an initiative successful on vibes. Google Cloud recommends measuring gen-AI success across **five categories of KPI**, and a leader should know which category answers which question:\n\n| KPI category | Answers | Example measures |\n|---|---|---|\n| **Model quality** | Is the output good? | coherence, fluency, safety, groundedness, instruction-following |\n| **System quality** | Does it run well? | uptime, error rate, latency, throughput |\n| **Business operational** | Did the process improve? | call-containment rate, average handle time, click-through rate |\n| **Adoption** | Do people use it? | adoption rate, frequency of use, thumbs-up/down feedback |\n| **Business value** | Did it pay off? | time/cost savings, revenue uplift, churn reduction |\n\nThe framework's principle: measure **operational and adoption KPIs first**, then let finance **translate them into business-value (financial) metrics** — and always net off development and maintenance cost to get honest ROI. Business value \"complements\" the operational and adoption metrics; it doesn't replace them.\n\n> **Exam tip:** map the question's verb to the KPI category. *\"Is the answer accurate/grounded?\"* → model quality. *\"Is it fast/reliable?\"* → system quality. *\"Did handle-time drop?\"* → business operational. *\"Are people actually using it?\"* → adoption. *\"What's the ROI?\"* → business value. A common distractor offers a *system* metric (latency) when the question asks about *business* impact (cost saved).\n\n## Why the exam cares\n\nSection 4.1 is the spine of the whole domain: a leader who can move from *need → solution type → chosen solution → integration → measurement*, and pick the right KPI to prove impact, is exactly the \"visionary professional\" the credential describes. Get the order right and the value story honest, and the rest of D4 (secure and responsible) hangs off it.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-1",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Following the Google Cloud-recommended steps, what should a leader establish BEFORE choosing a specific gen-AI solution?",
+          "options": [
+            { "id": "a", "text": "The business need and the factors driving it (business requirements and technical constraints), plus the type of gen-AI solution required", "correct": true },
+            { "id": "b", "text": "The exact foundation model and its context-window size" },
+            { "id": "c", "text": "The cloud region and billing account" },
+            { "id": "d", "text": "The number of GPUs to reserve for training" }
+          ],
+          "explanation": "The recommended path starts from the **business need** and the factors that drive it, and identifies the **solution type** (text/image/code/personalized) before selecting a specific solution. Picking the model and its context window, the region/billing, or GPU capacity are all downstream implementation choices — deciding them first inverts the steps.",
+          "sourceRefs": ["r-exam-guide", "r-model-selection"]
+        },
+        {
+          "id": "kc-d4-2",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A support team reports that average handle time dropped 20% after deploying a gen-AI assistant. Which KPI category does that belong to?",
+          "options": [
+            { "id": "a", "text": "Business operational KPIs", "correct": true },
+            { "id": "b", "text": "Model quality KPIs" },
+            { "id": "c", "text": "System quality KPIs" },
+            { "id": "d", "text": "Adoption KPIs" }
+          ],
+          "explanation": "Average handle time is a **business operational** measure — the effect on the business process. Model quality is about output (coherence, groundedness); system quality is about how the system runs (latency, uptime); adoption is about whether people use it. Handle-time improvement is operational, and finance would later translate it into a business-value (financial) metric.",
+          "sourceRefs": ["r-kpi-framework"]
+        },
+        {
+          "id": "kc-d4-3",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In Google Cloud's KPI framework, which category translates operational and adoption metrics into financial impact (ROI)?",
+          "options": [
+            { "id": "a", "text": "Business value KPIs", "correct": true },
+            { "id": "b", "text": "System quality KPIs" },
+            { "id": "c", "text": "Model quality KPIs" },
+            { "id": "d", "text": "Adoption KPIs" }
+          ],
+          "explanation": "**Business value KPIs** translate operational and adoption metrics into financial terms — time/cost savings, revenue uplift, churn reduction — netting off development and maintenance cost. The other three categories measure output quality, system performance, and usage; they feed the business-value calculation but are not themselves the financial ROI view.",
+          "sourceRefs": ["r-kpi-framework"]
+        }
+      ]
+    },
+    {
+      "id": "l2-build-vs-buy-and-data",
+      "title": "Build vs buy, and getting the data ready",
+      "estMinutes": 13,
+      "objective": "Judge when to build a custom gen-AI solution versus buy a ready-made one, and explain why data readiness is the precondition for either.",
+      "body": "## The build-vs-buy call\n\nOnce the need is clear, a leader decides *how* to get the capability. Google Cloud's gen-AI portfolio spans a spectrum, and the exam wants you to match the option to the situation:\n\n- **Buy / use ready-made** — the fastest route to value. Use a managed application or agent when the need is common and speed matters: **Gemini Enterprise** for enterprise search and custom agents, **Agent Studio** for building agents on **Agent Platform**, or an off-the-shelf model called through an API. You get frontier capability and no infrastructure to run, at the cost of less control over the internals.\n- **Build / customise** — more control, more effort. Choose from **Model Garden** on **Agent Platform**, ground a model on your own data, or fine-tune when a ready-made model can't meet the need. You own more of the outcome (and the maintenance) in exchange for a solution shaped to you.\n\nThe decision turns on a small set of factors a leader must weigh:\n\n| Factor | Leans BUY (ready-made) | Leans BUILD (custom) |\n|---|---|---|\n| **Time-to-value** | need it now | can invest for a differentiated result |\n| **Control / differentiation** | standard capability is fine | the capability is a competitive edge |\n| **In-house skill** | limited AI/ML talent | strong engineering + MLOps |\n| **Cost model** | predictable, per-use | willing to fund build + run |\n| **Data sensitivity / residency** | vendor controls satisfy policy | must keep data/tuning in-house |\n\n> **Exam tip:** there is no universal \"build is better\" or \"buy is better.\" The right answer names the *factor that decides it* for the scenario — usually time-to-value, control/differentiation, in-house skill, or data-residency. An option that says \"always build for control\" or \"always buy to save money\" is an over-generalisation the exam likes to punish.\n\n## Choosing the model within either path\n\nWhen you do reach for a specific model, the guide lists the business factors that drive the choice: **modality, context window, security, availability and reliability, cost, performance,** and **fine-tuning / customization**. A leader doesn't tune these personally, but must recognise that \"the biggest, newest model\" is rarely the right default — a smaller, cheaper, faster model that meets the requirement often wins on total value.\n\n## Data readiness: the precondition\n\nNeither build nor buy succeeds on poor data. Gen-AI value depends on **data quality** and **data accessibility** — the guide names the characteristics: *completeness, consistency, relevance, availability, cost, and format.* A leader must ask, before committing:\n\n- **Is the data there and reachable?** Grounding an agent or fine-tuning a model needs the right data accessible, governed, and permissioned.\n- **Is it good enough?** Incomplete, inconsistent, or irrelevant data produces confident-but-wrong output — and gen AI can scale that error fast.\n- **Structured vs unstructured?** Both feed gen AI (documents, images, tables); knowing which you have shapes the solution.\n\nData readiness is why many initiatives stall: the model is the easy part; the governed, quality, accessible data is the work.\n\n## Organisational readiness: people and skills\n\n\"Integrate gen AI into the organisation\" is a change-management step. Value only lands if people **adopt** the tool and workflows change around it — which means training, clear ownership, and addressing the skills gap. This is why **adoption KPIs** exist: a technically perfect deployment nobody uses has produced zero value.\n\n## Why the exam cares\n\nSection 4.1 asks a leader to *choose the right gen-AI solution for a specific business need* and *integrate it into an organisation*. Build-vs-buy, model-fit, data readiness, and change management are the levers of that choice — and the most common real-world reasons gen-AI programmes succeed or stall.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-4",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A retailer needs a customer-service assistant live in six weeks, has little in-house ML talent, and the capability is not a competitive differentiator. What's the soundest build-vs-buy call?",
+          "options": [
+            { "id": "a", "text": "Buy / use a ready-made managed solution — time-to-value and limited in-house skill both favour it", "correct": true },
+            { "id": "b", "text": "Build a fully custom model from scratch for maximum control" },
+            { "id": "c", "text": "Delay the project until they hire an ML research team" },
+            { "id": "d", "text": "Always build, because building is cheaper in every case" }
+          ],
+          "explanation": "Short timeline + limited ML talent + no differentiation all point to **buying a ready-made solution** — fastest value, no infrastructure to run. Building from scratch is slow and skill-heavy for a non-differentiating capability; delaying forgoes value; and \"always build is cheaper\" is false — building adds build-and-run cost. The factors decide the call, and here they favour buy.",
+          "sourceRefs": ["r-exam-guide", "r-model-selection"]
+        },
+        {
+          "id": "kc-d4-5",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Before launching a gen-AI initiative, which readiness question most directly determines whether it can succeed at all?",
+          "options": [
+            { "id": "a", "text": "Is the required data present, accessible, governed, and of sufficient quality?", "correct": true },
+            { "id": "b", "text": "Which brand colour will the chatbot use?" },
+            { "id": "c", "text": "How many social-media followers the company has" },
+            { "id": "d", "text": "Whether the newest, largest model has been released yet" }
+          ],
+          "explanation": "**Data readiness** — presence, accessibility, governance, and quality (completeness, consistency, relevance) — is the precondition for grounding or tuning any gen-AI solution; poor data produces confident-but-wrong output at scale. Brand colour and follower counts are irrelevant to feasibility, and waiting for the newest/largest model is not what determines success — a smaller model on good data usually beats a bigger model on bad data.",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d4-6",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which is a valid reason to lean toward BUILDING/customising rather than buying a ready-made solution?",
+          "options": [
+            { "id": "a", "text": "The capability is a competitive differentiator and the team has the engineering skill to own it", "correct": true },
+            { "id": "b", "text": "The team wants the capability live as fast as possible with no infrastructure to run" },
+            { "id": "c", "text": "The need is a common, standard task with no special requirements" },
+            { "id": "d", "text": "The organisation has no ML talent and wants the lowest-effort path" }
+          ],
+          "explanation": "Building makes sense when the capability is a **differentiator** and you have the **skill** to own it. Wanting it live fast with no infra, a standard/common task, and no ML talent all point the other way — toward **buying** a ready-made solution. The build-vs-buy answer is decided by the factors, not by a blanket preference.",
+          "sourceRefs": ["r-exam-guide"]
+        }
+      ]
+    },
+    {
+      "id": "l3-secure-ai",
+      "title": "Secure AI: SAIF and the Google Cloud security tools",
+      "estMinutes": 13,
+      "objective": "Explain secure AI across the ML lifecycle, the purpose and six core elements of Google's Secure AI Framework (SAIF), and where IAM, Security Command Center, and Model Armor fit.",
+      "body": "## Security is a lifecycle problem (Section 4.2)\n\nThe guide asks a leader to *explain security throughout the ML lifecycle* — not as a bolt-on at the end. Every stage carries risk: **data** (poisoning, leakage), **training** (tampering, stolen weights), **deployment** (a model exposed without access control), and **use** (prompt injection, sensitive-data exfiltration through prompts and responses). \"Secure AI\" means putting controls at each stage, so a leader should think of security as spanning ingestion → preparation → training → deployment → monitoring.\n\n## SAIF — Google's Secure AI Framework\n\nSAIF is Google's **conceptual framework to secure AI systems**, built so that when AI models are implemented they are **\"secure by default.\"** It exists to give security teams a structured way to manage **AI/ML model risk, security, and privacy**. A leader doesn't implement SAIF personally but should be able to state its purpose and recognise its **six core elements**:\n\n1. **Expand strong security foundations** to the AI ecosystem.\n2. **Extend detection and response** to bring AI into the organisation's threat management.\n3. **Automate defenses** to keep pace with existing and new threats.\n4. **Harmonize platform-level controls** for consistent security across the organisation.\n5. **Adapt controls** to create faster feedback loops for AI deployment.\n6. **Contextualize AI system risks** within the surrounding business processes.\n\n> **Exam tip:** the one-line takeaway is *SAIF makes AI **secure by default** and gives security teams a framework for model risk*. If an option calls SAIF a *product you buy*, a *specific model*, or a *responsible-AI/ethics policy*, it's wrong — SAIF is a **security framework**, distinct from the responsible-AI principles in Section 4.3.\n\n## The Google Cloud security tools a leader should name\n\nSection 4.2 lists the tooling explicitly. Recognise each by its job:\n\n- **Secure-by-design infrastructure** — Google Cloud's platform is built with security foundations from the ground up (the SAIF element 1 idea, made real).\n- **Identity and Access Management (IAM)** — controls *who can do what*: least-privilege access to data, models, and resources. The front line against unauthorised use.\n- **Security Command Center (SCC)** — Google Cloud's **\"cloud-based risk management solution that helps security professionals prevent, detect, and respond to security issues.\"** It does vulnerability and threat detection, security-posture management, and compliance monitoring (against benchmarks like NIST, HIPAA, PCI-DSS, CIS) — and now includes **AI Protection** for AI workloads and **Model Armor**.\n- **Workload monitoring tools** — watch running systems for anomalies and misuse.\n\n### Model Armor — screening the AI itself\n\n**Model Armor** (part of Security Command Center) **screens LLM prompts and responses** to protect against AI-specific risks: **prompt injection and jailbreak** attempts, **sensitive-data loss** (PII and intellectual property leaking through prompts or responses), **malicious URLs**, and **harmful content**. It inspects both the incoming prompt and the outgoing response, and can be set to *inspect-only* (log) or *inspect-and-block* (prevent). This is the control a leader points to for \"how do we stop the model being manipulated or leaking data.\"\n\n> **Exam tip:** map the risk to the tool. *Who can access the model/data?* → **IAM**. *Are there vulnerabilities/threats across our cloud, and are we compliant?* → **Security Command Center**. *Is someone jailbreaking the model or exfiltrating data through prompts?* → **Model Armor**. Don't conflate them: IAM is access, SCC is posture/threats, Model Armor is prompt/response screening.\n\n## Why the exam cares\n\nSecure AI is a leadership responsibility because a breach or a leaked-data incident destroys trust and value faster than any productivity gain creates it. The exam wants a leader who can say *what SAIF is for*, that **security spans the whole ML lifecycle**, and *which Google Cloud tool answers which security question* — without needing to configure any of them.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-7",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "What is the purpose of Google's Secure AI Framework (SAIF)?",
+          "options": [
+            { "id": "a", "text": "A conceptual framework to secure AI systems so models are secure by default, giving security teams a structured way to manage AI/ML model risk", "correct": true },
+            { "id": "b", "text": "A specific foundation model optimised for cybersecurity tasks" },
+            { "id": "c", "text": "A paid product that automatically fixes all AI vulnerabilities" },
+            { "id": "d", "text": "A responsible-AI ethics policy governing fairness and bias" }
+          ],
+          "explanation": "SAIF is a **conceptual security framework** for building and deploying AI that is **secure by default**, aimed at managing model risk, security, and privacy. It is not a model, not a product you buy, and not the responsible-AI/ethics policy — those fairness/bias concerns live in Section 4.3, a separate topic from security.",
+          "sourceRefs": ["r-saif", "r-exam-guide"]
+        },
+        {
+          "id": "kc-d4-8",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A team is worried users could jailbreak their customer-facing LLM or trick it into leaking PII through prompts. Which Google Cloud capability directly addresses this?",
+          "options": [
+            { "id": "a", "text": "Model Armor — it screens LLM prompts and responses for prompt injection/jailbreak, sensitive-data loss, and malicious content", "correct": true },
+            { "id": "b", "text": "Identity and Access Management (IAM), by assigning roles" },
+            { "id": "c", "text": "A larger context window on the model" },
+            { "id": "d", "text": "The dependency graph of the application's packages" }
+          ],
+          "explanation": "**Model Armor** screens prompts and responses specifically for prompt injection/jailbreak, PII/IP leakage, and malicious content — exactly this risk. IAM controls *who can access* resources but doesn't inspect prompt content; a bigger context window is a capability, not a safeguard; and a dependency graph is a software-supply-chain artifact, unrelated to prompt-level attacks.",
+          "sourceRefs": ["r-model-armor", "r-scc"]
+        },
+        {
+          "id": "kc-d4-9",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which best describes Security Command Center?",
+          "options": [
+            { "id": "a", "text": "A cloud-based risk-management solution that helps prevent, detect, and respond to security issues — vulnerabilities, threats, posture, and compliance", "correct": true },
+            { "id": "b", "text": "A tool that writes prompts for foundation models" },
+            { "id": "c", "text": "A billing dashboard for gen-AI usage" },
+            { "id": "d", "text": "A framework of ethical AI principles" }
+          ],
+          "explanation": "Security Command Center is Google Cloud's **risk-management platform** for preventing, detecting, and responding to security issues — vulnerability and threat detection, posture management, and compliance monitoring (and it now includes AI Protection and Model Armor). It is not a prompt authoring tool, a billing dashboard, or an ethics framework.",
+          "sourceRefs": ["r-scc"]
+        }
+      ]
+    },
+    {
+      "id": "l4-responsible-ai",
+      "title": "Responsible AI in business: trust, transparency, and accountability",
+      "estMinutes": 12,
+      "objective": "Explain responsible AI at a leadership level — transparency, privacy, data quality, bias and fairness, accountability and explainability — and why it protects business value.",
+      "body": "## Responsible AI is a business concern, not a nicety (Section 4.3)\n\nThe guide's third task group asks a leader to *describe the importance of responsible AI in business.* The framing matters: responsible AI is not charity or PR — it's **risk management for trust**. A biased hiring model, a privacy leak, or an unexplainable decision can trigger legal exposure, regulatory penalties, and reputational damage that erases the value the initiative created. Google frames its own approach as being **\"both bold and responsible\"** — innovating rapidly *while* safeguarding user safety, security, and privacy across the whole AI lifecycle.\n\n## The dimensions a leader must recognise\n\nThe exam lists specific responsible-AI considerations. Know each and the business risk it manages:\n\n- **Transparency** — being open about when and how AI is used, and its limitations. Builds user trust and meets disclosure expectations.\n- **Privacy** — protecting personal data. The guide names the techniques: **anonymisation** (stripping identifiers so data can't be traced to a person) and **pseudonymisation** (replacing identifiers with tokens that can be re-linked only under control). Manages privacy risk and regulatory exposure.\n- **Data quality, bias, and fairness** — poor or skewed training data produces **biased** output; a fair system doesn't systematically disadvantage groups. This is where responsible AI meets data readiness: the same data problems that break accuracy also create unfairness.\n- **Accountability** — someone owns the outcomes; there is human oversight and a clear line of responsibility for what the AI does.\n- **Explainability** — being able to say *why* the AI produced an output. Essential where decisions must be justified to customers, regulators, or auditors.\n\n> **Exam tip:** don't confuse **secure AI (4.2)** with **responsible AI (4.3)**. Security is about protecting the system from attack and misuse (SAIF, IAM, SCC, Model Armor). Responsible AI is about fairness, transparency, privacy, accountability, and explainability — protecting *people and trust*. A question about *bias in outputs* is responsible AI; a question about *a jailbreak attack* is security.\n\n## Google's three AI Principles (the north star)\n\nGoogle's current AI Principles give a leader the vocabulary for \"innovative and responsible AI adoption\":\n\n1. **Bold innovation** — develop AI that assists, empowers, and inspires people and solves real-world problems.\n2. **Responsible development and deployment** — apply human oversight, due diligence, and feedback, with rigorous design, testing, monitoring, and safeguards.\n3. **Collaborative progress, together** — build AI that enables a broad ecosystem and shared innovation.\n\nThese pair the ambition (bold) with the guardrails (responsible), which is exactly the balance a Generative AI Leader is expected to strike.\n\n## Tying it together: responsible AND measured\n\nResponsible AI and measuring success reinforce each other. **Model-quality KPIs** already track *safety* and *groundedness*; **human feedback** (thumbs-up/down) surfaces harmful or unfair output; and **accountability** means a named owner watches those signals. A leader who launches with responsible-AI guardrails *and* the KPI framework in place can innovate boldly without flying blind.\n\n## Why the exam cares\n\nThe credential describes a leader who guides an organisation toward **\"innovative and responsible AI adoption.\"** Section 4.3 is where that word — *responsible* — is tested directly: can you name the dimensions (transparency, privacy, fairness, accountability, explainability), explain why each protects the business, and keep them distinct from security? That judgement is the heart of the leader role.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-d4-10",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A model used for loan pre-screening is found to systematically disadvantage a demographic group. Which responsible-AI dimension is most directly at stake?",
+          "options": [
+            { "id": "a", "text": "Bias and fairness", "correct": true },
+            { "id": "b", "text": "System latency" },
+            { "id": "c", "text": "Prompt-injection defence" },
+            { "id": "d", "text": "Context-window size" }
+          ],
+          "explanation": "Systematic disadvantage to a group is a **bias/fairness** problem — a core responsible-AI dimension, often rooted in skewed training data. Latency and context-window are performance/capability attributes, and prompt-injection defence is a *security* concern (Section 4.2), not a fairness one. Keeping responsible-AI and security topics distinct is a frequent exam discriminator.",
+          "sourceRefs": ["r-exam-guide", "r-ai-principles"]
+        },
+        {
+          "id": "kc-d4-11",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A leader needs to reduce privacy risk in a dataset used to ground a gen-AI assistant. Which pair of techniques does the guide name?",
+          "options": [
+            { "id": "a", "text": "Data anonymisation and pseudonymisation", "correct": true },
+            { "id": "b", "text": "Fine-tuning and distillation" },
+            { "id": "c", "text": "Prompt injection and jailbreaking" },
+            { "id": "d", "text": "Autoscaling and load balancing" }
+          ],
+          "explanation": "The guide names **anonymisation** (removing identifiers) and **pseudonymisation** (replacing identifiers with re-linkable tokens) as privacy techniques. Fine-tuning and distillation are model-customisation methods; prompt injection and jailbreaking are attacks (security); autoscaling and load balancing are infrastructure operations — none of those addresses personal-data privacy.",
+          "sourceRefs": ["r-exam-guide"]
+        },
+        {
+          "id": "kc-d4-12",
+          "domainId": "d4-business-strategy",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Which statement best captures the difference between responsible AI (4.3) and secure AI (4.2)?",
+          "options": [
+            { "id": "a", "text": "Responsible AI protects people and trust (fairness, transparency, privacy, accountability, explainability); secure AI protects the system from attack and misuse (SAIF, IAM, SCC, Model Armor)", "correct": true },
+            { "id": "b", "text": "They are the same thing under two names" },
+            { "id": "c", "text": "Responsible AI is about firewalls; secure AI is about ethics" },
+            { "id": "d", "text": "Responsible AI applies only to public models; secure AI only to private models" }
+          ],
+          "explanation": "**Responsible AI** concerns fairness, transparency, privacy, accountability, and explainability — protecting people and trust. **Secure AI** concerns protecting the system from attack/misuse via SAIF, IAM, Security Command Center, and Model Armor. They are related but distinct (not the same, not reversed), and neither is gated by model visibility.",
+          "sourceRefs": ["r-exam-guide", "r-saif", "r-ai-principles"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-d4-3",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "According to the guide's recommended steps, what is the FIRST thing to establish when implementing a transformational gen-AI solution?",
+      "options": [
+        { "id": "a", "text": "The type of gen-AI solution the need calls for, and the factors driving that need", "correct": true },
+        { "id": "b", "text": "The specific model's parameter count" },
+        { "id": "c", "text": "The marketing launch date" },
+        { "id": "d", "text": "The colour scheme of the user interface" }
+      ],
+      "explanation": "The recommended path starts by **recognising the solution type** (text/image/code/personalized) and **identifying the factors that drive the need** (business requirements, technical constraints). Parameter count is a downstream technical detail, and launch date and UI colour are not what determines a successful transformational solution.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d4-6",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Google Cloud's KPI framework groups gen-AI success metrics into five categories. Which of these is one of them?",
+      "options": [
+        { "id": "a", "text": "Adoption KPIs (adoption rate, frequency of use, thumbs-up/down feedback)", "correct": true },
+        { "id": "b", "text": "Vanity KPIs (press mentions)" },
+        { "id": "c", "text": "Payroll KPIs (headcount cost)" },
+        { "id": "d", "text": "Real-estate KPIs (office square footage)" }
+      ],
+      "explanation": "**Adoption KPIs** — whether people actually use the solution — are one of the five categories, alongside model quality, system quality, business operational, and business value. Press mentions, payroll headcount, and office square footage are not part of the gen-AI success framework.",
+      "sourceRefs": ["r-kpi-framework"]
+    },
+    {
+      "id": "q-d4-7",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader asks: 'Is the assistant's output accurate and well-grounded in our source documents?' Which KPI category answers that?",
+      "options": [
+        { "id": "a", "text": "Model quality KPIs (e.g. groundedness, safety, instruction-following)", "correct": true },
+        { "id": "b", "text": "System quality KPIs (latency, uptime)" },
+        { "id": "c", "text": "Adoption KPIs (frequency of use)" },
+        { "id": "d", "text": "Business value KPIs (cost savings)" }
+      ],
+      "explanation": "Accuracy and grounding are **model quality** dimensions (groundedness, safety, coherence, instruction-following). System quality is about how the system runs, adoption is about usage, and business value is the financial ROI — none of those measures whether the output itself is good.",
+      "sourceRefs": ["r-kpi-framework"]
+    },
+    {
+      "id": "q-d4-8",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Leadership wants the ROI of a gen-AI programme in financial terms. Which KPI category, and what does the framework say about deriving it?",
+      "options": [
+        { "id": "a", "text": "Business value KPIs — derived by translating operational and adoption metrics into financial impact, netting off build and maintenance cost", "correct": true },
+        { "id": "b", "text": "Model quality KPIs — measured purely by pointwise output scores" },
+        { "id": "c", "text": "System quality KPIs — measured by GPU utilisation alone" },
+        { "id": "d", "text": "There is no way to express gen-AI impact financially" }
+      ],
+      "explanation": "**Business value KPIs** express financial impact, and the framework's principle is to measure **operational and adoption KPIs first, then translate them into financial metrics**, accounting for development and maintenance cost. Model-quality scores and GPU utilisation aren't financial ROI, and gen-AI impact very much can be quantified financially.",
+      "sourceRefs": ["r-kpi-framework"]
+    },
+    {
+      "id": "q-d4-9",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A gen-AI assistant scores well on model quality and system quality, but leadership can't see any business benefit. Per the KPI framework, what's the most likely gap?",
+      "options": [
+        { "id": "a", "text": "Low adoption and/or unmeasured business-operational impact — a technically good system that people aren't using, or whose process effect isn't tracked, delivers no value", "correct": true },
+        { "id": "b", "text": "The model's context window is too large" },
+        { "id": "c", "text": "The framework has only two KPI categories, so nothing else can be measured" },
+        { "id": "d", "text": "Business benefit cannot be measured once model quality is high" }
+      ],
+      "explanation": "Good model and system quality don't guarantee value — if **adoption** is low or the **business-operational** effect isn't measured, no business benefit shows up. A large context window isn't a downside here, the framework has **five** categories (not two), and benefit is absolutely measurable via operational, adoption, and business-value KPIs.",
+      "sourceRefs": ["r-kpi-framework"]
+    },
+    {
+      "id": "q-d4-11",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which situation most justifies BUILDING/customising a gen-AI solution rather than buying one?",
+      "options": [
+        { "id": "a", "text": "The capability is a competitive differentiator, data must stay in-house for residency, and the team has strong engineering and MLOps skill", "correct": true },
+        { "id": "b", "text": "The need is a generic task and the team wants it live next week with no infrastructure" },
+        { "id": "c", "text": "Leadership simply prefers building because it sounds more impressive" },
+        { "id": "d", "text": "There is no in-house engineering capability at all" }
+      ],
+      "explanation": "Differentiation + data-residency requirements + strong in-house skill are the classic reasons to **build**. A generic urgent task with no infra points to buying; 'sounds more impressive' isn't a business reason; and no engineering capability makes building impractical. The decision follows the factors.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d4-12",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The guide lists factors for choosing the right foundation model for a business use case. Which set matches?",
+      "options": [
+        { "id": "a", "text": "Modality, context window, security, availability and reliability, cost, performance, and fine-tuning/customization", "correct": true },
+        { "id": "b", "text": "Logo colour, font choice, and app-store rating" },
+        { "id": "c", "text": "Office location, team size, and holiday schedule" },
+        { "id": "d", "text": "Number of social-media followers and press mentions" }
+      ],
+      "explanation": "The guide names **modality, context window, security, availability and reliability, cost, performance,** and **fine-tuning/customization**. Branding choices, office logistics, and marketing reach are not model-selection factors — the choice is driven by capability-to-requirement fit.",
+      "sourceRefs": ["r-exam-guide", "r-model-selection"]
+    },
+    {
+      "id": "q-d4-13",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why is data readiness treated as a precondition for a successful gen-AI initiative?",
+      "options": [
+        { "id": "a", "text": "Gen-AI value depends on data quality and accessibility; incomplete, inconsistent, or irrelevant data produces confident-but-wrong output at scale", "correct": true },
+        { "id": "b", "text": "Because larger datasets always guarantee a bigger model" },
+        { "id": "c", "text": "Because data readiness only matters for image generation" },
+        { "id": "d", "text": "Because gen AI never depends on an organisation's own data" }
+      ],
+      "explanation": "The guide stresses **data quality** (completeness, consistency, relevance) and **accessibility** as central to gen-AI value; bad data yields wrong output that gen AI can scale rapidly. Dataset size doesn't dictate model size, data readiness isn't limited to images, and grounding/tuning very much depend on the organisation's own data.",
+      "sourceRefs": ["r-exam-guide"]
+    },
+    {
+      "id": "q-d4-14",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "'Integrating gen AI into the organisation' is best understood as:",
+      "options": [
+        { "id": "a", "text": "A change-management step — people, process, workflow, training, and ownership — not just a technical deployment", "correct": true },
+        { "id": "b", "text": "Purely the act of deploying the model to a server" },
+        { "id": "c", "text": "Buying more GPUs" },
+        { "id": "d", "text": "Renaming the project" }
+      ],
+      "explanation": "Integration is a **change-management** step: value only lands if people adopt the tool and workflows change around it (hence adoption KPIs). Deploying to a server is one small part; buying GPUs is infrastructure; renaming the project changes nothing. The organisational change is the hard, decisive part.",
+      "sourceRefs": ["r-exam-guide", "r-kpi-framework"]
+    },
+    {
+      "id": "q-d4-16",
+      "domainId": "d4-business-strategy",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "Which of the following are among SAIF's six core elements? (Select all that apply.)",
+      "options": [
+        { "id": "a", "text": "Expand strong security foundations to the AI ecosystem", "correct": true },
+        { "id": "b", "text": "Extend detection and response to bring AI into threat management", "correct": true },
+        { "id": "c", "text": "Contextualize AI system risks within surrounding business processes", "correct": true },
+        { "id": "d", "text": "Guarantee 100% accuracy for every AI model" }
+      ],
+      "explanation": "A, B, and C are three of SAIF's **six core elements** (the others: automate defenses, harmonize platform-level controls, and adapt controls for faster feedback loops). D is not a SAIF element and is not something any framework can promise — SAIF is about security, not accuracy guarantees.",
+      "sourceRefs": ["r-saif"]
+    },
+    {
+      "id": "q-d4-18",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which Google Cloud security tool is primarily about controlling WHO can access data, models, and resources?",
+      "options": [
+        { "id": "a", "text": "Identity and Access Management (IAM)", "correct": true },
+        { "id": "b", "text": "Model Armor" },
+        { "id": "c", "text": "Security Command Center's compliance benchmarks" },
+        { "id": "d", "text": "A larger context window" },
+        { "id": "e", "text": "Autoscaling" }
+      ],
+      "explanation": "**IAM** governs *who can do what* — least-privilege access to data, models, and resources. Model Armor screens prompts/responses (content, not access); SCC's compliance benchmarks measure posture against standards; a context window and autoscaling are capability/infrastructure features, not access controls.",
+      "sourceRefs": ["r-exam-guide", "r-scc"]
+    },
+    {
+      "id": "q-d4-20",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A leader must match three concerns to the right control: (1) an attacker jailbreaking the model, (2) a contractor having more data access than needed, (3) whether the cloud environment is compliant with PCI-DSS. The correct mapping is:",
+      "options": [
+        { "id": "a", "text": "(1) Model Armor, (2) IAM, (3) Security Command Center", "correct": true },
+        { "id": "b", "text": "(1) IAM, (2) Model Armor, (3) SAIF" },
+        { "id": "c", "text": "(1) Security Command Center, (2) SAIF, (3) IAM" },
+        { "id": "d", "text": "(1) SAIF, (2) Security Command Center, (3) Model Armor" }
+      ],
+      "explanation": "Jailbreak → **Model Armor** (prompt/response screening); excess access → **IAM** (who can do what); compliance posture → **Security Command Center** (which monitors against benchmarks like PCI-DSS). The other options misassign these — SAIF is a *framework*, not a runtime control, so it never fits the per-concern tool slot.",
+      "sourceRefs": ["r-model-armor", "r-scc", "r-saif"]
+    },
+    {
+      "id": "q-d4-21",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Why is responsible AI framed as a BUSINESS concern in the guide, not just an ethical one?",
+      "options": [
+        { "id": "a", "text": "Bias, privacy breaches, and unexplainable decisions create legal, regulatory, and reputational risk that can destroy the value an initiative creates", "correct": true },
+        { "id": "b", "text": "Because responsible AI increases the model's parameter count" },
+        { "id": "c", "text": "Because it is legally optional and has no business impact" },
+        { "id": "d", "text": "Because it only matters for academic research" }
+      ],
+      "explanation": "Responsible AI is **risk management for trust**: fairness, privacy, and explainability failures carry legal, regulatory, and reputational cost that can erase business value. It has nothing to do with parameter count, it is not without business impact, and it applies to enterprise adoption, not just research.",
+      "sourceRefs": ["r-exam-guide", "r-ai-principles"]
+    },
+    {
+      "id": "q-d4-23",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Which pairing correctly separates SECURE AI (4.2) from RESPONSIBLE AI (4.3)?",
+      "options": [
+        { "id": "a", "text": "A prompt-injection attack → secure AI; a biased hiring recommendation → responsible AI", "correct": true },
+        { "id": "b", "text": "A prompt-injection attack → responsible AI; a biased hiring recommendation → secure AI" },
+        { "id": "c", "text": "Both are secure-AI concerns only" },
+        { "id": "d", "text": "Both are responsible-AI concerns only" }
+      ],
+      "explanation": "A prompt-injection attack is a **security** issue (protect the system — SAIF/Model Armor); a biased recommendation is a **responsible-AI** issue (fairness — protect people/trust). Reversing them is wrong, and collapsing both into one category ignores the distinction the exam tests directly.",
+      "sourceRefs": ["r-exam-guide", "r-saif", "r-ai-principles"]
+    },
+    {
+      "id": "q-d4-25",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A leader wants a ready-made way to add enterprise search and custom agents grounded on company data, without building infrastructure. Which current Google offering fits — and what should they avoid calling it?",
+      "options": [
+        { "id": "a", "text": "Gemini Enterprise / Agent Platform (Agent Studio for building agents) — use current names, not retired ones like 'Vertex AI Agent Builder'", "correct": true },
+        { "id": "b", "text": "A responsible-AI policy document" },
+        { "id": "c", "text": "Security Command Center" },
+        { "id": "d", "text": "A software bill of materials" }
+      ],
+      "explanation": "Enterprise search and custom agents map to **Gemini Enterprise** and **Agent Platform / Agent Studio** — the current branding used in the guide. A responsible-AI policy governs conduct (not a build option), Security Command Center is a security tool, and an SBOM is a supply-chain artifact. The exam's currency trap rewards **current** product names.",
+      "sourceRefs": ["r-cert-page", "r-model-selection"]
+    },
+    {
+      "id": "q-d4-27",
+      "domainId": "d4-business-strategy",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A leader claims: 'We deployed the biggest available model, so our gen-AI project is automatically a success.' What is the strongest correction from a Section-4 standpoint?",
+      "options": [
+        { "id": "a", "text": "Success depends on matching the solution to the business need, readying the data, driving adoption, and measuring impact — not on picking the largest model", "correct": true },
+        { "id": "b", "text": "Correct — the largest model always guarantees success" },
+        { "id": "c", "text": "The largest model is the only responsible choice" },
+        { "id": "d", "text": "Model size is the only KPI that matters" }
+      ],
+      "explanation": "Section 4 defines success as need-fit → data readiness → integration/adoption → measured impact; a large model doesn't guarantee any of that, and a smaller model on good data often wins on value. 'Largest guarantees success', 'largest is the only responsible choice', and 'size is the only KPI' all contradict the guide's need-first, measurement-driven approach.",
+      "sourceRefs": ["r-exam-guide", "r-kpi-framework", "r-model-selection"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "s-d4-adoption-decision",
+      "domainIds": ["d4-business-strategy"],
+      "title": "A leader's gen-AI adoption decision, end to end",
+      "tagline": "Need → solution → build-vs-buy → secure → responsible → measure — pick the best move at each step.",
+      "context": "You lead digital transformation at a mid-size insurer. Customer support is drowning in repetitive policy questions, agents spend hours hunting through PDFs, and the board wants 'an AI strategy' with proof it pays off. You have a large but messy document store, a small platform team, and no in-house ML researchers. Walk the Section-4 path and choose the strongest move at each decision.",
+      "steps": [
+        {
+          "id": "st1",
+          "prompt": "Where do you start the initiative?",
+          "choices": [
+            { "id": "a", "text": "Define the business need and the solution type — 'summarise/answer policy questions from our documents' — and the factors driving it, before choosing any tool", "verdict": "best", "rationale": "The guide's recommended path starts from the business need and solution type (a discover/summarise use case), then the driving factors — need first, tool later." },
+            { "id": "b", "text": "Pick the newest, largest foundation model first, then find a use for it", "verdict": "wrong", "rationale": "This inverts the steps — choosing a model before the need is the classic anti-pattern; the biggest model is rarely the right default." },
+            { "id": "c", "text": "Run a quick proof of concept on any convenient dataset to 'see what sticks'", "verdict": "viable", "rationale": "Experimentation has a place, but without a defined need and success measure it risks a flashy demo that proves nothing — define the need first." }
+          ]
+        },
+        {
+          "id": "st2",
+          "prompt": "Build a custom solution or buy a ready-made one?",
+          "choices": [
+            { "id": "a", "text": "Buy / use a ready-made managed solution (e.g. Gemini Enterprise / Agent Platform) grounded on your documents — small team, no ML researchers, capability isn't a differentiator", "verdict": "best", "rationale": "Time-to-value, limited in-house skill, and a non-differentiating capability all favour buying a ready-made, groundable solution over building from scratch." },
+            { "id": "b", "text": "Build and train a fully custom model in-house for maximum control", "verdict": "wrong", "rationale": "With a small team and no ML researchers, building from scratch is slow, costly, and high-risk for a capability that isn't a competitive edge." },
+            { "id": "c", "text": "Buy now to get value fast, and revisit building only if a genuine differentiator emerges later", "verdict": "viable", "rationale": "A reasonable staged stance — buy for speed, keep build on the table — though the immediate decision is simply to buy given the factors." }
+          ]
+        },
+        {
+          "id": "st3",
+          "prompt": "Before launch, what's the most important readiness check?",
+          "choices": [
+            { "id": "a", "text": "Data readiness — are the policy documents accessible, governed, permissioned, and good enough (complete, consistent, relevant) to ground the assistant?", "verdict": "best", "rationale": "Data quality and accessibility are the precondition; a 'messy' store will produce confident-but-wrong answers unless readied and governed." },
+            { "id": "b", "text": "Confirm the user-interface colour palette matches the brand", "verdict": "wrong", "rationale": "Cosmetic; irrelevant to whether the solution can produce correct, safe answers." },
+            { "id": "c", "text": "Draft a change-management and training plan so agents actually adopt the tool", "verdict": "viable", "rationale": "Genuinely important for value and adoption KPIs — but if the underlying data isn't ready, even well-trained agents get wrong answers, so data readiness leads." }
+          ]
+        },
+        {
+          "id": "st4",
+          "prompt": "Security review: customers will type free-text questions to the assistant. What do you prioritise?",
+          "choices": [
+            { "id": "a", "text": "Screen prompts and responses (Model Armor) against jailbreak and PII leakage, enforce least-privilege access (IAM), and use Security Command Center for posture — security across the lifecycle", "verdict": "best", "rationale": "Free-text customer input invites prompt injection and data-exfiltration; Model Armor screens prompts/responses, IAM controls access, and SCC covers posture — lifecycle security." },
+            { "id": "b", "text": "Assume the managed platform is secure and skip any AI-specific safeguards", "verdict": "wrong", "rationale": "Secure AI spans the whole lifecycle; a customer-facing LLM specifically needs prompt/response screening — assuming it away is the risk." },
+            { "id": "c", "text": "Lock down access with IAM but do nothing about prompt-level attacks", "verdict": "viable", "rationale": "IAM is necessary but insufficient — it controls who connects, not what a malicious prompt does; you still need Model Armor for prompt/response risks." }
+          ]
+        },
+        {
+          "id": "st5",
+          "prompt": "Responsible-AI check before go-live?",
+          "choices": [
+            { "id": "a", "text": "Ensure transparency (tell users it's AI and its limits), protect privacy (anonymise/pseudonymise personal data), watch for bias, and assign a named owner for accountability", "verdict": "best", "rationale": "These are the guide's responsible-AI dimensions — transparency, privacy, fairness, accountability — each managing a concrete business/trust risk." },
+            { "id": "b", "text": "Skip responsible-AI review — it's optional and slows the launch", "verdict": "wrong", "rationale": "Responsible AI is risk management for trust; skipping it invites legal, regulatory, and reputational damage that can erase the value." },
+            { "id": "c", "text": "Cover privacy and transparency now, and schedule a fairness/bias audit as a fast follow", "verdict": "viable", "rationale": "Defensible sequencing if bias risk is genuinely low at launch, but fairness still needs a named owner and a firm date — not an open-ended 'later'." }
+          ]
+        },
+        {
+          "id": "st6",
+          "prompt": "The board asks how you'll prove it worked. What do you commit to measure?",
+          "choices": [
+            { "id": "a", "text": "The KPI framework end to end — model quality (groundedness), system quality (latency/uptime), business operational (handle time, containment), adoption (usage, feedback), and business value (cost saved), netting off build/run cost", "verdict": "best", "rationale": "This is exactly Google Cloud's five-category KPI framework, translating operational and adoption metrics into honest financial ROI." },
+            { "id": "b", "text": "Only the model's benchmark accuracy score", "verdict": "wrong", "rationale": "A single model-quality number says nothing about adoption or business impact — a technically good system nobody uses delivers no value." },
+            { "id": "c", "text": "Business-value (financial) metrics only, without the operational and adoption metrics underneath", "verdict": "viable", "rationale": "Financial impact is the headline, but the framework derives it from operational and adoption metrics — reporting ROI without them is fragile and hard to defend." }
+          ]
+        }
+      ],
+      "sourceRefs": ["r-exam-guide", "r-kpi-framework", "r-saif", "r-model-armor", "r-scc", "r-ai-principles"]
+    }
+  ],
+  "labs": [
+    {
+      "id": "lab-d4-adoption-brief",
+      "domainId": "d4-business-strategy",
+      "title": "Write a one-page gen-AI adoption brief for a real use case",
+      "goal": "Produce the strategy artifact a Generative AI Leader is expected to author — a board-ready one-pager that walks a use case through Section 4's path: need → solution → build-vs-buy → data → secure → responsible → measure. No code.",
+      "steps": "## What you'll produce\n\nA single page (or one slide) any executive could read in two minutes. Pick a real use case from your own organisation or one you know well (e.g. 'summarise support tickets', 'answer HR-policy questions', 'draft first-pass marketing copy'). Fill in each section — this is the exam's Section 4 turned into a deliverable.\n\n1. **The need & solution type.** One sentence on the business problem and the value (create / summarise / discover / automate). Name the gen-AI solution type (text / image / code / personalized). *Do not name a model yet.*\n2. **Driving factors.** List the business requirements and the technical constraints (data, latency, integration, budget) that shape the choice.\n3. **Build vs buy.** State your call and the *deciding factor* — time-to-value, control/differentiation, in-house skill, cost, or data-residency. If buying, name a current Google offering (Gemini Enterprise, Agent Platform / Agent Studio); if building, note Model Garden / grounding / fine-tuning. Use **current** product names — no 'Vertex AI Agent Builder'.\n4. **Data readiness.** Rate your data on the guide's characteristics — completeness, consistency, relevance, availability, cost, format — and note the one gap you'd fix first. State whether the data is structured or unstructured.\n5. **Secure AI.** Name the top security risk (e.g. prompt injection, PII leakage, over-broad access) and the matching control: **Model Armor** (prompt/response screening), **IAM** (access), **Security Command Center** (posture), and reference **SAIF** as the framing. One line on security across the ML lifecycle.\n6. **Responsible AI.** For each dimension — transparency, privacy (anonymise/pseudonymise), bias/fairness, accountability (named owner), explainability — write one line on how you'll address it.\n7. **Success measures.** Choose 3–5 KPIs across the five categories (model quality, system quality, business operational, adoption, business value) and state the single business-value (financial) metric you'll report to the board.\n\n## Why it matters\n\nSection 4 is a *decision* domain. Authoring this brief forces every decision the exam tests — need-first sequencing, build-vs-buy on the real factors, data readiness, the security-tool mapping, the responsible-AI dimensions, and the KPI framework — into one coherent artifact you could actually take to a leadership team.",
+      "checklist": [
+        "Need and solution type stated in one sentence, with no model named prematurely",
+        "Build-vs-buy call justified by a named deciding factor, using current Google product names",
+        "Data rated against the guide's quality/accessibility characteristics, with the first gap identified",
+        "Top security risk mapped to the correct tool (Model Armor / IAM / SCC), SAIF referenced, lifecycle noted",
+        "All five responsible-AI dimensions addressed with a named accountable owner",
+        "3–5 KPIs chosen across the five categories, with one business-value (financial) metric named"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "r-exam-guide",
+      "title": "Generative AI Leader certification exam guide (PDF)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The source of truth for Section 4 ('Business strategies for a successful gen AI solution', ~15%). Extract the three task groups verbatim: 4.1 the recommended steps to a transformational gen-AI solution (recognise solution types; identify factors — business requirements and technical constraints; choose the right solution; integrate into the org; measure impact) plus the foundation-model selection factors and data-quality characteristics carried from Section 1; 4.2 secure AI (security across the ML lifecycle, SAIF, and the tools — secure-by-design infrastructure, IAM, Security Command Center, workload monitoring); 4.3 responsible AI (transparency, privacy incl. anonymisation/pseudonymisation, data quality/bias/fairness, accountability, explainability). Note the guide uses current branding (Agent Platform, Gemini Enterprise Agent Platform, Agent Studio, Model Garden, Agent Search) and does NOT use 'Vertex AI' or 'Agent Builder' — teach current names.",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-cert-page",
+      "title": "Generative AI Leader — certification overview",
+      "url": "https://cloud.google.com/learn/certification/generative-ai-leader",
+      "kind": "official-doc",
+      "annotation": "The exam logistics and audience: $99 (plus tax), 90 minutes, 50–60 multiple-choice questions, online- or onsite-proctored, valid 3 years, no prerequisites, 'for anyone in any job role, with or without hands-on technical experience'. The passing score is NOT published here (keep the Academy's own 70% training bar; leave passingScore unset). Also surfaces current product names (Gemini Enterprise, Agent Platform, Customer Experience Agent Studio, Agent Search).",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-kpi-framework",
+      "title": "Measuring gen AI success: a KPI framework (Google Cloud)",
+      "url": "https://cloud.google.com/transform/gen-ai-kpis-measuring-ai-success-deep-dive",
+      "kind": "reference",
+      "annotation": "Google Cloud's five-category framework for measuring gen-AI success — the backbone of 'techniques to measure the impact of gen AI initiatives' (4.1). Extract the five categories: (1) model quality (coherence, groundedness, safety, instruction-following), (2) system quality (uptime, latency, throughput), (3) business operational (handle time, containment, CTR), (4) adoption (adoption rate, frequency, thumbs-up/down), (5) business value (cost/time savings, revenue uplift, churn reduction). Key principle: measure operational and adoption KPIs first, then translate into financial (business-value) metrics, netting off build and maintenance cost for honest ROI.",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-saif",
+      "title": "Google's Secure AI Framework (SAIF)",
+      "url": "https://safety.google/cybersecurity-advancements/saif/",
+      "kind": "official-doc",
+      "annotation": "The authoritative description of SAIF for task 4.2. SAIF is a 'conceptual framework to secure AI systems' designed so that AI models are 'secure by default', addressing AI/ML model risk, security, and privacy. Extract the six core elements: (1) expand strong security foundations, (2) extend detection and response, (3) automate defenses, (4) harmonize platform-level controls, (5) adapt controls for faster feedback loops, (6) contextualize AI system risks within surrounding business processes. Emphasise that SAIF is a security framework — distinct from the responsible-AI principles.",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-scc",
+      "title": "Security Command Center overview (Google Cloud docs)",
+      "url": "https://docs.cloud.google.com/security-command-center/docs/security-command-center-overview",
+      "kind": "official-doc",
+      "annotation": "Names the Google Cloud security tool from task 4.2: Security Command Center is a 'cloud-based risk management solution that helps security professionals prevent, detect, and respond to security issues'. Extract its four domains — vulnerability detection (misconfigurations, exposed resources, leaked credentials; compliance vs NIST/HIPAA/PCI-DSS/CIS), threat detection, security-posture management, and compliance frameworks — plus its AI-specific capabilities (AI Protection for AI workloads and Model Armor).",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-model-armor",
+      "title": "Model Armor overview (Google Cloud docs)",
+      "url": "https://docs.cloud.google.com/security-command-center/docs/model-armor-overview",
+      "kind": "official-doc",
+      "annotation": "The AI-specific safeguard behind the secure-AI answers: Model Armor 'proactively screens LLM prompts and responses' to protect against prompt injection and jailbreaking, sensitive-data loss (PII and IP leaking through prompts/responses), malicious URLs, and harmful content. Extract that it inspects both incoming prompts and outgoing responses and supports 'inspect only' (log) versus 'inspect and block' (prevent). It is part of Security Command Center.",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-ai-principles",
+      "title": "Google's AI Principles",
+      "url": "https://ai.google/responsibility/principles/",
+      "kind": "official-doc",
+      "annotation": "The responsible-AI north star for task 4.3. Google's three current AI Principles: (1) Bold innovation — develop AI that assists, empowers, and inspires people and solves real-world problems; (2) Responsible development and deployment — human oversight, due diligence, feedback, and rigorous design/testing/monitoring/safeguards; (3) Collaborative progress, together. Frames the balance of 'both bold and responsible' that a Generative AI Leader must strike, and grounds the responsible-AI dimensions (transparency, privacy, fairness, accountability, explainability).",
+      "domainIds": ["d4-business-strategy"]
+    },
+    {
+      "id": "r-model-selection",
+      "title": "Foundation models on Agent Platform (Google Cloud docs)",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
+      "kind": "official-doc",
+      "annotation": "Grounds the build-vs-buy and model-fit reasoning in 4.1: the business factors for choosing a foundation model — modality, context window, cost, performance/latency, security and compliance (access control, VPC Service Controls, CMEK), availability (provisioned throughput vs pay-as-you-go), and fine-tuning/customization (supervised fine-tuning, RL fine-tuning, preference tuning, distillation). Model discovery is via Model Garden on Agent Platform. NOTE: this doc's navigation still shows some legacy 'Vertex AI' labels mid-rebrand — teach the CURRENT names (Gemini Enterprise Agent Platform / Agent Platform / Model Garden), which the exam guide uses.",
+      "domainIds": ["d4-business-strategy"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-d4-1",
+      "title": "D4 · From need to value — use-case selection, build-vs-buy, data readiness & measuring success",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d4-business-strategy"],
+      "sourceNotebook": "gen-ai-leader / d4 / adoption-strategy-and-value"
+    },
+    {
+      "id": "v-d4-2",
+      "title": "D4 · Secure & responsible AI for leaders — SAIF, Security Command Center, Model Armor & the responsible-AI dimensions",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["d4-business-strategy"],
+      "sourceNotebook": "gen-ai-leader / d4 / secure-and-responsible-ai"
+    }
+  ]
+}
