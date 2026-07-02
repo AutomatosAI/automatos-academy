@@ -24,9 +24,10 @@ Cover ONLY, in order:
 2. Budgets: two levers. Workspace-wide Cost alerts (Settings → General → Features: notify on budget
    thresholds), and per-Mission budget control (Activity → Missions: cost breakdown by task, pause a
    Mission if costs run high, resume with increased budget). Frame budgets as "policy, not vibes."
-3. Blueprints = the agent's config: each agent's model/provider, temperature, max tokens, persona,
-   tools and skills (set at creation) is its operating blueprint — the thing that bounds what it does
-   and what it costs. Cheaper models for simple tasks is the #1 optimisation lever.
+3. The agent's config as its operating "blueprint" (our teaching term — the user docs just call it
+   the agent's configuration; say that once): each agent's model/provider, temperature, max tokens,
+   persona, tools and skills (set at creation) bounds what it does and what it costs. Cheaper models
+   for simple tasks is the #1 optimisation lever.
 4. RBAC (team/roles.md): three roles — Admin, Member, Viewer — and the permission matrix. Everyone can
    chat and view activity; Members create/edit agents, upload docs, run Playbooks, install
    marketplace items; only Admins connect tools, manage the team, access Settings/Analytics-admin,
