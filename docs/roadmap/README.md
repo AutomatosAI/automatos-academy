@@ -6,10 +6,12 @@ the academy's mock exams) for a *real external* exam; the academy itself issues 
 
 **Two lanes, one academy** ([strategy review](../STRATEGY-REVIEW-2026-07-02.md)):
 - **Operator lane** — *"Run your business with AI."* For owners, team leads, non-technical
-  professionals. Start: [`ai-business/`](./ai-business/) (ABF).
-- **Practitioner lane** — *"Get certified in AI."* The S0–S5 program. Start by persona:
+  professionals. Start: [`ai-business/`](./ai-business/) (ABF) → want a credential to show for it?
+  [`gen-ai-leader/`](./gen-ai-leader/) (Google's business-leader exam — the natural bridge).
+- **Practitioner lane** — *"Get certified in AI."* Start by persona:
   developer/architect → [`cca-f/`](./cca-f/) then [`gh-300/`](./gh-300/)/[`gh-500/`](./gh-500/) ·
   security → [`ai-security/`](./ai-security/) · risk/compliance → [`aigp/`](./aigp/) ·
+  business leadership → [`gen-ai-leader/`](./gen-ai-leader/) ·
   platform-agnostic → [`cross-vendor/`](./cross-vendor/) · Automatos mastery → [`automatos-apa/`](./automatos-apa/).
 
 **Dogfood principle:** every academy operation is an Automatos showcase where sensible — the

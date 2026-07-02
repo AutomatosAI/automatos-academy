@@ -8,21 +8,43 @@ import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { claimPanel } from "./certificate.js";
 import { trackOnce } from "../analytics.js";
+import { downloadBackup, importBackup } from "../progress-io.js";
 
 const domGrade = (pct) => (pct >= 90 ? "A+" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 55 ? "C" : pct >= 40 ? "D" : "F");
 const gradeVar = (g) => `var(--grade-${g === "A+" ? "aplus" : g === "A" ? "a" : g === "B" ? "b" : g === "C" ? "c" : g === "D" ? "d" : "f"})`;
 
-function resetButton(store, backTo) {
-  // two-click reset (no blocking dialog)
-  const btn = el("button", { class: "ac-btn", type: "button", style: { borderColor: "var(--bad)", color: "var(--bad)" } }, ["Reset my progress"]);
+// Local-first data controls: back up / restore all progress (no account) and
+// a two-click reset. Backup carries EVERY track, not just this one.
+function dataControls(store, backTo) {
+  const msg = el("span", { class: "mono-label", style: { alignSelf: "center" } });
+  const reload = () => { location.hash = backTo; window.dispatchEvent(new HashChangeEvent("hashchange")); };
+
+  const reset = el("button", { class: "ac-btn", type: "button", style: { borderColor: "var(--bad)", color: "var(--bad)" } }, ["Reset my progress"]);
   let armed = false;
-  btn.addEventListener("click", () => {
-    if (!armed) { armed = true; btn.textContent = "Click again to erase everything"; return; }
+  reset.addEventListener("click", () => {
+    if (!armed) { armed = true; reset.textContent = "Click again to erase everything"; return; }
     store.reset();
-    location.hash = backTo;
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    reload();
   });
-  return btn;
+
+  const backup = el("button", { class: "ac-btn", type: "button", onClick: () => { downloadBackup(); msg.textContent = "Backup downloaded ✓"; } }, ["Back up my progress"]);
+
+  const file = el("input", { type: "file", accept: "application/json,.json", style: { display: "none" } });
+  file.addEventListener("change", () => {
+    const f = file.files && file.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const res = importBackup(String(r.result));
+      msg.textContent = res.ok ? `Restored ${res.restored} item${res.restored === 1 ? "" : "s"} — reloading…` : res.error;
+      if (res.ok) setTimeout(reload, 700);
+    };
+    r.readAsText(f);
+    file.value = "";
+  });
+  const restore = el("button", { class: "ac-btn", type: "button", onClick: () => file.click() }, ["Restore"]);
+
+  return el("div", { class: "row", style: { gap: "10px", flexWrap: "wrap", alignItems: "center" } }, [backup, restore, reset, file, msg]);
 }
 
 // Skills-track progress: modules done + the capstone are the whole story —
@@ -59,9 +81,9 @@ function progressView(ctx) {
       claimPanel(track, comp),
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 14px" }, text: "Progress by module group" }),
       el("div", { class: "mastery" }, rows),
-      el("div", { class: "row", style: { marginTop: "48px", justifyContent: "space-between" } }, [
-        el("a", { class: "mono-label", href: "#" + url.track(v, t), text: "← Back to curriculum" }),
-        resetButton(store, url.readiness(v, t)),
+      el("div", { class: "row", style: { marginTop: "48px", flexWrap: "wrap", gap: "16px", justifyContent: "space-between" } }, [
+        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: "#" + url.track(v, t), text: "← Back to curriculum" }),
+        dataControls(store, url.readiness(v, t)),
       ]),
     ),
   ]);
@@ -88,7 +110,6 @@ export function readinessView(ctx) {
   });
 
   const weakHref = r.weakest ? url.quiz(v, t, r.weakest.id) : url.exam(v, t);
-  const resetBtn = resetButton(store, url.readiness(v, t));
 
   return el("div", {}, [
     trackHeader(track, "readiness"),
@@ -122,9 +143,9 @@ export function readinessView(ctx) {
       el("p", { class: "muted", style: { fontSize: "13px", marginBottom: "16px" }, text: "Blueprint-weighted. Gated by how much of the bank you've actually attempted — one lucky answer can't fake mastery." }),
       el("div", { class: "mastery" }, rows),
 
-      el("div", { class: "row", style: { marginTop: "48px", justifyContent: "space-between" } }, [
-        el("a", { class: "mono-label", href: "#" + url.track(v, t), text: "← Back to curriculum" }),
-        resetBtn,
+      el("div", { class: "row", style: { marginTop: "48px", flexWrap: "wrap", gap: "16px", justifyContent: "space-between" } }, [
+        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: "#" + url.track(v, t), text: "← Back to curriculum" }),
+        dataControls(store, url.readiness(v, t)),
       ]),
     ),
   ]);

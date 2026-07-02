@@ -1,4 +1,9 @@
-# Cross-Vendor Fluency — skills track + Gen-AI-Leader exam sub-track
+# Cross-Vendor Fluency — skills track
+
+> **Shipped update (2026-07-02):** Gen-AI-Leader graduated from a "module 05 sub-track" to its own
+> standalone exam track — content lives at [`../gen-ai-leader/`](../gen-ai-leader/) (roadmap prompts)
+> and `public/content/google/gen-ai-leader/`. This folder is now the 4-module skills track (m1–m4).
+> The module-05 material below is retained as the original planning record.
 
 Teaches **provider-agnostic** judgement: reason about build-vs-buy and portability across model
 providers instead of being a partisan of one vendor. Choose hosted vs open-weight per workload, avoid
