@@ -28,13 +28,28 @@
           "difficulty": 1,
           "stem": "You ask Copilot to refactor a long function into smaller pieces and it produces a clean version. What must you do before relying on it?",
           "options": [
-            { "id": "a", "text": "Run it and confirm it still produces the correct result — the same review any change needs", "correct": true },
-            { "id": "b", "text": "Nothing — a refactor by definition preserves behaviour" },
-            { "id": "c", "text": "Merge it immediately so the diff stays small" },
-            { "id": "d", "text": "Delete the tests, since the code is now cleaner" }
+            {
+              "id": "a",
+              "text": "Run it and confirm it still produces the correct result — the same review any change needs",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Nothing — a refactor by definition preserves behaviour"
+            },
+            {
+              "id": "c",
+              "text": "Merge it immediately so the diff stays small"
+            },
+            {
+              "id": "d",
+              "text": "Delete the tests, since the code is now cleaner"
+            }
           ],
           "explanation": "Copilot gives you a first draft; **you verify it runs and behaves correctly**. A refactor is not guaranteed to preserve behaviour just because it looks tidy, merging blind skips review, and deleting tests removes the very safety net a refactor needs.",
-          "sourceRefs": ["r-d5-refactor"]
+          "sourceRefs": [
+            "r-d5-refactor"
+          ]
         },
         {
           "id": "kc-d5-2",
@@ -43,13 +58,29 @@
           "difficulty": 2,
           "stem": "You're modernising a legacy module you don't fully understand. What's the safest first step with Copilot?",
           "options": [
-            { "id": "a", "text": "Use /explain to understand the existing code before changing anything", "correct": true },
-            { "id": "b", "text": "Let Agent mode rewrite it to the new pattern immediately, then read the diff" },
-            { "id": "c", "text": "Accept completions until it compiles" },
-            { "id": "d", "text": "Delete it and ask Copilot to write a replacement from the function name" }
+            {
+              "id": "a",
+              "text": "Use /explain to understand the existing code before changing anything",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Let Agent mode rewrite it to the new pattern immediately, then read the diff"
+            },
+            {
+              "id": "c",
+              "text": "Accept completions until it compiles"
+            },
+            {
+              "id": "d",
+              "text": "Delete it and ask Copilot to write a replacement from the function name"
+            }
           ],
           "explanation": "**Understand first, change second.** `/explain` builds the shared understanding you need before a migration. Rewriting code neither you nor the model understands, blindly accepting completions, or regenerating from a name alone all invite silent behaviour changes.",
-          "sourceRefs": ["r-d5-refactor", "r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-refactor",
+            "r-d5-usecases"
+          ]
         },
         {
           "id": "kc-d5-3",
@@ -58,13 +89,28 @@
           "difficulty": 1,
           "stem": "Which task is squarely in Copilot's productivity sweet spot?",
           "options": [
-            { "id": "a", "text": "Scaffolding repetitive boilerplate and glue code from a clear description", "correct": true },
-            { "id": "b", "text": "Deciding the product's data-privacy strategy" },
-            { "id": "c", "text": "Choosing which vendor to sign a contract with" },
-            { "id": "d", "text": "Setting the team's quarterly priorities" }
+            {
+              "id": "a",
+              "text": "Scaffolding repetitive boilerplate and glue code from a clear description",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Deciding the product's data-privacy strategy"
+            },
+            {
+              "id": "c",
+              "text": "Choosing which vendor to sign a contract with"
+            },
+            {
+              "id": "d",
+              "text": "Setting the team's quarterly priorities"
+            }
           ],
           "explanation": "Copilot shines on well-specified, mechanical coding work like **boilerplate and glue**. Strategy, contracts, and prioritisation are human-judgment calls Copilot can inform but not own.",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         }
       ]
     },
@@ -82,13 +128,28 @@
           "difficulty": 2,
           "stem": "Copilot generates a unit-test suite and every test passes. What's the responsible next step?",
           "options": [
-            { "id": "a", "text": "Read the tests, check they cover edge cases, and confirm they'd fail against buggy code", "correct": true },
-            { "id": "b", "text": "Merge immediately — passing tests prove the code is correct" },
-            { "id": "c", "text": "Increase the number of tests until the count looks impressive" },
-            { "id": "d", "text": "Delete the assertions so the suite runs faster" }
+            {
+              "id": "a",
+              "text": "Read the tests, check they cover edge cases, and confirm they'd fail against buggy code",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Merge immediately — passing tests prove the code is correct"
+            },
+            {
+              "id": "c",
+              "text": "Increase the number of tests until the count looks impressive"
+            },
+            {
+              "id": "d",
+              "text": "Delete the assertions so the suite runs faster"
+            }
           ],
           "explanation": "Passing generated tests can be testing the wrong thing — or mirroring a bug. **Review them, judge coverage and edge cases, and verify they catch real failures.** Volume isn't value, and stripping assertions guts the test.",
-          "sourceRefs": ["r-d5-unit-tests"]
+          "sourceRefs": [
+            "r-d5-unit-tests"
+          ]
         },
         {
           "id": "kc-d5-5",
@@ -97,13 +158,28 @@
           "difficulty": 2,
           "stem": "Why is a Copilot-generated test that simply mirrors the implementation a problem?",
           "options": [
-            { "id": "a", "text": "It can pass even when the code is wrong, because it encodes the same misunderstanding — proving nothing", "correct": true },
-            { "id": "b", "text": "It runs too slowly to be useful" },
-            { "id": "c", "text": "Copilot cannot generate tests that reference the implementation" },
-            { "id": "d", "text": "It always fails on the first run" }
+            {
+              "id": "a",
+              "text": "It can pass even when the code is wrong, because it encodes the same misunderstanding — proving nothing",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It runs too slowly to be useful"
+            },
+            {
+              "id": "c",
+              "text": "Copilot cannot generate tests that reference the implementation"
+            },
+            {
+              "id": "d",
+              "text": "It always fails on the first run"
+            }
           ],
           "explanation": "A test derived from the same assumptions as the code will **pass in lockstep with the bug** — it validates the mistake instead of catching it. That's why you judge whether tests assert intended behaviour, not just current behaviour.",
-          "sourceRefs": ["r-d5-unit-tests"]
+          "sourceRefs": [
+            "r-d5-unit-tests"
+          ]
         },
         {
           "id": "kc-d5-6",
@@ -112,13 +188,28 @@
           "difficulty": 1,
           "stem": "You want Copilot to draft docstrings across a file. How should you treat the result?",
           "options": [
-            { "id": "a", "text": "As a first draft to review and correct against what the code actually does", "correct": true },
-            { "id": "b", "text": "As authoritative documentation that needs no checking" },
-            { "id": "c", "text": "As a reason to remove the code comments you already had" },
-            { "id": "d", "text": "As a substitute for understanding the code yourself" }
+            {
+              "id": "a",
+              "text": "As a first draft to review and correct against what the code actually does",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "As authoritative documentation that needs no checking"
+            },
+            {
+              "id": "c",
+              "text": "As a reason to remove the code comments you already had"
+            },
+            {
+              "id": "d",
+              "text": "As a substitute for understanding the code yourself"
+            }
           ],
           "explanation": "Generated docs are a **fast first draft you edit** — verify they describe real behaviour, not the behaviour the name suggests. They're not automatically authoritative and don't replace your own understanding.",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         }
       ]
     },
@@ -136,13 +227,28 @@
           "difficulty": 2,
           "stem": "Copilot proposes a fix via /fix and it makes the failing test pass. What still matters?",
           "options": [
-            { "id": "a", "text": "Confirming the fix addresses the root cause and doesn't break anything else, not just that one test goes green", "correct": true },
-            { "id": "b", "text": "Nothing — a green test means the bug is fully resolved" },
-            { "id": "c", "text": "Reverting your own tests so Copilot's fix owns the file" },
-            { "id": "d", "text": "Disabling other tests that might now fail" }
+            {
+              "id": "a",
+              "text": "Confirming the fix addresses the root cause and doesn't break anything else, not just that one test goes green",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Nothing — a green test means the bug is fully resolved"
+            },
+            {
+              "id": "c",
+              "text": "Reverting your own tests so Copilot's fix owns the file"
+            },
+            {
+              "id": "d",
+              "text": "Disabling other tests that might now fail"
+            }
           ],
           "explanation": "A `/fix` is a **hypothesis**. One passing test can mask a symptom rather than cure the cause — verify the root cause and run the full suite. Disabling tests to hide regressions is the opposite of verification.",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         },
         {
           "id": "kc-d5-8",
@@ -151,13 +257,29 @@
           "difficulty": 2,
           "stem": "Copilot reviewed a function in chat and didn't mention any security issues. What can you conclude?",
           "options": [
-            { "id": "a", "text": "Little — Copilot isn't a security scanner; absence of a warning isn't proof the code is safe", "correct": true },
-            { "id": "b", "text": "The code is guaranteed free of vulnerabilities" },
-            { "id": "c", "text": "You can skip your SAST scan for this change" },
-            { "id": "d", "text": "The function is safe to expose publicly without further review" }
+            {
+              "id": "a",
+              "text": "Little — Copilot isn't a security scanner; absence of a warning isn't proof the code is safe",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The code is guaranteed free of vulnerabilities"
+            },
+            {
+              "id": "c",
+              "text": "You can skip your SAST scan for this change"
+            },
+            {
+              "id": "d",
+              "text": "The function is safe to expose publicly without further review"
+            }
           ],
           "explanation": "Copilot can **spot** likely issues but gives no completeness guarantee — **no warning is not a clean bill of health.** Real assurance comes from dedicated security tooling and human review, which you don't skip on Copilot's silence.",
-          "sourceRefs": ["r-d5-usecases", "r-d5-review"]
+          "sourceRefs": [
+            "r-d5-usecases",
+            "r-d5-review"
+          ]
         },
         {
           "id": "kc-d5-9",
@@ -166,13 +288,28 @@
           "difficulty": 2,
           "stem": "Copilot rewrites a hot loop and says it's more efficient. How do you treat that claim?",
           "options": [
-            { "id": "a", "text": "As a candidate to measure — benchmark before and after to confirm it's actually faster", "correct": true },
-            { "id": "b", "text": "As fact, because Copilot analysed the code" },
-            { "id": "c", "text": "As irrelevant, since performance never matters" },
-            { "id": "d", "text": "As a reason to remove the old version without testing correctness" }
+            {
+              "id": "a",
+              "text": "As a candidate to measure — benchmark before and after to confirm it's actually faster",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "As fact, because Copilot analysed the code"
+            },
+            {
+              "id": "c",
+              "text": "As irrelevant, since performance never matters"
+            },
+            {
+              "id": "d",
+              "text": "As a reason to remove the old version without testing correctness"
+            }
           ],
           "explanation": "Performance claims are **verified by measurement**, not assumption — profile or benchmark to confirm the gain (and that behaviour is unchanged). Trusting the claim blind, or dropping the tested version, skips the verify step.",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         }
       ]
     },
@@ -190,13 +327,28 @@
           "difficulty": 1,
           "stem": "What is GitHub Spark best suited for?",
           "options": [
-            { "id": "a", "text": "Quickly building a prototype or internal tool from a natural-language description", "correct": true },
-            { "id": "b", "text": "Reviewing pull requests for security issues" },
-            { "id": "c", "text": "Storing an organisation's Copilot policies" },
-            { "id": "d", "text": "Excluding files from Copilot" }
+            {
+              "id": "a",
+              "text": "Quickly building a prototype or internal tool from a natural-language description",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Reviewing pull requests for security issues"
+            },
+            {
+              "id": "c",
+              "text": "Storing an organisation's Copilot policies"
+            },
+            {
+              "id": "d",
+              "text": "Excluding files from Copilot"
+            }
           ],
           "explanation": "**Spark** builds and deploys full-stack apps from prose — its sweet spot is **prototypes and internal tools**, validating ideas fast. The others describe code review, admin policy, and content exclusion.",
-          "sourceRefs": ["r-d5-spark"]
+          "sourceRefs": [
+            "r-d5-spark"
+          ]
         },
         {
           "id": "kc-d5-11",
@@ -205,13 +357,28 @@
           "difficulty": 3,
           "stem": "A manager reports 'our Copilot acceptance rate is 80%, so it's clearly boosting productivity'. What's the flaw?",
           "options": [
-            { "id": "a", "text": "Acceptance rate isn't value — accepted code can still be wrong, and high acceptance with weak review can add defects", "correct": true },
-            { "id": "b", "text": "80% is too low to mean anything" },
-            { "id": "c", "text": "Acceptance rate can only be measured on the Enterprise plan" },
-            { "id": "d", "text": "Nothing — acceptance rate is the definitive productivity metric" }
+            {
+              "id": "a",
+              "text": "Acceptance rate isn't value — accepted code can still be wrong, and high acceptance with weak review can add defects",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "80% is too low to mean anything"
+            },
+            {
+              "id": "c",
+              "text": "Acceptance rate can only be measured on the Enterprise plan"
+            },
+            {
+              "id": "d",
+              "text": "Nothing — acceptance rate is the definitive productivity metric"
+            }
           ],
           "explanation": "**Acceptance rate measures usage, not value.** Accepted suggestions can be defective, rejected ones can still help, and acceptance without review can raise defect rates. Real measurement pairs time-saved and satisfaction with quality held constant.",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         },
         {
           "id": "kc-d5-12",
@@ -220,13 +387,28 @@
           "difficulty": 2,
           "stem": "Which task leans most on human judgement rather than Copilot's automation?",
           "options": [
-            { "id": "a", "text": "Deciding the security-critical architecture of a new payment flow", "correct": true },
-            { "id": "b", "text": "Generating boilerplate DTOs from a schema" },
-            { "id": "c", "text": "Drafting docstrings for existing functions" },
-            { "id": "d", "text": "Writing a first-pass unit test for a pure function" }
+            {
+              "id": "a",
+              "text": "Deciding the security-critical architecture of a new payment flow",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Generating boilerplate DTOs from a schema"
+            },
+            {
+              "id": "c",
+              "text": "Drafting docstrings for existing functions"
+            },
+            {
+              "id": "d",
+              "text": "Writing a first-pass unit test for a pure function"
+            }
           ],
           "explanation": "Ambiguous, high-stakes, architectural work — like a **security-critical payment design** — is where human judgement dominates. Boilerplate, docs, and first-pass tests are exactly where Copilot's leverage is highest (still reviewed).",
-          "sourceRefs": ["r-d5-usecases"]
+          "sourceRefs": [
+            "r-d5-usecases"
+          ]
         }
       ]
     }
@@ -239,13 +421,28 @@
       "difficulty": 1,
       "stem": "What is Copilot's core value proposition for everyday productivity, stated correctly?",
       "options": [
-        { "id": "a", "text": "It produces a fast first draft; a human still verifies whether it's correct", "correct": true },
-        { "id": "b", "text": "It produces finished, correct code that needs no review" },
-        { "id": "c", "text": "It replaces the need for tests" },
-        { "id": "d", "text": "It guarantees the code is secure and optimal" }
+        {
+          "id": "a",
+          "text": "It produces a fast first draft; a human still verifies whether it's correct",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It produces finished, correct code that needs no review"
+        },
+        {
+          "id": "c",
+          "text": "It replaces the need for tests"
+        },
+        {
+          "id": "d",
+          "text": "It guarantees the code is secure and optimal"
+        }
       ],
       "explanation": "The recurring theme: **Copilot accelerates, humans verify.** It drafts fast; it doesn't remove review, tests, or accountability for correctness and security.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-2",
@@ -254,13 +451,28 @@
       "difficulty": 1,
       "stem": "Which everyday task is the strongest fit for Copilot code generation?",
       "options": [
-        { "id": "a", "text": "Scaffolding repetitive boilerplate from a clear description", "correct": true },
-        { "id": "b", "text": "Deciding which features to prioritise this quarter" },
-        { "id": "c", "text": "Negotiating a vendor contract" },
-        { "id": "d", "text": "Choosing the company's cloud provider" }
+        {
+          "id": "a",
+          "text": "Scaffolding repetitive boilerplate from a clear description",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Deciding which features to prioritise this quarter"
+        },
+        {
+          "id": "c",
+          "text": "Negotiating a vendor contract"
+        },
+        {
+          "id": "d",
+          "text": "Choosing the company's cloud provider"
+        }
       ],
       "explanation": "Mechanical, well-specified coding like **boilerplate** is Copilot's sweet spot. Prioritisation, contracts, and vendor choices are human-judgment decisions.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-3",
@@ -269,13 +481,28 @@
       "difficulty": 1,
       "stem": "Before relying on a Copilot refactor, the documentation says you should always do what?",
       "options": [
-        { "id": "a", "text": "Check that the revised code runs without errors and produces the correct result", "correct": true },
-        { "id": "b", "text": "Assume behaviour is preserved because it's a refactor" },
-        { "id": "c", "text": "Merge it before anyone can object" },
-        { "id": "d", "text": "Remove the existing tests" }
+        {
+          "id": "a",
+          "text": "Check that the revised code runs without errors and produces the correct result",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Assume behaviour is preserved because it's a refactor"
+        },
+        {
+          "id": "c",
+          "text": "Merge it before anyone can object"
+        },
+        {
+          "id": "d",
+          "text": "Remove the existing tests"
+        }
       ],
       "explanation": "The refactoring docs repeat it after nearly every example: **verify the revised code runs and is correct.** A tidy-looking refactor is not guaranteed to preserve behaviour.",
-      "sourceRefs": ["r-d5-refactor"]
+      "sourceRefs": [
+        "r-d5-refactor"
+      ]
     },
     {
       "id": "q-d5-4",
@@ -284,13 +511,29 @@
       "difficulty": 2,
       "stem": "You're migrating a legacy module to a newer API. What's the recommended first move with Copilot?",
       "options": [
-        { "id": "a", "text": "Use /explain to understand the existing code before changing it", "correct": true },
-        { "id": "b", "text": "Let it rewrite everything first, then try to understand the diff" },
-        { "id": "c", "text": "Accept completions until it compiles" },
-        { "id": "d", "text": "Regenerate the module from its file name" }
+        {
+          "id": "a",
+          "text": "Use /explain to understand the existing code before changing it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Let it rewrite everything first, then try to understand the diff"
+        },
+        {
+          "id": "c",
+          "text": "Accept completions until it compiles"
+        },
+        {
+          "id": "d",
+          "text": "Regenerate the module from its file name"
+        }
       ],
       "explanation": "**Understand first, change second.** `/explain` gives you the grasp needed to judge a migration; rewriting or regenerating code you don't understand invites silent behaviour changes.",
-      "sourceRefs": ["r-d5-refactor", "r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-refactor",
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-5",
@@ -299,13 +542,28 @@
       "difficulty": 1,
       "stem": "Which Copilot Chat command asks for tests for the selected code?",
       "options": [
-        { "id": "a", "text": "/tests", "correct": true },
-        { "id": "b", "text": "/deploy" },
-        { "id": "c", "text": "/secure" },
-        { "id": "d", "text": "/benchmark" }
+        {
+          "id": "a",
+          "text": "/tests",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "/deploy"
+        },
+        {
+          "id": "c",
+          "text": "/secure"
+        },
+        {
+          "id": "d",
+          "text": "/benchmark"
+        }
       ],
       "explanation": "`/tests` requests tests for the current selection or context. The others aren't Copilot Chat test commands.",
-      "sourceRefs": ["r-d5-unit-tests"]
+      "sourceRefs": [
+        "r-d5-unit-tests"
+      ]
     },
     {
       "id": "q-d5-6",
@@ -314,13 +572,28 @@
       "difficulty": 2,
       "stem": "Copilot generates 40 unit tests and they all pass. Which conclusion is sound?",
       "options": [
-        { "id": "a", "text": "You still need to read them and judge coverage — passing doesn't prove they test the right things", "correct": true },
-        { "id": "b", "text": "The feature is fully verified because all tests pass" },
-        { "id": "c", "text": "More passing tests always means better quality" },
-        { "id": "d", "text": "You can delete manual review from the process" }
+        {
+          "id": "a",
+          "text": "You still need to read them and judge coverage — passing doesn't prove they test the right things",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The feature is fully verified because all tests pass"
+        },
+        {
+          "id": "c",
+          "text": "More passing tests always means better quality"
+        },
+        {
+          "id": "d",
+          "text": "You can delete manual review from the process"
+        }
       ],
       "explanation": "Generated tests can pass while testing the wrong things or mirroring a bug. **Read them and judge coverage and edge cases** — count and green status aren't proof of quality.",
-      "sourceRefs": ["r-d5-unit-tests"]
+      "sourceRefs": [
+        "r-d5-unit-tests"
+      ]
     },
     {
       "id": "q-d5-7",
@@ -329,13 +602,28 @@
       "difficulty": 2,
       "stem": "Why push Copilot to generate edge-case tests specifically?",
       "options": [
-        { "id": "a", "text": "Generated tests often cover the happy path but miss the boundary conditions where real bugs hide", "correct": true },
-        { "id": "b", "text": "Edge-case tests run faster than normal tests" },
-        { "id": "c", "text": "Copilot refuses to write happy-path tests" },
-        { "id": "d", "text": "Boundary tests never fail, so they're safe to add" }
+        {
+          "id": "a",
+          "text": "Generated tests often cover the happy path but miss the boundary conditions where real bugs hide",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Edge-case tests run faster than normal tests"
+        },
+        {
+          "id": "c",
+          "text": "Copilot refuses to write happy-path tests"
+        },
+        {
+          "id": "d",
+          "text": "Boundary tests never fail, so they're safe to add"
+        }
       ],
       "explanation": "Copilot's default output leans to the **happy path**; the boundary and error conditions are where defects lurk, so you explicitly ask for them — as the testing module recommends.",
-      "sourceRefs": ["r-d5-unit-tests"]
+      "sourceRefs": [
+        "r-d5-unit-tests"
+      ]
     },
     {
       "id": "q-d5-8",
@@ -344,13 +632,28 @@
       "difficulty": 3,
       "stem": "A generated test passes against the current code but the code has a known bug. What does that most likely indicate?",
       "options": [
-        { "id": "a", "text": "The test asserts the current (buggy) behaviour instead of the intended behaviour", "correct": true },
-        { "id": "b", "text": "The test framework is misconfigured" },
-        { "id": "c", "text": "Copilot cannot generate assertions" },
-        { "id": "d", "text": "The bug has been fixed automatically" }
+        {
+          "id": "a",
+          "text": "The test asserts the current (buggy) behaviour instead of the intended behaviour",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The test framework is misconfigured"
+        },
+        {
+          "id": "c",
+          "text": "Copilot cannot generate assertions"
+        },
+        {
+          "id": "d",
+          "text": "The bug has been fixed automatically"
+        }
       ],
       "explanation": "A test that **encodes the current behaviour** will pass in lockstep with the bug — it validates the mistake. That's why you check tests assert *intended* behaviour and would fail on the defect.",
-      "sourceRefs": ["r-d5-unit-tests"]
+      "sourceRefs": [
+        "r-d5-unit-tests"
+      ]
     },
     {
       "id": "q-d5-9",
@@ -359,13 +662,28 @@
       "difficulty": 1,
       "stem": "How should you treat Copilot-generated docstrings and README sections?",
       "options": [
-        { "id": "a", "text": "As a first draft to review against what the code actually does", "correct": true },
-        { "id": "b", "text": "As authoritative documentation needing no checks" },
-        { "id": "c", "text": "As a replacement for understanding the code" },
-        { "id": "d", "text": "As a reason to delete existing accurate comments" }
+        {
+          "id": "a",
+          "text": "As a first draft to review against what the code actually does",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "As authoritative documentation needing no checks"
+        },
+        {
+          "id": "c",
+          "text": "As a replacement for understanding the code"
+        },
+        {
+          "id": "d",
+          "text": "As a reason to delete existing accurate comments"
+        }
       ],
       "explanation": "Generated docs are a **fast draft you edit** — verify they describe real behaviour, not the name's implication. They aren't automatically authoritative and don't replace understanding.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-10",
@@ -374,13 +692,28 @@
       "difficulty": 2,
       "stem": "You paste a stack trace into Copilot Chat. What is the realistic benefit?",
       "options": [
-        { "id": "a", "text": "A faster explanation of the error and likely causes to investigate", "correct": true },
-        { "id": "b", "text": "A guaranteed correct fix that needs no verification" },
-        { "id": "c", "text": "Automatic deployment of a patch" },
-        { "id": "d", "text": "Proof the bug cannot recur" }
+        {
+          "id": "a",
+          "text": "A faster explanation of the error and likely causes to investigate",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A guaranteed correct fix that needs no verification"
+        },
+        {
+          "id": "c",
+          "text": "Automatic deployment of a patch"
+        },
+        {
+          "id": "d",
+          "text": "Proof the bug cannot recur"
+        }
       ],
       "explanation": "Explaining an error and suggesting causes **speeds diagnosis** — but it's a starting point to investigate, not a guaranteed cure, an auto-deploy, or a permanent fix.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-11",
@@ -389,13 +722,28 @@
       "difficulty": 2,
       "stem": "Copilot's /fix makes a failing test go green. What still needs checking?",
       "options": [
-        { "id": "a", "text": "That it fixes the root cause and doesn't break other behaviour — run the full suite", "correct": true },
-        { "id": "b", "text": "Nothing further; one green test closes the bug" },
-        { "id": "c", "text": "That the fix is the longest possible solution" },
-        { "id": "d", "text": "That other failing tests are disabled" }
+        {
+          "id": "a",
+          "text": "That it fixes the root cause and doesn't break other behaviour — run the full suite",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing further; one green test closes the bug"
+        },
+        {
+          "id": "c",
+          "text": "That the fix is the longest possible solution"
+        },
+        {
+          "id": "d",
+          "text": "That other failing tests are disabled"
+        }
       ],
       "explanation": "A `/fix` is a **candidate**. One passing test can mask a symptom — confirm the root cause and run everything. Disabling tests to hide regressions is not verification.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-12",
@@ -404,13 +752,29 @@
       "difficulty": 2,
       "stem": "Copilot didn't flag any vulnerabilities when you asked it to review a function. What follows?",
       "options": [
-        { "id": "a", "text": "Nothing conclusive — Copilot isn't a security scanner, so no warning isn't a guarantee of safety", "correct": true },
-        { "id": "b", "text": "The code is provably secure" },
-        { "id": "c", "text": "You can skip dedicated security tooling for it" },
-        { "id": "d", "text": "It's safe to expose publicly with no further review" }
+        {
+          "id": "a",
+          "text": "Nothing conclusive — Copilot isn't a security scanner, so no warning isn't a guarantee of safety",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The code is provably secure"
+        },
+        {
+          "id": "c",
+          "text": "You can skip dedicated security tooling for it"
+        },
+        {
+          "id": "d",
+          "text": "It's safe to expose publicly with no further review"
+        }
       ],
       "explanation": "Copilot can **spot** likely issues but offers no completeness guarantee. **Absence of a warning is not a clean bill of health** — dedicated scanners and human review still apply.",
-      "sourceRefs": ["r-d5-usecases", "r-d5-review"]
+      "sourceRefs": [
+        "r-d5-usecases",
+        "r-d5-review"
+      ]
     },
     {
       "id": "q-d5-13",
@@ -419,13 +783,28 @@
       "difficulty": 2,
       "stem": "Copilot proposes a rewrite it describes as faster. What's the responsible way to accept it?",
       "options": [
-        { "id": "a", "text": "Benchmark before and after to confirm the gain and that behaviour is unchanged", "correct": true },
-        { "id": "b", "text": "Accept it as fact because Copilot analysed the code" },
-        { "id": "c", "text": "Ignore performance entirely" },
-        { "id": "d", "text": "Delete the old version without testing correctness" }
+        {
+          "id": "a",
+          "text": "Benchmark before and after to confirm the gain and that behaviour is unchanged",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Accept it as fact because Copilot analysed the code"
+        },
+        {
+          "id": "c",
+          "text": "Ignore performance entirely"
+        },
+        {
+          "id": "d",
+          "text": "Delete the old version without testing correctness"
+        }
       ],
       "explanation": "Performance is **verified by measurement**, not assertion — benchmark to confirm the improvement and preserved behaviour before dropping the old code.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-14",
@@ -434,13 +813,28 @@
       "difficulty": 1,
       "stem": "What does GitHub Spark do?",
       "options": [
-        { "id": "a", "text": "Builds and deploys a full-stack app from a natural-language description", "correct": true },
-        { "id": "b", "text": "Runs Copilot code review on pull requests" },
-        { "id": "c", "text": "Manages content-exclusion rules" },
-        { "id": "d", "text": "Stores org-wide Copilot policies" }
+        {
+          "id": "a",
+          "text": "Builds and deploys a full-stack app from a natural-language description",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Runs Copilot code review on pull requests"
+        },
+        {
+          "id": "c",
+          "text": "Manages content-exclusion rules"
+        },
+        {
+          "id": "d",
+          "text": "Stores org-wide Copilot policies"
+        }
       ],
       "explanation": "**Spark** turns prose into a deployable full-stack app (storage, AI, auth built in). The other options are code review, exclusions, and admin policy.",
-      "sourceRefs": ["r-d5-spark"]
+      "sourceRefs": [
+        "r-d5-spark"
+      ]
     },
     {
       "id": "q-d5-15",
@@ -449,13 +843,28 @@
       "difficulty": 2,
       "stem": "You need a quick internal tool to validate an idea this week. Which fits best?",
       "options": [
-        { "id": "a", "text": "GitHub Spark — describe it and get a running app to iterate on", "correct": true },
-        { "id": "b", "text": "A Copilot Space of screenshots" },
-        { "id": "c", "text": "Content exclusions on the repo" },
-        { "id": "d", "text": "A PR summary" }
+        {
+          "id": "a",
+          "text": "GitHub Spark — describe it and get a running app to iterate on",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Copilot Space of screenshots"
+        },
+        {
+          "id": "c",
+          "text": "Content exclusions on the repo"
+        },
+        {
+          "id": "d",
+          "text": "A PR summary"
+        }
       ],
       "explanation": "**Spark** is built for exactly this — validate ideas fast with a working prototype or internal tool. Spaces, exclusions, and PR summaries don't build an app.",
-      "sourceRefs": ["r-d5-spark"]
+      "sourceRefs": [
+        "r-d5-spark"
+      ]
     },
     {
       "id": "q-d5-16",
@@ -464,13 +873,28 @@
       "difficulty": 3,
       "stem": "Which is the best way to measure Copilot's productivity impact?",
       "options": [
-        { "id": "a", "text": "Combine developer-reported time saved and satisfaction with outcome metrics, holding quality constant", "correct": true },
-        { "id": "b", "text": "Use suggestion acceptance rate as the single headline metric" },
-        { "id": "c", "text": "Count total lines of code Copilot wrote" },
-        { "id": "d", "text": "Measure how many suggestions were shown per hour" }
+        {
+          "id": "a",
+          "text": "Combine developer-reported time saved and satisfaction with outcome metrics, holding quality constant",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Use suggestion acceptance rate as the single headline metric"
+        },
+        {
+          "id": "c",
+          "text": "Count total lines of code Copilot wrote"
+        },
+        {
+          "id": "d",
+          "text": "Measure how many suggestions were shown per hour"
+        }
       ],
       "explanation": "Honest measurement blends **perception and outcomes with quality held constant.** Acceptance rate, lines written, and suggestions shown all measure activity, not value.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-17",
@@ -479,13 +903,28 @@
       "difficulty": 2,
       "stem": "Why is suggestion acceptance rate a weak measure of value on its own?",
       "options": [
-        { "id": "a", "text": "Accepted suggestions can be wrong, rejected ones can still help, and high acceptance with weak review can add defects", "correct": true },
-        { "id": "b", "text": "It can't be collected accurately" },
-        { "id": "c", "text": "It's only available to enterprise admins" },
-        { "id": "d", "text": "It always understates the real benefit" }
+        {
+          "id": "a",
+          "text": "Accepted suggestions can be wrong, rejected ones can still help, and high acceptance with weak review can add defects",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It can't be collected accurately"
+        },
+        {
+          "id": "c",
+          "text": "It's only available to enterprise admins"
+        },
+        {
+          "id": "d",
+          "text": "It always understates the real benefit"
+        }
       ],
       "explanation": "Acceptance rate tracks **usage, not correctness or outcomes** — accepted code may be defective, rejected code may still spark the right answer, and unreviewed acceptance can raise defects.",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-18",
@@ -494,13 +933,28 @@
       "difficulty": 2,
       "stem": "Which task sits on the human-judgement side of the line, where Copilot assists but doesn't own the call?",
       "options": [
-        { "id": "a", "text": "Designing the security architecture of a new authentication system", "correct": true },
-        { "id": "b", "text": "Generating getters and setters for a data class" },
-        { "id": "c", "text": "Writing a docstring for an existing function" },
-        { "id": "d", "text": "Drafting a first unit test for a pure function" }
+        {
+          "id": "a",
+          "text": "Designing the security architecture of a new authentication system",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Generating getters and setters for a data class"
+        },
+        {
+          "id": "c",
+          "text": "Writing a docstring for an existing function"
+        },
+        {
+          "id": "d",
+          "text": "Drafting a first unit test for a pure function"
+        }
       ],
       "explanation": "Ambiguous, high-stakes, architectural work — **security-critical design** — is human-led. Boilerplate, docs, and first-pass tests are where Copilot's leverage is highest (still reviewed).",
-      "sourceRefs": ["r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "q-d5-19",
@@ -509,13 +963,30 @@
       "difficulty": 3,
       "stem": "Which practices keep Copilot-generated tests trustworthy? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "Read every generated test rather than trusting a green run", "correct": true },
-        { "id": "b", "text": "Check coverage and push for edge cases, not just the happy path", "correct": true },
-        { "id": "c", "text": "Confirm the tests would actually fail against buggy code", "correct": true },
-        { "id": "d", "text": "Accept any suite that passes, since passing means correct" }
+        {
+          "id": "a",
+          "text": "Read every generated test rather than trusting a green run",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Check coverage and push for edge cases, not just the happy path",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Confirm the tests would actually fail against buggy code",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Accept any suite that passes, since passing means correct"
+        }
       ],
       "explanation": "Trustworthy generated tests are **read, coverage-checked, and proven to catch real failures.** 'It passes, so it's correct' is exactly the trap — passing tests can mirror a bug or miss edge cases.",
-      "sourceRefs": ["r-d5-unit-tests"]
+      "sourceRefs": [
+        "r-d5-unit-tests"
+      ]
     },
     {
       "id": "q-d5-20",
@@ -524,19 +995,39 @@
       "difficulty": 2,
       "stem": "Across generation, refactoring, tests, debugging, and security help, what's the constant that every correct answer shares? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "Copilot produces a first draft or candidate quickly", "correct": true },
-        { "id": "b", "text": "A human reviews and verifies before it's relied on", "correct": true },
-        { "id": "c", "text": "Accountability for correctness stays with the developer", "correct": true },
-        { "id": "d", "text": "AI output can be shipped unreviewed once it looks right" }
+        {
+          "id": "a",
+          "text": "Copilot produces a first draft or candidate quickly",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A human reviews and verifies before it's relied on",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Accountability for correctness stays with the developer",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "AI output can be shipped unreviewed once it looks right"
+        }
       ],
       "explanation": "The domain's through-line: Copilot **drafts fast**, a **human verifies**, and **accountability doesn't move.** 'Looks right, ship it unreviewed' is the anti-pattern the exam tests against.",
-      "sourceRefs": ["r-d5-usecases", "r-d5-review"]
+      "sourceRefs": [
+        "r-d5-usecases",
+        "r-d5-review"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d5-testgen",
-      "domainIds": ["d5-developer-productivity"],
+      "domainIds": [
+        "d5-developer-productivity"
+      ],
       "title": "A safe test-generation workflow",
       "tagline": "Turn 'Copilot wrote the tests' into tests you can actually trust.",
       "context": "You've just finished a payments helper module and want a solid unit-test suite fast. You decide to generate tests with Copilot — but do it responsibly. Work each step.",
@@ -545,44 +1036,109 @@
           "id": "st1",
           "prompt": "You're ready to create the initial suite. How do you start?",
           "choices": [
-            { "id": "a", "text": "Use /tests in chat to generate a first suite from the module", "verdict": "best", "rationale": "Generating a first draft with /tests is exactly the fast start Copilot is for — you'll review it next." },
-            { "id": "b", "text": "Write every test by hand and never involve Copilot", "verdict": "viable", "rationale": "Perfectly correct, just slower — you're leaving the drafting speed on the table." },
-            { "id": "c", "text": "Skip tests entirely because the code looks fine", "verdict": "wrong", "rationale": "No tests on a payments module is the opposite of safe; 'looks fine' isn't verification." }
+            {
+              "id": "a",
+              "text": "Use /tests in chat to generate a first suite from the module",
+              "verdict": "best",
+              "rationale": "Generating a first draft with /tests is exactly the fast start Copilot is for — you'll review it next."
+            },
+            {
+              "id": "b",
+              "text": "Write every test by hand and never involve Copilot",
+              "verdict": "viable",
+              "rationale": "Perfectly correct, just slower — you're leaving the drafting speed on the table."
+            },
+            {
+              "id": "c",
+              "text": "Skip tests entirely because the code looks fine",
+              "verdict": "wrong",
+              "rationale": "No tests on a payments module is the opposite of safe; 'looks fine' isn't verification."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Copilot returns a suite and every test passes on the first run. What now?",
           "choices": [
-            { "id": "a", "text": "Read each test and check what it actually asserts before trusting the green run", "verdict": "best", "rationale": "A test you didn't read is a claim you can't trust — reviewing them is the core discipline." },
-            { "id": "b", "text": "Merge immediately — all green means the module is verified", "verdict": "wrong", "rationale": "Passing generated tests can assert the wrong behaviour or mirror a bug; green isn't proof." },
-            { "id": "c", "text": "Glance at the test names and assume the bodies are fine", "verdict": "viable", "rationale": "Names hint at intent but the assertions are where correctness lives — a skim isn't enough." }
+            {
+              "id": "a",
+              "text": "Read each test and check what it actually asserts before trusting the green run",
+              "verdict": "best",
+              "rationale": "A test you didn't read is a claim you can't trust — reviewing them is the core discipline."
+            },
+            {
+              "id": "b",
+              "text": "Merge immediately — all green means the module is verified",
+              "verdict": "wrong",
+              "rationale": "Passing generated tests can assert the wrong behaviour or mirror a bug; green isn't proof."
+            },
+            {
+              "id": "c",
+              "text": "Glance at the test names and assume the bodies are fine",
+              "verdict": "viable",
+              "rationale": "Names hint at intent but the assertions are where correctness lives — a skim isn't enough."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Reading them, you notice they only cover typical amounts — no zero, no negative, no overflow. What do you do?",
           "choices": [
-            { "id": "a", "text": "Ask Copilot to add edge-case tests for zero, negative, and boundary amounts, then review those too", "verdict": "best", "rationale": "Edge cases are where payment bugs hide; prompting for them and reviewing is the right move." },
-            { "id": "b", "text": "Leave it — the happy path passing is good enough", "verdict": "wrong", "rationale": "Happy-path-only coverage misses exactly the boundaries that break payments code." },
-            { "id": "c", "text": "Add the edge cases entirely by hand instead", "verdict": "viable", "rationale": "Correct and thorough, just slower than letting Copilot draft them for you to review." }
+            {
+              "id": "a",
+              "text": "Ask Copilot to add edge-case tests for zero, negative, and boundary amounts, then review those too",
+              "verdict": "best",
+              "rationale": "Edge cases are where payment bugs hide; prompting for them and reviewing is the right move."
+            },
+            {
+              "id": "b",
+              "text": "Leave it — the happy path passing is good enough",
+              "verdict": "wrong",
+              "rationale": "Happy-path-only coverage misses exactly the boundaries that break payments code."
+            },
+            {
+              "id": "c",
+              "text": "Add the edge cases entirely by hand instead",
+              "verdict": "viable",
+              "rationale": "Correct and thorough, just slower than letting Copilot draft them for you to review."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "You want confidence the suite would actually catch a regression. How do you check?",
           "choices": [
-            { "id": "a", "text": "Introduce a deliberate bug and confirm a test fails — then revert", "verdict": "best", "rationale": "Proving the tests fail on a real defect is the strongest confirmation they're meaningful." },
-            { "id": "b", "text": "Trust that passing tests must also fail correctly on bugs", "verdict": "wrong", "rationale": "Passing says nothing about whether a test can detect a defect — you have to check." },
-            { "id": "c", "text": "Re-run the passing suite a second time to be sure", "verdict": "viable", "rationale": "Confirms stability, but re-running green tests doesn't prove they'd catch a regression." }
+            {
+              "id": "a",
+              "text": "Introduce a deliberate bug and confirm a test fails — then revert",
+              "verdict": "best",
+              "rationale": "Proving the tests fail on a real defect is the strongest confirmation they're meaningful."
+            },
+            {
+              "id": "b",
+              "text": "Trust that passing tests must also fail correctly on bugs",
+              "verdict": "wrong",
+              "rationale": "Passing says nothing about whether a test can detect a defect — you have to check."
+            },
+            {
+              "id": "c",
+              "text": "Re-run the passing suite a second time to be sure",
+              "verdict": "viable",
+              "rationale": "Confirms stability, but re-running green tests doesn't prove they'd catch a regression."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d5-unit-tests", "r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-unit-tests",
+        "r-d5-usecases"
+      ]
     },
     {
       "id": "s-d5-legacy",
-      "domainIds": ["d5-developer-productivity"],
+      "domainIds": [
+        "d5-developer-productivity"
+      ],
       "title": "Modernise a legacy service — accelerate, then verify",
       "tagline": "Speed up a migration without letting Copilot change what you don't understand.",
       "context": "You've inherited an old order-processing service that must move to a supported library and shed some dead weight. You'll lean on Copilot to go fast — while keeping verification in the loop at every step.",
@@ -591,31 +1147,79 @@
           "id": "st1",
           "prompt": "You barely know this code. What's the first thing you do with Copilot?",
           "choices": [
-            { "id": "a", "text": "Use /explain on the key modules to understand current behaviour", "verdict": "best", "rationale": "Understand first, change second — /explain builds the grasp a migration needs." },
-            { "id": "b", "text": "Have Agent mode migrate the whole service now, and read the diff after", "verdict": "wrong", "rationale": "Rewriting code you don't understand risks silent behaviour changes you can't catch in review." },
-            { "id": "c", "text": "Start renaming things until it feels familiar", "verdict": "viable", "rationale": "Better names help, but that's not understanding the behaviour you're about to migrate." }
+            {
+              "id": "a",
+              "text": "Use /explain on the key modules to understand current behaviour",
+              "verdict": "best",
+              "rationale": "Understand first, change second — /explain builds the grasp a migration needs."
+            },
+            {
+              "id": "b",
+              "text": "Have Agent mode migrate the whole service now, and read the diff after",
+              "verdict": "wrong",
+              "rationale": "Rewriting code you don't understand risks silent behaviour changes you can't catch in review."
+            },
+            {
+              "id": "c",
+              "text": "Start renaming things until it feels familiar",
+              "verdict": "viable",
+              "rationale": "Better names help, but that's not understanding the behaviour you're about to migrate."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Before you change anything, what makes the migration safest to verify later?",
           "choices": [
-            { "id": "a", "text": "Generate a characterisation test suite for current behaviour and review it, so you can detect regressions", "verdict": "best", "rationale": "Tests that pin down today's behaviour give you a safety net to verify the migration against." },
-            { "id": "b", "text": "Nothing — you'll eyeball the diff at the end", "verdict": "wrong", "rationale": "Eyeballing a legacy migration by diff alone won't catch subtle behaviour changes." },
-            { "id": "c", "text": "Write a couple of smoke tests by hand and call it covered", "verdict": "viable", "rationale": "Some coverage beats none, but thin coverage will miss the edge cases legacy code hides." }
+            {
+              "id": "a",
+              "text": "Generate a characterisation test suite for current behaviour and review it, so you can detect regressions",
+              "verdict": "best",
+              "rationale": "Tests that pin down today's behaviour give you a safety net to verify the migration against."
+            },
+            {
+              "id": "b",
+              "text": "Nothing — you'll eyeball the diff at the end",
+              "verdict": "wrong",
+              "rationale": "Eyeballing a legacy migration by diff alone won't catch subtle behaviour changes."
+            },
+            {
+              "id": "c",
+              "text": "Write a couple of smoke tests by hand and call it covered",
+              "verdict": "viable",
+              "rationale": "Some coverage beats none, but thin coverage will miss the edge cases legacy code hides."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Copilot proposes the migration to the new library. How do you accept it?",
           "choices": [
-            { "id": "a", "text": "Review the diff, run the characterisation tests, and confirm behaviour is unchanged", "verdict": "best", "rationale": "The candidate change is verified against your tests before you trust it — accelerate then verify." },
-            { "id": "b", "text": "Accept it wholesale because it compiles", "verdict": "wrong", "rationale": "Compiling isn't correct — a migration can compile and still change behaviour." },
-            { "id": "c", "text": "Accept it but only spot-check one function", "verdict": "viable", "rationale": "A spot-check is partial assurance; running the suite is what actually confirms it." }
+            {
+              "id": "a",
+              "text": "Review the diff, run the characterisation tests, and confirm behaviour is unchanged",
+              "verdict": "best",
+              "rationale": "The candidate change is verified against your tests before you trust it — accelerate then verify."
+            },
+            {
+              "id": "b",
+              "text": "Accept it wholesale because it compiles",
+              "verdict": "wrong",
+              "rationale": "Compiling isn't correct — a migration can compile and still change behaviour."
+            },
+            {
+              "id": "c",
+              "text": "Accept it but only spot-check one function",
+              "verdict": "viable",
+              "rationale": "A spot-check is partial assurance; running the suite is what actually confirms it."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d5-refactor", "r-d5-usecases"]
+      "sourceRefs": [
+        "r-d5-refactor",
+        "r-d5-usecases"
+      ]
     }
   ],
   "labs": [
@@ -653,7 +1257,9 @@
       "url": "https://docs.github.com/en/copilot/tutorials",
       "kind": "official-doc",
       "annotation": "Task-based guides for generation, refactoring, docs, tests, debugging, and security — the practical spine of this domain. Every recipe ends with reviewing the result.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     },
     {
       "id": "r-d5-unit-tests",
@@ -661,7 +1267,9 @@
       "url": "https://learn.microsoft.com/en-us/training/modules/develop-unit-tests-using-github-copilot-tools/",
       "kind": "learning-path",
       "annotation": "Hands-on: generate tests in chat, target edge cases, use Plan and Agent modes to run test workflows, and extend/fix failing tests with ghost text. The test-generation module to work end to end.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     },
     {
       "id": "r-d5-refactor",
@@ -669,7 +1277,9 @@
       "url": "https://docs.github.com/en/copilot/tutorials/refactor-code",
       "kind": "official-doc",
       "annotation": "Worked refactors — split functions, remove duplication, rewrite conditionals, improve names — each closing with the same rule: always check the revised code runs and is correct.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     },
     {
       "id": "r-d5-spark",
@@ -677,7 +1287,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/spark",
       "kind": "official-doc",
       "annotation": "Build and deploy a full-stack app from natural language — storage, AI, and auth built in. Its pitch is speed: validate ideas in hours, ideal for prototypes and internal tools.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     },
     {
       "id": "r-d5-code-review",
@@ -685,7 +1297,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/agents/code-review",
       "kind": "official-doc",
       "annotation": "AI review always leaves a 'Comment' (never Approve/Request changes), doesn't count toward required approvals, and won't block a merge — assistive, with a human accountable.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     },
     {
       "id": "r-d5-review",
@@ -693,17 +1307,21 @@
       "url": "https://docs.github.com/en/copilot/tutorials/review-ai-generated-code",
       "kind": "official-doc",
       "annotation": "The validate-the-output discipline in practice: pair automated tests and static analysis with human judgement — functional, context, quality, and dependency checks — before trusting generated code.",
-      "domainIds": ["d5-developer-productivity"]
+      "domainIds": [
+        "d5-developer-productivity"
+      ]
     }
   ],
   "videos": [
     {
       "id": "v-d5-1",
       "title": "D5 · Generate, refactor & document — accelerate then verify",
-      "provider": "youtube",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["d5-developer-productivity"],
+      "provider": "file",
+      "url": "/content/github-copilot/videos/d5-exam.mp4",
+      "status": "published",
+      "domainIds": [
+        "d5-developer-productivity"
+      ],
       "sourceNotebook": "gh-300 / d5 / generate-refactor-document"
     },
     {
@@ -712,7 +1330,9 @@
       "provider": "youtube",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["d5-developer-productivity"],
+      "domainIds": [
+        "d5-developer-productivity"
+      ],
       "sourceNotebook": "gh-300 / d5 / tests-and-measurement"
     }
   ]

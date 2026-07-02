@@ -28,13 +28,28 @@
           "difficulty": 1,
           "stem": "A repository contains a `secrets/` directory that should never feed Copilot. What's the mechanism to keep it out?",
           "options": [
-            { "id": "a", "text": "A content exclusion covering that path", "correct": true },
-            { "id": "b", "text": "Switching the chat model to a smaller one" },
-            { "id": "c", "text": "Turning off inline completions for the whole IDE" },
-            { "id": "d", "text": "Making the repository private" }
+            {
+              "id": "a",
+              "text": "A content exclusion covering that path",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Switching the chat model to a smaller one"
+            },
+            {
+              "id": "c",
+              "text": "Turning off inline completions for the whole IDE"
+            },
+            {
+              "id": "d",
+              "text": "Making the repository private"
+            }
           ],
           "explanation": "Keeping specific files or paths out of Copilot is exactly what **content exclusion** is for. Model choice doesn't gate context; disabling completions globally is a blunt overreach; and repo visibility doesn't stop Copilot from reading files you have open.",
-          "sourceRefs": ["r-d6-exclusion"]
+          "sourceRefs": [
+            "r-d6-exclusion"
+          ]
         },
         {
           "id": "kc-d6-2",
@@ -43,13 +58,29 @@
           "difficulty": 2,
           "stem": "You need one exclusion pattern to apply to a set of repositories across the whole organisation. At which scope do you set it?",
           "options": [
-            { "id": "a", "text": "Organisation-level content exclusion, set by an org owner", "correct": true },
-            { "id": "b", "text": "Each developer's local IDE settings" },
-            { "id": "c", "text": "A single repository's settings, copied by hand into every repo" },
-            { "id": "d", "text": "The user's personal Copilot account settings" }
+            {
+              "id": "a",
+              "text": "Organisation-level content exclusion, set by an org owner",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Each developer's local IDE settings"
+            },
+            {
+              "id": "c",
+              "text": "A single repository's settings, copied by hand into every repo"
+            },
+            {
+              "id": "d",
+              "text": "The user's personal Copilot account settings"
+            }
           ],
           "explanation": "Cross-repo exclusions belong at the **organisation** scope, where an org owner can target repos or apply filesystem-wide patterns in one place. Per-developer or per-repo copies don't scale and can be bypassed; personal settings don't govern org repos.",
-          "sourceRefs": ["r-d6-exclusion", "r-d6-settings"]
+          "sourceRefs": [
+            "r-d6-exclusion",
+            "r-d6-settings"
+          ]
         },
         {
           "id": "kc-d6-3",
@@ -58,13 +89,28 @@
           "difficulty": 1,
           "stem": "Which Copilot plans provide content exclusion?",
           "options": [
-            { "id": "a", "text": "Copilot Business and Copilot Enterprise", "correct": true },
-            { "id": "b", "text": "Only Copilot Free" },
-            { "id": "c", "text": "Every plan, including individual paid plans" },
-            { "id": "d", "text": "No plan — it's a third-party add-on" }
+            {
+              "id": "a",
+              "text": "Copilot Business and Copilot Enterprise",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Only Copilot Free"
+            },
+            {
+              "id": "c",
+              "text": "Every plan, including individual paid plans"
+            },
+            {
+              "id": "d",
+              "text": "No plan — it's a third-party add-on"
+            }
           ],
           "explanation": "Content exclusion is an administrative control available on **Business and Enterprise**. It isn't part of the individual plans and isn't a separate add-on.",
-          "sourceRefs": ["r-d6-exclusion"]
+          "sourceRefs": [
+            "r-d6-exclusion"
+          ]
         }
       ]
     },
@@ -82,13 +128,29 @@
           "difficulty": 3,
           "stem": "A teammate says 'we excluded the file, so its secret is now removed from Copilot's model'. What's wrong with that?",
           "options": [
-            { "id": "a", "text": "Exclusions only govern your ongoing usage; they don't retroactively remove anything from an already-trained model", "correct": true },
-            { "id": "b", "text": "Nothing — exclusions do delete data from the model" },
-            { "id": "c", "text": "Exclusions only work on public repositories" },
-            { "id": "d", "text": "Exclusions apply retroactively but not going forward" }
+            {
+              "id": "a",
+              "text": "Exclusions only govern your ongoing usage; they don't retroactively remove anything from an already-trained model",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Nothing — exclusions do delete data from the model"
+            },
+            {
+              "id": "c",
+              "text": "Exclusions only work on public repositories"
+            },
+            {
+              "id": "d",
+              "text": "Exclusions apply retroactively but not going forward"
+            }
           ],
           "explanation": "Content exclusion is **forward-looking and best-effort**: it stops the excluded file from feeding Copilot's suggestions and chat for you now. It does not reach into a trained model to erase anything. The real fix for a leaked secret is to rotate it, not to trust an exclusion.",
-          "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+          "sourceRefs": [
+            "r-d6-exclusion",
+            "r-d6-concept"
+          ]
         },
         {
           "id": "kc-d6-5",
@@ -97,13 +159,29 @@
           "difficulty": 2,
           "stem": "Your org relies on content exclusions, but developers also use the Copilot coding agent and Copilot CLI on the same repos. What's the gap?",
           "options": [
-            { "id": "a", "text": "Content exclusions are not currently enforced by the CLI, the coding agent, or Agent mode — those surfaces aren't covered", "correct": true },
-            { "id": "b", "text": "The CLI and coding agent enforce exclusions more strictly than completions do" },
-            { "id": "c", "text": "Exclusions only fail if the repo is public" },
-            { "id": "d", "text": "There is no gap — every Copilot surface honours exclusions equally" }
+            {
+              "id": "a",
+              "text": "Content exclusions are not currently enforced by the CLI, the coding agent, or Agent mode — those surfaces aren't covered",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The CLI and coding agent enforce exclusions more strictly than completions do"
+            },
+            {
+              "id": "c",
+              "text": "Exclusions only fail if the repo is public"
+            },
+            {
+              "id": "d",
+              "text": "There is no gap — every Copilot surface honours exclusions equally"
+            }
           ],
           "explanation": "Exclusions cover completions, cross-file context, chat, and code review, but **Copilot CLI, the coding agent, and Agent mode do not currently enforce them**. If those surfaces touch the sensitive repos, exclusion isn't the control you can lean on.",
-          "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+          "sourceRefs": [
+            "r-d6-exclusion",
+            "r-d6-concept"
+          ]
         },
         {
           "id": "kc-d6-6",
@@ -112,13 +190,28 @@
           "difficulty": 3,
           "stem": "Even with a file excluded, Copilot sometimes still seems to 'know' a symbol's type from it. Why?",
           "options": [
-            { "id": "a", "text": "The IDE can surface indirect semantic info — type data, hover definitions, project properties — that Copilot may use", "correct": true },
-            { "id": "b", "text": "Exclusions silently expire after one edit" },
-            { "id": "c", "text": "Copilot re-reads excluded files during code review only" },
-            { "id": "d", "text": "The exclusion pattern must have matched nothing" }
+            {
+              "id": "a",
+              "text": "The IDE can surface indirect semantic info — type data, hover definitions, project properties — that Copilot may use",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Exclusions silently expire after one edit"
+            },
+            {
+              "id": "c",
+              "text": "Copilot re-reads excluded files during code review only"
+            },
+            {
+              "id": "d",
+              "text": "The exclusion pattern must have matched nothing"
+            }
           ],
           "explanation": "The excluded file's **text** is withheld, but the IDE may still expose derived information — types, hover-over definitions, general project properties — that Copilot can use. That's a documented limit, not a misconfiguration.",
-          "sourceRefs": ["r-d6-concept"]
+          "sourceRefs": [
+            "r-d6-concept"
+          ]
         }
       ]
     },
@@ -136,13 +229,29 @@
           "difficulty": 2,
           "stem": "An enterprise wants Copilot to never surface suggestions that match public code. Which setting achieves that?",
           "options": [
-            { "id": "a", "text": "Set the 'Suggestions matching public code' policy to Block", "correct": true },
-            { "id": "b", "text": "Add a content exclusion for every public repository" },
-            { "id": "c", "text": "Disable Copilot Chat" },
-            { "id": "d", "text": "Switch to a model that never matches public code" }
+            {
+              "id": "a",
+              "text": "Set the 'Suggestions matching public code' policy to Block",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Add a content exclusion for every public repository"
+            },
+            {
+              "id": "c",
+              "text": "Disable Copilot Chat"
+            },
+            {
+              "id": "d",
+              "text": "Switch to a model that never matches public code"
+            }
           ],
           "explanation": "Blocking the **matching-public-code** policy discards any suggestion that matches public GitHub code before you see it. Content exclusions govern *your* files, not public repos; disabling chat is unrelated; and the policy applies irrespective of model.",
-          "sourceRefs": ["r-d6-referencing", "r-d6-settings"]
+          "sourceRefs": [
+            "r-d6-referencing",
+            "r-d6-settings"
+          ]
         },
         {
           "id": "kc-d6-8",
@@ -151,13 +260,28 @@
           "difficulty": 2,
           "stem": "With the matching-public-code policy set to Allow, what does code referencing give you when you accept a matching suggestion?",
           "options": [
-            { "id": "a", "text": "The URL(s) of the matching public file(s) and the licence that applies, if one was found", "correct": true },
-            { "id": "b", "text": "Automatic rewriting of the code to avoid the match" },
-            { "id": "c", "text": "A blocked suggestion with no detail" },
-            { "id": "d", "text": "A signed legal clearance to use the code" }
+            {
+              "id": "a",
+              "text": "The URL(s) of the matching public file(s) and the licence that applies, if one was found",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Automatic rewriting of the code to avoid the match"
+            },
+            {
+              "id": "c",
+              "text": "A blocked suggestion with no detail"
+            },
+            {
+              "id": "d",
+              "text": "A signed legal clearance to use the code"
+            }
           ],
           "explanation": "Allow shows the match and, via **code referencing**, logs the matching file URL(s) and the applicable **licence** — provenance so you can decide. It doesn't rewrite the code, block it, or grant legal clearance.",
-          "sourceRefs": ["r-d6-referencing"]
+          "sourceRefs": [
+            "r-d6-referencing"
+          ]
         },
         {
           "id": "kc-d6-9",
@@ -166,13 +290,28 @@
           "difficulty": 3,
           "stem": "What is the scope limit of the matching-public-code filter?",
           "options": [
-            { "id": "a", "text": "It compares against public GitHub repositories only — private or off-GitHub code isn't in the index", "correct": true },
-            { "id": "b", "text": "It scans every repository on the internet for matches" },
-            { "id": "c", "text": "It only checks your own organisation's private repos" },
-            { "id": "d", "text": "It guarantees no suggestion ever infringes a licence" }
+            {
+              "id": "a",
+              "text": "It compares against public GitHub repositories only — private or off-GitHub code isn't in the index",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It scans every repository on the internet for matches"
+            },
+            {
+              "id": "c",
+              "text": "It only checks your own organisation's private repos"
+            },
+            {
+              "id": "d",
+              "text": "It guarantees no suggestion ever infringes a licence"
+            }
           ],
           "explanation": "The filter checks about 150 characters against an index of **public GitHub** code — not private repos, not code hosted elsewhere. It's a safeguard, not an all-sources plagiarism or licence guarantee.",
-          "sourceRefs": ["r-d6-referencing"]
+          "sourceRefs": [
+            "r-d6-referencing"
+          ]
         }
       ]
     },
@@ -190,13 +329,28 @@
           "difficulty": 2,
           "stem": "For Copilot Business/Enterprise, which statement about model training is correct?",
           "options": [
-            { "id": "a", "text": "Business/Enterprise code and prompts are not used to train the foundation models", "correct": true },
-            { "id": "b", "text": "All Business/Enterprise code is used to retrain the model nightly" },
-            { "id": "c", "text": "Training behaviour depends on which IDE you use" },
-            { "id": "d", "text": "Admins must pay extra to stop their code being used for training" }
+            {
+              "id": "a",
+              "text": "Business/Enterprise code and prompts are not used to train the foundation models",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "All Business/Enterprise code is used to retrain the model nightly"
+            },
+            {
+              "id": "c",
+              "text": "Training behaviour depends on which IDE you use"
+            },
+            {
+              "id": "d",
+              "text": "Admins must pay extra to stop their code being used for training"
+            }
           ],
           "explanation": "The Business/Enterprise contract is that customer **code and prompts are not used to train** the foundation models — that's the baseline, documented in the privacy statement, not something gated by IDE or an extra fee.",
-          "sourceRefs": ["r-d6-privacy"]
+          "sourceRefs": [
+            "r-d6-privacy"
+          ]
         },
         {
           "id": "kc-d6-11",
@@ -205,13 +359,29 @@
           "difficulty": 2,
           "stem": "An org owner wants to confirm which paths across the org are actually excluded from Copilot. What do they do?",
           "options": [
-            { "id": "a", "text": "Audit the content-exclusion configuration at the relevant scopes", "correct": true },
-            { "id": "b", "text": "Ask each developer to describe their local settings" },
-            { "id": "c", "text": "Read the model's training logs" },
-            { "id": "d", "text": "Assume the defaults exclude sensitive files automatically" }
+            {
+              "id": "a",
+              "text": "Audit the content-exclusion configuration at the relevant scopes",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Ask each developer to describe their local settings"
+            },
+            {
+              "id": "c",
+              "text": "Read the model's training logs"
+            },
+            {
+              "id": "d",
+              "text": "Assume the defaults exclude sensitive files automatically"
+            }
           ],
           "explanation": "You verify what's fenced off by **auditing the exclusion configuration** at each scope — not by polling developers, reading training logs (you can't), or assuming defaults (there are none for your files).",
-          "sourceRefs": ["r-d6-exclusion", "r-d6-settings"]
+          "sourceRefs": [
+            "r-d6-exclusion",
+            "r-d6-settings"
+          ]
         },
         {
           "id": "kc-d6-12",
@@ -220,13 +390,28 @@
           "difficulty": 2,
           "stem": "How should Copilot's security-warning / vulnerability filtering be treated?",
           "options": [
-            { "id": "a", "text": "As an assistive safeguard that flags some insecure patterns — not a replacement for security review or SAST", "correct": true },
-            { "id": "b", "text": "As a guarantee that generated code is free of vulnerabilities" },
-            { "id": "c", "text": "As a full replacement for static analysis tooling" },
-            { "id": "d", "text": "As a feature that blocks all insecure code from ever appearing" }
+            {
+              "id": "a",
+              "text": "As an assistive safeguard that flags some insecure patterns — not a replacement for security review or SAST",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "As a guarantee that generated code is free of vulnerabilities"
+            },
+            {
+              "id": "c",
+              "text": "As a full replacement for static analysis tooling"
+            },
+            {
+              "id": "d",
+              "text": "As a feature that blocks all insecure code from ever appearing"
+            }
           ],
           "explanation": "The filtering **flags some** insecure patterns and helps, but it's assistive — it doesn't guarantee vulnerability-free code or replace SAST and human review. Defence in depth still applies.",
-          "sourceRefs": ["r-d6-privacy"]
+          "sourceRefs": [
+            "r-d6-privacy"
+          ]
         }
       ]
     }
@@ -239,13 +424,28 @@
       "difficulty": 1,
       "stem": "What is the purpose of a Copilot content exclusion?",
       "options": [
-        { "id": "a", "text": "To keep specified files, paths, or repositories from feeding Copilot's completions and chat", "correct": true },
-        { "id": "b", "text": "To speed up completions by caching files" },
-        { "id": "c", "text": "To grant Copilot access to private repositories" },
-        { "id": "d", "text": "To choose which model answers chat" }
+        {
+          "id": "a",
+          "text": "To keep specified files, paths, or repositories from feeding Copilot's completions and chat",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "To speed up completions by caching files"
+        },
+        {
+          "id": "c",
+          "text": "To grant Copilot access to private repositories"
+        },
+        {
+          "id": "d",
+          "text": "To choose which model answers chat"
+        }
       ],
       "explanation": "Content exclusion **fences files out** of Copilot — no completions in them, no using them for context or chat. It isn't a cache, an access grant, or a model selector.",
-      "sourceRefs": ["r-d6-exclusion"]
+      "sourceRefs": [
+        "r-d6-exclusion"
+      ]
     },
     {
       "id": "q-d6-2",
@@ -254,13 +454,29 @@
       "difficulty": 2,
       "stem": "An enterprise owner needs the same exclusion applied across every organisation in the enterprise. At which scope is that set?",
       "options": [
-        { "id": "a", "text": "Enterprise-level content exclusion", "correct": true },
-        { "id": "b", "text": "One organisation's settings only" },
-        { "id": "c", "text": "Each repository, one at a time" },
-        { "id": "d", "text": "Individual developers' IDEs" }
+        {
+          "id": "a",
+          "text": "Enterprise-level content exclusion",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "One organisation's settings only"
+        },
+        {
+          "id": "c",
+          "text": "Each repository, one at a time"
+        },
+        {
+          "id": "d",
+          "text": "Individual developers' IDEs"
+        }
       ],
       "explanation": "Enterprise-wide coverage is set at the **enterprise** scope by the enterprise owner. Org, repo, or per-developer settings don't reach across the whole enterprise.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-settings"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-settings"
+      ]
     },
     {
       "id": "q-d6-3",
@@ -269,13 +485,28 @@
       "difficulty": 2,
       "stem": "Which syntax do content-exclusion patterns use?",
       "options": [
-        { "id": "a", "text": "fnmatch glob patterns (case-insensitive), e.g. *.env or /config/**", "correct": true },
-        { "id": "b", "text": "Full Perl-compatible regular expressions" },
-        { "id": "c", "text": "SQL LIKE expressions" },
-        { "id": "d", "text": "Exact absolute file paths only, no wildcards" }
+        {
+          "id": "a",
+          "text": "fnmatch glob patterns (case-insensitive), e.g. *.env or /config/**",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Full Perl-compatible regular expressions"
+        },
+        {
+          "id": "c",
+          "text": "SQL LIKE expressions"
+        },
+        {
+          "id": "d",
+          "text": "Exact absolute file paths only, no wildcards"
+        }
       ],
       "explanation": "Exclusions use **fnmatch** glob syntax (case-insensitive) with wildcards like `*.env` and `/config/**`. They aren't PCRE, SQL, or exact-path-only.",
-      "sourceRefs": ["r-d6-exclusion"]
+      "sourceRefs": [
+        "r-d6-exclusion"
+      ]
     },
     {
       "id": "q-d6-4",
@@ -284,13 +515,29 @@
       "difficulty": 2,
       "stem": "Besides completions, which of these does content exclusion also affect?",
       "options": [
-        { "id": "a", "text": "Copilot Chat answers and whether the file is reviewed in Copilot code review", "correct": true },
-        { "id": "b", "text": "The Copilot CLI's behaviour" },
-        { "id": "c", "text": "The coding (cloud) agent's behaviour" },
-        { "id": "d", "text": "Agent mode in IDE chat" }
+        {
+          "id": "a",
+          "text": "Copilot Chat answers and whether the file is reviewed in Copilot code review",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The Copilot CLI's behaviour"
+        },
+        {
+          "id": "c",
+          "text": "The coding (cloud) agent's behaviour"
+        },
+        {
+          "id": "d",
+          "text": "Agent mode in IDE chat"
+        }
       ],
       "explanation": "Exclusions reach completions, cross-file context, **chat**, and **code review**. They do **not** currently cover the CLI, the coding agent, or Agent mode — those are the surfaces to watch.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-concept"
+      ]
     },
     {
       "id": "q-d6-5",
@@ -299,13 +546,28 @@
       "difficulty": 2,
       "stem": "You add a new exclusion but a developer still sees suggestions in the file minutes later. What's the most likely explanation?",
       "options": [
-        { "id": "a", "text": "Exclusions can take up to ~30 minutes to propagate, and some editors need a reload", "correct": true },
-        { "id": "b", "text": "Exclusions never affect the developer who created them" },
-        { "id": "c", "text": "The exclusion permanently failed and must be recreated" },
-        { "id": "d", "text": "The file must be deleted for the exclusion to work" }
+        {
+          "id": "a",
+          "text": "Exclusions can take up to ~30 minutes to propagate, and some editors need a reload",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Exclusions never affect the developer who created them"
+        },
+        {
+          "id": "c",
+          "text": "The exclusion permanently failed and must be recreated"
+        },
+        {
+          "id": "d",
+          "text": "The file must be deleted for the exclusion to work"
+        }
       ],
       "explanation": "Exclusion changes are **best-effort and take time** — up to about 30 minutes in IDEs, with a reload needed in some editors. It isn't per-user, permanently broken, or dependent on deleting the file.",
-      "sourceRefs": ["r-d6-exclusion"]
+      "sourceRefs": [
+        "r-d6-exclusion"
+      ]
     },
     {
       "id": "q-d6-6",
@@ -314,13 +576,29 @@
       "difficulty": 3,
       "stem": "A secret was committed and briefly usable by Copilot before you added an exclusion. What's the correct conclusion?",
       "options": [
-        { "id": "a", "text": "The exclusion doesn't undo past exposure — rotate the secret; exclusions are forward-looking", "correct": true },
-        { "id": "b", "text": "The exclusion retroactively purges the secret everywhere, so no action is needed" },
-        { "id": "c", "text": "Copilot will automatically rotate the secret for you" },
-        { "id": "d", "text": "Making the repo private undoes the exposure" }
+        {
+          "id": "a",
+          "text": "The exclusion doesn't undo past exposure — rotate the secret; exclusions are forward-looking",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The exclusion retroactively purges the secret everywhere, so no action is needed"
+        },
+        {
+          "id": "c",
+          "text": "Copilot will automatically rotate the secret for you"
+        },
+        {
+          "id": "d",
+          "text": "Making the repo private undoes the exposure"
+        }
       ],
       "explanation": "Exclusions only govern usage **going forward** — they don't reverse exposure or scrub trained models. A leaked secret must be **rotated**; Copilot won't do it, and repo visibility doesn't help after the fact.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-concept"
+      ]
     },
     {
       "id": "q-d6-7",
@@ -329,13 +607,28 @@
       "difficulty": 3,
       "stem": "Why might Copilot still use some information from an excluded file?",
       "options": [
-        { "id": "a", "text": "The IDE can surface indirect semantic data — type info, hover definitions, project properties", "correct": true },
-        { "id": "b", "text": "Exclusions are ignored on weekends" },
-        { "id": "c", "text": "Copilot decrypts the file during chat" },
-        { "id": "d", "text": "The exclusion only hides the filename, never the contents" }
+        {
+          "id": "a",
+          "text": "The IDE can surface indirect semantic data — type info, hover definitions, project properties",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Exclusions are ignored on weekends"
+        },
+        {
+          "id": "c",
+          "text": "Copilot decrypts the file during chat"
+        },
+        {
+          "id": "d",
+          "text": "The exclusion only hides the filename, never the contents"
+        }
       ],
       "explanation": "The file's text is withheld, but the IDE may expose **derived semantic information** Copilot can use. It's a documented limit — not a schedule quirk, decryption, or a filename-only exclusion.",
-      "sourceRefs": ["r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-concept"
+      ]
     },
     {
       "id": "q-d6-8",
@@ -344,13 +637,29 @@
       "difficulty": 2,
       "stem": "Which Copilot surfaces do NOT currently enforce content exclusions?",
       "options": [
-        { "id": "a", "text": "Copilot CLI, the coding agent, and Agent mode in IDE chat", "correct": true },
-        { "id": "b", "text": "Inline completions and cross-file context" },
-        { "id": "c", "text": "Copilot Chat's file references" },
-        { "id": "d", "text": "Copilot code review" }
+        {
+          "id": "a",
+          "text": "Copilot CLI, the coding agent, and Agent mode in IDE chat",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Inline completions and cross-file context"
+        },
+        {
+          "id": "c",
+          "text": "Copilot Chat's file references"
+        },
+        {
+          "id": "d",
+          "text": "Copilot code review"
+        }
       ],
       "explanation": "Exclusions **don't** currently apply to the **CLI, coding agent, or Agent mode**. Completions, cross-file context, chat, and code review are the surfaces they *do* cover.",
-      "sourceRefs": ["r-d6-concept", "r-d6-exclusion"]
+      "sourceRefs": [
+        "r-d6-concept",
+        "r-d6-exclusion"
+      ]
     },
     {
       "id": "q-d6-9",
@@ -359,13 +668,28 @@
       "difficulty": 2,
       "stem": "What does the matching-public-code filter compare suggestions against?",
       "options": [
-        { "id": "a", "text": "About 150 characters of surrounding code against an index of public GitHub repositories", "correct": true },
-        { "id": "b", "text": "Your organisation's private repositories" },
-        { "id": "c", "text": "Every website on the public internet" },
-        { "id": "d", "text": "A local copy of your open editor tabs" }
+        {
+          "id": "a",
+          "text": "About 150 characters of surrounding code against an index of public GitHub repositories",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Your organisation's private repositories"
+        },
+        {
+          "id": "c",
+          "text": "Every website on the public internet"
+        },
+        {
+          "id": "d",
+          "text": "A local copy of your open editor tabs"
+        }
       ],
       "explanation": "The filter checks roughly **150 characters** of context against **public GitHub** code. Private repos, arbitrary websites, and your local tabs aren't the index.",
-      "sourceRefs": ["r-d6-referencing"]
+      "sourceRefs": [
+        "r-d6-referencing"
+      ]
     },
     {
       "id": "q-d6-10",
@@ -374,13 +698,28 @@
       "difficulty": 2,
       "stem": "With the matching-public-code policy set to Block, what happens to a suggestion that matches public code?",
       "options": [
-        { "id": "a", "text": "It is discarded — you never see it", "correct": true },
-        { "id": "b", "text": "It is shown with a licence banner you must accept" },
-        { "id": "c", "text": "It is shown but greyed out" },
-        { "id": "d", "text": "It is emailed to the org owner for approval" }
+        {
+          "id": "a",
+          "text": "It is discarded — you never see it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is shown with a licence banner you must accept"
+        },
+        {
+          "id": "c",
+          "text": "It is shown but greyed out"
+        },
+        {
+          "id": "d",
+          "text": "It is emailed to the org owner for approval"
+        }
       ],
       "explanation": "**Block discards** matching suggestions before they reach you. Showing with a reference is the **Allow** behaviour; there's no greyed-out or email-approval flow.",
-      "sourceRefs": ["r-d6-referencing"]
+      "sourceRefs": [
+        "r-d6-referencing"
+      ]
     },
     {
       "id": "q-d6-11",
@@ -389,13 +728,28 @@
       "difficulty": 2,
       "stem": "With the policy set to Allow, code referencing logs which details for an accepted match?",
       "options": [
-        { "id": "a", "text": "The URL(s) of the matching public file(s) and the applicable licence, if found", "correct": true },
-        { "id": "b", "text": "The developer's IP address and machine name" },
-        { "id": "c", "text": "A full copy of the private repository" },
-        { "id": "d", "text": "Nothing — Allow logs no detail" }
+        {
+          "id": "a",
+          "text": "The URL(s) of the matching public file(s) and the applicable licence, if found",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The developer's IP address and machine name"
+        },
+        {
+          "id": "c",
+          "text": "A full copy of the private repository"
+        },
+        {
+          "id": "d",
+          "text": "Nothing — Allow logs no detail"
+        }
       ],
       "explanation": "Code referencing records the **matching file URL(s)** and the **licence** if one is found — provenance to inform your decision. It doesn't log IPs, copy repos, or record nothing.",
-      "sourceRefs": ["r-d6-referencing"]
+      "sourceRefs": [
+        "r-d6-referencing"
+      ]
     },
     {
       "id": "q-d6-12",
@@ -404,13 +758,28 @@
       "difficulty": 2,
       "stem": "Does the choice of chat/completion model change whether the matching-public-code policy applies?",
       "options": [
-        { "id": "a", "text": "No — the policy applies irrespective of which model is chosen", "correct": true },
-        { "id": "b", "text": "Yes — only the default model enforces it" },
-        { "id": "c", "text": "Yes — larger models disable it" },
-        { "id": "d", "text": "Only when using Copilot Chat, not completions" }
+        {
+          "id": "a",
+          "text": "No — the policy applies irrespective of which model is chosen",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — only the default model enforces it"
+        },
+        {
+          "id": "c",
+          "text": "Yes — larger models disable it"
+        },
+        {
+          "id": "d",
+          "text": "Only when using Copilot Chat, not completions"
+        }
       ],
       "explanation": "The matching-public-code policy is applied **regardless of the model**. It isn't tied to the default model, disabled by larger models, or limited to chat.",
-      "sourceRefs": ["r-d6-referencing"]
+      "sourceRefs": [
+        "r-d6-referencing"
+      ]
     },
     {
       "id": "q-d6-13",
@@ -419,13 +788,28 @@
       "difficulty": 1,
       "stem": "For Copilot Business and Enterprise, are customer prompts and code used to train the foundation models?",
       "options": [
-        { "id": "a", "text": "No — Business/Enterprise prompts and code are not used to train the foundation models", "correct": true },
-        { "id": "b", "text": "Yes — always, with no way to change it" },
-        { "id": "c", "text": "Only if the repository is public" },
-        { "id": "d", "text": "Only on Tuesdays during maintenance" }
+        {
+          "id": "a",
+          "text": "No — Business/Enterprise prompts and code are not used to train the foundation models",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — always, with no way to change it"
+        },
+        {
+          "id": "c",
+          "text": "Only if the repository is public"
+        },
+        {
+          "id": "d",
+          "text": "Only on Tuesdays during maintenance"
+        }
       ],
       "explanation": "The Business/Enterprise baseline is that customer **prompts and code are not used to train** the models. The authority for the specifics is the Copilot Business privacy statement.",
-      "sourceRefs": ["r-d6-privacy"]
+      "sourceRefs": [
+        "r-d6-privacy"
+      ]
     },
     {
       "id": "q-d6-14",
@@ -434,13 +818,28 @@
       "difficulty": 1,
       "stem": "Where is the authoritative source for Copilot Business data handling, retention, and flow?",
       "options": [
-        { "id": "a", "text": "The Copilot Business privacy statement", "correct": true },
-        { "id": "b", "text": "A third-party blog comparison" },
-        { "id": "c", "text": "The IDE's release notes" },
-        { "id": "d", "text": "The completion latency dashboard" }
+        {
+          "id": "a",
+          "text": "The Copilot Business privacy statement",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A third-party blog comparison"
+        },
+        {
+          "id": "c",
+          "text": "The IDE's release notes"
+        },
+        {
+          "id": "d",
+          "text": "The completion latency dashboard"
+        }
       ],
       "explanation": "Data-handling specifics live in the **Copilot Business privacy statement** — the primary source. Blogs, release notes, and dashboards aren't authoritative for privacy terms.",
-      "sourceRefs": ["r-d6-privacy"]
+      "sourceRefs": [
+        "r-d6-privacy"
+      ]
     },
     {
       "id": "q-d6-15",
@@ -449,13 +848,29 @@
       "difficulty": 2,
       "stem": "Who can configure organisation-level Copilot policies such as the matching-public-code setting?",
       "options": [
-        { "id": "a", "text": "Organisation owners", "correct": true },
-        { "id": "b", "text": "Any member of the organisation" },
-        { "id": "c", "text": "External collaborators on a single repo" },
-        { "id": "d", "text": "Only GitHub Support" }
+        {
+          "id": "a",
+          "text": "Organisation owners",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Any member of the organisation"
+        },
+        {
+          "id": "c",
+          "text": "External collaborators on a single repo"
+        },
+        {
+          "id": "d",
+          "text": "Only GitHub Support"
+        }
       ],
       "explanation": "Org-level policies are set by **organisation owners**. Ordinary members and external collaborators can't set them, and it's not a support-only action.",
-      "sourceRefs": ["r-d6-settings", "r-d6-exclusion"]
+      "sourceRefs": [
+        "r-d6-settings",
+        "r-d6-exclusion"
+      ]
     },
     {
       "id": "q-d6-16",
@@ -464,13 +879,28 @@
       "difficulty": 2,
       "stem": "How should Copilot's vulnerability/insecure-pattern filtering be understood?",
       "options": [
-        { "id": "a", "text": "An assistive safeguard that flags some issues — not a replacement for SAST or human review", "correct": true },
-        { "id": "b", "text": "A guarantee of vulnerability-free output" },
-        { "id": "c", "text": "A full SAST replacement" },
-        { "id": "d", "text": "A tool that auto-fixes every security bug" }
+        {
+          "id": "a",
+          "text": "An assistive safeguard that flags some issues — not a replacement for SAST or human review",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A guarantee of vulnerability-free output"
+        },
+        {
+          "id": "c",
+          "text": "A full SAST replacement"
+        },
+        {
+          "id": "d",
+          "text": "A tool that auto-fixes every security bug"
+        }
       ],
       "explanation": "It **flags some** insecure patterns and helps, but it's assistive — no guarantee, no SAST replacement, no universal auto-fix. Keep the rest of your security controls.",
-      "sourceRefs": ["r-d6-privacy"]
+      "sourceRefs": [
+        "r-d6-privacy"
+      ]
     },
     {
       "id": "q-d6-17",
@@ -479,13 +909,29 @@
       "difficulty": 3,
       "stem": "A team argues 'content exclusion is our data-loss control, so sensitive data in that repo is safe'. What's the strongest correction?",
       "options": [
-        { "id": "a", "text": "Exclusion is best-effort — several surfaces skip it and semantic hints can leak; don't rely on it as the sole control for must-never-see data", "correct": true },
-        { "id": "b", "text": "Exclusion is airtight, so the team is right" },
-        { "id": "c", "text": "Exclusion only fails if the repo is public" },
-        { "id": "d", "text": "Exclusion moves the data to a secure vault" }
+        {
+          "id": "a",
+          "text": "Exclusion is best-effort — several surfaces skip it and semantic hints can leak; don't rely on it as the sole control for must-never-see data",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Exclusion is airtight, so the team is right"
+        },
+        {
+          "id": "c",
+          "text": "Exclusion only fails if the repo is public"
+        },
+        {
+          "id": "d",
+          "text": "Exclusion moves the data to a secure vault"
+        }
       ],
       "explanation": "Content exclusion is **partial**: CLI/coding-agent/Agent-mode don't enforce it, indirect semantic info can leak, and it's forward-looking. For data that must never be seen, use defence in depth, not exclusion alone.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-concept"
+      ]
     },
     {
       "id": "q-d6-18",
@@ -494,13 +940,28 @@
       "difficulty": 2,
       "stem": "The matching-public-code filter reports very few matches in practice. Roughly how often do matches occur?",
       "options": [
-        { "id": "a", "text": "Typically in under 1% of suggestions", "correct": true },
-        { "id": "b", "text": "In the majority of suggestions" },
-        { "id": "c", "text": "In exactly half of suggestions" },
-        { "id": "d", "text": "Never — matches are impossible" }
+        {
+          "id": "a",
+          "text": "Typically in under 1% of suggestions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "In the majority of suggestions"
+        },
+        {
+          "id": "c",
+          "text": "In exactly half of suggestions"
+        },
+        {
+          "id": "d",
+          "text": "Never — matches are impossible"
+        }
       ],
       "explanation": "GitHub documents that matches to public code occur in **less than 1%** of suggestions — rare, but real enough to warrant the policy. It's neither common nor impossible.",
-      "sourceRefs": ["r-d6-referencing"]
+      "sourceRefs": [
+        "r-d6-referencing"
+      ]
     },
     {
       "id": "q-d6-19",
@@ -509,13 +970,31 @@
       "difficulty": 3,
       "stem": "Which statements about content exclusion are accurate? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "It can be configured at repository, organisation, and enterprise scope", "correct": true },
-        { "id": "b", "text": "It is not currently enforced by the CLI, coding agent, or Agent mode", "correct": true },
-        { "id": "c", "text": "Indirect semantic information may still reach Copilot", "correct": true },
-        { "id": "d", "text": "It retroactively removes excluded content from already-trained models" }
+        {
+          "id": "a",
+          "text": "It can be configured at repository, organisation, and enterprise scope",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It is not currently enforced by the CLI, coding agent, or Agent mode",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Indirect semantic information may still reach Copilot",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "It retroactively removes excluded content from already-trained models"
+        }
       ],
       "explanation": "Exclusion is multi-scope, is skipped by CLI/coding-agent/Agent-mode, and can still leak indirect semantic info. It does **not** reach back into trained models — that's the false option.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-concept"
+      ]
     },
     {
       "id": "q-d6-20",
@@ -524,19 +1003,40 @@
       "difficulty": 2,
       "stem": "An org wants a conservative privacy-and-safeguards posture for a regulated codebase. Which configuration steps fit? (Select all that apply.)",
       "options": [
-        { "id": "a", "text": "Set content exclusions for the sensitive paths at the org (or enterprise) scope", "correct": true },
-        { "id": "b", "text": "Set the matching-public-code policy to Block", "correct": true },
-        { "id": "c", "text": "Audit exclusions and policies regularly to confirm they're in place", "correct": true },
-        { "id": "d", "text": "Rely on exclusions alone and skip secrets management" }
+        {
+          "id": "a",
+          "text": "Set content exclusions for the sensitive paths at the org (or enterprise) scope",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Set the matching-public-code policy to Block",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Audit exclusions and policies regularly to confirm they're in place",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Rely on exclusions alone and skip secrets management"
+        }
       ],
       "explanation": "Exclusions at the owning scope, **Block** for public-code matches, and regular **auditing** all fit a conservative posture. Relying on exclusions alone — dropping secrets management — is the unsafe option.",
-      "sourceRefs": ["r-d6-exclusion", "r-d6-referencing", "r-d6-settings"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-referencing",
+        "r-d6-settings"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-d6-regulated-repo",
-      "domainIds": ["d6-privacy-safeguards"],
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ],
       "title": "Fence Copilot around a regulated repository",
       "tagline": "Configure the right safeguards — and know their limits — for sensitive code.",
       "context": "You own Copilot policy for a regulated service. One repo holds customer PII and secrets; the org wants Copilot's help elsewhere but tight guardrails here. Configure the safeguards and reason about what they do and don't cover.",
@@ -545,44 +1045,111 @@
           "id": "st1",
           "prompt": "First: keep the PII and secrets paths out of Copilot across the relevant repos. What do you configure?",
           "choices": [
-            { "id": "a", "text": "Organisation-level content exclusions for those paths (or enterprise scope if it spans orgs)", "verdict": "best", "rationale": "Cross-repo exclusions belong at the org/enterprise scope so they're enforced centrally and can't be overridden locally." },
-            { "id": "b", "text": "Ask developers to add local exclusions in their own IDEs", "verdict": "wrong", "rationale": "Per-developer local settings aren't enforcement — they're inconsistent and easily missed." },
-            { "id": "c", "text": "Add a repository-level exclusion in just that one repo", "verdict": "viable", "rationale": "Correct control, but scoped to a single repo; if the sensitive paths span repos you want the org scope." }
+            {
+              "id": "a",
+              "text": "Organisation-level content exclusions for those paths (or enterprise scope if it spans orgs)",
+              "verdict": "best",
+              "rationale": "Cross-repo exclusions belong at the org/enterprise scope so they're enforced centrally and can't be overridden locally."
+            },
+            {
+              "id": "b",
+              "text": "Ask developers to add local exclusions in their own IDEs",
+              "verdict": "wrong",
+              "rationale": "Per-developer local settings aren't enforcement — they're inconsistent and easily missed."
+            },
+            {
+              "id": "c",
+              "text": "Add a repository-level exclusion in just that one repo",
+              "verdict": "viable",
+              "rationale": "Correct control, but scoped to a single repo; if the sensitive paths span repos you want the org scope."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Legal doesn't want Copilot surfacing verbatim public code in this codebase. What do you set?",
           "choices": [
-            { "id": "a", "text": "Set the matching-public-code policy to Block for the org", "verdict": "best", "rationale": "Block discards suggestions matching public GitHub code before anyone sees them — the conservative posture legal is asking for." },
-            { "id": "b", "text": "Add content exclusions for popular public repositories", "verdict": "wrong", "rationale": "Exclusions govern your own files; they don't control matching against public code — that's the matching-public-code policy." },
-            { "id": "c", "text": "Set the policy to Allow so developers can see the licence and decide", "verdict": "viable", "rationale": "Allow gives provenance and can be defensible, but it doesn't meet a 'never surface verbatim public code' requirement the way Block does." }
+            {
+              "id": "a",
+              "text": "Set the matching-public-code policy to Block for the org",
+              "verdict": "best",
+              "rationale": "Block discards suggestions matching public GitHub code before anyone sees them — the conservative posture legal is asking for."
+            },
+            {
+              "id": "b",
+              "text": "Add content exclusions for popular public repositories",
+              "verdict": "wrong",
+              "rationale": "Exclusions govern your own files; they don't control matching against public code — that's the matching-public-code policy."
+            },
+            {
+              "id": "c",
+              "text": "Set the policy to Allow so developers can see the licence and decide",
+              "verdict": "viable",
+              "rationale": "Allow gives provenance and can be defensible, but it doesn't meet a 'never surface verbatim public code' requirement the way Block does."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "A dev points out the team also uses the Copilot coding agent and CLI on this repo. What's the honest risk call?",
           "choices": [
-            { "id": "a", "text": "Flag that exclusions don't cover CLI/coding-agent/Agent-mode, and restrict or govern those surfaces separately for this repo", "verdict": "best", "rationale": "Exclusions have a real gap on those surfaces; the responsible move is to name it and control those surfaces another way, not assume exclusion covers them." },
-            { "id": "b", "text": "Assume the exclusion protects those surfaces too, since it's org-wide", "verdict": "wrong", "rationale": "Scope doesn't change coverage — the CLI, coding agent, and Agent mode don't enforce exclusions regardless of scope." },
-            { "id": "c", "text": "Disable the coding agent and CLI for this regulated repo's teams while you assess", "verdict": "viable", "rationale": "A defensible interim guardrail via feature policy, though it may be broader than needed — the point is you're not relying on exclusions there." }
+            {
+              "id": "a",
+              "text": "Flag that exclusions don't cover CLI/coding-agent/Agent-mode, and restrict or govern those surfaces separately for this repo",
+              "verdict": "best",
+              "rationale": "Exclusions have a real gap on those surfaces; the responsible move is to name it and control those surfaces another way, not assume exclusion covers them."
+            },
+            {
+              "id": "b",
+              "text": "Assume the exclusion protects those surfaces too, since it's org-wide",
+              "verdict": "wrong",
+              "rationale": "Scope doesn't change coverage — the CLI, coding agent, and Agent mode don't enforce exclusions regardless of scope."
+            },
+            {
+              "id": "c",
+              "text": "Disable the coding agent and CLI for this regulated repo's teams while you assess",
+              "verdict": "viable",
+              "rationale": "A defensible interim guardrail via feature policy, though it may be broader than needed — the point is you're not relying on exclusions there."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "Compliance asks for evidence the guardrails are actually in place. What do you give them?",
           "choices": [
-            { "id": "a", "text": "An audit of the exclusion configuration and Copilot policies at each scope, with the privacy statement for data handling", "verdict": "best", "rationale": "Auditing the actual configuration plus citing the privacy statement is exactly the evidence a compliance review wants." },
-            { "id": "b", "text": "A screenshot of one developer's IDE showing no suggestions in the file", "verdict": "viable", "rationale": "A weak spot-check — it shows one moment on one machine, not the enforced org-wide configuration." },
-            { "id": "c", "text": "The model's training logs proving the data was never learned", "verdict": "wrong", "rationale": "You can't produce model training logs; that's not how the evidence works. Audit configuration and cite the privacy statement instead." }
+            {
+              "id": "a",
+              "text": "An audit of the exclusion configuration and Copilot policies at each scope, with the privacy statement for data handling",
+              "verdict": "best",
+              "rationale": "Auditing the actual configuration plus citing the privacy statement is exactly the evidence a compliance review wants."
+            },
+            {
+              "id": "b",
+              "text": "A screenshot of one developer's IDE showing no suggestions in the file",
+              "verdict": "viable",
+              "rationale": "A weak spot-check — it shows one moment on one machine, not the enforced org-wide configuration."
+            },
+            {
+              "id": "c",
+              "text": "The model's training logs proving the data was never learned",
+              "verdict": "wrong",
+              "rationale": "You can't produce model training logs; that's not how the evidence works. Audit configuration and cite the privacy statement instead."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d6-exclusion", "r-d6-referencing", "r-d6-privacy", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-referencing",
+        "r-d6-privacy",
+        "r-d6-concept"
+      ]
     },
     {
       "id": "s-d6-troubleshoot",
-      "domainIds": ["d6-privacy-safeguards"],
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ],
       "title": "Diagnose an exclusion that 'isn't working'",
       "tagline": "Separate real gaps from expected behaviour.",
       "context": "A team reports that a file they excluded still seems reachable by Copilot in a few ways. You need to triage each report and respond with the accurate cause and fix.",
@@ -591,31 +1158,79 @@
           "id": "st1",
           "prompt": "Report 1: 'I added the exclusion five minutes ago but I still get completions in the file.' Your response?",
           "choices": [
-            { "id": "a", "text": "Expected — exclusions take up to ~30 minutes to propagate; reload the editor and re-check", "verdict": "best", "rationale": "Propagation delay plus a possible reload is the documented behaviour; wait and reload before assuming a misconfiguration." },
-            { "id": "b", "text": "The exclusion feature is broken; file a support ticket immediately", "verdict": "wrong", "rationale": "Jumping to 'broken' skips the known propagation delay — the most likely cause." },
-            { "id": "c", "text": "Tell them to delete and re-add the exclusion until it works", "verdict": "viable", "rationale": "Harmless but premature churn; the delay usually resolves on its own with a reload." }
+            {
+              "id": "a",
+              "text": "Expected — exclusions take up to ~30 minutes to propagate; reload the editor and re-check",
+              "verdict": "best",
+              "rationale": "Propagation delay plus a possible reload is the documented behaviour; wait and reload before assuming a misconfiguration."
+            },
+            {
+              "id": "b",
+              "text": "The exclusion feature is broken; file a support ticket immediately",
+              "verdict": "wrong",
+              "rationale": "Jumping to 'broken' skips the known propagation delay — the most likely cause."
+            },
+            {
+              "id": "c",
+              "text": "Tell them to delete and re-add the exclusion until it works",
+              "verdict": "viable",
+              "rationale": "Harmless but premature churn; the delay usually resolves on its own with a reload."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Report 2: 'Copilot still seems to know the type of a symbol defined in the excluded file.' Your response?",
           "choices": [
-            { "id": "a", "text": "That's a known limit — the IDE can surface indirect semantic info (types, hover definitions) even when the file's text is excluded", "verdict": "best", "rationale": "Indirect semantic leakage is documented; the exclusion is working on the file's text, but derived info can still reach Copilot." },
-            { "id": "b", "text": "The exclusion clearly failed; the whole file is being read", "verdict": "wrong", "rationale": "Seeing a type isn't the same as the file's text being read — this is the indirect-info limit, not a failure." },
-            { "id": "c", "text": "Move the type definition to a non-excluded file to make it explicit", "verdict": "viable", "rationale": "Sometimes pragmatic, but it doesn't address the underlying limit and may not be desirable for sensitive types." }
+            {
+              "id": "a",
+              "text": "That's a known limit — the IDE can surface indirect semantic info (types, hover definitions) even when the file's text is excluded",
+              "verdict": "best",
+              "rationale": "Indirect semantic leakage is documented; the exclusion is working on the file's text, but derived info can still reach Copilot."
+            },
+            {
+              "id": "b",
+              "text": "The exclusion clearly failed; the whole file is being read",
+              "verdict": "wrong",
+              "rationale": "Seeing a type isn't the same as the file's text being read — this is the indirect-info limit, not a failure."
+            },
+            {
+              "id": "c",
+              "text": "Move the type definition to a non-excluded file to make it explicit",
+              "verdict": "viable",
+              "rationale": "Sometimes pragmatic, but it doesn't address the underlying limit and may not be desirable for sensitive types."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Report 3: 'The coding agent opened a PR that clearly used content from the excluded file.' Your response?",
           "choices": [
-            { "id": "a", "text": "Correct — the coding agent doesn't enforce content exclusions; govern that surface separately for sensitive repos", "verdict": "best", "rationale": "This is a real coverage gap, not a bug: exclusions don't apply to the coding agent, so it needs a different control." },
-            { "id": "b", "text": "Reassure them exclusions cover every Copilot surface, so it must be coincidence", "verdict": "wrong", "rationale": "False — exclusions don't cover the coding agent; dismissing it as coincidence is wrong and unsafe." },
-            { "id": "c", "text": "Disable the coding agent on that repo's teams while you decide on a longer-term control", "verdict": "viable", "rationale": "A reasonable interim guardrail via feature policy, even if broader than strictly necessary." }
+            {
+              "id": "a",
+              "text": "Correct — the coding agent doesn't enforce content exclusions; govern that surface separately for sensitive repos",
+              "verdict": "best",
+              "rationale": "This is a real coverage gap, not a bug: exclusions don't apply to the coding agent, so it needs a different control."
+            },
+            {
+              "id": "b",
+              "text": "Reassure them exclusions cover every Copilot surface, so it must be coincidence",
+              "verdict": "wrong",
+              "rationale": "False — exclusions don't cover the coding agent; dismissing it as coincidence is wrong and unsafe."
+            },
+            {
+              "id": "c",
+              "text": "Disable the coding agent on that repo's teams while you decide on a longer-term control",
+              "verdict": "viable",
+              "rationale": "A reasonable interim guardrail via feature policy, even if broader than strictly necessary."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-d6-exclusion", "r-d6-concept"]
+      "sourceRefs": [
+        "r-d6-exclusion",
+        "r-d6-concept"
+      ]
     }
   ],
   "labs": [
@@ -653,7 +1268,9 @@
       "url": "https://docs.github.com/en/copilot/how-tos/configure-content-exclusion/exclude-content-from-copilot",
       "kind": "official-doc",
       "annotation": "How to configure content exclusions at repo, org, and enterprise scope with fnmatch patterns; what they cover (completions and chat) and the propagation behaviour. The core how-to for this domain.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     },
     {
       "id": "r-d6-concept",
@@ -661,7 +1278,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/content-exclusion",
       "kind": "official-doc",
       "annotation": "The conceptual view: what exclusions affect (including code review), the surfaces they don't cover, and the crucial limits — indirect semantic leakage, symlinks/remote filesystems, best-effort nature.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     },
     {
       "id": "r-d6-referencing",
@@ -669,7 +1288,9 @@
       "url": "https://docs.github.com/en/copilot/concepts/completions/code-referencing",
       "kind": "official-doc",
       "annotation": "The duplication-detection filter: the ~150-character check against public GitHub code, Block vs Allow, what code referencing logs (URLs + licence), and the under-1% match rate.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     },
     {
       "id": "r-d6-settings",
@@ -677,7 +1298,9 @@
       "url": "https://docs.github.com/en/copilot/how-tos/manage-your-account/manage-policies-for-copilot-in-your-organization",
       "kind": "official-doc",
       "annotation": "Org and enterprise Copilot policies — the matching-public-code setting, feature policies, and which role sets what. Where auditing 'who can configure what' is grounded.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     },
     {
       "id": "r-d6-privacy",
@@ -685,7 +1308,9 @@
       "url": "https://docs.github.com/en/site-policy/privacy-policies/github-copilot-business-privacy-statement",
       "kind": "official-doc",
       "annotation": "The authority for Business/Enterprise data handling: retention, training (customer code and prompts are not used to train the models), and telemetry. The source of truth for data-handling questions.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     },
     {
       "id": "r-d6-suggestions",
@@ -693,17 +1318,21 @@
       "url": "https://docs.github.com/en/copilot/concepts/completions/code-suggestions",
       "kind": "official-doc",
       "annotation": "How each suggestion is checked for matches with public code and handled per the matching-public-code policy, independent of the model chosen.",
-      "domainIds": ["d6-privacy-safeguards"]
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ]
     }
   ],
   "videos": [
     {
       "id": "v-d6-1",
       "title": "D6 · Privacy & safeguards — exclusions, matching-code filter, auditing",
-      "provider": "youtube",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["d6-privacy-safeguards"],
+      "provider": "file",
+      "url": "/content/github-copilot/videos/d6-privacy.mp4",
+      "status": "published",
+      "domainIds": [
+        "d6-privacy-safeguards"
+      ],
       "sourceNotebook": "gh-300 / d6 / privacy-safeguards"
     }
   ]
