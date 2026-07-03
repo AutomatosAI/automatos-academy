@@ -93,6 +93,6 @@ ships the track **coming-soon** (with notify-me demand capture) until that lands
 
 `npm run validate` green (skills-track shape, no weights) · renders on the surfaces (minus
 exam/readiness) · tone rule holds (no unexplained acronym anywhere — spot-check) · every module has
-its 🤝 peek grounded in a real gitbook surface · module 04 asserts no single "best" model · module 10
+its 🤝 peek grounded in a real gitbook surface · module 04 asserts no single "best" model · module 12
 links both doors + Gen-AI-Leader · manifest entry under `automatos` (`trackId: ai-explained`, code
 **AIX**, lane `foundations`, `coming-soon` until authored).

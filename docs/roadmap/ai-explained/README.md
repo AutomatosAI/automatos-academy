@@ -33,7 +33,7 @@ this."* No exam, no jargon, no experience needed. Blueprint: [PRD-B0-AI-EXPLAINE
 
 - **The bottom rung.** It sits *below* both lanes — after AIX a learner picks a door: **Operator**
   ([AI Business Foundations](../ai-business/) — run your business with AI) or **Practitioner**
-  (get certified). Module 10 is the router.
+  (get certified). Module 12 is the router.
 - **Understanding, not homework.** No exam, no capstone build. Completion = "AI-literate": you can
   explain agent / model / open-vs-closed / context / RAG / knowledge graph / MCP in your own words.
 - **Honest about the field.** Module 04 refuses to crown a "best" model — the true answer ("it
