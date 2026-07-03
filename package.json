@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "description": "Automatos Academy — the Automatos learning model. A repeatable pedagogy (Learn → Build → Decide → Prove → Ready) applied across certification tracks. Flagship track: Anthropic Claude Certified Architect — Foundations (CCA-F).",
+  "description": "Automatos Academy \u2014 the Automatos learning model. A repeatable pedagogy (Learn \u2192 Build \u2192 Decide \u2192 Prove \u2192 Ready) applied across certification tracks. Flagship track: Anthropic Claude Certified Architect \u2014 Foundations (CCA-F).",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "validate": "node scripts/validate-content.mjs",
     "test": "node tests/engine.test.mjs",
-    "shells": "node scripts/generate-shells.mjs"
+    "shells": "node scripts/generate-shells.mjs",
+    "tutor-corpus": "node scripts/export-tutor-corpus.mjs"
   },
   "dependencies": {
     "compression": "^1.7.4",
