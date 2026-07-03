@@ -865,6 +865,398 @@
       "sourceRefs": [
         "r-d1-agents"
       ]
+    },
+    {
+      "id": "q-d1-19",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A pipeline drafts marketing copy, then a second step translates that draft, then a third checks it against a style guide — each step consuming the previous output. Which workflow pattern is this?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Prompt chaining — sequential steps where each processes the prior output",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Routing — a classifier sends work to specialised handlers"
+        },
+        {
+          "id": "c",
+          "text": "Parallelisation — independent steps run at once and results are merged"
+        },
+        {
+          "id": "d",
+          "text": "Orchestrator-workers — a model dynamically splits and delegates"
+        }
+      ],
+      "explanation": "Fixed, ordered steps that each transform the previous output is **prompt chaining**. Routing branches on a classification; parallelisation runs independent work concurrently; orchestrator-workers lets the model decide the split at runtime — none match a known linear sequence.",
+      "sourceRefs": [
+        "r-d1-agents"
+      ]
+    },
+    {
+      "id": "q-d1-20",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want a draft to be graded against explicit criteria and revised repeatedly until it passes, with the generator and the grader as separate LLM roles. Which workflow pattern fits, and does it need the agent tier?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Evaluator-optimizer — one call generates, another evaluates and feeds back in a loop; it's a workflow, not necessarily an agent",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Prompt chaining — a fixed one-pass sequence with no feedback loop"
+        },
+        {
+          "id": "c",
+          "text": "Routing — the grader picks which pipeline to run"
+        },
+        {
+          "id": "d",
+          "text": "It requires the agent tier because the model must decide its own trajectory"
+        }
+      ],
+      "explanation": "Generator-plus-grader in a revise loop is the **evaluator-optimizer** workflow — your code owns the loop and stop condition, so it's still a workflow. Prompt chaining has no feedback; routing is a one-shot branch; and because control flow is known, you don't need the more expensive agent tier.",
+      "sourceRefs": [
+        "r-d1-agents"
+      ]
+    },
+    {
+      "id": "q-d1-21",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "To make a moderation decision more robust, you run the same input through the model several times and take the majority verdict. Which pattern is this a form of?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Parallelisation by voting — run the task multiple times and aggregate the outputs",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Parallelisation by sectioning — split one task into independent subtasks"
+        },
+        {
+          "id": "c",
+          "text": "Prompt chaining — feed each verdict into the next call"
+        },
+        {
+          "id": "d",
+          "text": "Evaluator-optimizer — a grader revises a single draft"
+        }
+      ],
+      "explanation": "Running the *same* task repeatedly and aggregating is **voting**, one of the two parallelisation forms. **Sectioning** instead splits *different* independent subtasks to run at once. Chaining is sequential and dependent; evaluator-optimizer is a generate/critique loop on one artifact.",
+      "sourceRefs": [
+        "r-d1-agents"
+      ]
+    },
+    {
+      "id": "q-d1-22",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Sub-agents in your fan-out do short, well-scoped lookups and you want them fast and cheap. Which effort level does the guidance point to for subagents?",
+      "options": [
+        {
+          "id": "a",
+          "text": "low — most efficient, significant token savings; the documented fit for subagents",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "max — absolute maximum capability with no token constraints"
+        },
+        {
+          "id": "c",
+          "text": "xhigh — extended capability for long-horizon work"
+        },
+        {
+          "id": "d",
+          "text": "Effort can't be set per sub-agent, only per organisation"
+        }
+      ],
+      "explanation": "`low` effort is the documented pick for simple, high-volume work such as subagents — it trims tokens and latency. `max` and `xhigh` are for the hardest / longest-horizon work and would overspend on quick lookups. Effort is a per-request control (`output_config.effort`), so each agent can set its own.",
+      "sourceRefs": [
+        "r-d1-effort"
+      ]
+    },
+    {
+      "id": "q-d1-23",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Where is the effort parameter passed, and what is the default when you omit it on a modern model like Opus 4.8?",
+      "options": [
+        {
+          "id": "a",
+          "text": "In `output_config.effort`; omitting it is equivalent to `high`",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "As a top-level `effort` field; the default is `low`"
+        },
+        {
+          "id": "c",
+          "text": "Inside `thinking.effort`; the default is `max`"
+        },
+        {
+          "id": "d",
+          "text": "In the system prompt as plain text; there is no default"
+        }
+      ],
+      "explanation": "Effort lives at `output_config.effort`, and setting it to `high` is identical to leaving it out — `high` is the API default. The recommended starting point for coding/agentic work is to set `xhigh` explicitly, since it overrides the `high` default.",
+      "sourceRefs": [
+        "r-d1-effort"
+      ]
+    },
+    {
+      "id": "q-d1-24",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "On Opus 4.8 you set `thinking: {type: \"enabled\", budget_tokens: 8000}` to force a fixed reasoning budget on an agentic task. What happens, and what should you do instead?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It returns a 400 error — manual budgets aren't supported; use adaptive thinking (`thinking: {type: \"adaptive\"}`) and control depth with effort",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It works and pins thinking to exactly 8000 tokens"
+        },
+        {
+          "id": "c",
+          "text": "It silently downgrades the model to Opus 4.5"
+        },
+        {
+          "id": "d",
+          "text": "It disables tool use for the request"
+        }
+      ],
+      "explanation": "Manual `budget_tokens` is rejected with a 400 on the newest models (Opus 4.8, Sonnet 5, Fable 5). Those models use adaptive thinking — the model decides when and how much to think — and you steer depth with the effort parameter, not a fixed budget.",
+      "sourceRefs": [
+        "r-d1-effort"
+      ]
+    },
+    {
+      "id": "q-d1-25",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Polling a Managed Agents session, you see `status: \"rescheduling\"`. Is the run over?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No — rescheduling means a transient error occurred and the platform is retrying automatically; it is not terminal",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — rescheduling is the normal end state for a completed session"
+        },
+        {
+          "id": "c",
+          "text": "Yes — it means the session hit an unrecoverable error"
+        },
+        {
+          "id": "d",
+          "text": "No — but it means the agent is waiting on you for a tool result"
+        }
+      ],
+      "explanation": "A session moves through `idle`, `running`, `rescheduling`, and `terminated`. `rescheduling` is a transient retry after a recoverable error — keep waiting. Only `terminated` is the unrecoverable end state; `idle` (not rescheduling) is where the agent awaits your input.",
+      "sourceRefs": [
+        "r-d1-managed"
+      ]
+    },
+    {
+      "id": "q-d1-26",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "For one experimental session you want to run an existing agent on a different model and with one extra tool, without disturbing other sessions or bumping the agent's version. What's the supported mechanism?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Create the session with an `agent_with_overrides` object supplying `model` and the full `tools` list — overrides apply to that session only and create no new version",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Pass `model` and `tools` as top-level session fields alongside the agent id"
+        },
+        {
+          "id": "c",
+          "text": "Edit the agent, run the session, then edit it back"
+        },
+        {
+          "id": "d",
+          "text": "You can't — a session can only run the agent's exact stored configuration"
+        }
+      ],
+      "explanation": "The `agent_with_overrides` form lets one session override `model`, `system`, `tools`, `mcp_servers`, or `skills` without modifying the agent resource or creating a version — other sessions are unaffected. Overrides replace a field in full (list a complete `tools` array), and `model` can be overridden but never cleared. Bare top-level `model`/`tools` on the session is not the API shape.",
+      "sourceRefs": [
+        "r-d1-managed"
+      ]
+    },
+    {
+      "id": "q-d1-27",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Mid-run, you need to grant a session an extra MCP server. Which is true about updating a live session's configuration?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only `tools` and `mcp_servers` can change after creation, the session must be idle, and the update is full-replacement (GET, modify the array, POST it back)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Any field including `model` and `system` can be changed at any time"
+        },
+        {
+          "id": "c",
+          "text": "Updates merge into the existing arrays, so you only send the new entries"
+        },
+        {
+          "id": "d",
+          "text": "Configuration is frozen at creation; you must start a new session"
+        }
+      ],
+      "explanation": "You can update `tools` and `mcp_servers` (including permission policies) mid-session, but the session must be `idle` first (interrupt it if running), and the semantics are full replacement — read the current array, add your entry, and post the whole list back. `model`/`system`/`skills` can't be changed after creation; use overrides at creation for those.",
+      "sourceRefs": [
+        "r-d1-managed"
+      ]
+    },
+    {
+      "id": "q-d1-28",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A response returns `stop_reason: \"stop_sequence\"`. What does that tell you?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The model emitted one of your configured stop sequences; read the `stop_sequence` field to see which one fired",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model refused the request on safety grounds"
+        },
+        {
+          "id": "c",
+          "text": "The output was truncated by the max_tokens limit"
+        },
+        {
+          "id": "d",
+          "text": "A server-side tool loop paused at its iteration cap"
+        }
+      ],
+      "explanation": "`stop_sequence` means Claude produced one of the `stop_sequences` you supplied and halted; the `stop_sequence` field reports which. That's distinct from `refusal` (safety decline), `max_tokens` (length cap), and `pause_turn` (server-tool loop pause).",
+      "sourceRefs": [
+        "r-d1-tooluse"
+      ]
+    },
+    {
+      "id": "q-d1-29",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does `stop_reason: \"model_context_window_exceeded\"` differ from `max_tokens`, and how should you treat the response?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It means output filled the model's context window (not your max_tokens cap); treat the response as truncated",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They are identical; both mean you set max_tokens too low"
+        },
+        {
+          "id": "c",
+          "text": "It means the model refused; discard the content"
+        },
+        {
+          "id": "d",
+          "text": "It means a tool result was too large; retry the tool"
+        }
+      ],
+      "explanation": "`max_tokens` fires when output hits the limit *you* set; `model_context_window_exceeded` fires when generation reaches the model's own context ceiling. Both yield a truncated response you should handle as incomplete — but the fix differs (raise your cap / stream vs. reduce input so there's room to generate).",
+      "sourceRefs": [
+        "r-d1-tooluse"
+      ]
+    },
+    {
+      "id": "q-d1-30",
+      "domainId": "d1-agentic-architectures",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "Which statements about a Managed Agents coordinator's `multiagent` roster and threads are correct? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "The roster is capped at 20 unique agents, though the coordinator can call multiple copies of each",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A `{\"type\": \"self\"}` entry lets the coordinator spawn copies of itself",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Delegation is one level deep; a sub-agent's own roster (depth > 1) is ignored",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "There is no limit on concurrent threads in a session"
+        }
+      ],
+      "explanation": "The roster (`multiagent.agents`) holds up to 20 unique agents, `self` copies are allowed, and delegation is strictly one level deep. The false option is the thread limit: a session supports at most 25 concurrent threads, so unbounded fan-out is not possible.",
+      "sourceRefs": [
+        "r-d1-multiagent"
+      ]
+    },
+    {
+      "id": "q-d1-31",
+      "domainId": "d1-agentic-architectures",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A stakeholder asks you to build an autonomous agent to rename a single config key across the codebase — a change a scripted find-and-replace fully covers. What's the right architectural call?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Don't build an agent — a deterministic script (or single tool call) is cheaper, faster, and safer for a fully specifiable change",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Build a multi-agent coordinator so the work parallelises across files"
+        },
+        {
+          "id": "c",
+          "text": "Build an open-ended agent so it can handle any edge case it finds"
+        },
+        {
+          "id": "d",
+          "text": "Build an agent because any codebase-wide change requires model-chosen steps"
+        }
+      ],
+      "explanation": "Agents trade latency and cost for flexibility you only need when the trajectory can't be specified up front. A mechanical, fully-specifiable rename fails the complexity check, so the right unit of autonomy is *none* — a script or single tool call. Adding agency (let alone multi-agent) here just adds cost and failure modes.",
+      "sourceRefs": [
+        "r-d1-agents"
+      ]
     }
   ],
   "scenarios": [
@@ -1121,6 +1513,26 @@
       "url": "https://platform.claude.com/docs/en/managed-agents/overview",
       "kind": "official-doc",
       "annotation": "Agent → Session, versioning, environments, events. The cardinal rule lives here.",
+      "domainIds": [
+        "d1-agentic-architectures"
+      ]
+    },
+    {
+      "id": "r-d1-effort",
+      "title": "Effort parameter",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/effort",
+      "kind": "official-doc",
+      "annotation": "output_config.effort (low/medium/high/xhigh/max), the high default, and why modern models use adaptive thinking instead of budget_tokens. Know which level suits agentic work vs subagents.",
+      "domainIds": [
+        "d1-agentic-architectures"
+      ]
+    },
+    {
+      "id": "r-d1-multiagent",
+      "title": "Managed Agents — multi-agent sessions",
+      "url": "https://platform.claude.com/docs/en/managed-agents/multi-agent",
+      "kind": "official-doc",
+      "annotation": "The coordinator multiagent roster, self copies, one-level-deep delegation, the 20-agent / 25-thread limits, and shared-filesystem-not-context threads.",
       "domainIds": [
         "d1-agentic-architectures"
       ]

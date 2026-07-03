@@ -718,6 +718,400 @@
       "sourceRefs": [
         "r-docs"
       ]
+    },
+    {
+      "id": "q-d2-12",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Anthropic's guidance calls the tool description 'by far the most important factor in tool performance.' Roughly how much detail does it recommend per description?",
+      "options": [
+        {
+          "id": "a",
+          "text": "At least 3-4 sentences (more if the tool is complex), covering what it does, when to use it and when not to, and each parameter",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "One short sentence — the model infers the rest from the name"
+        },
+        {
+          "id": "c",
+          "text": "Exactly one sentence per parameter and nothing about the tool itself"
+        },
+        {
+          "id": "d",
+          "text": "As few words as possible to save prompt tokens"
+        }
+      ],
+      "explanation": "The docs say to aim for at least 3-4 sentences per description (more if complex), explaining what the tool does, when it should and shouldn't be used, and what each parameter means. A single sentence or a token-minimising label leaves the model guessing; per-parameter-only text omits the crucial when-to-call guidance. Description quality beats saving a few tokens.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-13",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You have three separate tools — create_pr, review_pr, and merge_pr — and the model sometimes picks the wrong one. Which refactor does Anthropic recommend?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Consolidate them into one tool with an 'action' parameter, since fewer, more capable tools reduce selection ambiguity",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Split each one further into even more granular tools so each does exactly one thing"
+        },
+        {
+          "id": "c",
+          "text": "Give all three the identical description so the model can't tell them apart"
+        },
+        {
+          "id": "d",
+          "text": "Force the model to always call create_pr with tool_choice"
+        }
+      ],
+      "explanation": "The docs advise consolidating related operations into a single tool with an action parameter — fewer, more capable tools cut selection ambiguity and are easier for the model to navigate. Splitting further worsens the problem, identical descriptions destroy selectability, and forcing one tool breaks the other two operations.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-14",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You aggregate tools from GitHub, Slack, and Jira into one agent. Which tool-naming practice does Anthropic recommend, especially when using tool search?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Prefix names with the service, e.g. github_list_prs, slack_send_message, so selection stays unambiguous as the library grows",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Use the same generic verb (get, do, run) for every tool regardless of service"
+        },
+        {
+          "id": "c",
+          "text": "Give tools random unique IDs so no two names collide"
+        },
+        {
+          "id": "d",
+          "text": "Keep names as short as possible, dropping the service entirely"
+        }
+      ],
+      "explanation": "Meaningful namespacing — prefixing by service or resource (github_, slack_) — makes selection unambiguous and lets one tool-search query match a whole group. Generic verbs and dropped services create collisions and ambiguity; opaque random IDs are unsearchable and unreadable.",
+      "sourceRefs": [
+        "r-d2-definetools",
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-15",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A tool takes a nested, format-sensitive input and the model keeps mis-shaping the arguments. Which tool-definition feature best helps, and what is its constraint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Add input_examples with example input objects; each example must itself be valid against the tool's input_schema",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Add input_examples, which are exempt from schema validation so you can show edge cases"
+        },
+        {
+          "id": "c",
+          "text": "Set is_error: true so the model retries until the shape is right"
+        },
+        {
+          "id": "d",
+          "text": "Move the tool to the server side so Anthropic fixes the arguments"
+        }
+      ],
+      "explanation": "input_examples supplies concrete, well-formed calls alongside the schema, which is especially useful for nested or format-sensitive inputs — but every example must validate against input_schema (an invalid example returns a 400). is_error is for reporting failures, not shaping inputs, and server-side execution doesn't repair client argument shape.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-16",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "input_examples are a great fit for a complex user-defined tool. On which tools are they NOT supported?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Server-side tools such as web_search and code_execution",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Any tool that marks a parameter as required"
+        },
+        {
+          "id": "c",
+          "text": "Tools that use an enum in their schema"
+        },
+        {
+          "id": "d",
+          "text": "Tools that also set strict: true"
+        }
+      ],
+      "explanation": "input_examples work on user-defined and Anthropic-schema client tools, but not on server tools like web search or code execution — you don't define those schemas. Required params, enums, and strict tool use are all fully compatible with input_examples.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-17",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need a guarantee that the model both calls one of your tools AND that the arguments strictly match your schema. Which combination delivers both?",
+      "options": [
+        {
+          "id": "a",
+          "text": "tool_choice: { type: 'any' } together with strict: true on the tool definitions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "tool_choice: { type: 'auto' } alone"
+        },
+        {
+          "id": "c",
+          "text": "strict: true alone, with no tool_choice set"
+        },
+        {
+          "id": "d",
+          "text": "tool_choice: { type: 'none' } together with strict: true"
+        }
+      ],
+      "explanation": "Combining tool_choice 'any' (must call some tool) with strict: true (schema-validated arguments) guarantees both a tool call and conformant inputs. 'auto' may answer in text; 'strict' alone doesn't force a call; 'none' forbids all tools, so nothing runs.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-18",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Your request uses extended thinking. You try tool_choice: { type: 'tool', name: 'classify' } to force that tool and get a 400 error. Why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "With extended thinking, forced tool choice ('any' and 'tool') isn't supported — only 'auto' and 'none' are compatible",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Extended thinking disables all tool use, so no tool_choice value is valid"
+        },
+        {
+          "id": "c",
+          "text": "The tool name must be omitted when extended thinking is on"
+        },
+        {
+          "id": "d",
+          "text": "Extended thinking requires strict: true before any tool_choice works"
+        }
+      ],
+      "explanation": "When extended thinking is enabled, tool_choice 'any' and 'tool' are not supported and error out; only 'auto' (default) and 'none' are compatible. Extended thinking does allow tool use (via 'auto'), the name isn't the issue, and strict is unrelated to this restriction.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-19",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You force a tool with tool_choice 'any' or 'tool' but also want the model to say a sentence to the user before the tool_use block. What actually happens, and what's the fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'any'/'tool' prefill the assistant turn so no natural-language text precedes the tool_use; use 'auto' plus a user-message instruction to get commentary",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model always adds a sentence regardless of tool_choice; no change is needed"
+        },
+        {
+          "id": "c",
+          "text": "Set disable_parallel_tool_use: true to re-enable the preamble"
+        },
+        {
+          "id": "d",
+          "text": "Lower max_tokens so the model summarises before calling the tool"
+        }
+      ],
+      "explanation": "With 'any' or 'tool', the API prefills the assistant message to force a tool call, so the model emits no natural-language explanation first — even if asked. To get commentary, use 'auto' (the default) and instruct it in a user message (e.g. 'Use the get_weather tool in your response'). disable_parallel_tool_use only limits concurrency; max_tokens doesn't restore the preamble.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-20",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need the model's FINAL answer as a fixed JSON object for a downstream service — not a tool call. Which mechanism fits, and how does it relate to strict tool use?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Structured outputs via output_config.format (type: json_schema) constrain the response text; strict tool use validates tool-call inputs — different problems that can work together",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "strict: true on a tool, because it also forces the final text into your schema"
+        },
+        {
+          "id": "c",
+          "text": "tool_choice: 'any', which formats the assistant's text as JSON"
+        },
+        {
+          "id": "d",
+          "text": "disable_parallel_tool_use, which serialises output into a single JSON block"
+        }
+      ],
+      "explanation": "Structured outputs (output_config.format with a json_schema) constrain what the model says — the final response is guaranteed valid JSON for your schema. Strict tool use instead validates how the model calls your functions (tool inputs). They solve different problems and compose. tool_choice and disable_parallel_tool_use steer tool calling, not the shape of the final text.",
+      "sourceRefs": [
+        "r-docs"
+      ]
+    },
+    {
+      "id": "q-d2-21",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "The tool search tool ships in two variants. What is the difference in how Claude queries them?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The regex variant has Claude write Python re.search() patterns; the BM25 variant has Claude search with natural-language queries",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The regex variant uses natural language; the BM25 variant uses SQL WHERE clauses"
+        },
+        {
+          "id": "c",
+          "text": "Both variants require you to pre-compute embeddings for every tool"
+        },
+        {
+          "id": "d",
+          "text": "The variants differ only in price; the query format is identical"
+        }
+      ],
+      "explanation": "With the regex tool search variant Claude constructs Python re.search() patterns (case-insensitive, up to 200 chars); with the BM25 variant it issues natural-language queries (up to 500 chars). Neither built-in variant needs you to pre-compute embeddings (that's the custom client-side approach), and the query format genuinely differs.",
+      "sourceRefs": [
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-22",
+      "domainId": "d2-tools-mcp",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "When is enabling the tool search tool the right call, and how do you configure the toolset? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Reach for it once you have roughly 10+ tools or definitions exceeding ~10k tokens, or when selection accuracy drops as the set grows",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Set defer_loading: true on the tools that shouldn't load up front, keeping your 3-5 most-used tools non-deferred",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "At least one tool (normally the tool search tool itself) must stay non-deferred, or the request 400s",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Set defer_loading: true on the tool search tool too, so even it loads on demand"
+        }
+      ],
+      "explanation": "Tool search fits when you have ~10+ tools, >~10k tokens of definitions, or degrading selection accuracy (which starts once you pass ~30-50 tools). You mark deferred tools with defer_loading: true while keeping the 3-5 hottest tools non-deferred, and at least one tool must remain non-deferred (normally the search tool) or the API returns a 400 — so never defer the tool search tool itself.",
+      "sourceRefs": [
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-23",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Using the Messages API MCP connector (not a self-hosted MCP client), which statement is correct about what it supports?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only MCP tool calls are supported through the connector, and the server must be publicly reachable over HTTP (Streamable HTTP or SSE) — local stdio servers can't connect directly",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The connector exposes tools, resources, and prompts equally, and connects to local stdio servers"
+        },
+        {
+          "id": "c",
+          "text": "The connector requires a gRPC endpoint and does not support SSE"
+        },
+        {
+          "id": "d",
+          "text": "The connector only works with servers hosted by Anthropic"
+        }
+      ],
+      "explanation": "Through the Messages API MCP connector, only tool calls are currently supported, and the server must be publicly exposed over HTTP — both Streamable HTTP and SSE transports work, but local STDIO servers cannot be connected directly (use a client-side MCP client for stdio, prompts, or resources). It is not gRPC-only and is not limited to Anthropic-hosted servers.",
+      "sourceRefs": [
+        "r-d2-mcp-connector",
+        "r-mcp"
+      ]
+    },
+    {
+      "id": "q-d2-24",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You connect a calendar MCP server via the connector but must stop the agent from ever calling its destructive tools (e.g. delete_all_events). What is the cleanest way?",
+      "options": [
+        {
+          "id": "a",
+          "text": "In the mcp_toolset, denylist those tools by setting enabled: false for them in configs (or allowlist only the safe tools via default_config.enabled: false + per-tool enables)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Delete the tools from the remote MCP server's source code"
+        },
+        {
+          "id": "c",
+          "text": "Add is_error: true to those tools so calls always fail"
+        },
+        {
+          "id": "d",
+          "text": "Put the destructive tool names in the mcp_servers URL as a blocklist query string"
+        }
+      ],
+      "explanation": "The mcp_toolset in the tools array controls which of a server's tools are exposed: denylist by setting enabled: false in configs, or allowlist by defaulting enabled: false and enabling only the safe tools — exactly what the docs recommend for read-only or confirm-first assistants. You don't edit the server's code, is_error is a runtime result not a config, and the URL carries no tool blocklist.",
+      "sourceRefs": [
+        "r-d2-mcp-connector"
+      ]
     }
   ],
   "scenarios": [
@@ -1009,6 +1403,26 @@
       "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
       "kind": "official-doc",
       "annotation": "Extract which tools run on Anthropic infra, that web_search/web_fetch return citations, and that plain code_execution has no general internet access.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-definetools",
+      "title": "Define tools — descriptions, examples, and forcing tool use (Anthropic)",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+      "kind": "official-doc",
+      "annotation": "Source for description best practices (3-4+ sentences, when-to-use/when-not, consolidation, namespacing), input_examples (schema-validated, not for server tools), and the four tool_choice options incl. the extended-thinking and prefill caveats.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-toolsearch",
+      "title": "Tool search tool — scaling to thousands of tools (Anthropic)",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool",
+      "kind": "official-doc",
+      "annotation": "Source for the regex vs BM25 variants, defer_loading (at least one tool non-deferred), when to enable (~10+ tools / >10k tokens / accuracy drop past ~30-50), and that appended tool_reference blocks preserve the prompt cache.",
       "domainIds": [
         "d2-tools-mcp"
       ]
