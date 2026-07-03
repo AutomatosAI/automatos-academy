@@ -11,7 +11,7 @@
     "Drive selection with tool_choice (auto/any/tool/none) and force one tool per turn with disable_parallel_tool_use.",
     "Return tool failures honestly with is_error and an informative message so the model can adapt instead of hallucinating success.",
     "Decide bash vs a dedicated tool on reversibility — promote when you must gate, confirm, render, audit, or mark parallel-safe.",
-    "Wire MCP and server-side tools correctly: declare a server by url with no inline auth, and supply OAuth via vaults — not the service's REST API key."
+    "Wire MCP and server-side tools correctly: declare a remote server by url and pass the OAuth access token inline as authorization_token (you run the OAuth flow and refresh it) — an OAuth bearer token, not the service's REST API key."
   ],
   "lessons": [
     {
@@ -285,8 +285,8 @@
       "id": "l4-mcp",
       "title": "Model Context Protocol: servers, declaration, and the auth trap",
       "estMinutes": 16,
-      "objective": "Declare an MCP server correctly and supply auth the right way — OAuth via vaults, not the REST key.",
-      "body": "## What MCP is\n\nThe **Model Context Protocol (MCP)** is an open standard for connecting models to external systems. An **MCP server** exposes three kinds of capability:\n\n- **tools** — actions the model can invoke.\n- **resources** — data/content the model can read.\n- **prompts** — reusable prompt templates the server offers.\n\nRemote servers communicate over **Streamable HTTP / SSE**. The client (your agent) connects to a server and the server's tools become available to Claude.\n\n## Declaring a server — no inline auth\n\nYou declare a remote MCP server by **url**, and — critically — you do **not** put credentials in that declaration:\n\n```python\nmcp_servers = [{\n  'type': 'url',\n  'name': 'github',\n  'url': 'https://mcp.example.com/github'\n}]\n```\n\nThe `mcp_servers` parameter lets Claude connect to remote MCP servers directly. Auth is handled **separately**, not inline.\n\n## The auth trap (exam favourite)\n\nIn **Managed Agents**, auth for a server is supplied through **vaults**: you attach `vault_ids` to the session, and Anthropic stores the credential and **auto-refreshes OAuth tokens** for you. The single most-missed fact:\n\n> A hosted MCP server usually authenticates with an **OAuth bearer token**, **not** the service's native REST API key. They are different auth systems.\n\nSo if a GitHub MCP server expects OAuth, dropping your GitHub *personal access token* / REST API key into a vault and expecting it to 'just work' is wrong — the server speaks OAuth bearer, and the REST key belongs to a different mechanism. Provision the OAuth credential, let Anthropic refresh it, and reference it by vault — never paste a token inline in the server declaration.\n\n## Tool search for large libraries\n\nWhen an agent has **many** tools (dozens of MCP servers, hundreds of tools), loading every schema up front bloats the prompt. **Tool search** lets Claude **discover** the relevant tools on demand: matching tool schemas are **appended** to the context (not swapped in and out). Appending matters because it **preserves the prompt cache** — earlier cached content stays valid, so you get discovery without paying to re-process the whole prompt each turn.",
+      "objective": "Declare an MCP server correctly and supply auth the right way — an OAuth bearer token passed inline as authorization_token, not the REST key.",
+      "body": "## What MCP is\n\nThe **Model Context Protocol (MCP)** is an open standard for connecting models to external systems. An **MCP server** exposes three kinds of capability:\n\n- **tools** — actions the model can invoke.\n- **resources** — data/content the model can read.\n- **prompts** — reusable prompt templates the server offers.\n\nRemote servers communicate over **Streamable HTTP / SSE**. The client (your agent) connects to a server and the server's tools become available to Claude.\n\n## Declaring a server via the MCP connector\n\nUsing the Messages API MCP connector, you declare a remote MCP server in the `mcp_servers` array by **url**. If the server needs auth, the OAuth access token goes **inline** in that same object as `authorization_token`:\n\n```python\nmcp_servers = [{\n  'type': 'url',\n  'name': 'github',\n  'url': 'https://mcp.example.com/github',\n  'authorization_token': 'YOUR_OAUTH_ACCESS_TOKEN'  # omit if the server is public\n}]\n```\n\nThe fields are `type` (only `'url'`), `url` (must be `https://`), `name` (a unique id referenced by exactly one `mcp_toolset` in `tools[]`), and the optional `authorization_token`. The connector currently needs the beta header `anthropic-beta: mcp-client-2025-11-20`.\n\n**You run the OAuth flow, not Anthropic.** The docs are explicit: *API consumers are expected to handle the OAuth flow and obtain the access token prior to making the API call, and to refresh the token as needed.* So you complete OAuth against the server (for testing, the MCP inspector's Quick OAuth Flow hands you an `access_token`), then paste that token into `authorization_token`.\n\n## The auth trap (exam favourite)\n\nThe single most-missed fact:\n\n> A hosted MCP server usually authenticates with an **OAuth bearer token**, **not** the service's native REST API key. They are different auth systems.\n\nSo if a GitHub MCP server expects OAuth, dropping your GitHub *personal access token* / REST API key into `authorization_token` and expecting it to 'just work' is wrong — the server speaks OAuth bearer, and the REST key belongs to a different mechanism. Run the OAuth flow to mint an access token, pass it as `authorization_token`, and refresh it yourself when it expires. Two more don'ts: never put the token in the **url** as a query parameter, and don't confuse this connector-level inline token with Managed Agents' separate credential-vault mechanism.\n\n## Tool search for large libraries\n\nWhen an agent has **many** tools (dozens of MCP servers, hundreds of tools), loading every schema up front bloats the prompt. **Tool search** lets Claude **discover** the relevant tools on demand: matching tool schemas are **appended** to the context (not swapped in and out). Appending matters because it **preserves the prompt cache** — earlier cached content stays valid, so you get discovery without paying to re-process the whole prompt each turn.",
       "knowledgeCheck": [
         {
           "id": "kc-d2-9",
@@ -324,7 +324,7 @@
           "domainId": "d2-tools-mcp",
           "type": "single",
           "difficulty": 3,
-          "stem": "A hosted GitHub MCP server fails to authenticate after you stored your GitHub REST personal-access token in a vault. Most likely cause?",
+          "stem": "A hosted GitHub MCP server fails to authenticate after you passed your GitHub REST personal-access token as authorization_token. Most likely cause?",
           "options": [
             {
               "id": "a",
@@ -333,7 +333,7 @@
             },
             {
               "id": "b",
-              "text": "Vaults can only hold one credential per session"
+              "text": "authorization_token can only hold one credential per request"
             },
             {
               "id": "c",
@@ -344,7 +344,7 @@
               "text": "MCP servers don't support GitHub"
             }
           ],
-          "explanation": "Hosted MCP servers typically authenticate via OAuth bearer tokens, not the service's native REST API key — they're separate mechanisms. Provision the OAuth credential (Anthropic auto-refreshes it) and reference it by vault; the REST PAT is the wrong credential type, and you never put tokens in the url.",
+          "explanation": "Hosted MCP servers typically authenticate via OAuth bearer tokens, not the service's native REST API key — they're separate mechanisms. Run the OAuth flow to mint an access token and pass that as `authorization_token`; the REST PAT is the wrong credential type, and you never put tokens in the url.",
           "sourceRefs": [
             "r-docs",
             "r-mcp"
@@ -601,16 +601,16 @@
       "domainId": "d2-tools-mcp",
       "type": "single",
       "difficulty": 2,
-      "stem": "How do you declare a remote MCP server so Claude can connect to it?",
+      "stem": "How do you declare a remote MCP server (via the Messages API MCP connector) so Claude can connect to it?",
       "options": [
         {
           "id": "a",
-          "text": "{ type: 'url', name, url } with no credentials inline",
+          "text": "{ type: 'url', name, url, authorization_token } — the OAuth access token inline as authorization_token (omitted only if the server is public)",
           "correct": true
         },
         {
           "id": "b",
-          "text": "{ type: 'url', name, url, api_key } with the REST key inline"
+          "text": "{ type: 'url', name, url, api_key } with the service's REST key inline"
         },
         {
           "id": "c",
@@ -621,7 +621,7 @@
           "text": "By adding the server's tools individually to the tools[] array by hand"
         }
       ],
-      "explanation": "You declare the server by `type: 'url'`, `name`, and `url` — and deliberately omit auth from the declaration. Credentials are supplied separately (vaults in Managed Agents); never inline an API key or put a token in the url.",
+      "explanation": "In the `mcp_servers` array you declare the server by `type: 'url'`, `name`, and `url`, and pass the OAuth access token inline as `authorization_token` (leave it off only for a public server). It's an OAuth bearer token, not the service's REST `api_key` (B), and you never put the token in the url (C); the connector surfaces the server's tools for you, so you don't hand-add them (D).",
       "sourceRefs": [
         "r-docs",
         "r-mcp"
@@ -632,27 +632,27 @@
       "domainId": "d2-tools-mcp",
       "type": "single",
       "difficulty": 3,
-      "stem": "In Managed Agents, how is auth supplied to a hosted MCP server, and what does Anthropic do with it?",
+      "stem": "Using the MCP connector, who runs the OAuth flow for an authenticated MCP server, and who keeps the token fresh?",
       "options": [
         {
           "id": "a",
-          "text": "Via vault_ids on the session; Anthropic stores the credential and auto-refreshes OAuth tokens",
+          "text": "You do — the API consumer completes the OAuth flow, obtains the access token before the call, passes it as authorization_token, and refreshes it as needed",
           "correct": true
         },
         {
           "id": "b",
-          "text": "By embedding the API key in the agent's system prompt"
+          "text": "Anthropic runs OAuth for you and auto-refreshes the token; you supply nothing"
         },
         {
           "id": "c",
-          "text": "By passing the token in every user message"
+          "text": "You embed the API key in the agent's system prompt and it never expires"
         },
         {
           "id": "d",
           "text": "Auth isn't needed — MCP servers are always public"
         }
       ],
-      "explanation": "Auth is attached out-of-band through vaults (`vault_ids` on the session); Anthropic holds the credential and auto-refreshes OAuth tokens so calls keep working. Secrets in prompts or messages persist in history and are the wrong pattern; MCP servers are frequently authenticated, not public.",
+      "explanation": "The docs state the API consumer handles the OAuth flow, obtains the access token before making the call, passes it inline as `authorization_token`, and refreshes it as needed — the connector does not run OAuth or auto-refresh for you (B). Secrets in the system prompt persist in history and are the wrong pattern (C), and MCP servers are frequently authenticated, not always public (D).",
       "sourceRefs": [
         "r-docs"
       ]
@@ -1236,19 +1236,19 @@
       "steps": [
         {
           "id": "st1",
-          "prompt": "How do you declare the GitHub MCP server?",
+          "prompt": "How do you declare the GitHub MCP server through the connector?",
           "choices": [
             {
               "id": "a",
-              "text": "{ type: 'url', name: 'github', url: '…' } with no credentials in the declaration",
+              "text": "{ type: 'url', name: 'github', url: '…', authorization_token: <OAuth access token> } in mcp_servers, with a matching mcp_toolset in tools[]",
               "verdict": "best",
-              "rationale": "Servers are declared by url with auth handled separately — keeping credentials out of the declaration is the documented pattern."
+              "rationale": "The documented pattern: declare the server by url and pass the OAuth access token inline as authorization_token (GitHub's server needs auth), then reference it from an mcp_toolset."
             },
             {
               "id": "b",
               "text": "Put the GitHub REST token inside the server object as api_key",
               "verdict": "wrong",
-              "rationale": "Auth is never inline in the declaration, and the REST token is usually the wrong credential type anyway."
+              "rationale": "There is no api_key field, and the REST token is the wrong credential type — the server wants an OAuth bearer token in authorization_token."
             },
             {
               "id": "c",
@@ -1260,25 +1260,25 @@
         },
         {
           "id": "st2",
-          "prompt": "The GitHub MCP server expects OAuth. How do you supply auth in the managed agent?",
+          "prompt": "The GitHub MCP server expects OAuth. How do you supply that auth?",
           "choices": [
             {
               "id": "a",
-              "text": "Provision an OAuth credential and attach it via vault_ids on the session; let Anthropic auto-refresh the token",
+              "text": "Run the OAuth flow yourself, obtain an access token, and pass it inline as authorization_token — refreshing it yourself as it expires",
               "verdict": "best",
-              "rationale": "Vaults are the auth mechanism for hosted MCP; Anthropic stores the credential and refreshes OAuth so calls keep working."
+              "rationale": "The docs say the API consumer handles the OAuth flow, obtains the access token before the call, passes it as authorization_token, and refreshes it as needed. The connector does not run OAuth or refresh for you."
             },
             {
               "id": "b",
-              "text": "Store your GitHub REST personal-access token in a vault and assume it works",
+              "text": "Pass your GitHub REST personal-access token as authorization_token and assume it works",
               "verdict": "wrong",
               "rationale": "Hosted MCP usually wants an OAuth bearer token, not the service's REST API key — different auth systems. The PAT is the wrong credential type."
             },
             {
               "id": "c",
-              "text": "Hard-code a long-lived token and refresh it yourself on a cron",
+              "text": "Mint a long-lived token once and never refresh it",
               "verdict": "viable",
-              "rationale": "Technically possible but reinvents refresh that vaults already handle, and long-lived tokens are a security liability."
+              "rationale": "Technically it authenticates until it expires, but long-lived tokens are a security liability and the flow still needs you to refresh — plan for token rotation instead."
             }
           ]
         },
@@ -1354,14 +1354,14 @@
     {
       "id": "lab-d2-mcp",
       "domainId": "d2-tools-mcp",
-      "title": "Wire an MCP server with vault-based OAuth",
-      "goal": "Declare a remote MCP server and authenticate it the right way — no inline keys.",
-      "steps": "## Steps\n\n1. Declare a remote MCP server in `mcp_servers` as `{ type: 'url', name, url }` — deliberately with **no** credentials inline.\n2. Provision an **OAuth** credential for the server (not the service's REST API key) and store it as a vault.\n3. Attach the credential via `vault_ids` on the session; confirm Anthropic auto-refreshes the OAuth token rather than you managing expiry.\n4. List the server's exposed **tools**, **resources**, and **prompts**, and call one tool through Claude.\n5. Deliberately swap in the REST API key instead of the OAuth credential and observe the auth failure — internalise that they are different systems.\n6. Attach several more servers and enable **tool search**; confirm relevant tool schemas are appended on demand and the prompt cache is preserved.\n\n## Checkpoint\n\nIf you ever pasted a token into the server `url` or into the declaration object, stop — auth is supplied out-of-band via vaults, never inline.",
+      "title": "Wire an MCP server with an inline OAuth token",
+      "goal": "Declare a remote MCP server through the connector and authenticate it the right way — an OAuth access token passed inline as authorization_token.",
+      "steps": "## Steps\n\n1. Set the connector beta header `anthropic-beta: mcp-client-2025-11-20` and declare a remote MCP server in `mcp_servers` as `{ type: 'url', name, url }` (start with a public server — no token yet).\n2. Run the **OAuth** flow against an authenticated server to obtain an **access token** (for testing, `npx @modelcontextprotocol/inspector` → Quick OAuth Flow gives you an `access_token`) — an OAuth bearer token, not the service's REST API key.\n3. Paste that token into the server object as `authorization_token`, and add a matching `mcp_toolset` entry in `tools[]`; call one tool through Claude.\n4. Deliberately swap in the REST API key instead of the OAuth access token and observe the auth failure — internalise that they are different systems.\n5. Let the token expire (or revoke it) and confirm **you** must obtain a fresh one and re-pass it — the connector does not refresh it for you.\n6. Attach several more servers and enable **tool search**; confirm relevant tool schemas are appended on demand and the prompt cache is preserved.\n\n## Checkpoint\n\nIf you ever pasted the token into the server `url` as a query parameter, stop — the OAuth access token belongs in the `authorization_token` field of the `mcp_servers` object, and you run and refresh the OAuth flow yourself.",
       "checklist": [
-        "Server declared by url with no credentials inline",
-        "Auth supplied via vault_ids using an OAuth credential, not the REST API key",
-        "Anthropic auto-refreshes the OAuth token (no manual refresh)",
-        "tools, resources, and prompts are all visible from the server",
+        "Connector beta header set; server declared by { type: 'url', name, url }",
+        "OAuth access token passed inline as authorization_token (an OAuth bearer token, not the REST API key)",
+        "You obtain and refresh the token yourself — the connector does not auto-refresh it",
+        "A matching mcp_toolset lets Claude call a tool from the server",
         "Tool search appends schemas on demand without busting the prompt cache"
       ]
     }
@@ -1392,7 +1392,7 @@
       "title": "MCP connector / connecting to remote servers",
       "url": "https://platform.claude.com/docs/en/agents-and-tools/mcp-connector",
       "kind": "official-doc",
-      "annotation": "Extract how mcp_servers is declared ({type:'url', name, url}) and that auth is handled separately — the source for the OAuth-vs-REST-key distinction.",
+      "annotation": "Extract how mcp_servers is declared ({type:'url', name, url, authorization_token}) with the OAuth access token passed inline and the consumer running/refreshing the OAuth flow — the source for the OAuth-vs-REST-key distinction.",
       "domainIds": [
         "d2-tools-mcp"
       ]

@@ -187,7 +187,7 @@
       "title": "Reliability: refusals, retries, provenance, and honest status",
       "estMinutes": 15,
       "objective": "Handle every stop reason, lean on SDK backoff, and make the agent's output verifiable and honest.",
-      "body": "## Check stop_reason before reading content\n\nA safety refusal is **not an error** — it's a successful `HTTP 200` with `stop_reason: \"refusal\"`. The trap: a *pre-output* refusal can return an **empty `content` array**, so code that reads `response.content[0]` unconditionally throws on exactly those responses.\n\n```python\nresp = client.messages.create(model='claude-opus-4-8', max_tokens=1024, messages=messages)\nif resp.stop_reason == 'refusal':\n    handle_refusal()        # content may be empty (pre-output) or partial (mid-stream)\nelse:\n    print(resp.content[0].text)\n```\n\nAlways branch on `stop_reason` first. The full set you must handle: `end_turn`, `tool_use`, `pause_turn`, `max_tokens`, `refusal`, and `model_context_window_exceeded`.\n\n## Don't hand-roll retries\n\nThe SDK **automatically retries** `429` and `5xx` with exponential backoff — default ~2 retries, configurable via `max_retries`. It also reads and respects the `retry-after` header. Writing your own retry loop usually just fights the built-in one and ignores `retry-after`. Only hand-roll when you need genuinely custom behaviour (e.g. a circuit breaker), and even then, configure `max_retries` rather than disabling it blindly.\n\n## Caching for cost and reliability\n\nPrompt caching is a **prefix match**: any byte change anywhere in the prefix invalidates everything after it. Render order is `tools` -> `system` -> `messages`. So keep the **stable prefix first** (frozen system prompt, deterministic tool list) and put **volatile content last** (timestamps, per-request ids, the varying question). A `datetime.now()` in the system prompt silently busts the cache on every call — verify with `usage.cache_read_input_tokens`.\n\n## Provenance: track where a fact came from\n\nIn a multi-step agent, a fact three tools deep is worthless if you can't say *where it came from*. **Information provenance** means carrying the source alongside each fact so a human (or the agent) can verify it — which document, which tool result, which URL. It's the antidote to confident fabrication and the basis of honest status reporting.\n\n## Error propagation and escalation\n\nA bad tool result early in a run **poisons** every later step that builds on it — error propagation. Defend against it with validation at tool boundaries, and with **escalation / human-review gates** for irreversible or low-confidence actions: when the agent isn't sure, it should stop and ask, not guess.\n\n## Honest status reporting\n\nThe agent must report what actually happened — 'tests failed', 'I skipped step 3', 'this is unverified' — not a cheerful summary that papers over a gap. Ground every progress claim against a real tool result. An agent that lies about success is worse than one that fails loudly.",
+      "body": "## Check stop_reason before reading content\n\nA safety refusal is **not an error** — it's a successful `HTTP 200` with `stop_reason: \"refusal\"`. The trap: a *pre-output* refusal can return an **empty `content` array**, so code that reads `response.content[0]` unconditionally throws on exactly those responses.\n\n```python\nresp = client.messages.create(model='claude-opus-4-8', max_tokens=1024, messages=messages)\nif resp.stop_reason == 'refusal':\n    handle_refusal()        # content may be empty (pre-output) or partial (mid-stream)\nelse:\n    print(resp.content[0].text)\n```\n\nAlways branch on `stop_reason` first. The full set you must handle: `end_turn`, `tool_use`, `pause_turn`, `max_tokens`, `refusal`, and `model_context_window_exceeded`.\n\n**Recovering from a refusal.** Re-sending the *identical* request to the *same* model usually just refuses again, so resetting the context (remove or rephrase the offending turn) is one option. The stronger one, per the docs, is to **retry on a fallback model** — a request one model's safety classifier declines is often served by another. Newer models also attach a `stop_details` object whose `category` (e.g. `cyber`, `bio`) names the policy area, so you can log or route on it; branch on `stop_reason == 'refusal'`, not on `stop_details`, which can be `null`.\n\n## Don't hand-roll retries\n\nThe SDK **automatically retries** `429` and `5xx` with exponential backoff — default ~2 retries, configurable via `max_retries`. It also reads and respects the `retry-after` header. Writing your own retry loop usually just fights the built-in one and ignores `retry-after`. Only hand-roll when you need genuinely custom behaviour (e.g. a circuit breaker), and even then, configure `max_retries` rather than disabling it blindly.\n\n## Caching for cost and reliability\n\nPrompt caching is a **prefix match**: any byte change anywhere in the prefix invalidates everything after it. Render order is `tools` -> `system` -> `messages`. So keep the **stable prefix first** (frozen system prompt, deterministic tool list) and put **volatile content last** (timestamps, per-request ids, the varying question). A `datetime.now()` in the system prompt silently busts the cache on every call — verify with `usage.cache_read_input_tokens`.\n\n## Provenance: track where a fact came from\n\nIn a multi-step agent, a fact three tools deep is worthless if you can't say *where it came from*. **Information provenance** means carrying the source alongside each fact so a human (or the agent) can verify it — which document, which tool result, which URL. It's the antidote to confident fabrication and the basis of honest status reporting.\n\n## Error propagation and escalation\n\nA bad tool result early in a run **poisons** every later step that builds on it — error propagation. Defend against it with validation at tool boundaries, and with **escalation / human-review gates** for irreversible or low-confidence actions: when the agent isn't sure, it should stop and ask, not guess.\n\n## Honest status reporting\n\nThe agent must report what actually happened — 'tests failed', 'I skipped step 3', 'this is unverified' — not a cheerful summary that papers over a gap. Ground every progress claim against a real tool result. An agent that lies about success is worse than one that fails loudly.",
       "knowledgeCheck": [
         {
           "id": "kc-d5-6",
@@ -369,7 +369,7 @@
           "text": "As proof the API key lacks permission for the model"
         }
       ],
-      "explanation": "A refusal is a deliberate, successful response (`stop_reason: \"refusal\"`), not an error. Pre-output refusals can have empty content, so check `stop_reason` first; retrying the identical prompt will just refuse again.",
+      "explanation": "A refusal is a deliberate, successful response (`stop_reason: \"refusal\"`), not an error. Pre-output refusals can have empty content, so check `stop_reason` first; re-sending the identical prompt to the same model usually refuses again, so reset the context or retry on a fallback model rather than blindly resending.",
       "sourceRefs": [
         "r-d5-errors"
       ]
@@ -401,7 +401,7 @@
       ],
       "explanation": "Caching is a prefix match — any byte change in the prefix invalidates everything after it. Render order is tools -> system -> messages, so keep stable content first and push volatile content (timestamps, ids, the question) after the breakpoint. A `datetime.now()` in the system prompt silently busts every cache.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-caching"
       ]
     },
     {
@@ -431,7 +431,7 @@
       ],
       "explanation": "Provenance carries the source alongside each fact so a human or the agent can check it. It's the defence against confident fabrication and the foundation of honest status reporting.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -461,7 +461,7 @@
       ],
       "explanation": "An agent that reports success it can't evidence is failing on honest status reporting. Each claim should be audited against a real tool result; failures and skipped steps must be stated plainly.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -491,7 +491,7 @@
       ],
       "explanation": "A bad early tool result poisoning downstream steps is error propagation. You contain it by validating tool outputs at the boundary and gating risky or uncertain actions behind escalation rather than letting the agent build on bad data.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -1066,7 +1066,7 @@
               "id": "c",
               "text": "Retry the request on the same model until content is non-empty",
               "verdict": "wrong",
-              "rationale": "Retrying an identical prompt that was refused just refuses again, burning quota and latency for nothing."
+              "rationale": "Re-sending an identical refused prompt to the same model usually refuses again, burning quota and latency; reset the context or fall back to another model instead of looping on the same one."
             }
           ]
         },

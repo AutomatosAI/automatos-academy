@@ -753,7 +753,7 @@
       "options": [
         {
           "id": "a",
-          "text": "The effort parameter (e.g. high/xhigh for agentic work), with adaptive thinking",
+          "text": "The effort parameter — one of low, medium, high, xhigh, or max (xhigh for agentic work) — with adaptive thinking",
           "correct": true
         },
         {
@@ -769,7 +769,7 @@
           "text": "Sending the task twice and diffing the answers"
         }
       ],
-      "explanation": "Modern models use adaptive thinking plus the effort parameter as the depth/cost control; higher effort suits long-horizon agentic work. Fixed thinking budgets are removed on the newest models, and sampling knobs like temperature are not the mechanism (and are dropped there too).",
+      "explanation": "Modern models use adaptive thinking plus the effort parameter as the depth/cost control. Effort has five levels — low, medium, high (the default), xhigh, and max — and for long-horizon agentic work xhigh is the recommended starting point, with max reserved for the hardest problems. Fixed thinking budgets are removed on the newest models, and sampling knobs like temperature are not the mechanism (and are dropped there too).",
       "sourceRefs": [
         "r-docs"
       ]
