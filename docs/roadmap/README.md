@@ -43,13 +43,13 @@ buried in a combined document.
 
 | # | Vendor | Track folder | Type | Status | Modules |
 |---|---|---|---|---|---|
-| **B0** | Automatos | [`ai-explained/`](./ai-explained/) | **free training (Foundations on-ramp)** | **prompts authored** | 11 |
+| **B0** | Automatos | [`ai-explained/`](./ai-explained/) | **free training (Foundations on-ramp)** | **prompts authored** | 13 |
 | — | Anthropic | [`cca-f/`](./cca-f/) | external exam | **LIVE** (videos in) | 5 |
 | — | GitHub | [`gh-300/`](./gh-300/) | external exam | **LIVE** (videos in) | 6 |
 | S0 | GitHub | [`gh-500/`](./gh-500/) | external exam | **DONE** | 6 |
 | S1 | Automatos | [`automatos-apa/`](./automatos-apa/) | **free training** | **DONE** | 11 |
 | S2 | (cross) | [`ai-security/`](./ai-security/) | skills | **DONE** | 6 |
-| S3 | IAPP | [`aigp/`](./aigp/) | external exam | **DONE** | 4 |
+| S3 | IAPP | [`aigp/`](./aigp/) | external exam | **in progress** (videos rendering) | 4 |
 | S4 | (cross) | [`cross-vendor/`](./cross-vendor/) | skills | **DONE** | 4 |
 | S4b | Google | [`gen-ai-leader/`](./gen-ai-leader/) | external exam | **DONE** | 4 |
 | **B1** | Automatos | [`ai-business/`](./ai-business/) | **free training (Operator lane)** | **DONE** | 9 |

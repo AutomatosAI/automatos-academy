@@ -1,4 +1,4 @@
-# AIX · Module 09 — MCP, for beginners
+# AIX · Module 11 — MCP, for beginners
 
 **Type:** Skills track (no exam) · Lane: Foundations · Kills: *"MCP keeps coming up — what is it, in normal words?"*
 

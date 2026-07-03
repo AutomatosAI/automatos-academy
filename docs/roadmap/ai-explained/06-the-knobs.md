@@ -1,4 +1,4 @@
-# AIX · Module 05 — The knobs: temperature, tokens & parameters
+# AIX · Module 06 — The knobs: temperature, tokens & parameters
 
 **Type:** Skills track (no exam) · Lane: Foundations · Kills: *"What do all these settings mean — and do I need to touch them?"*
 

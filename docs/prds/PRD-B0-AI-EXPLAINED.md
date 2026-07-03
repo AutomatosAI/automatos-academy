@@ -38,7 +38,7 @@ Same skills-track shape as ABF (no `exam{}`, no weights, no readiness gate). Two
 RAG / knowledge graph / MCP in their own words, and knows which door to walk through next. Badge per
 [PRD-CREDENTIALS](./PRD-CREDENTIALS.md).
 
-## 3. Curriculum (11 modules — each kills one confusion)
+## 3. Curriculum (13 modules — each kills one confusion; memory + text-images-video added 2026-07-02 per owner)
 
 | m | Module | The confusion it kills | slug |
 |---|---|---|---|
@@ -47,12 +47,14 @@ RAG / knowledge graph / MCP in their own words, and knows which door to walk thr
 | 02 | Why are there so many models? | "GPT, Claude, Gemini, Llama — I'm lost" | `m02-so-many-models` |
 | 03 | Open vs closed models | "Open source vs not — does it matter to me?" | `m03-open-vs-closed` |
 | 04 | OpenAI vs Claude vs the rest | "Which is best? Which should *I* use?" | `m04-which-model` |
-| 05 | The knobs: temperature, tokens & parameters | "What do all these settings mean?" | `m05-the-knobs` |
-| 06 | Context: the AI's desk | "What's a context window and why does size matter?" | `m06-context` |
-| 07 | Teaching AI your stuff (RAG) | "How does it know about *my* things?" | `m07-rag` |
-| 08 | Knowledge graphs | "Everyone says knowledge graph — what is it?" | `m08-knowledge-graphs` |
-| 09 | MCP, for beginners | "MCP keeps coming up — what is it?" | `m09-mcp` |
-| 10 | You get it now — where next? | "OK, I understand AI. Now what?" | `m10-where-next` |
+| 05 | Text, images, video | "Some AIs write, some paint, some film — same thing?" | `m05-text-images-video` |
+| 06 | The knobs: temperature, tokens & parameters | "What do all these settings mean?" | `m06-the-knobs` |
+| 07 | Context: the AI's desk | "What's a context window and why does size matter?" | `m07-context` |
+| 08 | Memory: does it remember me? | "I told it last week — why doesn't it remember?" | `m08-memory` |
+| 09 | Teaching AI your stuff (RAG) | "How does it know about *my* things?" | `m09-rag` |
+| 10 | Knowledge graphs | "Everyone says knowledge graph — what is it?" | `m10-knowledge-graphs` |
+| 11 | MCP, for beginners | "MCP keeps coming up — what is it?" | `m11-mcp` |
+| 12 | You get it now — where next? | "OK, I understand AI. Now what?" | `m12-where-next` |
 
 ## 4. Content plan (per module — shallow by design)
 
@@ -60,7 +62,7 @@ RAG / knowledge graph / MCP in their own words, and knows which door to walk thr
 brilliant new hire; context as a desk; MCP as USB-C), an optional ungated knowledge check, and the
 **🤝 Automatos peek**. Signature move: **module 04 stays honest** — there is no single "best"
 model; the answer is "it depends, and Automatos lets you use any of them via your own key," which is
-both true and the most disarming possible pitch. Module 10 is the router: recap the vocabulary, then
+both true and the most disarming possible pitch. Module 12 is the router: recap the vocabulary, then
 point at the two doors (and name Gen-AI-Leader for anyone who wants a first credential).
 
 ## 5. Sources (vendor-neutral explainers + the gitbook for the peek)

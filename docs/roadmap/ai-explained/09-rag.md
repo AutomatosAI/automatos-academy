@@ -1,4 +1,4 @@
-# AIX · Module 07 — Teaching AI your stuff (RAG)
+# AIX · Module 09 — Teaching AI your stuff (RAG)
 
 **Type:** Skills track (no exam) · Lane: Foundations · Kills: *"How does it know about MY things — my prices, my policies?"*
 

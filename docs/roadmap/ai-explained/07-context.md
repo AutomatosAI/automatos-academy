@@ -1,4 +1,4 @@
-# AIX · Module 06 — Context: the AI's desk
+# AIX · Module 07 — Context: the AI's desk
 
 **Type:** Skills track (no exam) · Lane: Foundations · Kills: *"What's a 'context window' and why does everyone care how big it is?"*
 
@@ -39,7 +39,7 @@ long document or thread so answers account for all of it, and the flip side that
 the earliest content can fall off the desk ("running out of context"). Be clear and reassuring about
 the no-memory-between-sessions point: a new conversation is a clean desk unless you deliberately give
 the AI a memory (flagged as a later idea, and as what knowledge bases and memory features solve).
-Connect gently to Module 05: because the desk contents are measured in tokens, a bigger desk holding
+Connect gently to Module 06: because the desk contents are measured in tokens, a bigger desk holding
 more also costs more. End with the practical beginner habit: put the important stuff in the same
 conversation, and don't assume it remembers last week. Ground strictly in the sources.
 ```

@@ -1,4 +1,4 @@
-# AIX · Module 08 — Knowledge graphs
+# AIX · Module 10 — Knowledge graphs
 
 **Type:** Skills track (no exam) · Lane: Foundations · Kills: *"Everyone says 'knowledge graph' — what actually is it, and how would I set one up?"*
 
@@ -11,7 +11,7 @@
 ```
 Audience: a beginner who's heard "knowledge graph" thrown around and pictures something complicated.
 No technical background. Explain plainly first, then name the term. Cover ONLY: what a knowledge
-graph is and why it helps an AI. Build on Module 07: giving the AI your documents is great, but a
+graph is and why it helps an AI. Build on Module 09: giving the AI your documents is great, but a
 pile of documents is just a pile — the AI can find a page, but it doesn't automatically see how
 things CONNECT. A knowledge graph is a map of the CONNECTIONS between the things in your world:
 this customer placed that order; that order contains these products; this product comes from that
@@ -20,7 +20,7 @@ the ones that relate. Why it helps: some questions can't be answered from a sing
 suppliers are affected if this product is recalled?" needs the AI to FOLLOW the connections, not
 just find one document. A knowledge graph lets it join the dots. How you "set one up", in beginner
 terms: you usually don't draw it by hand — modern tools READ your documents and build the map of
-people/things and their links automatically; your job is to feed it good material (Module 07 again).
+people/things and their links automatically; your job is to feed it good material (Module 09 again).
 ~7 minutes: open with "documents are a pile; a knowledge graph is the map of how they connect," the
 cork-board analogy, one join-the-dots question a plain document search would miss, the 2–3
 confusions (thinking you must build it by hand — tools extract it for you; thinking it replaces your
@@ -38,7 +38,7 @@ Use the detective cork-board analogy. Make the payoff concrete with a multi-hop 
 one-page search can't answer but a graph can (recall impact, "who is connected to what"). On "how do
 I set one up," reassure: for a beginner it's less about drawing and more about feeding good documents
 to a tool that extracts the graph for you, then asking questions that follow the links. Position it
-honestly as an upgrade to RAG (Module 07), not a replacement, and as useful for anyone with
+honestly as an upgrade to RAG (Module 09), not a replacement, and as useful for anyone with
 connected information, not just enterprises. Ground strictly in the sources.
 ```
 

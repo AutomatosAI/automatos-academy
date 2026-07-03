@@ -20,12 +20,14 @@ this."* No exam, no jargon, no experience needed. Blueprint: [PRD-B0-AI-EXPLAINE
 | 02 | [Why so many models?](./02-so-many-models.md) | "GPT, Claude, Gemini, Llama — I'm lost" |
 | 03 | [Open vs closed models](./03-open-vs-closed.md) | "Open source vs not — does it matter to me?" |
 | 04 | [OpenAI vs Claude vs the rest](./04-which-model.md) | "Which is best? Which should *I* use?" |
-| 05 | [The knobs: temperature, tokens & parameters](./05-the-knobs.md) | "What do all these settings mean?" |
-| 06 | [Context: the AI's desk](./06-context.md) | "What's a context window and why does size matter?" |
-| 07 | [Teaching AI your stuff (RAG)](./07-rag.md) | "How does it know about *my* things?" |
-| 08 | [Knowledge graphs](./08-knowledge-graphs.md) | "Everyone says knowledge graph — what is it?" |
-| 09 | [MCP, for beginners](./09-mcp.md) | "MCP keeps coming up — what is it?" |
-| 10 | [You get it now — where next?](./10-where-next.md) | "OK, I understand AI. Now what?" |
+| 05 | [Text, images, video](./05-text-images-video.md) | "Some AIs write, some paint, some film — same thing?" |
+| 06 | [The knobs: temperature, tokens & parameters](./06-the-knobs.md) | "What do all these settings mean?" |
+| 07 | [Context: the AI's desk](./07-context.md) | "What's a context window and why does size matter?" |
+| 08 | [Memory: does it remember me?](./08-memory.md) | "I told it last week — why doesn't it remember?" |
+| 09 | [Teaching AI your stuff (RAG)](./09-rag.md) | "How does it know about *my* things?" |
+| 10 | [Knowledge graphs](./10-knowledge-graphs.md) | "Everyone says knowledge graph — what is it?" |
+| 11 | [MCP, for beginners](./11-mcp.md) | "MCP keeps coming up — what is it?" |
+| 12 | [You get it now — where next?](./12-where-next.md) | "OK, I understand AI. Now what?" |
 
 ## What makes this track different
 
@@ -60,12 +62,14 @@ this."* No exam, no jargon, no experience needed. Blueprint: [PRD-B0-AI-EXPLAINE
 - [ ] **02 · So many models** — Video + Deep Dive
 - [ ] **03 · Open vs closed** — Video + Deep Dive
 - [ ] **04 · Which model** — Video + Deep Dive
-- [ ] **05 · The knobs** — Video + Deep Dive
-- [ ] **06 · Context** — Video + Deep Dive
-- [ ] **07 · RAG** — Video + Deep Dive
-- [ ] **08 · Knowledge graphs** — Video + Deep Dive
-- [ ] **09 · MCP** — Video + Deep Dive
-- [ ] **10 · Where next** — Video + Deep Dive
+- [ ] **05 · Text, images, video** — Video + Deep Dive
+- [ ] **06 · The knobs** — Video + Deep Dive
+- [ ] **07 · Context** — Video + Deep Dive
+- [ ] **08 · Memory** — Video + Deep Dive
+- [ ] **09 · RAG** — Video + Deep Dive
+- [ ] **10 · Knowledge graphs** — Video + Deep Dive
+- [ ] **11 · MCP** — Video + Deep Dive
+- [ ] **12 · Where next** — Video + Deep Dive
 - [ ] Every video registered in the track `videos[]` with its `sourceNotebook`
 
 ---
