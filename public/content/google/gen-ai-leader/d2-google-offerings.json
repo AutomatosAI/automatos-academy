@@ -297,14 +297,14 @@
       "domainId": "d2-google-offerings",
       "type": "single",
       "difficulty": 2,
-      "stem": "What are 'Gems'?",
+      "stem": "A marketer keeps re-pasting the same 'act as our brand copy editor, use this tone and these rules' preamble into the Gemini app before every drafting session. What is the intended way to stop repeating that setup?",
       "options": [
-        { "id": "a", "text": "Custom, reusable versions of Gemini configured for a specific repeated task", "correct": true },
-        { "id": "b", "text": "Google's custom AI accelerator chips (TPUs)" },
-        { "id": "c", "text": "The RAG API used to ground on your data" },
-        { "id": "d", "text": "Prebuilt contact-centre virtual agents" }
+        { "id": "a", "text": "Create a Gem — a saved, reusable version of Gemini with that role and instructions baked in — and reuse it for the recurring task", "correct": true },
+        { "id": "b", "text": "Fine-tune a foundation model in Model Garden on the brand guidelines" },
+        { "id": "c", "text": "Stand up Gemini Enterprise for the whole organisation" },
+        { "id": "d", "text": "Switch to NotebookLM so it answers only from the brand documents" }
       ],
-      "explanation": "**Gems** are **customised, reusable versions of Gemini** for recurring tasks. TPUs are Google's accelerator chips, RAG APIs are grounding offerings, and prebuilt virtual agents are Conversational Agents — none of those is a Gem.",
+      "explanation": "A **Gem** is exactly this: a custom, reusable version of Gemini you configure once with a role and instructions, then reuse for a repeated task — the intended fix for re-pasting the same preamble. **Fine-tuning** in Model Garden is a heavyweight developer technique, not a consumer-app convenience (b); **Gemini Enterprise** is the org-wide platform, far more than one marketer needs (c); and **NotebookLM** is a source-grounded research tool, not a way to save a reusable assistant persona (d).",
       "sourceRefs": ["r-exam-guide", "r-cert-page"]
     },
     {
@@ -672,14 +672,14 @@
       "domainId": "d2-google-offerings",
       "type": "single",
       "difficulty": 2,
-      "stem": "In the Customer Engagement Suite, which component provides REAL-TIME suggestions to a HUMAN support agent during a live conversation?",
+      "stem": "The exam guide names four parts of the Customer Engagement Suite. Three are AI features (Conversational Agents, Agent Assist, Conversational Insights). Which fourth part is the underlying managed contact-centre PLATFORM the suite runs on?",
       "options": [
-        { "id": "a", "text": "Agent Assist", "correct": true },
-        { "id": "b", "text": "Conversational Agents" },
-        { "id": "c", "text": "Conversational Insights" },
-        { "id": "d", "text": "Model Garden" }
+        { "id": "a", "text": "Google Cloud Contact Center as a Service (CCaaS)", "correct": true },
+        { "id": "b", "text": "Agent Search" },
+        { "id": "c", "text": "Model Garden" },
+        { "id": "d", "text": "Gemini for Google Workspace" }
       ],
-      "explanation": "**Agent Assist** helps the *human* agent in real time with suggested responses and information. **Conversational Agents** is the AI virtual agent that talks *directly to customers* (no human); **Conversational Insights** analyses past conversations for trends after the fact; and **Model Garden** is the model catalogue, not a contact-centre tool.",
+      "explanation": "The guide lists the Customer Engagement Suite as Conversational Agents, Agent Assist, Conversational Insights, and **Google Cloud Contact Center as a Service (CCaaS)** — CCaaS is the managed contact-centre platform the AI features sit on. **Agent Search** is enterprise search across your content (not part of the suite); **Model Garden** is the model catalogue; and **Gemini for Google Workspace** is AI inside the office apps — none is the contact-centre platform.",
       "sourceRefs": ["r-exam-guide"]
     },
     {
@@ -732,14 +732,14 @@
       "domainId": "d2-google-offerings",
       "type": "single",
       "difficulty": 2,
-      "stem": "A business wants to compare and choose between Google's own models, Anthropic's Claude, Meta's Llama, and open models in one place. Which offering is that?",
+      "stem": "Beyond browsing models, how does Model Garden let a business actually CONSUME the models it lists?",
       "options": [
-        { "id": "a", "text": "Model Garden — the multi-vendor catalogue of first-party, partner, and open models", "correct": true },
-        { "id": "b", "text": "Gemini for Google Workspace" },
-        { "id": "c", "text": "Conversational Agents" },
-        { "id": "d", "text": "Gems" }
+        { "id": "a", "text": "Either call a model as a fully managed API (model-as-a-service) or self-deploy an open model to your own endpoint — you choose managed or self-hosted", "correct": true },
+        { "id": "b", "text": "Only by self-hosting every model on your own hardware; there is no managed option" },
+        { "id": "c", "text": "Only through the consumer Gemini app; models cannot be called from your own applications" },
+        { "id": "d", "text": "By fine-tuning is the sole way to use any listed model; you cannot call one as-is" }
       ],
-      "explanation": "**Model Garden** is Google Cloud's model catalogue where first-party (Gemini, Imagen, Veo, Gemma), partner (Claude, Llama, Mistral), and open models sit side by side — the open-approach, anti-lock-in story. Workspace embeds Gemini in office apps (b); Conversational Agents is a customer virtual agent (c); and Gems are reusable custom versions of the consumer Gemini app (d).",
+      "explanation": "Model Garden supports two consumption paths: consume a model as a **fully managed API** (model-as-a-service, how partner models like Claude and Llama are typically called) or **self-deploy** an open model to an endpoint you run — managed or self-hosted, your choice. It is not self-host-only (b), it is not limited to the consumer Gemini app (c), and you can call models as-is without fine-tuning (d).",
       "sourceRefs": ["r-exam-guide", "r-model-garden"]
     },
     {

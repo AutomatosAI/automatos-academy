@@ -187,7 +187,7 @@
       "title": "Reliability: refusals, retries, provenance, and honest status",
       "estMinutes": 15,
       "objective": "Handle every stop reason, lean on SDK backoff, and make the agent's output verifiable and honest.",
-      "body": "## Check stop_reason before reading content\n\nA safety refusal is **not an error** — it's a successful `HTTP 200` with `stop_reason: \"refusal\"`. The trap: a *pre-output* refusal can return an **empty `content` array**, so code that reads `response.content[0]` unconditionally throws on exactly those responses.\n\n```python\nresp = client.messages.create(model='claude-opus-4-8', max_tokens=1024, messages=messages)\nif resp.stop_reason == 'refusal':\n    handle_refusal()        # content may be empty (pre-output) or partial (mid-stream)\nelse:\n    print(resp.content[0].text)\n```\n\nAlways branch on `stop_reason` first. The full set you must handle: `end_turn`, `tool_use`, `pause_turn`, `max_tokens`, `refusal`, and `model_context_window_exceeded`.\n\n## Don't hand-roll retries\n\nThe SDK **automatically retries** `429` and `5xx` with exponential backoff — default ~2 retries, configurable via `max_retries`. It also reads and respects the `retry-after` header. Writing your own retry loop usually just fights the built-in one and ignores `retry-after`. Only hand-roll when you need genuinely custom behaviour (e.g. a circuit breaker), and even then, configure `max_retries` rather than disabling it blindly.\n\n## Caching for cost and reliability\n\nPrompt caching is a **prefix match**: any byte change anywhere in the prefix invalidates everything after it. Render order is `tools` -> `system` -> `messages`. So keep the **stable prefix first** (frozen system prompt, deterministic tool list) and put **volatile content last** (timestamps, per-request ids, the varying question). A `datetime.now()` in the system prompt silently busts the cache on every call — verify with `usage.cache_read_input_tokens`.\n\n## Provenance: track where a fact came from\n\nIn a multi-step agent, a fact three tools deep is worthless if you can't say *where it came from*. **Information provenance** means carrying the source alongside each fact so a human (or the agent) can verify it — which document, which tool result, which URL. It's the antidote to confident fabrication and the basis of honest status reporting.\n\n## Error propagation and escalation\n\nA bad tool result early in a run **poisons** every later step that builds on it — error propagation. Defend against it with validation at tool boundaries, and with **escalation / human-review gates** for irreversible or low-confidence actions: when the agent isn't sure, it should stop and ask, not guess.\n\n## Honest status reporting\n\nThe agent must report what actually happened — 'tests failed', 'I skipped step 3', 'this is unverified' — not a cheerful summary that papers over a gap. Ground every progress claim against a real tool result. An agent that lies about success is worse than one that fails loudly.",
+      "body": "## Check stop_reason before reading content\n\nA safety refusal is **not an error** — it's a successful `HTTP 200` with `stop_reason: \"refusal\"`. The trap: a *pre-output* refusal can return an **empty `content` array**, so code that reads `response.content[0]` unconditionally throws on exactly those responses.\n\n```python\nresp = client.messages.create(model='claude-opus-4-8', max_tokens=1024, messages=messages)\nif resp.stop_reason == 'refusal':\n    handle_refusal()        # content may be empty (pre-output) or partial (mid-stream)\nelse:\n    print(resp.content[0].text)\n```\n\nAlways branch on `stop_reason` first. The full set you must handle: `end_turn`, `tool_use`, `pause_turn`, `max_tokens`, `refusal`, and `model_context_window_exceeded`.\n\n**Recovering from a refusal.** Re-sending the *identical* request to the *same* model usually just refuses again, so resetting the context (remove or rephrase the offending turn) is one option. The stronger one, per the docs, is to **retry on a fallback model** — a request one model's safety classifier declines is often served by another. Newer models also attach a `stop_details` object whose `category` (e.g. `cyber`, `bio`) names the policy area, so you can log or route on it; branch on `stop_reason == 'refusal'`, not on `stop_details`, which can be `null`.\n\n## Don't hand-roll retries\n\nThe SDK **automatically retries** `429` and `5xx` with exponential backoff — default ~2 retries, configurable via `max_retries`. It also reads and respects the `retry-after` header. Writing your own retry loop usually just fights the built-in one and ignores `retry-after`. Only hand-roll when you need genuinely custom behaviour (e.g. a circuit breaker), and even then, configure `max_retries` rather than disabling it blindly.\n\n## Caching for cost and reliability\n\nPrompt caching is a **prefix match**: any byte change anywhere in the prefix invalidates everything after it. Render order is `tools` -> `system` -> `messages`. So keep the **stable prefix first** (frozen system prompt, deterministic tool list) and put **volatile content last** (timestamps, per-request ids, the varying question). A `datetime.now()` in the system prompt silently busts the cache on every call — verify with `usage.cache_read_input_tokens`.\n\n## Provenance: track where a fact came from\n\nIn a multi-step agent, a fact three tools deep is worthless if you can't say *where it came from*. **Information provenance** means carrying the source alongside each fact so a human (or the agent) can verify it — which document, which tool result, which URL. It's the antidote to confident fabrication and the basis of honest status reporting.\n\n## Error propagation and escalation\n\nA bad tool result early in a run **poisons** every later step that builds on it — error propagation. Defend against it with validation at tool boundaries, and with **escalation / human-review gates** for irreversible or low-confidence actions: when the agent isn't sure, it should stop and ask, not guess.\n\n## Honest status reporting\n\nThe agent must report what actually happened — 'tests failed', 'I skipped step 3', 'this is unverified' — not a cheerful summary that papers over a gap. Ground every progress claim against a real tool result. An agent that lies about success is worse than one that fails loudly.",
       "knowledgeCheck": [
         {
           "id": "kc-d5-6",
@@ -369,7 +369,7 @@
           "text": "As proof the API key lacks permission for the model"
         }
       ],
-      "explanation": "A refusal is a deliberate, successful response (`stop_reason: \"refusal\"`), not an error. Pre-output refusals can have empty content, so check `stop_reason` first; retrying the identical prompt will just refuse again.",
+      "explanation": "A refusal is a deliberate, successful response (`stop_reason: \"refusal\"`), not an error. Pre-output refusals can have empty content, so check `stop_reason` first; re-sending the identical prompt to the same model usually refuses again, so reset the context or retry on a fallback model rather than blindly resending.",
       "sourceRefs": [
         "r-d5-errors"
       ]
@@ -401,7 +401,7 @@
       ],
       "explanation": "Caching is a prefix match — any byte change in the prefix invalidates everything after it. Render order is tools -> system -> messages, so keep stable content first and push volatile content (timestamps, ids, the question) after the breakpoint. A `datetime.now()` in the system prompt silently busts every cache.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-caching"
       ]
     },
     {
@@ -431,7 +431,7 @@
       ],
       "explanation": "Provenance carries the source alongside each fact so a human or the agent can check it. It's the defence against confident fabrication and the foundation of honest status reporting.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -461,7 +461,7 @@
       ],
       "explanation": "An agent that reports success it can't evidence is failing on honest status reporting. Each claim should be audited against a real tool result; failures and skipped steps must be stated plainly.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -491,7 +491,7 @@
       ],
       "explanation": "A bad early tool result poisoning downstream steps is error propagation. You contain it by validating tool outputs at the boundary and gating risky or uncertain actions behind escalation rather than letting the agent build on bad data.",
       "sourceRefs": [
-        "r-d5-windows"
+        "r-d5-errors"
       ]
     },
     {
@@ -559,6 +559,370 @@
       "sourceRefs": [
         "r-d5-compaction",
         "r-d5-editing"
+      ]
+    },
+    {
+      "id": "q-d5-11",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You call the count_tokens endpoint to size a prompt before sending it. Which statement about that endpoint is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It's free, has its own rate limit separate from message creation, and returns an estimate that may differ from actual usage by a small amount",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It bills at the same input-token rate as an actual message and counts against your Messages rate limit"
+        },
+        {
+          "id": "c",
+          "text": "It returns the exact token count that will be billed, guaranteed to match the real request"
+        },
+        {
+          "id": "d",
+          "text": "It only counts the messages array and ignores the system prompt and tool definitions"
+        }
+      ],
+      "explanation": "Token counting is free to use, has requests-per-minute limits that are separate and independent from message creation, and its result is explicitly an estimate that the actual request may differ from slightly. It counts the same structured inputs as a real message (system, tools, images, PDFs), so B, C, and D are all wrong.",
+      "sourceRefs": [
+        "r-d5-tokens"
+      ]
+    },
+    {
+      "id": "q-d5-12",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You measured a prompt at 120k tokens on an older model and are migrating the workload to Claude Opus 4.8 (a newer-tokenizer model). Why must you recount before trusting your budget?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The newer tokenizer produces roughly 30% more tokens for the same text, so the old count understates the real size — recount with the target model id",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The newer tokenizer produces about 30% fewer tokens, so the old count is safely conservative"
+        },
+        {
+          "id": "c",
+          "text": "Token counts are identical across models; recounting only matters if the text changed"
+        },
+        {
+          "id": "d",
+          "text": "Only output tokens change with the tokenizer, so an input-size budget is unaffected"
+        }
+      ],
+      "explanation": "Newer-tokenizer models (Opus 4.7+, Fable 5, Mythos 5, Sonnet 5) produce roughly 30% more tokens than earlier models for the same text, and the count endpoint returns the count under the model you pass — so a count from an older model understates the real size and must be redone against the target model. It's not fewer tokens (B), counts are model-specific not identical (C), and it affects input sizing, not just output (D).",
+      "sourceRefs": [
+        "r-d5-tokens"
+      ]
+    },
+    {
+      "id": "q-d5-13",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Two different requests fail. In request A the input messages alone already exceed the model's context window. In request B the input fits, but input + max_tokens together exceed the window and generation runs long. On a current (4.5+) model, how do these surface differently?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A is rejected up front with a 400 invalid_request_error ('prompt is too long'); B is accepted and, if generation reaches the limit, stops with stop_reason 'model_context_window_exceeded'",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Both return a 400 invalid_request_error before any tokens are generated"
+        },
+        {
+          "id": "c",
+          "text": "Both return stop_reason 'max_tokens' because the output was capped"
+        },
+        {
+          "id": "d",
+          "text": "A returns stop_reason 'model_context_window_exceeded'; B returns a 400 error"
+        }
+      ],
+      "explanation": "If the input alone overflows the window the API rejects it immediately with a 400 'prompt is too long'. If the input fits but input + max_tokens could overflow, current models accept the request and only stop with stop_reason 'model_context_window_exceeded' if generation actually reaches the limit (treat that response as truncated). B is wrong because the second case isn't rejected up front; C confuses it with the output cap; D reverses the two.",
+      "sourceRefs": [
+        "r-d5-windows"
+      ]
+    },
+    {
+      "id": "q-d5-14",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You enable prompt caching to cut cost on a large fixed system prompt. Which describes the default cache lifetime and how you'd extend it?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The default cache entry lives ~5 minutes (refreshed on each hit); you can opt into a 1-hour TTL at additional cost",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The cache is permanent until you manually delete the entry"
+        },
+        {
+          "id": "c",
+          "text": "The default lifetime is 1 hour and cannot be changed"
+        },
+        {
+          "id": "d",
+          "text": "Cache entries never expire but are evicted only under memory pressure"
+        }
+      ],
+      "explanation": "Prompt cache entries have a default ~5-minute lifetime, and a 1-hour TTL is available at extra cost via cache_control ttl '1h'. The cache is not permanent (B), the default is not 1 hour (C), and expiry is time-based, not eviction-under-pressure (D).",
+      "sourceRefs": [
+        "r-d5-caching"
+      ]
+    },
+    {
+      "id": "q-d5-15",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "After adding prompt caching you notice usage.input_tokens dropped to a tiny number even though you send a large prompt each call. What does input_tokens report once caching is in play?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only the tokens after the last cache breakpoint; the cached prefix is reported separately in cache_read_input_tokens and cache_creation_input_tokens",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The total prompt size, unchanged — caching affects price but not the reported token count"
+        },
+        {
+          "id": "c",
+          "text": "Zero on any cache hit, regardless of what follows the breakpoint"
+        },
+        {
+          "id": "d",
+          "text": "The number of tokens that were written to the cache this request"
+        }
+      ],
+      "explanation": "With caching, input_tokens counts only the tokens after the last cache breakpoint; the cached prefix shows up in cache_read_input_tokens (hits) and cache_creation_input_tokens (writes), and the true input is the sum of all three. So it isn't the unchanged total (B), isn't necessarily zero when there's content after the breakpoint (C), and cache writes are a different field (D).",
+      "sourceRefs": [
+        "r-d5-caching"
+      ]
+    },
+    {
+      "id": "q-d5-16",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You target Claude Opus 4.8 and want the model to reason before answering hard requests. What must you set, and what happens if you use the old manual thinking config?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Set thinking: {type: 'adaptive'} — thinking is off unless you opt in; the old manual thinking: {type: 'enabled', budget_tokens: N} is rejected with a 400 on this model",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Set thinking: {type: 'enabled', budget_tokens: 8000}; adaptive mode is not available on Opus 4.8"
+        },
+        {
+          "id": "c",
+          "text": "Do nothing — extended thinking is always on for Opus 4.8 and cannot be turned off"
+        },
+        {
+          "id": "d",
+          "text": "Set thinking: {type: 'summarized'} to enable reasoning with a visible summary"
+        }
+      ],
+      "explanation": "On Opus 4.8 adaptive thinking is the only supported mode and is off unless you set thinking: {type: 'adaptive'}; passing manual {type: 'enabled'} / budget_tokens returns a 400. Manual mode isn't available (B), thinking is not always-on for Opus (C) — that's Fable 5 / Mythos 5 — and 'summarized' is a display value, not a thinking type (D).",
+      "sourceRefs": [
+        "r-d5-adaptive-thinking"
+      ]
+    },
+    {
+      "id": "q-d5-17",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An agent on an adaptive-thinking model keeps returning stop_reason 'max_tokens' at high effort. Which explanation and fix is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Thinking tokens count toward max_tokens, and high/max effort makes Claude think more, so it can exhaust the budget — raise max_tokens or lower the effort level",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Effort has a separate token budget from max_tokens, so raising effort can't cause a max_tokens stop"
+        },
+        {
+          "id": "c",
+          "text": "'max_tokens' here means the context window overflowed; enable compaction to fix it"
+        },
+        {
+          "id": "d",
+          "text": "Lowering max_tokens gives the model more room to think and avoids the truncation"
+        }
+      ],
+      "explanation": "With adaptive thinking, thinking tokens are part of the max_tokens budget; at high or max effort Claude thinks more and is more likely to hit the cap, truncating the reply — so you raise max_tokens or lower effort. Effort is soft guidance within max_tokens, not a separate budget (B); a max_tokens stop is the output cap, not a window overflow (C); and lowering max_tokens makes truncation more likely, not less (D).",
+      "sourceRefs": [
+        "r-d5-adaptive-thinking"
+      ]
+    },
+    {
+      "id": "q-d5-18",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A long adaptive-thinking agent runs with display 'omitted', so each returned thinking block has an empty 'thinking' field. To keep the transcript readable in your logs, you rewrite each block's 'thinking' text to your own summary before appending the assistant turn back for the next request. The next request 400s. What went wrong?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Thinking blocks must be echoed back exactly as received (empty-text ones included) — the signature carries the encrypted reasoning and the API rejects any block whose content was modified; reading the block to display it is fine, rewriting it is not",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Empty-text thinking blocks must be dropped entirely before resending; leaving them in is what triggers the 400"
+        },
+        {
+          "id": "c",
+          "text": "You must set display to 'summarized' on every turn or the blocks can't be round-tripped at all"
+        },
+        {
+          "id": "d",
+          "text": "Thinking blocks can never be sent back to the API; only text and tool_result blocks are allowed in an assistant turn"
+        }
+      ],
+      "explanation": "On the same model you pass each thinking block back verbatim — including omitted (empty-text) ones — because the signature holds the encrypted full reasoning and the API rejects a block whose content has been altered; text you write into a round-tripped omitted block is ignored anyway. Dropping the blocks isn't required and can break tool-use continuity (B); display doesn't have to be 'summarized' to round-trip — the signature is identical either way (C); and thinking blocks are round-tripped as normal assistant content, not forbidden (D).",
+      "sourceRefs": [
+        "r-d5-adaptive-thinking"
+      ]
+    },
+    {
+      "id": "q-d5-19",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You configure context editing's tool-result clearing on a long agent that also uses prompt caching. You set a very small clear amount so it trims often. Costs get worse, not better. What's the mechanism and the fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Clearing tool results invalidates the cached prefix, so tiny frequent clears keep forcing cache writes; use clear_at_least so each clear removes enough tokens to be worth the re-cache",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Context editing bypasses the cache entirely, so caching and editing can't be combined"
+        },
+        {
+          "id": "c",
+          "text": "The trigger threshold is too high; lowering it will stop the cache from resetting"
+        },
+        {
+          "id": "d",
+          "text": "Cleared tool results are silently deleted with no marker, so the model re-requests them and inflates cost"
+        }
+      ],
+      "explanation": "When context editing clears content, it invalidates cached prompt prefixes from the clear point on, so you incur a cache write each time — clearing a tiny amount very often pays that write premium repeatedly for little benefit. The clear_at_least parameter ensures each activation removes enough tokens to make the re-cache worthwhile. Editing and caching do compose (B), the trigger threshold isn't the cause (C), and cleared content is replaced with a placeholder so the model knows it was removed (D).",
+      "sourceRefs": [
+        "r-d5-editing",
+        "r-d5-caching"
+      ]
+    },
+    {
+      "id": "q-d5-20",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want the compaction summary to be produced but held back so you can inspect and adjust the message history before continuing. Which compaction option does this, and what stop_reason signals it?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Set pause_after_compaction: true; the request stops with stop_reason 'compaction' and the response contains only the compaction block, which you append before making the next request",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "There's no such option; compaction always continues straight into the answer with stop_reason 'end_turn'"
+        },
+        {
+          "id": "c",
+          "text": "Set pause_turn: true; it stops with stop_reason 'pause_turn' after summarising"
+        },
+        {
+          "id": "d",
+          "text": "Enable context editing alongside compaction; it stops with stop_reason 'max_tokens' at the summary"
+        }
+      ],
+      "explanation": "pause_after_compaction: true makes the API stop right after summarising with stop_reason 'compaction', returning only the compaction block so you can adjust messages before continuing — then you append that content and send again. Compaction can be paused (B is wrong), pause_turn is the separate server-tool iteration-limit signal (C), and none of this involves max_tokens (D).",
+      "sourceRefs": [
+        "r-d5-compaction"
+      ]
+    },
+    {
+      "id": "q-d5-21",
+      "domainId": "d5-context-reliability",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "The SDK retries certain failures automatically before raising. Which of these does the SDK retry by default? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "429 rate-limit responses",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "5xx internal/server errors",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Connection errors from a network problem",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "400 invalid_request_error from a malformed request",
+          "correct": false
+        }
+      ],
+      "explanation": "The SDK auto-retries with exponential backoff (2 times by default, tunable via max_retries): connection errors, 408, 409, 429, and >=500 are all retried. A 400 invalid_request_error is a client mistake in the request itself — retrying it unchanged just fails again, so it is not retried.",
+      "sourceRefs": [
+        "r-d5-errors"
+      ]
+    },
+    {
+      "id": "q-d5-22",
+      "domainId": "d5-context-reliability",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A long-running agent on Claude Sonnet 4.6 appears to 'know' how much context it has left and paces its work accordingly, yet your code never sends any budget information. How is that possible, and what changes on a newer model like Opus 4.7?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Sonnet 4.6 has automatic context awareness — the API injects the token budget and post-tool-call remaining-capacity warnings; newer models like Opus 4.7 don't get those injected tags, so you give an explicit budget via task budgets (beta)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You must be sending the <budget:token_budget> tag yourself; remove it and the behaviour stops on every model"
+        },
+        {
+          "id": "c",
+          "text": "All Claude models receive the injected budget tags identically; there is no per-model difference"
+        },
+        {
+          "id": "d",
+          "text": "The behaviour comes from compaction; disabling compaction removes the model's sense of remaining context"
+        }
+      ],
+      "explanation": "Context awareness is automatic on Sonnet 5/4.6/4.5 and Haiku 4.5: the API injects the total token budget into the system prompt and a remaining-capacity warning after each tool call — you never send these yourself. Newer models (Opus 4.7+, Fable 5, Mythos 5) don't receive the injected tags; you give them an explicit budget via task budgets (beta). So you aren't sending the tag (B), the behaviour is not identical across models (C), and it's context awareness, not compaction (D).",
+      "sourceRefs": [
+        "r-d5-windows"
       ]
     }
   ],
@@ -702,7 +1066,7 @@
               "id": "c",
               "text": "Retry the request on the same model until content is non-empty",
               "verdict": "wrong",
-              "rationale": "Retrying an identical prompt that was refused just refuses again, burning quota and latency for nothing."
+              "rationale": "Re-sending an identical refused prompt to the same model usually refuses again, burning quota and latency; reset the context or fall back to another model instead of looping on the same one."
             }
           ]
         },
@@ -811,6 +1175,26 @@
       "url": "https://platform.claude.com/docs/en/api/errors",
       "kind": "official-doc",
       "annotation": "Error codes, the retryable set, SDK auto-backoff for 429/5xx, and respecting retry-after.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-adaptive-thinking",
+      "title": "Adaptive thinking & effort",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+      "kind": "official-doc",
+      "annotation": "thinking:{type:'adaptive'} is the modern mode (manual budget_tokens is rejected on Opus 4.8/4.7); output_config.effort guides how much Claude thinks, thinking counts toward max_tokens, and switching thinking modes breaks message-level cache breakpoints.",
+      "domainIds": [
+        "d5-context-reliability"
+      ]
+    },
+    {
+      "id": "r-d5-caching",
+      "title": "Prompt caching",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+      "kind": "official-doc",
+      "annotation": "cache_control ephemeral, exact prefix match over tools->system->messages, up to 4 breakpoints, ~5-min default TTL (1h option), write/read pricing, and usage.input_tokens counting only tokens after the last breakpoint.",
       "domainIds": [
         "d5-context-reliability"
       ]

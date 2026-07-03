@@ -1,0 +1,271 @@
+{
+  "id": "m11-mcp",
+  "order": 11,
+  "code": "11",
+  "name": "MCP, for beginners",
+  "tagline": "You keep seeing \"MCP\" and it never gets explained. Here it is in normal words: an AI on its own can only talk — to be useful it often has to reach real things like your calendar or your files. MCP is simply an agreed standard way for AIs to plug into those tools. It's USB-C for AI: one shape everything agreed on, so any AI that speaks it can connect to any tool that speaks it, no custom wiring.",
+  "overview": "The confusion this module kills is a small, nagging one: \"MCP keeps coming up — what actually is it, in plain English?\" You'll get the answer with zero code and one analogy that does all the work. Start from the need. An AI by itself is just words on a screen; it can write and reason, but it can't check your calendar, file a ticket, or read a spreadsheet unless something connects it to those things. For years, every one of those connections was hand-built — a different custom plug for every socket, which was slow, fragile, and a mess. MCP — the Model Context Protocol — is simply an AGREED STANDARD way for AIs to connect to tools and data. Any AI that \"speaks MCP\" can plug into any tool that \"speaks MCP,\" with no bespoke wiring in between. The picture to hold is USB-C: before it, every device had its own charger and cable; USB-C is one shape everyone agreed on, so a single cable works across your laptop, phone, and headphones. MCP is USB-C for AI tools. Why should a beginner care? This standard plug is a big part of why modern AI is shifting from just chatting to actually DOING things — checking a calendar, sending an email, filing a ticket — and why connecting AI to your tools is getting simpler and safer, because everyone's using the same well-understood plug instead of a hundred one-off ones. This is orientation, not a technical course: you'll never see the plug yourself, and you don't need to.",
+  "objectives": [
+    "Explain in one plain sentence why an AI needs to connect to outside tools at all — on its own it can only talk, so to actually do things (check a calendar, read a file, send an email) it has to reach real apps and data.",
+    "Describe MCP — the Model Context Protocol — in your own words as an agreed standard way for AIs to plug into tools, using the USB-C analogy: one shape everyone agreed on, so any MCP-speaking AI connects to any MCP-speaking tool with no custom wiring.",
+    "Clear up the three things beginners get wrong about MCP — it's a standard, not an app you install; it's not just for programmers, you benefit without ever seeing it; and \"tool\" here means any app or data the AI is allowed to use, not a gadget."
+  ],
+  "lessons": [
+    {
+      "id": "l1-why-ai-needs-a-plug",
+      "title": "AI that can only talk is limited: why it needs to plug in",
+      "estMinutes": 8,
+      "objective": "Understand, with no code, why an AI on its own can't reach your real tools and data — and why for years every one of those connections had to be custom-built, which was a genuine mess.",
+      "body": "## An AI on its own can only talk\n\nEverything you've learned so far describes an AI that is brilliant with **words**. It reads, it writes, it summarises, it reasons over what you hand it. But notice what that leaves out. Ask it \"what's on my calendar tomorrow?\" and — by itself — it can't actually look. Ask it to \"send that email\" or \"file a ticket about this bug\" and it can't reach out and do it. On its own, an AI is a very capable **talker** sitting in a room with no doors: it can describe what it would do, but it can't touch anything real.\n\nThat's the whole limitation this module is about. To go from *talking* about your calendar to *actually checking it*, the AI needs a **connection** to the real thing — to your calendar app, your email, a spreadsheet, a company system. The word for any of those real things the AI can reach is a **tool**. And here's the first thing beginners get wrong, so let's kill it early: a \"tool\" here does **not** mean a gadget or a physical device. It means any **app or source of data the AI is allowed to use** — your calendar is a tool, your email is a tool, a customer database is a tool. Anything the AI can plug into to look something up or get something done.\n\n## The old way: a different custom plug for every socket\n\nSo how did the AI reach those tools? For a long time, the answer was: **someone built each connection by hand, one at a time.**\n\nPicture it. Want your AI to reach your calendar? An engineer writes a special connection just for that calendar. Want it to reach your email too? That's a *second* custom connection, built from scratch, because email works differently from a calendar. Now your ticketing system — a *third* one. Every single app spoke its own private language, so every single connection was a **bespoke, one-off piece of wiring.**\n\nThink of the drawer we all used to have: a tangle of chargers where every device needed its *own* cable. The phone had one plug, the camera had a different plug, the old laptop had a third, and none of them fit anything else. If you had ten devices, you had ten incompatible cables. Connecting AI to tools used to be exactly that drawer. Ten tools meant ten hand-built, incompatible connections — and if a tool changed even slightly, its special connection could break and someone had to go fix it.\n\n## Why that was a genuine mess\n\nThis wasn't just untidy — it actively held things back, in ways that reached all the way down to you as an everyday user.\n\nIt was **slow**: every new tool you might want your AI to use meant waiting for someone to hand-build yet another connection. It was **fragile**: hundreds of one-off connections meant hundreds of things that could quietly break. And it **didn't spread**: a clever connection someone built for *their* AI and *their* calendar couldn't just be reused by a different AI, because it was custom-made for one specific pairing. Everyone kept reinventing the same plug, slightly differently, forever.\n\nSo we had this strange gap. The AI itself was getting genuinely capable — a fluent reader and writer. But it stayed stuck behind glass, because reaching the real tools around it was such a hand-built chore. The obvious question hangs in the air, and it's exactly the one the next lesson answers: *what if every tool just agreed to use the same plug?*",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m11-1",
+          "domainId": "m11-mcp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "Why is an AI \"on its own\" limited, no matter how good it is with words?",
+          "options": [
+            { "id": "a", "text": "It can talk, reason, and write, but it can't reach real things like your calendar, email, or files unless something connects it to them", "correct": true },
+            { "id": "b", "text": "It isn't actually good with words yet — the writing and summarising come later, once it's connected to tools" },
+            { "id": "c", "text": "It runs out of things to say, so it needs tools purely to have more to talk about" },
+            { "id": "d", "text": "It's limited only because it's slow, and connecting tools is really about making it faster" }
+          ],
+          "explanation": "On its own an AI is a very capable talker with no way to touch anything real — to actually check a calendar or send an email it needs a connection to that tool. Its word ability is exactly its strength, not something that comes later (b). The limit isn't that it runs dry (c) or that it's slow (d) — it's that talking about your calendar and actually looking at it are two different things, and the second one needs a connection.",
+          "sourceRefs": ["r-mcp-site", "r-gb-tools"]
+        },
+        {
+          "id": "kc-m11-2",
+          "domainId": "m11-mcp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In this module, when we say the AI uses a \"tool,\" what do we mean?",
+          "options": [
+            { "id": "a", "text": "Any app or source of data the AI is allowed to use — like your calendar, your email, or a database", "correct": true },
+            { "id": "b", "text": "A physical gadget or device, like a drill or a phone, that the AI operates" },
+            { "id": "c", "text": "A special programming skill only engineers can give the AI" },
+            { "id": "d", "text": "A setting inside the AI that makes its writing better" }
+          ],
+          "explanation": "A \"tool\" here is any app or data source the AI is permitted to reach — a calendar, an inbox, a customer database. It is deliberately not a physical gadget (b): that's the exact mix-up this lesson heads off. It isn't a coding skill (c) — it's a thing the AI connects to, not something it learns — and it isn't an internal writing setting (d), which is closer to the knobs from an earlier module.",
+          "sourceRefs": ["r-gb-tools"]
+        }
+      ]
+    },
+    {
+      "id": "l2-usb-c-for-ai",
+      "title": "MCP is USB-C for AI: one standard plug",
+      "estMinutes": 9,
+      "objective": "Understand MCP as an agreed standard way for AIs to connect to tools — using the USB-C analogy end to end — and know why it's a standard, not an app, why you benefit without ever seeing it, and how this idea shows up in Automatos.",
+      "body": "## The fix: everyone agrees on one plug\n\nHere's what changed, and it's beautifully simple. Instead of building a fresh custom connection for every AI-and-tool pairing, the world agreed on **one standard way** for AIs and tools to talk to each other. This agreed standard has a name: **the Model Context Protocol — MCP for short.**\n\nLet's take that name apart in plain words, because it sounds far more technical than the idea behind it. A **protocol** is just an agreed way of doing something so two sides understand each other — like everyone agreeing to drive on the same side of the road, or to start a phone call with \"hello.\" No one owns \"hello\"; it's a shared convention that makes things work. MCP is exactly that kind of agreement, but for **how an AI (the \"model\") connects to tools and data (its \"context\")**. That's the entire idea: *an agreed standard way for AIs to plug into tools.*\n\nThe payoff is the part that matters. Because it's a shared standard, **any AI that \"speaks MCP\" can connect to any tool that \"speaks MCP\"** — with no custom wiring in between. Build a tool once so it speaks MCP, and every MCP-speaking AI can use it. No more hand-building a special connection for each pairing. One plug, agreed on by everyone.\n\n## The analogy that does all the work: USB-C\n\nYou already understand MCP, because you already understand **USB-C** — the plug on the back of most new phones and laptops.\n\nRemember the drawer of incompatible chargers from the last lesson? USB-C is the answer to that drawer. It's **one shape everyone agreed on.** Because they agreed, a single USB-C cable now works across your laptop, your phone, and your headphones. You don't check whether *this* cable matches *that* device — they share the standard, so it just fits. You stopped even thinking about it.\n\n**MCP is USB-C for AI tools.** That's the sentence to carry out of this whole module. Before, every AI-to-tool connection was its own oddly-shaped plug, hand-built. Now there's one agreed shape, so the AI can plug into things without a custom adapter each time.\n\nOne quick before-and-after makes it land. **Before:** to connect an AI to a calendar, someone hand-built a one-off connection made specifically for that AI and that calendar — and it worked *only* for that exact pair. **After:** the calendar speaks MCP, the AI speaks MCP, and they simply connect — the same way any USB-C cable meets any USB-C port. The custom, one-off plug becomes a standard one.\n\n## Two things people get wrong about MCP\n\nWith the picture in place, clear up the two mix-ups that trip beginners up most.\n\n- **\"MCP is an app I need to install.\"** No. MCP is a **standard** — a shape everyone agreed on, like USB-C itself. You don't \"install USB-C\"; it's just the agreed shape that lets things fit together. In the same way, MCP isn't a program you download and run. It's the shared convention that lets an AI and a tool connect.\n- **\"MCP is only for programmers.\"** No. You **benefit from it without ever seeing it.** You've almost certainly never looked at the metal shape inside a USB-C port, and you never need to — you just enjoy that your cable works everywhere. MCP is the same: it hums away underneath, and the payoff reaches you as an ordinary user. Which is exactly why it matters to you...\n\n## Why a beginner should actually care\n\nHere's the thing worth caring about. This standard plug is a big reason modern AI is shifting from just **chatting** to actually **doing** — checking your calendar, filing a ticket, drafting from a real document — because connecting it to the tools that make those actions possible finally got easy. And it's getting not just easier but **safer**, because everyone leaning on the *same* well-understood plug means the connection is a known, well-worn thing rather than a hundred fragile one-offs each with its own quirks.\n\nSo the next time \"MCP\" flashes past in an article or a settings screen, you can relax: it's the standard plug that lets your AI reach your real tools. **MCP is USB-C for AI: one standard plug so your AI can reach your real tools.**\n\n## The Automatos peek\n\nWhen Automatos connects your agents to outside apps — a calendar, a store, and hundreds more — this standard-plug idea is exactly what's under the hood. In practice you never touch the plug: you go to the Tools page, pick the app you want, and grant permission (typically a quick sign-in), and the platform handles the connecting for you. The docs' sensible advice is to start small — connect the few tools your agents actually need, and add more as you come to trust it — rather than wiring up everything at once. You now know what the \"MCP\" and \"tools\" language really means the moment you see it: it's this same agreed-plug idea, quietly doing its job so your agents can reach the real apps you use.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m11-3",
+          "domainId": "m11-mcp",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The module says \"MCP is USB-C for AI.\" What is that analogy actually claiming?",
+          "options": [
+            { "id": "a", "text": "MCP is one agreed standard shape, so any AI that speaks it can plug into any tool that speaks it — no custom wiring, just like one USB-C cable fits many devices", "correct": true },
+            { "id": "b", "text": "MCP is a physical cable you buy to plug your AI into your computer" },
+            { "id": "c", "text": "MCP makes your AI charge faster, the way USB-C charges a phone quickly" },
+            { "id": "d", "text": "MCP is Automatos's own private connector that only works with Automatos agents" }
+          ],
+          "explanation": "The analogy is about a shared standard: because everyone agreed on one shape, any MCP-speaking AI connects to any MCP-speaking tool with no bespoke wiring — exactly how one USB-C cable fits your laptop, phone, and headphones. It isn't a physical cable you buy (b); MCP is a convention, not a product. It has nothing to do with charging speed (c) — that borrows the wrong half of the analogy. And it's an open, industry-wide standard, not any one company's private connector (d).",
+          "sourceRefs": ["r-mcp-site", "r-mcp-intro"]
+        },
+        {
+          "id": "kc-m11-4",
+          "domainId": "m11-mcp",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A friend says, \"So MCP is an app I download and only programmers use, right?\" What's the accurate correction?",
+          "options": [
+            { "id": "a", "text": "Neither — MCP is a standard, like the USB-C shape, not an app you install; and you benefit from it without ever seeing it, no coding required", "correct": true },
+            { "id": "b", "text": "Yes to both — you install the MCP app, and only programmers ever touch it" },
+            { "id": "c", "text": "It's an app you install, but ordinary people use it directly every day through its own screen" },
+            { "id": "d", "text": "It's only for programmers, but there's nothing to install because it comes built into your phone's charger" }
+          ],
+          "explanation": "MCP is a shared standard, not a program you download — just as you don't \"install\" the USB-C shape — and it works quietly underneath so you get the benefit without ever seeing it or writing a line of code. So both halves of the friend's claim are wrong (b). There's no MCP app you open and use directly (c) — you never see it. And while \"nothing to install\" is right, \"only for programmers\" is not, and it has nothing to do with a phone charger (d) — that confuses the analogy for the real thing.",
+          "sourceRefs": ["r-mcp-site", "r-gb-connecting"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m11-1",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the plainest possible terms, what is MCP (the Model Context Protocol)?",
+      "options": [
+        { "id": "a", "text": "An agreed standard way for AIs to connect to tools and data, so any AI that speaks it can plug into any tool that speaks it", "correct": true },
+        { "id": "b", "text": "A specific AI model, like a rival to GPT or Claude" },
+        { "id": "c", "text": "A paid app you install to make your AI smarter" },
+        { "id": "d", "text": "A physical device that connects your computer to the internet" }
+      ],
+      "explanation": "MCP is a shared standard for how an AI connects to tools and data — agree on it once, and any MCP-speaking AI meets any MCP-speaking tool with no custom wiring. It isn't a model itself (b): it's the plug between a model and its tools, not a competitor to one. It isn't an app you install (c) — a standard is a convention, not a program. And it isn't a physical device (d); nothing about MCP is a piece of hardware.",
+      "sourceRefs": ["r-mcp-site", "r-mcp-intro"]
+    },
+    {
+      "id": "q-m11-2",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Why does an AI need something like MCP at all?",
+      "options": [
+        { "id": "a", "text": "On its own an AI can only talk; to actually do things — check a calendar, read a file, send an email — it has to connect to those real tools", "correct": true },
+        { "id": "b", "text": "Because without it the AI can't form sentences or answer questions properly" },
+        { "id": "c", "text": "Because MCP is what trains the AI and gives it its knowledge in the first place" },
+        { "id": "d", "text": "Because every AI is legally required to use MCP before it can be switched on" }
+      ],
+      "explanation": "An AI by itself is a capable talker with no way to reach real things — MCP is about giving it a standard connection to the tools that let it *act*. It has no bearing on whether the AI can write or answer (b); that ability comes from its training and stands on its own. MCP doesn't train the AI or supply its knowledge (c) — it's a connection standard, not a teaching method. And there's no legal requirement involved (d).",
+      "sourceRefs": ["r-mcp-site", "r-gb-tools"]
+    },
+    {
+      "id": "q-m11-3",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Before a shared standard existed, what did connecting an AI to each new tool involve, and why was it a problem?",
+      "options": [
+        { "id": "a", "text": "A custom, one-off connection hand-built for each AI-and-tool pairing — slow to make, fragile, and impossible to reuse for a different pairing", "correct": true },
+        { "id": "b", "text": "Nothing special — any AI has always connected to any tool automatically", "correct": false },
+        { "id": "c", "text": "Simply installing the tool's app on the AI, which always worked first time" },
+        { "id": "d", "text": "Retraining the whole AI from scratch for every tool, which made it smarter each time" }
+      ],
+      "explanation": "Each connection was bespoke — built by hand for one specific AI-and-tool pair — which made it slow, fragile, and non-reusable, like a drawer full of incompatible cables. Connections were never automatic before the standard (b): that's precisely what MCP introduced. It wasn't a matter of installing an app (c) — every tool spoke its own private language, so there was nothing standard to install. And it never involved retraining the AI (d); connecting to a tool and training a model are entirely different things.",
+      "sourceRefs": ["r-mcp-site", "r-mcp-intro"]
+    },
+    {
+      "id": "q-m11-4",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which everyday comparison best captures what MCP is?",
+      "options": [
+        { "id": "a", "text": "USB-C — one shape everyone agreed on, so a single cable works across your laptop, phone, and headphones", "correct": true },
+        { "id": "b", "text": "A dictionary — a big list of every word the AI knows" },
+        { "id": "c", "text": "A filing cabinet — a place the AI stores everything it remembers" },
+        { "id": "d", "text": "A translator who speaks a language the AI doesn't understand" }
+      ],
+      "explanation": "USB-C is the intended picture: one agreed shape means a single cable connects to many devices, exactly as MCP's one standard lets an AI connect to many tools. A dictionary (b) is about vocabulary, not connecting to tools. A filing cabinet (c) is closer to memory or a knowledge base — a different idea from an earlier module. And a translator (d) suggests bridging languages the AI can't grasp, whereas MCP is a shared plug both sides already agree on.",
+      "sourceRefs": ["r-mcp-site"]
+    },
+    {
+      "id": "q-m11-5",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Someone insists, \"MCP is just another app I have to install and manage.\" Why is that not right?",
+      "options": [
+        { "id": "a", "text": "MCP is a standard — a shape everyone agreed on, like USB-C — not a program you download and run; you don't \"install\" a standard", "correct": true },
+        { "id": "b", "text": "It's correct — MCP is an app, and you install it from an app store like any other" },
+        { "id": "c", "text": "It's an app, but it installs itself invisibly, so technically you don't manage it" },
+        { "id": "d", "text": "MCP is a website you log into rather than an app, but otherwise they're right" }
+      ],
+      "explanation": "MCP is a shared convention, not software you install — just as you never \"install\" the USB-C shape, you simply benefit when things share it. So calling it an app to download (b) misses what a standard is. It isn't a hidden self-installing app either (c) — there's no app at all, just an agreed way for an AI and a tool to connect. And it isn't a website you log into (d); the agreed-standard idea, not the delivery method, is the point.",
+      "sourceRefs": ["r-mcp-site", "r-mcp-intro"]
+    },
+    {
+      "id": "q-m11-6",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You're a non-technical person who'll never write code. How does MCP still matter to you?",
+      "options": [
+        { "id": "a", "text": "You benefit without ever seeing it — like USB-C humming away underneath, it's a big part of why AI can now do things (check a calendar, file a ticket), not just chat", "correct": true },
+        { "id": "b", "text": "It doesn't matter to you at all unless you become a programmer", "correct": false },
+        { "id": "c", "text": "It matters only because you'll have to configure the MCP plug yourself before using any AI" },
+        { "id": "d", "text": "It matters because you'll need to buy MCP hardware to connect your AI to your apps" }
+      ],
+      "explanation": "MCP works quietly underneath — you get the payoff (AI that can act on real tools, more easily and more safely) without ever touching it, just like you enjoy USB-C without studying the plug. So \"only matters if you're a programmer\" is wrong (b): the whole point is that ordinary users benefit. You don't configure the plug yourself (c) — a platform handles that for you. And there's no hardware to buy (d); MCP is a standard, not a device.",
+      "sourceRefs": ["r-mcp-site", "r-gb-connecting"]
+    },
+    {
+      "id": "q-m11-7",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "When we talk about an AI using a \"tool\" via MCP, a \"tool\" means:",
+      "options": [
+        { "id": "a", "text": "Any app or source of data the AI is allowed to use — a calendar, an inbox, a spreadsheet, a company system", "correct": true },
+        { "id": "b", "text": "A physical gadget the AI picks up and operates in the real world" },
+        { "id": "c", "text": "The AI model itself — \"tool\" and \"model\" mean the same thing" },
+        { "id": "d", "text": "A hidden setting that adjusts how creative or precise the AI's writing is" }
+      ],
+      "explanation": "A tool is any app or data source the AI can reach and is permitted to use — your calendar, your email, a database. It is not a physical gadget (b): that everyday sense of the word is the exact trap this module warns about. It isn't the model itself (c) — the model is the AI; the tool is a separate thing it connects to. And it isn't an internal writing setting (d), which is closer to the temperature knob from an earlier module.",
+      "sourceRefs": ["r-gb-tools", "r-mcp-site"]
+    },
+    {
+      "id": "q-m11-8",
+      "domainId": "m11-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In Automatos, how would you actually connect one of your agents to an outside app like your calendar or store?",
+      "options": [
+        { "id": "a", "text": "Go to the Tools page, pick the app, and grant permission — the platform handles the standard-plug connection for you; sensible to start with a few tools and add more as you trust it", "correct": true },
+        { "id": "b", "text": "Write the MCP connection code yourself for each app before an agent can use it", "correct": false },
+        { "id": "c", "text": "Connect every available app at once on day one, because agents need all of them to work", "correct": false },
+        { "id": "d", "text": "You can't — Automatos agents are chat-only and never reach outside apps" }
+      ],
+      "explanation": "The platform's own guidance: open the Tools page, choose the app, authorise it, and the connecting is handled for you — and it advises starting with the tools your agents need most, adding others over time. You don't write any connection code yourself (b); that's the whole benefit of a standard plug the platform manages. You needn't connect everything upfront (c) — the docs explicitly suggest not to. And agents are certainly not chat-only (d): connecting them to real tools is exactly what the Tools page is for.",
+      "sourceRefs": ["r-gb-tools", "r-gb-connecting"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [],
+  "resources": [
+    {
+      "id": "r-mcp-site",
+      "title": "Model Context Protocol — official site",
+      "url": "https://modelcontextprotocol.io/",
+      "kind": "official-doc",
+      "annotation": "The home of the open standard this whole module explains. Read only the top-level intro for a beginner's purpose: it frames MCP as a shared, open way to connect AI applications to the tools and data they need — the \"one standard plug\" idea. You don't need any of the technical or developer sections to understand what MCP is; the opening description is enough.",
+      "domainIds": ["m11-mcp"]
+    },
+    {
+      "id": "r-mcp-intro",
+      "title": "Model Context Protocol — Introduction",
+      "url": "https://modelcontextprotocol.io/introduction",
+      "kind": "official-doc",
+      "annotation": "The plain introduction to why a standard was needed and what it replaces. It's the source behind this module's before-and-after: instead of a custom connection for every AI-and-tool pairing, MCP is one agreed way for them to talk. Skim the overview only — enough to hear the \"agreed standard, not custom wiring\" point in the standard's own words.",
+      "domainIds": ["m11-mcp"]
+    },
+    {
+      "id": "r-gb-tools",
+      "title": "Automatos AI — Tools & Integrations",
+      "url": "automatos-gitbook/tools/README.md",
+      "kind": "official-doc",
+      "annotation": "Where the standard-plug idea shows up in the platform. It describes connecting external apps (GitHub, Slack, a calendar, hundreds more), assigning them to agents, and letting agents use them when relevant — and it explicitly advises starting with the tools you need most rather than connecting everything upfront. Grounds this module's \"tool = any app or data the AI can use\" and the peek.",
+      "domainIds": ["m11-mcp"]
+    },
+    {
+      "id": "r-gb-connecting",
+      "title": "Automatos AI — Connecting Apps",
+      "url": "automatos-gitbook/tools/connecting-apps.md",
+      "kind": "official-doc",
+      "annotation": "The step-by-step behind the peek: pick an app, click Connect, and authorise it (usually a quick sign-in), then confirm permissions — the platform handles the actual connection. It's the concrete version of \"you never touch the plug; you just grant permission,\" and it shows the everyday categories (calendar, email, storage, and more) an agent can reach.",
+      "domainIds": ["m11-mcp"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m11-1",
+      "title": "M11 · MCP, for beginners — USB-C for AI, in about 7 minutes",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m11-mcp"],
+      "sourceNotebook": "ai-explained / m11 / mcp-usb-c-for-ai"
+    },
+    {
+      "id": "v-m11-2",
+      "title": "M11 · Deep Dive — why AI needs a standard plug, and the confusions it clears up",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m11-mcp"],
+      "sourceNotebook": "ai-explained / m11 / deep-dive-standard-plug"
+    }
+  ]
+}

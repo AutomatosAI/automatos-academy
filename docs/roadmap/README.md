@@ -4,6 +4,10 @@ A **free** academy: help people learn AI (self-learning) and pull awareness to A
 Every track teaches a skill **and** shows how to do it in Automatos. External-exam tracks prep you (via
 the academy's mock exams) for a *real external* exam; the academy itself issues no exams.
 
+**Never touched AI? Start here → [`ai-explained/`](./ai-explained/) (AIX)** — the beginner on-ramp
+below both lanes: what an agent is, why so many models, OpenAI vs Claude, context windows, knowledge
+graphs, MCP — plain English, then pick a door. ([PRD-B0](../prds/PRD-B0-AI-EXPLAINED.md).)
+
 **Two lanes, one academy** ([strategy review](../STRATEGY-REVIEW-2026-07-02.md)):
 - **Operator lane** — *"Run your business with AI."* For owners, team leads, non-technical
   professionals. Start: [`ai-business/`](./ai-business/) (ABF) → want a credential to show for it?
@@ -39,12 +43,13 @@ buried in a combined document.
 
 | # | Vendor | Track folder | Type | Status | Modules |
 |---|---|---|---|---|---|
+| **B0** | Automatos | [`ai-explained/`](./ai-explained/) | **free training (Foundations on-ramp)** | **prompts authored** | 13 |
 | — | Anthropic | [`cca-f/`](./cca-f/) | external exam | **LIVE** (videos in) | 5 |
 | — | GitHub | [`gh-300/`](./gh-300/) | external exam | **LIVE** (videos in) | 6 |
 | S0 | GitHub | [`gh-500/`](./gh-500/) | external exam | **DONE** | 6 |
 | S1 | Automatos | [`automatos-apa/`](./automatos-apa/) | **free training** | **DONE** | 11 |
 | S2 | (cross) | [`ai-security/`](./ai-security/) | skills | **DONE** | 6 |
-| S3 | IAPP | [`aigp/`](./aigp/) | external exam | **DONE** | 4 |
+| S3 | IAPP | [`aigp/`](./aigp/) | external exam | **in progress** (videos rendering) | 4 |
 | S4 | (cross) | [`cross-vendor/`](./cross-vendor/) | skills | **DONE** | 4 |
 | S4b | Google | [`gen-ai-leader/`](./gen-ai-leader/) | external exam | **DONE** | 4 |
 | **B1** | Automatos | [`ai-business/`](./ai-business/) | **free training (Operator lane)** | **DONE** | 9 |

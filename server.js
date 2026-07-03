@@ -15,11 +15,49 @@ import compression from "compression";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { createHmac, timingSafeEqual } from "crypto";
 import { decodeCert, linkedInAddUrl } from "./public/js/engine/certificate.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(__dirname, "public");
 const PORT = process.env.PORT || 4321;
+
+// ── Server-signed badges (PRD-CREDENTIALS §4, stateless variant) ──────
+// The signature attests only that the Academy issued the certificate LINK —
+// it says NOTHING about exam results. Copy is always "Signed by the Academy",
+// never "verified". Stateless: nothing is stored; the HMAC is recomputable
+// from the payload alone, so this works on ephemeral (Railway) instances.
+const DEV_SIGNING_SECRET = "automatos-academy-dev-signing-secret-not-for-production";
+const BADGE_SIGNING_SECRET = process.env.BADGE_SIGNING_SECRET || DEV_SIGNING_SECRET;
+if (BADGE_SIGNING_SECRET === DEV_SIGNING_SECRET) {
+  console.warn("[badge] BADGE_SIGNING_SECRET not set — signing badges in DEV mode with a public default secret. Set BADGE_SIGNING_SECRET in production.");
+}
+// HMAC-SHA256(payload) as lowercase hex — chars are [0-9a-f] only, so a sig
+// never collides with base64url ([A-Za-z0-9-_]), the "." checksum separator,
+// or the "~" payload~sig separator used in cert URLs.
+const signPayload = (payload) => createHmac("sha256", BADGE_SIGNING_SECRET).update(payload).digest("hex");
+const sigMatches = (payload, sig) => {
+  if (typeof sig !== "string" || !/^[0-9a-f]{64}$/.test(sig)) return false;
+  const expected = Buffer.from(signPayload(payload), "utf8");
+  const got = Buffer.from(sig, "utf8");
+  return expected.length === got.length && timingSafeEqual(expected, got);
+};
+
+// Light in-memory rate limit for the sign endpoint (per IP) — deters abuse
+// without any store. Ephemeral by design; resets on restart.
+const SIGN_RATE_MAX = 30, SIGN_RATE_WINDOW_MS = 60_000;
+const signHits = new Map();
+function signRateLimited(ip) {
+  const now = Date.now();
+  const rec = signHits.get(ip);
+  if (!rec || now - rec.start >= SIGN_RATE_WINDOW_MS) {
+    signHits.set(ip, { start: now, count: 1 });
+    if (signHits.size > 5000) for (const [k, v] of signHits) if (now - v.start >= SIGN_RATE_WINDOW_MS) signHits.delete(k);
+    return false;
+  }
+  rec.count += 1;
+  return rec.count > SIGN_RATE_MAX;
+}
 
 // SEO landing shells + sitemap are generated from content at boot (same
 // pattern as chat-config hydration below). Failure is non-fatal — the SPA
@@ -79,6 +117,30 @@ app.post("/api/notify", async (req, res) => {
   }
 });
 
+// ── Badge signing (PRD-CREDENTIALS §4) ─────────────────────────────────
+// POST /api/badge/sign {payload} → {sig}. We re-decode the payload with the
+// SAME codec the client used (decodeCert) before signing, so we never sign
+// arbitrary strings — only well-formed Academy certificates.
+app.post("/api/badge/sign", (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  if (signRateLimited(ip)) return res.status(429).json({ error: "rate_limited" });
+  const payload = req.body && req.body.payload;
+  if (typeof payload !== "string" || !payload || !decodeCert(payload)) {
+    return res.status(400).json({ error: "invalid_payload" });
+  }
+  res.json({ sig: signPayload(payload) });
+});
+
+// GET /api/badge/verify?payload=&sig= → {valid}. Timing-safe compare. Never
+// leaks why a sig failed; the client renders the "Signed by the Academy" chip
+// only on valid:true and nothing at all on false.
+app.get("/api/badge/verify", (req, res) => {
+  const payload = typeof req.query.payload === "string" ? req.query.payload : "";
+  const sig = typeof req.query.sig === "string" ? req.query.sig : "";
+  const valid = !!payload && !!decodeCert(payload) && sigMatches(payload, sig);
+  res.json({ valid });
+});
+
 // ── API namespace reserved for the future backend ─────────────────────
 // Returns 501 today so client code can feature-detect a backend cleanly.
 app.use("/api", (_req, res) => res.status(501).json({ error: "not_implemented", note: "Phase 1 is local-first; no backend yet." }));
@@ -99,11 +161,18 @@ function trackMeta(vendorId, trackId) {
 }
 
 app.get("/cert/:payload", (req, res) => {
-  const cert = decodeCert(req.params.payload);
+  // A "~sig" suffix is the v2 server signature (progressive enhancement).
+  // Strip it before decoding; v1 links WITHOUT a sig keep working unchanged.
+  const raw = req.params.payload;
+  const tilde = raw.indexOf("~");
+  const payload = tilde === -1 ? raw : raw.slice(0, tilde);
+  const sig = tilde === -1 ? "" : raw.slice(tilde + 1);
+  const signed = !!sig && sigMatches(payload, sig);
+  const cert = decodeCert(payload);
   if (!cert) { res.status(404); return res.sendFile(resolve(PUBLIC, "index.html")); }
   const { vendorName, trackName } = trackMeta(cert.vendorId, cert.trackId);
   const base = `${req.protocol}://${req.get("host")}`;
-  const certUrl = `${base}/cert/${req.params.payload}`;
+  const certUrl = `${base}/cert/${raw}`;
   const title = `${cert.name} — ${trackName} · Automatos Academy`;
   const desc = `${cert.name} completed the Automatos Academy ${trackName} track (${cert.date}). Free, honest AI training — independent of any certification body.`;
   const li = linkedInAddUrl({ certName: `Automatos Academy — ${trackName}`, certUrl, certId: cert.certId, issued: cert.date });
@@ -128,6 +197,7 @@ app.get("/cert/:payload", (req, res) => {
     <div style="display:flex;justify-content:space-between;margin-top:36px;padding-top:16px;border-top:1px dashed var(--rule-c)">
       <span class="mono-label">${esc(vendorName)} · ${esc(trackName)}</span><span class="mono-label">Ref ${esc(cert.certId)}</span>
     </div>
+    ${signed ? '<p class="mono-label" style="margin-top:12px">✓ Signed by the Academy</p>' : ""}
   </div>
   <p style="margin-top:22px"><a class="ac-btn ac-btn-solid" href="${esc(li)}">Add to LinkedIn profile ↗</a>
   <a class="ac-btn" href="/#/t/${esc(cert.vendorId)}/${esc(cert.trackId)}">Start this track →</a></p>

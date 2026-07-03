@@ -30,9 +30,9 @@
           "stem": "OWASP LLM06:2025 Excessive Agency decomposes into three root causes. Which set names them?",
           "options": [
             { "id": "a", "text": "Excessive functionality, excessive permissions, and excessive autonomy", "correct": true },
-            { "id": "b", "text": "Excessive prompting, excessive context, and excessive fine-tuning" },
-            { "id": "c", "text": "Excessive latency, excessive cost, and excessive logging" },
-            { "id": "d", "text": "Excessive users, excessive tokens, and excessive models" }
+            { "id": "b", "text": "Excessive prompting, excessive context, and excessive fine-tuning", "correct": false },
+            { "id": "c", "text": "Excessive latency, excessive cost, and excessive logging", "correct": false },
+            { "id": "d", "text": "Excessive users, excessive tokens, and excessive models", "correct": false }
           ],
           "explanation": "OWASP splits Excessive Agency into functionality (tools/functions the agent doesn't need), permissions (a tool's downstream access is broader than required), and autonomy (high-impact actions with no human verification) — option a. Option b lists model-tuning concerns, which are not the LLM06 root causes. Option c lists operational metrics; cost and logging matter elsewhere (LLM10, monitoring) but are not the three axes. Option d lists scaling nouns unrelated to the agency decomposition.",
           "sourceRefs": ["r-owasp-llm06", "r-owasp-llm-top10"]

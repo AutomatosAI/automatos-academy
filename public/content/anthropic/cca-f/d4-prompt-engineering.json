@@ -89,7 +89,7 @@
       "title": "Prompt caching is a prefix match",
       "estMinutes": 16,
       "objective": "Order the prompt by stability, place breakpoints at boundaries, and verify hits with usage.",
-      "body": "## The one invariant\n\n**Prompt caching is a prefix match. Any byte change anywhere in the prefix invalidates everything after it.** The cache key is the exact bytes of the rendered prompt up to each `cache_control` breakpoint. One changed character at position N invalidates every breakpoint at positions ≥ N.\n\nRender order is fixed: **tools → system → messages**. A breakpoint on the last system block caches both tools and system together.\n\n## Design around it\n\nPut **stable** content first — the frozen system prompt, a deterministically ordered tool list. Put **volatile** content last — timestamps, request ids, the varying question — *after* the final `cache_control` breakpoint. The shared-prefix / varying-suffix pattern is the whole game: breakpoint at the end of the shared portion, leave the varying question unmarked.\n\n```python\nmessages=[{'role': 'user', 'content': [\n    {'type': 'text', 'text': SHARED_CONTEXT, 'cache_control': {'type': 'ephemeral'}},\n    {'type': 'text', 'text': todays_question}  # volatile, no marker\n]}]\n```\n\n## The silent invalidator\n\nVerify with `usage.cache_read_input_tokens`. If it reads **0** across requests that *should* share a prefix, a silent invalidator is in the prefix — `datetime.now()` in the system prompt, a `uuid4()` early in content, or `json.dumps(d)` without `sort_keys=True` (non-deterministic key order). Diff the rendered bytes of two requests to find it. Remember `input_tokens` is the *uncached remainder* — total prompt = `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`.\n\n## Limits worth memorising\n\n- Max **4** `cache_control` breakpoints per request.\n- Minimum cacheable prefix is **model-dependent** (e.g. ~4096 tokens on Opus 4.8, ~2048 on Sonnet 4.6) — a too-short prefix silently won't cache, no error, `cache_creation_input_tokens: 0`.\n- Switching **model** or changing the **tool definitions** forces a full rebuild — those render at position 0. Changing `tool_choice` or toggling `thinking` does **not** invalidate the tools+system cache.",
+      "body": "## The one invariant\n\n**Prompt caching is a prefix match. Any byte change anywhere in the prefix invalidates everything after it.** The cache key is the exact bytes of the rendered prompt up to each `cache_control` breakpoint. One changed character at position N invalidates every breakpoint at positions ≥ N.\n\nRender order is fixed: **tools → system → messages**. A breakpoint on the last system block caches both tools and system together.\n\n## Design around it\n\nPut **stable** content first — the frozen system prompt, a deterministically ordered tool list. Put **volatile** content last — timestamps, request ids, the varying question — *after* the final `cache_control` breakpoint. The shared-prefix / varying-suffix pattern is the whole game: breakpoint at the end of the shared portion, leave the varying question unmarked.\n\n```python\nmessages=[{'role': 'user', 'content': [\n    {'type': 'text', 'text': SHARED_CONTEXT, 'cache_control': {'type': 'ephemeral'}},\n    {'type': 'text', 'text': todays_question}  # volatile, no marker\n]}]\n```\n\n## The silent invalidator\n\nVerify with `usage.cache_read_input_tokens`. If it reads **0** across requests that *should* share a prefix, a silent invalidator is in the prefix — `datetime.now()` in the system prompt, a `uuid4()` early in content, or `json.dumps(d)` without `sort_keys=True` (non-deterministic key order). Diff the rendered bytes of two requests to find it. Remember `input_tokens` is the *uncached remainder* — total prompt = `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`.\n\n## Limits worth memorising\n\n- Max **4** `cache_control` breakpoints per request.\n- Minimum cacheable prefix is **model-dependent** (1,024 tokens on Opus 4.8 and on Sonnet 4.6; higher on some older/smaller models, e.g. 4,096 on Opus 4.5 and Haiku 4.5) — a too-short prefix silently won't cache, no error, `cache_creation_input_tokens: 0`.\n- Switching **model** or changing the **tool definitions** forces a full rebuild — those render at position 0. Changing `tool_choice` or toggling `thinking` does **not** invalidate the tools+system cache.",
       "knowledgeCheck": [
         {
           "id": "kc-d4-3",
@@ -315,7 +315,7 @@
               "text": "Restart the conversation with a fresh system prompt"
             }
           ],
-          "explanation": "Editing top-level system changes the prefix ahead of the whole history and re-processes it uncached. A mid-conversation {role:'system'} message appended to messages[] preserves the cached prefix (beta) — phrase it as context, not override.",
+          "explanation": "Editing top-level system changes the prefix ahead of the whole history and re-processes it uncached. A mid-conversation {role:'system'} message appended to messages[] preserves the cached prefix — phrase it as context, not override.",
           "sourceRefs": [
             "r-d4-caching"
           ]
@@ -619,7 +619,7 @@
           "text": "Caching only works with tools present; add a dummy tool"
         }
       ],
-      "explanation": "The system prompt is the front of the cached prefix — editing it per request invalidates everything downstream. A mid-conversation system message sits after the cached history (beta), so the prefix stays intact.",
+      "explanation": "The system prompt is the front of the cached prefix — editing it per request invalidates everything downstream. A mid-conversation system message sits after the cached history, so the prefix stays intact.",
       "sourceRefs": [
         "r-d4-caching"
       ]
@@ -687,6 +687,371 @@
       "sourceRefs": [
         "r-d4-effort",
         "r-d4-adaptive"
+      ]
+    },
+    {
+      "id": "q-d4-13",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You're adding a handful of few-shot examples to steer output format. How should they be structured, and how many is a good starting point?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Wrap each in <example> tags (all of them inside <examples>); 3–5 examples is a good target",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Paste them as raw text with no delimiters; one example is enough on modern models"
+        },
+        {
+          "id": "c",
+          "text": "Put every example in a separate assistant prefill turn"
+        },
+        {
+          "id": "d",
+          "text": "Encode them as a JSON array in the system prompt; 20+ examples for best coverage"
+        }
+      ],
+      "explanation": "The docs recommend wrapping examples in <example> tags (grouped in <examples>) so the model can tell them apart from instructions, and including 3–5 for best results. Raw undelimited text blurs examples into instructions; prefill turns return 400 on modern models; and there's no call for a 20-example JSON blob. Examples should also be relevant and diverse (cover edge cases).",
+      "sourceRefs": [
+        "r-d4-prompting"
+      ]
+    },
+    {
+      "id": "q-d4-14",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A single user turn mixes standing instructions, a reference document, and the variable input to act on, and the model keeps treating the document text as commands. What's the recommended structural fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Wrap each content type in its own XML tag (e.g. <instructions>, <context>, <input>) with consistent, descriptive names",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Delete the document — modern models can't separate data from instructions"
+        },
+        {
+          "id": "c",
+          "text": "Move the document into a trailing assistant prefill turn"
+        },
+        {
+          "id": "d",
+          "text": "Convert the whole turn to uppercase so the real instructions stand out"
+        }
+      ],
+      "explanation": "XML tags let the model parse a prompt that mixes instructions, context, and variable input unambiguously — wrap each type in its own descriptive, consistently-named tag (nest when there's a hierarchy). The document isn't the problem; the missing delimiters are. Prefill returns 400 on modern models, and shouting in uppercase does nothing to mark the data/instruction boundary.",
+      "sourceRefs": [
+        "r-d4-prompting"
+      ]
+    },
+    {
+      "id": "q-d4-15",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want guaranteed-valid arguments on your tools, so you set strict: true on all 26 of them in one request. What happens?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The request is rejected — a request may contain at most 20 strict tools; keep strict on the tools that need guaranteed args and leave the rest non-strict",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "All 26 are validated; there is no limit on strict tools"
+        },
+        {
+          "id": "c",
+          "text": "Only the first tool is validated and the other 25 are ignored"
+        },
+        {
+          "id": "d",
+          "text": "strict: true is silently downgraded to non-strict for every tool"
+        }
+      ],
+      "explanation": "Structured outputs cap a request at 20 strict tools (non-strict tools don't count toward the limit), so 26 strict tools is over the limit. The fix is to reserve strict:true for the tools whose arguments must be schema-valid and leave the others non-strict — not to assume there's no limit, and the API doesn't silently drop or downgrade tools to make it fit.",
+      "sourceRefs": [
+        "r-d4-structured"
+      ]
+    },
+    {
+      "id": "q-d4-16",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Your strict-tool input schema includes \"minLength\": 3 and \"maximum\": 100 on some fields. Why might the request be rejected?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Strict schemas don't support string/numeric constraints like minLength or maximum — enforce those in your own validation after the call",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Constraints are supported, but only when strict is false"
+        },
+        {
+          "id": "c",
+          "text": "The schema must be nested inside output_config.format even for tools"
+        },
+        {
+          "id": "d",
+          "text": "minLength and maximum are fine; the failure must be an unrelated syntax error"
+        }
+      ],
+      "explanation": "Strict tool schemas (like structured-output json_schemas) support a limited subset of JSON Schema: numerical constraints (minimum/maximum/multipleOf), string-length constraints (minLength/maxLength), recursive schemas, and additionalProperties set to anything but false are unsupported. Enforce those bounds in your own code after the model returns. Toggling strict off wouldn't make the constraints validate, and tool schemas live under the tool's input_schema, not output_config.format.",
+      "sourceRefs": [
+        "r-d4-structured"
+      ]
+    },
+    {
+      "id": "q-d4-17",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In an agentic loop on Opus 4.8, you try to inject a mid-conversation {role:'system'} message immediately BETWEEN an assistant tool_use block and the tool_result that answers it. What happens, and where should it go?",
+      "options": [
+        {
+          "id": "a",
+          "text": "400 error — a system message can't sit between tool_use and its tool_result; place it right after the user turn carrying the tool_result",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It works anywhere in messages[]; placement is unconstrained"
+        },
+        {
+          "id": "c",
+          "text": "It's allowed there but silently demoted to a user message"
+        },
+        {
+          "id": "d",
+          "text": "It's fine, but only if it's also the first entry in messages[]"
+        }
+      ],
+      "explanation": "A mid-conversation system message must follow a user turn (a user turn carrying tool_result blocks counts) or an assistant turn ending in server tool use, and must either end the array or precede an assistant turn — it cannot sit between a tool_use block and its tool_result, which returns 400. In an agentic loop, place it right after the tool_result-bearing user message. It's not demoted to user, and it can never be the first entry in messages[] (use the top-level system field for that).",
+      "sourceRefs": [
+        "r-d4-midconv"
+      ]
+    },
+    {
+      "id": "q-d4-18",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The docs recommend xhigh as the starting point for coding and agentic work on Opus 4.8, yet your agent behaves as if it's running at high. You never touched output_config.effort. Why, and what's the fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "xhigh is not the API default — high is — so you get high until you set effort:'xhigh' explicitly; the value you pass overrides the high default",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "xhigh is the default on Opus 4.8, so something else is overriding it back down to high"
+        },
+        {
+          "id": "c",
+          "text": "Omitting effort disables the effort system entirely; you must also pass a beta header to activate xhigh"
+        },
+        {
+          "id": "d",
+          "text": "xhigh only takes effect when thinking is set to 'enabled' with a budget; adaptive thinking silently caps effort at high"
+        }
+      ],
+      "explanation": "The API default is high — omitting effort is equivalent to high. The coding/agentic recommendation (xhigh) is a recommendation, not the default: you must set effort:'xhigh' explicitly, and the value you pass overrides high. xhigh isn't the default being overridden (B), there's no beta header or effort 'off' switch (C), and effort is independent of the thinking mode — adaptive thinking doesn't cap it (D).",
+      "sourceRefs": [
+        "r-d4-effort"
+      ]
+    },
+    {
+      "id": "q-d4-19",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A config templating helper sets output_config.effort to 'xhigh' for every model in your fleet. On which model is that value NOT accepted?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Claude Opus 4.6 — xhigh is available on Fable 5, Mythos 5, Opus 4.8, Opus 4.7, and Sonnet 5, but not Opus 4.6",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Claude Opus 4.8"
+        },
+        {
+          "id": "c",
+          "text": "Claude Sonnet 5"
+        },
+        {
+          "id": "d",
+          "text": "Claude Opus 4.7"
+        }
+      ],
+      "explanation": "xhigh is available on Claude Fable 5, Mythos 5, Opus 4.8, Opus 4.7, and Sonnet 5 — but Opus 4.6 (and Sonnet 4.6) top out at max without an xhigh level. So a blanket xhigh value breaks specifically on Opus 4.6, while it's valid on 4.8, 4.7, and Sonnet 5. Effort levels are per-model; don't assume every level exists everywhere.",
+      "sourceRefs": [
+        "r-d4-effort"
+      ]
+    },
+    {
+      "id": "q-d4-20",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You move a latency-critical classifier to Claude Sonnet 5 and omit the thinking parameter entirely, expecting no extended thinking. Instead responses are slower than on your old setup. Why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "On Sonnet 5 adaptive thinking is ON by default; pass thinking:{type:'disabled'} (or lower effort) to turn it off",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Sonnet 5 ignores the thinking parameter; the slowdown must be network latency"
+        },
+        {
+          "id": "c",
+          "text": "Omitting thinking forces max effort on Sonnet 5"
+        },
+        {
+          "id": "d",
+          "text": "You must set thinking:{type:'enabled', budget_tokens:0} to disable it"
+        }
+      ],
+      "explanation": "Unlike Opus 4.8/4.7 (where thinking is off unless you opt in with type:'adaptive'), Sonnet 5 has adaptive thinking on by default — omitting thinking leaves it enabled, so the model thinks and latency rises. Pass thinking:{type:'disabled'} to turn it off, or drop effort to low so it skips thinking on simple inputs. Omitting thinking doesn't change effort, and enabled+budget_tokens is rejected with a 400 on Sonnet 5.",
+      "sourceRefs": [
+        "r-d4-adaptive",
+        "r-d4-effort"
+      ]
+    },
+    {
+      "id": "q-d4-21",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Claude Code exposes an 'ultracode' entry in its effort menu. A developer tries to reproduce it by sending output_config.effort='ultracode' to the API. What's wrong, and what actually is ultracode?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'ultracode' isn't an API effort level — it pairs xhigh effort with standing permission (granted via a mid-conversation system message) to launch multi-agent workflows",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "ultracode is a valid sixth effort level above max; the developer just needs the right beta header"
+        },
+        {
+          "id": "c",
+          "text": "ultracode is an alias for max effort and behaves identically"
+        },
+        {
+          "id": "d",
+          "text": "ultracode is a separate model id, not an effort value"
+        }
+      ],
+      "explanation": "The API's effort values are exactly low | medium | high | xhigh | max — 'ultracode' is not among them, so sending it fails. In Claude Code, ultracode combines the xhigh effort level with standing consent to launch multi-agent workflows, granted through a mid-conversation system message. It isn't a hidden sixth level, isn't merely max (max is a real level with different behavior), and isn't a model id.",
+      "sourceRefs": [
+        "r-d4-effort",
+        "r-d4-midconv"
+      ]
+    },
+    {
+      "id": "q-d4-22",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In an adaptive-thinking conversation, most turns are trivial but a few genuinely need deep reasoning. You want to nudge thinking ON for just those specific turns without touching the system prompt. What's a supported lever?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Append a per-message cue to that user turn, e.g. 'Please think hard before responding.'",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Set a per-turn budget_tokens on those requests only"
+        },
+        {
+          "id": "c",
+          "text": "Raise temperature on the hard turns to force deliberation"
+        },
+        {
+          "id": "d",
+          "text": "Prefill an assistant '<thinking>' block to start the reasoning"
+        }
+      ],
+      "explanation": "Adaptive thinking is promptable per message: appending 'Please think hard before responding.' to a user turn encourages thinking on that turn (and 'Answer directly without deliberating.' suppresses it), independent of the system prompt. budget_tokens is rejected on the adaptive-only models; temperature is a removed sampling param (400) and never controlled deliberation; and assistant prefill returns 400. Effort is the other supported lever, but the question asked for a per-turn nudge.",
+      "sourceRefs": [
+        "r-d4-adaptive"
+      ]
+    },
+    {
+      "id": "q-d4-23",
+      "domainId": "d4-prompt-engineering",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A service caches a large tools+system prefix and normally runs adaptive thinking. On some requests it switches to thinking:{type:'disabled'} for speed. What's the caching consequence?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Switching between adaptive and enabled/disabled breaks the messages cache, but the tools and system prefix stay cached",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It invalidates the entire cache including tools and system, forcing a full rebuild"
+        },
+        {
+          "id": "c",
+          "text": "It has no effect on caching at any level"
+        },
+        {
+          "id": "d",
+          "text": "It only invalidates the tools cache, since thinking renders at position 0"
+        }
+      ],
+      "explanation": "Consecutive requests that stay in adaptive thinking preserve cache breakpoints, but switching between adaptive and enabled/disabled breaks the breakpoints for messages. System prompts and tool definitions remain cached regardless of the mode change — so it's the messages cache that's hit, not the whole thing, and not the tools cache (thinking settings don't render at position 0; tools do).",
+      "sourceRefs": [
+        "r-d4-caching",
+        "r-d4-adaptive"
+      ]
+    },
+    {
+      "id": "q-d4-24",
+      "domainId": "d4-prompt-engineering",
+      "type": "multi",
+      "difficulty": 1,
+      "stem": "Which practices are recommended when using few-shot examples and XML structure on modern Claude? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Wrap few-shot examples in <example>/<examples> tags so they're distinct from instructions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Make examples diverse enough to cover edge cases and avoid unintended patterns",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "Use <thinking> tags inside examples to demonstrate a reasoning pattern the model should generalize",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Keep tag names inconsistent across the prompt so each section looks unique"
+        }
+      ],
+      "explanation": "Examples should be tag-delimited (<example>/<examples>) and diverse (covering edge cases so the model doesn't latch onto an accidental pattern), and <thinking> tags inside few-shot examples teach a reasoning style the model generalizes to its own thinking blocks. Tag names should be consistent and descriptive, not deliberately varied — inconsistent tags make the prompt harder to parse, the opposite of the goal.",
+      "sourceRefs": [
+        "r-d4-prompting"
       ]
     }
   ],
@@ -954,6 +1319,26 @@
       "url": "https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
       "kind": "official-doc",
       "annotation": "thinking:{type:'adaptive'}, the display setting, and why fixed budget_tokens is gone on modern models.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    },
+    {
+      "id": "r-d4-prompting",
+      "title": "Prompting best practices (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+      "kind": "official-doc",
+      "annotation": "XML structuring (<instructions>/<context>/<input>), few-shot examples (3–5, wrapped in <example> tags, diverse), and roles — the clarity techniques for current models.",
+      "domainIds": [
+        "d4-prompt-engineering"
+      ]
+    },
+    {
+      "id": "r-d4-midconv",
+      "title": "Mid-conversation system messages (Anthropic docs)",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages",
+      "kind": "official-doc",
+      "annotation": "Append a {role:'system'} message to messages[] to steer mid-run without invalidating the cached prefix. Opus 4.8 only; strict placement rules (never between tool_use and its tool_result); phrase as context, not override.",
       "domainIds": [
         "d4-prompt-engineering"
       ]

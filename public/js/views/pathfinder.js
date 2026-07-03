@@ -40,8 +40,10 @@ const QS = [
 
 // (role, goal, comfort) → ordered track ids, most-recommended first.
 function recommend(a) {
-  if (a.role === "owner" || a.comfort === "non") return ["ai-business", "platform-architect"];
-  if (a.role === "grc") return ["aigp", "ai-business"];
+  // Doesn't know the words yet → the Foundations on-ramp before anything else.
+  if (a.comfort === "non") return ["ai-explained", "ai-business"];
+  if (a.role === "owner") return a.goal === "credential" ? ["ai-business", "gen-ai-leader"] : ["ai-business", "platform-architect"];
+  if (a.role === "grc") return ["aigp", "ai-security"];
   if (a.role === "security") return ["ai-security", "gh-500"];
   if (a.goal === "outcomes") return ["platform-architect", "ai-business"];
   return ["cca-f", "gh-300"];

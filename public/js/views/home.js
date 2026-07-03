@@ -65,6 +65,23 @@ function trackCard(t) {
   ]);
 }
 
+// The on-ramp strip (PRD-B0 §6): the Foundations-lane track sits BELOW both
+// doors — for the visitor who doesn't know the words yet. Data-driven from
+// manifest lane; renders a link when live, an honest "coming soon" until then.
+function onRamp(tracks) {
+  const t = tracks.find((x) => (x.lane || "") === "foundations");
+  if (!t) return null;
+  const live = t.status === "live";
+  const inner = [
+    el("span", { class: "mono-label", text: "Never touched AI?" }),
+    el("span", { class: "serif-i", style: { fontSize: "18px" }, text: `Start here — ${t.name}` }),
+    el("span", { class: "mono-label", style: { marginLeft: "auto", color: live ? "var(--accent)" : "var(--muted)" }, text: live ? "Start free →" : "Coming soon — notify me below" }),
+  ];
+  const attrs = { class: "onramp" + (live ? "" : " is-soon"), style: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px", border: "1px solid var(--rule-c)", borderLeft: "3px solid var(--accent)", padding: "12px 16px", marginTop: "26px" } };
+  if (live) { attrs.href = "#" + url.track(t.vendorId, t.trackId); return el("a", attrs, inner); }
+  return el("div", attrs, inner);
+}
+
 // Two doors, one academy (PRD-GROWTH §5): the operator who wants AI running
 // their business, and the practitioner chasing a credential. Lane comes from
 // manifest data (track.lane) — the engine stays vendor-agnostic.
@@ -109,6 +126,7 @@ export async function catalog() {
       el("a", { class: "ac-btn", href: "#/start" }, ["Which track is mine?"]),
       el("a", { class: "ac-btn", href: "#" + url.method() }, ["See the model"]),
     ]),
+    onRamp(tracks),
     doors(tracks),
     spine(),
   ])]);

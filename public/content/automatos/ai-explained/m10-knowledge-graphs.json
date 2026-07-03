@@ -1,0 +1,263 @@
+{
+  "id": "m10-knowledge-graphs",
+  "order": 10,
+  "code": "10",
+  "name": "Knowledge graphs",
+  "tagline": "Everyone says \"knowledge graph\" like it's something you'd need a data science team to build. It isn't. In Module 09 you gave the AI a pile of your documents — great, but a pile is still just a pile. A knowledge graph is the map of how the things in those documents CONNECT: this customer placed that order, that order contains these products, this product comes from that supplier. Picture a detective's cork-board with string between the photos. That's the whole idea — and modern tools build it for you.",
+  "overview": "This is the tenth stop on the beginner on-ramp, and it builds directly on Module 09 (teaching the AI your documents — RAG). Giving an AI your documents lets it find the right page. But some questions can't be answered from any single page — they need the AI to follow the trail across several documents at once. \"Which suppliers are affected if we recall this product?\" isn't written down anywhere; the answer lives in the connections between a product, its orders, and its suppliers. A knowledge graph is exactly that: a map of the things in your world (the people, orders, products, suppliers — the entities) and the links between them (the relationships). The everyday picture is a detective's cork-board — photos pinned up with string joining the ones that relate. Two ideas do all the work here. First, why it helps: a graph lets the AI join the dots and follow the connections, answering \"who is connected to what\" questions a plain page-by-page search would miss. Second, how you'd \"set one up\": for a beginner, you almost never draw it by hand — modern tools read your documents and build the map automatically; your job is just to feed them good material, which is the same job as Module 09. Three things people get wrong, cleared up along the way: you don't build the graph by hand (tools extract it for you), it doesn't replace your documents (it sits on top of them), and it isn't only for big companies (it helps anyone whose information connects — which is almost everyone). This module is about understanding, not homework — you leave able to say what a knowledge graph is and why it's an upgrade to RAG, not a replacement for it.",
+  "objectives": [
+    "Explain, in one plain sentence, what a knowledge graph is — a map of the things in your world (the entities) and the links between them (the relationships) — and why a pile of documents alone doesn't give you that map.",
+    "Describe why the graph helps: some questions (like recall impact, or \"who is connected to what\") can only be answered by following the connections across several documents, which a plain one-page search can't do but a graph can.",
+    "State honestly how you'd \"set one up\" as a beginner — you feed good documents to a tool that reads them and extracts the graph for you — and clear up the three common confusions: you don't draw it by hand, it doesn't replace your documents, and it isn't only for big companies."
+  ],
+  "lessons": [
+    {
+      "id": "l1-pile-vs-map",
+      "title": "A pile of documents vs a map of how they connect",
+      "estMinutes": 8,
+      "objective": "Understand a knowledge graph in plain terms — a map of the things in your world and the links between them — using the detective cork-board picture, and see why a pile of documents alone doesn't give you those connections.",
+      "body": "## Start where Module 09 left off\n\nIn the last module you did something genuinely useful: you gave the AI your own documents, so it could find the right page instead of guessing from general knowledge. That's teaching the AI your stuff — the technique is called **RAG**, and it's a big step up from a cold, generic assistant.\n\nBut here's the honest limit. A pile of documents is still just a **pile**. The AI can reach into it and pull out the one page that matches your question — that's what RAG does well. What it *doesn't* automatically see is how the things in those documents **connect to each other**. Each page sits on its own. Nothing tells the AI that the customer named on page 12 is the same customer whose order is described on page 40, whose products come from the supplier listed on page 3.\n\nThat missing layer — the connections — is what a knowledge graph adds.\n\n## The plain-English version, then the term\n\nHere's the idea before the label. Imagine you wrote down every important *thing* in your business on its own card: each customer, each order, each product, each supplier. Then you drew lines between the cards that relate — a line from a customer to the order they placed, a line from that order to the products in it, a line from each product to the supplier it comes from.\n\nWhat you'd have is a **map of the things in your world and the links between them.** That map is called a **knowledge graph**. The \"things\" have a proper name too — they're the **entities** (the people, orders, products, suppliers). The lines are the **relationships** (placed, contains, comes from). A knowledge graph is just entities plus the relationships between them.\n\nDon't let the word \"graph\" throw you. It doesn't mean a bar chart or a line going up. Here it means a *web of connected things* — closer to a map of a train network, where stations are joined by lines, than to anything you'd see in a spreadsheet.\n\n## The picture to remember: a detective's cork-board\n\nYou've seen this in every crime drama. A detective pins photos to a cork-board — suspects, places, pieces of evidence — and runs coloured string between the ones that are connected. This person knew that person. That car was seen at this address. The string is the whole point: any single photo tells you a little, but the *strings between them* are where the case gets solved.\n\nA knowledge graph is that cork-board for your information. The photos are your entities — customers, orders, products, suppliers. The string is your relationships. And just like the detective, the value isn't in any one photo; it's in being able to trace the string from one thing to the next.\n\n## Why the pile can't do this on its own\n\nGo back to the pile of documents. Everything you'd need to draw those strings is *in there somewhere* — the customer's name, the order details, the supplier list. But it's scattered across separate pages, written in prose, never linked up. When the AI does a plain page-by-page search, it finds the page that best matches your words and stops there. It has no map telling it \"the thing on this page is the same thing mentioned on that other page, and here's how they relate.\"\n\nThe knowledge graph *is* that map. It doesn't replace the pile — the documents are still there, and they're still where the details live. The graph sits on top, holding the connections the pile never made explicit. In the next lesson we'll see the exact kind of question that suddenly becomes answerable once those strings exist — and, just as importantly, who actually draws them (spoiler: not you).",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m10-1",
+          "domainId": "m10-knowledge-graphs",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In plain terms, what is a knowledge graph?",
+          "options": [
+            { "id": "a", "text": "A map of the things in your world (the entities — people, orders, products, suppliers) and the links between them (the relationships)", "correct": true },
+            { "id": "b", "text": "A bar chart or line graph that shows your business numbers going up or down over time" },
+            { "id": "c", "text": "A single, better document that replaces all your other documents" },
+            { "id": "d", "text": "A faster way to search the live internet for public facts" }
+          ],
+          "explanation": "A knowledge graph is a map of your entities and the relationships between them — the cork-board of photos joined by string. It is not a chart of numbers (b): \"graph\" here means a web of connected things, like a train-network map, not a bar or line graph. It doesn't replace your documents (c) — it sits on top of them and holds the connections the documents never made explicit. And it isn't an internet search tool (d); it's built from your own material, which is where Module 09's RAG left off.",
+          "sourceRefs": ["r-gb-knowledge-graph", "r-gb-knowledge"]
+        },
+        {
+          "id": "kc-m10-2",
+          "domainId": "m10-knowledge-graphs",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "You gave the AI a pile of your documents in Module 09 (RAG). Why isn't that pile, on its own, the same as a knowledge graph?",
+          "options": [
+            { "id": "a", "text": "The pile lets the AI find the right page, but nothing in it links the things across pages — a knowledge graph adds that missing layer of connections", "correct": true },
+            { "id": "b", "text": "The pile is useless, so the knowledge graph throws the documents away and starts over" },
+            { "id": "c", "text": "The pile already is a knowledge graph — the two words mean exactly the same thing" },
+            { "id": "d", "text": "The pile can only be searched by a data scientist, whereas anyone can read a knowledge graph" }
+          ],
+          "explanation": "RAG lets the AI pull the best-matching page out of the pile, but the pages sit on their own — nothing says the customer on one page is the same one whose order is on another. The graph adds that connective layer. The pile isn't useless and isn't discarded (b): the graph sits on top of the documents, which still hold the details. They are not the same thing (c) — one is scattered pages, the other is the map of how those pages' contents connect. And the distinction is about connections, not about who's allowed to search it (d).",
+          "sourceRefs": ["r-gb-knowledge-graph", "r-gb-knowledge"]
+        }
+      ]
+    },
+    {
+      "id": "l2-join-the-dots",
+      "title": "Joining the dots: the questions a graph can answer (and who builds it)",
+      "estMinutes": 9,
+      "objective": "See the kind of multi-step question a plain document search can't answer but a knowledge graph can, understand that tools build the graph automatically from your documents, and clear up the three common confusions.",
+      "body": "## The question a pile of documents can't answer\n\nHere's the moment the cork-board earns its keep. Picture a small homeware shop that has to recall a faulty product. The owner asks a fair question: **\"Which suppliers are affected if we recall this mug?\"**\n\nThink about what answering that actually requires. You have to start at the mug, find every order that contained it, find every customer on those orders, and find every supplier that provided parts for it. That answer isn't written on any single page — no document says \"suppliers affected by a mug recall.\" It only exists as a **trail through the connections**: mug → orders → suppliers. To answer it, something has to *follow the string* from one thing to the next.\n\nA plain page-by-page search can't do this. Ask it about the recall and it finds the page that mentions the mug — and stops. It has no way to hop from the mug to its orders to its suppliers, because it was never given the strings. This is a **multi-step question** (you'll sometimes hear it called *multi-hop* — you have to hop from thing to thing). A knowledge graph is exactly what makes it answerable: the strings are already there, so the AI can trace the path and join the dots.\n\nThat's the payoff in one line. A pile of documents answers *\"find me the page about X.\"* A knowledge graph answers *\"show me how X connects to Y\"* — the who-is-connected-to-what questions that a single page simply can't hold.\n\n## \"So how do I build one?\" — you mostly don't\n\nThe word \"graph\" makes people picture a painful afternoon dragging boxes and arrows around a screen, drawing every connection by hand. For a beginner, that's the biggest misunderstanding to drop.\n\nYou almost never draw a knowledge graph by hand. **Modern tools read your documents and build the map for you.** As material goes in, the tool picks out the entities it finds — the people, orders, products, suppliers — and works out the relationships between them, stringing the cork-board together automatically. Your job isn't to draw arrows; it's the same job as the last module: **feed it good documents.** Good material in, a richer map out.\n\nSo \"setting one up,\" in beginner terms, isn't a drawing task at all. It's a *feeding* task. You supply the documents; the tool does the extraction; then you ask questions that follow the links.\n\n## The three confusions, cleared up\n\nAlmost everyone new to this trips on the same three things. Get them straight and you understand knowledge graphs better than most people who use the phrase:\n\n- **\"I have to build it by hand.\"** No — the tools extract it *for* you from the documents you provide. You feed; it draws. If you can upload a document, you can get a knowledge graph.\n- **\"It replaces my documents.\"** No — it **sits on top of** them. The documents are still where the details live; the graph just adds the layer of connections between them. It's an upgrade to your RAG setup from Module 09, not a replacement for it.\n- **\"It's only for big companies.\"** No — it helps **anyone whose information connects**, which is nearly everyone. A one-person shop with customers, orders, and suppliers has exactly the kind of connected data a graph makes sense of. Big data-science teams aren't the entry ticket; connected information is.\n\n## Where this leaves you\n\nHold onto the one-sentence version: **a pile of facts, plus the strings between them — that's a knowledge graph.** The pile (your documents, from Module 09) lets the AI find a page. The strings (the graph) let it follow the connections and answer the join-the-dots questions no single page can. And you don't pin the board yourself — a tool reads your material and does it for you.\n\n**The Automatos peek.** This is one of those ideas that sounds like a project and turns out to be a feature. In Automatos, as you add documents, the platform automatically extracts a knowledge graph from them — the people, things and links — without you drawing a single line or configuring anything. That map then makes your agents' answers better in the background: when an agent searches your material, it doesn't only fetch the best-matching page, it also follows the connections around it, so it can handle the join-the-dots questions a plain search would miss. You feed it good documents (exactly as in Module 09); it strings the cork-board together for you. The detective's board you just pictured is something you'd simply *have*, built as a by-product of uploading your material — no pen required.",
+      "knowledgeCheck": [
+    {
+      "id": "kc-m10-3",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "\"Which suppliers are affected if we recall this product?\" Why can a knowledge graph answer this when a plain page-by-page document search can't?",
+      "options": [
+        { "id": "a", "text": "The answer isn't on any single page — it's a trail across connections (product → orders → suppliers), and the graph already holds the strings the AI can follow", "correct": true },
+        { "id": "b", "text": "The graph has memorised a special \"recall\" document that lists the affected suppliers directly", "correct": false },
+        { "id": "c", "text": "The graph searches faster, so it simply finds the one correct page before the plain search does", "correct": false },
+        { "id": "d", "text": "A plain search can answer it just as well; the graph makes no difference to this kind of question", "correct": false }
+      ],
+      "explanation": "The answer lives only in the connections — you hop from the product to its orders to its suppliers — and the graph already has those strings, so the AI can trace the path. There's no single \"recall\" document holding the answer (b); that's the whole reason a plain page search fails. It's not about raw speed finding one page faster (c) — no single page contains the answer at all. And a plain search genuinely can't do this (d): it finds a matching page and stops, with no way to follow the trail.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    },
+    {
+      "id": "kc-m10-4",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "As a beginner, how do you \"set up\" a knowledge graph?",
+      "options": [
+        { "id": "a", "text": "You feed good documents to a tool, and the tool reads them and builds the map (the entities and their links) automatically", "correct": true },
+        { "id": "b", "text": "You draw every entity and every connection by hand, dragging boxes and arrows on a screen", "correct": false },
+        { "id": "c", "text": "You hire a data-science team, because there's no way for a non-technical person to get one", "correct": false },
+        { "id": "d", "text": "You write code that manually links each document to every other document", "correct": false }
+      ],
+      "explanation": "For a beginner it's a feeding task, not a drawing task: you supply the documents and a tool extracts the entities and relationships for you. You almost never draw it by hand (b) — that's the biggest misconception to drop. You don't need a data-science team (c); if you can upload a document, you can get a graph. And you don't write linking code (d) — the extraction is what the tool does automatically.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m10-1",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which one-sentence description of a knowledge graph is the most accurate?",
+      "options": [
+        { "id": "a", "text": "A pile of facts plus the strings between them — a map of the things in your world (entities) and how they connect (relationships)", "correct": true },
+        { "id": "b", "text": "A chart that plots your sales or metrics over time", "correct": false },
+        { "id": "c", "text": "A single master document that all your other documents get merged into", "correct": false },
+        { "id": "d", "text": "A tool that searches the public web faster than a normal search engine", "correct": false }
+      ],
+      "explanation": "The accurate picture is entities plus relationships — the cork-board of photos joined by string, a map of how your things connect. It's not a chart of numbers over time (b): here \"graph\" means a web of connected things, not a bar or line graph. It doesn't merge your documents into one master file (c) — it sits on top of them and adds the connections. And it isn't a web search tool (d); it's built from your own material.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    },
+    {
+      "id": "q-m10-2",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the cork-board picture, what do the photos and the string each stand for?",
+      "options": [
+        { "id": "a", "text": "The photos are the entities (people, orders, products, suppliers); the string is the relationships between them", "correct": true },
+        { "id": "b", "text": "The photos are your documents; the string is the internet connection to the AI", "correct": false },
+        { "id": "c", "text": "The photos are AI models; the string is the electricity powering them", "correct": false },
+        { "id": "d", "text": "The photos are search results; the string is the loading time between them", "correct": false }
+      ],
+      "explanation": "On a detective's cork-board, the pinned photos are the things — the entities — and the string running between them shows how they connect, which is the relationships. The photos aren't documents and the string isn't an internet link (b). They aren't AI models and electricity (c). And they aren't search results and loading time (d) — the point of the analogy is entities joined by their relationships, which is exactly what a knowledge graph is.",
+      "sourceRefs": ["r-gb-knowledge-graph"]
+    },
+    {
+      "id": "q-m10-3",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "What kind of question is a knowledge graph especially good at, compared with plain document search?",
+      "options": [
+        { "id": "a", "text": "\"Who is connected to what\" questions that need the AI to follow links across several documents, like recall impact", "correct": true },
+        { "id": "b", "text": "\"Find me the single page that mentions this exact phrase\" — matching one page to your words", "correct": false },
+        { "id": "c", "text": "\"What's the weather today\" — a live public fact with no connection to your data", "correct": false },
+        { "id": "d", "text": "\"Rewrite this email in a friendlier tone\" — a pure writing task with no lookup at all", "correct": false }
+      ],
+      "explanation": "A graph shines at multi-step, follow-the-connections questions — trace the mug to its orders to its suppliers — because the links are already there to follow. Finding the single page that matches your words (b) is what plain RAG search already does well; you don't need a graph for it. Live public facts like weather (c) aren't about your connected data at all. And rewriting an email (d) is a language task with no lookup — nothing to connect.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m10-4",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Does a knowledge graph replace the documents you gave the AI in Module 09?",
+      "options": [
+        { "id": "a", "text": "No — it sits on top of your documents, adding a layer of connections; the documents still hold the details", "correct": true },
+        { "id": "b", "text": "Yes — once the graph exists, the original documents are deleted and no longer needed", "correct": false },
+        { "id": "c", "text": "Yes — the graph is just a renamed version of the same document pile", "correct": false },
+        { "id": "d", "text": "No — because a knowledge graph has nothing to do with your documents at all", "correct": false }
+      ],
+      "explanation": "The graph is an upgrade that layers connections over your documents; the documents remain and are still where the specifics live. They aren't deleted (b) — the details would be lost if they were. It isn't merely the pile renamed (c): the pile is scattered pages, the graph is the map of how their contents connect. And it's certainly related to your documents (d) — it's built from them, by a tool reading your material.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m10-5",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "\"Knowledge graphs are only worth it for big companies with data-science teams.\" Is that right?",
+      "options": [
+        { "id": "a", "text": "No — a graph helps anyone whose information connects, which is nearly everyone; a small shop with customers, orders, and suppliers qualifies", "correct": true },
+        { "id": "b", "text": "Yes — you need a large team of data scientists just to get any graph at all", "correct": false },
+        { "id": "c", "text": "Yes — small businesses don't have connected data, so a graph would be empty", "correct": false },
+        { "id": "d", "text": "No — because knowledge graphs are only useful for personal hobbies, never for business", "correct": false }
+      ],
+      "explanation": "The entry ticket is connected information, not company size — and a one-person shop with customers, orders, and suppliers has exactly that. You don't need a large data-science team (b): tools extract the graph for you from documents you upload. Small businesses very much do have connected data (c) — that's the norm, not the exception. And it's genuinely useful for business (d), not limited to hobbies — the recall example is a plain business question.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    },
+    {
+      "id": "q-m10-6",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A colleague says: \"A knowledge graph sounds like a huge project — someone has to sit and draw every connection.\" What's the honest correction for a beginner?",
+      "options": [
+        { "id": "a", "text": "You mostly don't draw it — modern tools read your documents and extract the entities and relationships automatically; your job is to feed good material", "correct": true },
+        { "id": "b", "text": "They're right: every entity and link must be drawn by hand before the graph works", "correct": false },
+        { "id": "c", "text": "You draw about half of it by hand and the tool guesses the rest at random", "correct": false },
+        { "id": "d", "text": "You don't need documents at all — the graph invents the connections from nothing", "correct": false }
+      ],
+      "explanation": "The honest correction is that extraction is automatic: you supply documents and the tool builds the map, so it's a feeding task, not a drawing project. You don't draw every link by hand (b) — that's the misconception to drop. It isn't half-by-hand-half-random (c); the tool extracts the connections from what your documents actually say. And documents are essential (d) — the graph is built *from* your material, not invented from nothing, which is why feeding good documents matters.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    },
+    {
+      "id": "q-m10-7",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "How does a knowledge graph relate to RAG (teaching the AI your documents) from Module 09?",
+      "options": [
+        { "id": "a", "text": "It's an upgrade to RAG, not a replacement — RAG finds the right page, and the graph adds the connections so the AI can follow links between pages", "correct": true },
+        { "id": "b", "text": "It's a competitor to RAG — you pick one or the other, and using both is impossible", "correct": false },
+        { "id": "c", "text": "It's completely unrelated to RAG and works on a totally separate set of information", "correct": false },
+        { "id": "d", "text": "It's a downgrade from RAG that makes the AI worse at finding pages", "correct": false }
+      ],
+      "explanation": "The graph builds on RAG: RAG retrieves the best-matching page, and the graph layers on the connections so the AI can also follow links across documents. They aren't either-or (b) — the graph works together with your document search, enriching it. It's not unrelated (c): the graph is extracted from the very same documents you gave RAG. And it doesn't make page-finding worse (d) — it adds a capability on top, keeping the strength you already had.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m10-8",
+      "domainId": "m10-knowledge-graphs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "The word \"graph\" in \"knowledge graph\" is easy to misread. What does it actually mean here?",
+      "options": [
+        { "id": "a", "text": "A web of connected things — like a map of a train network, stations joined by lines — not a bar chart or a line going up", "correct": true },
+        { "id": "b", "text": "A bar chart showing quantities side by side", "correct": false },
+        { "id": "c", "text": "A line graph tracking a number rising or falling over time", "correct": false },
+        { "id": "d", "text": "A pie chart splitting a total into slices", "correct": false }
+      ],
+      "explanation": "In \"knowledge graph,\" graph means a network of connected things — the stations-and-lines picture — where the connections are the whole point. It's not a bar chart of quantities (b), not a line graph over time (c), and not a pie chart of a total (d). Those are all charts of numbers; a knowledge graph is a map of how things link together, which is why the cork-board analogy fits it and a chart doesn't.",
+      "sourceRefs": ["r-gb-knowledge-graph", "r-hf-what-is-kg"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [],
+  "resources": [
+    {
+      "id": "r-gb-knowledge-graph",
+      "title": "Automatos AI — Knowledge Graph (entities, relationships, and connected search)",
+      "url": "automatos-gitbook/knowledge/knowledge-graph.md",
+      "kind": "official-doc",
+      "annotation": "The page behind this module's peek. It describes, in plain terms, how the platform automatically extracts entities (people, concepts, products, processes) and the relationships between them from documents you upload — no manual configuration — and how agents then traverse that graph to answer questions plain search would miss. Read it for the sanctioned vocabulary (entities, relationships) and for the honest line that the graph builds automatically and sits alongside your documents, not instead of them.",
+      "domainIds": ["m10-knowledge-graphs"]
+    },
+    {
+      "id": "r-gb-knowledge",
+      "title": "Automatos AI — Knowledge Bases (the documents the graph is built from)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "official-doc",
+      "annotation": "Where the pile comes from. This is the Module 09 (RAG) surface — upload documents once and agents can search and reference them. It matters here because the knowledge graph is extracted from exactly these documents: feed good material in, get a richer map out. Useful for seeing that the graph is an upgrade layered on top of your knowledge base, not a separate thing you set up by hand.",
+      "domainIds": ["m10-knowledge-graphs"]
+    },
+    {
+      "id": "r-hf-what-is-kg",
+      "title": "Neo4j — What is a knowledge graph? (plain-language explainer)",
+      "url": "https://neo4j.com/blog/what-is-knowledge-graph/",
+      "kind": "reference",
+      "annotation": "A neutral, vendor-light \"what is a knowledge graph\" primer for the beginner who wants the concept in general terms, outside any one platform. Read it only for the plain idea — nodes are things (entities), edges are the relationships between them, and the value is in following those connections. Orientation, not a technical how-to; ignore any product-specific tooling.",
+      "domainIds": ["m10-knowledge-graphs"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m10-1",
+      "title": "10 · Knowledge graphs — a pile of documents vs a map of how they connect, in 7 minutes",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m10-knowledge-graphs"],
+      "sourceNotebook": "ai-explained / m10 / knowledge-graphs-corkboard"
+    },
+    {
+      "id": "v-m10-2",
+      "title": "10 · Deep Dive — joining the dots, and who actually builds the graph",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m10-knowledge-graphs"],
+      "sourceNotebook": "ai-explained / m10 / deep-dive-join-the-dots"
+    }
+  ]
+}

@@ -11,7 +11,7 @@
     "Drive selection with tool_choice (auto/any/tool/none) and force one tool per turn with disable_parallel_tool_use.",
     "Return tool failures honestly with is_error and an informative message so the model can adapt instead of hallucinating success.",
     "Decide bash vs a dedicated tool on reversibility — promote when you must gate, confirm, render, audit, or mark parallel-safe.",
-    "Wire MCP and server-side tools correctly: declare a server by url with no inline auth, and supply OAuth via vaults — not the service's REST API key."
+    "Wire MCP and server-side tools correctly: declare a remote server by url and pass the OAuth access token inline as authorization_token (you run the OAuth flow and refresh it) — an OAuth bearer token, not the service's REST API key."
   ],
   "lessons": [
     {
@@ -285,8 +285,8 @@
       "id": "l4-mcp",
       "title": "Model Context Protocol: servers, declaration, and the auth trap",
       "estMinutes": 16,
-      "objective": "Declare an MCP server correctly and supply auth the right way — OAuth via vaults, not the REST key.",
-      "body": "## What MCP is\n\nThe **Model Context Protocol (MCP)** is an open standard for connecting models to external systems. An **MCP server** exposes three kinds of capability:\n\n- **tools** — actions the model can invoke.\n- **resources** — data/content the model can read.\n- **prompts** — reusable prompt templates the server offers.\n\nRemote servers communicate over **Streamable HTTP / SSE**. The client (your agent) connects to a server and the server's tools become available to Claude.\n\n## Declaring a server — no inline auth\n\nYou declare a remote MCP server by **url**, and — critically — you do **not** put credentials in that declaration:\n\n```python\nmcp_servers = [{\n  'type': 'url',\n  'name': 'github',\n  'url': 'https://mcp.example.com/github'\n}]\n```\n\nThe `mcp_servers` parameter lets Claude connect to remote MCP servers directly. Auth is handled **separately**, not inline.\n\n## The auth trap (exam favourite)\n\nIn **Managed Agents**, auth for a server is supplied through **vaults**: you attach `vault_ids` to the session, and Anthropic stores the credential and **auto-refreshes OAuth tokens** for you. The single most-missed fact:\n\n> A hosted MCP server usually authenticates with an **OAuth bearer token**, **not** the service's native REST API key. They are different auth systems.\n\nSo if a GitHub MCP server expects OAuth, dropping your GitHub *personal access token* / REST API key into a vault and expecting it to 'just work' is wrong — the server speaks OAuth bearer, and the REST key belongs to a different mechanism. Provision the OAuth credential, let Anthropic refresh it, and reference it by vault — never paste a token inline in the server declaration.\n\n## Tool search for large libraries\n\nWhen an agent has **many** tools (dozens of MCP servers, hundreds of tools), loading every schema up front bloats the prompt. **Tool search** lets Claude **discover** the relevant tools on demand: matching tool schemas are **appended** to the context (not swapped in and out). Appending matters because it **preserves the prompt cache** — earlier cached content stays valid, so you get discovery without paying to re-process the whole prompt each turn.",
+      "objective": "Declare an MCP server correctly and supply auth the right way — an OAuth bearer token passed inline as authorization_token, not the REST key.",
+      "body": "## What MCP is\n\nThe **Model Context Protocol (MCP)** is an open standard for connecting models to external systems. An **MCP server** exposes three kinds of capability:\n\n- **tools** — actions the model can invoke.\n- **resources** — data/content the model can read.\n- **prompts** — reusable prompt templates the server offers.\n\nRemote servers communicate over **Streamable HTTP / SSE**. The client (your agent) connects to a server and the server's tools become available to Claude.\n\n## Declaring a server via the MCP connector\n\nUsing the Messages API MCP connector, you declare a remote MCP server in the `mcp_servers` array by **url**. If the server needs auth, the OAuth access token goes **inline** in that same object as `authorization_token`:\n\n```python\nmcp_servers = [{\n  'type': 'url',\n  'name': 'github',\n  'url': 'https://mcp.example.com/github',\n  'authorization_token': 'YOUR_OAUTH_ACCESS_TOKEN'  # omit if the server is public\n}]\n```\n\nThe fields are `type` (only `'url'`), `url` (must be `https://`), `name` (a unique id referenced by exactly one `mcp_toolset` in `tools[]`), and the optional `authorization_token`. The connector currently needs the beta header `anthropic-beta: mcp-client-2025-11-20`.\n\n**You run the OAuth flow, not Anthropic.** The docs are explicit: *API consumers are expected to handle the OAuth flow and obtain the access token prior to making the API call, and to refresh the token as needed.* So you complete OAuth against the server (for testing, the MCP inspector's Quick OAuth Flow hands you an `access_token`), then paste that token into `authorization_token`.\n\n## The auth trap (exam favourite)\n\nThe single most-missed fact:\n\n> A hosted MCP server usually authenticates with an **OAuth bearer token**, **not** the service's native REST API key. They are different auth systems.\n\nSo if a GitHub MCP server expects OAuth, dropping your GitHub *personal access token* / REST API key into `authorization_token` and expecting it to 'just work' is wrong — the server speaks OAuth bearer, and the REST key belongs to a different mechanism. Run the OAuth flow to mint an access token, pass it as `authorization_token`, and refresh it yourself when it expires. Two more don'ts: never put the token in the **url** as a query parameter, and don't confuse this connector-level inline token with Managed Agents' separate credential-vault mechanism.\n\n## Tool search for large libraries\n\nWhen an agent has **many** tools (dozens of MCP servers, hundreds of tools), loading every schema up front bloats the prompt. **Tool search** lets Claude **discover** the relevant tools on demand: matching tool schemas are **appended** to the context (not swapped in and out). Appending matters because it **preserves the prompt cache** — earlier cached content stays valid, so you get discovery without paying to re-process the whole prompt each turn.",
       "knowledgeCheck": [
         {
           "id": "kc-d2-9",
@@ -324,7 +324,7 @@
           "domainId": "d2-tools-mcp",
           "type": "single",
           "difficulty": 3,
-          "stem": "A hosted GitHub MCP server fails to authenticate after you stored your GitHub REST personal-access token in a vault. Most likely cause?",
+          "stem": "A hosted GitHub MCP server fails to authenticate after you passed your GitHub REST personal-access token as authorization_token. Most likely cause?",
           "options": [
             {
               "id": "a",
@@ -333,7 +333,7 @@
             },
             {
               "id": "b",
-              "text": "Vaults can only hold one credential per session"
+              "text": "authorization_token can only hold one credential per request"
             },
             {
               "id": "c",
@@ -344,7 +344,7 @@
               "text": "MCP servers don't support GitHub"
             }
           ],
-          "explanation": "Hosted MCP servers typically authenticate via OAuth bearer tokens, not the service's native REST API key — they're separate mechanisms. Provision the OAuth credential (Anthropic auto-refreshes it) and reference it by vault; the REST PAT is the wrong credential type, and you never put tokens in the url.",
+          "explanation": "Hosted MCP servers typically authenticate via OAuth bearer tokens, not the service's native REST API key — they're separate mechanisms. Run the OAuth flow to mint an access token and pass that as `authorization_token`; the REST PAT is the wrong credential type, and you never put tokens in the url.",
           "sourceRefs": [
             "r-docs",
             "r-mcp"
@@ -601,16 +601,16 @@
       "domainId": "d2-tools-mcp",
       "type": "single",
       "difficulty": 2,
-      "stem": "How do you declare a remote MCP server so Claude can connect to it?",
+      "stem": "How do you declare a remote MCP server (via the Messages API MCP connector) so Claude can connect to it?",
       "options": [
         {
           "id": "a",
-          "text": "{ type: 'url', name, url } with no credentials inline",
+          "text": "{ type: 'url', name, url, authorization_token } — the OAuth access token inline as authorization_token (omitted only if the server is public)",
           "correct": true
         },
         {
           "id": "b",
-          "text": "{ type: 'url', name, url, api_key } with the REST key inline"
+          "text": "{ type: 'url', name, url, api_key } with the service's REST key inline"
         },
         {
           "id": "c",
@@ -621,7 +621,7 @@
           "text": "By adding the server's tools individually to the tools[] array by hand"
         }
       ],
-      "explanation": "You declare the server by `type: 'url'`, `name`, and `url` — and deliberately omit auth from the declaration. Credentials are supplied separately (vaults in Managed Agents); never inline an API key or put a token in the url.",
+      "explanation": "In the `mcp_servers` array you declare the server by `type: 'url'`, `name`, and `url`, and pass the OAuth access token inline as `authorization_token` (leave it off only for a public server). It's an OAuth bearer token, not the service's REST `api_key` (B), and you never put the token in the url (C); the connector surfaces the server's tools for you, so you don't hand-add them (D).",
       "sourceRefs": [
         "r-docs",
         "r-mcp"
@@ -632,27 +632,27 @@
       "domainId": "d2-tools-mcp",
       "type": "single",
       "difficulty": 3,
-      "stem": "In Managed Agents, how is auth supplied to a hosted MCP server, and what does Anthropic do with it?",
+      "stem": "Using the MCP connector, who runs the OAuth flow for an authenticated MCP server, and who keeps the token fresh?",
       "options": [
         {
           "id": "a",
-          "text": "Via vault_ids on the session; Anthropic stores the credential and auto-refreshes OAuth tokens",
+          "text": "You do — the API consumer completes the OAuth flow, obtains the access token before the call, passes it as authorization_token, and refreshes it as needed",
           "correct": true
         },
         {
           "id": "b",
-          "text": "By embedding the API key in the agent's system prompt"
+          "text": "Anthropic runs OAuth for you and auto-refreshes the token; you supply nothing"
         },
         {
           "id": "c",
-          "text": "By passing the token in every user message"
+          "text": "You embed the API key in the agent's system prompt and it never expires"
         },
         {
           "id": "d",
           "text": "Auth isn't needed — MCP servers are always public"
         }
       ],
-      "explanation": "Auth is attached out-of-band through vaults (`vault_ids` on the session); Anthropic holds the credential and auto-refreshes OAuth tokens so calls keep working. Secrets in prompts or messages persist in history and are the wrong pattern; MCP servers are frequently authenticated, not public.",
+      "explanation": "The docs state the API consumer handles the OAuth flow, obtains the access token before making the call, passes it inline as `authorization_token`, and refreshes it as needed — the connector does not run OAuth or auto-refresh for you (B). Secrets in the system prompt persist in history and are the wrong pattern (C), and MCP servers are frequently authenticated, not always public (D).",
       "sourceRefs": [
         "r-docs"
       ]
@@ -717,6 +717,400 @@
       "explanation": "Tool search surfaces only the relevant tools without loading all schemas up front, appending the matched schemas so the cached prefix stays valid. Swapping schemas in/out would invalidate the cache; it doesn't delete server tools or merge them into one.",
       "sourceRefs": [
         "r-docs"
+      ]
+    },
+    {
+      "id": "q-d2-12",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Anthropic's guidance calls the tool description 'by far the most important factor in tool performance.' Roughly how much detail does it recommend per description?",
+      "options": [
+        {
+          "id": "a",
+          "text": "At least 3-4 sentences (more if the tool is complex), covering what it does, when to use it and when not to, and each parameter",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "One short sentence — the model infers the rest from the name"
+        },
+        {
+          "id": "c",
+          "text": "Exactly one sentence per parameter and nothing about the tool itself"
+        },
+        {
+          "id": "d",
+          "text": "As few words as possible to save prompt tokens"
+        }
+      ],
+      "explanation": "The docs say to aim for at least 3-4 sentences per description (more if complex), explaining what the tool does, when it should and shouldn't be used, and what each parameter means. A single sentence or a token-minimising label leaves the model guessing; per-parameter-only text omits the crucial when-to-call guidance. Description quality beats saving a few tokens.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-13",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You have three separate tools — create_pr, review_pr, and merge_pr — and the model sometimes picks the wrong one. Which refactor does Anthropic recommend?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Consolidate them into one tool with an 'action' parameter, since fewer, more capable tools reduce selection ambiguity",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Split each one further into even more granular tools so each does exactly one thing"
+        },
+        {
+          "id": "c",
+          "text": "Give all three the identical description so the model can't tell them apart"
+        },
+        {
+          "id": "d",
+          "text": "Force the model to always call create_pr with tool_choice"
+        }
+      ],
+      "explanation": "The docs advise consolidating related operations into a single tool with an action parameter — fewer, more capable tools cut selection ambiguity and are easier for the model to navigate. Splitting further worsens the problem, identical descriptions destroy selectability, and forcing one tool breaks the other two operations.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-14",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You aggregate tools from GitHub, Slack, and Jira into one agent. Which tool-naming practice does Anthropic recommend, especially when using tool search?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Prefix names with the service, e.g. github_list_prs, slack_send_message, so selection stays unambiguous as the library grows",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Use the same generic verb (get, do, run) for every tool regardless of service"
+        },
+        {
+          "id": "c",
+          "text": "Give tools random unique IDs so no two names collide"
+        },
+        {
+          "id": "d",
+          "text": "Keep names as short as possible, dropping the service entirely"
+        }
+      ],
+      "explanation": "Meaningful namespacing — prefixing by service or resource (github_, slack_) — makes selection unambiguous and lets one tool-search query match a whole group. Generic verbs and dropped services create collisions and ambiguity; opaque random IDs are unsearchable and unreadable.",
+      "sourceRefs": [
+        "r-d2-definetools",
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-15",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A tool takes a nested, format-sensitive input and the model keeps mis-shaping the arguments. Which tool-definition feature best helps, and what is its constraint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Add input_examples with example input objects; each example must itself be valid against the tool's input_schema",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Add input_examples, which are exempt from schema validation so you can show edge cases"
+        },
+        {
+          "id": "c",
+          "text": "Set is_error: true so the model retries until the shape is right"
+        },
+        {
+          "id": "d",
+          "text": "Move the tool to the server side so Anthropic fixes the arguments"
+        }
+      ],
+      "explanation": "input_examples supplies concrete, well-formed calls alongside the schema, which is especially useful for nested or format-sensitive inputs — but every example must validate against input_schema (an invalid example returns a 400). is_error is for reporting failures, not shaping inputs, and server-side execution doesn't repair client argument shape.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-16",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "input_examples are a great fit for a complex user-defined tool. On which tools are they NOT supported?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Server-side tools such as web_search and code_execution",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Any tool that marks a parameter as required"
+        },
+        {
+          "id": "c",
+          "text": "Tools that use an enum in their schema"
+        },
+        {
+          "id": "d",
+          "text": "Tools that also set strict: true"
+        }
+      ],
+      "explanation": "input_examples work on user-defined and Anthropic-schema client tools, but not on server tools like web search or code execution — you don't define those schemas. Required params, enums, and strict tool use are all fully compatible with input_examples.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-17",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need a guarantee that the model both calls one of your tools AND that the arguments strictly match your schema. Which combination delivers both?",
+      "options": [
+        {
+          "id": "a",
+          "text": "tool_choice: { type: 'any' } together with strict: true on the tool definitions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "tool_choice: { type: 'auto' } alone"
+        },
+        {
+          "id": "c",
+          "text": "strict: true alone, with no tool_choice set"
+        },
+        {
+          "id": "d",
+          "text": "tool_choice: { type: 'none' } together with strict: true"
+        }
+      ],
+      "explanation": "Combining tool_choice 'any' (must call some tool) with strict: true (schema-validated arguments) guarantees both a tool call and conformant inputs. 'auto' may answer in text; 'strict' alone doesn't force a call; 'none' forbids all tools, so nothing runs.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-18",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "Your request uses extended thinking. You try tool_choice: { type: 'tool', name: 'classify' } to force that tool and get a 400 error. Why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "With extended thinking, forced tool choice ('any' and 'tool') isn't supported — only 'auto' and 'none' are compatible",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Extended thinking disables all tool use, so no tool_choice value is valid"
+        },
+        {
+          "id": "c",
+          "text": "The tool name must be omitted when extended thinking is on"
+        },
+        {
+          "id": "d",
+          "text": "Extended thinking requires strict: true before any tool_choice works"
+        }
+      ],
+      "explanation": "When extended thinking is enabled, tool_choice 'any' and 'tool' are not supported and error out; only 'auto' (default) and 'none' are compatible. Extended thinking does allow tool use (via 'auto'), the name isn't the issue, and strict is unrelated to this restriction.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-19",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You force a tool with tool_choice 'any' or 'tool' but also want the model to say a sentence to the user before the tool_use block. What actually happens, and what's the fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'any'/'tool' prefill the assistant turn so no natural-language text precedes the tool_use; use 'auto' plus a user-message instruction to get commentary",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model always adds a sentence regardless of tool_choice; no change is needed"
+        },
+        {
+          "id": "c",
+          "text": "Set disable_parallel_tool_use: true to re-enable the preamble"
+        },
+        {
+          "id": "d",
+          "text": "Lower max_tokens so the model summarises before calling the tool"
+        }
+      ],
+      "explanation": "With 'any' or 'tool', the API prefills the assistant message to force a tool call, so the model emits no natural-language explanation first — even if asked. To get commentary, use 'auto' (the default) and instruct it in a user message (e.g. 'Use the get_weather tool in your response'). disable_parallel_tool_use only limits concurrency; max_tokens doesn't restore the preamble.",
+      "sourceRefs": [
+        "r-d2-definetools"
+      ]
+    },
+    {
+      "id": "q-d2-20",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You need the model's FINAL answer as a fixed JSON object for a downstream service — not a tool call. Which mechanism fits, and how does it relate to strict tool use?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Structured outputs via output_config.format (type: json_schema) constrain the response text; strict tool use validates tool-call inputs — different problems that can work together",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "strict: true on a tool, because it also forces the final text into your schema"
+        },
+        {
+          "id": "c",
+          "text": "tool_choice: 'any', which formats the assistant's text as JSON"
+        },
+        {
+          "id": "d",
+          "text": "disable_parallel_tool_use, which serialises output into a single JSON block"
+        }
+      ],
+      "explanation": "Structured outputs (output_config.format with a json_schema) constrain what the model says — the final response is guaranteed valid JSON for your schema. Strict tool use instead validates how the model calls your functions (tool inputs). They solve different problems and compose. tool_choice and disable_parallel_tool_use steer tool calling, not the shape of the final text.",
+      "sourceRefs": [
+        "r-docs"
+      ]
+    },
+    {
+      "id": "q-d2-21",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "The tool search tool ships in two variants. What is the difference in how Claude queries them?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The regex variant has Claude write Python re.search() patterns; the BM25 variant has Claude search with natural-language queries",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The regex variant uses natural language; the BM25 variant uses SQL WHERE clauses"
+        },
+        {
+          "id": "c",
+          "text": "Both variants require you to pre-compute embeddings for every tool"
+        },
+        {
+          "id": "d",
+          "text": "The variants differ only in price; the query format is identical"
+        }
+      ],
+      "explanation": "With the regex tool search variant Claude constructs Python re.search() patterns (case-insensitive, up to 200 chars); with the BM25 variant it issues natural-language queries (up to 500 chars). Neither built-in variant needs you to pre-compute embeddings (that's the custom client-side approach), and the query format genuinely differs.",
+      "sourceRefs": [
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-22",
+      "domainId": "d2-tools-mcp",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "When is enabling the tool search tool the right call, and how do you configure the toolset? (Select all that apply.)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Reach for it once you have roughly 10+ tools or definitions exceeding ~10k tokens, or when selection accuracy drops as the set grows",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Set defer_loading: true on the tools that shouldn't load up front, keeping your 3-5 most-used tools non-deferred",
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": "At least one tool (normally the tool search tool itself) must stay non-deferred, or the request 400s",
+          "correct": true
+        },
+        {
+          "id": "d",
+          "text": "Set defer_loading: true on the tool search tool too, so even it loads on demand"
+        }
+      ],
+      "explanation": "Tool search fits when you have ~10+ tools, >~10k tokens of definitions, or degrading selection accuracy (which starts once you pass ~30-50 tools). You mark deferred tools with defer_loading: true while keeping the 3-5 hottest tools non-deferred, and at least one tool must remain non-deferred (normally the search tool) or the API returns a 400 — so never defer the tool search tool itself.",
+      "sourceRefs": [
+        "r-d2-toolsearch"
+      ]
+    },
+    {
+      "id": "q-d2-23",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Using the Messages API MCP connector (not a self-hosted MCP client), which statement is correct about what it supports?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only MCP tool calls are supported through the connector, and the server must be publicly reachable over HTTP (Streamable HTTP or SSE) — local stdio servers can't connect directly",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The connector exposes tools, resources, and prompts equally, and connects to local stdio servers"
+        },
+        {
+          "id": "c",
+          "text": "The connector requires a gRPC endpoint and does not support SSE"
+        },
+        {
+          "id": "d",
+          "text": "The connector only works with servers hosted by Anthropic"
+        }
+      ],
+      "explanation": "Through the Messages API MCP connector, only tool calls are currently supported, and the server must be publicly exposed over HTTP — both Streamable HTTP and SSE transports work, but local STDIO servers cannot be connected directly (use a client-side MCP client for stdio, prompts, or resources). It is not gRPC-only and is not limited to Anthropic-hosted servers.",
+      "sourceRefs": [
+        "r-d2-mcp-connector",
+        "r-mcp"
+      ]
+    },
+    {
+      "id": "q-d2-24",
+      "domainId": "d2-tools-mcp",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "You connect a calendar MCP server via the connector but must stop the agent from ever calling its destructive tools (e.g. delete_all_events). What is the cleanest way?",
+      "options": [
+        {
+          "id": "a",
+          "text": "In the mcp_toolset, denylist those tools by setting enabled: false for them in configs (or allowlist only the safe tools via default_config.enabled: false + per-tool enables)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Delete the tools from the remote MCP server's source code"
+        },
+        {
+          "id": "c",
+          "text": "Add is_error: true to those tools so calls always fail"
+        },
+        {
+          "id": "d",
+          "text": "Put the destructive tool names in the mcp_servers URL as a blocklist query string"
+        }
+      ],
+      "explanation": "The mcp_toolset in the tools array controls which of a server's tools are exposed: denylist by setting enabled: false in configs, or allowlist by defaulting enabled: false and enabling only the safe tools — exactly what the docs recommend for read-only or confirm-first assistants. You don't edit the server's code, is_error is a runtime result not a config, and the URL carries no tool blocklist.",
+      "sourceRefs": [
+        "r-d2-mcp-connector"
       ]
     }
   ],
@@ -842,19 +1236,19 @@
       "steps": [
         {
           "id": "st1",
-          "prompt": "How do you declare the GitHub MCP server?",
+          "prompt": "How do you declare the GitHub MCP server through the connector?",
           "choices": [
             {
               "id": "a",
-              "text": "{ type: 'url', name: 'github', url: '…' } with no credentials in the declaration",
+              "text": "{ type: 'url', name: 'github', url: '…', authorization_token: <OAuth access token> } in mcp_servers, with a matching mcp_toolset in tools[]",
               "verdict": "best",
-              "rationale": "Servers are declared by url with auth handled separately — keeping credentials out of the declaration is the documented pattern."
+              "rationale": "The documented pattern: declare the server by url and pass the OAuth access token inline as authorization_token (GitHub's server needs auth), then reference it from an mcp_toolset."
             },
             {
               "id": "b",
               "text": "Put the GitHub REST token inside the server object as api_key",
               "verdict": "wrong",
-              "rationale": "Auth is never inline in the declaration, and the REST token is usually the wrong credential type anyway."
+              "rationale": "There is no api_key field, and the REST token is the wrong credential type — the server wants an OAuth bearer token in authorization_token."
             },
             {
               "id": "c",
@@ -866,25 +1260,25 @@
         },
         {
           "id": "st2",
-          "prompt": "The GitHub MCP server expects OAuth. How do you supply auth in the managed agent?",
+          "prompt": "The GitHub MCP server expects OAuth. How do you supply that auth?",
           "choices": [
             {
               "id": "a",
-              "text": "Provision an OAuth credential and attach it via vault_ids on the session; let Anthropic auto-refresh the token",
+              "text": "Run the OAuth flow yourself, obtain an access token, and pass it inline as authorization_token — refreshing it yourself as it expires",
               "verdict": "best",
-              "rationale": "Vaults are the auth mechanism for hosted MCP; Anthropic stores the credential and refreshes OAuth so calls keep working."
+              "rationale": "The docs say the API consumer handles the OAuth flow, obtains the access token before the call, passes it as authorization_token, and refreshes it as needed. The connector does not run OAuth or refresh for you."
             },
             {
               "id": "b",
-              "text": "Store your GitHub REST personal-access token in a vault and assume it works",
+              "text": "Pass your GitHub REST personal-access token as authorization_token and assume it works",
               "verdict": "wrong",
               "rationale": "Hosted MCP usually wants an OAuth bearer token, not the service's REST API key — different auth systems. The PAT is the wrong credential type."
             },
             {
               "id": "c",
-              "text": "Hard-code a long-lived token and refresh it yourself on a cron",
+              "text": "Mint a long-lived token once and never refresh it",
               "verdict": "viable",
-              "rationale": "Technically possible but reinvents refresh that vaults already handle, and long-lived tokens are a security liability."
+              "rationale": "Technically it authenticates until it expires, but long-lived tokens are a security liability and the flow still needs you to refresh — plan for token rotation instead."
             }
           ]
         },
@@ -960,14 +1354,14 @@
     {
       "id": "lab-d2-mcp",
       "domainId": "d2-tools-mcp",
-      "title": "Wire an MCP server with vault-based OAuth",
-      "goal": "Declare a remote MCP server and authenticate it the right way — no inline keys.",
-      "steps": "## Steps\n\n1. Declare a remote MCP server in `mcp_servers` as `{ type: 'url', name, url }` — deliberately with **no** credentials inline.\n2. Provision an **OAuth** credential for the server (not the service's REST API key) and store it as a vault.\n3. Attach the credential via `vault_ids` on the session; confirm Anthropic auto-refreshes the OAuth token rather than you managing expiry.\n4. List the server's exposed **tools**, **resources**, and **prompts**, and call one tool through Claude.\n5. Deliberately swap in the REST API key instead of the OAuth credential and observe the auth failure — internalise that they are different systems.\n6. Attach several more servers and enable **tool search**; confirm relevant tool schemas are appended on demand and the prompt cache is preserved.\n\n## Checkpoint\n\nIf you ever pasted a token into the server `url` or into the declaration object, stop — auth is supplied out-of-band via vaults, never inline.",
+      "title": "Wire an MCP server with an inline OAuth token",
+      "goal": "Declare a remote MCP server through the connector and authenticate it the right way — an OAuth access token passed inline as authorization_token.",
+      "steps": "## Steps\n\n1. Set the connector beta header `anthropic-beta: mcp-client-2025-11-20` and declare a remote MCP server in `mcp_servers` as `{ type: 'url', name, url }` (start with a public server — no token yet).\n2. Run the **OAuth** flow against an authenticated server to obtain an **access token** (for testing, `npx @modelcontextprotocol/inspector` → Quick OAuth Flow gives you an `access_token`) — an OAuth bearer token, not the service's REST API key.\n3. Paste that token into the server object as `authorization_token`, and add a matching `mcp_toolset` entry in `tools[]`; call one tool through Claude.\n4. Deliberately swap in the REST API key instead of the OAuth access token and observe the auth failure — internalise that they are different systems.\n5. Let the token expire (or revoke it) and confirm **you** must obtain a fresh one and re-pass it — the connector does not refresh it for you.\n6. Attach several more servers and enable **tool search**; confirm relevant tool schemas are appended on demand and the prompt cache is preserved.\n\n## Checkpoint\n\nIf you ever pasted the token into the server `url` as a query parameter, stop — the OAuth access token belongs in the `authorization_token` field of the `mcp_servers` object, and you run and refresh the OAuth flow yourself.",
       "checklist": [
-        "Server declared by url with no credentials inline",
-        "Auth supplied via vault_ids using an OAuth credential, not the REST API key",
-        "Anthropic auto-refreshes the OAuth token (no manual refresh)",
-        "tools, resources, and prompts are all visible from the server",
+        "Connector beta header set; server declared by { type: 'url', name, url }",
+        "OAuth access token passed inline as authorization_token (an OAuth bearer token, not the REST API key)",
+        "You obtain and refresh the token yourself — the connector does not auto-refresh it",
+        "A matching mcp_toolset lets Claude call a tool from the server",
         "Tool search appends schemas on demand without busting the prompt cache"
       ]
     }
@@ -998,7 +1392,7 @@
       "title": "MCP connector / connecting to remote servers",
       "url": "https://platform.claude.com/docs/en/agents-and-tools/mcp-connector",
       "kind": "official-doc",
-      "annotation": "Extract how mcp_servers is declared ({type:'url', name, url}) and that auth is handled separately — the source for the OAuth-vs-REST-key distinction.",
+      "annotation": "Extract how mcp_servers is declared ({type:'url', name, url, authorization_token}) with the OAuth access token passed inline and the consumer running/refreshing the OAuth flow — the source for the OAuth-vs-REST-key distinction.",
       "domainIds": [
         "d2-tools-mcp"
       ]
@@ -1009,6 +1403,26 @@
       "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
       "kind": "official-doc",
       "annotation": "Extract which tools run on Anthropic infra, that web_search/web_fetch return citations, and that plain code_execution has no general internet access.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-definetools",
+      "title": "Define tools — descriptions, examples, and forcing tool use (Anthropic)",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+      "kind": "official-doc",
+      "annotation": "Source for description best practices (3-4+ sentences, when-to-use/when-not, consolidation, namespacing), input_examples (schema-validated, not for server tools), and the four tool_choice options incl. the extended-thinking and prefill caveats.",
+      "domainIds": [
+        "d2-tools-mcp"
+      ]
+    },
+    {
+      "id": "r-d2-toolsearch",
+      "title": "Tool search tool — scaling to thousands of tools (Anthropic)",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool",
+      "kind": "official-doc",
+      "annotation": "Source for the regex vs BM25 variants, defer_loading (at least one tool non-deferred), when to enable (~10+ tools / >10k tokens / accuracy drop past ~30-50), and that appended tool_reference blocks preserve the prompt cache.",
       "domainIds": [
         "d2-tools-mcp"
       ]

@@ -748,6 +748,369 @@
         "r-d3-skills",
         "r-d3-subagents"
       ]
+    },
+    {
+      "id": "q-d3-12",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Your `CLAUDE.md` contains the line `See @docs/git-workflow.md for our branching rules`. What does the `@` do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It imports that file — its contents are expanded into context at launch alongside the CLAUDE.md that references it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It creates a hyperlink Claude can click on demand but does not load the file"
+        },
+        {
+          "id": "c",
+          "text": "It mentions the path as plain text; `@` has no special meaning in CLAUDE.md"
+        },
+        {
+          "id": "d",
+          "text": "It converts the referenced file into a slash command"
+        }
+      ],
+      "explanation": "`@path/to/import` is CLAUDE.md's import syntax: the referenced file is expanded and loaded into context at launch, so importing doesn't save tokens (the content still loads). Imports can nest up to four hops deep. To mention a path literally without importing, wrap it in backticks. It is not a lazy link, not inert text, and not a command.",
+      "sourceRefs": [
+        "r-d3-memory"
+      ]
+    },
+    {
+      "id": "q-d3-13",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In a large monorepo, an ancestor `CLAUDE.md` from another team keeps loading with rules irrelevant to you. You add its path to `claudeMdExcludes` in your local settings. But your org also ships a managed-policy `CLAUDE.md` you'd like gone. What happens?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The other team's file is skipped, but the managed-policy CLAUDE.md cannot be excluded — that guarantee is the point of managed policy",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Both files are excluded once they appear in claudeMdExcludes"
+        },
+        {
+          "id": "c",
+          "text": "Neither is excluded; claudeMdExcludes only affects settings.json, not CLAUDE.md"
+        },
+        {
+          "id": "d",
+          "text": "Only the managed-policy file is excluded; peer-team files always load"
+        }
+      ],
+      "explanation": "`claudeMdExcludes` skips specific CLAUDE.md files by path or glob and its arrays merge across settings layers — so the peer team's file drops out. But managed-policy CLAUDE.md is explicitly non-excludable, ensuring org-wide instructions always apply. Options B–D misstate one or both of these behaviours.",
+      "sourceRefs": [
+        "r-d3-memory",
+        "r-d3-settings"
+      ]
+    },
+    {
+      "id": "q-d3-14",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You want the current git branch and any failing test names injected into context every time the user submits a prompt. Which hook event fits?",
+      "options": [
+        {
+          "id": "a",
+          "text": "UserPromptSubmit — it fires before Claude processes a prompt and can add context via additionalContext (or block the prompt on exit 2)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "PreToolUse — it fires before every tool call, which is when the prompt is processed"
+        },
+        {
+          "id": "c",
+          "text": "SessionStart — it runs once at launch, so the branch is captured for the whole session"
+        },
+        {
+          "id": "d",
+          "text": "PostToolUse — it fires after each tool succeeds, which is the earliest a prompt exists"
+        }
+      ],
+      "explanation": "`UserPromptSubmit` fires right before Claude handles a submitted prompt; returning `additionalContext` under `hookSpecificOutput` injects the branch and test data with that prompt (and exit code 2 rejects the prompt). PreToolUse is per-tool, not per-prompt; SessionStart runs once (a stale branch by the tenth prompt); PostToolUse is after tools, the wrong point entirely.",
+      "sourceRefs": [
+        "r-d3-hooks"
+      ]
+    },
+    {
+      "id": "q-d3-15",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A PreToolUse hook needs to deny a tool call AND hand Claude a clear reason, using the structured (not exit-code) path. What does it output?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Exit 0 with JSON containing hookSpecificOutput.permissionDecision \"deny\" and a permissionDecisionReason string",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Exit 2 with the reason on stdout as JSON"
+        },
+        {
+          "id": "c",
+          "text": "Exit 1 with the reason on stderr"
+        },
+        {
+          "id": "d",
+          "text": "Exit 0 with the word DENY printed to stdout as plain text"
+        }
+      ],
+      "explanation": "The structured path is exit code 0 plus JSON: under `hookSpecificOutput`, set `permissionDecision` to `deny` (values are `allow`/`deny`/`ask`) and explain it in `permissionDecisionReason`. JSON is only honoured on exit 0 — on exit 2 the JSON is ignored and stderr becomes the reason (that's the other, separate path). Exit 1 is a non-blocking error; plain text isn't parsed as a decision.",
+      "sourceRefs": [
+        "r-d3-hooks"
+      ]
+    },
+    {
+      "id": "q-d3-16",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want one hook to fire for every tool from your `memory` MCP server. Which matcher, and how is it interpreted?",
+      "options": [
+        {
+          "id": "a",
+          "text": "`mcp__memory__.*` — because it contains regex metacharacters it is evaluated as a regular expression, matching every tool on that server",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "`mcp__memory__.*` — but it is treated as a literal exact tool name, so it matches nothing"
+        },
+        {
+          "id": "c",
+          "text": "`Edit|Write` — the pipe makes it a regex that happens to match the memory tools"
+        },
+        {
+          "id": "d",
+          "text": "`*` is the only valid matcher for MCP tools; server-specific matching isn't possible"
+        }
+      ],
+      "explanation": "A matcher made only of letters, digits, `_`, `-`, spaces, commas, or pipes is an exact string or a pipe/comma list (so `Edit|Write` matches those two tools exactly). Any other character — like `.` and `*` in `mcp__memory__.*` — makes it an unanchored regex, so it matches all `mcp__memory__…` tools. `*` matches everything, which is broader than asked.",
+      "sourceRefs": [
+        "r-d3-hooks"
+      ]
+    },
+    {
+      "id": "q-d3-17",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You define a subagent in `.claude/agents/` and omit the `tools` field entirely. What tool access does it get?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It inherits all tools available to the main conversation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It gets no tools until you list them explicitly"
+        },
+        {
+          "id": "c",
+          "text": "It gets only the Read tool by default"
+        },
+        {
+          "id": "d",
+          "text": "It fails to load, because `tools` is required"
+        }
+      ],
+      "explanation": "Omitting `tools` means the subagent inherits every tool the main conversation has — you use `tools` (allowlist) or `disallowedTools` (denylist) precisely to narrow that. Only `name` and `description` are required; `model` similarly defaults to `inherit`. So the subagent loads fine and starts fully-equipped, which is why deliberately restricting it is the security move.",
+      "sourceRefs": [
+        "r-d3-subagents"
+      ]
+    },
+    {
+      "id": "q-d3-18",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You want a review subagent that keeps every tool the main conversation has EXCEPT the ability to write or edit files. What's the cleanest frontmatter?",
+      "options": [
+        {
+          "id": "a",
+          "text": "`disallowedTools: Write, Edit` — a denylist that removes just those two and inherits the rest",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "`tools: Write, Edit` — listing the tools you want to forbid"
+        },
+        {
+          "id": "c",
+          "text": "`permissionMode: plan` — which permanently strips write tools from the definition"
+        },
+        {
+          "id": "d",
+          "text": "There is no way to subtract tools; you must re-list every allowed tool by hand"
+        }
+      ],
+      "explanation": "`disallowedTools` is a denylist: `Write, Edit` are removed and everything else is inherited — exactly the requirement. `tools` is an allowlist, so option B would *grant only* Write and Edit (the opposite). `permissionMode: plan` sets a read-only mode, not a per-tool subtraction. And subtracting is possible, so D is wrong.",
+      "sourceRefs": [
+        "r-d3-subagents"
+      ]
+    },
+    {
+      "id": "q-d3-19",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Your GitHub MCP server exposes a `pr_review` prompt. How do you invoke it in Claude Code, and how would you reference that server's `create_issue` tool in a permission rule?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Run the prompt as `/mcp__github__pr_review`; reference the tool as `mcp__github__create_issue`",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Run the prompt as `/github pr_review`; reference the tool as `github.create_issue`"
+        },
+        {
+          "id": "c",
+          "text": "MCP prompts can't be invoked as commands; only tools are exposed"
+        },
+        {
+          "id": "d",
+          "text": "Run the prompt as `@github:pr_review`; the tool cannot appear in permission rules"
+        }
+      ],
+      "explanation": "MCP prompts surface as slash commands in the form `/mcp__servername__promptname`, and MCP tools are named `mcp__servername__toolname` — the form you use in permission rules, a skill's `allowed-tools`, or a subagent's `tools`. The dotted and `@`-mention forms in B/D aren't the command/tool syntax; C is wrong because prompts do become commands. (`@server:protocol://…` is for MCP *resources*, a different primitive.)",
+      "sourceRefs": [
+        "r-d3-mcp",
+        "r-mcp"
+      ]
+    },
+    {
+      "id": "q-d3-20",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "The same MCP server name is defined in your `.mcp.json` (project) AND in `~/.claude.json` under both a local-scope and a user-scope entry, each with a different URL. Which definition does Claude Code use?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The local-scope entry — local outranks project outranks user, and the whole entry from the winner is used, not merged",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The project entry, because `.mcp.json` is checked into version control and shared"
+        },
+        {
+          "id": "c",
+          "text": "The fields are merged across all three scopes into one combined server"
+        },
+        {
+          "id": "d",
+          "text": "The user-scope entry, since user settings are broadest and apply everywhere"
+        }
+      ],
+      "explanation": "When one server name is defined at multiple scopes, Claude Code connects once using the highest-precedence source, and precedence is local > project > user (then plugin, then claude.ai connectors). The entire entry from the winner is used — fields are never merged across scopes — so a differing URL in a lower scope is simply ignored. That refutes B, C, and D.",
+      "sourceRefs": [
+        "r-d3-mcp"
+      ]
+    },
+    {
+      "id": "q-d3-21",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A CI job needs Claude to extract function names and emit them as a JSON array your script can consume directly. Which headless setup does this?",
+      "options": [
+        {
+          "id": "a",
+          "text": "`--output-format json` with `--json-schema '{...}'`, then read the `structured_output` field",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "`--output-format json` alone, then parse the free-text `result` field as if it were JSON"
+        },
+        {
+          "id": "c",
+          "text": "`--output-format text` and split the prose on commas"
+        },
+        {
+          "id": "d",
+          "text": "`--output-format stream-json` and concatenate every event's text"
+        }
+      ],
+      "explanation": "Passing a JSON Schema via `--json-schema` alongside `--output-format json` makes Claude return schema-conforming data in a dedicated `structured_output` field (with session/usage metadata alongside). Plain `json` gives you a free-text `result` you'd have to coax into shape; `text` and `stream-json` aren't structured single objects. The `result` field holds the text answer, `structured_output` holds the typed payload.",
+      "sourceRefs": [
+        "r-d3-headless"
+      ]
+    },
+    {
+      "id": "q-d3-22",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In a headless run you pass `--permission-mode dontAsk`. What does that do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It denies anything not already in your allow rules (or the read-only command set) — a locked-down posture with no prompts",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It approves every tool call automatically, like a full permission bypass"
+        },
+        {
+          "id": "c",
+          "text": "It pauses and waits for a human to answer each prompt"
+        },
+        {
+          "id": "d",
+          "text": "It disables the permission system so hooks no longer fire"
+        }
+      ],
+      "explanation": "`dontAsk` auto-denies whatever isn't explicitly allowed (via `permissions.allow` or the built-in read-only commands), so an unattended CI run can't be derailed by an unexpected action — the safe locked-down choice. It is not a blanket approval (that's `bypassPermissions` / `--dangerously-skip-permissions`), it never waits for a human, and it doesn't disable hooks.",
+      "sourceRefs": [
+        "r-d3-headless",
+        "r-d3-settings"
+      ]
+    },
+    {
+      "id": "q-d3-23",
+      "domainId": "d3-agent-ops-claude-code",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "While in plan mode, Claude needs to read large parts of the codebase to build its plan. How is that exploration handled, and what can it change?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A read-only Plan subagent does the research in its own context; nothing is written or edited until you approve the plan",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The main agent reads and may make small edits as it goes, then summarises them as the plan"
+        },
+        {
+          "id": "c",
+          "text": "Plan mode auto-accepts edits so exploration can refactor freely before proposing a plan"
+        },
+        {
+          "id": "d",
+          "text": "Exploration is disabled in plan mode; Claude must plan purely from open files"
+        }
+      ],
+      "explanation": "Plan mode is a read-only permission mode: research is delegated to the built-in Plan subagent (read-only tools; Write and Edit are denied) so exploration stays in a separate context while the main conversation makes no changes until you approve. So B and C (which allow edits) are wrong, and D is wrong because exploration very much happens — just without mutations.",
+      "sourceRefs": [
+        "r-d3-subagents"
+      ]
     }
   ],
   "scenarios": [
