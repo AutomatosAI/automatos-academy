@@ -33,6 +33,12 @@ const STUDY_PROMPTS = [
 const session = { messages: [], conversationId: null, busy: false };
 let uid = 0;
 
+// Docked-panel handles, populated by mountTutor(), so askTutor() can drive the
+// same panel + send path from anywhere (e.g. a "why?" deep-link on a revealed
+// question). Kept in module scope rather than closed over so the deep-link and
+// the FAB share one panel.
+const dock = { list: null, setOpen: null };
+
 // ── minimal markdown → HTML, with ```mermaid fences pulled out ───────────
 // XSS-safe by construction: every text path runs through esc() FIRST, then we
 // add only a fixed tag whitelist (code/strong/em/a/h*/li/ul/ol/blockquote/p/pre)
@@ -268,6 +274,25 @@ export function mountTutor() {
   document.body.appendChild(panel);
   document.body.appendChild(fab);
 
+  // expose the docked panel to askTutor() (deep-links, "explain this" buttons)
+  dock.list = list;
+  dock.setOpen = setOpen;
+
   // re-theme mermaid on mood flip (next render picks up the new theme)
   new MutationObserver(() => { mermaidPromise = null; }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-mood"] });
+}
+
+// ── deep-link hook: open the docked tutor and send a message ──────────────
+// Used by the "Ask the tutor why →" buttons on revealed questions. Opens the
+// corner panel and pushes `text` through the existing send() path, so the ask
+// shares the same session/history as the FAB. If the tutor is disabled (no
+// publicKey) the panel still opens on its "coming online" state — send() is a
+// no-op there — so the button explains itself rather than erroring. Mounts the
+// panel on demand if it isn't up yet.
+export function askTutor(text) {
+  text = (text || "").trim();
+  if (!dock.setOpen) mountTutor();
+  if (!dock.setOpen || !dock.list) return;   // DOM not ready (e.g. no document)
+  dock.setOpen(true);
+  if (text) send(text, dock.list);
 }
