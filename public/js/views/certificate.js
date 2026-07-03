@@ -12,6 +12,42 @@ const NAME_KEY = "automatos-academy:v1:claim-name";
 const certHash = (payload) => `/cert/${payload}`;
 const absoluteCertUrl = (payload) => `${location.origin}/cert/${payload}`;
 
+// v2 signed badges (PRD-CREDENTIALS §4). The "~" separator survives the router
+// param regex ([^\/]+) and can't appear in base64url, the "." checksum, or a
+// hex sig — so a signed link is "<payload>~<sig>", an unsigned one just "<payload>".
+const SIG_SEP = "~";
+const splitSig = (raw) => {
+  const i = (raw || "").indexOf(SIG_SEP);
+  return i === -1 ? { payload: raw || "", sig: "" } : { payload: raw.slice(0, i), sig: raw.slice(i + 1) };
+};
+
+// Ask the server to sign the payload. Signing is progressive enhancement:
+// any failure (offline, 501 no-backend, 429, malformed) resolves to "" and the
+// caller silently falls back to the unsigned link.
+async function signBadge(payload) {
+  try {
+    const r = await fetch("/api/badge/sign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload }),
+    });
+    if (!r.ok) return "";
+    const j = await r.json();
+    return typeof j.sig === "string" ? j.sig : "";
+  } catch (_) { return ""; }
+}
+
+async function verifyBadge(payload, sig) {
+  if (!sig) return false;
+  try {
+    const q = new URLSearchParams({ payload, sig });
+    const r = await fetch(`/api/badge/verify?${q.toString()}`);
+    if (!r.ok) return false;
+    const j = await r.json();
+    return j.valid === true;
+  } catch (_) { return false; }
+}
+
 // ── claim panel ──────────────────────────────────────────────────────────
 export function claimPanel(trackData, comp) {
   const requirement = comp.kind === "exam"
@@ -31,7 +67,7 @@ export function claimPanel(trackData, comp) {
   const go = el("button", { class: "ac-btn ac-btn-solid", type: "button" }, ["Claim your badge ", el("span", { class: "arr", text: "→" })]);
   const hint = el("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12.5px" }, text: "Generates a shareable certificate page — add it to LinkedIn in one click. Your name goes only into the certificate link; nothing is uploaded." });
 
-  go.addEventListener("click", () => {
+  go.addEventListener("click", async () => {
     const name = input.value.trim();
     if (!name) { input.focus(); return; }
     try { localStorage.setItem(NAME_KEY, name); } catch (_) {}
@@ -43,7 +79,10 @@ export function claimPanel(trackData, comp) {
       date: new Date().toISOString().slice(0, 10),
     });
     tk("badge_claim", { track: trackData.trackId });
-    location.hash = certHash(payload);
+    // Progressive enhancement: try to server-sign, else navigate unsigned.
+    go.disabled = true;
+    const sig = await signBadge(payload);
+    location.hash = certHash(sig ? `${payload}${SIG_SEP}${sig}` : payload);
   });
 
   return el("div", { class: "panel claim-box", style: { marginTop: "26px" } }, [
@@ -56,7 +95,9 @@ export function claimPanel(trackData, comp) {
 
 // ── certificate page (#/cert/:payload) ───────────────────────────────────
 export async function certificateView({ params }) {
-  const cert = decodeCert(params.payload);
+  // A signed link is "<payload>~<sig>"; unsigned links decode exactly as v1.
+  const { payload, sig } = splitSig(params.payload);
+  const cert = decodeCert(payload);
   if (!cert) {
     return el("div", { class: "section" }, [el("div", { class: "wrap" }, [
       el("span", { class: "mono-label", text: "Certificate" }),
@@ -92,6 +133,10 @@ export async function certificateView({ params }) {
     try { await navigator.clipboard.writeText(absoluteCertUrl(params.payload)); copyBtn.textContent = "Copied ✓"; } catch (_) { copyBtn.textContent = absoluteCertUrl(params.payload); }
   });
 
+  // Filled asynchronously with the "Signed by the Academy" chip iff a valid
+  // sig verifies. On invalid/absent sig it stays empty — never an error banner.
+  const signedChip = el("div", { class: "no-print", style: { marginTop: "12px" } });
+
   const card = el("div", { class: "cert-card" }, [
     el("div", { class: "row", style: { justifyContent: "space-between", alignItems: "baseline" } }, [
       el("span", { class: "mono-label", text: "Automatos Academy" }),
@@ -105,7 +150,15 @@ export async function certificateView({ params }) {
       el("span", { class: "mono-label", text: `${vendorName} · ${trackName}` }),
       el("span", { class: "mono-label", text: `Ref ${cert.certId}` }),
     ]),
+    signedChip,
   ]);
+
+  // Progressive enhancement: verify the sig (if any) and reveal the chip.
+  if (sig) {
+    verifyBadge(payload, sig).then((valid) => {
+      if (valid) signedChip.appendChild(el("span", { class: "mono-label", text: "✓ Signed by the Academy" }));
+    });
+  }
 
   return el("div", {}, [
     el("section", { class: "section" }, [el("div", { class: "wrap", style: { maxWidth: "820px" } }, [

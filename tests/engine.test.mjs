@@ -117,6 +117,22 @@ ok(decodeCert(uniName).name === "Zoë O'Brien—García 日本", "unicode names 
 const li = linkedInAddUrl({ certName: "Automatos Academy — CCA-F prep", certUrl: "https://x/cert/abc", certId: "zzz", issued: "2026-07-02" });
 ok(li.startsWith("https://www.linkedin.com/profile/add?") && li.includes("issueYear=2026") && li.includes("certId=zzz"), "LinkedIn add-to-profile URL forms");
 
+// ── signed-badge separator invariants (PRD-CREDENTIALS §4) ────────────
+// The v2 "<payload>~<sig>" scheme is only safe if "~" can never appear inside
+// an encodeCert payload (base64url body + "." + base36 checksum). Prove it,
+// and prove stripping a "~sig" suffix leaves the v1 payload decodable.
+console.log("signed-badge separators");
+const sample = encodeCert({ name: "Grace Hopper", vendorId: "anthropic", trackId: "cca-f", code: "CCA-F", date: "2026-07-03" });
+ok(!sample.includes("~"), "encodeCert payload never contains the ~ separator");
+ok(/^[A-Za-z0-9._-]+$/.test(sample), "payload is base64url + '.' checksum only (no ~, no reserved chars)");
+const fakeSig = "a".repeat(64);
+const signedUrlParam = `${sample}~${fakeSig}`;
+const strippedPayload = signedUrlParam.slice(0, signedUrlParam.indexOf("~"));
+ok(strippedPayload === sample, "stripping at ~ recovers the exact original payload");
+ok(decodeCert(strippedPayload) !== null, "stripped payload still decodes (backward compat)");
+ok(decodeCert(signedUrlParam) === null, "a ~-suffixed payload does NOT decode raw (must strip first)");
+ok(/^[0-9a-f]{64}$/.test(fakeSig), "an HMAC-SHA256 hex sig is [0-9a-f]{64} — disjoint from payload chars");
+
 // exam-track completion follows the A+ verdict
 const freshComp = completion(track, stub, verdict);
 ok(freshComp.kind === "exam" && freshComp.complete === false, "fresh learner: exam track not complete");
