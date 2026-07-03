@@ -1,0 +1,263 @@
+{
+  "id": "m01-what-is-an-agent",
+  "order": 1,
+  "code": "01",
+  "name": "What is an agent?",
+  "tagline": "A chatbot talks; an agent works. Same underlying AI — but give it a job, some knowledge, and a set of tools it's allowed to use, and it stops just answering and starts actually doing the task. The plainest way to picture it: you don't program an agent, you hire and brief one.",
+  "overview": "You've probably used a chatbot once or twice, and now you keep hearing the word \"agent\" — and quietly wondering whether it's just a fancier word for the same thing. This module settles that. A chatbot is a clever person you can ask questions: you type, it replies, and the doing is left to you. An agent is that same clever person hired into a role — handed the company handbook to work from, and given a phone and an email account — so it can actually go and do the task, not just talk about it. We carry one everyday analogy the whole way through: the AI as a brilliant new hire. From there, the three parts every agent is made of, each in a sentence you'll actually remember: a brain (the model that thinks), a job (its role and instructions), and tools plus knowledge (what it's allowed to use and what it knows to work from). We'll clear up the confusions that trip everyone here — that an agent is just a chatbot with a bigger vocabulary, that an agent runs loose and acts without limits, and that you'd need to write code to make one. None of those is true. By the end you'll be able to say, in your own words, exactly what an agent is and why \"agent\" is the word that matters — the shift from AI that answers to AI that gets things done. This is understanding, not homework; nothing here asks you to be technical.",
+  "objectives": [
+    "Explain the plain difference between a chatbot and an agent — a chatbot answers when you type; an agent is that same AI given a job, some knowledge, and a set of permitted tools, so it can carry out the task rather than only describe it.",
+    "Name the three parts every agent is built from — a brain (the model that thinks), a job (its role and instructions, sometimes called its persona), and tools plus knowledge (what it's allowed to use and what it works from) — using the new-hire analogy to make each stick.",
+    "Recognise and correct the three common confusions: that an agent is just a smarter chatbot, that it acts without limits, and that making one requires coding — understanding instead that you brief an agent the way you'd brief a new employee, and it only ever does what it's allowed to do."
+  ],
+  "lessons": [
+    {
+      "id": "l1-talks-vs-works",
+      "title": "A chatbot talks; an agent works",
+      "estMinutes": 8,
+      "objective": "Understand the plain difference between a chatbot and an agent, and meet the three parts every agent is built from — brain, job, tools plus knowledge — through the new-hire analogy.",
+      "body": "## The one line to hold onto\n\nHere's the whole module in a sentence, and everything else just fills it in: **a chatbot talks; an agent works.**\n\nYou've likely used a chatbot — you type a question, it types an answer, and then it's on you to go and do something with that answer. It's a talker. Genuinely useful, but the doing is left to you.\n\nAn **agent** is that same underlying AI, but wrapped so it can actually carry out the task instead of only describing it. The plainest way to picture the difference is with people. A chatbot is like a clever, well-read person you can ask questions — sharp answers, but they don't work for you. An agent is that same clever person **hired into a role**: you've told them \"you're our customer-support assistant,\" handed them the company handbook to work from, and given them a phone and an email account. Now they can go and *handle* things, not just chat about them.\n\nThat's the shift, and it's why the word \"agent\" is the one that matters. It's the move from **AI that answers** to **AI that gets things done.**\n\n## The three parts every agent is made of\n\nEvery agent, no matter how simple or fancy, is built from the same three parts. Keep the new-hire analogy running and each one lands in a sentence.\n\n**1. A brain — the model that thinks.** This is the AI model underneath: the same kind of engine that powers a chatbot, the part that reads, reasons, and writes. It's the raw cleverness of your new hire. On its own, that's exactly a chatbot — a brain and nothing else. The other two parts are what turn it into a worker.\n\n**2. A job — its role and instructions.** This is where you tell the agent who it is and what it's for: *\"You are our customer-support assistant. You're friendly and concise, you help people with returns and refunds, and you never promise anything the policy doesn't cover.\"* It's the job description and the briefing you'd give any new employee on day one. (You'll sometimes hear this called the agent's **persona** — that's just the technical word for its defined role and manner. Plain idea first: it's the job.)\n\n**3. Tools plus knowledge — what it can use, and what it works from.** **Tools** are the things it's *allowed to use* to take action: an email account to send a reply, access to your calendar, a connection to the system where your orders live. **Knowledge** is what it *works from* — the material you've given it, like your returns policy or your product list. In the analogy, tools are the phone and the email login you set your new hire up with; knowledge is the handbook on their desk. A chatbot has neither. An agent has both, and that's precisely why it can *act* rather than just talk.\n\n## Same brain, different result\n\nNotice what actually changed. The brain is the same in both cases — the same clever engine. A chatbot is that brain on its own. An agent is that brain **given a job, some knowledge, and a set of tools it's allowed to use.** You didn't build a smarter AI. You took a capable one and *set it up to work* — the same way hiring someone isn't about making them cleverer, it's about giving them a role, the information they need, and the accounts to do it.\n\nHold onto that. In the next lesson we'll watch it play out on one concrete task, clear up the confusions that trip people here, and see how this exact idea is what the Automatos platform is built around.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m01-1",
+          "domainId": "m01-what-is-an-agent",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In one plain sentence, what's the real difference between a chatbot and an agent?",
+          "options": [
+            { "id": "a", "text": "A chatbot answers when you type; an agent is that same AI given a job, some knowledge, and tools it's allowed to use — so it can actually do the task, not just talk about it", "correct": true },
+            { "id": "b", "text": "An agent is simply a chatbot built on a bigger, more expensive, more powerful AI model", "correct": false },
+            { "id": "c", "text": "A chatbot is for casual chat and an agent is for serious topics, but they work exactly the same way", "correct": false },
+            { "id": "d", "text": "An agent is a chatbot that talks back faster and in a more human-sounding voice", "correct": false }
+          ],
+          "explanation": "The difference isn't a better brain — it's the wrapper. Both can share the same underlying model; an agent is that model given a role, knowledge to work from, and permitted tools, so it can carry out a task rather than only describe it (a). It isn't defined by a bigger or pricier model (b) — the brain can be identical. It isn't about casual-versus-serious subject matter (c) — that's not the distinction at all. And it's not about speed or a more human voice (d) — the shift is from answering to acting.",
+          "sourceRefs": ["r-gb-about", "r-gb-agents"]
+        },
+        {
+          "id": "kc-m01-2",
+          "domainId": "m01-what-is-an-agent",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The module says every agent is built from three parts. Using the new-hire analogy, which line matches them up correctly?",
+          "options": [
+            { "id": "a", "text": "Brain = the model that thinks (the raw cleverness); job = its role and instructions (the day-one briefing); tools plus knowledge = the phone and email login plus the handbook on the desk", "correct": true },
+            { "id": "b", "text": "Brain = the company handbook; job = the email account; tools = the person's personality", "correct": false },
+            { "id": "c", "text": "The three parts are speed, a friendly tone, and a large vocabulary", "correct": false },
+            { "id": "d", "text": "Brain = the tools it's allowed to use; job = the AI model; knowledge = how fast it replies", "correct": false }
+          ],
+          "explanation": "The mapping is: brain is the thinking model (the new hire's cleverness), job is the role and instructions you brief them with, and tools plus knowledge are what they're allowed to use (phone, email) plus what they work from (the handbook) — so (a) is right. Option (b) scrambles the pairings — the handbook is knowledge, not the brain, and personality isn't a tool. Option (c) lists surface traits, not the three structural parts. And (d) swaps brain and tools outright, which is exactly the mix-up the analogy exists to prevent.",
+          "sourceRefs": ["r-gb-about", "r-gb-agents"]
+        }
+      ]
+    },
+    {
+      "id": "l2-hire-and-brief",
+      "title": "You don't program an agent — you hire and brief one",
+      "estMinutes": 9,
+      "objective": "See the chatbot-versus-agent difference on one concrete task, clear up the three common confusions, and understand that an agent only ever does what it's allowed to — then meet the idea in Automatos.",
+      "body": "## One task, two ways\n\nThe difference is easiest to feel on a single job. Say a refund request lands in your support inbox.\n\n**The chatbot way.** You open a chatbot and type: *\"Draft a polite reply telling this customer their refund is approved.\"* Back comes a nicely written paragraph. It's good — but now *you* have to check it against your actual policy, copy it out, find the customer's email, and send it. The chatbot wrote words. Every bit of the doing stayed with you.\n\n**The agent way.** Now picture an agent set up for exactly this. Its **job**: \"You handle refund requests in the support inbox.\" Its **knowledge**: your returns policy, so its replies match what you actually offer. Its **tools**: read access to the inbox and permission to draft an email. Give it the same request and it can read the incoming message, check it against the real policy it was given, and draft the reply grounded in *your* terms — the whole small task, not just the paragraph.\n\nSame brain in both. The agent simply had the job, the knowledge, and the tools to carry the task through — which is the entire point of the word.\n\n## The three confusions worth clearing up\n\nAlmost everyone new to this hits the same three snags. Here they are, straightened out.\n\n**\"An agent is just a fancier chatbot.\"** No. The brain can be identical. What makes it an agent is everything wrapped around that brain — the defined job, the knowledge, and the permitted tools that let it *act*. A chatbot with a bigger vocabulary is still a chatbot. An agent is a chatbot put to work.\n\n**\"An agent runs loose and acts without limits.\"** This is the one that makes people nervous, so it matters most. An agent **only ever does what it's been allowed to do** — nothing more. It can use the tools you gave it and no others; it can reach the knowledge you handed it and nothing else. If you didn't give it the power to send emails, it can't send emails. Scope and permission aren't a footnote — they're the whole design. (Deciding how much to let an agent do on its own, and how to trust it, is its own topic a later module covers properly. For now, just hold the reassurance: an agent is fenced in by exactly what you permit.)\n\n**\"You have to be able to code to make one.\"** No. Creating an agent is much closer to **writing a job description than writing software.** You give it a name, describe its role, choose the knowledge it should use, and pick the tools it's allowed. That's briefing a new hire, not programming — a skill you already have.\n\n## The everyday takeaway\n\nRoll those together and you get the line to leave with: **you don't program an agent, you hire and brief one.** Same brain as the chatbot you've already used — but give it a job, some knowledge, and a set of tools, and it becomes a worker. That's the whole idea, and it's the thing the rest of AI keeps building on.\n\n## The Automatos peek\n\nThis is exactly how Automatos works — it calls its AI workers *agents*, and its own docs put it bluntly: **\"agents are workers, not chatbots.\"** Creating one there is closer to writing a job description than writing code: you give it a name and a description of its role, choose a persona for how it communicates, select the model that acts as its brain, and add the knowledge and tools it's allowed to use — then click Create, and it's ready to receive work. Which is to say: you've just met, in plain English, the single thing the whole platform is built around.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m01-3",
+          "domainId": "m01-what-is-an-agent",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Someone worried about AI says, \"I don't want an agent because it'll run loose and start doing things I never approved.\" What's the accurate, reassuring correction?",
+          "options": [
+            { "id": "a", "text": "An agent only ever does what it's been allowed to do — it can use the tools and knowledge you gave it and nothing else; scope and permission are the whole design", "correct": true },
+            { "id": "b", "text": "That worry is correct — once created, an agent can use any tool it likes and there's no way to limit it", "correct": false },
+            { "id": "c", "text": "You can't limit an agent, but it's fine because agents never make mistakes", "correct": false },
+            { "id": "d", "text": "An agent can act without limits, but only ever on public information, so nothing you own is affected", "correct": false }
+          ],
+          "explanation": "The reassurance is real and structural: an agent is fenced in by exactly what you permit — the tools you assigned and the knowledge you provided, nothing else — so it can't act outside its scope (a). It is *not* unlimited by default (b): the whole design is scope and permission. It's not that limits don't exist but mistakes never happen (c) — that's a different and false claim. And it isn't roaming freely over public data either (d); permission bounds what it can touch, full stop. How much freedom to grant is a later module's topic.",
+          "sourceRefs": ["r-gb-agents", "r-gb-creating"]
+        },
+        {
+          "id": "kc-m01-4",
+          "domainId": "m01-what-is-an-agent",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "The module sums an agent up as \"you don't program one, you hire and brief one.\" What does that most directly mean for how you'd actually create one?",
+          "options": [
+            { "id": "a", "text": "You give it a name and a role, choose the knowledge it should use and the tools it's allowed — much like writing a job description, not writing code", "correct": true },
+            { "id": "b", "text": "You must learn a programming language first, because every agent is built by writing software", "correct": false },
+            { "id": "c", "text": "You do nothing at all — an agent configures its own job, knowledge, and tools by itself", "correct": false },
+            { "id": "d", "text": "You buy a completely different and more advanced AI, since a normal model can never become an agent", "correct": false }
+          ],
+          "explanation": "Creating an agent is briefing work, not coding: name it, describe its role, pick its knowledge, choose its permitted tools — a job description in plain language (a). It doesn't require learning to program first (b); that's the exact myth the line dispels. It isn't self-configuring either (c) — you're the one who briefs it, just as you'd brief a new hire. And you don't need a special, more advanced AI (d): the same kind of model that powers a chatbot becomes an agent once you wrap it with a job, knowledge, and tools.",
+          "sourceRefs": ["r-gb-creating", "r-gb-agents"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m01-1",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which line best captures why \"agent\" is a different word from \"chatbot\"?",
+      "options": [
+        { "id": "a", "text": "It marks the shift from AI that answers to AI that gets things done — same brain, but now with a job, knowledge, and tools it's allowed to use", "correct": true },
+        { "id": "b", "text": "\"Agent\" is just a trendier, more marketable name for the exact same chatbot with no real difference", "correct": false },
+        { "id": "c", "text": "An agent is a chatbot that has been trained on far more data than any chatbot", "correct": false },
+        { "id": "d", "text": "An agent is a chatbot that speaks in a more formal, professional tone", "correct": false }
+      ],
+      "explanation": "The word marks a genuine shift — from answering to doing — achieved by wrapping the same model with a role, knowledge, and permitted tools (a). It's not merely a rebrand of the identical thing (b): the wrapper changes what it can do. It's not about more training data (c) — the brain can be the same model. And it's not a matter of tone (d); formality has nothing to do with the distinction.",
+      "sourceRefs": ["r-gb-about", "r-gb-agents"]
+    },
+    {
+      "id": "q-m01-2",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "In the new-hire analogy, what does the \"brain\" of an agent correspond to?",
+      "options": [
+        { "id": "a", "text": "The AI model underneath — the part that reads, reasons, and writes; the new hire's raw cleverness", "correct": true },
+        { "id": "b", "text": "The company handbook the new hire keeps on their desk", "correct": false },
+        { "id": "c", "text": "The email account and phone the new hire is given on day one", "correct": false },
+        { "id": "d", "text": "The written job description that says what the role is", "correct": false }
+      ],
+      "explanation": "The brain is the model itself — the thinking engine that reads, reasons, and writes, matching the new hire's cleverness (a). The handbook is *knowledge* — what the agent works from (b). The email and phone are *tools* — what it's allowed to use to act (c). And the job description is the *job* — its role and instructions (d). Those last three are the parts you add around the brain to turn a chatbot into a worker.",
+      "sourceRefs": ["r-gb-about", "r-gb-agents"]
+    },
+    {
+      "id": "q-m01-3",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the refund-request example, what specifically lets the agent handle the task in a way the chatbot can't?",
+      "options": [
+        { "id": "a", "text": "The agent has a defined job, the returns policy as knowledge, and permitted tools (read the inbox, draft an email) — so it can carry the task through, not just write a paragraph", "correct": true },
+        { "id": "b", "text": "The agent runs on a fundamentally smarter model than the chatbot, so it simply understands refunds better", "correct": false },
+        { "id": "c", "text": "The agent has no limits, so it can reach into any system it wants to complete the job", "correct": false },
+        { "id": "d", "text": "The chatbot refused the task, so the agent was the only option available", "correct": false }
+      ],
+      "explanation": "What lets the agent do more is the wrapper: a job, the real policy as knowledge, and the specific tools it was granted — that combination carries the whole small task (a). It isn't a smarter brain (b); the model can be the same, and the example turns on setup, not intelligence. It isn't limitlessness (c) — it acts only within the tools and knowledge you permitted. And the chatbot didn't refuse (d); it wrote a perfectly good paragraph — it just had no way to read the inbox or send the reply.",
+      "sourceRefs": ["r-gb-agents", "r-gb-about"]
+    },
+    {
+      "id": "q-m01-4",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "\"An agent is just a fancier chatbot\" is one of the confusions this module corrects. What's the accurate view?",
+      "options": [
+        { "id": "a", "text": "The brain can be identical — what makes it an agent is the job, knowledge, and permitted tools wrapped around it that let it act", "correct": true },
+        { "id": "b", "text": "It's true — an agent is literally a chatbot with a longer, fancier vocabulary and nothing more", "correct": false },
+        { "id": "c", "text": "An agent and a chatbot share nothing in common; they're built from entirely different technology", "correct": false },
+        { "id": "d", "text": "An agent is a chatbot that has simply been given a more impressive name to sell it", "correct": false }
+      ],
+      "explanation": "The honest correction: a chatbot and an agent can run on the same model, and what distinguishes an agent is the role, knowledge, and tools that let it take action (a). It's not merely a bigger vocabulary (b) — a wordier chatbot is still just answering. Nor is it built from wholly different technology (c) — they share the same kind of brain. And it isn't a pure marketing rename (d); there's a real capability difference behind the word.",
+      "sourceRefs": ["r-gb-about", "r-gb-agents"]
+    },
+    {
+      "id": "q-m01-5",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You're setting up an agent and you don't give it any tool for sending email. What follows?",
+      "options": [
+        { "id": "a", "text": "It can't send email — an agent only does what it's allowed to do, using the tools and knowledge you granted and nothing else", "correct": true },
+        { "id": "b", "text": "It will find another way to send email on its own, because agents act without limits", "correct": false },
+        { "id": "c", "text": "It stops working entirely, because every agent must be able to send email to function", "correct": false },
+        { "id": "d", "text": "It sends email anyway, but only to addresses it already knows", "correct": false }
+      ],
+      "explanation": "Permission is the whole design: with no email tool granted, the agent simply cannot send email — it's bounded by exactly what you allowed (a). It won't route around that limit (b); \"acts without limits\" is the myth this module dispels. It doesn't need email to function at all (c) — plenty of agents never touch email. And it can't quietly send to known addresses either (d): without the tool, the capability isn't there.",
+      "sourceRefs": ["r-gb-agents", "r-gb-creating"]
+    },
+    {
+      "id": "q-m01-6",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A colleague says, \"I'd love to try building an agent but I can't code.\" What's the honest reply?",
+      "options": [
+        { "id": "a", "text": "You don't need to code — making an agent is closer to writing a job description: name it, describe its role, choose its knowledge, and pick the tools it's allowed", "correct": true },
+        { "id": "b", "text": "They're right — you must be a programmer, because every agent is written in code from scratch", "correct": false },
+        { "id": "c", "text": "Coding isn't needed because agents build themselves with no input from anyone", "correct": false },
+        { "id": "d", "text": "They should give up on agents entirely and stick to using a plain chatbot forever", "correct": false }
+      ],
+      "explanation": "Creating an agent is briefing, not programming — a job description in plain language: name, role, knowledge, permitted tools (a). So the premise that you must be a programmer is wrong (b). But agents don't self-assemble either (c) — a person does the briefing. And there's no reason to give up (d); the whole point is that this is within reach of someone who's only ever used a chatbot.",
+      "sourceRefs": ["r-gb-creating", "r-gb-agents"]
+    },
+    {
+      "id": "q-m01-7",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "In the three-part picture, \"knowledge\" and \"tools\" are often mentioned together but they aren't the same thing. Which pairing is right?",
+      "options": [
+        { "id": "a", "text": "Knowledge is what the agent works from (like your returns policy); tools are what it's allowed to use to act (like an email account or access to your orders)", "correct": true },
+        { "id": "b", "text": "Knowledge is the email account it sends from; tools are the documents it reads", "correct": false },
+        { "id": "c", "text": "Knowledge and tools are two words for the same thing — the AI model at the centre", "correct": false },
+        { "id": "d", "text": "Knowledge is how quickly it replies; tools are how formally it writes", "correct": false }
+      ],
+      "explanation": "Knowledge is the material it works from — your policy, your product list — while tools are the capabilities it's permitted to use to take action, like sending email or reaching your order system (a). Option (b) swaps the two — the email account is a tool, documents are knowledge. Neither is the model (c); the model is the brain, a separate part. And neither is about reply speed or writing style (d) — those aren't parts of an agent at all.",
+      "sourceRefs": ["r-gb-about", "r-gb-agents"]
+    },
+    {
+      "id": "q-m01-8",
+      "domainId": "m01-what-is-an-agent",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "If you had to leave this module with a single sentence, which one best captures it?",
+      "options": [
+        { "id": "a", "text": "Same brain as a chatbot — give it a job, some knowledge, and a set of tools it's allowed to use, and it becomes a worker; you hire and brief an agent, you don't program it", "correct": true },
+        { "id": "b", "text": "An agent is a more expensive chatbot, and the extra cost is what makes it able to act", "correct": false },
+        { "id": "c", "text": "An agent is any AI that speaks in complete, well-punctuated sentences", "correct": false },
+        { "id": "d", "text": "An agent is a chatbot that has been switched into a special hidden mode", "correct": false }
+      ],
+      "explanation": "The takeaway is the hire-and-brief line: the same underlying model, wrapped with a job, knowledge, and permitted tools, becomes a worker (a). It's not about spending more (b) — cost isn't what grants the ability to act; the job, knowledge, and tools are. It's got nothing to do with grammar or punctuation (c). And there's no secret \"mode\" being toggled (d) — you actively set up the role, knowledge, and tools that make it an agent.",
+      "sourceRefs": ["r-gb-about", "r-gb-creating"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [],
+  "resources": [
+    {
+      "id": "r-gb-about",
+      "title": "Automatos AI — About (what the platform is, in its own words)",
+      "url": "automatos-gitbook/about.md",
+      "kind": "official-doc",
+      "annotation": "The platform's own plain-language description, and the source of the line this module leans on: \"agents are workers, not chatbots.\" It also lays out, in one place, that each agent has a role, a model, a persona, and its own tools and knowledge — the exact three-part picture (brain, job, tools plus knowledge) taught here.",
+      "domainIds": ["m01-what-is-an-agent"]
+    },
+    {
+      "id": "r-gb-agents",
+      "title": "Automatos AI — Agents (build and manage your AI workforce)",
+      "url": "automatos-gitbook/agents/README.md",
+      "kind": "official-doc",
+      "annotation": "Where the idea of an agent as a hired worker becomes concrete: agents are specialised workers, each with its own model, persona, tools, and skills, browsed as a roster. Useful here to see that \"agent\" is a real, everyday object you set up and manage — not a rebranded chatbot.",
+      "domainIds": ["m01-what-is-an-agent"]
+    },
+    {
+      "id": "r-gb-creating",
+      "title": "Automatos AI — Creating an Agent (the step-by-step)",
+      "url": "automatos-gitbook/agents/creating.md",
+      "kind": "official-doc",
+      "annotation": "The page behind the module's central claim that you hire and brief an agent rather than code one: you give it a name and role, pick the model that acts as its brain, choose a persona, and assign the tools and knowledge it's allowed. It reads like filling out a job description — which is the whole point.",
+      "domainIds": ["m01-what-is-an-agent"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m01-1",
+      "title": "01 · A chatbot talks, an agent works — what an agent is, in about 7 minutes",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m01-what-is-an-agent"],
+      "sourceNotebook": "ai-explained / m01 / what-is-an-agent"
+    },
+    {
+      "id": "v-m01-2",
+      "title": "01 · Deep Dive — the three parts of an agent, and why you hire one instead of coding it",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m01-what-is-an-agent"],
+      "sourceNotebook": "ai-explained / m01 / deep-dive-hire-and-brief"
+    }
+  ]
+}

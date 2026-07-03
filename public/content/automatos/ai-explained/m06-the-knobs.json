@@ -1,0 +1,271 @@
+{
+  "id": "m06-the-knobs",
+  "order": 6,
+  "code": "06",
+  "name": "The knobs: temperature, tokens & parameters",
+  "tagline": "You've opened an AI's settings, seen sliders like \"temperature\" and \"max tokens,\" felt sure you must be getting it wrong by ignoring them — and closed the panel. Good news: ignoring them was the right call. The defaults are tuned well, and exactly one knob is worth knowing on purpose. This module tells you which one, what it does, and why you can leave the rest alone.",
+  "overview": "The module that kills the quiet anxiety behind \"what do all these settings mean — and am I failing by not touching them?\" You're not. The single most reassuring fact about AI settings is that the defaults are almost always fine, and a beginner rarely needs to change anything. This module covers only the two or three knobs you'll actually meet, in plain language, and hands you one everyday picture for each. TEMPERATURE is a \"play it safe ↔ surprise me\" dial: turn it down and the AI plays safe — steady, consistent, predictable answers, which is what you want for facts, code, and policy; turn it up and it gets more adventurous and varied, which is what you want for brainstorming and marketing lines. It is the one knob worth a deliberate choice, and only when an answer feels too robotic (turn it up a little) or too random (turn it down). TOKENS are the little chunks of words the AI reads and writes in — roughly three-quarters of a word each; \"max tokens\" simply caps how long the answer can be, and tokens are also the thing you pay by, so \"it costs per token\" just means \"you pay by the amount of text going in and coming out\" — which is why shorter prompts and answers cost less. The other knobs you might spot (top-p and its cousins) are variations on the temperature idea, and a beginner can safely leave them untouched. The honest headline, repeated on purpose because it's the point: for almost everything, the defaults are good; the one knob worth knowing is temperature; leave the rest. Nothing here is technical — settings are for occasional fine-tuning, not a test you're failing by leaving them alone.",
+  "objectives": [
+    "Explain, in plain words, what temperature does — a \"play it safe ↔ surprise me\" dial where low means steady and predictable (good for facts, code, and policy) and high means more creative and varied (good for brainstorming and marketing) — and know it's the one knob worth changing on purpose, and only when an answer feels too robotic or too random.",
+    "Say what a token is — a little chunk of text, roughly three-quarters of a word — and understand that \"max tokens\" just caps how long the answer can be and that you're billed by tokens, so shorter prompts and answers cost less; no exact prices needed.",
+    "Take away the honest, calming headline: the defaults are almost always fine, top-p and other knobs are cousins of temperature that a beginner can safely ignore, and settings are for occasional fine-tuning rather than a test you're failing by leaving them alone."
+  ],
+  "lessons": [
+    {
+      "id": "l1-temperature-the-one-dial",
+      "title": "Temperature: the one dial worth knowing",
+      "estMinutes": 8,
+      "objective": "Understand temperature as a plain \"play it safe ↔ surprise me\" dial, know which way to move it and when, and internalise that it's the single knob worth a deliberate choice while the defaults handle everything else.",
+      "body": "## You've been ignoring the settings — and that was the right call\n\nHere's a small confession most people share and nobody says out loud. You opened an AI's settings once, saw a slider called **temperature** and a box called **max tokens**, felt a quiet certainty that you must be doing this wrong by leaving them alone, and shut the panel.\n\nLet's clear that up before anything else: **ignoring them was the correct move.** The people who build these tools set the defaults deliberately, and for almost everything you'll ever do, those defaults are good. You are not failing a test by leaving them where they are. Settings like these are for *occasional fine-tuning* by someone who wants a specific effect — not a checklist you're neglecting.\n\nSo this lesson isn't \"here are ten dials you've been getting wrong.\" It's the opposite: there is really only **one** knob worth understanding on purpose, and once you get it, you can leave the rest alone with a clear conscience. That one knob is temperature.\n\n## The dial: play it safe ↔ surprise me\n\nHere's the whole idea in one picture. Imagine a single dial with two ends:\n\n- **Turn it down (low temperature): \"play it safe.\"** The AI gives you its most likely, most expected answer. Steady, consistent, predictable. Ask the same thing twice and you'll get roughly the same reply both times.\n- **Turn it up (high temperature): \"surprise me.\"** The AI gets more adventurous — it's willing to reach for less obvious words and phrasings. More creative, more varied. Ask the same thing twice and the two answers might look quite different.\n\nThat's temperature. The plain name for it is *how adventurous the AI is being* — and \"temperature\" is just the term of art the settings screen uses for that dial. Low is cautious and repeatable; high is inventive and surprising. Nothing more complicated is going on.\n\nA quick way to feel it: at a low setting, ask for \"three names for a coffee shop\" and you'll get safe, sensible ones — the sort anyone might suggest. At a high setting, the same request gives you wilder, more unexpected names — some brilliant, some a bit odd. Same question, different appetite for risk.\n\n## Which way, and when\n\nYou don't need a chart for this. Match the dial to the *kind* of answer you want.\n\n**Turn it down — play it safe — when you want one right answer, consistently.** Facts. Code. A policy explanation. A step-by-step instruction. Anything where being steady and predictable matters more than being interesting, and where a surprising answer would actually be a *worse* answer. If you're asking \"what's our refund window\" or \"fix this spreadsheet formula,\" you want the boring, reliable version — turn it down.\n\n**Turn it up — surprise me — when you want options and creativity.** Brainstorming. Marketing lines. Taglines, subject lines, product names, first-draft ideas you'll pick and choose from. Anything where you'd rather see ten different swings than the same safe pitch — turn it up.\n\nAnd here's the honest part that keeps this from being one more thing to fuss over: **most of the time you won't touch it at all.** The default sits in a sensible middle, and it's fine. You reach for temperature only when an answer feels *off* in one of two specific ways:\n\n- The answer feels **too robotic, flat, or samey** — nudge it **up** a little for more life and variety.\n- The answer feels **too random, wild, or off-brief** — nudge it **down** a little to rein it in.\n\nThat's the entire skill. One dial, two directions, moved only when something feels wrong. Everything else on the settings screen, you can leave exactly where the makers put it.\n\n## Worked example — the marketing email and the policy reply\n\nSameera runs a small online shop and uses an AI assistant for two very different jobs in the same afternoon.\n\nFirst, she wants **subject lines** for a summer sale email — she'd love a dozen to choose from, and she wants a few unexpected ones. This is a *surprise me* job, so she nudges the dial **up**. Back come varied, punchy options, some playful, some she'd never have thought of. Exactly right for picking and choosing.\n\nAn hour later she asks the same assistant to draft a **reply explaining her refund policy** to a customer. Now she wants the opposite: accurate, consistent, no creative flourishes, the same clear answer every time. This is a *play it safe* job, so she turns the dial **down**. The reply comes back steady and precise — boring, in the best possible way.\n\nSame assistant, same person, two jobs — and the *only* thing she changed was one dial, in the direction the job called for. That's temperature doing its whole job. And for the many small tasks in between, she left it on the default and never thought about it once.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-1",
+          "domainId": "m06-the-knobs",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In plain terms, what does the \"temperature\" setting control?",
+          "options": [
+            { "id": "a", "text": "How adventurous the AI is — low means safe, steady, predictable answers, and high means more creative and varied ones", "correct": true },
+            { "id": "b", "text": "How fast the AI types its answer back to you on the screen", "correct": false },
+            { "id": "c", "text": "How factually correct the AI is guaranteed to be, with high always meaning more accurate", "correct": false },
+            { "id": "d", "text": "How much the AI likes you, warming up as you chat with it longer", "correct": false }
+          ],
+          "explanation": "Temperature is a \"play it safe ↔ surprise me\" dial for how adventurous the AI is: low gives steady, consistent, predictable answers, high gives more creative and varied ones. It has nothing to do with typing speed (b) — that's just how quickly text appears. It isn't an accuracy setting (c): turning it up makes answers more varied, not more correct, and a high setting can actually make a factual answer worse by adding surprise where you wanted reliability. And it isn't a friendliness or mood dial (d) — the AI has no feelings warming up over time; it's simply choosing between safe and surprising phrasings.",
+          "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+        },
+        {
+          "id": "kc-m06-2",
+          "domainId": "m06-the-knobs",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "You ask the AI to explain your company's refund policy to a customer and want the same accurate, reliable wording every time. Which way should temperature go, and why?",
+          "options": [
+            { "id": "a", "text": "Down (play it safe) — a policy explanation wants steady, consistent, predictable answers, not creative variety", "correct": true },
+            { "id": "b", "text": "Up (surprise me) — a higher setting will make the policy answer more accurate and trustworthy", "correct": false },
+            { "id": "c", "text": "It makes no difference — temperature only affects the colour of the text, not the content", "correct": false },
+            { "id": "d", "text": "All the way to the maximum — policy answers should be as varied and surprising as possible", "correct": false }
+          ],
+          "explanation": "A policy reply is a \"play it safe\" job: you want the boring, reliable, repeatable answer, so you turn temperature down. Turning it up doesn't add accuracy (b) — it adds variety and surprise, which is the last thing a policy explanation needs. It absolutely affects the content, not just appearance (c): higher temperature changes the wording and can drift off the safe answer. And maxing it out (d) is exactly backwards — that invites the creative, inconsistent phrasings you're trying to avoid for something factual. Honestly, the middle default would serve here too; nudging down just makes doubly sure it stays steady.",
+          "sourceRefs": ["r-gb-configuration"]
+        }
+      ]
+    },
+    {
+      "id": "l2-tokens-and-leave-the-rest",
+      "title": "Tokens: the chunks you pay by — and leaving the rest alone",
+      "estMinutes": 8,
+      "objective": "Understand tokens as little chunks of words (roughly three-quarters of a word), see that \"max tokens\" caps answer length and that you're billed by tokens, and take away the calm rule that top-p and other knobs are cousins of temperature a beginner can ignore — closing with how these dials show up in Automatos.",
+      "body": "## The AI reads and writes in little chunks\n\nThe second word you'll bump into is **tokens**, and it sounds far more technical than it is.\n\nHere's the plain version. The AI doesn't handle text one whole word at a time and it doesn't handle it letter by letter — it works in little **chunks of words**, and the name for one of those chunks is a **token**. As a rough rule of thumb, **a token is about three-quarters of a word.** So a short sentence is a handful of tokens; a long email is a few hundred; a big document is thousands. You never have to count them yourself — but knowing the AI measures text in these chunks explains the two places the word shows up.\n\n## \"Max tokens\" just caps how long the answer can be\n\nThe first place you'll see it is a setting called **max tokens** (sometimes \"maximum length\" or \"response length\"). Now that you know a token is a chunk of text, this one decodes itself: **it simply caps how long the AI's answer is allowed to be.** A low cap means shorter replies; a high cap allows longer ones. That's the whole function.\n\nAnd like temperature, the default is usually fine — you'd only reach for it in obvious situations. Turn the cap up if you're asking for something genuinely long, like a full report, and the answer keeps stopping partway. Turn it down if you want to *force* brevity — short, punchy answers only. Most of the time you leave it alone and never notice it.\n\n## Tokens are also the thing you pay by\n\nThe second place tokens show up is on the bill, and this is the practical bit worth carrying with you.\n\nAI tools that charge by usage charge **by the token** — that is, by the *amount of text*. Every token going **in** (your prompt, plus any documents you supply) and every token coming **out** (the AI's answer) is counted, and the total is what you pay for. So when someone says *\"it costs per token,\"* they're saying something very simple in a technical-sounding way: **you pay by the amount of text in and out.** More text in and out costs more; less text costs less.\n\nWhich hands you one genuinely useful, entirely non-technical habit: **shorter prompts and shorter answers cost less.** If you're doing something small and repetitive at volume, being concise — not padding the request, not asking for a five-page answer when a paragraph will do — quietly saves money. You don't need to know any prices (they change constantly, and vary by tool) to use the principle. Less text, less cost. That's all you need.\n\n## The other knobs: cousins of temperature you can ignore\n\nIf you scroll through a settings panel you might spot a few more dials with names like **top-p** (and one or two other odd ones). Here is the honest, freeing truth about them: for a beginner, **you can leave every one of them exactly where it is.**\n\nWithout getting technical, the ones you're most likely to see are basically **cousins of temperature** — different ways of tuning that same \"how adventurous versus how safe\" behaviour you already understand. They exist for people who want very fine control over that one idea. You are not missing anything important by never touching them. If an answer feels too robotic or too random, you already have the one dial that fixes it — temperature — and that is genuinely all a beginner ever needs to reach for.\n\nSo the whole settings screen, boiled down: **temperature** is the one dial worth knowing (safe ↔ surprise, moved only when an answer feels off); **max tokens** just caps length and doubles as the reason text costs money; and **everything else is a cousin of temperature you can safely leave alone.** Settings are for fine-tuning, not a test you're failing by ignoring them.\n\n## The Automatos peek\n\nWhen you build an agent in Automatos, these exact same knobs live on its configuration — a **model** to use, a **default temperature** (the platform's settings even describe it in plain words as the \"base creativity setting\"), and a **max token limit** that caps how long a response can run. You can leave every one of them at its sensible default and genuinely never think about it, or make the one deliberate choice you now know how to make — nudge temperature **down** for an agent that must be precise and consistent, like one answering policy questions. The platform sets these defaults once for your whole fleet, and any individual agent can override them if a particular job calls for it. So the settings screen won't read like a cockpit anymore — it's the two or three familiar dials you just learned, sitting where you'd expect them.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m06-3",
+          "domainId": "m06-the-knobs",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "What is a \"token,\" and what does the \"max tokens\" setting do?",
+          "options": [
+            { "id": "a", "text": "A token is a little chunk of text (roughly three-quarters of a word); \"max tokens\" caps how long the answer is allowed to be", "correct": true },
+            { "id": "b", "text": "A token is a password you buy to unlock the AI; \"max tokens\" is how many logins you have left", "correct": false },
+            { "id": "c", "text": "A token is a whole paragraph; \"max tokens\" sets how many paragraphs of memory the AI keeps forever", "correct": false },
+            { "id": "d", "text": "A token is a measure of the AI's intelligence; \"max tokens\" makes it smarter when raised", "correct": false }
+          ],
+          "explanation": "A token is one of the little chunks the AI reads and writes in — about three-quarters of a word — and \"max tokens\" simply caps how long the reply can be. It isn't a password or a login credit (b): that's a different meaning of the word \"token\" from other software, not this one. It's a small chunk, not a whole paragraph, and it doesn't grant permanent memory (c) — memory is a separate topic entirely. And it's not a measure of intelligence (d): raising the max-tokens cap lets answers run longer, it doesn't make the AI cleverer.",
+          "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+        },
+        {
+          "id": "kc-m06-4",
+          "domainId": "m06-the-knobs",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "A colleague says \"this AI costs per token, so we should keep prompts and answers tight.\" What does that actually mean, and are they right?",
+          "options": [
+            { "id": "a", "text": "\"Costs per token\" just means you pay by the amount of text in and out — so yes, shorter prompts and answers genuinely cost less", "correct": true },
+            { "id": "b", "text": "It means each answer has a fixed price no matter its length, so shortening things saves nothing", "correct": false },
+            { "id": "c", "text": "It means only the questions you type are charged, and the AI's answers are always free", "correct": false },
+            { "id": "d", "text": "It means you're billed once per day for unlimited use, so length is irrelevant", "correct": false }
+          ],
+          "explanation": "Paying \"per token\" means paying by the amount of text — every chunk going in (your prompt and any documents) and coming out (the answer) is counted — so keeping things tight really does cost less, and the colleague is right. It isn't a flat price per answer (b): a longer answer uses more tokens and costs more. Answers aren't free (c) — output tokens are counted too, often the larger share. And it isn't a flat daily fee (d); usage-based billing scales with the text, which is exactly why concise prompts and answers save money. You don't need to know the price to use the rule.",
+          "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m06-1",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which everyday picture best captures what the temperature setting does?",
+      "options": [
+        { "id": "a", "text": "A \"play it safe ↔ surprise me\" dial — low for steady, predictable answers, high for creative, varied ones", "correct": true },
+        { "id": "b", "text": "A thermostat that controls how warm the computer running the AI gets", "correct": false },
+        { "id": "c", "text": "A volume knob that makes the AI's answers longer or shorter", "correct": false },
+        { "id": "d", "text": "A quality dial where higher always means a better, more correct answer", "correct": false }
+      ],
+      "explanation": "Temperature is a safe-versus-surprising dial for how adventurous the AI's answers are — low is steady and predictable, high is creative and varied. It has nothing to do with the machine's physical heat (b) despite the name. Length is a different setting — that's max tokens (c), not temperature. And higher isn't simply \"better\" (d): a high setting adds variety and surprise, which is great for brainstorming but worse for a factual answer you need to be reliable.",
+      "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m06-2",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "For which kind of task should you turn temperature down (play it safe)?",
+      "options": [
+        { "id": "a", "text": "Explaining a policy, fixing a formula, or giving step-by-step facts — where steady, consistent, predictable answers matter", "correct": true },
+        { "id": "b", "text": "Brainstorming a dozen wild product names to pick from", "correct": false },
+        { "id": "c", "text": "Writing playful, varied marketing taglines", "correct": false },
+        { "id": "d", "text": "Generating lots of different creative first-draft ideas to choose between", "correct": false }
+      ],
+      "explanation": "Facts, code, and policy explanations are \"play it safe\" jobs — you want the reliable, repeatable answer, so you turn temperature down. Brainstorming product names (b), writing playful taglines (c), and generating varied first-draft ideas (d) are all the opposite — \"surprise me\" jobs where you want variety and creativity, so you'd turn temperature up for those. The rule is simply: match the dial to whether you want one steady answer or many varied ones.",
+      "sourceRefs": ["r-gb-configuration"]
+    },
+    {
+      "id": "q-m06-3",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "The honest headline of this module is that a beginner should mostly leave the settings alone. When is the one time it's worth deliberately moving temperature?",
+      "options": [
+        { "id": "a", "text": "Only when an answer feels off — nudge it up if it's too robotic and flat, or down if it's too random and off-brief", "correct": true },
+        { "id": "b", "text": "Before every single question, to get the setting exactly right each time", "correct": false },
+        { "id": "c", "text": "Never — temperature should always be left on its default no matter what", "correct": false },
+        { "id": "d", "text": "Only when you want the AI to be more factually accurate, by turning it up", "correct": false }
+      ],
+      "explanation": "You reach for temperature only when an answer feels wrong in one of two ways — too robotic (nudge up) or too random (nudge down); the rest of the time the default is fine. You don't need to fiddle before every question (b) — that's the anxiety this module dispels; the default handles the vast majority of tasks. \"Never touch it\" (c) goes too far the other way — it's the one knob genuinely worth knowing for those off-feeling moments. And turning it up doesn't buy accuracy (d): high temperature adds variety, not correctness.",
+      "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m06-4",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Roughly how much text is one token?",
+      "options": [
+        { "id": "a", "text": "About three-quarters of a word — a little chunk of text", "correct": true },
+        { "id": "b", "text": "Exactly one full sentence, every time", "correct": false },
+        { "id": "c", "text": "A single letter of the alphabet", "correct": false },
+        { "id": "d", "text": "One entire page of a document", "correct": false }
+      ],
+      "explanation": "A token is a little chunk of text, and the useful rule of thumb is about three-quarters of a word — so text measures out to a handful of tokens for a sentence and thousands for a big document. It isn't a whole sentence (b), which would be many tokens. It isn't a single letter (c) — that's finer than how the AI actually chunks text. And it's certainly not a full page (d), which would be hundreds or thousands of tokens. You never count them by hand; the rough size is all you need.",
+      "sourceRefs": ["r-genai-leader-guide", "r-gb-configuration"]
+    },
+    {
+      "id": "q-m06-5",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An AI tool charges \"per token.\" Which practical habit follows directly from that, with no need to know the actual prices?",
+      "options": [
+        { "id": "a", "text": "Keep prompts and answers reasonably tight — since you pay by the amount of text in and out, less text costs less", "correct": true },
+        { "id": "b", "text": "Always ask for the longest possible answer, since length doesn't affect cost", "correct": false },
+        { "id": "c", "text": "Only worry about the length of your question, because the AI's answer is free", "correct": false },
+        { "id": "d", "text": "Memorise the current per-token price, because it's fixed and never changes", "correct": false }
+      ],
+      "explanation": "Paying by token means paying by the amount of text — in and out — so the direct, price-free habit is to keep prompts and answers tight; less text, less cost. Asking for the longest possible answer (b) does the opposite: more output tokens, more cost. The answer isn't free (c) — output tokens are counted too, and often make up the bigger share. And you shouldn't rely on a memorised price (d) because per-token prices change often and differ by tool — which is exactly why the durable habit is about *amount of text*, not a specific number.",
+      "sourceRefs": ["r-genai-leader-guide", "r-gb-configuration"]
+    },
+    {
+      "id": "q-m06-6",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "You spot a setting called \"top-p\" (and a couple of other unfamiliar dials) in an AI's advanced options. As a beginner, what should you do?",
+      "options": [
+        { "id": "a", "text": "Leave them alone — they're cousins of temperature for fine control, and you're not missing anything by ignoring them", "correct": true },
+        { "id": "b", "text": "Set every one of them to maximum to get the best results", "correct": false },
+        { "id": "c", "text": "Set every one to zero, because lower is always safer", "correct": false },
+        { "id": "d", "text": "Stop using the AI until you've learned exactly what each one does", "correct": false }
+      ],
+      "explanation": "Top-p and its fellow dials are essentially cousins of temperature — other ways to fine-tune the same \"safe versus adventurous\" behaviour — and a beginner can safely leave every one of them at its default. Maxing them out (b) or zeroing them (c) both assume a single direction is universally best, which isn't how these controls work, and neither is a sensible blind move. And you certainly don't need to stop using the AI until you've mastered them (d) — you already have the one dial that matters, temperature, for the rare moment an answer feels off.",
+      "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m06-7",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You ask for a full written report and the answer keeps stopping partway through, cut off mid-thought. Which setting is the likely culprit, and what do you do?",
+      "options": [
+        { "id": "a", "text": "The max-tokens (length) cap is set too low for a long report — raise it so the answer has room to finish", "correct": true },
+        { "id": "b", "text": "Temperature is too low — turn it up to make the answer longer", "correct": false },
+        { "id": "c", "text": "The AI has run out of memory forever and must be reset before it can ever write again", "correct": false },
+        { "id": "d", "text": "It's a billing error and has nothing to do with any setting", "correct": false }
+      ],
+      "explanation": "An answer that stops partway is the classic sign the max-tokens cap — the limit on how long a reply can be — is set too low for what you asked, so you raise it to give the report room to finish. Temperature is the wrong knob (b): it controls safe-versus-surprising, not length. Nothing is permanently broken (c) — the AI hasn't lost some forever-memory; the reply simply hit its length ceiling. And it isn't a billing glitch (d): it's a length setting doing exactly what it was set to do, just set lower than this task needs.",
+      "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+    },
+    {
+      "id": "q-m06-8",
+      "domainId": "m06-the-knobs",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What's the single most reassuring takeaway a beginner should carry away from this module about AI settings?",
+      "options": [
+        { "id": "a", "text": "The defaults are almost always fine; temperature is the one knob worth knowing, and only sometimes — leave the rest alone", "correct": true },
+        { "id": "b", "text": "You must configure every setting correctly before each task or the AI won't work properly", "correct": false },
+        { "id": "c", "text": "The more settings you change from their defaults, the better your results will always be", "correct": false },
+        { "id": "d", "text": "Settings are a hidden test, and leaving them on default means you're using the AI wrong", "correct": false }
+      ],
+      "explanation": "The calm headline is exactly this: defaults are tuned well and almost always fine, temperature is the one dial worth understanding (and only for the occasional off-feeling answer), and the rest can be left alone. You do not need to configure everything before each task (b) — that's the needless anxiety the module exists to remove. Changing more settings isn't automatically better (c); it's a way to get a specific effect when you actually want one. And leaving settings on default is not \"using it wrong\" (d) — it's the sensible norm the makers designed for.",
+      "sourceRefs": ["r-gb-configuration", "r-genai-leader-guide"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [],
+  "resources": [
+    {
+      "id": "r-gb-configuration",
+      "title": "Automatos AI — Agent Configuration (where these knobs live, in its own words)",
+      "url": "automatos-gitbook/agents/configuration.md",
+      "kind": "official-doc",
+      "annotation": "The platform's own settings page and the grounding for this module's peek. It names the exact dials this module teaches — a default model, a Default Temperature described plainly as the \"base creativity setting,\" and a Max Token Limit that caps response length — and notes these are workspace-wide defaults that any individual agent can override. Concrete proof that temperature and a length cap are just two familiar knobs sitting where you'd expect, not a cockpit.",
+      "domainIds": ["m06-the-knobs"]
+    },
+    {
+      "id": "r-genai-leader-guide",
+      "title": "Google — Generative AI Leader exam guide (Fundamentals of generative AI)",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "A vendor-light, business-toned primer on what generative AI is and how it behaves. For this module, use the \"Fundamentals of gen AI\" material for background on why a model can be tuned to be more or less varied, and why text is measured and processed in chunks (tokens). Beginner-friendly and non-technical; take no specific pricing or capability numbers from it, since those change.",
+      "domainIds": ["m06-the-knobs"]
+    },
+    {
+      "id": "r-openai-tokenizer",
+      "title": "A maker's plain explainer on tokens — \"what is a token?\"",
+      "url": "https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them",
+      "kind": "reference",
+      "annotation": "A tool-maker's beginner note that a token is a chunk of text — commonly summarised as roughly three-quarters of a word — and that both the text you send and the text you get back are counted. Used here only to back the plain \"token = a chunk you pay by\" idea, and the shorter-in-and-out-costs-less habit. Read for the concept, not for any price; per-token costs move constantly and vary by tool.",
+      "domainIds": ["m06-the-knobs"]
+    },
+    {
+      "id": "r-hf-generation-params",
+      "title": "Hugging Face — plain notes on temperature and top-p (generation settings)",
+      "url": "https://huggingface.co/docs/transformers/generation_strategies",
+      "kind": "reference",
+      "annotation": "A maker's plain-language description of the generation knobs, useful purely to confirm the module's framing: temperature tunes how safe-versus-adventurous the output is, and top-p and its relatives are close cousins that adjust the same idea in a different way. Skim only for orientation — that these are variations on one theme a beginner can leave at their defaults; ignore the code and technical detail.",
+      "domainIds": ["m06-the-knobs"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m06-1",
+      "title": "06 · Temperature — the one dial worth knowing (play it safe ↔ surprise me), in about 7 minutes",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m06-the-knobs"],
+      "sourceNotebook": "ai-explained / m06 / temperature-the-one-dial"
+    },
+    {
+      "id": "v-m06-2",
+      "title": "06 · Deep Dive — tokens as the chunks you pay by, and why you can leave the rest alone",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m06-the-knobs"],
+      "sourceNotebook": "ai-explained / m06 / deep-dive-tokens-and-defaults"
+    }
+  ]
+}

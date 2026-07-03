@@ -1,0 +1,166 @@
+{
+  "vendorName": "Automatos",
+  "name": "AI Explained",
+  "code": "AIX",
+  "summary": "Never touched AI? Start here. Plain-English answers to what an agent is, why there are so many models, OpenAI vs Claude, what a context window is, knowledge graphs, and MCP — no jargon, no experience needed.",
+  "blueprintNote": "First-party beginner on-ramp (Foundations lane) per PRD-B0-AI-EXPLAINED — 13 modules, no exam, no weights, no labs. Concepts are taught fully vendor-neutral (OpenAI, Claude, Gemini, Llama all named honestly); Automatos appears only as a one-paragraph 'here's how you'd see this' peek at the end of each module. Completion = 'AI-literate': the learner can explain the ideas in their own words and knows which door (Operator or Practitioner) is theirs. Module prompts in docs/roadmap/ai-explained/.",
+  "verification": {
+    "verifiedAt": "2026-07-02",
+    "sourceOfTruth": [
+      "/Users/gkavanagh/Development/Automatos-AI-Platform/automatos-gitbook (peeks)",
+      "/Users/gkavanagh/Development/Automatos-AI-Platform/automatos-academy/docs/roadmap/ai-explained (the authored module specs)"
+    ],
+    "notes": "Vendor-neutral by design — no version numbers, benchmarks or prices appear anywhere, so the content resists rot as models and prices move. The concepts stand on their own; the only time-sensitive claims are the closing Automatos peeks, which were grounded in the Automatos gitbook (the canonical user documentation) at authoring time. Re-check each module's peek against the gitbook on every platform release, since feature flags and surfaces keep moving; the concept teaching does not need re-checking."
+  },
+  "badge": {
+    "completionLabel": "AI-literate — AI Explained",
+    "definition": "Completed the Automatos Academy AI Explained track: can explain — in their own words — what an agent is, why there are so many models, open vs closed models, multimodal (text/images/video), the context window, memory, RAG, knowledge graphs and MCP, and knows their next step (the Operator or Practitioner lane)."
+  },
+  "domainFiles": [
+    "m00-what-is-ai.json",
+    "m01-what-is-an-agent.json",
+    "m02-so-many-models.json",
+    "m03-open-vs-closed.json",
+    "m04-which-model.json",
+    "m05-text-images-video.json",
+    "m06-the-knobs.json",
+    "m07-context.json",
+    "m08-memory.json",
+    "m09-rag.json",
+    "m10-knowledge-graphs.json",
+    "m11-mcp.json",
+    "m12-where-next.json"
+  ],
+  "officialResources": [
+    {
+      "id": "gb-about",
+      "title": "Automatos docs — About Automatos AI",
+      "url": "automatos-gitbook/about.md",
+      "kind": "first-party-doc",
+      "annotation": "The platform in its own words, and the source for the module peeks. It names the plain vocabulary the whole track uses: an agent is a worker with a role and tools (not just a chatbot), a Universal Router hands each of your messages to the right agent, and uploading documents to a knowledge base lets agents read your own material. Read it to see where 'well-read new hire' and 'generic until you ground it' land inside a real product.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-agents",
+      "title": "Automatos docs — Agents",
+      "url": "automatos-gitbook/agents/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Where you build and manage your AI workers. Backs the 'what is an agent?' peek — an agent is a persona plus a model plus tools and skills, which is exactly the difference between an agent and a plain chatbot that the module teaches.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-models",
+      "title": "Automatos docs — Models settings (choose the model per agent, bring your own key)",
+      "url": "automatos-gitbook/settings/models.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek behind the 'so many models', 'open vs closed' and 'which model?' modules. It shows the honest punchline those modules build to: there is no single 'best' model — you pick a model per agent and bring your own key, so the same workspace can run OpenAI, Claude, Gemini or an open model side by side.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-documents",
+      "title": "Automatos docs — Documents (multimodal knowledge)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "first-party-doc",
+      "annotation": "Backs the 'text, images, video' peek — how the platform takes in more than plain text. The plain point for a beginner: multimodal means the AI can work from several kinds of input at once, and here that starts with the documents you upload.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-configuration",
+      "title": "Automatos docs — Agent Configuration (where the knobs live)",
+      "url": "automatos-gitbook/agents/configuration.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek for 'the knobs' module. When the module explains temperature, tokens and other settings in plain English, this is where those same knobs actually live on an agent — so the vocabulary maps straight onto real controls.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-chat",
+      "title": "Automatos docs — Chat (how conversations and context behave)",
+      "url": "automatos-gitbook/chat/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek behind the 'context: the AI's desk' module. Talking to an agent fills its desk (the context window) with the conversation; this is where you see that behaviour in the product, and why a fresh chat starts with a clear desk.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-memory",
+      "title": "Automatos docs — Memory (explore and manage what your agents remember)",
+      "url": "automatos-gitbook/activity/memory.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek for the 'does it remember me?' module. It shows the difference the module teaches — a single chat's context versus durable memory that persists across conversations — and lets a learner actually see and manage what an agent has remembered.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-knowledge",
+      "title": "Automatos docs — Knowledge Bases (teach the AI your own material)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek behind the RAG module. 'How does it know about my things?' is answered here: you upload documents to a knowledge base and agents retrieve from them, which is retrieval-augmented generation (RAG) in the product's own words.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-knowledge-graph",
+      "title": "Automatos docs — Knowledge Graph (entities, relationships, connected search)",
+      "url": "automatos-gitbook/knowledge/knowledge-graph.md",
+      "kind": "first-party-doc",
+      "annotation": "The peek for the knowledge-graph module. It shows the plain idea the module builds — things (entities) and how they connect (relationships) — as a real, searchable graph over your own knowledge, rather than an abstract diagram.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-tools",
+      "title": "Automatos docs — Tools & Integrations",
+      "url": "automatos-gitbook/tools/README.md",
+      "kind": "first-party-doc",
+      "annotation": "Part of the peek behind the MCP module. When the module explains, in beginner terms, how an AI plugs into outside apps, this is where you connect the tools an agent is allowed to use — the concrete version of 'giving the AI hands'.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-connecting",
+      "title": "Automatos docs — Connecting Apps",
+      "url": "automatos-gitbook/tools/connecting-apps.md",
+      "kind": "first-party-doc",
+      "annotation": "The step-by-step half of the MCP peek: actually connecting an app so an agent can act in it. Read alongside the Tools page to see how a general standard for connecting AI to tools (which is what MCP is) shows up as real buttons.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-mcp-site",
+      "title": "Model Context Protocol — official site & introduction",
+      "url": "https://modelcontextprotocol.io/",
+      "kind": "official-doc",
+      "annotation": "The primary source for the MCP module. MCP is an open standard for connecting AI assistants to tools and data — one common 'plug' instead of a custom integration per app. The Introduction page is the plainest starting point; the rest of the site is the reference the module points curious learners to.",
+      "domainIds": []
+    },
+    {
+      "id": "ext-genai-leader-guide",
+      "title": "Google — Generative AI Leader exam guide",
+      "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
+      "kind": "official-doc",
+      "annotation": "The vendor-light, genuinely beginner-toned primer the concept modules lean on for AI fundamentals — what today's AI is, its strengths, and its honest limits. It is also the 'gentle first credential' that module 12 names as one possible next step for a learner who wants something to aim at, without being pushed toward it.",
+      "domainIds": []
+    },
+    {
+      "id": "gb-roadmap",
+      "title": "Automatos Academy — Roadmap (the two lanes and where each door leads)",
+      "url": "automatos-academy/docs/roadmap/README.md",
+      "kind": "first-party-doc",
+      "annotation": "The map behind module 12, 'where next?'. AIX sits below both lanes; after it a learner picks a door — Operator (AI Business Foundations, run your business with AI) or Practitioner (get certified). The roadmap is where those onward paths are laid out.",
+      "domainIds": []
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-ov-1",
+      "title": "Start here — what this course is",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    },
+    {
+      "id": "v-ov-2",
+      "title": "How to use this course",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": []
+    }
+  ]
+}

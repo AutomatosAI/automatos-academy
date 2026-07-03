@@ -1,0 +1,263 @@
+{
+  "id": "m09-rag",
+  "order": 9,
+  "code": "09",
+  "name": "Teaching AI your stuff (RAG)",
+  "tagline": "Out of the box, an AI doesn't know your prices, your policies, or your products — it never saw them. You don't fix that by rebuilding the AI. You hand it a folder of your own documents and say \"answer from this.\" It looks things up in your folder first, answers from what it found, and shows you which document it came from. That's the whole idea, and it has a name you can then forget: RAG.",
+  "overview": "The module that answers the question everyone hits once they start using AI for real: \"how does it know about MY things?\" Back in the very first module you learned the AI knows only what it was trained on — general, public, frozen at some past date — plus whatever you put in front of it. So straight out of the box it knows nothing about your business. This module is the permanent fix, in plain English. Instead of asking a smart friend to answer from memory, you hand them your company binder first and say \"answer from this.\" Concretely: you give the AI a folder of your own documents; when you ask a question, it first looks things up in that folder, then writes its answer using what it found — and it can point at the exact document the answer came from. That look-it-up-then-answer pattern is called retrieval-augmented generation, or RAG, and once you've got the idea you can drop the phrase. Two payoffs make it the single biggest upgrade from \"generic AI\" to \"an assistant that knows my world\": answers become grounded in your real material instead of the AI's general guesses, and you can check the source, which is exactly how you cut down on the confident-but-wrong answers you met earlier. And one discipline makes or breaks it: garbage in, garbage out. A folder full of out-of-date documents produces a confidently wrong assistant, so keeping the folder current is the job. This needs no technical skill — it's uploading documents, not programming.",
+  "objectives": [
+    "Explain in one plain sentence how you give an AI knowledge of your specific business — you give it a folder of your own documents, it looks things up in that folder before answering, and it can cite the document it used — and name that pattern once as RAG (retrieval-augmented generation).",
+    "Describe the two payoffs that make this worth doing: answers grounded in your real material rather than the AI's general guesses, and a source you can check, which directly reduces the confident-but-wrong answers from the first module.",
+    "State the one discipline that makes or breaks it — garbage in, garbage out: a stale document produces a confidently wrong assistant, so keeping the folder current is the whole job — and clear the three common confusions (you don't retrain the AI, it doesn't read your whole company automatically, stale documents are worse than none)."
+  ],
+  "lessons": [
+    {
+      "id": "l1-hand-it-your-binder",
+      "title": "Hand it your binder: how AI learns your specific stuff",
+      "estMinutes": 9,
+      "objective": "Understand, in plain language, how you give an AI knowledge of your own business — a folder of your documents that it looks things up in before answering — and meet the name for that pattern (RAG) once, plainly.",
+      "body": "## It doesn't know your business — until you hand it your binder\n\nRight back at the start you learned the one honest limit of any AI: it knows only what it was trained on — general, public knowledge, frozen at some point in the past — **plus whatever you put in front of it.** Which means, out of the box, it knows nothing about *your* business. Not your prices. Not your refund policy. Not what's in stock this morning. It never saw any of it.\n\nSo how do you fix that? Not the way most people first assume. You don't send the AI back to school or rebuild it from scratch. You do something far simpler, and it's the whole idea of this module:\n\n**You hand it your binder.**\n\nPicture asking a smart, well-read friend a question about your company. If they answer purely from memory, you'll get something general and reasonable — and quite possibly a confident guess where they don't actually know. But if you hand them your **company binder first** — your price list, your policies, your product sheets — and say *\"answer from this\"*, everything changes. Now they're not guessing. They're reading *your* facts and answering from them. Same friend. Completely different answer.\n\nThat is exactly what you do with an AI. You give it a **folder of your own documents**, and from then on it answers your questions using what's in that folder.\n\n## Look it up first, then answer\n\nHere's what's actually happening under the hood, and it's refreshingly ordinary.\n\nWhen you ask a question, the AI doesn't just answer from memory anymore. First, it **looks things up in your folder** — it goes and finds the documents (or the parts of documents) that relate to your question. *Then* it writes its answer, using what it just found. Look it up, *then* answer. Exactly like a friend flipping to the right page of the binder before they reply, instead of answering off the top of their head.\n\nAnd because it went and fetched specific documents to answer, it can do something a plain AI can't: **it can show you which document the answer came from.** \"Here's your answer — and I got it from page 3 of your returns policy.\" You'll meet why that matters enormously in the next lesson.\n\nThis look-it-up-then-answer pattern has a proper name, and here it is so it never trips you up again: **retrieval-augmented generation**, or **RAG**. Break it down and it's just describing what you already understood — it *retrieves* your documents, uses them to *augment* (add to) what the AI already knows, and then *generates* the answer. That's the entire meaning. You've now got the idea, so you can happily forget the phrase; people will say \"RAG\" and you'll simply know they mean *give the AI a folder of your stuff and let it look things up before answering.*\n\n## You're uploading documents, not programming\n\nOne reassurance, because the acronym makes this sound more technical than it is. Setting this up is **uploading files.** You drag your documents into a folder — PDFs, Word docs, spreadsheets, text files, the ordinary stuff a business already has — and the tool does the fiddly part (chopping them into searchable pieces and filing them so they can be found later) automatically, in the background. There's no code. There's no \"training.\" If you can attach a file to an email, you can do this.\n\n## Worked example — the café binder\n\nBack to a café. The owner wants the AI to answer customer emails about refunds, in her real policy, not a generic one.\n\n**Without the binder**, she asks the AI to \"write a reply explaining our refund policy,\" and it produces a perfectly polite paragraph describing a *typical* café refund policy — a plausible guess, because it has no idea what *her* actual policy is. It might say 14 days when hers is 48 hours. Confident, and wrong.\n\n**With the binder**, she uploads one file — her actual refund policy — into the AI's folder. Now when she asks the same thing, the AI first looks it up, finds her real policy, and writes the reply around *her* genuine 48-hour rule — and it can tell her it pulled that from the policy document she uploaded. Same question, same AI. The only difference is she handed it the binder first. That difference — and how to keep it trustworthy — is the rest of this module.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-1",
+          "domainId": "m09-rag",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "In plain terms, how do you give an AI knowledge of your specific business (your prices, your policies)?",
+          "options": [
+            { "id": "a", "text": "You give it a folder of your own documents; it looks things up in that folder before answering, and can point at the document it used", "correct": true },
+            { "id": "b", "text": "You send the AI back for retraining so your business becomes part of what it learned" },
+            { "id": "c", "text": "You wait for the AI maker to add your company to the next version" },
+            { "id": "d", "text": "You can't — an AI can only ever answer with general, public knowledge" }
+          ],
+          "explanation": "The fix is the whole point of the module: hand it a folder of your documents and it looks them up before answering — no rebuilding required. You don't retrain it (b); retraining is a heavy technical process, and it isn't how you teach an AI your day-to-day facts — you just give it the documents. The maker never sees or adds your private business (c). And \"only ever generic\" (d) is exactly the limit this module removes — the moment you supply your documents, its answers become specific to you.",
+          "sourceRefs": ["r-gb-knowledge", "r-gb-documents"]
+        },
+        {
+          "id": "kc-m09-2",
+          "domainId": "m09-rag",
+          "type": "single",
+          "difficulty": 1,
+          "stem": "\"RAG\" (retrieval-augmented generation) is just a name for which everyday idea?",
+          "options": [
+            { "id": "a", "text": "Look it up in your documents first, then answer using what was found — like a friend flipping to the right page of your binder before replying", "correct": true },
+            { "id": "b", "text": "A more powerful, more expensive AI model you upgrade to" },
+            { "id": "c", "text": "A way to make the AI answer faster by skipping the reading step" },
+            { "id": "d", "text": "A setting that lets the AI browse the whole public internet live" }
+          ],
+          "explanation": "RAG is nothing more than retrieve-then-generate: it retrieves your relevant documents, uses them to augment what it already knows, and then writes the answer — the binder-flip, named. It isn't a bigger or pricier model (b); it's the same AI, just handed your material first. It doesn't skip reading — reading your documents is the entire point (c). And it's about *your* folder, not live web browsing (d); that's a different thing altogether.",
+          "sourceRefs": ["r-gb-knowledge", "r-mozilla-rag"]
+        }
+      ]
+    },
+    {
+      "id": "l2-grounded-and-current",
+      "title": "Grounded, cited, and kept current: why it works and how it breaks",
+      "estMinutes": 9,
+      "objective": "Understand the two payoffs of giving the AI your documents — grounded answers and checkable sources that reduce hallucination — and the one discipline that makes or breaks it: keep the folder current, because garbage in, garbage out.",
+      "body": "## Two payoffs: grounded, and checkable\n\nSo you've handed the AI your binder and it looks things up before answering. What do you actually get out of it? Two things, and together they're the biggest single upgrade from \"generic AI\" to \"an assistant that knows my world.\"\n\n**Payoff one: answers grounded in your truth.** Instead of the AI's general, textbook-average guesses, you get answers anchored to *your* real material — your actual prices, your genuine policy wording, your specific products. The reply stops being \"here's what a business like yours might say\" and becomes \"here's what *your* business says.\" That's the difference between an assistant that sounds knowledgeable and one that's actually right about you.\n\n**Payoff two: a source you can check.** Because the AI went and fetched specific documents to build its answer, it can show you where each part came from — a citation back to the exact document, right there in the reply. This is quietly the most important safety feature in the whole course. Remember the confident-but-wrong problem from the very first module — the AI stating something false as smoothly as something true, with no tell? A citation *is* the tell. When the AI says \"your refund window is 48 hours — from your returns policy document,\" you can click through and confirm it in seconds. You're no longer taking a fluent answer on faith; you're checking it against the source. That directly cuts down the confident-wrong answers, because now the AI is answering *from* your documents and *pointing at* them, rather than improvising.\n\n## The one rule that makes or breaks it: keep the folder current\n\nHere's the catch, and it's the single most important habit in this module. The AI answers from whatever's in the folder — **faithfully.** It doesn't know which of your documents are current and which are three years out of date. It just reads what's there and answers from it, confidently, either way.\n\nWhich means an **out-of-date document is worse than no document at all.** With nothing, the AI at least gives you a cautious general answer you'd naturally double-check. But feed it last year's price list and it will quote last year's prices to your customers with total confidence — and cite the document, making the wrong answer look *more* trustworthy, not less. The very citation that keeps you safe when the folder is clean will vouch for a stale fact when it isn't.\n\nThere's an old computing phrase for exactly this: **garbage in, garbage out.** The AI's answer is only ever as good as the documents you gave it. So the real work of teaching an AI your business isn't the uploading — that part's easy. It's the **curation**: keep the folder current, take out the stale drafts, and don't dump every old file \"just in case.\" A small, clean, up-to-date binder beats a huge messy one every time.\n\n## The three things people get wrong\n\nBefore you go near this, the three confusions that cause the most grief — each one a small relief once it's cleared up:\n\n- **\"I have to retrain the AI.\"** No. You never rebuild or retrain anything — that's a heavy technical process, and it isn't how you teach an AI your everyday facts. You just **upload documents** into a folder. That's the entire setup.\n- **\"It reads my whole company automatically.\"** No. It only ever sees the documents *you* put in the folder. It can't reach into your emails, your systems, or your files on its own — nothing you don't add is visible to it. That's a feature: you decide exactly what it knows.\n- **\"A stale document is harmless.\"** No — it's the most harmful thing in the folder, because the AI will state its out-of-date facts *confidently and with a citation.* Old documents aren't neutral clutter; they're active misinformation. Keeping the folder current isn't housekeeping you'll get to later — it's the job.\n\nGet those three straight, keep your binder clean and current, and you've turned a generic AI into one that genuinely knows your world — and shows its working.\n\n## The Automatos peek\n\nThis \"hand it your binder\" idea is exactly what a **knowledge base** is in Automatos — with an upload button. You upload your documents once (PDFs, Word docs, spreadsheets, text — the ordinary stuff), it chops and files them for you automatically, and from then on your agents answer from *your* material and cite the source document they used. There's even a search box where you can type a question and see which of your documents comes back — the very look-it-up step, made visible. It's the generic-versus-grounded difference from the start of the course, made permanent: not re-pasting into every chat, but a folder your assistant always has, kept current by you. The whole of this module, with a drag-and-drop.",
+      "knowledgeCheck": [
+        {
+          "id": "kc-m09-3",
+          "domainId": "m09-rag",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "Why does letting the AI cite the document its answer came from help so much with the confident-but-wrong problem from Module 00?",
+          "options": [
+            { "id": "a", "text": "A citation gives you a source to check, so you can confirm the answer against your real document instead of taking a fluent reply on faith", "correct": true },
+            { "id": "b", "text": "A citation guarantees the answer is correct, so you never need to check anything again", "correct": false },
+            { "id": "c", "text": "Citations stop the AI from ever making mistakes in the first place", "correct": false },
+            { "id": "d", "text": "Citations make the answer arrive faster, which is what reduces errors", "correct": false }
+          ],
+          "explanation": "The citation is the tell the plain AI never gave you — a source you can click through and verify in seconds, which is how you catch a wrong answer. But it's not a guarantee of correctness (b): if the cited document is stale, the citation will vouch for a wrong fact, which is why the folder must be kept current. It doesn't prevent mistakes (c) — the AI can still misread or the document can be out of date; it just makes checking possible. And speed (d) has nothing to do with it; the value is verifiability, not pace.",
+          "sourceRefs": ["r-gb-knowledge", "r-mozilla-rag"]
+        },
+        {
+          "id": "kc-m09-4",
+          "domainId": "m09-rag",
+          "type": "single",
+          "difficulty": 2,
+          "stem": "\"Garbage in, garbage out.\" Why is an out-of-date document in the folder worse than having no document at all?",
+          "options": [
+            { "id": "a", "text": "The AI reads it faithfully and states its stale facts confidently — and cites it — making a wrong answer look more trustworthy, not less", "correct": true },
+            { "id": "b", "text": "It isn't worse; an old document is harmless clutter the AI simply ignores", "correct": false },
+            { "id": "c", "text": "Old documents slow the AI down but don't affect whether the answer is right", "correct": false },
+            { "id": "d", "text": "The AI automatically detects and skips any document that's out of date", "correct": false }
+          ],
+          "explanation": "The AI can't tell current from stale — it answers from whatever's there, confidently, and cites it, so an old price list gets quoted to customers with a source attached, which looks *more* credible. It's not harmless clutter the AI ignores (b): it actively pulls it in and answers from it. It's not merely a speed issue (c); it changes whether the answer is right. And it does not auto-detect staleness (d) — keeping the folder current is your job, which is the whole make-or-break discipline of this module.",
+          "sourceRefs": ["r-gb-documents", "r-gb-knowledge"]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-m09-1",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What's the plain-English way to give an AI knowledge of your specific business?",
+      "options": [
+        { "id": "a", "text": "Give it a folder of your own documents; it looks things up in there before answering and can cite the document it used", "correct": true },
+        { "id": "b", "text": "Retrain the whole AI from scratch on your company's data yourself", "correct": false },
+        { "id": "c", "text": "Ask it more cleverly-worded questions until it happens to know your prices", "correct": false },
+        { "id": "d", "text": "Nothing works — an AI can only ever answer from general public knowledge", "correct": false }
+      ],
+      "explanation": "You hand it your binder: a folder of your documents it looks things up in before answering. Retraining from scratch (b) is a heavy technical process and isn't how you teach an AI your everyday facts — uploading documents is. No wording trick reveals facts the AI was never given (c) — clever phrasing can't conjure your prices out of thin air. And \"only ever generic\" (d) is precisely the limit this removes: supply your documents and its answers become specific to you.",
+      "sourceRefs": ["r-gb-knowledge", "r-gb-documents"]
+    },
+    {
+      "id": "q-m09-2",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "\"RAG\" stands for retrieval-augmented generation. Stripped of the jargon, it means:",
+      "options": [
+        { "id": "a", "text": "The AI retrieves (looks up) your relevant documents, uses them to augment what it knows, then generates the answer", "correct": true },
+        { "id": "b", "text": "A premium AI model that costs more and thinks harder", "correct": false },
+        { "id": "c", "text": "A way to let the AI search the live public internet during a chat", "correct": false },
+        { "id": "d", "text": "A method for permanently rewriting the AI's training", "correct": false }
+      ],
+      "explanation": "The three words describe the whole trick: retrieve your documents, augment (add them to) what the AI already knows, generate the reply — the binder-flip, named. It's not a pricier or smarter model (b); it's the same AI handed your material first. It's about your own folder, not live web search (c) — a separate capability. And it doesn't rewrite the AI's training (d); nothing about the AI itself changes — you just give it documents to look things up in.",
+      "sourceRefs": ["r-mozilla-rag", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m09-3",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "Which two payoffs make giving the AI your documents the big upgrade from \"generic AI\" to \"an assistant that knows my world\"?",
+      "options": [
+        { "id": "a", "text": "Answers grounded in your real material, and a source you can check back to the document it came from", "correct": true },
+        { "id": "b", "text": "The AI runs faster, and it uses less of your computer's memory", "correct": false },
+        { "id": "c", "text": "The AI becomes conscious, and it no longer needs any instructions", "correct": false },
+        { "id": "d", "text": "The answers get longer, and the AI stops asking you follow-up questions", "correct": false }
+      ],
+      "explanation": "The two real payoffs are grounding (answers anchored to your true facts, not textbook averages) and checkable sources (a citation you can verify). Speed and memory (b) aren't the point of RAG at all. It doesn't make the AI conscious or instruction-free (c) — that's a misunderstanding of what any AI is. And it's not about longer answers or fewer follow-ups (d); it's about answers being *yours* and *verifiable*.",
+      "sourceRefs": ["r-gb-knowledge", "r-mozilla-rag"]
+    },
+    {
+      "id": "q-m09-4",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "How does a citation back to the source document help with the confident-but-wrong answers you met in the first module?",
+      "options": [
+        { "id": "a", "text": "It gives you something to check against — you can confirm the claim in the real document instead of trusting a fluent-sounding reply", "correct": true },
+        { "id": "b", "text": "It makes the AI incapable of being wrong from then on", "correct": false },
+        { "id": "c", "text": "It hides the answer until you've read the whole document first", "correct": false },
+        { "id": "d", "text": "It proves the answer is right because the AI wouldn't cite a source unless it were certain", "correct": false }
+      ],
+      "explanation": "A citation is the tell a plain AI never gives you: a source you can open and verify, which is how you catch a confident-wrong answer. It doesn't make the AI incapable of error (b) — it makes error *catchable*. It doesn't gate the answer behind reading the document (c); the citation sits alongside the reply for you to check if you choose. And it's not proof of correctness (d) — a citation can point at a stale or misread document, which is exactly why keeping the folder current still matters.",
+      "sourceRefs": ["r-gb-knowledge", "r-mozilla-rag"]
+    },
+    {
+      "id": "q-m09-5",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "You upload last year's price list into the AI's folder and forget to remove it. What's the likely result?",
+      "options": [
+        { "id": "a", "text": "The AI confidently quotes last year's prices — and cites the document — making the wrong answer look trustworthy", "correct": true },
+        { "id": "b", "text": "The AI notices the file is old and automatically ignores it", "correct": false },
+        { "id": "c", "text": "Nothing changes, because an out-of-date document is harmless clutter", "correct": false },
+        { "id": "d", "text": "The AI merges the old prices with the correct current ones on its own", "correct": false }
+      ],
+      "explanation": "The AI reads the folder faithfully and can't tell current from stale — so it quotes the old prices confidently and cites the document, which makes the wrong answer look *more* credible. It doesn't detect and skip old files (b); staleness is invisible to it. It's not harmless clutter (c) — a stale document is active misinformation, worse than none. And it won't reconcile old against current on its own (d); it has no way to know which is right. This is garbage in, garbage out, and why curation is the job.",
+      "sourceRefs": ["r-gb-documents", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m09-6",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "True or false: to teach an AI your business this way, you have to be technical and know how to program.",
+      "options": [
+        { "id": "a", "text": "False — it's uploading documents into a folder; the tool handles the rest automatically, no code involved", "correct": true },
+        { "id": "b", "text": "True — you must write code to load each document into the AI", "correct": false },
+        { "id": "c", "text": "True — only a developer can set up a folder the AI is allowed to read", "correct": false },
+        { "id": "d", "text": "False — but only because the AI reads your files off your computer without any upload", "correct": false }
+      ],
+      "explanation": "It's genuinely just uploading files — drag documents in, and the tool does the fiddly part (chopping and filing them so they're searchable) in the background. No programming is required (b), and you don't need a developer to set it up (c) — if you can attach a file to an email, you can do this. And (d) gets the reason wrong: the AI does *not* silently read files off your machine; it only ever sees documents you deliberately upload, which is exactly the control you want.",
+      "sourceRefs": ["r-gb-documents", "r-gb-knowledge"]
+    },
+    {
+      "id": "q-m09-7",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "Which statement about what the AI can see is correct once you've set up a folder of documents?",
+      "options": [
+        { "id": "a", "text": "It only sees the documents you put in the folder — it can't reach into your emails or systems on its own", "correct": true },
+        { "id": "b", "text": "It automatically reads your whole company — every email, file, and system — the moment you connect it", "correct": false },
+        { "id": "c", "text": "It sees nothing you upload; you still have to paste everything into each chat by hand", "correct": false },
+        { "id": "d", "text": "It sees your documents and also everything the AI maker has about other companies", "correct": false }
+      ],
+      "explanation": "It sees exactly and only what you add to the folder — that's a control, not a limit: you decide what it knows. It does not vacuum up your whole company automatically (b); it has no access to anything you don't deliberately give it. And the point of the folder is precisely that you *don't* re-paste into every chat (c) — upload once, it's available from then on. Nor does it see other companies' data (d); your folder is yours, and the maker isn't feeding you anyone else's material.",
+      "sourceRefs": ["r-gb-knowledge", "r-gb-documents"]
+    },
+    {
+      "id": "q-m09-8",
+      "domainId": "m09-rag",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "What is the single most important ongoing habit for keeping this kind of AI assistant trustworthy?",
+      "options": [
+        { "id": "a", "text": "Keep the folder current — remove stale documents and don't dump old files \"just in case\"", "correct": true },
+        { "id": "b", "text": "Upload as many documents as possible so the AI has the most to work with", "correct": false },
+        { "id": "c", "text": "Re-ask every question several times and average the answers", "correct": false },
+        { "id": "d", "text": "Retrain the AI from scratch every month to refresh what it knows", "correct": false }
+      ],
+      "explanation": "Curation is the whole job: a small, clean, up-to-date folder beats a big messy one, because the AI answers faithfully from whatever's there. Piling in as much as possible (b) is the opposite of the discipline — every stale file is a chance for a confident wrong answer. Re-asking and averaging (c) doesn't fix a bad source; it just launders it. And you never retrain the AI here (d) — that's not how this works; you keep the documents current, and the AI looks them up fresh each time.",
+      "sourceRefs": ["r-gb-documents", "r-gb-knowledge"]
+    }
+  ],
+  "scenarios": [],
+  "labs": [],
+  "resources": [
+    {
+      "id": "r-gb-knowledge",
+      "title": "Automatos AI — Knowledge Bases (give your agents your documents)",
+      "url": "automatos-gitbook/knowledge/README.md",
+      "kind": "official-doc",
+      "annotation": "The platform's own page for the idea in this module: upload your documents once and your agents can search and reference them, with a Search box to test what comes back for a question — the look-it-up-then-answer step, made visible. Read it for the plain vocabulary (knowledge base, RAG, upload-then-search) and to see that setup really is drag-and-drop, no configuration.",
+      "domainIds": ["m09-rag"]
+    },
+    {
+      "id": "r-gb-documents",
+      "title": "Automatos AI — Documents (uploading and keeping the folder clean)",
+      "url": "automatos-gitbook/knowledge/documents.md",
+      "kind": "official-doc",
+      "annotation": "The detail behind the binder: which everyday file types you can upload (PDF, Word, spreadsheets, text and more), that the tool automatically parses, chops, and files them for you, and that you browse, re-process, and delete files yourself. That last part is the make-or-break discipline in practice — this is the page where you keep the folder current and take stale documents out.",
+      "domainIds": ["m09-rag"]
+    },
+    {
+      "id": "r-mozilla-rag",
+      "title": "MDN Web Docs — \"What is retrieval-augmented generation (RAG)?\"",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/AI/AI_basics",
+      "kind": "reference",
+      "annotation": "A vendor-neutral, plain-language explainer of the retrieve-then-generate idea from Mozilla's developer docs. Useful only to double-check the one term this module names: that RAG means the AI looks things up in a supplied set of documents before answering, so its reply is grounded in that material rather than memory. Read it for the concept, not for setup steps — the how-to lives in the two Automatos pages above.",
+      "domainIds": ["m09-rag"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "v-m09-1",
+      "title": "09 · Teaching AI your stuff — hand it your binder, in 7 minutes",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m09-rag"],
+      "sourceNotebook": "ai-explained / m09 / rag-hand-it-your-binder"
+    },
+    {
+      "id": "v-m09-2",
+      "title": "09 · Deep Dive — grounded answers, citations, and keeping the folder current",
+      "provider": "file",
+      "url": "",
+      "status": "placeholder",
+      "domainIds": ["m09-rag"],
+      "sourceNotebook": "ai-explained / m09 / deep-dive-rag"
+    }
+  ]
+}
