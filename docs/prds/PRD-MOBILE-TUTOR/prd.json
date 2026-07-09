@@ -1,0 +1,127 @@
+{
+  "project": "Automatos Academy — Mobile Tutor (design docs)",
+  "branchName": "ralph/mobile-tutor-design-docs",
+  "description": "Produce the Mobile Tutor design package (docs 02–08) as a fresh-context, wave-ordered, reviewed swarm. Each story writes ONE markdown design doc under docs/prds/PRD-MOBILE-TUTOR/. Constitution (required reading for every story): 00-INDEX.md, 01-vision-usecases.md, and — once written — 02-architecture.md. Global rules for every agent: conform to locked decisions D1–D5; do NOT re-litigate or unilaterally descope; flag conflicts in an 'Open conflicts' section; markdown + mermaid only, NO code, nothing to build or run.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "S02 — Architecture (Wave 0 foundation)",
+      "description": "As the architecture author, I want 02-architecture.md defining the three-tier system, academy Content API, data model, Clerk auth and stack, so that every downstream doc has a locked foundation.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/02-architecture.md",
+        "Mermaid three-tier diagram (Factory / Spine / Surfaces) + 2 data-flow diagrams, syntactically valid",
+        "Postgres data model as tables: users, mastery_map, progress, content_cache, telemetry",
+        "Clerk auth documented: plan-capable, ships FREE through pilot, Sign-in-with-Apple",
+        "Academy Content API contract references today's JSON schema (manifest.json, track.json, domain files) as the shared contract",
+        "Stack: Expo/React Native recommended with rationale; Capacitor noted as alternative",
+        "Explicitly EXCLUDES selector math (S03), factory internals (S04), screen layouts (S05)",
+        "Conforms to constitution (00-INDEX, 01) and locked decisions D1–D5; no code; ~220 lines max"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Wave 0. Foundation — locked before the swarm. Read 00-INDEX.md and 01-vision-usecases.md first."
+    },
+    {
+      "id": "US-002",
+      "title": "S03 — Mastery engine (Wave 1)",
+      "description": "As the engine designer, I want 03-mastery-engine.md defining the mastery model, adaptive selector and readiness gate, so the app knows what to serve and when a user is ready.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/03-mastery-engine.md",
+        "Mastery model: item-level SM-2 rolled up to domain competence with decay",
+        "Adaptive selector as plain numbered steps (no code): 4 buckets — due-review, weak-spot, new, stretch — weighted by exam date",
+        "Readiness gate defined: all domains >= threshold AND mock >= real pass mark",
+        "Worked example included (e.g. '87% ready, weakest D2')",
+        "Grounds in existing store.js (SM-2) and readiness.js",
+        "Excludes storage (S02) and readiness screen (S05)",
+        "Conforms to constitution incl. 02-architecture; no code"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Wave 1 (parallel). Read constitution incl. 02-architecture.md first."
+    },
+    {
+      "id": "US-003",
+      "title": "S04 — Content factory (Wave 1)",
+      "description": "As the factory designer, I want 04-content-factory.md defining the Automatos playbooks, content types, NotebookLM pipeline and verification gate, so content stays fresh and trustworthy.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/04-content-factory.md",
+        "Factory data-flow diagram: playbook -> verification gate -> published -> app (valid mermaid)",
+        "Cadence table: nightly feed / weekly podcast / quarterly graded-bank",
+        "Content-type catalogue table (flashcards, clips, podcasts, cheat-sheets, multi-explanation, mnemonics, mind-maps, carousels, audio-flashcards, mock variants, news cards)",
+        "Verification gate rules: cite-SUPPORTS (entailment) not cite-exists; independent + adversarial validator; source-drift auto-invalidation via KG",
+        "Source allowlist: per-track from track.json.verification.sourceOfTruth; security-sensitive, versioned, governed",
+        "Draft->published promotion + factory observability/alerting (references the silent-playbook-failure lesson)",
+        "Excludes app rendering (S05) and app data model (S02)",
+        "Conforms to constitution incl. 02-architecture; no code"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Wave 1 (parallel). Read constitution incl. 02-architecture.md first."
+    },
+    {
+      "id": "US-004",
+      "title": "S05 — UX flows (Wave 1)",
+      "description": "As the UX designer, I want 05-ux-flows.md with a screen inventory and every screen-flow diagram, so the whole app is mapped before any pixels.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/05-ux-flows.md",
+        "Screen inventory listed",
+        "Box-and-arrow mermaid flow for every screen: onboarding + path/level select, Feed, Voice Tutor, Podcast, Readiness, Library/cheat-sheets, Settings/frequency, Notifications",
+        "One user journey each for personas P1, P2, P3",
+        "Every screen mapped to use cases U1–U9",
+        "Offline behavior noted per screen; lock-screen widget + answerable notifications; ethical soft-stop",
+        "Fidelity = flow diagrams (D4); excludes hi-fi visuals and engine math (S03)",
+        "Conforms to constitution incl. 02-architecture; no code"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Wave 1 (parallel). Read constitution incl. 02-architecture.md first."
+    },
+    {
+      "id": "US-005",
+      "title": "S06 — Risks & compliance (Wave 1)",
+      "description": "As the risk owner, I want 06-risks-compliance.md with a risk register, disclaimers, IP/trademark and App-Store notes, so the project ships safely and legally.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/06-risks-compliance.md",
+        "Risk register table: risk / likelihood / impact / mitigation / owner (incl. notification fatigue, auto-content quality, factory reliability, scope creep, token cost, voice latency)",
+        "Disclaimer model (three homes) + non-affiliation + IP/trademark",
+        "App-Store review gotchas: Sign-in-with-Apple, 'prepares you for' not 'guarantees'",
+        "Privacy/GDPR: Clerk, telemetry, age gating; security: allowlist governance, KG/PII",
+        "References disclaimer model in 01; excludes gate mechanics (S04, reference only)",
+        "Conforms to constitution incl. 02-architecture; no code"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Wave 1 (parallel). Read constitution incl. 02-architecture.md first."
+    },
+    {
+      "id": "US-006",
+      "title": "S07 — Roadmap (Wave 2)",
+      "description": "As the delivery lead, I want 07-roadmap.md sequencing MVP -> v1 -> factory-on with review gates, so we know the order of build.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/07-roadmap.md",
+        "Stage table (MVP -> v1 -> factory-on) with entry/exit criteria",
+        "Explicit MVP cut defined",
+        "Sequences S02–S06; calls out academy file->DB migration dependency and Expo build path",
+        "Reads 01–06; conforms to constitution; no code"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Wave 2. Read 01–06 first."
+    },
+    {
+      "id": "US-007",
+      "title": "S08 — Design red-team (Wave 3)",
+      "description": "As the reviewer, I want 08-design-red-team.md critiquing the whole package for consistency and gaps, so we get a go/no-go before build.",
+      "acceptanceCriteria": [
+        "Creates docs/prds/PRD-MOBILE-TUTOR/08-design-red-team.md",
+        "Multi-perspective findings table: doc / issue / severity / fix (architect, security, product, UX lenses)",
+        "Cross-doc consistency matrix; contradiction + duplication + gap check across 00–07",
+        "Explicit go/no-go verdict: 'ready to proceed to Claude Design + build?'",
+        "Reads 00–07; no code"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Wave 3. Reviews the whole package."
+    }
+  ]
+}
