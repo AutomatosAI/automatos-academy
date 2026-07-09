@@ -1,0 +1,22 @@
+# Academy CI — content validation + engine/API tests on every PR and main push.
+# First test workflow in this repo (PRD-MT-01 US-015); deploy-media.yml stays
+# manual-only and untouched.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test

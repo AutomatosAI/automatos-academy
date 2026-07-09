@@ -89,6 +89,69 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
   console.log(`${label}: ${domainCount} domains${isExam || weighted ? `, weight sum ${weightSum.toFixed(3)}` : ""}`);
 }
 
+// ── Paths & levels (D6 content objects — CONTENT-API-CONTRACT.md §3) ──
+// Both files are required: the Content API serves them, and the mobile
+// chooser + `path` mastery scope have no source data without them.
+{
+  const manifest = existsSync(join(ROOT, "manifest.json")) ? read(join(ROOT, "manifest.json")) : null;
+  if (!manifest) err("manifest.json missing");
+  const manifestTracks = new Map(); // "vendor/track" → {lane, status}
+  for (const v of manifest?.vendors || []) for (const t of v.tracks || []) {
+    manifestTracks.set(`${v.id}/${t.trackId}`, { lane: t.lane, status: t.status });
+  }
+  const refKey = (r) => `${r?.vendorId}/${r?.trackId}`;
+  const validRef = (r, where) => {
+    if (!r || typeof r.vendorId !== "string" || typeof r.trackId !== "string") { err(`${where}: malformed track ref ${JSON.stringify(r)}`); return false; }
+    if (!manifestTracks.has(refKey(r))) { err(`${where}: track ref ${refKey(r)} not in manifest`); return false; }
+    return true;
+  };
+
+  let paths = null, levels = null;
+  if (!existsSync(join(ROOT, "paths.json"))) err("paths.json missing (D6 — required by the Content API)");
+  else try { paths = read(join(ROOT, "paths.json")); } catch (e) { err(`paths.json invalid — ${e.message}`); }
+  if (!existsSync(join(ROOT, "levels.json"))) err("levels.json missing (D6 — required by the Content API)");
+  else try { levels = read(join(ROOT, "levels.json")); } catch (e) { err(`levels.json invalid — ${e.message}`); }
+
+  if (paths) {
+    const ids = new Set();
+    for (const p of paths.paths || []) {
+      const where = `paths/${p.id || "?"}`;
+      if (!p.id || !p.name) err(`${where}: id and name required`);
+      if (ids.has(p.id)) err(`${where}: duplicate path id`); else ids.add(p.id);
+      if (!Array.isArray(p.tracks) || !p.tracks.length) { err(`${where}: needs ≥1 ordered track ref`); continue; }
+      const resolved = p.tracks.filter((r) => validRef(r, where));
+      if (resolved.length && !resolved.some((r) => manifestTracks.get(refKey(r)).status === "live")) {
+        err(`${where}: every track is unpublished — a path may not be all coming-soon`);
+      }
+    }
+    if (!(paths.paths || []).length) err("paths.json: empty paths[]");
+    else console.log(`paths: ${(paths.paths || []).length} learning paths`);
+  }
+
+  if (levels) {
+    const ids = new Set(), orders = new Set(), covered = new Map(); // "vendor/track" → levelId
+    for (const l of levels.levels || []) {
+      const where = `levels/${l.id || "?"}`;
+      if (!l.id || !l.name || typeof l.order !== "number") err(`${where}: id, name, numeric order required`);
+      if (ids.has(l.id)) err(`${where}: duplicate level id`); else ids.add(l.id);
+      if (orders.has(l.order)) err(`${where}: duplicate order ${l.order}`); else orders.add(l.order);
+      for (const r of l.tracks || []) {
+        if (!validRef(r, where)) continue;
+        const key = refKey(r);
+        if (covered.has(key)) err(`${where}: ${key} already in level ${covered.get(key)} — a track appears in exactly one level`);
+        covered.set(key, l.id);
+        const lane = manifestTracks.get(key).lane;
+        if (lane && lane !== l.id) err(`${where}: ${key} has manifest lane "${lane}" but sits in level "${l.id}" — levels are lanes promoted to objects, they must agree`);
+      }
+    }
+    for (const [key, meta] of manifestTracks) {
+      if (meta.status === "live" && !covered.has(key)) err(`levels: live track ${key} not assigned to any level`);
+    }
+    if (!(levels.levels || []).length) err("levels.json: empty levels[]");
+    else console.log(`levels: ${(levels.levels || []).length} levels, ${covered.size} tracks assigned`);
+  }
+}
+
 if (warnings.length) { console.log("\nWarnings:"); warnings.forEach((w) => console.log("  ! " + w)); }
 if (errors.length) { console.error("\nErrors:"); errors.forEach((e) => console.error("  ✗ " + e)); process.exit(1); }
 console.log(`\n✓ content valid${warnings.length ? ` (${warnings.length} warning${warnings.length > 1 ? "s" : ""})` : ""}`);
