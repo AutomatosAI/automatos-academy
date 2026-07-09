@@ -17,6 +17,7 @@ import { fileURLToPath } from "url";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { createHmac, timingSafeEqual } from "crypto";
 import { decodeCert, linkedInAddUrl } from "./public/js/engine/certificate.js";
+import { buildContentIndex, createCatalogRouter } from "./server/catalog.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(__dirname, "public");
@@ -140,6 +141,18 @@ app.get("/api/badge/verify", (req, res) => {
   const valid = !!payload && !!decodeCert(payload) && sigMatches(payload, sig);
   res.json({ valid });
 });
+
+// ── Content API v1 (PRD-MT-01) ─────────────────────────────────────────
+// Versioned, published-only catalog for the mobile app (and, later, the web
+// SPA). Built from the same files the SPA reads; boot fails loudly on
+// malformed content — the validator catches this pre-merge, so a crash here
+// means an unvalidated deploy shipped.
+const contentIndex = buildContentIndex(
+  resolve(PUBLIC, "content"),
+  process.env.CONTENT_JOURNAL_PATH || resolve(__dirname, "data", "content-journal.json"),
+);
+app.use("/api/catalog", createCatalogRouter(contentIndex));
+console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks)`);
 
 // ── API namespace reserved for the future backend ─────────────────────
 // Returns 501 today so client code can feature-detect a backend cleanly.

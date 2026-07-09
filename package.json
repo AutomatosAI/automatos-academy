@@ -9,7 +9,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "validate": "node scripts/validate-content.mjs",
-    "test": "node tests/engine.test.mjs",
+    "test": "node tests/engine.test.mjs && node tests/content-api.test.mjs",
+    "test:engine": "node tests/engine.test.mjs",
+    "test:api": "node tests/content-api.test.mjs",
     "shells": "node scripts/generate-shells.mjs",
     "tutor-corpus": "node scripts/export-tutor-corpus.mjs"
   },
