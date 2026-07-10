@@ -17,12 +17,28 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // US-023 PII-minimization: telemetry payloads are flat objects whose keys
 // must sit in the per-event-type schema below — free-text fields outside the
 // schema are rejected, not stored. (`scenario` keys per 02 §3.)
-const TELEMETRY_TYPES = ["answer", "card_outcome", "session", "scenario"];
+//
+// The MT-04 set (consent acknowledgement + onboarding funnel) and the MT-07
+// F10 pilot-metric set follow app docs/PILOT-METRICS.md §3; keys mirror the
+// app-side emitters (src/onboarding/analytics.ts, src/metrics/events.ts)
+// exactly — only what the app sends, no free-text fields. The follow-up
+// migration relaxes telemetry.event_type's CHECK to the same ten values.
+const TELEMETRY_TYPES = [
+  "answer", "card_outcome", "session", "scenario",
+  "consent", "onboarding",
+  "gate_transition", "weak_domain_closed", "session_open", "exam_outcome",
+];
 const PAYLOAD_KEYS = {
   answer: ["itemId", "correct", "timeMs", "bucket", "surface"],
   card_outcome: ["itemId", "outcome", "timeMs", "surface"],
   session: ["surface", "durationMs", "itemCount", "startedAt", "endedAt"],
   scenario: ["scenario_id", "step", "scorePct"],
+  consent: ["copyVersion", "ackAt"],
+  onboarding: ["step", "pathId", "levelId", "trackCount", "mode"],
+  gate_transition: ["from", "to", "at", "v"],
+  weak_domain_closed: ["pct", "at", "v"], // domain id rides top-level itemId
+  session_open: ["surface", "at", "v"],
+  exam_outcome: ["answer", "examDateMs", "at", "v"],
 };
 
 const isId = (v) => typeof v === "string" && v.length > 0 && v.length <= MAX_ID_LEN;
