@@ -125,6 +125,25 @@ ok(String(validateTelemetryEvent({ ...goodTelemetry, payload: { correct: { deep:
 ok(String(validateTelemetryEvent({ ...goodTelemetry, payload: { bucket: "x".repeat(200) } }).error).startsWith("payload_string_too_long"), "over-long payload strings rejected");
 ok(validateTelemetryEvent({ ...goodTelemetry, eventType: "pageview" }).error === "unknown_event_type", "event_type outside the enum rejected");
 
+// PILOT-METRICS §3 — the six types a live Spine used to 400 into client-side
+// quarantine (MT-04 consent/onboarding, MT-07 pilot metrics). Each payload
+// below is field-for-field what its app-side emitter sends
+// (src/onboarding/analytics.ts, src/metrics/events.ts).
+const NEW_TELEMETRY = {
+  consent: { copyVersion: "pilot-consent-v1", ackAt: nowMs },
+  onboarding: { step: "scope_confirmed", pathId: "p-arch", levelId: "practitioner", trackCount: 2, mode: "first-run" },
+  gate_transition: { from: "none", to: "ready", at: nowMs, v: 1 },
+  weak_domain_closed: { pct: 86.2, at: nowMs, v: 1 },
+  session_open: { surface: "feed", at: nowMs, v: 1 },
+  exam_outcome: { answer: "passed", examDateMs: nowMs + 30 * DAY, at: nowMs, v: 1 },
+};
+for (const [eventType, payload] of Object.entries(NEW_TELEMETRY)) {
+  ok(!validateTelemetryEvent({ eventId: randomUUID(), eventType, payload }).error, `previously-quarantined '${eventType}' now accepted with its emitter's payload`);
+}
+ok(!validateTelemetryEvent({ eventId: randomUUID(), eventType: "weak_domain_closed", vendorId: "anthropic", trackId: "cca-f", itemId: "d1-agentic-architectures", payload: NEW_TELEMETRY.weak_domain_closed }).error, "weak_domain_closed carries the domain id in top-level itemId");
+ok(String(validateTelemetryEvent({ eventId: randomUUID(), eventType: "exam_outcome", payload: { ...NEW_TELEMETRY.exam_outcome, notes: "sat it at 12 Elm Street" } }).error).startsWith("payload_key_not_in_schema"), "new types keep the PII discipline: off-schema key refused, not stripped");
+ok(String(validateTelemetryEvent({ eventId: randomUUID(), eventType: "gate_transition", payload: { surface: "feed" } }).error).startsWith("payload_key_not_in_schema"), "allowlists stay per-type: another type's key refused on gate_transition");
+
 ok(!validateMockEvent({ eventId: randomUUID(), vendorId: "a", trackId: "t", scaled: 812, passed: true, at: nowMs }, nowMs).error, "well-formed mock accepted");
 ok(validateMockEvent({ eventId: randomUUID(), vendorId: "a", trackId: "t", scaled: 812, passed: true, at: nowMs + 49 * 3_600_000 }, nowMs).error === "at_too_far_future", "mock `at` skew-checked");
 ok(validateScenarioEvent({ eventId: randomUUID(), vendorId: "a", trackId: "t", scenarioId: "s", step: 2, scorePct: 101, at: nowMs }, nowMs).error === "scorePct_out_of_range", "scenario scorePct bounded");
@@ -292,6 +311,26 @@ const tele2 = await request("POST", "/api/sync/telemetry", { token: alice, body:
 ok(tele2.body.data.applied === 0 && tele2.body.data.deduped === 1, "same event uuid twice → one row (dedupe)");
 const teleBad = await request("POST", "/api/sync/telemetry", { token: alice, body: { events: [{ ...tele, eventId: randomUUID(), payload: { freeText: "I studied at 12 Elm Street" } }] } });
 ok(teleBad.status === 400 && teleBad.body.error.includes("payload_key_not_in_schema"), "free-text telemetry field rejected (PII minimization)");
+
+// ── telemetry: PILOT-METRICS §3 types cross boundary AND the CHECK ────
+// The follow-up migration must have relaxed telemetry_event_type_check —
+// without it these validated events still die at INSERT. Fresh user so the
+// alice-scoped export/wipe row counts below stay untouched. consent and
+// onboarding ride without vendor/track (nullable — schema decision 5),
+// exactly as the app emits them.
+const frank = "fixture:user_frank";
+const newTypeEvents = Object.entries(NEW_TELEMETRY).map(([eventType, payload]) => ({
+  eventId: randomUUID(), eventType,
+  ...(eventType === "consent" || eventType === "onboarding" ? {} : { vendorId: "anthropic", trackId: "cca-f" }),
+  ...(eventType === "weak_domain_closed" ? { itemId: d1.id } : {}),
+  payload,
+}));
+const teleNew = await request("POST", "/api/sync/telemetry", { token: frank, body: { events: newTypeEvents } });
+ok(teleNew.status === 200 && teleNew.body.data.applied === 6, `all six newer telemetry types stored end-to-end (${JSON.stringify(teleNew.body && teleNew.body.data)})`);
+const { rows: frankTypeRows } = await pool.query(
+  "SELECT DISTINCT event_type FROM telemetry WHERE user_id = (SELECT id FROM users WHERE clerk_user_id = 'user_frank')",
+);
+ok(frankTypeRows.length === 6 && ["consent", "onboarding", "gate_transition", "weak_domain_closed", "session_open", "exam_outcome"].every((t) => frankTypeRows.some((r) => r.event_type === t)), "…and the relaxed CHECK constraint admitted every newer event_type");
 
 // ── mocks: append-only attempts feeding the readiness gate ────────────
 const mockEv = { eventId: randomUUID(), vendorId: "anthropic", trackId: "cca-f", scaled: 812, passed: true, at: new Date(T).toISOString() };
