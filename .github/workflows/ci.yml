@@ -1,6 +1,11 @@
-# Academy CI — content validation + engine/API tests on every PR and main push.
-# First test workflow in this repo (PRD-MT-01 US-015); deploy-media.yml stays
-# manual-only and untouched.
+# Academy CI — content validation + engine/API tests on every PR and main push,
+# plus the Spine job (PRD-MT-02): migrations + integration tests against a
+# disposable Postgres service container. deploy-media.yml stays manual-only.
+#
+# NOTE `npm install` (not `npm ci`) in both jobs, TEMPORARILY: PRD-MT-02 adds
+# pg/@clerk/backend/node-pg-migrate and this change shipped from a no-local-
+# execution environment, so package-lock.json is stale. After review, one
+# local `npm install` + lockfile commit restores `npm ci` here.
 name: ci
 
 on:
@@ -17,6 +22,34 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run validate
       - run: npm test
+
+  spine:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spine_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/spine_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npm run migrate
+      - run: npm run test:spine

@@ -88,7 +88,9 @@ hydrateChatConfig();
 
 const app = express();
 app.use(compression());
-app.use(express.json());
+// 1mb body cap: sync batches (PRD-MT-02, up to 500 events) outgrow the 100kb
+// express default; every consumer of req.body validates its input regardless.
+app.use(express.json({ limit: "1mb" }));
 
 // ── Health check (Railway / uptime) ───────────────────────────────────
 app.get("/healthz", (_req, res) => res.json({ ok: true, service: "automatos-academy" }));
@@ -153,6 +155,20 @@ const contentIndex = buildContentIndex(
 );
 app.use("/api/catalog", createCatalogRouter(contentIndex));
 console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks)`);
+
+// ── Spine — per-user state: Postgres + Clerk + sync + GDPR (PRD-MT-02) ─
+// Default OFF: without SPINE_ENABLED=true the service boots exactly as
+// today — pure static/catalog, no DB, no auth (academy deploy safety).
+// Enabled without its config = loud boot failure, never a half-alive API.
+if (process.env.SPINE_ENABLED === "true") {
+  if (!process.env.DATABASE_URL || !process.env.CLERK_SECRET_KEY) {
+    console.error("[spine] SPINE_ENABLED=true but DATABASE_URL and/or CLERK_SECRET_KEY is missing — refusing to boot.");
+    process.exit(1);
+  }
+  const { mountSpine } = await import("./server/spine/index.js");
+  mountSpine(app, { contentIndex });
+  console.log("[spine] user-state API mounted (/api/me, /api/sync)");
+}
 
 // ── API namespace reserved for the future backend ─────────────────────
 // Returns 501 today so client code can feature-detect a backend cleanly.
