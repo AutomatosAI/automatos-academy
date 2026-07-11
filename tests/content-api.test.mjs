@@ -10,6 +10,7 @@ import { createServer } from "http";
 import { isDeepStrictEqual } from "util";
 import express from "express";
 import { buildContentIndex, createCatalogRouter, computeChanges } from "../server/catalog.js";
+import { collectEpisodeErrors } from "../server/podcasts.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTENT = join(HERE, "..", "public", "content");
@@ -109,6 +110,68 @@ const diff = computeChanges(from, to);
 ok(isDeepStrictEqual(diff.find((c) => c.trackId === "t1"), { scope: "track", vendorId: "a", trackId: "t1", domains: ["d2"] }), "changed domain detected at domain granularity");
 ok(isDeepStrictEqual(diff.find((c) => c.trackId === "t2"), { scope: "track", vendorId: "b", trackId: "t2" }), "new track listed without domain detail");
 ok(diff.some((c) => c.scope === "paths") && !diff.some((c) => c.scope === "levels"), "paths change flagged, levels untouched");
+
+// ── podcasts (PRD-MT-10) ────────────────────────────────────────────────
+// Served verbatim from podcasts.json in exactly the app's manifest shape
+// (automatos-academy-app/src/podcast/schema.ts), so the app parses it adapter-
+// free. Two real episodes are seeded; new ones arrive via NotebookLM later.
+console.log("podcasts");
+const podManifest = readJson(join(CONTENT, "podcasts.json"));
+const pod = await get("/podcasts");
+ok(pod.status === 200 && typeof pod.body.version === "number" && Array.isArray(pod.body.episodes), "GET /podcasts → manifest shape { version, episodes }");
+ok(pod.body.episodes.length === 2, `GET /podcasts → 2 seeded episodes (got ${pod.body.episodes.length})`);
+ok(isDeepStrictEqual(pod.body, podManifest), "GET /podcasts ≡ podcasts.json (verbatim)");
+ok(pod.headers.get("x-content-version") === idx.contentVersion, "podcasts: X-Content-Version header present");
+ok((pod.headers.get("cache-control") || "").includes("max-age=300"), "podcasts: cache-control public max-age=300");
+ok(pod.headers.get("access-control-allow-origin") === "*", "podcasts: CORS is public");
+
+// every episode matches the app schema field-for-field, and its (vendorId,
+// trackId) resolves to a real manifest track — no dangling audio.
+const contractKeys = ["id", "title", "vendorId", "trackId", "durationSec", "chapters", "audioUrl", "groundingLabel"];
+for (const ep of pod.body.episodes) {
+  ok(collectEpisodeErrors(ep, ep.id).length === 0, `episode ${ep.id} passes the app schema contract`);
+  ok(contractKeys.every((k) => k in ep), `episode ${ep.id} carries every required contract field`);
+  ok(typeof ep.durationSec === "number" && ep.durationSec > 0 && Array.isArray(ep.chapters), `episode ${ep.id} durationSec > 0 + chapters[]`);
+  ok(manifestKeys.has(`${ep.vendorId}/${ep.trackId}`), `episode ${ep.id} ref ${ep.vendorId}/${ep.trackId} resolves against the manifest`);
+}
+
+// one episode, verbatim + 404 on a miss
+const oneEp = await get("/podcasts/cca-f-exam-guide");
+ok(oneEp.status === 200 && isDeepStrictEqual(oneEp.body, podManifest.episodes.find((e) => e.id === "cca-f-exam-guide")), "GET /podcasts/:id ≡ the bare episode object");
+const missEp = await get("/podcasts/nope");
+ok(missEp.status === 404 && missEp.body.error === "not_found", "GET /podcasts/:id unknown → 404 not_found");
+
+// ETag / 304 on the list
+const podEtag = pod.headers.get("etag");
+ok(!!podEtag, "podcasts: ETag set");
+const podCached = await get("/podcasts", { "If-None-Match": podEtag });
+ok(podCached.status === 304 && podCached.body === null, "podcasts: If-None-Match → 304, empty body");
+
+// filters narrow by vendor/track; an unknown filter → empty list is still valid
+const byVendor = await get("/podcasts?vendor=anthropic");
+ok(byVendor.status === 200 && byVendor.body.episodes.length === 1 && byVendor.body.episodes[0].id === "cca-f-exam-guide", "?vendor=anthropic → 1 episode");
+const byTrack = await get("/podcasts?track=platform-architect");
+ok(byTrack.status === 200 && byTrack.body.episodes.length === 1 && byTrack.body.episodes[0].id === "apa-autonomous-workforce", "?track=platform-architect → 1 episode");
+const byNone = await get("/podcasts?vendor=nobody");
+ok(byNone.status === 200 && Array.isArray(byNone.body.episodes) && byNone.body.episodes.length === 0, "unknown filter → empty episodes[] is valid (honest empty state)");
+
+// the shipped example fixture is contract-valid (it documents the optional
+// chapters[] + transcriptUrl the two seeded episodes omit).
+const example = readJson(join(CONTENT, "podcasts.example.json"));
+ok(Array.isArray(example.episodes) && example.episodes.length >= 1, "podcasts.example.json has ≥1 example episode");
+for (const ep of example.episodes) {
+  ok(collectEpisodeErrors(ep, `example:${ep.id}`).length === 0, `example ${ep.id} validates against the app schema shape`);
+  ok(Array.isArray(ep.chapters) && ep.chapters.length >= 1 && typeof ep.transcriptUrl === "string", `example ${ep.id} demonstrates chapters[] + transcriptUrl`);
+  ok(ep.chapters.every((c, i) => i === 0 || c.startSec > ep.chapters[i - 1].startSec), `example ${ep.id} chapters strictly ascending`);
+}
+
+// deltas: a new episode surfaces as a podcasts scope change, episode-granular.
+const pFrom = { version: "v_p0", scopes: { manifest: "m", paths: "p", levels: "l", podcasts: {}, tracks: {} } };
+const pTo = { version: "v_p1", scopes: { manifest: "m", paths: "p", levels: "l", podcasts: { "ep-1": "h1" }, tracks: {} } };
+ok(isDeepStrictEqual(computeChanges(pFrom, pTo).find((c) => c.scope === "podcasts"), { scope: "podcasts", episodes: ["ep-1"] }), "new episode → { scope:'podcasts', episodes:[id] }");
+ok(computeChanges(pTo, pTo).every((c) => c.scope !== "podcasts"), "unchanged podcasts → no delta");
+const pLegacy = { version: "v_leg", scopes: { manifest: "m", paths: "p", levels: "l", tracks: {} } };
+ok(computeChanges(pLegacy, pFrom).every((c) => c.scope !== "podcasts"), "pre-podcasts snapshot + zero episodes → no false delta");
 
 server.close();
 rmSync(scratch, { recursive: true, force: true });
