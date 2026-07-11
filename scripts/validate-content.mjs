@@ -4,6 +4,7 @@
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { collectEpisodeErrors } from "../server/podcasts.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "content");
 const errors = [];
@@ -149,6 +150,31 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
     }
     if (!(levels.levels || []).length) err("levels.json: empty levels[]");
     else console.log(`levels: ${(levels.levels || []).length} levels, ${covered.size} tracks assigned`);
+  }
+
+  // ── Podcasts (PRD-MT-10 — CONTENT-API-CONTRACT.md §8) ──────────────────
+  // Episode shape is the app's client contract (schema.ts); collectEpisodeErrors
+  // (server/podcasts.js) is the ONE shared judge the boot index uses too, so a
+  // malformed manifest fails the PR here, not the deploy. Every episode's
+  // (vendorId, trackId) must resolve to a real manifest track — no dangling audio.
+  const pp = join(ROOT, "podcasts.json");
+  if (!existsSync(pp)) err("podcasts.json missing (PRD-MT-10 — required by the Content API)");
+  else {
+    let pod = null;
+    try { pod = read(pp); } catch (e) { err(`podcasts.json invalid — ${e.message}`); }
+    if (pod) {
+      if (typeof pod.version !== "number") err("podcasts.json: version must be a number");
+      if (!Array.isArray(pod.episodes)) err("podcasts.json: episodes must be an array");
+      const epIds = new Set();
+      for (const ep of pod.episodes || []) {
+        const where = `podcasts/${ep?.id || "?"}`;
+        for (const m of collectEpisodeErrors(ep, where)) err(m);
+        if (ep?.id) { if (epIds.has(ep.id)) err(`${where}: duplicate episode id`); else epIds.add(ep.id); }
+        validRef({ vendorId: ep?.vendorId, trackId: ep?.trackId }, where);
+      }
+      const n = (pod.episodes || []).length;
+      console.log(`podcasts: ${n} episode${n === 1 ? "" : "s"}`);
+    }
   }
 }
 

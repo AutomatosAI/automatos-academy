@@ -1,0 +1,40 @@
+{
+  "_readme": [
+    "REFERENCE ONLY — this file is never served or validated by the API; podcasts.json is.",
+    "It shows the FULL episode shape, including the two OPTIONAL fields the shipped demo",
+    "episodes omit: populated `chapters` and `transcriptUrl`. Copy an entry from here into",
+    "podcasts.json (and bump nothing — `version` stays 1 for additive changes) to add one.",
+    "",
+    "Contract: automatos-academy-app/src/podcast/schema.ts (the app parses exactly this).",
+    "Required per episode: id, title, vendorId, trackId, durationSec (>0), audioUrl,",
+    "groundingLabel. Optional: chapters[] (default []), transcriptUrl. `vendorId/trackId`",
+    "MUST resolve to a live manifest track (validator-enforced — no dangling audio).",
+    "chapters[].startSec must be strictly ascending and sit inside durationSec.",
+    "",
+    "Audio hosting: the proper home is the S3/CloudFront media CDN via deploy-media.yml",
+    "(widgets.automatos.app/academy/<vendor>/podcasts/<file>) — same lane as videos. The",
+    "two demo episodes in podcasts.json are TEMPORARILY git-hosted under",
+    "/content/<vendor>/podcasts/*.m4a so they play immediately; migrate them to the CDN",
+    "with the videos. groundingLabel is the 04 §4.5 derived-format label, rendered",
+    "distinctly by the app (F7)."
+  ],
+  "version": 1,
+  "episodes": [
+    {
+      "id": "cca-f-deep-dive-example",
+      "title": "CCA-F Deep Dive: Agentic Architectures (EXAMPLE)",
+      "vendorId": "anthropic",
+      "trackId": "cca-f",
+      "durationSec": 1800,
+      "chapters": [
+        { "id": "intro", "title": "Why agentic architectures", "startSec": 0 },
+        { "id": "patterns", "title": "Orchestrator, workers, and handoffs", "startSec": 420 },
+        { "id": "failure-modes", "title": "Failure modes and guardrails", "startSec": 960 },
+        { "id": "recap", "title": "Exam-relevant recap", "startSec": 1500 }
+      ],
+      "transcriptUrl": "https://widgets.automatos.app/academy/anthropic/podcasts/cca-f-deep-dive.transcript.json",
+      "audioUrl": "https://widgets.automatos.app/academy/anthropic/podcasts/cca-f-deep-dive.mp3",
+      "groundingLabel": "grounded: source transcript verified; synthesis spot-checked"
+    }
+  ]
+}

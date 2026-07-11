@@ -23,6 +23,8 @@
 | `GET /api/catalog/paths/:pathId` | one path incl. ordered track membership | same |
 | `GET /api/catalog/levels` | **NEW (D6)** — list of level objects | `public/content/levels.json` |
 | `GET /api/catalog/levels/:levelId` | one level incl. track membership | same |
+| `GET /api/catalog/podcasts` | **NEW (MT-10)** — episode list in the manifest shape `{ version, episodes[] }`; optional `?vendor=` / `?track=` filters (AND-combined) | `public/content/podcasts.json` |
+| `GET /api/catalog/podcasts/:episodeId` | one episode (bare `PodcastEpisode`) | same |
 | `GET /api/catalog/changes?since={contentVersion}` | delta: which scopes changed since a version (see §5) | computed |
 
 **Schema landmines the app must respect** (F3): `track.json` has **no inline `domains` array** — domains resolve via `domainFiles`; skills tracks omit `exam{}`; question/domain ids are **unique only within a track** (F4) — clients store fully-qualified `(vendorId, trackId, id)`.
@@ -74,7 +76,7 @@ Paths and levels do not exist in today's files; they are new first-class content
 
 ## 4. Versioning
 
-- `contentVersion` = short hash over the manifest + every track/domain/paths/levels file (computed at service boot; changes exactly when deployed content changes).
+- `contentVersion` = short hash over the manifest + every track/domain/paths/levels/podcasts file (computed at service boot; changes exactly when deployed content changes).
 - Clients persist `(contentVersion, per-scope ETags)`. On app foreground/refresh: `GET /api/catalog/version`; if unchanged, done — zero further requests.
 
 ## 5. Deltas
@@ -85,11 +87,12 @@ Paths and levels do not exist in today's files; they are new first-class content
 { "from": "v_abc", "to": "v_def", "changed": [
     { "scope": "track", "vendorId": "anthropic", "trackId": "cca-f",
       "domains": ["d1-agentic-architectures"] },
-    { "scope": "paths" }
+    { "scope": "paths" },
+    { "scope": "podcasts", "episodes": ["cca-f-exam-guide"] }
 ] }
 ```
 
-- `changed[]` lists the scopes whose files changed between the two versions, at domain granularity where known.
+- `changed[]` lists the scopes whose files changed between the two versions, at domain granularity for tracks and **episode granularity for podcasts** (a new or edited episode appears as `{ scope: "podcasts", episodes: [ids] }`).
 - If `since` is unknown/too old (the service keeps a **bounded history, last 20 versions**), respond `410 Gone` → client performs a full refetch of its in-scope tracks. Cheap, explicit, no silent divergence.
 - v1 implementation note: history = a small manifest-of-hashes journal persisted alongside the content snapshot at boot/deploy; the *contract* is the response shape, not the journal mechanics.
 
@@ -106,3 +109,36 @@ Paths and levels do not exist in today's files; they are new first-class content
 | App (MT-03..08) | builds its content client + cache against exactly these shapes | ☐ |
 | Academy (MT-01, future migration) | serves these shapes and treats them as frozen-additive | ☐ |
 | Owner (Gerard) | O5 closed; D6 objects approved incl. §3 seed data | ☐ |
+
+## 8. Podcasts (PRD-MT-10)
+
+The podcast surface (MT-10) reads episodes from a versioned manifest served at `/api/catalog/podcasts`. The **episode shape is owned by the app** — `automatos-academy-app/src/podcast/schema.ts` is the source of truth; the API serves it verbatim so the app consumes it with zero adapters. Published-only and additive-compatible exactly like the rest of the catalog; folded into `contentVersion` and the `changes` journal so a new episode is a catalog delta (§5).
+
+### 8.1 `podcasts.json`
+
+```json
+{
+  "version": 1,
+  "episodes": [
+    {
+      "id": "cca-f-exam-guide",
+      "title": "Claude Certified Architect — Foundations: Exam Guide",
+      "vendorId": "anthropic",
+      "trackId": "cca-f",
+      "durationSec": 2545,
+      "chapters": [],
+      "audioUrl": "/content/anthropic/podcasts/cca-f-exam-guide.m4a",
+      "groundingLabel": "grounded: source transcript verified; synthesis spot-checked"
+    }
+  ]
+}
+```
+
+- **Episode fields** (schema.ts): `id`, `title`, `vendorId`, `trackId`, `durationSec` (>0), `audioUrl`, `groundingLabel` are **required**; `chapters[]` (each `{ id, title, startSec }`, default `[]`) and `transcriptUrl` are **optional**. Unknown fields pass through (additive-safe). `chapters[].startSec` must be strictly ascending and sit inside `durationSec` — the player's seek math depends on it.
+- `vendorId/trackId` **must resolve to a real manifest track** (validator-enforced — no dangling audio); ids are globally unique across the manifest.
+- The list endpoint returns the manifest shape `{ version, episodes[] }` (optionally filtered); the item endpoint returns the bare episode. Empty `episodes[]` is valid — the app renders an honest empty state.
+- A worked, fully-optional example (populated `chapters` + `transcriptUrl`) lives in `public/content/podcasts.example.json` (reference only — never served or validated).
+
+### 8.2 Audio hosting
+
+Episodes are produced by the owner (NotebookLM audio overviews) and hosted on the **same media lane as videos** — the proper home is S3/CloudFront via `deploy-media.yml` (`widgets.automatos.app/academy/<vendor>/podcasts/<file>`). Media is never prefetched (F16): stream or explicit download only. The two seeded demo episodes are **temporarily git-hosted** (transcoded to 96 kbps AAC to fit GitHub's 100 MB/file limit) under `/content/<vendor>/podcasts/*.m4a` so they play immediately; the follow-up extends `deploy-media.yml` to sync `public/content/*/podcasts/` and migrates podcasts + videos off git together.

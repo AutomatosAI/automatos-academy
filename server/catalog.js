@@ -17,6 +17,7 @@ import express from "express";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { createHash } from "crypto";
+import { buildPodcastIndex } from "./podcasts.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -67,19 +68,24 @@ export function buildContentIndex(contentDir, journalPath) {
   files.set("paths.json", paths.hash);
   files.set("levels.json", levels.hash);
 
+  // Podcasts (PRD-MT-10) — folded into the version roll-up so a new episode
+  // rolls contentVersion and surfaces as a delta, exactly like a track change.
+  const podcasts = buildPodcastIndex(contentDir);
+  files.set("podcasts.json", podcasts.hash);
+
   const rollup = [...files.entries()].sort(([a], [b]) => a.localeCompare(b))
     .map(([p, h]) => `${p}:${h}`).join("\n");
   const contentVersion = `v_${shortHash(rollup)}`;
   const generatedAt = new Date().toISOString();
 
   // Per-scope hash snapshot — what the delta journal stores per version.
-  const scopes = { manifest: manifest.hash, paths: paths.hash, levels: levels.hash, tracks: {} };
+  const scopes = { manifest: manifest.hash, paths: paths.hash, levels: levels.hash, podcasts: podcasts.scope, tracks: {} };
   for (const [key, { track, domains }] of tracks) {
     scopes.tracks[key] = { track: track.hash, domains: Object.fromEntries([...domains].map(([id, d]) => [id, d.hash])) };
   }
 
   const journal = loadJournal(journalPath, { version: contentVersion, generatedAt, scopes });
-  return { manifest, tracks, paths, levels, contentVersion, generatedAt, scopes, journal };
+  return { manifest, tracks, paths, levels, podcasts, contentVersion, generatedAt, scopes, journal };
 }
 
 /**
@@ -136,6 +142,15 @@ export function computeChanges(fromEntry, toEntry) {
   }
   if (fromEntry.scopes.paths !== toEntry.scopes.paths) changed.push({ scope: "paths" });
   if (fromEntry.scopes.levels !== toEntry.scopes.levels) changed.push({ scope: "levels" });
+  // Podcasts: episode-granular, mirroring track/domain deltas. A new or changed
+  // episode surfaces as { scope:"podcasts", episodes:[ids] }. Snapshots taken
+  // before podcasts existed have no `podcasts` scope → treated as {} (no false
+  // delta when there are still zero episodes).
+  const fromEps = fromEntry.scopes.podcasts || {};
+  const toEps = toEntry.scopes.podcasts || {};
+  const epIds = new Set([...Object.keys(fromEps), ...Object.keys(toEps)]);
+  const episodes = [...epIds].sort().filter((id) => fromEps[id] !== toEps[id]);
+  if (episodes.length) changed.push({ scope: "podcasts", episodes });
   return changed;
 }
 
@@ -182,6 +197,26 @@ export function createCatalogRouter(idx) {
   router.get("/levels/:levelId", (req, res) => {
     const l = (idx.levels.data.levels || []).find((x) => x.id === req.params.levelId);
     return l ? send(res, req, l, `${idx.levels.hash}-${l.id}`) : notFound(res);
+  });
+
+  // Podcasts (PRD-MT-10) — episode list + one episode. The fixed `/podcasts`
+  // segment is registered BEFORE /:vendorId/:trackId so it wins the match. The
+  // list returns the app's manifest shape ({version, episodes}); an episode
+  // returns the bare PodcastEpisode. Both match automatos-academy-app/src/
+  // podcast/schema.ts field-for-field, so the app consumes them with no adapter.
+  router.get("/podcasts", (req, res) => {
+    const { vendor, track } = req.query;
+    let episodes = idx.podcasts.data.episodes || [];
+    if (typeof vendor === "string") episodes = episodes.filter((e) => e.vendorId === vendor);
+    if (typeof track === "string") episodes = episodes.filter((e) => e.trackId === track);
+    // ETag varies with content (podcasts.hash) AND the filter — a hex-only
+    // suffix keeps the quoted ETag well-formed for any query value.
+    const suffix = shortHash(`v=${typeof vendor === "string" ? vendor : ""}&t=${typeof track === "string" ? track : ""}`);
+    send(res, req, { version: idx.podcasts.data.version, episodes }, `${idx.podcasts.hash}-${suffix}`);
+  });
+  router.get("/podcasts/:episodeId", (req, res) => {
+    const ep = idx.podcasts.episodes.get(req.params.episodeId);
+    return ep ? send(res, req, ep, `${idx.podcasts.hash}-${req.params.episodeId}`) : notFound(res);
   });
 
   router.get("/", (req, res) => send(res, req, idx.manifest.data, idx.manifest.hash));
