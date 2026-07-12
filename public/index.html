@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Automatos Academy — Learn AI architecture. Prove it.</title>
   <meta name="description" content="The Automatos learning model: Learn → Build → Decide → Prove → Ready. Flagship track — Anthropic Claude Certified Architect (CCA-F). Tutorials, labs, scenario drills, full mock exams, and an honest readiness score." />
-  <meta name="theme-color" content="#0E1311" />
+  <meta name="theme-color" content="#D3DEF0" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#141D30" media="(prefers-color-scheme: dark)" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Automatos Academy" />
   <meta property="og:title" content="Automatos Academy — Learn AI architecture. Prove it." />
@@ -16,19 +17,24 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Funnel+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/academy.css" />
+  <script src="/js/anim.js" defer></script>
 
-  <!-- Anti-FOUC: apply the stored Automatos mood before first paint -->
+  <!-- Anti-FOUC: apply the stored Automatos mood before first paint.
+       Modes were renamed bone→mist (light) / pitch→night (dark); old persisted
+       values are migrated in place so returning learners keep their choice. -->
   <script>
     (function () {
       try {
         var m = localStorage.getItem('automatos-mood');
-        if (m !== 'bone' && m !== 'pitch') {
-          m = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'pitch' : 'bone';
+        if (m === 'bone') m = 'mist';
+        if (m === 'pitch') m = 'night';
+        if (m !== 'mist' && m !== 'night') {
+          m = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'night' : 'mist';
         }
         document.documentElement.setAttribute('data-mood', m);
-      } catch (e) { document.documentElement.setAttribute('data-mood', 'bone'); }
+      } catch (e) { document.documentElement.setAttribute('data-mood', 'mist'); }
     })();
   </script>
 </head>
@@ -49,7 +55,7 @@
     </nav>
     <button id="ac-mood" class="ac-mood" type="button" aria-label="Toggle light / dark">
       <span class="ac-mood-dot" aria-hidden="true"></span>
-      <span class="ac-mood-label">Bone</span>
+      <span class="ac-mood-label">Mist</span>
     </button>
   </header>
 

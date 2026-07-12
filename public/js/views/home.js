@@ -108,16 +108,66 @@ function doors(tracks) {
   ]);
 }
 
+// ── Periwinkle landing hero (design mock 1a): glowing brain, floating glass
+// stat widgets with count-up numbers, an avatar cluster and a numbered pager.
+// Pure DOM via el(); the motion + count-up are driven by js/anim.js, which is
+// reduced-motion aware. ──────────────────────────────────────────────────────
+const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
+const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+
+function heroAvatars(ids) {
+  return el("div", { class: "ac-hero__avatars" }, ids.map((i) =>
+    el("img", { src: `/img/avatar-${i}.png`, alt: "", loading: "lazy" })));
+}
+
+function periwinkleHero(flagship) {
+  const startHref = flagship ? "#" + url.track(flagship.vendorId, flagship.trackId) : "#/start";
+  return el("section", { class: "ac-hero", "aria-label": "Automatos Academy" }, [
+    el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
+    el("img", { class: "ac-hero__brain", src: "/img/brain.png", alt: "", "aria-hidden": "true" }),
+    el("div", { class: "ac-hero__inner" }, [
+      el("h1", {}, ["TRAIN YOUR ", el("span", { class: "lite", text: "AI" }), " MIND"]),
+      el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
+      el("a", { class: "ac-hero__cta", href: startHref }, [
+        el("span", { class: "orb", html: HERO_BRAIN_SVG }),
+        el("span", { class: "lbl", text: "Start Learning" }),
+        el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
+      ]),
+    ]),
+    // floating glass · active learners (count-up number + avatar cluster)
+    el("div", { class: "ac-glass anim-float", style: { right: "4%", top: "13%", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } }, [
+      heroAvatars([1, 2, 3]),
+      el("div", {}, [
+        el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: "544", suffix: "+" }, text: "0+" }),
+        el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "Active learners" }),
+      ]),
+    ]),
+    // floating glass · sessions tracked (count-up + reveal-fill bar + shimmer)
+    el("div", { class: "ac-glass anim-float2 shimmer", style: { right: "8%", top: "48%", width: "212px", padding: "18px" } }, [
+      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "30px", color: "#fff" }, dataset: { count: "345" }, text: "0" }),
+      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.75)" }, text: "Sessions tracked" }),
+      el("div", { class: "fillbar", style: { height: "8px", marginTop: "14px", "--fill": "72%" } }, [el("i", {})]),
+    ]),
+    el("div", { class: "ac-hero__pager", "aria-hidden": "true" }, [
+      el("span", { class: "nx", text: "01" }),
+      el("span", { class: "bar" }),
+      el("span", { class: "cur", text: "02" }),
+    ]),
+    el("div", { class: "ac-hero__corner", "aria-hidden": "true", html: "YOUR<br/>MIND<br/>UPGRADED" }),
+  ]);
+}
+
 export async function catalog() {
   const cat = await loadCatalog();
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const flagship = tracks.find((t) => t.flagship && t.status === "live") || tracks.find((t) => t.status === "live");
 
-  const hero = el("section", { class: "hero" }, [el("div", { class: "wrap" }, [
-    el("div", { class: "eyebrow", style: { marginBottom: "22px" } }, [el("span", { class: "mono-label", text: "Automatos Academy · A+ prep" })]),
-    el("h1", {}, ["Learn AI architecture. ", el("em", {}, ["Prove it."])]),
+  const heroVisual = el("div", { class: "wrap", style: { paddingTop: "18px" } }, [periwinkleHero(flagship)]);
+  const intro = el("section", { class: "hero" }, [el("div", { class: "wrap" }, [
+    el("div", { class: "eyebrow", style: { marginBottom: "20px" } }, [el("span", { class: "mono-label", text: "The Automatos learning model" })]),
+    el("h2", { style: { fontSize: "clamp(28px,4vw,44px)", maxWidth: "22ch" } }, ["Learn AI architecture. ", el("em", { class: "serif-i", text: "Prove it." })]),
     el("p", { class: "lede" }, [
-      "The Automatos learning model — ",
+      "One loop, every track — ",
       el("b", { class: "serif-i", text: "Learn → Build → Decide → Prove → Ready" }),
       ". Demanding preparation for people who intend to be in the top percentile, because A+ is the only grade that qualifies.",
     ]),
@@ -140,7 +190,7 @@ export async function catalog() {
     ]),
   ])]);
 
-  return el("div", {}, [hero, cards]);
+  return el("div", {}, [heroVisual, intro, cards]);
 }
 
 export async function method() {
