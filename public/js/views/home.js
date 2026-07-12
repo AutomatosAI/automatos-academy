@@ -117,6 +117,9 @@ function doors(tracks) {
 const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
 const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+// swap HERO_VIDEO_SRC for a dedicated brand loop whenever one is hosted
+const HERO_VIDEO_SRC = "/content/github-copilot/videos/overview-action-plan.mp4";
+const HERO_INSIGHTS_SVG = '<svg viewBox="0 0 236 90" preserveAspectRatio="none"><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40 L236 90 L0 90 Z" fill="rgba(255,255,255,0.16)"/><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40" fill="none" stroke="#fff" stroke-width="2" opacity="0.85"/></svg>';
 
 function heroAvatars(ids) {
   return el("div", { class: "ac-hero__avatars" }, ids.map((i) =>
@@ -133,12 +136,44 @@ function glassLearners(pos) {
     ]),
   ]);
 }
-function glassSessions(pos) {
-  return el("div", { class: "ac-glass anim-float2 shimmer", style: Object.assign({ width: "212px", padding: "18px" }, pos) }, [
-    el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "30px", color: "#fff" }, dataset: { count: "345" }, text: "0" }),
-    el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.75)" }, text: "Sessions tracked" }),
-    el("div", { class: "fillbar", style: { height: "8px", marginTop: "14px" } }, [el("i", {})]),
+// the "345 sessions tracked" stat stack (mock 1a)
+function heroStats(pos) {
+  return el("div", { class: "ac-hero__stats anim-float2", style: pos }, [
+    el("div", { class: "big", dataset: { count: "345" }, text: "0" }),
+    el("div", { class: "cap", text: "Sessions tracked" }),
+    el("div", { class: "mini" }, [
+      el("div", {}, [el("b", { dataset: { count: "24", suffix: "K" }, text: "0" }), el("span", { text: "data points" })]),
+      el("div", {}, [el("b", { dataset: { count: "1.33", dec: "2" }, text: "0" }), el("span", { text: "avg score" })]),
+    ]),
   ]);
+}
+
+// "Neural Insights" waveform card with a shimmer sweep (mock 1a)
+function heroInsights(pos) {
+  return el("div", { class: "ac-hero__insights shimmer", style: pos }, [
+    el("div", { class: "k1", text: "Neural" }),
+    el("div", { class: "k2", text: "Insights" }),
+    el("div", { html: HERO_INSIGHTS_SVG }),
+  ]);
+}
+
+// pulsing play button on the brain — jumps to the video slide
+function heroPlay(pos) {
+  return el("button", { class: "ac-hero__playbtn anim-play", type: "button", "aria-label": "Play the tour", style: pos }, [
+    el("i", { html: HERO_PLAY_SVG }),
+  ]);
+}
+
+// looping, muted, inline hero video (mock 1b). Lazy: preload="none" and it only
+// starts when the video slide becomes active (mountHeroCarousel's show() calls
+// play()), so slide 1 — the default view — never downloads it. muted is set as a
+// PROPERTY (not just the attribute) so muted autoplay is permitted on Safari/iOS.
+function heroVideo(src) {
+  const v = el("video", { class: "vmedia", poster: "/img/brain.png", loop: true, playsinline: true, preload: "none", "aria-hidden": "true" });
+  v.muted = true; v.defaultMuted = true;
+  v.setAttribute("muted", ""); v.setAttribute("webkit-playsinline", "");
+  if (src) v.src = src;
+  return v;
 }
 
 // pager click + auto-advance cross-fade; self-cleans when the hero leaves the DOM
@@ -151,8 +186,12 @@ function mountHeroCarousel(hero, slides, pager) {
     slides.forEach((s, k) => s.classList.toggle("is-active", k === idx));
     if (curEl) curEl.textContent = String(idx + 1).padStart(2, "0");
     if (nxEl) nxEl.textContent = String(((idx + 1) % slides.length) + 1).padStart(2, "0");
+    const vid = slides[idx].querySelector("video");
+    if (vid && vid.paused) { const p = vid.play(); if (p && p.catch) p.catch(() => {}); }
   };
   pager.addEventListener("click", () => show(idx + 1));
+  const play = hero.querySelector(".ac-hero__playbtn");
+  if (play) play.addEventListener("click", (e) => { e.preventDefault(); show(1); });
   show(0);
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reduce) {
@@ -180,8 +219,10 @@ function periwinkleHero(flagship) {
         el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
       ]),
     ])]),
-    glassLearners({ right: "4%", top: "13%" }),
-    glassSessions({ right: "8%", top: "48%" }),
+    glassLearners({ left: "60%", top: "12%" }),
+    heroStats({ right: "3%", top: "31%" }),
+    heroInsights({ left: "33%", top: "57%" }),
+    heroPlay({ left: "55%", top: "45%" }),
   ]);
 
   // slide 2 — video hero
@@ -196,17 +237,15 @@ function periwinkleHero(flagship) {
         el("span", { class: "lbl", text: "Watch the film" }),
       ]),
     ])]),
-    el("a", { class: "ac-hero__video", href: videoHref, "aria-label": "Watch the tour" }, [
-      el("img", { src: "/img/brain.png", alt: "", "aria-hidden": "true" }),
+    el("a", { class: "ac-hero__video", href: videoHref, "aria-label": "Watch the training films" }, [
+      heroVideo(HERO_VIDEO_SRC),
       el("span", { class: "vchip live", text: "Live demo" }),
-      el("span", { class: "vchip time", text: "2:14" }),
-      el("span", { class: "vplay anim-play" }, [el("i", { html: HERO_PLAY_SVG })]),
       el("div", { class: "vbar" }, [
         el("b", { text: "Inside a live training session" }),
         el("div", { class: "track" }, [el("i", {})]),
       ]),
     ]),
-    glassLearners({ left: "clamp(20px,5vw,56px)", bottom: "116px" }),
+    glassLearners({ left: "clamp(20px,5vw,56px)", bottom: "110px" }),
   ]);
 
   const slides = [slide1, slide2];
