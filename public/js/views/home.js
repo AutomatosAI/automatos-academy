@@ -240,40 +240,9 @@ function periwinkleHero(flagship) {
     heroPlay({ left: "55%", top: "45%" }),
   ]);
 
-  // slide 2 — video hero
-  const slide2 = el("div", { class: "ac-hero__slide" }, [
-    el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
-    el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
-      el("span", { class: "ac-hero__kicker", text: "Watch the 2-min tour" }),
-      el("h1", {}, ["PRESS PLAY", el("br"), "ON YOUR ", el("span", { class: "lite", text: "AI" }), " SKILLS"]),
-      el("p", { text: "See how learners go from zero to a running AI workforce — one guided mission at a time." }),
-      el("a", { class: "ac-hero__cta", href: videoHref }, [
-        el("span", { class: "orb", html: HERO_PLAY_SVG }),
-        el("span", { class: "lbl", text: "Watch the film" }),
-      ]),
-    ])]),
-    el("a", { class: "ac-hero__video", href: videoHref, "aria-label": "Watch the training films" }, [
-      heroVideo(HERO_VIDEO_SRC),
-      el("span", { class: "vchip live", text: "Live demo" }),
-      el("span", { class: "vplay anim-play" }, [el("i", { html: HERO_PLAY_SVG })]),
-      el("div", { class: "vbar" }, [
-        el("b", { text: "Inside a live training session" }),
-        el("div", { class: "track" }, [el("i", {})]),
-      ]),
-    ]),
-    glassLearners({ left: "clamp(20px,5vw,56px)", bottom: "110px" }),
-  ]);
-
-  const slides = [slide1, slide2];
-  const pager = el("button", { class: "ac-hero__pager", type: "button", "aria-label": "Next hero slide" }, [
-    el("span", { class: "nx", text: "01" }),
-    el("span", { class: "bar" }),
-    el("span", { class: "cur", text: "02" }),
-  ]);
   const corner = el("div", { class: "ac-hero__corner", "aria-hidden": "true", html: "YOUR<br/>MIND<br/>UPGRADED" });
-  const hero = el("section", { class: "ac-hero", "aria-label": "Automatos Academy" }, [slide1, slide2, pager, corner]);
-  mountHeroCarousel(hero, slides, pager);
-  return hero;
+  // single brain-video hero — no carousel, no second slide, no flip
+  return el("section", { class: "ac-hero", "aria-label": "Automatos Academy" }, [slide1, corner]);
 }
 
 export async function catalog() {
