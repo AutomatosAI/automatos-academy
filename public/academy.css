@@ -551,10 +551,16 @@ a.verify-chip:hover { background: var(--accent-soft); }
   line-height: 0.8; letter-spacing: -0.05em; color: rgba(255,255,255,0.22);
   transform: scaleX(1.12); transform-origin: left; white-space: nowrap; pointer-events: none; user-select: none;
 }
+/* the hero brain — a still <img> or the animated brain <video> (extracted from
+   the .fig). object-fit cover + a radial mask fade the video's rectangular edges
+   (and its corner watermark) into the periwinkle, so the brain appears to float. */
 .ac-hero__brain {
   position: absolute; left: 62%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
-  width: min(58%, 820px); height: auto;
-  filter: drop-shadow(0 30px 70px rgba(39,60,89,0.25)); pointer-events: none; user-select: none;
+  width: min(60%, 880px); aspect-ratio: 5 / 4; height: auto;
+  object-fit: cover; object-position: 50% 44%;
+  pointer-events: none; user-select: none;
+  -webkit-mask-image: radial-gradient(ellipse 58% 64% at 50% 46%, #000 50%, rgba(0,0,0,0) 77%);
+  mask-image: radial-gradient(ellipse 58% 64% at 50% 46%, #000 50%, rgba(0,0,0,0) 77%);
 }
 .ac-hero__inner {
   position: absolute; z-index: 4; left: 0; top: 0; bottom: 0;
@@ -639,10 +645,15 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__corner { position: absolute; right: clamp(20px,5vw,56px); bottom: 30px; z-index: 6; font-family: var(--display); font-weight: 600; font-size: clamp(15px,1.6vw,26px); line-height: 1.02; letter-spacing: -0.02em; color: var(--fg); text-align: right; pointer-events: none; }
 
 @media (max-width: 900px) {
-  .ac-hero { height: clamp(560px, 90vh, 760px); }
-  .ac-hero__inner { width: auto; right: 0; padding-right: clamp(24px,5vw,40px); }
-  .ac-hero__brain { left: 60%; opacity: .34; width: 128%; }
-  .ac-glass, .ac-hero__stats, .ac-hero__insights, .ac-hero__playbtn, .ac-hero__corner, .ac-hero__video { display: none; }
+  .ac-hero { height: clamp(660px, 98vh, 920px); }
+  .ac-hero__inner { width: auto; right: 0; top: 5%; bottom: auto; height: auto; padding-right: clamp(24px,5vw,40px); }
+  .ac-hero__brain { top: 66%; left: 52%; width: 168%; }
+  .ac-hero__playbtn { top: 58% !important; left: 44% !important; }
+  .ac-hero__corner, .ac-hero__video { display: none; }
+  /* stack the widgets over the lower brain, per the mobile reference */
+  .ac-glass { right: 4% !important; left: auto !important; top: auto !important; bottom: 30% !important; }
+  .ac-hero__stats { right: auto !important; left: 4% !important; top: auto !important; bottom: 4% !important; width: 200px; }
+  .ac-hero__insights { left: auto !important; right: 4% !important; top: auto !important; bottom: 4% !important; width: 184px; height: 122px; }
 }
 
 /* ── reduced motion: kill everything (gate JS on the same query) ─────── */

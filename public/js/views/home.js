@@ -178,6 +178,19 @@ function heroVideo(src) {
   return v;
 }
 
+// the animated brain loop (extracted from Automatos-Academy.fig) as the hero
+// centrepiece — autoplays muted-loop; the .ac-hero__brain radial mask fades its
+// rectangular edges (and the corner watermark) into the periwinkle. poster is
+// the still brain.png, shown until the 8s loop arrives.
+function heroBrainVideo() {
+  const v = el("video", { class: "ac-hero__brain", poster: "/img/brain.png", src: HERO_VIDEO_SRC, loop: true, playsinline: true, preload: "auto", "aria-hidden": "true" });
+  v.muted = true; v.defaultMuted = true; v.autoplay = true;
+  v.setAttribute("muted", ""); v.setAttribute("autoplay", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
+  const kick = () => { const p = v.play && v.play(); if (p && p.catch) p.catch(() => {}); };
+  if (document.readyState === "complete") kick(); else window.addEventListener("load", kick, { once: true });
+  return v;
+}
+
 // pager click + auto-advance cross-fade; self-cleans when the hero leaves the DOM
 function mountHeroCarousel(hero, slides, pager) {
   const curEl = pager.querySelector(".cur");
@@ -211,7 +224,7 @@ function periwinkleHero(flagship) {
   // slide 1 — image hero
   const slide1 = el("div", { class: "ac-hero__slide is-active" }, [
     el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
-    el("img", { class: "ac-hero__brain", src: "/img/brain.png", alt: "", "aria-hidden": "true" }),
+    heroBrainVideo(),
     el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
       el("h1", {}, ["TRAIN YOUR ", el("span", { class: "lite", text: "AI" }), " MIND"]),
       el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
