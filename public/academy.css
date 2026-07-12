@@ -570,7 +570,7 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__inner .col { width: 100%; }
 .ac-hero__inner h1 {
   font-family: var(--display); font-weight: 700; letter-spacing: -0.045em; line-height: 0.9;
-  font-size: clamp(44px, 5.4vw, 80px); color: var(--fg); margin: 0;
+  font-size: clamp(46px, 6.4vw, 100px); color: var(--fg); margin: 0;
 }
 .ac-hero__inner h1 .lite { color: rgba(255,255,255,0.6); }
 .ac-hero__inner p { margin: 26px 0 0; font-size: clamp(15px, 2vw, 17px); line-height: 1.5; color: var(--fg); max-width: 380px; }
@@ -645,26 +645,31 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__corner { position: absolute; right: clamp(20px,5vw,56px); bottom: 30px; z-index: 6; font-family: var(--display); font-weight: 600; font-size: clamp(15px,1.6vw,26px); line-height: 1.02; letter-spacing: -0.02em; color: var(--fg); text-align: right; pointer-events: none; }
 
 @media (max-width: 900px) {
-  .ac-hero { height: clamp(720px, 100vh, 900px); }
+  /* one screen: svh = the *visible* viewport (excludes browser chrome), so the
+     whole hero fits without scrolling; vh is the fallback. Everything inside is
+     positioned as % of this height, so it scales to fit. */
+  .ac-hero { height: 100vh; height: 100svh; min-height: 600px; }
   .ac-hero__watermark, .ac-hero__corner, .ac-hero__video { display: none; }
 
-  /* headline · subtext · CTA — top block, full width */
-  .ac-hero__inner { position: absolute; left: 0; right: 0; top: 0; bottom: auto; width: auto; height: auto; padding: 22px clamp(22px,6vw,30px) 0; }
+  /* headline · subtext · CTA — compact top block */
+  .ac-hero__inner { position: absolute; left: 0; right: 0; top: 0; bottom: auto; width: auto; height: auto; padding: 16px clamp(22px,6vw,30px) 0; }
   .ac-hero__inner .col { max-width: 500px; }
-  .ac-hero__inner h1 { font-size: clamp(38px, 12.5vw, 58px); line-height: 0.95; }
-  .ac-hero__inner p { font-size: 15px; max-width: none; margin-top: 16px; }
-  .ac-hero__cta { margin-top: 22px; }
+  .ac-hero__inner h1 { font-size: clamp(36px, 11.5vw, 54px); line-height: 0.94; }
+  .ac-hero__inner p { font-size: 14.5px; line-height: 1.45; max-width: none; margin-top: 12px; }
+  .ac-hero__cta { margin-top: 16px; padding: 4px 26px 4px 4px; }
+  .ac-hero__cta .orb { width: 52px; height: 52px; }
 
-  /* brain — lower portion, bottom-anchored, square crop to zoom + centre it */
-  .ac-hero__brain { left: 50%; right: auto; top: auto; bottom: 0; transform: translateX(-50%); width: 128%; aspect-ratio: 1 / 1; object-position: 50% 26%; }
+  /* brain — bottom-anchored, square crop, centred */
+  .ac-hero__brain { left: 50%; right: auto; top: auto; bottom: 0; transform: translateX(-50%); width: 118%; aspect-ratio: 1 / 1; object-position: 50% 22%; }
 
   /* widgets — clustered over the lower brain, scaled, clear of the tutor FAB */
-  .ac-hero__playbtn { top: auto !important; bottom: 44% !important; left: 50% !important; transform: translateX(-50%); width: 74px !important; height: 74px !important; }
-  .ac-hero__playbtn i { width: 46px; height: 46px; }
-  .ac-glass { top: auto !important; left: auto !important; right: 5% !important; bottom: 34% !important; padding: 10px 14px !important; }
-  .ac-hero__stats { top: auto !important; right: auto !important; left: 4% !important; bottom: 13% !important; width: 176px !important; padding: 14px !important; }
-  .ac-hero__stats .big { font-size: 30px; }
-  .ac-hero__insights { top: auto !important; left: auto !important; right: 4% !important; bottom: 13% !important; width: 170px !important; height: 108px !important; padding: 14px !important; }
+  .ac-hero__playbtn { top: auto !important; bottom: 43% !important; left: 50% !important; transform: translateX(-50%); width: 68px !important; height: 68px !important; }
+  .ac-hero__playbtn i { width: 42px; height: 42px; }
+  .ac-glass { top: auto !important; left: auto !important; right: 5% !important; bottom: 34% !important; padding: 9px 13px !important; }
+  .ac-hero__stats { top: auto !important; right: auto !important; left: 4% !important; bottom: 12% !important; width: 166px !important; padding: 13px !important; }
+  .ac-hero__stats .big { font-size: 27px; }
+  .ac-hero__stats .mini b { margin-top: 16px; }
+  .ac-hero__insights { top: auto !important; left: auto !important; right: 4% !important; bottom: 12% !important; width: 162px !important; height: 98px !important; padding: 13px !important; }
 }
 
 /* ── reduced motion: kill everything (gate JS on the same query) ─────── */
