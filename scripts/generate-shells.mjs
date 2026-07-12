@@ -71,7 +71,7 @@ function shellHtml(t, track) {
 <link rel="canonical" href="${esc(pageUrl)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Automatos Academy">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${esc(pageUrl)}"><meta property="og:image" content="${BASE}/og-academy.png">
+<meta property="og:url" content="${esc(pageUrl)}"><meta property="og:image" content="${BASE}/og-academy.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
