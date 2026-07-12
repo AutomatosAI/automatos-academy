@@ -136,7 +136,7 @@ function periwinkleHero(flagship) {
     ]),
     // floating glass · active learners (count-up number + avatar cluster)
     el("div", { class: "ac-glass anim-float", style: { right: "4%", top: "13%", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } }, [
-      heroAvatars([1, 2, 3]),
+      heroAvatars([1, 3, 5]),
       el("div", {}, [
         el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: "544", suffix: "+" }, text: "0+" }),
         el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "Active learners" }),

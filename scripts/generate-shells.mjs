@@ -75,7 +75,7 @@ function shellHtml(t, track) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-</head><body data-mood="bone" style="display:block">
+</head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <p class="mono-label">Automatos Academy · ${esc(t.vendorName)}</p>
   <h1 class="serif-i" style="font-size:clamp(34px,6vw,54px);margin:10px 0 0">${esc(track.name)}</h1>
