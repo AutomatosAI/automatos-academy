@@ -108,24 +108,70 @@ function doors(tracks) {
   ]);
 }
 
-// ── Periwinkle landing hero (design mock 1a): glowing brain, floating glass
-// stat widgets with count-up numbers, an avatar cluster and a numbered pager.
-// Pure DOM via el(); the motion + count-up are driven by js/anim.js, which is
-// reduced-motion aware. ──────────────────────────────────────────────────────
+// ── Periwinkle landing hero (design mock 1a + 1b): a full-bleed two-slide
+// carousel — slide 1 the glowing-brain image hero, slide 2 the video hero — with
+// floating glass stat widgets (count-up + avatar cluster), a shared numbered
+// pager that advances the slides, and a "YOUR MIND UPGRADED" corner. Pure DOM
+// via el(); count-up + float/shimmer come from js/anim.js (reduced-motion aware),
+// and the carousel auto-advances unless the OS asks for reduced motion. ──────────
 const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
 const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
 function heroAvatars(ids) {
   return el("div", { class: "ac-hero__avatars" }, ids.map((i) =>
     el("img", { src: `/img/avatar-${i}.png`, alt: "", loading: "lazy" })));
 }
 
+// floating glass widgets — `pos` is the absolute placement for the slide
+function glassLearners(pos) {
+  return el("div", { class: "ac-glass anim-float", style: Object.assign({ padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" }, pos) }, [
+    heroAvatars([1, 3, 5]),
+    el("div", {}, [
+      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: "544", suffix: "+" }, text: "0+" }),
+      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "Active learners" }),
+    ]),
+  ]);
+}
+function glassSessions(pos) {
+  return el("div", { class: "ac-glass anim-float2 shimmer", style: Object.assign({ width: "212px", padding: "18px" }, pos) }, [
+    el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "30px", color: "#fff" }, dataset: { count: "345" }, text: "0" }),
+    el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.75)" }, text: "Sessions tracked" }),
+    el("div", { class: "fillbar", style: { height: "8px", marginTop: "14px" } }, [el("i", {})]),
+  ]);
+}
+
+// pager click + auto-advance cross-fade; self-cleans when the hero leaves the DOM
+function mountHeroCarousel(hero, slides, pager) {
+  const curEl = pager.querySelector(".cur");
+  const nxEl = pager.querySelector(".nx");
+  let idx = 0;
+  const show = (i) => {
+    idx = ((i % slides.length) + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle("is-active", k === idx));
+    if (curEl) curEl.textContent = String(idx + 1).padStart(2, "0");
+    if (nxEl) nxEl.textContent = String(((idx + 1) % slides.length) + 1).padStart(2, "0");
+  };
+  pager.addEventListener("click", () => show(idx + 1));
+  show(0);
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce) {
+    const timer = setInterval(() => {
+      if (!document.body.contains(hero)) { clearInterval(timer); return; }
+      show(idx + 1);
+    }, 7000);
+  }
+}
+
 function periwinkleHero(flagship) {
   const startHref = flagship ? "#" + url.track(flagship.vendorId, flagship.trackId) : "#/start";
-  return el("section", { class: "ac-hero", "aria-label": "Automatos Academy" }, [
+  const videoHref = flagship ? "#" + url.videos(flagship.vendorId, flagship.trackId) : "#" + url.method();
+
+  // slide 1 — image hero
+  const slide1 = el("div", { class: "ac-hero__slide is-active" }, [
     el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
     el("img", { class: "ac-hero__brain", src: "/img/brain.png", alt: "", "aria-hidden": "true" }),
-    el("div", { class: "ac-hero__inner" }, [
+    el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
       el("h1", {}, ["TRAIN YOUR ", el("span", { class: "lite", text: "AI" }), " MIND"]),
       el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
       el("a", { class: "ac-hero__cta", href: startHref }, [
@@ -133,28 +179,46 @@ function periwinkleHero(flagship) {
         el("span", { class: "lbl", text: "Start Learning" }),
         el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
       ]),
-    ]),
-    // floating glass · active learners (count-up number + avatar cluster)
-    el("div", { class: "ac-glass anim-float", style: { right: "4%", top: "13%", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } }, [
-      heroAvatars([1, 3, 5]),
-      el("div", {}, [
-        el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: "544", suffix: "+" }, text: "0+" }),
-        el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "Active learners" }),
+    ])]),
+    glassLearners({ right: "4%", top: "13%" }),
+    glassSessions({ right: "8%", top: "48%" }),
+  ]);
+
+  // slide 2 — video hero
+  const slide2 = el("div", { class: "ac-hero__slide" }, [
+    el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
+    el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
+      el("span", { class: "ac-hero__kicker", text: "Watch the 2-min tour" }),
+      el("h1", {}, ["PRESS PLAY", el("br"), "ON YOUR ", el("span", { class: "lite", text: "AI" }), " SKILLS"]),
+      el("p", { text: "See how learners go from zero to a running AI workforce — one guided mission at a time." }),
+      el("a", { class: "ac-hero__cta", href: videoHref }, [
+        el("span", { class: "orb", html: HERO_PLAY_SVG }),
+        el("span", { class: "lbl", text: "Watch the film" }),
+      ]),
+    ])]),
+    el("a", { class: "ac-hero__video", href: videoHref, "aria-label": "Watch the tour" }, [
+      el("img", { src: "/img/brain.png", alt: "", "aria-hidden": "true" }),
+      el("span", { class: "vchip live", text: "Live demo" }),
+      el("span", { class: "vchip time", text: "2:14" }),
+      el("span", { class: "vplay anim-play" }, [el("i", { html: HERO_PLAY_SVG })]),
+      el("div", { class: "vbar" }, [
+        el("b", { text: "Inside a live training session" }),
+        el("div", { class: "track" }, [el("i", {})]),
       ]),
     ]),
-    // floating glass · sessions tracked (count-up + reveal-fill bar + shimmer)
-    el("div", { class: "ac-glass anim-float2 shimmer", style: { right: "8%", top: "48%", width: "212px", padding: "18px" } }, [
-      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "30px", color: "#fff" }, dataset: { count: "345" }, text: "0" }),
-      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.75)" }, text: "Sessions tracked" }),
-      el("div", { class: "fillbar", style: { height: "8px", marginTop: "14px", "--fill": "72%" } }, [el("i", {})]),
-    ]),
-    el("div", { class: "ac-hero__pager", "aria-hidden": "true" }, [
-      el("span", { class: "nx", text: "01" }),
-      el("span", { class: "bar" }),
-      el("span", { class: "cur", text: "02" }),
-    ]),
-    el("div", { class: "ac-hero__corner", "aria-hidden": "true", html: "YOUR<br/>MIND<br/>UPGRADED" }),
+    glassLearners({ left: "clamp(20px,5vw,56px)", bottom: "116px" }),
   ]);
+
+  const slides = [slide1, slide2];
+  const pager = el("button", { class: "ac-hero__pager", type: "button", "aria-label": "Next hero slide" }, [
+    el("span", { class: "nx", text: "01" }),
+    el("span", { class: "bar" }),
+    el("span", { class: "cur", text: "02" }),
+  ]);
+  const corner = el("div", { class: "ac-hero__corner", "aria-hidden": "true", html: "YOUR<br/>MIND<br/>UPGRADED" });
+  const hero = el("section", { class: "ac-hero", "aria-label": "Automatos Academy" }, [slide1, slide2, pager, corner]);
+  mountHeroCarousel(hero, slides, pager);
+  return hero;
 }
 
 export async function catalog() {
@@ -162,7 +226,7 @@ export async function catalog() {
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const flagship = tracks.find((t) => t.flagship && t.status === "live") || tracks.find((t) => t.status === "live");
 
-  const heroVisual = el("div", { class: "wrap", style: { paddingTop: "18px" } }, [periwinkleHero(flagship)]);
+  const heroVisual = periwinkleHero(flagship);
   const intro = el("section", { class: "hero" }, [el("div", { class: "wrap" }, [
     el("div", { class: "eyebrow", style: { marginBottom: "20px" } }, [el("span", { class: "mono-label", text: "The Automatos learning model" })]),
     el("h2", { style: { fontSize: "clamp(28px,4vw,44px)", maxWidth: "22ch" } }, ["Learn AI architecture. ", el("em", { class: "serif-i", text: "Prove it." })]),
