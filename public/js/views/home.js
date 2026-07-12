@@ -117,8 +117,10 @@ function doors(tracks) {
 const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
 const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-// swap HERO_VIDEO_SRC for a dedicated brand loop whenever one is hosted
-const HERO_VIDEO_SRC = "/content/github-copilot/videos/overview-action-plan.mp4";
+// Drop a SHORT (<2MB, ~2–5s) seamless brand loop at public/media/hero-loop.mp4
+// and it will play muted-loop in the hero panel. Until then this 404s and the
+// panel shows the brain poster — deliberately NOT a course video.
+const HERO_VIDEO_SRC = "/media/hero-loop.mp4";
 const HERO_INSIGHTS_SVG = '<svg viewBox="0 0 236 90" preserveAspectRatio="none"><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40 L236 90 L0 90 Z" fill="rgba(255,255,255,0.16)"/><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40" fill="none" stroke="#fff" stroke-width="2" opacity="0.85"/></svg>';
 
 function heroAvatars(ids) {
@@ -240,6 +242,7 @@ function periwinkleHero(flagship) {
     el("a", { class: "ac-hero__video", href: videoHref, "aria-label": "Watch the training films" }, [
       heroVideo(HERO_VIDEO_SRC),
       el("span", { class: "vchip live", text: "Live demo" }),
+      el("span", { class: "vplay anim-play" }, [el("i", { html: HERO_PLAY_SVG })]),
       el("div", { class: "vbar" }, [
         el("b", { text: "Inside a live training session" }),
         el("div", { class: "track" }, [el("i", {})]),
