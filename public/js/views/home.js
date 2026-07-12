@@ -226,7 +226,7 @@ function periwinkleHero(flagship) {
     el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
     heroBrainVideo(),
     el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
-      el("h1", {}, ["TRAIN YOUR ", el("span", { class: "lite", text: "AI" }), " MIND"]),
+      el("h1", {}, ["RUN YOUR", el("br"), el("span", { class: "lite", text: "AI" }), " WORKFORCE"]),
       el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
       el("a", { class: "ac-hero__cta", href: startHref }, [
         el("span", { class: "orb", html: HERO_BRAIN_SVG }),
