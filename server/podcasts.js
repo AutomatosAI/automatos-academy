@@ -61,28 +61,20 @@ export function collectEpisodeErrors(ep, where) {
 }
 
 /**
- * Build the in-memory podcast index from public/content/podcasts.json.
- *
- * Fail loud on malformed content — the validator catches the same problems
- * pre-merge, so a boot failure here means an unvalidated deploy shipped, never
- * a user-facing 500. Returns:
+ * Parse + validate a podcast manifest from its canonical text (the exact file
+ * bytes). Shared by the file loader below and the Postgres loader
+ * (server/catalog-db.js), so both content sources judge episodes — and hash
+ * the manifest — by ONE definition. Returns:
  *   data     — the raw manifest ({version, episodes}), served verbatim
- *   hash     — content hash of the whole manifest (folded into contentVersion)
+ *   hash     — content hash of the canonical text (folded into contentVersion)
  *   episodes — Map(episodeId → episode) for O(1) `/podcasts/:episodeId`
  *   scope    — {episodeId → per-episode hash} snapshot for episode-granular
  *              deltas in the changes journal (mirrors track/domain granularity)
  */
-export function buildPodcastIndex(contentDir) {
-  const path = join(contentDir, "podcasts.json");
-  // Required — a deploy without it is a packaging bug, not a runtime 404.
-  // (Seeded empty; episodes are added to it later.)
-  if (!existsSync(path)) throw new Error(`[podcasts] manifest missing at ${path}`);
-  let raw;
-  try { raw = readFileSync(path, "utf8"); }
-  catch (e) { throw new Error(`[podcasts] cannot read manifest at ${path}: ${e.message}`); }
+export function parsePodcastManifest(raw, where = "podcasts.json") {
   let data;
   try { data = JSON.parse(raw); }
-  catch (e) { throw new Error(`[podcasts] invalid JSON in manifest at ${path}: ${e.message}`); }
+  catch (e) { throw new Error(`[podcasts] invalid JSON in manifest at ${where}: ${e.message}`); }
 
   if (typeof data.version !== "number") throw new Error("[podcasts] manifest.version must be a number");
   const list = data.episodes ?? [];
@@ -98,4 +90,23 @@ export function buildPodcastIndex(contentDir) {
     scope[ep.id] = shortHash(JSON.stringify(ep));
   }
   return { data, hash: shortHash(raw), episodes, scope };
+}
+
+/**
+ * Build the in-memory podcast index from public/content/podcasts.json.
+ *
+ * Fail loud on malformed content — the validator catches the same problems
+ * pre-merge, so a boot failure here means an unvalidated deploy shipped, never
+ * a user-facing 500. Returns everything parsePodcastManifest does, plus
+ *   raw — the canonical file text (what publish-content stores and hashes).
+ */
+export function buildPodcastIndex(contentDir) {
+  const path = join(contentDir, "podcasts.json");
+  // Required — a deploy without it is a packaging bug, not a runtime 404.
+  // (Seeded empty; episodes are added to it later.)
+  if (!existsSync(path)) throw new Error(`[podcasts] manifest missing at ${path}`);
+  let raw;
+  try { raw = readFileSync(path, "utf8"); }
+  catch (e) { throw new Error(`[podcasts] cannot read manifest at ${path}: ${e.message}`); }
+  return { ...parsePodcastManifest(raw, path), raw };
 }

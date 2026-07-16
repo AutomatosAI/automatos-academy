@@ -10,10 +10,12 @@
     "dev": "node server.js",
     "validate": "node scripts/validate-content.mjs",
     "migrate": "node-pg-migrate -m migrations up",
-    "test": "node tests/engine.test.mjs && node tests/content-api.test.mjs && node tests/spine.test.mjs && node scripts/token-parity.mjs",
+    "publish-content": "node scripts/publish-content.mjs",
+    "test": "node tests/engine.test.mjs && node tests/content-api.test.mjs && node tests/content-db.test.mjs && node tests/spine.test.mjs && node scripts/token-parity.mjs",
     "tokens": "node scripts/token-parity.mjs",
     "test:engine": "node tests/engine.test.mjs",
     "test:api": "node tests/content-api.test.mjs",
+    "test:content-db": "node tests/content-db.test.mjs",
     "test:spine": "node tests/spine.test.mjs",
     "shells": "node scripts/generate-shells.mjs",
     "tutor-corpus": "node scripts/export-tutor-corpus.mjs"

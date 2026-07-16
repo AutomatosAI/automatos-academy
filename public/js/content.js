@@ -1,18 +1,25 @@
 // Vendor-agnostic content loader. The engine knows nothing about any vendor;
 // it loads whatever vendors/tracks the manifest declares and assembles a
 // typed tree (vendor → track → domain → lesson/question/scenario/lab/...).
+//
+// PRD-U3 S6: content comes from the Content API (/api/catalog — the same
+// contract the mobile app consumes) instead of static /content/*.json. The
+// assembled shapes are identical (the API serves the files verbatim), so this
+// module is the only one that changes. Plain fetch() — no cache:"no-cache" —
+// lets the browser honour the API's ETag/max-age=300 with native conditional
+// GETs.
 
 const cache = new Map();
 
 async function getJSON(url) {
-  const r = await fetch(url, { cache: "no-cache" });
+  const r = await fetch(url);
   if (!r.ok) throw new Error(`${r.status} ${url}`);
   return r.json();
 }
 
 export async function loadCatalog() {
   if (cache.has("catalog")) return cache.get("catalog");
-  const m = await getJSON("/content/manifest.json");
+  const m = await getJSON("/api/catalog");
   cache.set("catalog", m);
   return m;
 }
@@ -20,11 +27,15 @@ export async function loadCatalog() {
 export async function loadTrack(vendorId, trackId) {
   const key = `t:${vendorId}/${trackId}`;
   if (cache.has(key)) return cache.get(key);
-  const base = `/content/${vendorId}/${trackId}`;
-  const track = await getJSON(`${base}/track.json`);
+  const base = `/api/catalog/${encodeURIComponent(vendorId)}/${encodeURIComponent(trackId)}`;
+  const track = await getJSON(base);
   const domains = [];
   for (const df of track.domainFiles || []) {
-    try { domains.push(await getJSON(`${base}/${df}`)); }
+    // The API keys domains by the file's `id`; filename stem === id is the
+    // tree-wide invariant the mobile client already relies on
+    // (automatos-academy-app/src/cache/content.ts strips .json the same way).
+    const domainId = df.replace(/\.json$/, "");
+    try { domains.push(await getJSON(`${base}/${encodeURIComponent(domainId)}`)); }
     catch (e) { console.warn(`[content] domain failed: ${df}`, e.message); }
   }
   domains.sort((a, b) => (a.order || 0) - (b.order || 0));

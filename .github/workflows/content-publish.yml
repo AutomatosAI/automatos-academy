@@ -1,0 +1,59 @@
+# Content publish (PRD-U3, D-U6) — ingest main's validated content tree into
+# the live Postgres so the running server picks it up on its next 60 s poll
+# (D-U7), no redeploy.
+#
+# Triggers: every push to main that touches public/content/** (the dual-run
+# publisher, D-U9), plus manual workflow_dispatch as the override lane.
+#
+# Until the DATABASE_URL secret is provisioned (Gerard, Railway dashboard —
+# the same database the academy service + Spine use), the job skips with a
+# notice instead of failing: dual-run starts the moment the secret exists,
+# with zero further changes here.
+#
+# `npm run migrate` runs first and is idempotent (node-pg-migrate tracks
+# applied migrations) — it only matters the very first time, when the content
+# tables may not exist yet because no service deploy (D-U3 pre-deploy
+# migrate) has happened since PRD-U3 merged.
+name: content-publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/content/**"
+  workflow_dispatch:
+
+concurrency:
+  group: content-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Gate on the DATABASE_URL secret
+        id: gate
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::DATABASE_URL secret not configured — content publish skipped. Set it (Railway Postgres) to start the D-U9 dual-run."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.configured == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.configured == 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+        if: steps.gate.outputs.configured == 'true'
+      - run: npm run validate
+        if: steps.gate.outputs.configured == 'true'
+      - run: npm run migrate
+        if: steps.gate.outputs.configured == 'true'
+      - run: npm run publish-content
+        if: steps.gate.outputs.configured == 'true'

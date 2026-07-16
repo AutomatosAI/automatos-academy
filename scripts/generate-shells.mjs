@@ -2,20 +2,20 @@
 // SEO landing shells (PRD-GROWTH §2.1). The SPA is hash-routed — invisible to
 // search — so every LIVE track gets a real, static, crawlable page at
 // /tracks/<trackId>/ with Course JSON-LD, plus sitemap.xml + robots.txt.
-// Generated from content at server boot (and runnable standalone: npm run
-// shells). Output is derived — gitignored, never edited by hand.
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+// Output is derived — gitignored, never edited by hand.
+//
+// PRD-U3 S4: shells render FROM THE CONTENT INDEX, never from disk — one code
+// path whichever source (files or Postgres) built the index. server.js builds
+// the index first and calls generateShells(idx); standalone `npm run shells`
+// builds a file index below and emits the same bytes.
+import { writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
+import { buildContentIndex } from "../server/catalog.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const BASE = (process.env.ACADEMY_BASE_URL || "https://academy.automatos.app").replace(/\/$/, "");
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-const manifest = JSON.parse(readFileSync(join(PUBLIC, "content", "manifest.json"), "utf8"));
-const live = manifest.vendors.flatMap((v) =>
-  (v.tracks || []).filter((t) => t.status === "live").map((t) => ({ ...t, vendorId: v.id, vendorName: v.name }))
-);
 
 const DISCLAIMER = "Automatos Academy is independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.";
 
@@ -93,25 +93,44 @@ function shellHtml(t, track) {
 </main></body></html>`;
 }
 
-const urls = [`${BASE}/`];
-for (const t of live) {
-  let track;
-  try { track = JSON.parse(readFileSync(join(PUBLIC, "content", t.vendorId, t.trackId, "track.json"), "utf8")); }
-  catch (e) { console.warn(`[shells] ${t.trackId}: track.json unreadable — skipped (${e.message})`); continue; }
-  // Domain names come from the domain files so the shell lists real curriculum.
-  track.domainNames = (track.domainFiles || []).map((df) => {
-    try { return JSON.parse(readFileSync(join(PUBLIC, "content", t.vendorId, t.trackId, df), "utf8")).name; }
-    catch (_) { return null; }
-  }).filter(Boolean);
-  const dir = join(PUBLIC, "tracks", t.trackId);
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "index.html"), shellHtml(t, track), "utf8");
-  urls.push(`${BASE}/tracks/${t.trackId}/`);
-  console.log(`[shells] /tracks/${t.trackId}/ ✓`);
+/**
+ * Emit /tracks/<trackId>/index.html for every LIVE track, plus sitemap.xml +
+ * robots.txt, from an already-built content index. Reads the index only —
+ * never disk, never mutating it (the index's track.data is what the Content
+ * API serves verbatim; a stray property here would leak into responses).
+ */
+export function generateShells(idx) {
+  const manifest = idx.manifest.data;
+  const live = (manifest.vendors || []).flatMap((v) =>
+    (v.tracks || []).filter((t) => t.status === "live").map((t) => ({ ...t, vendorId: v.id, vendorName: v.name }))
+  );
+
+  const urls = [`${BASE}/`];
+  for (const t of live) {
+    const entry = idx.tracks.get(`${t.vendorId}/${t.trackId}`);
+    if (!entry) { console.warn(`[shells] ${t.trackId}: not in the content index — skipped`); continue; }
+    // Domain names come from the indexed domain files (insertion order =
+    // domainFiles order) so the shell lists real curriculum. Spread — never
+    // mutate the shared index object.
+    const track = {
+      ...entry.track.data,
+      domainNames: [...entry.domains.values()].map((d) => d.data.name).filter(Boolean),
+    };
+    const dir = join(PUBLIC, "tracks", t.trackId);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "index.html"), shellHtml(t, track), "utf8");
+    urls.push(`${BASE}/tracks/${t.trackId}/`);
+    console.log(`[shells] /tracks/${t.trackId}/ ✓`);
+  }
+
+  writeFileSync(join(PUBLIC, "sitemap.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    urls.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join("\n") + `\n</urlset>\n`, "utf8");
+  writeFileSync(join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n`, "utf8");
+  console.log(`[shells] sitemap.xml (${urls.length} urls) + robots.txt ✓`);
 }
 
-writeFileSync(join(PUBLIC, "sitemap.xml"),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-  urls.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join("\n") + `\n</urlset>\n`, "utf8");
-writeFileSync(join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n`, "utf8");
-console.log(`[shells] sitemap.xml (${urls.length} urls) + robots.txt ✓`);
+// ── standalone: npm run shells — build a file index, emit the same bytes ─
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  generateShells(buildContentIndex(join(PUBLIC, "content")));
+}
