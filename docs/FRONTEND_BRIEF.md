@@ -19,7 +19,7 @@ If a banker opens this and thinks *"this is the most beautiful learning thing I'
 - **Tailwind v4 + shadcn/ui** for the component system.
 - **Framer Motion** for the motion language (§7). **Respect `prefers-reduced-motion`.**
 - Data comes from the **Academy API** (§9) — do not hardcode content. Same-origin `/api`, or `NEXT_PUBLIC_ACADEMY_API` base.
-- Progress is **local-first** (localStorage) in this phase — but read/write it through one `useProgress()` hook so a synced backend can drop in later without touching components.
+- Progress is **local-first** (localStorage) — read/write it through one `useProgress()` hook so the synced backend (the Spine + optional Clerk sign-in, PRD-U1/U2 — already live on the vanilla SPA) drops in without touching components.
 
 ## 3. Audience translation — "in plain terms"
 

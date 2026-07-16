@@ -209,7 +209,7 @@ type BrandTokens = {
 
 - **Next.js (App Router) + TypeScript**, deployable to Vercel. MDX for content (`next-mdx-remote` or `@next/mdx` + `contentlayer`-style typed pipeline; if Contentlayer is unmaintained at build time, hand-roll a `gray-matter` + `zod` content loader — do not block on a library).
 - **Tailwind v4 + shadcn/ui** for the component system (Gerard has a tailwind-v4-shadcn setup skill — follow its `@theme inline` + CSS-variable pattern).
-- **Content as files, not a DB**, for Phase 1: `/content/<vendor>/<track>/<domain>/...` MDX + frontmatter. Progress/state is **local-first** (localStorage/IndexedDB) so it works with no backend and no login. Leave a clean `ProgressStore` interface so a synced backend (Supabase) can drop in later without touching UI.
+- **Content as files, not a DB**, for Phase 1: `/content/<vendor>/<track>/<domain>/...` MDX + frontmatter. Progress/state is **local-first** (localStorage/IndexedDB) so it works with no backend and no login required. Leave a clean `ProgressStore` interface so a synced backend can drop in later without touching UI. *(2026-07 update: that backend now exists — the Spine + optional Clerk sign-in, [PRD-U1](prds/PRD-UNIFIED/PRD-U1-WEB-CLERK-IDENTITY.md); signed-out stays fully supported.)*
 - **Quiz/exam engine, scenario engine, readiness math:** pure TypeScript modules, fully unit-tested (Vitest). These are the crown jewels — 80%+ coverage, table-driven tests.
 - **Code samples in lessons** run via embedded snippets + optional StackBlitz/sandbox links; do not build a server-side code executor in Phase 1.
 - **Search:** client-side (FlexSearch/Pagefind) over all lessons/resources/questions.
@@ -289,7 +289,7 @@ Author content as files; the system enforces quality:
 - **Mastery per domain** = f(lessons completed, quiz accuracy, recency) — weighted by blueprint weight to produce one overall readiness %.
 - **Spaced repetition:** missed questions and key concepts enter an SM-2-style review queue; the dashboard surfaces what's due. Getting an item right repeatedly increases its interval.
 - **Honest verdict:** "ready" requires per-domain mastery above a threshold *and* a passed mock at full length — not just clicking through lessons. Show the math; never fake-celebrate.
-- All of this runs on the local `ProgressStore`; no login required.
+- All of this runs on the local `ProgressStore`; no login required (optional sign-in adds sync only — PRD-U1).
 
 ---
 
@@ -383,7 +383,7 @@ Seed the registry now with **10 placeholder `VideoRef` entries** (`status: place
 - [ ] Readiness dashboard gives one honest score + weakest-domain guidance; verdict requires a passed full mock, not just lesson clicks.
 - [ ] Engine modules ≥80% unit-test coverage; build fails on schema/weight/ref violations.
 - [ ] Zero "Anthropic"/"Claude" strings in `lib/engine` or `lib/content` (grep-clean) — proof the engine is vendor-agnostic.
-- [ ] Deploys green to Vercel; Lighthouse perf + a11y both strong; works offline-first (no login).
+- [ ] Deploys green to Vercel; Lighthouse perf + a11y both strong; works offline-first (no login required — PRD-U1's optional sign-in must stay optional).
 
 ---
 

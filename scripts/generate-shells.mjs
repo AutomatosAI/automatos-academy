@@ -54,12 +54,12 @@ function shellHtml(t, track) {
   const faq = isExam
     ? [
         ["Is this the real exam?", "No — it's free preparation. The credential is issued only by the certification body; we prep you to pass it with original, source-grounded questions (never dumps)."],
-        ["What does it cost?", "Nothing. The whole academy is free — no account, no trial, no upsell. Your progress stays on your device."],
+        ["What does it cost?", "Nothing. The whole academy is free — no account required, no trial, no upsell. Signed out, your progress stays on your device; optional sign-in syncs it across devices."],
         ["How do I know the content is current?", "Every exam fact is verified against the live official study guide and stamped with its verification date on the track page."],
       ]
     : [
         ["Is there an exam?", "No — this is a skills track. You finish when every module's hands-on work is done and the capstone ships."],
-        ["What does it cost?", "Nothing. The whole academy is free — no account, no trial, no upsell."],
+        ["What does it cost?", "Nothing. The whole academy is free — no account required, no trial, no upsell."],
         ["Do I need to be technical?", "No. Modules are plain English first; every term of art is explained before it's used."],
       ];
 
@@ -82,7 +82,7 @@ function shellHtml(t, track) {
   <p style="margin-top:16px;font-size:18px;max-width:66ch">${esc(desc)}</p>
   ${examRow}
   ${verifiedRow}
-  <p style="margin:26px 0"><a class="ac-btn ac-btn-solid" href="${appUrl}">Start free — no account →</a></p>
+  <p style="margin:26px 0"><a class="ac-btn ac-btn-solid" href="${appUrl}">Start free — no account needed →</a></p>
   <h2 class="serif-i">What's inside</h2>
   <p>Lessons grounded in primary sources · hands-on labs · branching scenario drills${isExam ? " · full-length timed mock exams · an honest A+ readiness score" : " · a shipped capstone"} · videos and audio deep-dives · a source library where every claim links to the official doc.</p>
   ${domainList}

@@ -22,7 +22,11 @@ npm start            # PORT env (default 4321)
 - **Railway:** new service from this repo → it runs `npm start` → set no special config. The `Dockerfile` is provided if you prefer container builds.
 - Health check: `GET /healthz` → `{ ok: true }`.
 
-Pick Option B when you'll add accounts / progress-sync / a content CMS (the `/api` namespace is already reserved). Otherwise Option A is less to operate.
+Pick Option B for anything beyond static serving — the Content API, badge signing, and the optional accounts + progress-sync Spine all live in `server.js`. Option A (static) can never offer sign-in: `auth-config.js` is hydrated from env at boot, so a static deploy simply renders no auth UI. Otherwise Option A is less to operate.
+
+## Enabling accounts + sync (the Spine)
+
+Sign-in is **optional and additive** — an unconfigured deploy renders zero auth UI and behaves exactly as before. To turn on accounts + cross-device progress sync (Railway Postgres, Clerk keys, `SPINE_ENABLED=true`, authorized-parties hardening, smoke checks), follow the step-by-step runbook: **[SPINE-ENABLE.md](SPINE-ENABLE.md)**.
 
 ## DNS — point the subdomain
 
@@ -45,5 +49,5 @@ Then add `academy.automatos.app` as a custom domain in the host's dashboard so i
 
 ## Notes
 
-- **Local-first:** progress is in the visitor's `localStorage`. Clearing site data resets it. A synced backend is a Phase-2 addition behind the reserved `/api`.
+- **Local-first:** signed out, progress lives in the visitor's `localStorage` (clearing site data resets it). The synced backend now exists — the Spine (`/api/me`, `/api/sync`) with optional Clerk sign-in — and is **off by default**; enable it per [SPINE-ENABLE.md](SPINE-ENABLE.md).
 - **CORS:** none needed — content JSON is same-origin under `/content`.

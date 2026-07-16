@@ -1,8 +1,10 @@
 // Progress backup / restore. Progress is local-first (localStorage, per device),
 // so a cleared browser or a new machine loses everything. This lets a learner
 // carry ALL their academy progress — every track, plus claimed-name and
-// spaced-repetition state — to another browser or keep a backup file, with no
-// account and no backend. Pure client: exports a JSON file, imports it back.
+// spaced-repetition state — to another browser or keep a backup file. Pure
+// client: exports a JSON file, imports it back; while signed out, nothing
+// leaves the device. Optional sign-in (PRD-U1/U2) adds server-side sync as
+// the convenient path — this file backup stays the account-free one.
 const PREFIX = "automatos-academy:";
 const SCHEMA = "automatos-academy-progress/v1";
 
