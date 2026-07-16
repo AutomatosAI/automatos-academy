@@ -57,7 +57,10 @@ know.
 
 ## 4. Own the audience — email, minimally
 
-No accounts, ever (decided). Two honest capture moments:
+No accounts *required* — the original "no accounts, ever" decision is superseded by
+[PRD-U1](./PRD-UNIFIED/PRD-U1-WEB-CLERK-IDENTITY.md) (2026-07): optional sign-in exists for
+progress sync, and it is never a wall or a capture gate. Email stays consent-first, via two
+honest capture moments:
 1. **Badge claim** ([PRD-CREDENTIALS](./PRD-CREDENTIALS.md) §4) — "your certificate link +
    updates to tracks you finished."
 2. **"Notify me"** on every `coming-soon` track card — highest-intent signal we can get, and it

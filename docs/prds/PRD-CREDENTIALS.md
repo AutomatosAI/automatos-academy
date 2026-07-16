@@ -4,6 +4,13 @@
 **Strategy context:** [STRATEGY-REVIEW-2026-07-02.md](../STRATEGY-REVIEW-2026-07-02.md) §4 ("Share" — the missing loop stage)
 **Related:** [PRD-GROWTH.md](./PRD-GROWTH.md) (email capture at claim) · [PRD-B1-AI-BUSINESS.md](./PRD-B1-AI-BUSINESS.md) §2 (completion definition)
 
+> **Superseded note (2026-07-16 — [PRD-U1](./PRD-UNIFIED/PRD-U1-WEB-CLERK-IDENTITY.md)):** the
+> "no login, no DB" constraint this PRD was written under is lifted — PRD-U1 adds optional Clerk
+> sign-in and enables the Spine (Postgres) in production. Read "no login / no DB" below as "no
+> login **required**": signed-out claims keep working exactly as specified here, the stateless v1
+> badge design is unchanged, and signing in only prefills the claim name from the profile. The
+> "Signed by the Academy — not a vendor credential" honesty rules stay verbatim.
+
 ## 1. Why
 
 Completion currently produces **nothing shareable**. The readiness engine gates an A+; APA and ABF

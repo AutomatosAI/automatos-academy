@@ -17,7 +17,7 @@ npm install        # express + compression
 npm start          # → http://localhost:4321
 ```
 
-There is **no build step**. It's a vanilla-JS SPA (ES modules) with JSON content, served by a tiny Express server. Progress is **local-first** (localStorage) — no backend, no login required for Phase 1. `npm run validate` checks every content file against the schema.
+There is **no build step**. It's a vanilla-JS SPA (ES modules) with JSON content, served by a tiny Express server. Progress is **local-first** (localStorage) and no login is ever required — every track, quiz and mock works signed-out. Optional Clerk sign-in (PRD-U1) syncs progress across devices on deploys that enable the Spine API — see [docs/SPINE-ENABLE.md](docs/SPINE-ENABLE.md). `npm run validate` checks every content file against the schema.
 
 ## What's here
 

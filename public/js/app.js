@@ -17,6 +17,7 @@ import { libraryView, videosView } from "./views/library.js";
 import { certificateView } from "./views/certificate.js";
 import { pathFinderView } from "./views/pathfinder.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
+import { mountAuthUI } from "./auth-ui.js";
 import { track as tkEvent, mountCtaTracking } from "./analytics.js";
 
 const appEl = document.getElementById("app");
@@ -108,4 +109,5 @@ function syncTopnav(path) {
 
 start(handle);
 mountTutor();
+mountAuthUI();
 mountCtaTracking();

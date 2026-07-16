@@ -1,5 +1,7 @@
 // Local-first progress store. One namespace per (vendor, track). No backend
-// in Phase 1 — everything lives in localStorage on the learner's device.
+// required — everything lives in localStorage on the learner's device; the
+// optional Spine sync (PRD-U1/U2) mirrors it server-side for signed-in
+// learners without changing this store's contract.
 // All updates are immutable (new state objects), per house style.
 
 const VERSION = "v1";
