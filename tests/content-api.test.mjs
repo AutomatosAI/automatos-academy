@@ -2,7 +2,7 @@
 // Contract tests for the Content API v1 (PRD-MT-01), run against the real
 // content files — the proof that the served shapes ARE the file shapes
 // (CONTENT-API-CONTRACT.md §6: the future DB-backed v2 must keep these green).
-import { readFileSync, rmSync, mkdtempSync } from "fs";
+import { readFileSync, rmSync, mkdtempSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { tmpdir } from "os";
 import { fileURLToPath } from "url";
@@ -110,6 +110,41 @@ const diff = computeChanges(from, to);
 ok(isDeepStrictEqual(diff.find((c) => c.trackId === "t1"), { scope: "track", vendorId: "a", trackId: "t1", domains: ["d2"] }), "changed domain detected at domain granularity");
 ok(isDeepStrictEqual(diff.find((c) => c.trackId === "t2"), { scope: "track", vendorId: "b", trackId: "t2" }), "new track listed without domain detail");
 ok(diff.some((c) => c.scope === "paths") && !diff.some((c) => c.scope === "levels"), "paths change flagged, levels untouched");
+
+// ── stats (landing-hero real numbers) ──────────────────────────────────
+// The route must agree with an INDEPENDENT walk of the content files (not
+// computeContentStats — that would test the function against itself), and
+// learner fields must be null when no DB pool was handed to the router.
+console.log("stats");
+const stats = await get("/stats");
+ok(stats.status === 200, "GET /stats → 200");
+ok((stats.headers.get("cache-control") || "").includes("max-age=300"), "stats: cache-control public max-age=300");
+ok(stats.headers.get("access-control-allow-origin") === "*", "stats: CORS is public");
+ok(stats.headers.get("x-content-version") === idx.contentVersion, "stats: X-Content-Version header present");
+const expected = { liveTracks: 0, lessons: 0, learningMinutes: 0, questions: 0, scenarios: 0, labs: 0, videos: 0 };
+for (const vendor of manifest.vendors) {
+  for (const t of vendor.tracks || []) {
+    if (t.status !== "live") continue;
+    const trackPath = join(CONTENT, vendor.id, t.trackId, "track.json");
+    if (!existsSync(trackPath)) continue; // live-but-contentless would be skipped by the index too
+    expected.liveTracks++;
+    for (const df of readJson(trackPath).domainFiles || []) {
+      const d = readJson(join(CONTENT, vendor.id, t.trackId, df));
+      for (const l of d.lessons || []) {
+        expected.lessons++;
+        expected.learningMinutes += l.estMinutes || 0;
+        expected.questions += (l.knowledgeCheck || []).length;
+      }
+      expected.questions += (d.questions || []).length;
+      expected.scenarios += (d.scenarios || []).length;
+      expected.labs += (d.labs || []).length;
+      expected.videos += (d.videos || []).filter((v) => typeof v.url === "string" && v.url.trim() !== "").length;
+    }
+  }
+}
+for (const k of Object.keys(expected)) ok(stats.body[k] === expected[k], `stats.${k} = ${expected[k]} (independent file count)`);
+ok(expected.liveTracks >= 10 && expected.questions > 1000, "stats describe the real catalog (≥10 live tracks, >1000 questions)");
+ok(stats.body.learners === null && stats.body.activeThisWeek === null, "no DB pool → learners + activeThisWeek are null");
 
 // ── podcasts (PRD-MT-10) ────────────────────────────────────────────────
 // Served verbatim from podcasts.json in exactly the app's manifest shape

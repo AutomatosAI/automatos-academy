@@ -3,6 +3,25 @@ import { el } from "../ui.js";
 import { loadCatalog } from "../content.js";
 import { url } from "../router.js";
 import { track as tk } from "../analytics.js";
+import { continueStrip } from "./continue.js";
+
+// ── real hero numbers (GET /api/catalog/stats) ─────────────────────────
+// One fetch per session (module-level cached promise; the route is
+// max-age=300 anyway), raced against a short timeout so a hung request can
+// never hold the hero hostage. Resolves to the stats object or null — NEVER
+// rejects. On null every widget keeps its launch-era hardcoded copy: the
+// page must not look broken because an endpoint had a bad day.
+let statsPromise = null;
+function fetchHeroStats() {
+  if (!statsPromise) {
+    statsPromise = fetch("/api/catalog/stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null);
+  }
+  return Promise.race([statsPromise, new Promise((res) => setTimeout(() => res(null), 1500))]);
+}
+// a stat is usable only as a positive finite number — anything else falls back
+const posNum = (x) => (typeof x === "number" && isFinite(x) && x > 0 ? x : null);
 
 const SPINE = [
   ["01", "Learn", "Tutorials that teach the why, not just the what — grounded in primary sources."],
@@ -113,7 +132,9 @@ function doors(tracks) {
 // floating glass stat widgets (count-up + avatar cluster), a shared numbered
 // pager that advances the slides, and a "YOUR MIND UPGRADED" corner. Pure DOM
 // via el(); count-up + float/shimmer come from js/anim.js (reduced-motion aware),
-// and the carousel auto-advances unless the OS asks for reduced motion. ──────────
+// and the carousel auto-advances unless the OS asks for reduced motion.
+// The stat widgets show REAL numbers from /api/catalog/stats (see fetchHeroStats
+// above); the mock's placeholder figures survive only as the no-stats fallback. ──
 const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
 const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
@@ -128,25 +149,45 @@ function heroAvatars(ids) {
     el("img", { src: `/img/avatar-${i}.png`, alt: "", loading: "lazy" })));
 }
 
-// floating glass widgets — `pos` is the absolute placement for the slide
-function glassLearners(pos) {
+// floating glass widgets — `pos` is the absolute placement for the slide.
+// Cold-start honesty: until the Academy has a three-digit learner count we
+// don't dress a small one up — we show the practice-question count instead,
+// a number that is impressive today AND real. The moment `learners` crosses
+// 100 the widget flips to people, automatically, with no copy change needed.
+function glassLearners(pos, stats) {
+  const learners = stats && posNum(stats.learners);
+  const questions = stats && posNum(stats.questions);
+  const spec = learners && learners >= 100
+    ? { ds: { count: String(learners), suffix: "+" }, label: "Active learners" }
+    : questions
+      ? { ds: { count: String(questions) }, label: "Practice questions" }
+      : { ds: { count: "544", suffix: "+" }, label: "Active learners" }; // stats down → launch copy
   return el("div", { class: "ac-glass anim-float", style: Object.assign({ padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" }, pos) }, [
     heroAvatars([1, 3, 5]),
     el("div", {}, [
-      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: "544", suffix: "+" }, text: "0+" }),
-      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "Active learners" }),
+      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: spec.ds, text: "0" + (spec.ds.suffix || "") }),
+      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: spec.label }),
     ]),
   ]);
 }
-// the "345 sessions tracked" stat stack (mock 1a)
-function heroStats(pos) {
+// the hero stat stack (mock 1a) — real catalog numbers when /stats answers
+// (lessons big; tracks + guided hours mini), the launch mock copy otherwise.
+// Hours round DOWN (never promise more than we ship). Same nodes, same
+// classes, same count-up wiring — only numbers and labels change.
+function heroStats(pos, stats) {
+  const lessons = stats && posNum(stats.lessons);
+  const tracks = stats && posNum(stats.liveTracks);
+  const hours = stats && posNum(Math.floor((posNum(stats.learningMinutes) || 0) / 60));
+  const spec = lessons && tracks && hours
+    ? { big: { count: String(lessons) }, cap: "Guided lessons",
+        mini: [[{ count: String(tracks) }, "expert tracks"], [{ count: String(hours), suffix: "h" }, "guided learning"]] }
+    : { big: { count: "345" }, cap: "Sessions tracked",
+        mini: [[{ count: "24", suffix: "K" }, "data points"], [{ count: "1.33", dec: "2" }, "avg score"]] };
   return el("div", { class: "ac-hero__stats anim-float2", style: pos }, [
-    el("div", { class: "big", dataset: { count: "345" }, text: "0" }),
-    el("div", { class: "cap", text: "Sessions tracked" }),
-    el("div", { class: "mini" }, [
-      el("div", {}, [el("b", { dataset: { count: "24", suffix: "K" }, text: "0" }), el("span", { text: "data points" })]),
-      el("div", {}, [el("b", { dataset: { count: "1.33", dec: "2" }, text: "0" }), el("span", { text: "avg score" })]),
-    ]),
+    el("div", { class: "big", dataset: spec.big, text: "0" }),
+    el("div", { class: "cap", text: spec.cap }),
+    el("div", { class: "mini" }, spec.mini.map(([ds, label]) =>
+      el("div", {}, [el("b", { dataset: ds, text: "0" }), el("span", { text: label })]))),
   ]);
 }
 
@@ -217,7 +258,7 @@ function mountHeroCarousel(hero, slides, pager) {
   }
 }
 
-function periwinkleHero(flagship) {
+function periwinkleHero(flagship, stats) {
   const startHref = flagship ? "#" + url.track(flagship.vendorId, flagship.trackId) : "#/start";
   const videoHref = flagship ? "#" + url.videos(flagship.vendorId, flagship.trackId) : "#" + url.method();
 
@@ -234,8 +275,8 @@ function periwinkleHero(flagship) {
         el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
       ]),
     ])]),
-    glassLearners({ left: "60%", top: "12%" }),
-    heroStats({ right: "3%", top: "31%" }),
+    glassLearners({ left: "60%", top: "12%" }, stats),
+    heroStats({ right: "3%", top: "31%" }, stats),
     heroInsights({ left: "33%", top: "57%" }),
   ]);
 
@@ -245,11 +286,13 @@ function periwinkleHero(flagship) {
 }
 
 export async function catalog() {
+  const statsReady = fetchHeroStats(); // in flight while the catalog loads — adds ~zero latency
   const cat = await loadCatalog();
+  const stats = await statsReady;
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const flagship = tracks.find((t) => t.flagship && t.status === "live") || tracks.find((t) => t.status === "live");
 
-  const heroVisual = periwinkleHero(flagship);
+  const heroVisual = periwinkleHero(flagship, stats);
   const intro = el("section", { class: "hero" }, [el("div", { class: "wrap" }, [
     el("div", { class: "eyebrow", style: { marginBottom: "20px" } }, [el("span", { class: "mono-label", text: "The Automatos learning model" })]),
     el("h2", { style: { fontSize: "clamp(28px,4vw,44px)", maxWidth: "22ch" } }, ["Learn AI architecture. ", el("em", { class: "serif-i", text: "Prove it." })]),
@@ -277,7 +320,9 @@ export async function catalog() {
     ]),
   ])]);
 
-  return el("div", {}, [heroVisual, intro, cards]);
+  // Returning learners get the "welcome back" strip ABOVE the hero (null for
+  // new visitors — their home is unchanged; null on any internal error too).
+  return el("div", {}, [continueStrip(cat), heroVisual, intro, cards]);
 }
 
 export async function method() {
