@@ -1,6 +1,10 @@
 # Academy CI — content validation + engine/API tests on every PR and main push,
 # plus the Spine job (PRD-MT-02): migrations + integration tests against a
-# disposable Postgres service container. deploy-media.yml stays manual-only.
+# disposable Postgres service container. The same job runs the PRD-U3 content
+# equivalence gate (tests/content-db.test.mjs): publish the real tree into the
+# service Postgres, then prove db-index ≡ file-index byte-for-byte — the
+# mandatory dual-run tripwire (D-U9). deploy-media.yml stays manual-only;
+# content-publish.yml ingests main's content into the live DB (D-U6).
 #
 # NOTE `npm install` (not `npm ci`) in both jobs, TEMPORARILY: PRD-MT-02 adds
 # pg/@clerk/backend/node-pg-migrate and this change shipped from a no-local-
@@ -53,3 +57,4 @@ jobs:
       - run: npm install
       - run: npm run migrate
       - run: npm run test:spine
+      - run: npm run test:content-db

@@ -60,11 +60,53 @@ function signRateLimited(ip) {
   return rec.count > SIGN_RATE_MAX;
 }
 
-// SEO landing shells + sitemap are generated from content at boot (same
-// pattern as chat-config hydration below). Failure is non-fatal — the SPA
+// ── Content index (PRD-U3) — the single runtime source for all content ─
+// CONTENT_SOURCE=files (default/absent): read public/content at boot, exactly
+// as always — the no-DB static deploy keeps working with zero env.
+// CONTENT_SOURCE=db: load the published index from Postgres and poll the
+// current pointer every 60 s (D-U7), swapping the index atomically on a new
+// publish — content ships without a redeploy. Serving is identical either
+// way: same index shape, same router, zero per-request I/O.
+// Half-configured deploys fail loudly, same posture as the Spine below.
+const CONTENT_SOURCE = process.env.CONTENT_SOURCE || "files";
+if (CONTENT_SOURCE !== "files" && CONTENT_SOURCE !== "db") {
+  console.error(`[catalog] CONTENT_SOURCE must be 'files' or 'db' (got '${CONTENT_SOURCE}') — refusing to boot.`);
+  process.exit(1);
+}
+if (CONTENT_SOURCE === "db" && !process.env.DATABASE_URL) {
+  console.error("[catalog] CONTENT_SOURCE=db but DATABASE_URL is missing — refusing to boot.");
+  process.exit(1);
+}
+
+let contentIndex; // swapped by the db-mode refresh; read via getContentIndex()
+const getContentIndex = () => contentIndex;
+if (CONTENT_SOURCE === "db") {
+  // Boot fails loudly if nothing is published or an integrity tripwire fires;
+  // after a good boot, refresh failures keep serving the last good index.
+  const { createContentPool, buildContentIndexFromDb, startContentRefresh } = await import("./server/catalog-db.js");
+  const contentPool = createContentPool(process.env.DATABASE_URL);
+  contentIndex = await buildContentIndexFromDb(contentPool);
+  startContentRefresh(contentPool, {
+    getCurrent: getContentIndex,
+    swap: (next) => {
+      contentIndex = next;
+      console.log(`[catalog] content refreshed to ${next.contentVersion}`);
+    },
+  });
+} else {
+  contentIndex = buildContentIndex(
+    resolve(PUBLIC, "content"),
+    process.env.CONTENT_JOURNAL_PATH || resolve(__dirname, "data", "content-journal.json"),
+  );
+}
+
+// SEO landing shells + sitemap render FROM THE INDEX (PRD-U3 S4 — the index
+// exists first; shells never re-read disk). Failure is non-fatal — the SPA
 // serves fine without shells.
-try { await import("./scripts/generate-shells.mjs"); }
-catch (e) { console.warn("[shells] generation skipped:", e.message); }
+try {
+  const { generateShells } = await import("./scripts/generate-shells.mjs");
+  generateShells(getContentIndex());
+} catch (e) { console.warn("[shells] generation skipped:", e.message); }
 
 // ── Hydrate the tutor's chat config from env at startup ───────────────
 // Mirrors the landing site's _config.js pattern. The tutor is a separate
@@ -145,16 +187,11 @@ app.get("/api/badge/verify", (req, res) => {
 });
 
 // ── Content API v1 (PRD-MT-01) ─────────────────────────────────────────
-// Versioned, published-only catalog for the mobile app (and, later, the web
-// SPA). Built from the same files the SPA reads; boot fails loudly on
-// malformed content — the validator catches this pre-merge, so a crash here
-// means an unvalidated deploy shipped.
-const contentIndex = buildContentIndex(
-  resolve(PUBLIC, "content"),
-  process.env.CONTENT_JOURNAL_PATH || resolve(__dirname, "data", "content-journal.json"),
-);
-app.use("/api/catalog", createCatalogRouter(contentIndex));
-console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks)`);
+// Versioned catalog for the mobile app and the web SPA, serving the index
+// built above (files or db — one router, one contract). The getter keeps the
+// router on the freshest index when db mode's 60 s refresh swaps it.
+app.use("/api/catalog", createCatalogRouter(getContentIndex));
+console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks, source=${CONTENT_SOURCE})`);
 
 // ── Spine — per-user state: Postgres + Clerk + sync + GDPR (PRD-MT-02) ─
 // Default OFF: without SPINE_ENABLED=true the service boots exactly as
@@ -179,11 +216,12 @@ app.use("/api", (_req, res) => res.status(501).json({ error: "not_implemented", 
 // certificate. The payload is self-contained; nothing is stored server-side.
 // v1 checksum ≠ verification — copy must never claim "verified".
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-let manifestCache = null;
+// Track/vendor names come from the content index (PRD-U3 S4 — no disk read,
+// no separate cache; db mode's refresh keeps names current automatically).
 function trackMeta(vendorId, trackId) {
   try {
-    if (!manifestCache) manifestCache = JSON.parse(readFileSync(resolve(PUBLIC, "content", "manifest.json"), "utf8"));
-    const vend = (manifestCache.vendors || []).find((v) => v.id === vendorId);
+    const manifest = getContentIndex().manifest.data;
+    const vend = (manifest.vendors || []).find((v) => v.id === vendorId);
     const tr = vend && (vend.tracks || []).find((t) => t.trackId === trackId);
     return { vendorName: vend ? vend.name : vendorId, trackName: tr ? tr.name : trackId };
   } catch (_) { return { vendorName: vendorId, trackName: trackId }; }
