@@ -464,9 +464,9 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .vid-card .frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
 
 /* ── Tutor — FAB, docked panel, full study page ─────────────────────── */
-.tut-fab { position: fixed; right: 22px; bottom: 22px; z-index: 1200; width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-size: 18px; cursor: pointer; box-shadow: 0 10px 30px rgba(39,60,89,.28); transition: transform .12s; display: grid; place-items: center; }
+.tut-fab { position: fixed; right: 22px; bottom: 22px; z-index: 1200; width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-size: 18px; cursor: pointer; box-shadow: var(--shadow-card); transition: transform .12s; display: grid; place-items: center; }
 .tut-fab:hover { transform: translateY(-3px); }
-.tut-panel { position: fixed; right: 22px; bottom: 90px; z-index: 1201; width: min(400px, calc(100vw - 32px)); height: min(620px, calc(100vh - 130px)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); display: flex; flex-direction: column; opacity: 0; transform: translateY(12px) scale(.98); pointer-events: none; transition: opacity .16s, transform .16s; box-shadow: 0 24px 60px rgba(39,60,89,.28); overflow: hidden; }
+.tut-panel { position: fixed; right: 22px; bottom: 90px; z-index: 1201; width: min(400px, calc(100vw - 32px)); height: min(620px, calc(100vh - 130px)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); display: flex; flex-direction: column; opacity: 0; transform: translateY(12px) scale(.98); pointer-events: none; transition: opacity .16s, transform .16s; box-shadow: var(--shadow-lift); overflow: hidden; }
 .tut-panel[data-open="true"] { opacity: 1; transform: none; pointer-events: auto; }
 .tut-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--rule); }
 .tut-title { font-family: var(--display); font-weight: 700; font-size: 19px; }
@@ -502,6 +502,16 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .tut-input:focus { outline: none; border-color: var(--accent); }
 .tut-send { width: 40px; height: 40px; flex: none; border: 0; background: var(--accent); color: var(--accent-ink); font-size: 16px; cursor: pointer; border-radius: var(--radius); }
 .tut-send:hover { filter: brightness(1.08); }
+
+/* tutor truth states (PRD-TUTOR-LIVE S2): failures render as a distinct
+   system row — never a fake assistant bubble — and the FAB carries a quiet
+   unavailable dot after a failed send (cleared on the next success). */
+.tut-empty-title { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--muted); }
+.tut-status { align-self: center; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; max-width: 96%; padding: 10px 14px; border: 1px solid var(--rule-strong); border-radius: var(--radius); background: var(--glass); color: var(--fg-2); font-size: 13px; line-height: 1.5; }
+.tut-status-text { flex: 1 1 16ch; min-width: 0; }
+.tut-retry { font-family: var(--label); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.tut-retry:hover { filter: brightness(1.08); }
+.tut-fab[data-health="down"]::after { content: ""; position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 0 2px var(--bg); }
 
 /* full study page */
 .tut-page-grid { display: grid; grid-template-columns: 220px 1fr; gap: 28px; margin-top: 28px; align-items: start; }

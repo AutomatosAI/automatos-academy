@@ -6,7 +6,8 @@
 // Events (keep this the single vocabulary): page_view · track_start ·
 // module_complete · mock_start · mock_score · readiness_a_plus · badge_claim
 // · badge_view · cta_automatos_click · notify_me · tutor_message ·
-// tutor_deep_link · path_finder
+// tutor_error (props: kind, status? — counts only, never message text;
+// PRD-TUTOR-LIVE D-T4) · tutor_deep_link · path_finder
 
 const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim();
 
