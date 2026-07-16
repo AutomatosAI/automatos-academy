@@ -140,7 +140,10 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 /* ── topbar ─────────────────────────────────────────────────────────── */
 .ac-topbar {
   position: sticky; top: 0; z-index: 50;
-  display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 18px;
+  /* 4 tracks: brand | nav | auth slot (when configured) | mood pill. The auth
+     slot is inserted at runtime — a 3-track grid wrapped the mood pill onto
+     its own full-width row the moment auth mounted. */
+  display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 18px;
   padding: 12px clamp(16px, 4vw, 40px);
   background: color-mix(in srgb, var(--bg) 72%, transparent);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);

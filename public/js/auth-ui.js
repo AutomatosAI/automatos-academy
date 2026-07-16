@@ -4,14 +4,13 @@
 // slot, so the pre-U1 topbar is byte-identical — then:
 //   signed-out → a quiet ghost pill ("Sign in") that opens Clerk's modal
 //   signed-in  → avatar (photo, else the learner's initial in an accent
-//                circle) with a small menu: name/email header, Profile,
-//                Export my data, Delete… (both U2), and Sign out.
-// Export streams the Spine's GDPR document straight to a file download; the
-// typed-confirmation delete flows live on #/profile — the menu only points
-// there. All auth calls go through auth.js (the single Clerk seam).
+//                circle) with a small menu: name/email header, My progress,
+//                Sign out. Account plumbing (export / delete) deliberately
+//                does NOT live here — it has a "Your data" section at the
+//                bottom of #/profile; the menu stays about learning.
+// All auth calls go through auth.js (the single Clerk seam).
 import { el, clear } from "./ui.js";
 import { initAuth, isConfigured, onAuthChange, openSignIn, signOut } from "./auth.js";
-import { exportMyData } from "./sync/account.js";
 import { url } from "./router.js";
 
 // Document-level listeners for the open menu, torn down on every re-render so
@@ -49,18 +48,6 @@ function avatarFace(u) {
 }
 
 function accountMenu(u) {
-  // Export runs in place: the item narrates its own progress rather than
-  // closing the menu on a silent failure (profile has the richer surface).
-  const exportBtn = el("button", { class: "ac-auth-item", type: "button", role: "menuitem" }, ["Export my data"]);
-  exportBtn.addEventListener("click", async () => {
-    exportBtn.disabled = true;
-    exportBtn.textContent = "Exporting…";
-    const r = await exportMyData();
-    exportBtn.textContent = r.ok ? "Downloaded ✓" : "Export failed — see Profile";
-    exportBtn.disabled = false;
-    if (r.ok) setTimeout(() => setOpen(false), 900);
-  });
-
   const menu = el("div", { class: "ac-auth-menu", role: "menu", hidden: true }, [
     el("div", { class: "ac-auth-id", role: "presentation" }, [
       u.name ? el("b", { text: u.name }) : null,
@@ -69,12 +56,7 @@ function accountMenu(u) {
     el("button", {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
-    }, ["Profile"]),
-    exportBtn,
-    el("button", {
-      class: "ac-auth-item", type: "button", role: "menuitem",
-      onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
-    }, ["Delete my data…"]),
+    }, ["My progress"]),
     el("button", {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); signOut(); },
