@@ -1,18 +1,29 @@
 // Profile (#/profile — PRD-U2 S4, decision D-U4a: REAL DATA ONLY). One page,
-// three stories: who you are (Clerk identity + member-since + the
-// server-derived study streak), how ready you are (per-track readiness reusing
-// readiness.js/certificate.js over the local store — the SAME math and the
-// same store the rest of the SPA reads, zero forked computation; reconcile
-// keeps that store in step with other devices), and your rights over your
-// data (export / delete, §4.4 — typed in-page confirmations, no
-// window.confirm, wipes routed through the queue's clearAll seam).
+// four stories: who you are (Clerk identity + member-since), what your whole
+// learning life adds up to (the hero strip — time invested, lessons covered,
+// questions answered, the server-derived streak), how ready you are
+// (per-track readiness reusing readiness.js/certificate.js over the local
+// store — the SAME math and the same store the rest of the SPA reads, zero
+// forked computation; reconcile keeps that store in step with other devices),
+// and your rights over your data (export / delete, §4.4 — typed in-page
+// confirmations, no window.confirm, wipes routed through the queue's clearAll
+// seam; since the account menu slimmed down, this section is the ONLY home
+// of export/delete).
 //
-// The mastery bars are the first real consumer of the .fillbar reveal system
-// (anim.js + academy.css shipped it unused): width animates to --fill on
-// first view, instant under prefers-reduced-motion.
+// "Time invested" is an estimate and says so (the ≈ and the caption):
+//   Σ estMinutes over completed lessons
+//   + 45 s per recorded answer (every q.seen is one attempt)
+//   + mocks sat × the track's exam.durationMinutes.
+// Every number derives from the store the learner can export — no invented
+// telemetry (D-U4a). Signed out, the numbers are this device's numbers.
+//
+// The mastery + coverage bars ride the .fillbar reveal system and the hero
+// numbers ride the [data-count] count-up (anim.js): both animate on first
+// view and render instantly under prefers-reduced-motion.
 //
 // Signed out this page is a local-only mirror plus a quiet sign-in nudge —
-// never a wall (PRD-U2 goal 2).
+// never a wall (PRD-U2 goal 2). Cold start (no progress anywhere) gets an
+// invitation in the hero's own voice, not a wall of zeros.
 import { el, ring, seal } from "../ui.js";
 import { url } from "../router.js";
 import { loadCatalog, loadTrack } from "../content.js";
@@ -67,22 +78,107 @@ function identityHead(status) {
   ]);
 }
 
-function streakPanel(status) {
-  const streak = status.profile && status.profile.streak;
-  if (!signedIn() || !streak) return null;
-  return el("div", { class: "panel", style: { marginTop: "26px" } }, [
-    el("div", { class: "stat-row" }, [
-      el("div", { class: "s" }, [el("b", { text: String(streak.current) }), el("span", { class: "mono-label", text: "Day streak" })]),
-      el("div", { class: "s" }, [el("b", { text: String(streak.best) }), el("span", { class: "mono-label", text: "Best streak" })]),
-      status.lastSyncedAt
-        ? el("div", { class: "s" }, [el("b", { text: fmtDate(status.lastSyncedAt) }), el("span", { class: "mono-label", text: "Last synced" })])
-        : null,
-    ]),
-    el("p", { class: "muted", style: { margin: "12px 0 0", fontSize: "12.5px" }, text: "Streak days are counted in UTC, across every device on your account." }),
+// ── hero stats — the whole learning life in four count-up tiles ──────────
+// The old standalone streak panel folded into tile 4: current streak is the
+// number, best streak moves to the caption, and "last synced" already lives
+// in the "Your data" section — nothing was lost, one panel was.
+const ATTEMPT_SECONDS = 45; // honest flat cost per recorded answer (see header)
+
+function heroTotals(entries) {
+  let minutes = 0, lessonsDone = 0, lessonsTotal = 0, qDistinct = 0, qAttempts = 0;
+  for (const { track, store } of entries) {
+    for (const d of track.domains) {
+      for (const l of d.lessons || []) {
+        lessonsTotal++;
+        if (store.lessonDone(l.id)) { lessonsDone++; minutes += l.estMinutes || 0; }
+      }
+    }
+    // raw store, not tree-gated: they DID answer these, even if content moved
+    for (const r of Object.values(store.s.q || {})) { qDistinct++; qAttempts += r.seen || 0; }
+    minutes += (store.s.exams || []).length * ((track.exam && track.exam.durationMinutes) || 0);
+  }
+  minutes += (qAttempts * ATTEMPT_SECONDS) / 60;
+  return { minutes: Math.round(minutes), lessonsDone, lessonsTotal, qDistinct, qAttempts };
+}
+
+// anim.js tweens [data-count] the first time it scrolls into view (and just
+// prints the final value under prefers-reduced-motion).
+const countTo = (n, attrs = {}) => el("span", { "data-count": String(n), ...attrs });
+
+// "≈ 12h 40m" as two count-up spans (the tween only animates one number, so
+// hours and minutes each get their own).
+function timeValue(mins) {
+  if (mins < 60) return el("b", {}, [countTo(mins, { "data-prefix": "≈ ", "data-suffix": "m" })]);
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return el("b", {}, [
+    countTo(h, { "data-prefix": "≈ ", "data-suffix": "h" }),
+    m ? " " : null,
+    m ? countTo(m, { "data-suffix": "m" }) : null,
+  ]);
+}
+
+function statTile(value, label, caption) {
+  return el("div", { class: "profile-stat" }, [
+    value,
+    el("span", { class: "mono-label", text: label }),
+    caption ? el("p", { class: "cap", text: caption }) : null,
+  ]);
+}
+
+function heroStats(entries, status) {
+  const t = heroTotals(entries);
+  const streak = signedIn() && status.profile ? status.profile.streak : null;
+  const n = entries.length;
+
+  const lessons = el("b", {}, [countTo(t.lessonsDone), el("span", { class: "of", text: ` / ${t.lessonsTotal}` })]);
+  const streakVal = streak ? el("b", {}, [countTo(streak.current)]) : el("b", { text: "—" });
+  const streakCap = streak
+    ? `best ${streak.best} · counted in UTC, across your devices`
+    : (signedIn() ? "appears after your first sync" : "sign in to keep a streak across devices");
+
+  return el("div", { class: "profile-stats" }, [
+    statTile(timeValue(t.minutes), "Time invested", "estimated from lessons, reviews and mock exams"),
+    statTile(lessons, "Lessons completed", `across ${n} started track${n === 1 ? "" : "s"}`),
+    statTile(el("b", {}, [countTo(t.qDistinct)]), "Questions answered", `${t.qAttempts.toLocaleString()} attempt${t.qAttempts === 1 ? "" : "s"} in total`),
+    statTile(streakVal, "Day streak", streakCap),
   ]);
 }
 
 // ── per-track readiness (readiness.js math over the local store) ─────────
+// grade → its band colour token (same buckets as ui.js sealClass — tolerant
+// of the ± grades verdict() can produce, unlike an exact-match ternary)
+const gradeTone = (g) => {
+  const U = (g || "").toUpperCase();
+  const key = U === "A+" ? "aplus" : U.startsWith("A") ? "a" : U.startsWith("B") ? "b" : U === "C" ? "c" : U === "D" ? "d" : "f";
+  return `var(--grade-${key})`;
+};
+
+// Coverage — "what have I actually covered?" — lessons and distinct
+// questions over the track totals, aggregated from the SAME domainStats the
+// mastery bars use (tree-gated, so x can never exceed y).
+function coverageLines(track, store) {
+  let lDone = 0, lTot = 0, qDone = 0, qTot = 0;
+  for (const d of track.domains) {
+    const st = domainStats(d, store);
+    lDone += st.lessonsDone; lTot += st.lessonsTotal;
+    qDone += st.distinct;    qTot += st.poolSize;
+  }
+  if (!lTot && !qTot) return null;
+  const row = (label, done, total) => {
+    const bar = el("div", { class: "fillbar" }, [el("i")]);
+    bar.style.setProperty("--fill", Math.round((done / total) * 100) + "%");
+    return el("div", { class: "profile-cover-row" }, [
+      el("span", { class: "mono-label", text: label }),
+      el("span", { class: "profile-cover-count", text: `${done}/${total}` }),
+      bar,
+    ]);
+  };
+  return el("div", { class: "profile-cover" }, [
+    lTot ? row("Lessons", lDone, lTot) : null,
+    qTot ? row("Questions practised", qDone, qTot) : null,
+  ]);
+}
+
 function masteryBars(track, store) {
   return el("div", { class: "profile-bars" }, track.domains.map((d) => {
     const st = domainStats(d, store);
@@ -127,20 +223,31 @@ function trackPanel(track, store) {
   const scnTotal = track.domains.reduce((n, d) => n + (d.scenarios || []).length, 0);
   const scnDone = Object.keys(store.s.scenarios || {}).length;
 
-  let ringPct, gradeSeal, headline;
+  let ringPct, ringGrade = null, gradeSeal = null, headline;
   if (skills) {
-    ringPct = Math.round(comp.pct * 100);
-    gradeSeal = null;
+    ringPct = Math.round(comp.pct * 100); // no exam → the ring keeps its %
     headline = `${comp.done} of ${comp.total} lessons done`;
   } else {
     const v = comp.verdict;
     ringPct = Math.round(v.overall.mastery * 100);
-    gradeSeal = seal(v.grade, v.qualified ? "Qualified" : "Readiness", "sm");
+    ringGrade = v.grade;
+    // the seal is EARNED — it appears once a full mock is passed. Until then
+    // the ring's grade letter tells the story (no F stamped on day one; the
+    // headline already says "not yet qualified" in words).
+    if (store.bestPassedMock()) gradeSeal = seal(v.grade, v.qualified ? "Qualified" : "Readiness", "sm");
     headline = v.headline;
   }
 
   const readinessRing = ring(ringPct);
-  readinessRing.style.setProperty("--p", String(Math.max(0, Math.min(100, Math.round(ringPct))))); // portable --var set
+  readinessRing.style.setProperty("--p", String(Math.max(0, Math.min(100, Math.round(ringPct))))); // custom props need setProperty — style-object indexing is not portable
+  if (ringGrade) {
+    // readiness fill stays the %, the centred label becomes the grade letter
+    const label = readinessRing.querySelector("span");
+    label.textContent = ringGrade;
+    label.style.color = gradeTone(ringGrade);
+    readinessRing.setAttribute("role", "img");
+    readinessRing.setAttribute("aria-label", `${ringPct}% readiness — grade ${ringGrade}`);
+  }
 
   return el("div", { class: "panel profile-track" }, [
     el("div", { class: "profile-track-head" }, [
@@ -152,7 +259,11 @@ function trackPanel(track, store) {
       ]),
       gradeSeal,
     ]),
-    masteryBars(track, store),
+    coverageLines(track, store),
+    el("div", { class: "profile-mastery" }, [
+      el("span", { class: "mono-label", text: skills ? "Progress by module group" : "Mastery by domain" }),
+      masteryBars(track, store),
+    ]),
     el("div", { class: "profile-track-cols" }, [
       el("div", {}, [
         el("span", { class: "mono-label", text: "Mock exams" }),
@@ -167,27 +278,42 @@ function trackPanel(track, store) {
   ]);
 }
 
-async function tracksSection() {
-  let cat;
-  try { cat = await loadCatalog(); } catch (_) { return el("p", { class: "muted", text: "Couldn't load the catalog — your progress is safe; try again shortly." }); }
-  const panels = [];
+// One walk over the catalog: every STARTED track (local data present) gets
+// its full tree loaded once, and that single list feeds the hero totals and
+// the per-track panels alike — the same numbers, computed from the same trees.
+async function gatherStarted() {
+  const cat = await loadCatalog(); // throws → caller renders the honest error
+  const entries = [];
   for (const vend of cat.vendors || []) {
     for (const t of vend.tracks || []) {
       // Cheap local check first; only tracks with data fetch their full tree.
       const store = new Store(vend.id, t.trackId);
       if (!hasData(store.s)) continue;
       try {
-        panels.push(trackPanel(await loadTrack(vend.id, t.trackId), store));
+        entries.push({ track: await loadTrack(vend.id, t.trackId), store });
       } catch (_) { /* content unavailable — skip, the data stays local */ }
     }
   }
-  if (!panels.length) {
-    return el("div", { class: "panel" }, [
-      el("p", { class: "muted", text: "No study history on this profile yet." }),
-      el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.catalog(), style: { marginTop: "12px" } }, ["Pick a track →"]),
-    ]);
-  }
-  return el("div", { class: "profile-tracks" }, panels);
+  return entries;
+}
+
+// ── cold start — an invitation, not a wall of zeros ──────────────────────
+// The same brain as the landing hero (already-cached /img/brain.png), radially
+// masked into the periwinkle by CSS — zero new assets, no motion to gate.
+function emptyState() {
+  return el("div", { class: "panel profile-empty" }, [
+    el("img", { class: "profile-empty-brain", src: "/img/brain.png", alt: "", loading: "lazy", "aria-hidden": "true" }),
+    el("span", { class: "mono-label", text: "No study history yet" }),
+    el("h2", { text: "Your journey starts here" }),
+    el("p", { class: "muted", text: "Pick a track and this page starts keeping score — hours invested, lessons covered, questions practised, readiness by domain. All of it stays yours to export, any time." }),
+    signedIn()
+      ? el("p", { class: "muted", style: { fontSize: "13px" }, text: "Studied on another device? Its progress appears here after that device syncs." })
+      : null,
+    el("div", { class: "row", style: { gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" } }, [
+      el("a", { class: "ac-btn ac-btn-solid", href: "#/start" }, ["Find your track →"]),
+      el("a", { class: "ac-btn", href: "#" + url.catalog() }, ["Browse all tracks"]),
+    ]),
+  ]);
 }
 
 // ── "Your data" — GDPR self-service (§4.4) ───────────────────────────────
@@ -300,12 +426,25 @@ function dataSection(status) {
 // ── the view ─────────────────────────────────────────────────────────────
 export async function profileView() {
   const status = syncStatus();
-  const tracks = await tracksSection();
+  let entries = null; // null = catalog unreachable, [] = genuinely no history
+  try { entries = await gatherStarted(); } catch (_) {}
+
+  const body = [];
+  if (!entries) {
+    body.push(el("div", { class: "panel", style: { marginTop: "26px" } }, [
+      el("p", { class: "muted", text: "Couldn't load the catalog — your progress is safe; try again shortly." }),
+    ]));
+  } else if (!entries.length) {
+    body.push(emptyState());
+  } else {
+    body.push(heroStats(entries, status));
+    body.push(el("h2", { class: "serif-i", style: { fontSize: "26px", margin: "40px 0 14px" }, text: "Readiness, per track" }));
+    body.push(el("div", { class: "profile-tracks" }, entries.map((e) => trackPanel(e.track, e.store))));
+  }
+
   return el("div", { class: "section" }, [el("div", { class: "wrap", style: { maxWidth: "880px" } }, [
     identityHead(status),
-    streakPanel(status),
-    el("h2", { class: "serif-i", style: { fontSize: "26px", margin: "40px 0 14px" }, text: "Readiness, per track" }),
-    tracks,
+    ...body,
     dataSection(status),
   ])]);
 }
