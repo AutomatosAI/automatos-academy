@@ -1,9 +1,9 @@
 // Platform home (track catalog, two doors) + the "learning model" explainer.
-import { el } from "../ui.js";
+import { el, ring } from "../ui.js";
 import { loadCatalog } from "../content.js";
 import { url } from "../router.js";
 import { track as tk } from "../analytics.js";
-import { continueStrip } from "./continue.js";
+import { continueData, heroReadiness } from "./continue.js";
 
 // ── real hero numbers (GET /api/catalog/stats) ─────────────────────────
 // One fetch per session (module-level cached promise; the route is
@@ -127,14 +127,18 @@ function doors(tracks) {
   ]);
 }
 
-// ── Periwinkle landing hero (design mock 1a + 1b): a full-bleed two-slide
-// carousel — slide 1 the glowing-brain image hero, slide 2 the video hero — with
-// floating glass stat widgets (count-up + avatar cluster), a shared numbered
-// pager that advances the slides, and a "YOUR MIND UPGRADED" corner. Pure DOM
-// via el(); count-up + float/shimmer come from js/anim.js (reduced-motion aware),
-// and the carousel auto-advances unless the OS asks for reduced motion.
-// The stat widgets show REAL numbers from /api/catalog/stats (see fetchHeroStats
-// above); the mock's placeholder figures survive only as the no-stats fallback. ──
+// ── Periwinkle landing hero (design mock 1a): the glowing-brain hero with
+// floating glass widgets and a "YOUR MIND UPGRADED" corner. Pure DOM via
+// el(); count-up + float come from js/anim.js (reduced-motion aware).
+// Two audiences, one hero:
+//   • new visitors — REAL platform numbers from /api/catalog/stats (see
+//     fetchHeroStats above; the mock's placeholder figures survive only as
+//     the no-stats fallback), plus the live-learner card when /stats can
+//     honestly vouch for one.
+//   • returning learners (continueData != null) — the primary CTA becomes
+//     "Continue ⟨track⟩ →", "Start Learning" steps down to the ghost slot,
+//     and a chip row resumes reviews/mocks. Signed in, the widgets go
+//     personal too: streak flame, readiness ring, reviews due. ──
 const HERO_BRAIN_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>';
 const HERO_CHEVRON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
@@ -142,7 +146,8 @@ const HERO_PLAY_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="cur
 // and it will play muted-loop in the hero panel. Until then this 404s and the
 // panel shows the brain poster — deliberately NOT a course video.
 const HERO_VIDEO_SRC = "/media/hero-loop.mp4";
-const HERO_INSIGHTS_SVG = '<svg viewBox="0 0 236 90" preserveAspectRatio="none"><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40 L236 90 L0 90 Z" fill="rgba(255,255,255,0.16)"/><path d="M0 60 C 40 30, 70 78, 118 52 C 160 30, 190 66, 236 40" fill="none" stroke="#fff" stroke-width="2" opacity="0.85"/></svg>';
+// lucide "flame" — the streak widget's mark, tinted with the brain's coral
+const HERO_FLAME_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
 
 function heroAvatars(ids) {
   return el("div", { class: "ac-hero__avatars" }, ids.map((i) =>
@@ -191,12 +196,71 @@ function heroStats(pos, stats) {
   ]);
 }
 
-// "Neural Insights" waveform card with a shimmer sweep (mock 1a)
-function heroInsights(pos) {
-  return el("div", { class: "ac-hero__insights shimmer", style: pos }, [
-    el("div", { class: "k1", text: "Neural" }),
-    el("div", { class: "k2", text: "Insights" }),
-    el("div", { html: HERO_INSIGHTS_SVG }),
+// the third card, signed out — replaces the retired "Neural Insights"
+// placeholder waveform with something REAL: the live-learner count, but only
+// when /stats can honestly vouch for one (below the floor a true-but-tiny
+// number reads worse than no card, so the card hides entirely — no fakes).
+const HERO_ACTIVE_FLOOR = 5;
+function heroActive(pos, stats) {
+  const active = stats && posNum(stats.activeThisWeek);
+  if (!active || active < HERO_ACTIVE_FLOOR) return null;
+  return el("div", { class: "ac-hero__insights anim-float", style: pos }, [
+    el("div", { class: "k1", text: "Learners" }),
+    el("div", { class: "k2" }, [el("span", { dataset: { count: String(active) }, text: "0" }), " active this week"]),
+  ]);
+}
+
+// ── personal widgets (signed-in returning learners) ─────────────────────
+// Same glass shells, float loops and count-up wiring as the public stat
+// widgets — only the numbers become the learner's own. Each renders only
+// when its number is real: no streak → no flame, nothing due → no card.
+
+// (a) flame + "⟨n⟩-day streak" — the server-computed streak, read through the
+// same selector chain the profile page uses (continueData → syncStatus()).
+function streakWidget(pos, streak) {
+  if (!streak) return null;
+  return el("div", { class: "ac-glass anim-float", style: Object.assign({ padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" }, pos) }, [
+    el("span", { class: "anim-flame", "aria-hidden": "true", style: { display: "inline-flex", color: "var(--coral)" }, html: HERO_FLAME_SVG }),
+    el("div", {}, [
+      el("div", { style: { fontFamily: "var(--display)", fontWeight: "700", fontSize: "21px", color: "#fff" }, dataset: { count: String(streak) }, text: "0" }),
+      el("div", { style: { fontSize: "13px", color: "rgba(255,255,255,0.85)" }, text: "day streak" }),
+    ]),
+  ]);
+}
+
+// (b) conic ring + "⟨pct⟩% ready · ⟨code⟩" for the most-advanced track —
+// pct from heroReadiness (the profile page's completion/verdict math).
+function readyWidget(pos, ready) {
+  if (!ready) return null;
+  const r = ring(ready.pct);
+  // custom properties need setProperty (style-object indexing is not
+  // portable for --vars) — same guard profile.js applies to its rings
+  r.style.setProperty("--p", String(Math.max(0, Math.min(100, ready.pct))));
+  r.setAttribute("aria-hidden", "true"); // decorative — the text carries the number
+  const label = r.querySelector("span");
+  if (label) label.textContent = "";
+  return el("div", { class: "ac-hero__stats is-ready anim-float2", style: pos }, [
+    r,
+    el("div", {}, [
+      el("div", { class: "big" }, [
+        el("span", { dataset: { count: String(ready.pct), suffix: "%" }, text: "0%" }),
+        ready.skills ? " done" : " ready", // skills tracks have no exam to be "ready" for
+      ]),
+      el("div", { class: "cap", text: ready.code }),
+    ]),
+  ]);
+}
+
+// (c) "⟨n⟩ due today" — tappable, the same quick-practice link as the chip row
+function reviewsWidget(pos, reviews) {
+  if (!reviews) return null;
+  return el("a", { class: "ac-hero__insights anim-float", href: reviews.href, "aria-label": `${reviews.count} review${reviews.count === 1 ? "" : "s"} due — quick practice`, style: pos }, [
+    el("div", { class: "k1", text: "Reviews" }),
+    el("div", { class: "k2" }, [
+      el("span", { dataset: { count: String(reviews.count) }, text: "0" }),
+      " due today",
+      el("span", { style: { marginLeft: "6px" }, "aria-hidden": "true", text: "→" }),
+    ]),
   ]);
 }
 
@@ -258,26 +322,66 @@ function mountHeroCarousel(hero, slides, pager) {
   }
 }
 
-function periwinkleHero(flagship, stats) {
+function periwinkleHero(flagship, stats, personal) {
   const startHref = flagship ? "#" + url.track(flagship.vendorId, flagship.trackId) : "#/start";
-  const videoHref = flagship ? "#" + url.videos(flagship.vendorId, flagship.trackId) : "#" + url.method();
 
-  // slide 1 — image hero
+  // CTA block — the returning learner's primary action is CONTINUING, in the
+  // same orb pill; "Start Learning" steps down to the ghost slot beside it.
+  const cta = (href, label) => el("a", { class: "ac-hero__cta", href }, [
+    el("span", { class: "orb", html: HERO_BRAIN_SVG }),
+    el("span", { class: "lbl" }, label),
+    el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
+  ]);
+  const actions = el("div", { class: "ac-hero__actions" }, personal
+    ? [cta(personal.latest.href, ["Continue ", personal.latest.name]), el("a", { class: "ac-btn", href: startHref }, ["Start Learning"])]
+    : [cta(startHref, ["Start Learning"])]);
+
+  // resume chips — the welcome-back strip's actions, folded into the hero:
+  // reviews only when something is actually due, mock only when a started
+  // track carries an exam block (continueData enforces both).
+  const chips = personal && (personal.reviews || personal.mock)
+    ? el("div", { class: "ac-hero__chips" }, [
+        personal.reviews ? el("a", { class: "continue-pill", href: personal.reviews.href }, [
+          el("b", { text: String(personal.reviews.count) }), ` review${personal.reviews.count === 1 ? "" : "s"} due · Quick practice`,
+        ]) : null,
+        personal.mock ? el("a", { class: "continue-pill", href: personal.mock.href }, ["Take a mock"]) : null,
+      ])
+    : null;
+
+  // widgets — personal for the signed-in returning learner (real streak /
+  // readiness / due counts only; slots with nothing true to say stay empty),
+  // the platform's real catalog numbers for everyone else. If no personal
+  // number is showable at all, fall back to the public set — never a bare hero.
+  let widgets = null;
+  if (personal && personal.signedIn) {
+    const w = [
+      streakWidget({ left: "60%", top: "12%" }, personal.streak),
+      readyWidget({ right: "3%", top: "31%" }, personal.ready),
+      // left 48% ≥ the inner col's min(48%, 660px) width at every viewport —
+      // the tappable card can never sit over the CTA row or the chips
+      reviewsWidget({ left: "48%", top: "68%" }, personal.reviews),
+    ].filter(Boolean);
+    if (w.length) widgets = w;
+  }
+  if (!widgets) {
+    widgets = [
+      glassLearners({ left: "60%", top: "12%" }, stats),
+      heroStats({ right: "3%", top: "31%" }, stats),
+      heroActive({ left: "33%", top: "57%" }, stats),
+    ].filter(Boolean);
+  }
+
   const slide1 = el("div", { class: "ac-hero__slide is-active" }, [
     el("div", { class: "ac-hero__watermark", "aria-hidden": "true", text: "ACADEMY" }),
     heroBrainVideo(),
     el("div", { class: "ac-hero__inner" }, [el("div", { class: "col" }, [
-      el("h1", {}, ["TRAIN YOUR ", el("span", { class: "lite", text: "AI" }), " MIND"]),
+      personal ? el("span", { class: "ac-hero__kicker", text: personal.first ? `Welcome back, ${personal.first}` : "Welcome back" }) : null,
+      el("h1", {}, ["TRAIN YOUR ", el("span", { class: "coral", text: "AI" }), " MIND"]),
       el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
-      el("a", { class: "ac-hero__cta", href: startHref }, [
-        el("span", { class: "orb", html: HERO_BRAIN_SVG }),
-        el("span", { class: "lbl", text: "Start Learning" }),
-        el("span", { style: { color: "var(--fg)", display: "inline-flex" }, html: HERO_CHEVRON_SVG }),
-      ]),
+      actions,
+      chips,
     ])]),
-    glassLearners({ left: "60%", top: "12%" }, stats),
-    heroStats({ right: "3%", top: "31%" }, stats),
-    heroInsights({ left: "33%", top: "57%" }),
+    ...widgets,
   ]);
 
   const corner = el("div", { class: "ac-hero__corner", "aria-hidden": "true", html: "YOUR<br/>MIND<br/>UPGRADED" });
@@ -288,11 +392,19 @@ function periwinkleHero(flagship, stats) {
 export async function catalog() {
   const statsReady = fetchHeroStats(); // in flight while the catalog loads — adds ~zero latency
   const cat = await loadCatalog();
+  const cont = continueData(cat); // null for new visitors — their hero is unchanged
+  // the readiness widget's one tree fetch (signed-in returning learners only),
+  // raced against the same 1.5s cap as /stats — the hero never waits on a
+  // slow fetch, it just skips the widget.
+  const readyP = cont && cont.signedIn
+    ? Promise.race([heroReadiness(cont), new Promise((res) => setTimeout(() => res(null), 1500))])
+    : Promise.resolve(null);
   const stats = await statsReady;
+  const personal = cont ? { ...cont, ready: await readyP } : null;
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const flagship = tracks.find((t) => t.flagship && t.status === "live") || tracks.find((t) => t.status === "live");
 
-  const heroVisual = periwinkleHero(flagship, stats);
+  const heroVisual = periwinkleHero(flagship, stats, personal);
   const intro = el("section", { class: "hero" }, [el("div", { class: "wrap" }, [
     el("div", { class: "eyebrow", style: { marginBottom: "20px" } }, [el("span", { class: "mono-label", text: "The Automatos learning model" })]),
     el("h2", { style: { fontSize: "clamp(28px,4vw,44px)", maxWidth: "22ch" } }, ["Learn AI architecture. ", el("em", { class: "serif-i", text: "Prove it." })]),
@@ -320,9 +432,7 @@ export async function catalog() {
     ]),
   ])]);
 
-  // Returning learners get the "welcome back" strip ABOVE the hero (null for
-  // new visitors — their home is unchanged; null on any internal error too).
-  return el("div", {}, [continueStrip(cat), heroVisual, intro, cards]);
+  return el("div", {}, [heroVisual, intro, cards]);
 }
 
 export async function method() {

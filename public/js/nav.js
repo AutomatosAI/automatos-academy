@@ -2,10 +2,12 @@
 // app.js exactly like auth-ui.js. The topnav hides under 900px — the same
 // breakpoint where the landing hero goes one-screen, so "mobile" flips as one
 // coherent switch — and the static #ac-burger button in index.html opens a
-// glass drawer under the topbar: the same primary links on 48px tap rows, the
-// external automatos.app link, and an Appearance (mood) row. The in-bar mood
-// pill hides ≤560px where it crowds the brand; the drawer row exists at every
-// drawer width so there is always exactly one obvious mood control on phones.
+// glass drawer under the topbar: the same primary links on 48px tap rows and
+// an Appearance (mood) row. The external automatos.app link lives in the
+// footer's Automatos column now (both surfaces, every width) — not here, so
+// the drawer mirrors the slimmed topnav exactly. The in-bar mood pill hides
+// ≤560px where it crowds the brand; the drawer row exists at every drawer
+// width so there is always exactly one obvious mood control on phones.
 // The signed-in avatar / Sign-in pill deliberately STAYS in the bar — small,
 // high-value, and auth-ui.js already owns its lifecycle.
 //
@@ -59,10 +61,6 @@ export function mountNav() {
   // the onClick matters even with the hashchange listener below.
   const drawer = el("nav", { id: "ac-nav-drawer", class: "ac-nav-drawer", "aria-label": "Primary", hidden: true }, [
     ...LINKS.map((l) => el("a", { href: l.href, "data-nav": l.nav, onClick: () => setOpen(false) }, [l.label])),
-    el("a", {
-      class: "ac-ext", href: "https://automatos.app", target: "_blank", rel: "noopener",
-      onClick: () => setOpen(false),
-    }, ["automatos.app ↗"]),
     moodBtn,
   ]);
   bar.appendChild(drawer); // position:absolute — never becomes a topbar grid track

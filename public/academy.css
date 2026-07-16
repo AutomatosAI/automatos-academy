@@ -63,6 +63,14 @@
   --shadow-card: 0 18px 40px rgba(39, 60, 89, 0.14);
   --shadow-lift: 0 24px 50px rgba(39, 60, 89, 0.24);
   --gradient-mist: linear-gradient(158deg, #D3DEF0 0%, #BECFEA 46%, #A9BFDD 100%);
+
+  /* brand coral — the brain art's warm glow promoted to ink (the design
+     handover ties the brain's coral to Automatos orange). ADDITIVE tokens:
+     scripts/token-parity.mjs checks the canonical tables above and is
+     indifferent to extras — do not move or rename the keys it greps. */
+  --coral:      #FF8A5C;
+  --coral-2:    #FF5A36;
+  --coral-glow: rgba(255, 90, 54, 0.22);
 }
 
 [data-mood="night"] {
@@ -97,6 +105,11 @@
   --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.35);
   --shadow-lift: 0 24px 50px rgba(0, 0, 0, 0.45);
   --gradient-mist: linear-gradient(158deg, #1C2740 0%, #1A2338 46%, #141D30 100%);
+
+  /* coral runs a touch brighter on Night — the glow has to carry the mark */
+  --coral:      #FFA075;
+  --coral-2:    #FF6B42;
+  --coral-glow: rgba(255, 128, 84, 0.45);
 }
 
 * { box-sizing: border-box; }
@@ -162,7 +175,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-topnav { display: flex; align-items: center; gap: 22px; }
 .ac-topnav a { font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: 0; color: var(--muted); transition: color .15s; }
 .ac-topnav a:hover, .ac-topnav a[aria-current="page"] { color: var(--fg); }
-.ac-topnav .ac-ext { color: var(--accent); font-weight: 600; }
 .ac-mood {
   display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px;
   background: var(--glass); color: var(--fg); border: 1px solid var(--glass-border);
@@ -218,7 +230,6 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 /* current page — same voice as the desktop nav (ink, not accent), plus a soft
    fill so the state reads on a 48px row */
 .ac-nav-drawer a[aria-current="page"] { color: var(--fg); background: var(--accent-soft); }
-.ac-nav-drawer .ac-ext { color: var(--accent); font-weight: 600; }
 /* appearance (mood) row — the drawer's copy of the .ac-mood pill; the in-bar
    pill hides ≤560px, so on the smallest screens this row is the only mood
    control. Dashed rule separates setting from navigation. */
@@ -509,9 +520,29 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .chip.d1 { color: var(--accent); border-color: var(--accent); }
 .chip.diff::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
-/* ── footer ─────────────────────────────────────────────────────────── */
-.ac-footer { border-top: 1px solid var(--glass-border); margin-top: 40px; }
-.ac-footer-row { max-width: var(--maxw); margin: 0 auto; padding: 22px clamp(16px,4vw,40px); display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
+/* ── footer ─────────────────────────────────────────────────────────────
+   Brand column + three link columns (Learn / Account / Automatos) over a
+   dashed legal strip. Static HTML in index.html — no JS, tokens only, and
+   the automatos.app ↗ link lives HERE now (out of the topnav); analytics'
+   delegated hostname listener keeps counting it as cta_automatos_click.
+   No mood toggle down here — the topbar pill / drawer row stay the only two. */
+.ac-footer { border-top: 1px solid var(--glass-border); margin-top: 40px; background: color-mix(in srgb, var(--bg-2) 38%, transparent); }
+.ac-footer-grid {
+  max-width: var(--maxw); margin: 0 auto;
+  padding: clamp(30px, 5vw, 46px) clamp(16px, 4vw, 40px) 30px;
+  display: grid; grid-template-columns: minmax(220px, 1.6fr) 1fr 1fr 1fr; gap: 30px 24px;
+}
+.ac-footer-brand p { margin: 12px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--muted); max-width: 40ch; }
+.ac-footer-col { display: grid; gap: 10px; align-content: start; justify-items: start; }
+.ac-footer-col .mono-label { margin-bottom: 2px; }
+.ac-footer-col a { font: 500 14px/1.3 var(--sans); color: var(--fg-2); transition: color .15s; }
+.ac-footer-col a:hover { color: var(--fg); }
+.ac-footer-col .ac-ext { color: var(--accent); font-weight: 600; }
+.ac-footer-note { font: 400 12.5px/1.5 var(--sans); color: var(--muted); }
+.ac-footer-legal { border-top: 1px dashed var(--rule); }
+.ac-footer-row { max-width: var(--maxw); margin: 0 auto; padding: 18px clamp(16px,4vw,40px) 24px; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
+@media (max-width: 720px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .ac-footer-grid { grid-template-columns: 1fr; gap: 24px; } }
 
 /* ── misc ───────────────────────────────────────────────────────────── */
 .center { text-align: center; }
@@ -591,7 +622,8 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .fillbar > i { display: block; height: 100%; width: 0; border-radius: var(--radius-pill); background: var(--accent); transition: width 1.2s cubic-bezier(.22,.61,.36,1); }
 .fillbar.in > i { width: var(--fill, 65%); }
 
-/* shimmer sweep overlay for loading / "Neural Insights" surfaces */
+/* shimmer sweep overlay — generic loading-surface utility (currently unused
+   in the DOM; @keyframes shimmerX is part of the token contract regardless) */
 .shimmer { position: relative; overflow: hidden; }
 .shimmer::after { content: ""; position: absolute; top: 0; bottom: 0; width: 64px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0)); animation: shimmerX 2.6s linear infinite; }
 
@@ -635,7 +667,20 @@ a.verify-chip:hover { background: var(--accent-soft); }
   font-family: var(--display); font-weight: 700; letter-spacing: -0.045em; line-height: 0.9;
   font-size: clamp(46px, 6.4vw, 100px); color: var(--fg); margin: 0;
 }
-.ac-hero__inner h1 .lite { color: rgba(255,255,255,0.6); }
+/* the "AI" mark — the brain's coral as gradient ink (solid --coral-2 where
+   background-clip:text is unsupported). Night's token overrides brighten both
+   stops and the drop-shadow glow. Static — nothing to gate for reduced motion. */
+.ac-hero__inner h1 .coral {
+  color: var(--coral-2);
+  filter: drop-shadow(0 2px 16px var(--coral-glow));
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ac-hero__inner h1 .coral {
+    background: linear-gradient(118deg, var(--coral) 8%, var(--coral-2) 82%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+}
 .ac-hero__inner p { margin: 26px 0 0; font-size: clamp(15px, 2vw, 17px); line-height: 1.5; color: var(--fg); max-width: 380px; }
 .ac-hero__kicker {
   display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px;
@@ -650,7 +695,14 @@ a.verify-chip:hover { background: var(--accent-soft); }
 }
 .ac-hero__cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
 .ac-hero__cta .orb { width: 64px; height: 64px; border-radius: 50%; background: var(--muted-fill); display: grid; place-items: center; color: var(--accent); flex: none; }
-.ac-hero__cta .lbl { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--fg); letter-spacing: -0.02em; }
+.ac-hero__cta .lbl { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--fg); letter-spacing: -0.02em; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* CTA row + resume chips (personal hero) — the ghost .ac-btn rides beside the
+   orb pill, and the chips reuse .continue-pill: the welcome-back strip's
+   actions in the strip's own voice, folded into the hero */
+.ac-hero__actions { margin-top: 34px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; }
+.ac-hero__actions .ac-hero__cta { margin-top: 0; }
+.ac-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
 /* floating glass stat widgets */
 .ac-glass {
@@ -670,11 +722,19 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__stats .mini > div { flex: 1; background: rgba(255,255,255,0.13); border-radius: var(--radius); padding: 12px; text-align: left; }
 .ac-hero__stats .mini b { display: block; font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; margin-top: 26px; }
 .ac-hero__stats .mini span { font-size: 12px; color: rgba(255,255,255,0.7); }
-.ac-hero__insights { position: absolute; z-index: 5; width: 236px; height: 152px; overflow: hidden; border-radius: var(--radius-lg); background: rgba(39,60,89,0.22); border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 18px; }
+/* personal readiness card — the stats shell laid out around the conic ring
+   (ui.js ring(); its centre disc stays var(--bg), the house donut look) */
+.ac-hero__stats.is-ready { width: auto; display: flex; align-items: center; gap: 14px; text-align: left; padding: 16px 20px; }
+.ac-hero__stats.is-ready .big { font-size: 21px; }
+.ac-hero__stats.is-ready .ring { flex: none; }
+/* third card — was the fixed-height "Neural Insights" waveform; now sizes to
+   its two real lines (reviews due, signed in · learners active, signed out)
+   and is a link when tappable */
+.ac-hero__insights { position: absolute; z-index: 5; width: 236px; overflow: hidden; border-radius: var(--radius-lg); background: rgba(39,60,89,0.22); border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 18px; }
 .ac-hero__insights .k1 { font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.8); line-height: 1.1; }
-.ac-hero__insights .k2 { font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; }
-.ac-hero__insights > div:last-child { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; }
-.ac-hero__insights svg { position: absolute; left: 0; bottom: 0; width: 100%; height: 64px; display: block; }
+.ac-hero__insights .k2 { font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; margin-top: 4px; }
+a.ac-hero__insights { transition: border-color .15s, background .15s; }
+a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgba(39,60,89,0.30); }
 .ac-hero__playbtn { position: absolute; z-index: 5; width: 92px; height: 92px; border-radius: 50%; background: rgba(255,255,255,0.18); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: grid; place-items: center; color: #fff; border: 0; cursor: pointer; padding: 0; }
 .ac-hero__playbtn i { width: 58px; height: 58px; border-radius: 50%; background: rgba(255,255,255,0.30); display: grid; place-items: center; }
 .ac-hero__playbtn:hover { background: rgba(255,255,255,0.26); }
@@ -714,11 +774,16 @@ a.verify-chip:hover { background: var(--accent-soft); }
   .ac-hero { height: 100vh; height: 100svh; min-height: 600px; }
   .ac-hero__watermark, .ac-hero__corner, .ac-hero__video { display: none; }
 
-  /* headline · subtext · CTA — compact top block */
+  /* headline · subtext · CTA — compact top block (kicker / ghost / chips
+     tighten too so the personal variant still clears the bottom widgets) */
   .ac-hero__inner { position: absolute; left: 0; right: 0; top: 0; bottom: auto; width: auto; height: auto; padding: 16px clamp(22px,6vw,30px) 0; }
   .ac-hero__inner .col { max-width: 500px; }
   .ac-hero__inner h1 { font-size: clamp(36px, 11.5vw, 54px); line-height: 0.94; }
   .ac-hero__inner p { font-size: 14.5px; line-height: 1.45; max-width: none; margin-top: 12px; }
+  .ac-hero__kicker { margin-bottom: 10px; padding: 6px 12px; }
+  .ac-hero__actions { margin-top: 16px; gap: 10px; }
+  .ac-hero__actions .ac-btn { padding: 10px 18px; font-size: 13.5px; }
+  .ac-hero__chips { margin-top: 10px; }
   .ac-hero__cta { margin-top: 16px; padding: 4px 26px 4px 4px; }
   .ac-hero__cta .orb { width: 52px; height: 52px; }
 
@@ -732,7 +797,7 @@ a.verify-chip:hover { background: var(--accent-soft); }
   .ac-hero__stats { top: auto !important; right: auto !important; left: 4% !important; bottom: 12% !important; width: 166px !important; padding: 13px !important; }
   .ac-hero__stats .big { font-size: 27px; }
   .ac-hero__stats .mini b { margin-top: 16px; }
-  .ac-hero__insights { top: auto !important; left: auto !important; right: 4% !important; bottom: 12% !important; width: 162px !important; height: 98px !important; padding: 13px !important; }
+  .ac-hero__insights { top: auto !important; left: auto !important; right: 4% !important; bottom: 12% !important; width: 162px !important; padding: 13px !important; }
 }
 
 /* ── topbar sign-in / account (PRD-U1 S2) ───────────────────────────── */
@@ -878,26 +943,13 @@ a.verify-chip:hover { background: var(--accent-soft); }
 @keyframes sync-offer-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @media (max-width: 560px) { .sync-offer { left: 14px; right: 14px; max-width: none; } }
 
-/* ── "Welcome back" continue strip (home, above the hero) ───────────────
-   Returning learners only — continue.js renders null otherwise, so new
-   visitors never see this band. Tokens only: Mist and Night both come for
-   free from the var() swap. Static by design — no animation, and hovers
-   shift colour rather than position, so there is nothing new to gate under
-   reduced motion. */
-.continue-band { padding: 18px 0 0; }
-.continue-strip {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px;
-  border: 1px solid var(--glass-border); background: var(--glass);
-  border-radius: var(--radius-lg); padding: 14px 20px;
-}
-.continue-hello { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.continue-hello .serif-i { font-size: 18px; }
-.continue-chip {
-  font: 600 11px/1 var(--label); letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--accent); border: 1px solid var(--rule); border-radius: var(--radius-pill);
-  padding: 5px 10px; background: var(--glass-strong);
-}
-.continue-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+/* ── resume chips (personal hero) ───────────────────────────────────────
+   The "welcome back" strip above the hero (PR #28) read as a second topbar,
+   so it folded INTO the hero: continue.js is selectors-only now and home.js
+   renders these pills in .ac-hero__chips. Returning learners only. Tokens
+   only — Mist and Night both come for free from the var() swap; hovers shift
+   colour rather than position, so there is nothing to gate under reduced
+   motion. */
 .continue-pill {
   display: inline-flex; align-items: center; gap: 6px;
   font: 500 13px/1.2 var(--label); color: var(--fg); text-decoration: none;
@@ -907,13 +959,6 @@ a.verify-chip:hover { background: var(--accent-soft); }
 }
 .continue-pill:hover { border-color: var(--accent); }
 .continue-pill b { font-weight: 700; }
-.continue-pill .tname { max-width: 24ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.continue-pill.is-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.continue-pill.is-primary:hover { filter: brightness(1.08); } /* same idiom as .ac-btn-solid */
-@media (max-width: 720px) {
-  .continue-actions { margin-left: 0; width: 100%; }
-  .continue-pill .tname { max-width: 16ch; }
-}
 
 /* ============================================================================
    Mobile nav + small-screen sweep. All breakpoints are the file's existing
@@ -953,8 +998,10 @@ a.verify-chip:hover { background: var(--accent-soft); }
   .ac-brand-word em { display: none; }
   /* hero: the two fixed-width bottom widgets (166px + 162px) collided below
      ~370px. Precedent from the ≤900 block above (watermark/corner/video are
-     already shed): drop the decorative insights card, keep the real numbers.
-     !important matches the ≤900 rules it must out-cascade. */
+     already shed): drop the third card, keep the primary numbers — nothing is
+     lost: signed in, the chip row still carries the reviews link; signed out
+     the card was a bonus stat. !important matches the ≤900 rules it must
+     out-cascade. */
   .ac-hero__insights { display: none !important; }
   /* profile coverage rows: cap the label column so "Questions practised"
      wraps to two lines instead of starving the fillbar */
