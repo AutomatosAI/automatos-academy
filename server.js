@@ -223,7 +223,7 @@ app.get("/cert/:payload", (req, res) => {
     <p class="mono-label" style="margin-top:34px">This certifies that</p>
     <h1 class="serif-i" style="font-size:clamp(34px,6vw,58px);margin:8px 0 0">${esc(cert.name)}</h1>
     <p style="margin-top:18px;font-size:19px">completed the <b>${esc(trackName)}</b> track (${esc(vendorName)} lane).</p>
-    <div style="display:flex;justify-content:space-between;margin-top:36px;padding-top:16px;border-top:1px dashed var(--rule-c)">
+    <div style="display:flex;justify-content:space-between;margin-top:36px;padding-top:16px;border-top:1px dashed var(--rule)">
       <span class="mono-label">${esc(vendorName)} · ${esc(trackName)}</span><span class="mono-label">Ref ${esc(cert.certId)}</span>
     </div>
     ${signed ? '<p class="mono-label" style="margin-top:12px">✓ Signed by the Academy</p>' : ""}

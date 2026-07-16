@@ -146,7 +146,7 @@ export async function certificateView({ params }) {
     el("h1", { class: "serif-i", style: { fontSize: "clamp(34px,6vw,58px)", margin: "8px 0 0" }, text: cert.name }),
     el("p", { class: "lede", style: { marginTop: "18px", maxWidth: "58ch" }, text: copy.completionLabel }),
     el("p", { class: "muted", style: { marginTop: "14px", maxWidth: "62ch", fontSize: "14px" }, text: copy.definition }),
-    el("div", { class: "row", style: { justifyContent: "space-between", marginTop: "36px", paddingTop: "16px", borderTop: "1px dashed var(--rule-c)" } }, [
+    el("div", { class: "row", style: { justifyContent: "space-between", marginTop: "36px", paddingTop: "16px", borderTop: "1px dashed var(--rule)" } }, [
       el("span", { class: "mono-label", text: `${vendorName} · ${trackName}` }),
       el("span", { class: "mono-label", text: `Ref ${cert.certId}` }),
     ]),

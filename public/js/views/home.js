@@ -77,7 +77,7 @@ function onRamp(tracks) {
     el("span", { class: "serif-i", style: { fontSize: "18px" }, text: `Start here — ${t.name}` }),
     el("span", { class: "mono-label", style: { marginLeft: "auto", color: live ? "var(--accent)" : "var(--muted)" }, text: live ? "Start free →" : "Coming soon — notify me below" }),
   ];
-  const attrs = { class: "onramp" + (live ? "" : " is-soon"), style: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px", border: "1px solid var(--rule-c)", borderLeft: "3px solid var(--accent)", padding: "12px 16px", marginTop: "26px" } };
+  const attrs = { class: "onramp" + (live ? "" : " is-soon"), style: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px", border: "1px solid var(--rule)", borderLeft: "3px solid var(--accent)", padding: "12px 16px", marginTop: "26px" } };
   if (live) { attrs.href = "#" + url.track(t.vendorId, t.trackId); return el("a", attrs, inner); }
   return el("div", attrs, inner);
 }
@@ -293,7 +293,7 @@ export async function method() {
       el("h1", {}, ["How we make ", el("em", {}, ["A+ people."])]),
       spine(),
     ])]),
-    el("section", { class: "section" }, [el("div", { class: "wrap", style: { display: "grid", gap: "1px", background: "var(--rule-c)", border: "1px solid var(--rule-c)" } },
+    el("section", { class: "section" }, [el("div", { class: "wrap", style: { display: "grid", gap: "1px", background: "var(--rule)", border: "1px solid var(--rule)" } },
       blocks.map(([k, h, p]) => el("div", { style: { background: "var(--bg)", padding: "30px 28px" } }, [
         el("span", { class: "mono-label", text: k }),
         el("h2", { class: "serif-i", style: { fontSize: "30px", margin: "12px 0 12px" }, text: h }),
