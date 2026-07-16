@@ -55,7 +55,7 @@
       <a href="#/" data-nav="catalog">Tracks</a>
       <a href="#/method" data-nav="method">The model</a>
       <a href="#/tutor" data-nav="tutor">Tutor</a>
-      <a href="https://automatos.app" target="_blank" rel="noopener" class="ac-ext">automatos.app ↗</a>
+      <!-- automatos.app ↗ moved to the footer's Automatos column -->
     </nav>
     <button id="ac-mood" class="ac-mood" type="button" aria-label="Toggle light / dark">
       <span class="ac-mood-dot" aria-hidden="true"></span>
@@ -77,14 +77,45 @@
     </div>
   </main>
 
+  <!-- Footer — brand + three link columns over the legal strip. Static links
+       only (#/profile handles signed-out itself); the mood toggle is NOT
+       duplicated here — the topbar pill / drawer Appearance row own it.
+       Note: the SEO track shells (scripts/generate-shells.mjs) are standalone
+       minimal pages with their own inline disclaimer — they do not share this
+       skeleton, so no footer there. -->
   <footer class="ac-footer">
-    <div class="ac-footer-row">
-      <span class="mono-label">Automatos Academy</span>
-      <span class="mono-label">The Automatos learning model</span>
-      <span class="mono-label">Local-first · your progress stays on this device unless you sign in to sync</span>
+    <div class="ac-footer-grid">
+      <div class="ac-footer-brand">
+        <a class="ac-brand" href="#/" aria-label="Automatos Academy — home">
+          <span class="ac-brand-mark" aria-hidden="true"></span>
+          <span class="ac-brand-word">Automatos <em>Academy</em></span>
+        </a>
+        <p>The Automatos learning model — Learn → Build → Decide → Prove → Ready.</p>
+        <p>Local-first: your progress stays on this device unless you sign in to sync.</p>
+      </div>
+      <nav class="ac-footer-col" aria-label="Learn">
+        <span class="mono-label">Learn</span>
+        <a href="#/start">Start here</a>
+        <a href="#/">Tracks</a>
+        <a href="#/method">The model</a>
+        <a href="#/tutor">Tutor</a>
+      </nav>
+      <nav class="ac-footer-col" aria-label="Account">
+        <span class="mono-label">Account</span>
+        <a href="#/profile">My progress</a>
+        <a href="#/profile">Sign in</a>
+      </nav>
+      <nav class="ac-footer-col" aria-label="Automatos">
+        <span class="mono-label">Automatos</span>
+        <a href="https://automatos.app" target="_blank" rel="noopener" class="ac-ext">automatos.app ↗</a>
+        <span class="ac-footer-note">Built on Automatos agents</span>
+      </nav>
     </div>
-    <div class="ac-footer-row">
-      <span class="mono-label">Independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.</span>
+    <div class="ac-footer-legal">
+      <div class="ac-footer-row">
+        <span class="mono-label">Independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.</span>
+        <span class="mono-label">© 2026 Automatos</span>
+      </div>
     </div>
   </footer>
 
