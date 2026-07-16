@@ -172,6 +172,65 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-mood:hover { border-color: var(--accent); transform: translateY(-1px); }
 .ac-mood-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 
+/* ── mobile nav: burger + glass drawer (≤900px — see the media block near the
+      end of this file). The burger is a static button in index.html so the
+      topbar grid never reflows when JS lands; js/nav.js builds the drawer and
+      wires open/close. display:none here keeps desktop untouched. ────────── */
+.ac-burger {
+  display: none; /* revealed ≤900px */
+  width: 44px; height: 44px; padding: 0; flex: none; /* 44px = comfortable tap target */
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  border: 1px solid var(--glass-border); background: var(--glass); color: var(--fg);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.ac-burger:hover { border-color: var(--accent); background: var(--glass-strong); }
+.ac-burger span {
+  display: block; width: 18px; height: 2px; border-radius: var(--radius-pill);
+  background: currentColor; transition: transform .18s ease, opacity .12s ease;
+}
+/* open state: bars fold into an ✕ (7px = bar height 2px + gap 5px) */
+.ac-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.ac-burger.is-open span:nth-child(2) { opacity: 0; }
+.ac-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* drawer — same glass voice as .ac-auth-menu; absolutely positioned child of
+   the sticky topbar (its containing block), so it rides under the bar and is
+   never a grid track. Toggled with [hidden] like the auth menu — display
+   flips, nothing animates, so there is nothing new to gate for reduced
+   motion beyond the burger-bar fold above. */
+.ac-nav-drawer {
+  position: absolute; left: 0; right: 0; top: 100%; z-index: 60;
+  display: none; /* opened ≤900px via :not([hidden]) in the media block */
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  padding: 8px clamp(16px, 4vw, 40px) 12px;
+  max-height: calc(100vh - 64px); overflow-y: auto; /* short landscape phones */
+}
+.ac-nav-drawer a {
+  display: flex; align-items: center; min-height: 48px; padding: 0 10px; /* 48px rows: phone tap targets */
+  font-family: var(--display); font-weight: 500; font-size: 17px; color: var(--muted);
+  border-radius: var(--radius-sm); transition: color .15s, background .15s;
+}
+.ac-nav-drawer a:hover { color: var(--fg); background: var(--glass); }
+/* current page — same voice as the desktop nav (ink, not accent), plus a soft
+   fill so the state reads on a 48px row */
+.ac-nav-drawer a[aria-current="page"] { color: var(--fg); background: var(--accent-soft); }
+.ac-nav-drawer .ac-ext { color: var(--accent); font-weight: 600; }
+/* appearance (mood) row — the drawer's copy of the .ac-mood pill; the in-bar
+   pill hides ≤560px, so on the smallest screens this row is the only mood
+   control. Dashed rule separates setting from navigation. */
+.ac-drawer-mood {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px;
+  margin-top: 8px; padding: 0 10px; border: 0; border-top: 1px dashed var(--rule);
+  background: transparent; color: var(--fg); cursor: pointer; text-align: left;
+  font: 500 12px/1 var(--label); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.ac-drawer-mood:hover .ac-drawer-mood-cur { color: var(--accent); }
+.ac-drawer-mood .mono-label { margin-left: auto; }
+
 /* ── layout ─────────────────────────────────────────────────────────── */
 .ac-main { flex: 1 1 auto; outline: none; }
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
@@ -214,7 +273,10 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .eyebrow::before { content: ""; width: 26px; height: 2px; border-radius: var(--radius-pill); background: var(--accent); }
 
 /* ── catalog (track cards) ──────────────────────────────────────────── */
-.grid-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+/* min(320px, 100%): a hard 320px floor overflowed the viewport once the wrap's
+   content box dropped under 320px (≤352px screens) — min() lets the single
+   column shrink with the container instead */
+.grid-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 20px; }
 .track-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 28px 26px 24px; display: flex; flex-direction: column; gap: 14px; min-height: 260px; transition: transform .22s ease, box-shadow .22s ease, background .18s; position: relative; }
 .track-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); background: var(--glass-strong); }
 .track-card.is-soon { opacity: .62; }
@@ -383,7 +445,7 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .res-row:hover { transform: translateY(-3px); box-shadow: var(--shadow-card); }
 .res-row .kind { font: 600 10px/1 var(--label); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--radius-pill); padding: 6px 10px; white-space: nowrap; }
 .res-row .ann { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
-.vid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.vid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 20px; } /* same min() guard as .grid-tracks */
 .vid-card { border: 1px solid var(--glass-border); background: var(--glass); border-radius: var(--radius-lg); overflow: hidden; transition: transform .22s ease, box-shadow .22s ease; }
 .vid-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 .vid-card .frame { aspect-ratio: 16/9; background: var(--bg-3); display: grid; place-items: center; border-bottom: 1px solid var(--glass-border); position: relative; overflow: hidden; }
@@ -462,11 +524,11 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .hidden { display: none !important; }
 
 @media (max-width: 720px) {
-  .spine { grid-template-columns: 1fr 1fr; }
+  /* .spine now collapses at 900px (with the burger) — 5 columns were already
+     crushing h3s between 721–900. The old link-hiding topnav treatment is
+     gone: the whole nav lives in the burger drawer ≤900px. */
   .domain-row { grid-template-columns: auto 1fr; }
   .domain-row .weight { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
-  .ac-topnav { gap: 14px; }
-  .ac-topnav a:not(.ac-ext) { display: none; }
 }
 
 /* ── two doors, path finder, credentials, freshness ─────────────────── */
@@ -853,6 +915,56 @@ a.verify-chip:hover { background: var(--accent-soft); }
   .continue-pill .tname { max-width: 16ch; }
 }
 
+/* ============================================================================
+   Mobile nav + small-screen sweep. All breakpoints are the file's existing
+   ones (900 / 560 / 400-ish family): the burger flips at 900px — the same
+   width where the hero goes one-screen — so "mobile" is one coherent switch.
+   These sit AFTER the ≤900 hero block above so the ≤400 widget overrides win
+   its !importants (both are !important → later source order decides).
+   ========================================================================== */
+
+/* pre-burger squeeze zone: at 901–1080 the full bar (brand + 5 links + auth
+   pill + mood) brushes the viewport signed-out; tighter gaps keep it on one
+   line without hiding anything */
+@media (max-width: 1080px) {
+  .ac-topbar { gap: 14px; }
+  .ac-topnav { gap: 14px; }
+}
+
+@media (max-width: 900px) {
+  .ac-topnav { display: none; }         /* links live in the drawer now */
+  .ac-burger { display: inline-flex; }
+  .ac-nav-drawer:not([hidden]) { display: grid; }
+  /* the five-step spine: 5 columns crushed the step h3s below ~900px */
+  .spine { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  /* mood pill leaves the bar (the drawer's Appearance row takes over) — with
+     brand + avatar/Sign-in + burger it was the first thing to crush */
+  .ac-mood { display: none; }
+  .ac-topbar { gap: 12px; }
+  /* timer · progress · count · submit can't share one 320px row */
+  .exam-bar { flex-wrap: wrap; }
+}
+
+@media (max-width: 400px) {
+  /* brand shortens to "Automatos" so brand + Sign-in pill + burger fit 320px */
+  .ac-brand-word em { display: none; }
+  /* hero: the two fixed-width bottom widgets (166px + 162px) collided below
+     ~370px. Precedent from the ≤900 block above (watermark/corner/video are
+     already shed): drop the decorative insights card, keep the real numbers.
+     !important matches the ≤900 rules it must out-cascade. */
+  .ac-hero__insights { display: none !important; }
+  /* profile coverage rows: cap the label column so "Questions practised"
+     wraps to two lines instead of starving the fillbar */
+  .profile-cover-row { grid-template-columns: minmax(0, 104px) minmax(44px, auto) 1fr; }
+  /* dense rows breathe at 320px without redesign — padding only */
+  .res-row { padding: 14px 16px; gap: 12px; }
+  .pf-opt { padding: 16px; }
+  .cert-card { padding: 30px 22px; }
+}
+
 /* ── reduced motion: kill everything (gate JS on the same query) ─────── */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; }
@@ -860,4 +972,5 @@ a.verify-chip:hover { background: var(--accent-soft); }
   .ac-auth-signin:hover, .ac-avatar:hover { transform: none; }
   .fillbar > i { transition: none; }
   .sync-offer { animation: none; }
+  .ac-burger span, .ac-nav-drawer a, .ac-drawer-mood { transition: none; } /* burger fold + drawer rows */
 }

@@ -19,6 +19,7 @@ import { pathFinderView } from "./views/pathfinder.js";
 import { profileView } from "./views/profile.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
 import { mountAuthUI } from "./auth-ui.js";
+import { mountNav } from "./nav.js";
 import { initSync } from "./sync/syncer.js";
 import { track as tkEvent, mountCtaTracking } from "./analytics.js";
 
@@ -88,7 +89,10 @@ async function handle(match) {
 }
 
 function syncTopnav(path) {
-  document.querySelectorAll(".ac-topnav a[data-nav]").forEach((a) => {
+  // Both nav surfaces: the desktop .ac-topnav and the mobile drawer (nav.js)
+  // carry the same data-nav keys, so one pass highlights the current page in
+  // whichever is visible at this width.
+  document.querySelectorAll(".ac-topnav a[data-nav], .ac-nav-drawer a[data-nav]").forEach((a) => {
     const k = a.getAttribute("data-nav");
     const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "start" && path === "/start");
     if (on) a.setAttribute("aria-current", "page");
@@ -113,5 +117,6 @@ function syncTopnav(path) {
 start(handle);
 mountTutor();
 mountAuthUI();
+mountNav(); // burger + drawer ≤900px; after theme() so its mood row syncs
 initSync(); // PRD-U2: no-op on unconfigured deploys; inert signed-out
 mountCtaTracking();
