@@ -18,7 +18,7 @@ import { el, clear } from "./ui.js";
 const cfg = () => window.ACADEMY_CHAT || {};
 const apiBase = () => (cfg().apiBase || "https://api.automatos.app").replace(/\/$/, "");
 const enabled = () => !!cfg().publicKey;
-const mood = () => (document.documentElement.getAttribute("data-mood") === "pitch" ? "pitch" : "bone");
+const mood = () => (document.documentElement.getAttribute("data-mood") === "night" ? "night" : "mist");
 
 const STUDY_PROMPTS = [
   "Explain the agentic loop — and draw it as a flowchart.",
@@ -97,7 +97,7 @@ function getMermaid() {
     mermaidPromise = import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs")
       .then((m) => {
         const mer = m.default;
-        mer.initialize({ startOnLoad: false, securityLevel: "strict", theme: mood() === "pitch" ? "dark" : "neutral", fontFamily: "Geist, system-ui, sans-serif" });
+        mer.initialize({ startOnLoad: false, securityLevel: "strict", theme: mood() === "night" ? "dark" : "neutral", fontFamily: "Funnel Sans, system-ui, sans-serif" });
         return mer;
       });
   }

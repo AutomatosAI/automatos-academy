@@ -96,14 +96,14 @@ function syncTopnav(path) {
 (function theme() {
   const btn = document.getElementById("ac-mood");
   const label = btn && btn.querySelector(".ac-mood-label");
-  const cur = () => document.documentElement.getAttribute("data-mood") || "bone";
+  const cur = () => document.documentElement.getAttribute("data-mood") || "mist";
   const apply = (m) => {
     document.documentElement.setAttribute("data-mood", m);
     try { localStorage.setItem("automatos-mood", m); } catch (_) {}
-    if (label) label.textContent = m === "pitch" ? "Pitch" : "Bone";
+    if (label) label.textContent = m === "night" ? "Night" : "Mist";
   };
   apply(cur());
-  if (btn) btn.addEventListener("click", () => apply(cur() === "pitch" ? "bone" : "pitch"));
+  if (btn) btn.addEventListener("click", () => apply(cur() === "night" ? "mist" : "night"));
 })();
 
 start(handle);

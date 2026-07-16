@@ -213,10 +213,10 @@ app.get("/cert/:payload", (req, res) => {
 <meta name="description" content="${esc(desc)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Automatos Academy">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${esc(certUrl)}"><meta property="og:image" content="${esc(base)}/og-academy.png">
+<meta property="og:url" content="${esc(certUrl)}"><meta property="og:image" content="${esc(base)}/og-academy.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
-</head><body data-mood="bone" style="display:block">
+</head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <div class="cert-card">
     <div style="display:flex;justify-content:space-between"><span class="mono-label">Automatos Academy</span><span class="mono-label">${esc(cert.date)}</span></div>
