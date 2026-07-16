@@ -13,8 +13,9 @@ import { downloadBackup, importBackup } from "../progress-io.js";
 const domGrade = (pct) => (pct >= 90 ? "A+" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 55 ? "C" : pct >= 40 ? "D" : "F");
 const gradeVar = (g) => `var(--grade-${g === "A+" ? "aplus" : g === "A" ? "a" : g === "B" ? "b" : g === "C" ? "c" : g === "D" ? "d" : "f"})`;
 
-// Local-first data controls: back up / restore all progress (no account) and
-// a two-click reset. Backup carries EVERY track, not just this one.
+// Local-first data controls: back up / restore all progress (works signed-out,
+// no account needed — signed-in learners additionally get server sync, PRD-U2)
+// and a two-click reset. Backup carries EVERY track, not just this one.
 function dataControls(store, backTo) {
   const msg = el("span", { class: "mono-label", style: { alignSelf: "center" } });
   const reload = () => { location.hash = backTo; window.dispatchEvent(new HashChangeEvent("hashchange")); };

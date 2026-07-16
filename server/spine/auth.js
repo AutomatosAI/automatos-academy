@@ -20,14 +20,30 @@ const UPSERT_USER_SQL = `
   RETURNING id, clerk_user_id, workspace_id, plan, created_at
 `;
 
-/** Production verifier: Clerk session-token verification via the secret key. */
+/** ACADEMY_AUTHORIZED_PARTIES ("https://a.example,https://b.example") → array.
+ *  Exported pure so a unit test can cover it without env games. */
+export function parseAuthorizedParties(raw) {
+  return String(raw || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Production verifier: Clerk session-token verification via the secret key.
+ *
+ * Hardening (PRD-U1 S3): when ACADEMY_AUTHORIZED_PARTIES is set, the token's
+ * azp (authorized party) must be one of those origins — so a session token
+ * minted for a DIFFERENT app on the same Clerk instance, or replayed from an
+ * unexpected origin, verifies cryptographically but is still refused. Unset →
+ * no azp check (today's dev behavior); production must set it. */
 export function createClerkVerifier(secretKey) {
   if (!secretKey) {
     throw new Error("[spine] CLERK_SECRET_KEY is required when SPINE_ENABLED=true");
   }
+  const authorizedParties = parseAuthorizedParties(process.env.ACADEMY_AUTHORIZED_PARTIES);
   return async function clerkVerifier(token) {
     const { verifyToken } = await import("@clerk/backend");
-    return verifyToken(token, { secretKey });
+    return verifyToken(token, authorizedParties.length ? { secretKey, authorizedParties } : { secretKey });
   };
 }
 

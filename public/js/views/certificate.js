@@ -6,6 +6,7 @@ import { el } from "../ui.js";
 import { url } from "../router.js";
 import { loadCatalog, loadTrack } from "../content.js";
 import { encodeCert, decodeCert, badgeCopy, linkedInAddUrl, isSkillsTrack } from "../engine/certificate.js";
+import { user as authUser } from "../auth.js";
 import { track as tk } from "../analytics.js";
 
 const NAME_KEY = "automatos-academy:v1:claim-name";
@@ -63,9 +64,12 @@ export function claimPanel(trackData, comp) {
 
   let savedName = "";
   try { savedName = localStorage.getItem(NAME_KEY) || ""; } catch (_) {}
-  const input = el("input", { class: "claim-input", type: "text", placeholder: "Your name, as it should appear", value: savedName, "aria-label": "Your name for the certificate" });
+  // Prefill (PRD-U1): an explicitly saved claim-name wins; otherwise a
+  // signed-in learner's Clerk profile name starts the field. Always editable.
+  const clerkName = (authUser() && authUser().name) || "";
+  const input = el("input", { class: "claim-input", type: "text", placeholder: "Your name, as it should appear", value: savedName || clerkName, "aria-label": "Your name for the certificate" });
   const go = el("button", { class: "ac-btn ac-btn-solid", type: "button" }, ["Claim your badge ", el("span", { class: "arr", text: "→" })]);
-  const hint = el("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12.5px" }, text: "Generates a shareable certificate page — add it to LinkedIn in one click. Your name goes only into the certificate link; nothing is uploaded." });
+  const hint = el("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12.5px" }, text: "Generates a shareable certificate page — add it to LinkedIn in one click. Your name goes into the certificate link itself; while you're signed out, nothing is stored on our servers." });
 
   go.addEventListener("click", async () => {
     const name = input.value.trim();

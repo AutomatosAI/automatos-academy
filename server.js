@@ -6,9 +6,12 @@
  * /public; this server only does three things:
  *   - serve static assets with sane cache headers,
  *   - SPA fallback (any non-asset GET → index.html) so refreshes/deep links work,
- *   - reserve /api/* for the future backend (accounts, progress sync, CMS).
+ *   - host the optional APIs under /api/*: catalog (Content API), badge
+ *     signing, and — env-gated, default OFF — the Spine (accounts + sync).
  *
- * No backend is required for Phase 1 — progress is local-first (localStorage).
+ * No backend is required signed-out: progress is local-first (localStorage)
+ * and every surface works without an account. Optional Clerk sign-in (PRD-U1)
+ * plus the Spine add cross-device sync — see docs/SPINE-ENABLE.md.
  */
 import express from "express";
 import compression from "compression";
@@ -128,6 +131,34 @@ function hydrateChatConfig() {
 }
 hydrateChatConfig();
 
+// ── Hydrate the sign-in (auth) config from env at startup ─────────────
+// Mirrors hydrateChatConfig: boot writes a gitignored public/auth-config.js
+// consumed before the app module loads. CLERK_PUBLISHABLE_KEY is the client
+// half of the Clerk pair (safe to ship in JS — it only identifies the
+// instance; the secret key never leaves the server). Absent env →
+// window.ACADEMY_AUTH = null and the SPA renders exactly as before PRD-U1:
+// no sign-in affordance, no Clerk script, no network.
+function hydrateAuthConfig() {
+  const key = process.env.CLERK_PUBLISHABLE_KEY || "";
+  if (key && !/^pk_(test|live)_/.test(key)) {
+    console.warn("[auth] CLERK_PUBLISHABLE_KEY doesn't look like a Clerk publishable key (pk_test_/pk_live_) — shipping it anyway; the client will degrade to signed-out if it's wrong.");
+  }
+  if (key && process.env.SPINE_ENABLED !== "true") {
+    console.warn("[auth] CLERK_PUBLISHABLE_KEY is set but SPINE_ENABLED is not — learners can sign in, but there is no sync API mounted. See docs/SPINE-ENABLE.md.");
+  }
+  const body = key
+    ? `window.ACADEMY_AUTH = { publishableKey: ${JSON.stringify(key)} };\n`
+    : "window.ACADEMY_AUTH = null;\n";
+  writeFileSync(
+    resolve(PUBLIC, "auth-config.js"),
+    "// Generated at boot by server.js (hydrateAuthConfig) — gitignored, do not edit.\n" +
+    "// null → this deploy runs signed-out only (the Clerk script is never loaded).\n" +
+    body,
+    "utf8",
+  );
+}
+hydrateAuthConfig();
+
 const app = express();
 app.use(compression());
 // 1mb body cap: sync batches (PRD-MT-02, up to 500 events) outgrow the 100kb
@@ -207,9 +238,11 @@ if (process.env.SPINE_ENABLED === "true") {
   console.log("[spine] user-state API mounted (/api/me, /api/sync)");
 }
 
-// ── API namespace reserved for the future backend ─────────────────────
-// Returns 501 today so client code can feature-detect a backend cleanly.
-app.use("/api", (_req, res) => res.status(501).json({ error: "not_implemented", note: "Phase 1 is local-first; no backend yet." }));
+// ── API namespace fallback ─────────────────────────────────────────────
+// Anything not handled above (catalog/notify/badge always; /api/me + /api/sync
+// once the Spine is enabled) returns 501 so client code can feature-detect
+// cleanly. Signed-out learners never need /api — progress is local-first.
+app.use("/api", (_req, res) => res.status(501).json({ error: "not_implemented", note: "No such API on this deploy. The Academy works signed-out (local-first); accounts + progress sync mount under /api/me and /api/sync when the Spine is enabled — see docs/SPINE-ENABLE.md." }));
 
 // ── Certificate pages (PRD-CREDENTIALS v1) ─────────────────────────────
 // Real path (not hash) so shares unfurl: og tags + a no-JS render of the
