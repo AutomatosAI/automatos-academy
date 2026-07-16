@@ -19,8 +19,18 @@ import { DECAY_FLOOR, HALF_LIFE_MAX_DAYS, HALF_LIFE_MIN_DAYS, halfLifeDays, effe
 import {
   parseTimestamp, collapseLatest, validateBatch,
   validateProgressEvent, validateTelemetryEvent, validateMockEvent, validateScenarioEvent,
+  MAX_BATCH as SERVER_MAX_BATCH, MAX_FUTURE_SKEW_MS as SERVER_MAX_SKEW,
 } from "../server/spine/validate.js";
 import { mountSpine } from "../server/spine/index.js";
+// The web sync client's pure helpers (PRD-U2 S1/S2) — plain ES modules with
+// no DOM/localStorage at import time, so node can hold them to the server's
+// own validators without any browser harness.
+import {
+  buildProgressEvent, buildMockEvent, buildScenarioEvent,
+  MAX_BATCH as WEB_MAX_BATCH, MAX_FUTURE_SKEW_MS as WEB_MAX_SKEW,
+} from "../public/js/sync/events.js";
+import { synthesizeTrackEvents } from "../public/js/sync/synthesize.js";
+import { wireRowToLocal } from "../public/js/sync/reconcile.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DAY = 86_400_000;
@@ -155,6 +165,54 @@ ok(batchWithBad.error === "eventId_not_uuid" && batchWithBad.index === 1, "batch
 ok(parseTimestamp("1720000000000") === 1720000000000, "epoch-ms-as-string parses (query params)");
 ok(parseTimestamp("2026-07-01T00:00:00Z") === Date.parse("2026-07-01T00:00:00Z"), "ISO strings parse");
 ok(parseTimestamp("banana") === null, "garbage → null");
+
+// ═══════════════════════════ unit — web sync client (PRD-U2 S1/S2) ═════
+// The web client must be field-for-field the mobile client's wire dialect —
+// the server is the same one. Every event a web builder emits must clear the
+// SERVER validator unchanged, and the shared constants must agree.
+console.log("web sync client (pure ports of the mobile invariants)");
+
+ok(WEB_MAX_BATCH === SERVER_MAX_BATCH, "web batch cap === server MAX_BATCH");
+ok(WEB_MAX_SKEW === SERVER_MAX_SKEW, "web skew bound === server MAX_FUTURE_SKEW_MS");
+
+const LOWER_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const webState = { seen: 3, correct: 2, ease: 2.42, interval: 3, due: nowMs + 3 * DAY, at: nowMs - 1000, last: true, domainId: "d1" };
+const webBuilt = buildProgressEvent({ vendorId: "anthropic", trackId: "cca-f", itemId: "q-1", correct: true, state: webState, nowMs });
+ok(!!webBuilt.event && LOWER_UUID_RE.test(webBuilt.event.eventId), "web builder mints a lowercase uuid-v4 eventId");
+ok(webBuilt.event.correct_count === 2 && webBuilt.event.answeredAt === nowMs - 1000, "wire shape: snake_case correct_count, epoch-ms answeredAt from the store's `at`");
+ok(!validateProgressEvent(webBuilt.event, nowMs).error, "a web-built progress event clears the server validator unchanged");
+ok(buildProgressEvent({ vendorId: "a", trackId: "t", itemId: "q", correct: true, state: { ...webState, at: nowMs + 49 * 3_600_000 }, nowMs }).error === "answeredAt_too_far_future", "48h future-skew bound enforced client-side");
+ok(buildProgressEvent({ vendorId: "a", trackId: "t", itemId: "q", correct: true, state: { ...webState, correct: 5 }, nowMs }).error === "correct_count_out_of_range", "correct_count ≤ seen enforced client-side");
+ok(buildProgressEvent({ vendorId: "a", trackId: "t", itemId: "q", correct: true, state: { ...webState, ease: 4.4 }, nowMs }).error === "ease_out_of_range", "ease 1–4 enforced client-side");
+ok(buildProgressEvent({ vendorId: "a", trackId: "t", itemId: "q", correct: true, state: { ...webState, seen: 0, correct: 0 }, nowMs }).error === "seen_out_of_range", "seen ≥ 1 enforced client-side");
+ok(!validateMockEvent(buildMockEvent({ vendorId: "a", trackId: "t", scaled: 812, passed: true, at: nowMs, nowMs }).event, nowMs).error, "web mock event clears the server validator");
+ok(!validateScenarioEvent(buildScenarioEvent({ vendorId: "a", trackId: "t", scenarioId: "s", step: 4, scorePct: 80, at: nowMs, nowMs }).event, nowMs).error, "web scenario event clears the server validator");
+
+// reconcile apply (overwrite-without-merge + local-only hints, mobile M2)
+const serverRow = { vendorId: "a", trackId: "t", itemId: "q-1", seen: 7, correct: 6, ease: 2.6, interval: 8, dueAt: new Date(nowMs + 8 * DAY).toISOString(), answeredAt: new Date(nowMs).toISOString() };
+const localPrev = { seen: 3, correct: 2, ease: 2.42, interval: 3, due: 1, at: 1, last: false, domainId: "d1" };
+const appliedRow = wireRowToLocal(serverRow, localPrev);
+ok(appliedRow.seen === 7 && appliedRow.ease === 2.6 && appliedRow.due === nowMs + 8 * DAY, "reconcile OVERWRITES the server-owned SM-2 fields — no merging");
+ok(appliedRow.domainId === "d1" && appliedRow.last === false, "…while the local-only domainId/last hints survive (they never ride the wire)");
+ok(wireRowToLocal(serverRow, undefined).domainId === undefined, "no previous local row → no invented hints");
+
+// backfill synthesis: stable manifest ids → byte-identical retries
+const bfLocal = {
+  lessons: {},
+  q: { "q-1": { seen: 2, correct: 1, ease: 2.1, interval: 3, due: nowMs + 3 * DAY, last: false, at: nowMs - 5000 },
+       "q-junk": { seen: 0, correct: 0, ease: 2.3, interval: 0, due: 0, at: nowMs } },
+  exams: [{ scaled: 780, passed: true, at: nowMs - 4000 }],
+  scenarios: { "scn-1": { score: 66, at: nowMs - 3000 } },
+};
+const bfManifest = {};
+const bfIdFor = (k) => bfManifest[k] || (bfManifest[k] = randomUUID().toLowerCase());
+const bf1 = synthesizeTrackEvents(bfLocal, "anthropic", "cca-f", bfIdFor, nowMs);
+const bf2 = synthesizeTrackEvents(bfLocal, "anthropic", "cca-f", bfIdFor, nowMs);
+ok(bf1.progress.length === 1 && bf1.mocks.length === 1 && bf1.scenarios.length === 1, "synthesizer maps q{}/exams[]/scenarios{} onto the three wire kinds");
+ok(bf1.skipped.length === 1 && bf1.skipped[0].reason === "seen_out_of_range", "junk records are skipped with a reason, never sent to be quarantined");
+ok(JSON.stringify(bf1) === JSON.stringify(bf2), "same manifest → byte-identical events on retry (D-U5a idempotence)");
+ok(bf1.progress[0].answeredAt === nowMs - 5000 && bf1.mocks[0].at === nowMs - 4000, "backfill keeps ORIGINAL timestamps — history ordering survives the merge");
+ok(!validateProgressEvent(bf1.progress[0], nowMs).error && !validateMockEvent(bf1.mocks[0], nowMs).error && !validateScenarioEvent(bf1.scenarios[0], nowMs).error, "every synthesized event clears the server validators");
 
 // ══════════════════════════════════════════════════════ integration ════
 if (!process.env.DATABASE_URL) {
@@ -430,6 +488,127 @@ servers.push(noDeleter.server);
 const erin = "fixture:user_erin";
 const erinDel = await request("DELETE", "/api/me/account", { token: erin, headers: { "X-Confirm-Account-Deletion": "user_erin" }, base: noDeleter.base });
 ok(erinDel.status === 502 && erinDel.body.error === "clerk_deletion_unavailable", "no Clerk key/deleter configured → skipped WITH error, per the PRD");
+
+// ── PRD-U2 S3: streak rollup + user extras on GET /api/me/state ───────
+// Additive envelope fields (streak, user) — computed on read, absolute on
+// every pull. The mobile client's MeStateSchema is .passthrough(), so the
+// shipping app ignores them cleanly; web meta.js persists them for #/profile.
+// All activity is anchored at UTC NOON of each day so the assertions cannot
+// race a UTC-midnight boundary mid-suite (noon-today is at most +12h future,
+// well inside the 48h skew bound).
+const utcNoon = (daysAgo) => {
+  const d = new Date();
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - daysAgo, 12, 0, 0);
+};
+const sam = "fixture:user_sam";
+const s0 = await request("GET", "/api/me/state", { token: sam });
+ok(s0.body.data.streak && s0.body.data.streak.current === 0 && s0.body.data.streak.best === 0, "fresh user → streak {current: 0, best: 0}");
+ok(typeof s0.body.data.user.createdAt === "string" && s0.body.data.user.plan === "free", "state carries user {createdAt, plan} (member-since for profiles)");
+
+await request("POST", "/api/sync/progress", { token: sam, body: { events: [progressEvent(q(5), utcNoon(0))] } });
+const s1 = await request("GET", "/api/me/state", { token: sam });
+ok(s1.body.data.streak.current === 1 && s1.body.data.streak.best === 1, "one active UTC day (today) → current 1, best 1");
+
+// telemetry-only run 5+4 days ago: the gap breaks current, best keeps it
+const samId = (await pool.query("SELECT id FROM users WHERE clerk_user_id = 'user_sam'")).rows[0].id;
+await pool.query(
+  `INSERT INTO telemetry (user_id, event_id, event_type, payload, created_at) VALUES
+     ($1, $2, 'session', '{}', $4),
+     ($1, $3, 'session', '{}', $5)`,
+  [samId, randomUUID(), randomUUID(), new Date(utcNoon(5)), new Date(utcNoon(4))],
+);
+const s2 = await request("GET", "/api/me/state", { token: sam });
+ok(s2.body.data.streak.current === 1 && s2.body.data.streak.best === 2, `a gap breaks current (1) while best keeps the older run (2) — got ${JSON.stringify(s2.body.data.streak)}`);
+
+// one run SPANNING BOTH TABLES: telemetry 2 days ago + progress yesterday
+// chain into today's answer → a 3-day current run
+await pool.query(
+  "INSERT INTO telemetry (user_id, event_id, event_type, payload, created_at) VALUES ($1, $2, 'session', '{}', $3)",
+  [samId, randomUUID(), new Date(utcNoon(2))],
+);
+await request("POST", "/api/sync/progress", { token: sam, body: { events: [progressEvent(q(6), utcNoon(1))] } });
+const s3 = await request("GET", "/api/me/state", { token: sam });
+ok(s3.body.data.streak.current === 3 && s3.body.data.streak.best === 3, `progress + telemetry days chain into one 3-day run — got ${JSON.stringify(s3.body.data.streak)}`);
+
+const sDelta = await request("GET", `/api/me/state?since=${encodeURIComponent(new Date(Date.now() + 3_600_000).toISOString())}`, { token: sam });
+ok(sDelta.body.data.progress.length === 0 && sDelta.body.data.streak.best === 3, "a since-delta pull still carries the FULL streak (absolute, never since-filtered)");
+
+const tess = "fixture:user_tess";
+await request("GET", "/api/me/state", { token: tess }); // mint the user
+const tessId = (await pool.query("SELECT id FROM users WHERE clerk_user_id = 'user_tess'")).rows[0].id;
+await pool.query("INSERT INTO telemetry (user_id, event_id, event_type, payload, created_at) VALUES ($1, $2, 'session', '{}', $3)", [tessId, randomUUID(), new Date(utcNoon(3))]);
+const t1 = await request("GET", "/api/me/state", { token: tess });
+ok(t1.body.data.streak.current === 0 && t1.body.data.streak.best === 1, "last activity 3 UTC days ago → current 0 (broken), best 1");
+
+// ── PRD-U2 S7 (US-U12): two devices, one account, same item offline ───
+// Device A answers FIRST by wall-clock; device B later — but B reconnects
+// and flushes first. The later answer must win on both devices after their
+// reconcile, with exactly one row and no lost counts.
+const dev = "fixture:user_crossdev";
+const itemX = q(8);
+const devA = progressEvent(itemX, T + 10_000, { seen: 1, correct_count: 1, ease: 2.36 });
+const devB = progressEvent(itemX, T + 60_000, { seen: 4, correct_count: 3, ease: 2.18 });
+const bFlush = await request("POST", "/api/sync/progress", { token: dev, body: { events: [devB] } });
+const aFlush = await request("POST", "/api/sync/progress", { token: dev, body: { events: [devA] } });
+ok(bFlush.body.data.applied === 1 && aFlush.body.data.applied === 0 && aFlush.body.data.discarded === 1, "US-U12: later wall-clock wins regardless of arrival order");
+// replays from either device double-apply nothing
+const replay = await request("POST", "/api/sync/progress", { token: dev, body: { events: [devB, devA] } });
+ok(replay.body.data.applied === 0, "replaying both devices' events applies nothing (idempotent)");
+// both devices reconcile (a fresh web client's cursor-less first pull)
+const pullA = await request("GET", "/api/me/state", { token: dev });
+const pullB = await request("GET", "/api/me/state", { token: dev });
+const rowsA = pullA.body.data.progress.filter((p) => p.itemId === itemX);
+const rowsB = pullB.body.data.progress.filter((p) => p.itemId === itemX);
+ok(rowsA.length === 1 && rowsB.length === 1, "exactly one reconciled row per device — no duplicates");
+ok(rowsA[0].seen === 4 && rowsA[0].ease === 2.18 && rowsB[0].seen === 4 && rowsB[0].correct === 3, "both devices converge on device B's later SM-2 state, wholesale");
+// the web mirror-apply (reconcile.js) adopts the row exactly as mobile does
+const webApplied = wireRowToLocal(rowsA[0], { seen: 1, correct: 1, ease: 2.36, interval: 1, due: 1, last: true, domainId: d1.id, at: T + 10_000 });
+ok(webApplied.seen === 4 && webApplied.ease === 2.18 && webApplied.at === T + 60_000, "web reconcile overwrites without merging — the store mirror equals the server");
+ok(webApplied.domainId === d1.id && webApplied.last === true, "…and keeps the local-only hints readiness.js relies on");
+// cursor semantics: since=serverTime right after → an empty delta
+const crossCursor = pullB.body.data.serverTime;
+const crossDelta = await request("GET", `/api/me/state?since=${encodeURIComponent(crossCursor)}`, { token: dev });
+ok(crossDelta.body.data.progress.length === 0, "since=serverTime cursor → empty progress delta (the web client's next pull)");
+
+// ── PRD-U2 S2: backfill idempotence through the real synthesizer ──────
+// The web backfill persists a stable-key → eventId manifest BEFORE sending;
+// a retry re-synthesizes byte-identical events and the Spine absorbs them.
+const backfillUser = "fixture:user_backfill";
+const bfDevice = {
+  lessons: {},
+  q: { [q(7)]: { seen: 2, correct: 1, ease: 2.1, interval: 3, due: T + 3 * DAY, last: false, domainId: d1.id, at: T + 5_000 } },
+  exams: [{ scaled: 780, passed: true, at: T + 6_000 }],
+  scenarios: { [scnId]: { score: 66, at: T + 7_000 } },
+};
+const bfIds = {};
+const bfId = (k) => bfIds[k] || (bfIds[k] = randomUUID().toLowerCase());
+const bfEvents = synthesizeTrackEvents(bfDevice, "anthropic", "cca-f", bfId, Date.now());
+for (const [path, events] of [
+  ["/api/sync/progress", bfEvents.progress],
+  ["/api/sync/mocks", bfEvents.mocks],
+  ["/api/sync/scenarios", bfEvents.scenarios],
+]) {
+  const first = await request("POST", path, { token: backfillUser, body: { events } });
+  const again = await request("POST", path, { token: backfillUser, body: { events } });
+  ok(first.body.data.applied === 1 && again.body.data.applied === 0, `${path}: double-sent backfill applied exactly once (${first.body.data.applied}, then ${again.body.data.applied})`);
+}
+const bfState = await request("GET", "/api/me/state", { token: backfillUser });
+ok(bfState.body.data.mockAttempts.length === 1 && bfState.body.data.progress.length === 1, "no duplicated history after a repeated backfill (append-only tables deduped on the persisted eventIds)");
+ok(bfState.body.data.progress[0].answeredAt === new Date(T + 5_000).toISOString(), "backfilled history keeps its original answer time");
+
+// ── PRD-U2 S1: the 400-quarantine contract the web flush relies on ────
+// One bad event in a batch of 3 → the server 400s with a pointer at exactly
+// that event; the client parks it and re-sends the remaining 2.
+const g1 = progressEvent(q(9), T + 1_000);
+const badEv = progressEvent(q(10), T + 2_000, { correct_count: 9 }); // > seen
+const g2 = progressEvent(q(11), T + 3_000);
+const rejected = await request("POST", "/api/sync/progress", { token: dev, body: { events: [g1, badEv, g2] } });
+const invalidM = /^invalid_event:(\d+):(.+)$/.exec(rejected.body.error || "");
+ok(rejected.status === 400 && !!invalidM && Number(invalidM[1]) === 1 && invalidM[2] === "correct_count_out_of_range", `400 names the offending event + verbatim reason (${rejected.body.error}) — the exact shape flush.js quarantines on`);
+const resent = await request("POST", "/api/sync/progress", { token: dev, body: { events: [g1, g2] } });
+ok(resent.body.data.applied === 2, "the batch minus the quarantined event applies clean (2 of 3)");
+const afterQuarantine = await request("GET", "/api/me/state", { token: dev });
+ok(afterQuarantine.body.data.progress.filter((p) => [q(9), q(11)].includes(p.itemId)).length === 2 && !afterQuarantine.body.data.progress.some((p) => p.itemId === q(10)), "…and exactly the two good rows exist, the bad one never landed");
 
 // ── teardown ──────────────────────────────────────────────────────────
 for (const s of servers) s.close();

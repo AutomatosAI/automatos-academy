@@ -16,8 +16,10 @@ import { readinessView } from "./views/readiness.js";
 import { libraryView, videosView } from "./views/library.js";
 import { certificateView } from "./views/certificate.js";
 import { pathFinderView } from "./views/pathfinder.js";
+import { profileView } from "./views/profile.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
 import { mountAuthUI } from "./auth-ui.js";
+import { initSync } from "./sync/syncer.js";
 import { track as tkEvent, mountCtaTracking } from "./analytics.js";
 
 const appEl = document.getElementById("app");
@@ -60,6 +62,7 @@ route("/t/:vendor/:track/readiness", readinessView);
 route("/tutor", tutorPageView);
 route("/start", pathFinderView);
 route("/cert/:payload", certificateView);
+route("/profile", profileView);
 
 async function handle(match) {
   setProgress(18);
@@ -110,4 +113,5 @@ function syncTopnav(path) {
 start(handle);
 mountTutor();
 mountAuthUI();
+initSync(); // PRD-U2: no-op on unconfigured deploys; inert signed-out
 mountCtaTracking();
