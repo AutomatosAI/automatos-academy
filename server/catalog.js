@@ -13,10 +13,13 @@
  *     same problems pre-merge, so a boot failure here means an unvalidated
  *     deploy, not a user-facing 500). journalPath is optional — omit it (the
  *     publish script and standalone shells do) for a side-effect-free build.
- *   createCatalogRouter(idxOrGetter) — an express.Router serving the
+ *   createCatalogRouter(idxOrGetter, opts) — an express.Router serving the
  *     contract. Accepts the index object, or a zero-arg getter so the db
  *     mode's 60 s refresh (D-U7) can swap the index atomically between
- *     requests without remounting.
+ *     requests without remounting. opts.getPool (optional, zero-arg → pg
+ *     Pool | null) lets GET /stats add learner counts on Spine deploys.
+ *   computeContentStats(idx) — the aggregate numbers behind GET /stats,
+ *     exported pure so both loaders and the tests share one definition.
  *
  * Byte-fidelity invariant (PRD-U3 §8): every per-file `hash` is sha256 over
  *   the file's canonical utf8 text, and every response body is
@@ -207,12 +210,89 @@ export function computeChanges(fromEntry, toEntry) {
   return changed;
 }
 
-export function createCatalogRouter(idxOrGetter) {
+/**
+ * Aggregate catalog stats — the numbers behind GET /stats (the landing hero's
+ * "real numbers" widgets). Counts LIVE tracks only (manifest status): the hero
+ * advertises what a learner can start today, so coming-soon shells and
+ * on-disk-but-unlisted content must not inflate the promise. Pure over the
+ * index shape both loaders build, so files mode and db mode agree by
+ * construction.
+ */
+export function computeContentStats(idx) {
+  const live = new Set();
+  for (const vendor of idx.manifest.data.vendors || []) {
+    for (const t of vendor.tracks || []) {
+      if (t.status === "live") live.add(`${vendor.id}/${t.trackId}`);
+    }
+  }
+  let liveTracks = 0, lessons = 0, learningMinutes = 0, questions = 0, scenarios = 0, labs = 0, videos = 0;
+  for (const [key, { domains }] of idx.tracks) {
+    if (!live.has(key)) continue;
+    liveTracks += 1;
+    for (const { data: d } of domains.values()) {
+      for (const l of d.lessons || []) {
+        lessons += 1;
+        learningMinutes += l.estMinutes || 0;
+        // in-lesson knowledge checks count as questions: the engine records
+        // them into the same spaced-repetition bank as standalone items
+        questions += (l.knowledgeCheck || []).length;
+      }
+      questions += (d.questions || []).length;
+      scenarios += (d.scenarios || []).length;
+      labs += (d.labs || []).length;
+      // only videos a learner can actually press play on
+      videos += (d.videos || []).filter((v) => typeof v.url === "string" && v.url.trim() !== "").length;
+    }
+  }
+  return { liveTracks, lessons, learningMinutes, questions, scenarios, labs, videos };
+}
+
+// Learner numbers for GET /stats — only on deploys where the Spine's pg pool
+// exists (opts.getPool). Cached in-process for 5 minutes: the hero is a
+// marketing surface, not a dashboard, and two COUNTs per pageview would be a
+// self-inflicted load test. A DB error must never 500 a public content route:
+// it degrades to nulls (clients keep their fallback copy) with one warn per
+// cache window — failures are cached too, so a down DB isn't hammered.
+const LEARNER_CACHE_MS = 5 * 60 * 1000;
+const NO_LEARNER_DATA = Object.freeze({ learners: null, activeThisWeek: null });
+function createLearnerStats(getPool) {
+  let cache = { at: 0, data: NO_LEARNER_DATA }; // replaced whole, never mutated
+  let inflight = null; // stampede guard: concurrent requests share one refresh
+  return async function learnerStats() {
+    const pool = typeof getPool === "function" ? getPool() : null;
+    if (!pool) return NO_LEARNER_DATA;
+    if (Date.now() - cache.at < LEARNER_CACHE_MS) return cache.data;
+    if (!inflight) {
+      inflight = (async () => {
+        try {
+          const [u, a] = await Promise.all([
+            pool.query("SELECT COUNT(*)::int AS n FROM users"),
+            pool.query("SELECT COUNT(DISTINCT user_id)::int AS n FROM progress WHERE answered_at > now() - interval '7 days'"),
+          ]);
+          cache = { at: Date.now(), data: { learners: u.rows[0].n, activeThisWeek: a.rows[0].n } };
+        } catch (e) {
+          console.warn("[catalog] learner stats unavailable (serving nulls):", e.message);
+          cache = { at: Date.now(), data: NO_LEARNER_DATA };
+        } finally {
+          inflight = null;
+        }
+      })();
+    }
+    await inflight;
+    return cache.data;
+  };
+}
+
+export function createCatalogRouter(idxOrGetter, opts = {}) {
   // Accept the index itself (files mode, tests) or a zero-arg getter (db mode
   // — the 60 s refresh swaps the whole index object; one getter call per
   // request keeps each response internally consistent during a swap).
   const getIdx = typeof idxOrGetter === "function" ? idxOrGetter : () => idxOrGetter;
   const router = express.Router();
+  const learnerStats = createLearnerStats(opts.getPool);
+  // content stats keyed by index identity: files mode computes once per boot,
+  // db mode once per index swap — never per request
+  const contentStatsCache = new WeakMap();
 
   // Contract §1: ETag + 304, X-Content-Version, public cache, permissive CORS
   // (published content is public — identical posture to today's static files).
@@ -243,6 +323,24 @@ export function createCatalogRouter(idxOrGetter) {
     if (!from) return res.status(410).json({ error: "version_unknown", note: "full refetch required" });
     const to = idx.journal[idx.journal.length - 1];
     res.json({ from: from.version, to: to.version, changed: computeChanges(from, to) });
+  });
+
+  // Aggregate stats (landing hero + anyone else who wants honest numbers).
+  // Same public envelope-free posture as the rest of the catalog. No ETag on
+  // purpose: the learner half rolls on its own 5-minute clock, so a content
+  // hash would lie — Cache-Control max-age=300 is the whole freshness story.
+  router.get("/stats", async (req, res) => {
+    const idx = getIdx();
+    let content = contentStatsCache.get(idx);
+    if (!content) {
+      content = computeContentStats(idx);
+      contentStatsCache.set(idx, content);
+    }
+    const learners = await learnerStats(); // never throws — nulls on any failure
+    res.set("X-Content-Version", idx.contentVersion);
+    res.set("Cache-Control", "public, max-age=300");
+    res.set("Access-Control-Allow-Origin", "*");
+    res.json({ ...content, ...learners });
   });
 
   // Fixed segments before parameterised routes — /paths and /levels must win

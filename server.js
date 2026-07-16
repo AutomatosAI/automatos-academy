@@ -221,7 +221,12 @@ app.get("/api/badge/verify", (req, res) => {
 // Versioned catalog for the mobile app and the web SPA, serving the index
 // built above (files or db — one router, one contract). The getter keeps the
 // router on the freshest index when db mode's 60 s refresh swaps it.
-app.use("/api/catalog", createCatalogRouter(getContentIndex));
+// The Spine's pg pool (set further down, only when that add-on mounts) feeds
+// GET /api/catalog/stats its learner counts through a lazy getter — the pool
+// doesn't exist yet at mount time, and on static deploys it never will (the
+// stats route then serves learner fields as null; content numbers always work).
+let spinePool = null;
+app.use("/api/catalog", createCatalogRouter(getContentIndex, { getPool: () => spinePool }));
 console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks, source=${CONTENT_SOURCE})`);
 
 // ── Spine — per-user state: Postgres + Clerk + sync + GDPR (PRD-MT-02) ─
@@ -234,7 +239,7 @@ if (process.env.SPINE_ENABLED === "true") {
     process.exit(1);
   }
   const { mountSpine } = await import("./server/spine/index.js");
-  mountSpine(app, { contentIndex });
+  spinePool = mountSpine(app, { contentIndex }).pool; // shared with /api/catalog/stats (learner counts)
   console.log("[spine] user-state API mounted (/api/me, /api/sync)");
 }
 

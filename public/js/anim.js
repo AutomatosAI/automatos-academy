@@ -14,7 +14,9 @@
     var dec = parseInt(el.getAttribute("data-dec") || "0", 10);
     var suf = el.getAttribute("data-suffix") || "";
     var pre = el.getAttribute("data-prefix") || "";
-    el.textContent = pre + value.toFixed(dec) + suf;
+    // Locale grouping ("1,691", never "1691") — the hero counts real catalog
+    // numbers north of 1000 now; min/max fraction digits keep data-dec exact.
+    el.textContent = pre + value.toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf;
   }
 
   function countUp(el) {

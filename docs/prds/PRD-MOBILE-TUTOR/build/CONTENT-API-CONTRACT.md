@@ -26,6 +26,7 @@
 | `GET /api/catalog/podcasts` | **NEW (MT-10)** — episode list in the manifest shape `{ version, episodes[] }`; optional `?vendor=` / `?track=` filters (AND-combined) | `public/content/podcasts.json` |
 | `GET /api/catalog/podcasts/:episodeId` | one episode (bare `PodcastEpisode`) | same |
 | `GET /api/catalog/changes?since={contentVersion}` | delta: which scopes changed since a version (see §5) | computed |
+| `GET /api/catalog/stats` | **NEW** — aggregate catalog + learner numbers for marketing surfaces (see §9) | computed |
 
 **Schema landmines the app must respect** (F3): `track.json` has **no inline `domains` array** — domains resolve via `domainFiles`; skills tracks omit `exam{}`; question/domain ids are **unique only within a track** (F4) — clients store fully-qualified `(vendorId, trackId, id)`.
 
@@ -142,3 +143,25 @@ The podcast surface (MT-10) reads episodes from a versioned manifest served at `
 ### 8.2 Audio hosting
 
 Episodes are produced by the owner (NotebookLM audio overviews) and hosted on the **same media lane as videos** — the proper home is S3/CloudFront via `deploy-media.yml` (`widgets.automatos.app/academy/<vendor>/podcasts/<file>`). Media is never prefetched (F16): stream or explicit download only. The two seeded demo episodes are **temporarily git-hosted** (transcoded to 96 kbps AAC to fit GitHub's 100 MB/file limit) under `/content/<vendor>/podcasts/*.m4a` so they play immediately; the follow-up extends `deploy-media.yml` to sync `public/content/*/podcasts/` and migrates podcasts + videos off git together.
+
+## 9. Stats
+
+`GET /api/catalog/stats` serves the aggregate numbers behind the landing hero's stat widgets (and any other surface that wants honest, current figures). Flat object, no envelope, same public GET/CORS posture as the rest of the catalog; `Cache-Control: public, max-age=300` and `X-Content-Version` as everywhere, but **no ETag** — the learner half refreshes on its own five-minute clock, so a content hash would misrepresent freshness.
+
+```json
+{
+  "liveTracks": 10,
+  "lessons": 227,
+  "learningMinutes": 3061,
+  "questions": 1691,
+  "scenarios": 60,
+  "labs": 85,
+  "videos": 17,
+  "learners": null,
+  "activeThisWeek": null
+}
+```
+
+- **Content numbers** are computed from the served content index (files or db mode — identical by construction) over **live tracks only**: `lessons`, `learningMinutes` (Σ lesson `estMinutes`), `questions` (standalone + in-lesson `knowledgeCheck` items), `scenarios`, `labs`, `videos` (entries with a non-empty `url`). They change exactly when `contentVersion` changes.
+- **Learner numbers** (`learners` = total accounts, `activeThisWeek` = distinct users with an answer in the last 7 days) exist only on Spine-enabled deploys and are cached in-process for 5 minutes. Deploys without a database — and any DB error — serve both as `null`, never an error status. Clients must treat `null` as "unknown", not zero.
+- Additive-compatible like everything else in v1: new fields may appear; these may not change meaning.

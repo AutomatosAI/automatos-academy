@@ -816,6 +816,43 @@ a.verify-chip:hover { background: var(--accent-soft); }
 @keyframes sync-offer-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @media (max-width: 560px) { .sync-offer { left: 14px; right: 14px; max-width: none; } }
 
+/* ── "Welcome back" continue strip (home, above the hero) ───────────────
+   Returning learners only — continue.js renders null otherwise, so new
+   visitors never see this band. Tokens only: Mist and Night both come for
+   free from the var() swap. Static by design — no animation, and hovers
+   shift colour rather than position, so there is nothing new to gate under
+   reduced motion. */
+.continue-band { padding: 18px 0 0; }
+.continue-strip {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px;
+  border: 1px solid var(--glass-border); background: var(--glass);
+  border-radius: var(--radius-lg); padding: 14px 20px;
+}
+.continue-hello { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.continue-hello .serif-i { font-size: 18px; }
+.continue-chip {
+  font: 600 11px/1 var(--label); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--rule); border-radius: var(--radius-pill);
+  padding: 5px 10px; background: var(--glass-strong);
+}
+.continue-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.continue-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 13px/1.2 var(--label); color: var(--fg); text-decoration: none;
+  border: 1px solid var(--glass-border); background: var(--glass-strong);
+  border-radius: var(--radius-pill); padding: 9px 15px;
+  transition: background .15s, border-color .15s;
+}
+.continue-pill:hover { border-color: var(--accent); }
+.continue-pill b { font-weight: 700; }
+.continue-pill .tname { max-width: 24ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.continue-pill.is-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.continue-pill.is-primary:hover { filter: brightness(1.08); } /* same idiom as .ac-btn-solid */
+@media (max-width: 720px) {
+  .continue-actions { margin-left: 0; width: 100%; }
+  .continue-pill .tname { max-width: 16ch; }
+}
+
 /* ── reduced motion: kill everything (gate JS on the same query) ─────── */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; }
