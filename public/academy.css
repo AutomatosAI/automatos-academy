@@ -755,6 +755,42 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .profile-cred { margin-top: 16px; font-size: 14px; }
 .profile-cred a { color: var(--fg); }
 
+/* hero stats strip — the whole learning life in four glass tiles; the big
+   numbers ride anim.js's [data-count] count-up (instant under reduced motion,
+   the same gate as every other widget). min-height holds the row while the
+   tween's target span is still empty pre-reveal. */
+.profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+.profile-stat { border: 1px solid var(--glass-border); background: var(--glass); border-radius: var(--radius-lg); padding: 18px 20px 16px; }
+.profile-stat b { display: block; font-family: var(--display); font-size: clamp(24px, 2.6vw, 31px); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; min-height: 1.05em; }
+.profile-stat b .of { font-size: 0.55em; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.profile-stat > .mono-label { display: block; margin-top: 6px; }
+.profile-stat .cap { margin: 5px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+@media (max-width: 720px) { .profile-stats { grid-template-columns: 1fr 1fr; } }
+
+/* per-track head ring carries the grade letter on exam tracks — one size up
+   from the 48px default so a single letter reads at a glance */
+.profile-track-head .ring { width: 56px; height: 56px; }
+.profile-track-head .ring span { font-size: 16px; font-family: var(--display); font-weight: 700; }
+
+/* coverage lines — lessons + questions practised ride the same .fillbar
+   reveal as the mastery bars below them */
+.profile-cover { display: grid; gap: 9px; margin-top: 18px; }
+.profile-cover-row { display: grid; grid-template-columns: minmax(130px, auto) minmax(56px, auto) 1fr; gap: 12px; align-items: center; }
+.profile-cover-count { font: 600 12px/1 var(--label); color: var(--fg-2); text-align: right; white-space: nowrap; }
+.profile-cover-row .fillbar { height: 8px; }
+.profile-mastery { margin-top: 18px; }
+.profile-mastery .profile-bars { margin-top: 10px; }
+
+/* cold start — an invitation in the landing hero's own voice: the same
+   (already-cached) brain, radially masked into the periwinkle. Static, both
+   moods, nothing to gate under reduced motion. */
+.profile-empty { margin-top: 26px; text-align: center; padding: 34px 26px 38px; }
+.profile-empty-brain { display: block; width: min(300px, 64%); aspect-ratio: 5 / 4; object-fit: cover; object-position: 50% 44%; margin: 0 auto 4px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 62% at 50% 48%, #000 46%, rgba(0,0,0,0) 76%);
+  mask-image: radial-gradient(ellipse 60% 62% at 50% 48%, #000 46%, rgba(0,0,0,0) 76%); }
+.profile-empty h2 { font-size: clamp(26px, 4vw, 34px); margin-top: 12px; }
+.profile-empty p { max-width: 52ch; margin: 12px auto 0; font-size: 14.5px; }
+
 /* GDPR actions — destructive voice + typed in-page confirmation */
 .profile-danger-btn { border-color: var(--bad); color: var(--bad); }
 .profile-danger-btn:disabled { opacity: .45; cursor: not-allowed; }
