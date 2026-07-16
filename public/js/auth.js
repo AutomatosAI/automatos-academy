@@ -35,7 +35,7 @@ const listeners = new Set();
 let clerk = null; // window.Clerk, only once load() has resolved
 let ready = false; // true after a successful load — gates every Clerk call
 let started = false; // initAuth() is idempotent
-let snapshot = null; // { name, email, imageUrl } | null — immutable, replaced whole
+let snapshot = null; // { id, name, email, imageUrl } | null — immutable, replaced whole
 
 const config = () => (typeof window !== "undefined" && window.ACADEMY_AUTH) || null;
 
@@ -59,9 +59,13 @@ function frontendApiFromKey(key) {
 }
 
 // Normalize a Clerk user resource to the tiny shape the SPA consumes.
+// `id` is the clerk_user_id (PRD-U2): the Spine's account-deletion endpoint
+// demands it back as the X-Confirm-Account-Deletion header — identity still
+// only ever crosses this seam, never a second Clerk touchpoint.
 function toSnapshot(clerkUser) {
   if (!clerkUser) return null;
   return {
+    id: clerkUser.id || "",
     name: clerkUser.fullName || clerkUser.firstName || "",
     email: (clerkUser.primaryEmailAddress && clerkUser.primaryEmailAddress.emailAddress) || "",
     imageUrl: clerkUser.imageUrl || "",
@@ -125,7 +129,7 @@ export function initAuth() {
   });
 }
 
-/** Current user ({ name, email, imageUrl }) or null when signed out. */
+/** Current user ({ id, name, email, imageUrl }) or null when signed out. */
 export function user() {
   return snapshot ? { ...snapshot } : null;
 }

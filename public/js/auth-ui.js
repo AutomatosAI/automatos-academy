@@ -1,14 +1,18 @@
-// Topbar sign-in affordance (PRD-U1 S2). Chrome, not a view: mounted once by
-// app.js next to the mood toggle. It renders NOTHING until auth.js reports a
-// state — unconfigured deploys never even get the slot, so today's topbar is
-// byte-identical — then:
+// Topbar sign-in affordance (PRD-U1 S2, extended by PRD-U2 S4). Chrome, not a
+// view: mounted once by app.js next to the mood toggle. It renders NOTHING
+// until auth.js reports a state — unconfigured deploys never even get the
+// slot, so the pre-U1 topbar is byte-identical — then:
 //   signed-out → a quiet ghost pill ("Sign in") that opens Clerk's modal
 //   signed-in  → avatar (photo, else the learner's initial in an accent
-//                circle) with a small menu: name/email header + Sign out.
-// Profile / Export my data / Delete arrive with PRD-U2 — deliberately not
-// stubbed here. All auth calls go through auth.js (the single Clerk seam).
+//                circle) with a small menu: name/email header, Profile,
+//                Export my data, Delete… (both U2), and Sign out.
+// Export streams the Spine's GDPR document straight to a file download; the
+// typed-confirmation delete flows live on #/profile — the menu only points
+// there. All auth calls go through auth.js (the single Clerk seam).
 import { el, clear } from "./ui.js";
 import { initAuth, isConfigured, onAuthChange, openSignIn, signOut } from "./auth.js";
+import { exportMyData } from "./sync/account.js";
+import { url } from "./router.js";
 
 // Document-level listeners for the open menu, torn down on every re-render so
 // signed-in/out flips never leak handlers.
@@ -45,11 +49,32 @@ function avatarFace(u) {
 }
 
 function accountMenu(u) {
+  // Export runs in place: the item narrates its own progress rather than
+  // closing the menu on a silent failure (profile has the richer surface).
+  const exportBtn = el("button", { class: "ac-auth-item", type: "button", role: "menuitem" }, ["Export my data"]);
+  exportBtn.addEventListener("click", async () => {
+    exportBtn.disabled = true;
+    exportBtn.textContent = "Exporting…";
+    const r = await exportMyData();
+    exportBtn.textContent = r.ok ? "Downloaded ✓" : "Export failed — see Profile";
+    exportBtn.disabled = false;
+    if (r.ok) setTimeout(() => setOpen(false), 900);
+  });
+
   const menu = el("div", { class: "ac-auth-menu", role: "menu", hidden: true }, [
     el("div", { class: "ac-auth-id", role: "presentation" }, [
       u.name ? el("b", { text: u.name }) : null,
       u.email ? el("span", { text: u.email }) : null,
     ]),
+    el("button", {
+      class: "ac-auth-item", type: "button", role: "menuitem",
+      onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
+    }, ["Profile"]),
+    exportBtn,
+    el("button", {
+      class: "ac-auth-item", type: "button", role: "menuitem",
+      onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
+    }, ["Delete my data…"]),
     el("button", {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); signOut(); },

@@ -73,7 +73,7 @@ export function scenarioRun(ctx) {
 
   function finish() {
     const db = Scn.debrief(state);
-    store.pushScenario(scn.id, db.pct);
+    store.pushScenario(scn.id, db.pct, db.steps.length);
     clear(root);
     root.appendChild(trackHeader(track, "scenarios"));
     root.appendChild(section(

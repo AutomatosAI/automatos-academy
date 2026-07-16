@@ -3,6 +3,18 @@
 // optional Spine sync (PRD-U1/U2) mirrors it server-side for signed-in
 // learners without changing this store's contract.
 // All updates are immutable (new state objects), per house style.
+//
+// PRD-U2 S1 — the sync seam: recordAnswer/pushExam/pushScenario ALSO hand the
+// write to one registered emitter (sync/syncer.js), the web twin of the mobile
+// client's single-write-path outcomes.ts. The emitter is null by default and
+// the sync layer gates it on a signed-in user, so signed-out behaviour is
+// byte-identical to today. Emitters may never break a learner's answer:
+// every call is fire-and-forget behind a try/catch.
+//
+// loadRawState/saveRawState expose the SAME localStorage records to
+// sync/reconcile.js — the local store IS the sync mirror; reconcile writes
+// through this seam (not through the methods below) precisely so server rows
+// never re-enter the emitter and echo back to the server.
 
 const VERSION = "v1";
 const now = () => Date.now();
@@ -10,8 +22,44 @@ const DAY = 86400000;
 
 const keyFor = (vendorId, trackId) => `automatos-academy:${VERSION}:${vendorId}/${trackId}`;
 
+const EMPTY = () => ({ lessons: {}, q: {}, exams: [], scenarios: {} });
+
+// ── sync seam (PRD-U2) ─────────────────────────────────────────────────
+let syncEmitter = null;
+
+/** Register the one write-path emitter (or null to detach). Receives
+ *  { type: "answer"|"mock"|"scenario", vendorId, trackId, ... } after the
+ *  local write has been persisted. */
+export function setSyncEmitter(fn) {
+  syncEmitter = typeof fn === "function" ? fn : null;
+}
+
+function emit(payload) {
+  if (!syncEmitter) return;
+  try { syncEmitter(payload); } catch (e) { console.warn("[store] sync emitter failed:", (e && e.message) || e); }
+}
+
+/** Raw state for one track — for sync/reconcile.js and the profile view. */
+export function loadRawState(vendorId, trackId) {
+  try {
+    const raw = localStorage.getItem(keyFor(vendorId, trackId));
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === "object") return { ...EMPTY(), ...s };
+    }
+  } catch (_) {}
+  return EMPTY();
+}
+
+/** Overwrite one track's raw state (reconcile's apply path). */
+export function saveRawState(vendorId, trackId, state) {
+  try { localStorage.setItem(keyFor(vendorId, trackId), JSON.stringify(state)); } catch (_) {}
+}
+
 export class Store {
   constructor(vendorId, trackId) {
+    this.vendorId = vendorId;
+    this.trackId = trackId;
     this.key = keyFor(vendorId, trackId);
     this.s = this._load();
   }
@@ -21,7 +69,7 @@ export class Store {
       const raw = localStorage.getItem(this.key);
       if (raw) return JSON.parse(raw);
     } catch (_) {}
-    return { lessons: {}, q: {}, exams: [], scenarios: {} };
+    return EMPTY();
   }
 
   _save() {
@@ -51,11 +99,10 @@ export class Store {
       interval = 1;
     }
     const due = now() + interval * DAY;
-    this.s = {
-      ...this.s,
-      q: { ...this.s.q, [id]: { seen, correct: corr, ease, interval, due, last: !!correct, domainId: domainId || prev.domainId, at: now() } },
-    };
+    const state = { seen, correct: corr, ease, interval, due, last: !!correct, domainId: domainId || prev.domainId, at: now() };
+    this.s = { ...this.s, q: { ...this.s.q, [id]: state } };
     this._save();
+    emit({ type: "answer", vendorId: this.vendorId, trackId: this.trackId, itemId: id, correct: !!correct, state });
   }
 
   dueQuestions() {
@@ -65,8 +112,10 @@ export class Store {
 
   // ── exams ────────────────────────────────────────────────────────────
   pushExam(rec) {
-    this.s = { ...this.s, exams: [...this.s.exams, { ...rec, at: now() }].slice(-25) };
+    const stored = { ...rec, at: now() };
+    this.s = { ...this.s, exams: [...this.s.exams, stored].slice(-25) };
     this._save();
+    emit({ type: "mock", vendorId: this.vendorId, trackId: this.trackId, scaled: stored.scaled, passed: !!stored.passed, at: stored.at });
   }
   bestMock() {
     return this.s.exams.reduce((b, e) => (e.scaled > (b ? b.scaled : -1) ? e : b), null);
@@ -76,14 +125,16 @@ export class Store {
   }
 
   // ── scenarios ────────────────────────────────────────────────────────
-  pushScenario(id, scorePct) {
-    this.s = { ...this.s, scenarios: { ...this.s.scenarios, [id]: { score: scorePct, at: now() } } };
+  pushScenario(id, scorePct, step = 0) {
+    const at = now();
+    this.s = { ...this.s, scenarios: { ...this.s.scenarios, [id]: { score: scorePct, at } } };
     this._save();
+    emit({ type: "scenario", vendorId: this.vendorId, trackId: this.trackId, scenarioId: id, step, scorePct, at });
   }
   scenarioScore(id) { return this.s.scenarios[id]; }
 
   reset() {
-    this.s = { lessons: {}, q: {}, exams: [], scenarios: {} };
+    this.s = EMPTY();
     this._save();
   }
 }

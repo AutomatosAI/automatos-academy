@@ -50,4 +50,5 @@ export const url = {
   quiz: (v, t, d) => `/t/${v}/${t}/quiz/${d}`,
   exam: (v, t) => `/t/${v}/${t}/exam`,
   readiness: (v, t) => `/t/${v}/${t}/readiness`,
+  profile: () => "/profile",
 };

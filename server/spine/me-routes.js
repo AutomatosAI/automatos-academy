@@ -1,6 +1,13 @@
 // Per-user state out + GDPR surface (PRD-MT-02 US-024/US-025).
 //
 //   GET    /api/me/state?since=   — reconciled state deltas, decay ON READ
+//                                   (+ PRD-U2 S4.3 additive fields: `streak`
+//                                   {current, best} rolled up on read from
+//                                   distinct UTC activity days, and `user`
+//                                   {createdAt, plan} for profile headers —
+//                                   both ride EVERY response as absolute
+//                                   values, never deltas; existing clients
+//                                   passthrough-ignore them)
 //   GET    /api/me/export         — full JSON across all 7 tables (F8 access/portability)
 //   DELETE /api/me/data           — wipe Spine rows, keep the Clerk identity
 //   DELETE /api/me/account        — wipe rows AND delete the Clerk identity
@@ -27,6 +34,33 @@ const masteryRowFromDb = (r) => ({
   scopeType: r.scope_type, vendorId: r.vendor_id, trackId: r.track_id, scopeId: r.scope_id,
   competence: r.competence, decayAt: r.decay_at, updatedAt: r.updated_at,
 });
+
+// Study streak (PRD-U2 S4.3) — a rollup computed ON READ, no schema change:
+// an "active day" is any distinct UTC calendar day carrying an answer
+// (progress.answered_at — device wall-clock, the same truth the merge uses)
+// or a telemetry row (telemetry.created_at). Consecutive days group via the
+// classic day − row_number() gaps-and-islands trick; `best` is the longest
+// island, `current` the island still touching today OR yesterday (UTC) — a
+// streak isn't broken until a full UTC day passes with no activity. UTC
+// boundaries are v1, stated in the profile copy ("days are UTC").
+const STREAK_SQL = `
+  WITH days AS (
+    SELECT (answered_at AT TIME ZONE 'UTC')::date AS day FROM progress WHERE user_id = $1
+    UNION
+    SELECT (created_at AT TIME ZONE 'UTC')::date AS day FROM telemetry WHERE user_id = $1
+  ),
+  runs AS (
+    SELECT day, day - (ROW_NUMBER() OVER (ORDER BY day))::int AS grp FROM days
+  ),
+  lens AS (
+    SELECT count(*)::int AS len, max(day) AS last_day FROM runs GROUP BY grp
+  )
+  SELECT
+    COALESCE((SELECT max(len) FROM lens), 0)::int AS best,
+    COALESCE((SELECT len FROM lens
+              WHERE last_day >= (now() AT TIME ZONE 'UTC')::date - 1
+              ORDER BY last_day DESC LIMIT 1), 0)::int AS current
+`;
 
 // Deletion order: children first so the response can report per-table counts,
 // then the users row itself — "all 7 tables" (US-025). The next authenticated
@@ -72,7 +106,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
     const cond = (col) => (since ? ` AND ${col} > $2` : "");
     const params = since ? [userId, since] : [userId];
 
-    const [progress, mastery, mocks, scenarios] = await Promise.all([
+    const [progress, mastery, mocks, scenarios, streak] = await Promise.all([
       pool.query(`SELECT vendor_id, track_id, item_id, seen, correct, ease, "interval" AS interval, due_at, answered_at
                   FROM progress WHERE user_id = $1${cond("answered_at")}`, params),
       pool.query(`SELECT vendor_id, track_id, scope_type, scope_id, competence, decay_at, updated_at
@@ -81,6 +115,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
                   FROM mock_attempts WHERE user_id = $1${cond('"at"')}`, params),
       pool.query(`SELECT vendor_id, track_id, scenario_id, step, score_pct, updated_at
                   FROM scenario_progress WHERE user_id = $1${cond("updated_at")}`, params),
+      pool.query(STREAK_SQL, [userId]), // always user-scoped, never since-filtered
     ]);
 
     return ok(res, {
@@ -89,6 +124,11 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       masteryMap: mastery.rows.map((r) => masteryToWire(masteryRowFromDb(r), scopeWeight, nowMs)),
       mockAttempts: mocks.rows.map(mockToWire),
       scenarioProgress: scenarios.rows.map(scenarioToWire),
+      // PRD-U2 additive envelope fields — absolute values on every pull.
+      // The mobile client's MeStateSchema is .passthrough() (schemas.ts), so
+      // pre-U2 apps ignore these cleanly.
+      streak: { current: streak.rows[0].current, best: streak.rows[0].best },
+      user: { createdAt: iso(req.spineUser.created_at), plan: req.spineUser.plan },
     });
   }));
 

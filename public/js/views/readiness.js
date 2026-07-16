@@ -9,6 +9,7 @@ import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { claimPanel } from "./certificate.js";
 import { trackOnce } from "../analytics.js";
 import { downloadBackup, importBackup } from "../progress-io.js";
+import { noteRestore } from "../sync/backfill.js";
 
 const domGrade = (pct) => (pct >= 90 ? "A+" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 55 ? "C" : pct >= 40 ? "D" : "F");
 const gradeVar = (g) => `var(--grade-${g === "A+" ? "aplus" : g === "A" ? "a" : g === "B" ? "b" : g === "C" ? "c" : g === "D" ? "d" : "f"})`;
@@ -38,7 +39,9 @@ function dataControls(store, backTo) {
     r.onload = () => {
       const res = importBackup(String(r.result));
       msg.textContent = res.ok ? `Restored ${res.restored} item${res.restored === 1 ? "" : "s"} — reloading…` : res.error;
-      if (res.ok) setTimeout(reload, 700);
+      // PRD-U2 S2: a restore while signed in re-offers backfill for the
+      // restored state (and resets the reconcile cursor). Inert signed-out.
+      if (res.ok) { noteRestore(); setTimeout(reload, 700); }
     };
     r.readAsText(f);
     file.value = "";
