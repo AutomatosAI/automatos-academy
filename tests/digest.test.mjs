@@ -103,7 +103,8 @@ ok(/streak intact/.test(mail.subject), "subject notes the intact streak");
 ok(mail.html.includes("Identity &amp; Access Mgmt up 12%") && mail.text.includes("Identity & Access Mgmt up 12%"), "biggest move named with the domain's display name");
 ok(mail.html.includes("23 days to Cert A") && /coverage is what counts/.test(mail.html), "countdown present, coverage framing");
 ok(mail.html.includes("Clear your 12 due reviews") && mail.html.includes("?src=digest"), "CTA deep-links the due queue with the src=digest beacon tag");
-ok(mail.html.includes(meta.unsubUrl) && mail.text.includes(meta.unsubUrl), "one-click unsubscribe link in both parts");
+// the HTML part correctly &amp;-escapes the href; the text part carries it raw
+ok(mail.html.includes("/digest/unsubscribe?u=U&amp;t=T") && mail.text.includes(meta.unsubUrl), "one-click unsubscribe link in both parts (html escaped, text raw)");
 const noDate = composeDigest({ curr: currStats, prev: prevStats, meta: { ...meta, examDates: {} } });
 ok(!/days to/.test(noDate.html), "no exam date → no countdown line, never invented");
 const zero = composeDigest({ curr: { streak: { current: 0, best: 9 }, tracks: {} }, prev: prevStats, meta });

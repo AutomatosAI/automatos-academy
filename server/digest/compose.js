@@ -47,12 +47,18 @@ export function weekDeltas(curr, prev) {
   return { questions, firstDigest, dueTotal, topGain, zeroWeek: questions === 0 };
 }
 
-/** Days until the END of the exam day (UTC midnight boundary of iso+1). */
+/** Calendar-day distance to the exam (UTC dates) — "23 days" is date
+ *  subtraction, the number a learner would say, not ceil-of-hours (which
+ *  reads one high every evening). Exam-day itself still honestly has a
+ *  day; past dates render nothing. */
 export function daysToExam(iso, nowMs) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
-  const end = Date.parse(`${iso}T23:59:59Z`);
-  if (!Number.isFinite(end) || end < nowMs) return null;
-  return Math.ceil((end - nowMs) / 86_400_000);
+  const exam = Date.parse(`${iso}T00:00:00Z`);
+  if (!Number.isFinite(exam)) return null;
+  const today = Date.parse(`${new Date(nowMs).toISOString().slice(0, 10)}T00:00:00Z`);
+  const diff = Math.round((exam - today) / 86_400_000);
+  if (diff < 0) return null;
+  return Math.max(1, diff);
 }
 
 function streakLine(streak) {
