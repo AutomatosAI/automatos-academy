@@ -124,6 +124,14 @@ function progressView(ctx) {
         ]),
       ]),
       claimPanel(track, comp),
+      // PRD-COMMUNITY S1: share the completion number next to the claim
+      // panel — no name by default; signed only when the Spine attests it.
+      pct > 0 ? shareAffordance({
+        kind: "readiness",
+        label: "Share progress",
+        title: `${pct}% complete — ${track.name} · Automatos Academy`,
+        buildCard: () => ({ n: pct, vendorId: v, trackId: t }),
+      }) : null,
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 14px" }, text: "Progress by module group" }),
       el("div", { class: "mastery" }, rows),
       el("div", { class: "row", style: { marginTop: "48px", flexWrap: "wrap", gap: "16px", justifyContent: "space-between" } }, [
@@ -196,6 +204,16 @@ export function readinessView(ctx) {
       ]),
 
       claimPanel(track, { kind: "exam", complete: r.qualified }),
+
+      // PRD-COMMUNITY S1: share readiness next to the claim panel — the same
+      // weighted-mastery number the profile ring shows, bound to the PREP
+      // TRACK ("ready for <exam>" is banned copy; the card never says it).
+      masteryPct > 0 ? shareAffordance({
+        kind: "readiness",
+        label: "Share readiness",
+        title: `${masteryPct}% readiness — ${track.name} · Automatos Academy`,
+        buildCard: () => ({ n: masteryPct, vendorId: v, trackId: t }),
+      }) : null,
 
       el("div", { class: "panel", style: { marginTop: "34px" } }, [
         el("div", { class: "stat-row" }, [
