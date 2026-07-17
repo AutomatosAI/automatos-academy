@@ -7,6 +7,8 @@ import { url } from "../router.js";
 import { allScenarios, scenarioById } from "../content.js";
 import { md } from "../markdown.js";
 import * as Scn from "../engine/scenario.js";
+import { doneLine } from "./next-step.js";
+import { accountAsk } from "../account-ask.js";
 
 const KEYS = "ABCDEFGH";
 const strip = (s) => md(s || "").replace(/^<p>|<\/p>\s*$/g, "");
@@ -94,10 +96,21 @@ export function scenarioRun(ctx) {
           el("div", { class: "explain", style: { borderTop: "none", paddingTop: "6px" }, html: md(p.rationale || "") }),
         ])
       )),
-      el("div", { class: "row", style: { marginTop: "26px" } }, [
-        el("button", { class: "ac-btn ac-btn-solid", type: "button", onClick: () => { state = Scn.start(scn); renderStep(); } }, ["Re-run scenario"]),
-        el("a", { class: "ac-btn", href: "#" + url.scenarios(v, t) }, ["All scenarios"]),
-      ]),
+      // Session end-state (PRD-WEB-LOOP §4.4): the debrief gets a forward
+      // step — the next unplayed scenario, else readiness — then the closing
+      // line. The §4.2 ask composes in, right after value was created.
+      el("div", { class: "row", style: { marginTop: "26px" } }, (() => {
+        const nextScn = allScenarios(track).find((x) => x.id !== scn.id && !store.scenarioScore(x.id));
+        return [
+          nextScn
+            ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.scenario(v, t, nextScn.id) }, [`Next scenario: ${nextScn.title} →`])
+            : el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t) }, ["Readiness →"]),
+          el("button", { class: "ac-btn", type: "button", onClick: () => { state = Scn.start(scn); renderStep(); } }, ["Re-run scenario"]),
+          el("a", { class: "ac-btn", href: "#" + url.scenarios(v, t) }, ["All scenarios"]),
+        ];
+      })()),
+      doneLine(),
+      accountAsk("scenario"),
     ));
     window.scrollTo({ top: 0 });
   }

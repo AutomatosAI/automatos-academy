@@ -36,6 +36,7 @@ import { streakMilestone } from "../engine/sharecard.js";
 import { syncStatus, syncNow } from "../sync/syncer.js";
 import { maybeOfferBackfill } from "../sync/backfill.js";
 import { exportMyData, deleteMyData, deleteMyAccount } from "../sync/account.js";
+import { getExamDate, examDateLabel } from "../exam-date.js";
 
 const signedIn = () => isConfigured() && !!user();
 const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -263,6 +264,10 @@ function trackPanel(track, store) {
     readinessRing.setAttribute("aria-label", `${ringPct}% readiness — grade ${ringGrade}`);
   }
 
+  // PRD-WEB-LOOP §4.1: the exam date is SET on the readiness view; here it
+  // mirrors read-only (skills tracks have no exam to date).
+  const examIso = skills ? null : getExamDate(track.vendorId, track.trackId);
+
   return el("div", { class: "panel profile-track" }, [
     el("div", { class: "profile-track-head" }, [
       readinessRing,
@@ -270,6 +275,10 @@ function trackPanel(track, store) {
         el("span", { class: "mono-label", text: `${track.vendorName || track.vendorId} · ${track.code || track.trackId}` }),
         el("h3", {}, [el("a", { href: "#" + url.track(track.vendorId, track.trackId), text: track.name })]),
         el("p", { class: "muted", style: { fontSize: "13px" }, text: headline }),
+        examIso ? el("p", { class: "muted", style: { fontSize: "12.5px", marginTop: "2px" } }, [
+          `Exam date: ${examDateLabel(examIso, { long: true })} · `,
+          el("a", { href: "#" + url.readiness(track.vendorId, track.trackId), text: "change on readiness" }),
+        ]) : null,
       ]),
       gradeSeal,
     ]),

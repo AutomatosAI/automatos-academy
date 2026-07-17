@@ -8,6 +8,8 @@ import { buildMock, scoreMock, examScale } from "../engine/exam.js";
 import { questionCard } from "./question.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { track as tk } from "../analytics.js";
+import { nextStep, endNote } from "./next-step.js";
+import { accountAsk } from "../account-ask.js";
 
 function examHistory(store) {
   const ex = store.s.exams || [];
@@ -146,6 +148,29 @@ export function examView(ctx) {
         el("div", { class: "m-bar" }, [el("i", { style: { width: pct + "%" } })]),
       ]);
     }));
+    // Session end-state (PRD-WEB-LOOP §4.4): pass and fail stop getting the
+    // same next steps. Passed leads to the readiness verdict (the claim panel
+    // lives there); failed leads with the weakest domain from THIS mock
+    // (res.perDomain — the same framing readiness uses), then New exam.
+    let weakest = null;
+    if (!res.passed) {
+      let low = Infinity;
+      for (const d of track.domains) {
+        const pd = res.perDomain[d.id];
+        if (pd && pd.total > 0 && pd.correct / pd.total < low) { low = pd.correct / pd.total; weakest = d; }
+      }
+    }
+    const nextRow = res.passed
+      ? [
+          el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t) }, ["Readiness & claim →"]),
+          el("button", { class: "ac-btn", type: "button", onClick: begin }, ["New exam"]),
+        ]
+      : [
+          weakest ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.quiz(v, t, weakest.id) }, [`Drill ${weakest.name} →`]) : null,
+          el("button", { class: "ac-btn" + (weakest ? "" : " ac-btn-solid"), type: "button", onClick: begin }, ["New exam"]),
+          el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, ["Readiness →"]),
+        ];
+    const ask = accountAsk("mock"); // §4.2 — right after value was created
     root.appendChild(section(
       el("div", { class: "ready-hero" }, [
         seal(sealGrade, res.passed ? "Passed" : "Below pass", "lg"),
@@ -158,10 +183,9 @@ export function examView(ctx) {
       ]),
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "36px 0 12px" }, text: "By domain" }),
       dom,
-      el("div", { class: "row", style: { marginTop: "24px" } }, [
-        el("button", { class: "ac-btn ac-btn-solid", type: "button", onClick: begin }, ["New exam"]),
-        el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, ["Readiness →"]),
-      ]),
+      el("div", { class: "row", style: { marginTop: "24px" } }, nextRow),
+      endNote(nextStep({ track, store })), // due pull, else the closing line
+      ask,
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "44px 0 12px" }, text: "Review — every question, with the why" }),
       el("div", { class: "stack-24" }, mock.items.map((q) => questionCard(q, { reveal: true, showExplain: true, selected: answers[q.id] || [] }))),
     ));

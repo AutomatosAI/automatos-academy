@@ -7,10 +7,13 @@ import { url } from "../router.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { claimPanel } from "./certificate.js";
-import { shareAffordance } from "../share.js";
-import { trackOnce } from "../analytics.js";
+import { trackOnce, track as tk } from "../analytics.js";
 import { downloadBackup, importBackup } from "../progress-io.js";
 import { noteRestore } from "../sync/backfill.js";
+import { getExamDate, setExamDate, clearExamDate, examDateMs, examDateLabel } from "../exam-date.js";
+import { pace, paceInputs, PACE_WINDOW_DAYS } from "../engine/pace.js";
+import { paceLine } from "./pace-line.js";
+import { clearLane } from "../lane.js";
 
 const domGrade = (pct) => (pct >= 90 ? "A+" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 55 ? "C" : pct >= 40 ? "D" : "F");
 const gradeVar = (g) => `var(--grade-${g === "A+" ? "aplus" : g === "A" ? "a" : g === "B" ? "b" : g === "C" ? "c" : g === "D" ? "d" : "f"})`;
@@ -27,6 +30,11 @@ function dataControls(store, backTo) {
   reset.addEventListener("click", () => {
     if (!armed) { armed = true; reset.textContent = "Click again to erase everything"; return; }
     store.reset();
+    // PRD-WEB-LOOP §7/D-WL4: a reset also drops what derives from the learner —
+    // this track's exam date and the pathfinder lane preference (the GDPR
+    // wipes clear both by prefix already; this keeps the local path honest).
+    clearExamDate(store.vendorId, store.trackId);
+    clearLane();
     reload();
   });
 
@@ -50,6 +58,38 @@ function dataControls(store, backTo) {
   const restore = el("button", { class: "ac-btn", type: "button", onClick: () => file.click() }, ["Restore"]);
 
   return el("div", { class: "row", style: { gap: "10px", flexWrap: "wrap", alignItems: "center" } }, [backup, restore, reset, file, msg]);
+}
+
+// ── exam date + pacing (PRD-WEB-LOOP §4.1 / S1) ─────────────────────────
+// The per-track exam date is set HERE — a plain date input in the stats
+// panel, device-local (matching mobile's posture; set it on web AND phone
+// until a server home exists). Signed in, the setter also fires a one-way
+// prefs push (exam-date.js). The pacing line mirrors the hero's, beside
+// where the date is set, with its inputs on show — the MT-12 rule: every
+// verdict can be audited.
+function examDateRow(v, t, backTo) {
+  const cur = getExamDate(v, t);
+  const reload = () => { location.hash = backTo; window.dispatchEvent(new HashChangeEvent("hashchange")); };
+  const input = el("input", { class: "exam-date-input", type: "date", value: cur || "", "aria-label": "Exam date for this track" });
+  input.addEventListener("change", () => {
+    if (input.value) { setExamDate(v, t, input.value); tk("exam_date_set", { track: t, action: "set" }); }
+    else { clearExamDate(v, t); tk("exam_date_set", { track: t, action: "clear" }); }
+    reload();
+  });
+  const clearBtn = el("button", { class: "ac-btn", type: "button" }, ["Clear"]);
+  clearBtn.addEventListener("click", () => {
+    clearExamDate(v, t);
+    tk("exam_date_set", { track: t, action: "clear" });
+    reload();
+  });
+  return el("div", { class: "exam-date-row" }, [
+    el("span", { class: "mono-label", text: "Exam date" }),
+    input,
+    cur ? clearBtn : null,
+    el("span", { class: "cap", text: cur
+      ? "Drives the pacing line here and on home. Stays on this device."
+      : "Set it and the pacing line lights up here and on home. Stays on this device." }),
+  ]);
 }
 
 // Skills-track progress: modules done + the capstone are the whole story —
@@ -124,6 +164,26 @@ export function readinessView(ctx) {
 
   const weakHref = r.weakest ? url.quiz(v, t, r.weakest.id) : url.exam(v, t);
 
+  // PRD-WEB-LOOP §4.1 — the hero's pacing line, mirrored beside where the
+  // date is set, with the arithmetic on show (days left, due + unseen, rate).
+  const iso = getExamDate(v, t);
+  const nowMs = Date.now();
+  const pinp = paceInputs(track, store.s, nowMs);
+  const pv = iso ? pace(examDateMs(iso), pinp.dueNow, pinp.unseenInScope, pinp.observedPerDay, nowMs) : null;
+  const paceEl = paceLine(
+    iso
+      ? { verdict: pv.verdict, dueTotal: pinp.dueNow, requiredPerDay: pv.requiredPerDay, dateLabel: examDateLabel(iso) }
+      : { verdict: "no-date", dueTotal: pinp.dueNow },
+    { surface: "readiness" },
+  );
+  const rate = Math.round(pinp.observedPerDay * 10) / 10;
+  const paceWhy = pv
+    ? el("p", { class: "muted", style: { fontSize: "12.5px", marginTop: "4px" }, text:
+        pv.verdict === "exam-past"
+          ? `Exam date ${examDateLabel(iso, { long: true })} has passed — update or clear it below.`
+          : `${pv.daysLeft} day${pv.daysLeft === 1 ? "" : "s"} left · ${pinp.dueNow} due + ${pinp.unseenInScope} unseen · ~${rate}/day at your recent rate (${pinp.activeDays} active of the last ${PACE_WINDOW_DAYS} days)` })
+    : null;
+
   return el("div", {}, [
     trackHeader(track, "readiness"),
     section(
@@ -134,6 +194,8 @@ export function readinessView(ctx) {
           el("h2", { text: r.headline }),
           el("p", { text: r.next }),
           r.reasons.length ? el("ul", { class: "prose why", style: { maxWidth: "60ch" } }, r.reasons.map((x) => el("li", { text: x }))) : null,
+          paceEl,
+          paceWhy,
           el("div", { class: "row", style: { marginTop: "18px" } }, [
             el("a", { class: "ac-btn ac-btn-solid", href: "#" + weakHref }, [r.weakest ? `Drill ${r.weakest.name} →` : "Take a mock →"]),
             el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Mock exam"]),
@@ -160,6 +222,7 @@ export function readinessView(ctx) {
           el("div", { class: "s" }, [el("b", { text: String(r.due) }), el("span", { class: "mono-label", text: "Review due" })]),
           el("div", { class: "s" }, [el("b", { text: (store.s.exams || []).length + "" }), el("span", { class: "mono-label", text: "Mocks sat" })]),
         ]),
+        examDateRow(v, t, url.readiness(v, t)),
       ]),
 
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 14px" }, text: "Mastery by domain" }),

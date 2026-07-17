@@ -9,8 +9,10 @@
 // ctx? — "sent"|"held"|"off" context presence, only present when the
 // progress-context feature is offered; PRD-TUTOR-LIVE D-T4) ·
 // tutor_error (props: kind, status? — counts only, never message text;
-// PRD-TUTOR-LIVE D-T4) · tutor_consent (props: granted — consent flips,
-// a boolean only, never the shared numbers) · tutor_deep_link · path_finder
+// PRD-TUTOR-LIVE D-T4) · tutor_deep_link · path_finder · pace_line_shown
+// (props: verdict, surface) · exam_date_set (props: track, action) ·
+// account_ask_shown · account_ask_clicked · account_ask_dismissed (props:
+// surface — PRD-WEB-LOOP §4.2)
 
 const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim();
 

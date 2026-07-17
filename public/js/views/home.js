@@ -3,7 +3,9 @@ import { el, ring } from "../ui.js";
 import { loadCatalog } from "../content.js";
 import { url } from "../router.js";
 import { track as tk } from "../analytics.js";
-import { continueData, heroReadiness } from "./continue.js";
+import { continueData, heroReadiness, heroPace } from "./continue.js";
+import { paceLine } from "./pace-line.js";
+import { loadLane, laneSort } from "../lane.js";
 
 // ── real hero numbers (GET /api/catalog/stats) ─────────────────────────
 // One fetch per session (module-level cached promise; the route is
@@ -104,27 +106,49 @@ function onRamp(tracks) {
 // Two doors, one academy (PRD-GROWTH §5): the operator who wants AI running
 // their business, and the practitioner chasing a credential. Lane comes from
 // manifest data (track.lane) — the engine stays vendor-agnostic.
-function doors(tracks) {
-  const firstLive = (lane, fallbackLane) => {
-    const inLane = tracks.filter((t) => (t.lane || "practitioner") === lane);
-    return inLane.find((t) => t.status === "live") || inLane[0] ||
+// PRD-WEB-LOOP §4.3: a persisted pathfinder walk (lane.js) puts the learner's
+// lane door first — with a resume voice while they have no real progress
+// (once continueData is non-null the personal hero leads and only the
+// ordering remains). Foundations-lane learners keep the on-ramp as their
+// lead, so their doors stay in the default order.
+function doors(tracks, laneRec, resumeVoice) {
+  const lane = (laneRec && laneRec.lane) || null;
+  const rec0 = (laneRec && Array.isArray(laneRec.recs) && laneRec.recs[0]) || null;
+  const firstLive = (laneKey, fallbackLane) => {
+    const inLane = tracks.filter((t) => (t.lane || "practitioner") === laneKey);
+    // the learner's own recommendation wins its lane's door when it's live
+    const pref = rec0 && laneKey === lane && inLane.find((t) => t.trackId === rec0.trackId && t.status === "live");
+    return pref || inLane.find((t) => t.status === "live") || inLane[0] ||
       tracks.filter((t) => (t.lane || "practitioner") === fallbackLane).find((t) => t.status === "live");
   };
   const operator = firstLive("operator", "practitioner");
-  const practitioner = tracks.find((t) => t.flagship && t.status === "live") || firstLive("practitioner", "operator");
-  const door = (kicker, title, body, t) => {
+  // flagship stays the practitioner default; the learner's own live
+  // practitioner recommendation outranks it, nothing else does
+  const practitioner =
+    (lane === "practitioner" && rec0 && tracks.find((t) => t.trackId === rec0.trackId && (t.lane || "practitioner") === "practitioner" && t.status === "live")) ||
+    tracks.find((t) => t.flagship && t.status === "live") ||
+    firstLive("practitioner", "operator");
+  const door = (kicker, title, body, t, doorLane) => {
     const live = t && t.status === "live";
+    // the voice only speaks on the door that actually leads to rec[0] —
+    // never on a stand-in track it doesn't name
+    const voiced = resumeVoice && rec0 && lane === doorLane && live && t.trackId === rec0.trackId;
     return el(live ? "a" : "div", { class: "door" + (live ? "" : " is-soon"), href: live ? "#" + url.track(t.vendorId, t.trackId) : null }, [
       el("span", { class: "mono-label", text: kicker }),
       el("h3", { class: "serif-i", text: title }),
       el("p", { class: "muted", text: body }),
-      el("span", { class: "mono-label", style: { marginTop: "auto" }, text: t ? (live ? `Start: ${t.name} →` : `First track in development: ${t.name}`) : "" }),
+      el("span", { class: "mono-label", style: { marginTop: "auto" }, text: t
+        ? (voiced ? `Pick up where the path finder left off: ${rec0.name} →`
+          : live ? `Start: ${t.name} →` : `First track in development: ${t.name}`)
+        : "" }),
     ]);
   };
-  return el("div", { class: "door-grid" }, [
-    door("For operators", "Run your business with AI.", "Plain English, no exam — you leave with one real automation running in your business.", operator),
-    door("For practitioners", "Get certified in AI.", "Exam-grade prep, weighted to real blueprints, gated by an honest A+ readiness score.", practitioner),
-  ]);
+  const pair = [
+    door("For operators", "Run your business with AI.", "Plain English, no exam — you leave with one real automation running in your business.", operator, "operator"),
+    door("For practitioners", "Get certified in AI.", "Exam-grade prep, weighted to real blueprints, gated by an honest A+ readiness score.", practitioner, "practitioner"),
+  ];
+  if (lane === "practitioner") pair.reverse(); // operator already leads by default
+  return el("div", { class: "door-grid" }, pair);
 }
 
 // ── Periwinkle landing hero (design mock 1a): the glowing-brain hero with
@@ -348,6 +372,11 @@ function periwinkleHero(flagship, stats, personal) {
       ])
     : null;
 
+  // Web Today (PRD-WEB-LOOP §4.1, D-WL2): the due-count + pacing line under
+  // the chips row — any returning learner, signed in or out. No exam date ⇒
+  // no verdict, just the count and a quiet set-your-date link.
+  const pacer = personal && personal.pace ? paceLine(personal.pace, { surface: "hero", hero: true }) : null;
+
   // widgets — personal for the signed-in returning learner (real streak /
   // readiness / due counts only; slots with nothing true to say stay empty),
   // the platform's real catalog numbers for everyone else. If no personal
@@ -380,6 +409,7 @@ function periwinkleHero(flagship, stats, personal) {
       el("p", { text: "The Academy for building AI agents. Learn by doing, adapt in real time, and unlock measurable skills you can put to work." }),
       actions,
       chips,
+      pacer,
     ])]),
     ...widgets,
   ]);
@@ -399,8 +429,15 @@ export async function catalog() {
   const readyP = cont && cont.signedIn
     ? Promise.race([heroReadiness(cont), new Promise((res) => setTimeout(() => res(null), 1500))])
     : Promise.resolve(null);
+  // the Today/pacing line (PRD-WEB-LOOP §4.1) — any returning learner; it
+  // rides the same cached tree load and the same 1.5s cap, or resolves
+  // instantly when no exam date is set (no fetch at all).
+  const paceP = cont
+    ? Promise.race([heroPace(cont), new Promise((res) => setTimeout(() => res(null), 1500))])
+    : Promise.resolve(null);
   const stats = await statsReady;
-  const personal = cont ? { ...cont, ready: await readyP } : null;
+  const personal = cont ? { ...cont, ready: await readyP, pace: await paceP } : null;
+  const laneRec = loadLane(); // PRD-WEB-LOOP §4.3 — the persisted pathfinder walk (90-day TTL)
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const flagship = tracks.find((t) => t.flagship && t.status === "live") || tracks.find((t) => t.status === "live");
 
@@ -419,13 +456,15 @@ export async function catalog() {
       el("a", { class: "ac-btn", href: "#" + url.method() }, ["See the model"]),
     ]),
     onRamp(tracks),
-    doors(tracks),
+    // the lane door leads; the resume voice only speaks while there is no
+    // real progress (the personal hero always outranks the recommendation)
+    doors(tracks, laneRec, !cont),
     spine(),
   ])]);
 
   const cards = el("section", { class: "section" }, [el("div", { class: "wrap" }, [
     el("div", { class: "eyebrow", style: { marginBottom: "20px" } }, [el("span", { class: "mono-label", text: "Tracks" })]),
-    el("div", { class: "grid-tracks" }, tracks.map(trackCard)),
+    el("div", { class: "grid-tracks" }, laneSort(tracks, laneRec && laneRec.lane).map(trackCard)),
     el("p", { class: "muted", style: { marginTop: "20px", fontSize: "13px" } }, [
       "Same engine, every track. Adding a vendor is a content task, not an engineering one — see ",
       el("a", { href: "https://github.com/AutomatosAI", target: "_blank", rel: "noopener", style: { color: "var(--accent)" }, text: "the authoring guide" }), ".",
