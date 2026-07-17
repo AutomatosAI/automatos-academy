@@ -1011,6 +1011,25 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .wire-corrections { margin-top: 18px; }
 .wire-corrections li { margin: 8px 0; }
 .wire-empty { padding: 40px 0 20px; }
+
+/* ── "From the Wire" home teaser (PRD-WIRE S3, D-W3) ────────────────────
+   home.js mounts this strip ONLY when the Wire is on AND ≥3 posts are
+   published (wireTeaserData) — absent, the node never enters the tree: no
+   reserved space, zero layout shift. Additive rules, tokens only; items
+   reuse .wire-item so Mist/Night theming and the reduced-motion hover guard
+   below come for free. */
+.wire-teaser { padding: clamp(26px, 4vw, 44px) 0 0; }
+.wire-teaser-head {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 8px 16px; margin-bottom: 14px;
+}
+.wire-teaser-head a { text-decoration: none; color: var(--accent); }
+.wire-teaser-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.wire-teaser-row .wire-item h3 { font-size: 17px; margin: 8px 0 0; }
+@media (max-width: 900px) {
+  .wire-teaser-row { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wire-item:hover { transform: none; }
 }

@@ -8,10 +8,19 @@
 // path whichever source (files or Postgres) built the index. server.js builds
 // the index first and calls generateShells(idx); standalone `npm run shells`
 // builds a file index below and emits the same bytes.
-import { writeFileSync, mkdirSync } from "fs";
+//
+// PRD-WIRE S3: wire-enabled deploys (opts.wire, from WIRE_INGEST_KEY) also
+// get the STATIC parts of the Wire's SEO surface — the /wire/ index shell and
+// a robots.txt Sitemap line pointing at the DB-served /wire/sitemap.xml. Post
+// shells are deliberately NOT generated here: this runs at boot and cannot
+// see posts published (or killed) afterwards — they render per request from
+// the DB (server/wire/shell.js). Wire off → the index shell is removed, so a
+// dev tree flipping env never serves a stale door to a dead surface.
+import { writeFileSync, mkdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { buildContentIndex } from "../server/catalog.js";
+import { transparencyLabel } from "../server/wire/label.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const BASE = (process.env.ACADEMY_BASE_URL || "https://academy.automatos.app").replace(/\/$/, "");
@@ -93,13 +102,50 @@ function shellHtml(t, track) {
 </main></body></html>`;
 }
 
+// The Wire's static index shell (PRD-WIRE S3) — the crawlable front door at
+// /wire/; individual posts live at /wire/<slug>/ (per-request, DB-served).
+// The transparency label is computed from the same env the runtime reads
+// (D-W5: review mode claims the human review that is actually happening).
+function wireIndexHtml() {
+  const pageUrl = `${BASE}/wire/`;
+  const label = transparencyLabel(process.env.WIRE_PUBLISH_POLICY === "auto" ? "auto" : "review");
+  const title = "The Wire — agent-written, source-verified AI news · Automatos Academy";
+  const desc = "Daily briefings researched and written by Automatos agents — model news, trends, new courses and question refreshes. Every claim linked to its source, every correction in the open.";
+  return `<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${esc(pageUrl)}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Automatos Academy">
+<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${esc(pageUrl)}"><meta property="og:image" content="${BASE}/og-academy.png?v=2">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/atom+xml" title="The Wire — Automatos Academy" href="/wire/rss.xml">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
+</head><body data-mood="mist" style="display:block">
+<main style="max-width:820px;margin:0 auto;padding:64px 22px">
+  <p class="mono-label">Automatos Academy</p>
+  <h1 class="serif-i" style="font-size:clamp(34px,6vw,54px);margin:10px 0 0">The Wire</h1>
+  <p style="margin-top:16px;font-size:18px;max-width:66ch">${esc(desc)}</p>
+  <p class="wire-label">${esc(label)}</p>
+  <p style="margin:26px 0"><a class="ac-btn ac-btn-solid" href="/#/wire">Open the Wire →</a>
+  <a class="ac-btn" href="/wire/rss.xml">Subscribe — RSS</a></p>
+  <p style="margin-top:34px"><a href="/">← Automatos Academy</a></p>
+</main></body></html>`;
+}
+
 /**
  * Emit /tracks/<trackId>/index.html for every LIVE track, plus sitemap.xml +
  * robots.txt, from an already-built content index. Reads the index only —
  * never disk, never mutating it (the index's track.data is what the Content
  * API serves verbatim; a stray property here would leak into responses).
+ *
+ * @param {{wire?: boolean}} opts — wire:true additionally emits the static
+ *        Wire parts (index shell + robots sitemap line); wire:false/absent
+ *        removes any previously generated wire shell.
  */
-export function generateShells(idx) {
+export function generateShells(idx, opts = {}) {
   const manifest = idx.manifest.data;
   const live = (manifest.vendors || []).flatMap((v) =>
     (v.tracks || []).filter((t) => t.status === "live").map((t) => ({ ...t, vendorId: v.id, vendorName: v.name }))
@@ -126,11 +172,24 @@ export function generateShells(idx) {
   writeFileSync(join(PUBLIC, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     urls.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join("\n") + `\n</urlset>\n`, "utf8");
-  writeFileSync(join(PUBLIC, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n`, "utf8");
+
+  // Wire statics (PRD-WIRE S3): the index shell + the second Sitemap line —
+  // /wire/sitemap.xml is DB-served, so its urls are always current.
+  const wireOn = !!opts.wire;
+  if (wireOn) {
+    mkdirSync(join(PUBLIC, "wire"), { recursive: true });
+    writeFileSync(join(PUBLIC, "wire", "index.html"), wireIndexHtml(), "utf8");
+    console.log("[shells] /wire/ index shell ✓");
+  } else {
+    rmSync(join(PUBLIC, "wire"), { recursive: true, force: true });
+  }
+  writeFileSync(join(PUBLIC, "robots.txt"),
+    `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n` +
+    (wireOn ? `Sitemap: ${BASE}/wire/sitemap.xml\n` : ""), "utf8");
   console.log(`[shells] sitemap.xml (${urls.length} urls) + robots.txt ✓`);
 }
 
 // ── standalone: npm run shells — build a file index, emit the same bytes ─
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  generateShells(buildContentIndex(join(PUBLIC, "content")));
+  generateShells(buildContentIndex(join(PUBLIC, "content")), { wire: !!process.env.WIRE_INGEST_KEY });
 }

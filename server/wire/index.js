@@ -1,6 +1,7 @@
 // Wire assembly (PRD-WIRE §4.2) — the agent-verified news surface: ingest +
-// publish/unpublish/corrections writes under /api/wire (X-Wire-Key), public
-// reads, and the /wire/rss.xml feed.
+// publish/unpublish/corrections writes + admin reads under /api/wire
+// (X-Wire-Key), public reads, the /wire/rss.xml feed, and the per-request
+// SEO surfaces (/wire/:slug shells + /wire/sitemap.xml).
 //
 // Only ever imported when WIRE_INGEST_KEY is set (server.js dynamic-imports
 // it), so the default academy boot stays byte-identical to today. Same
@@ -20,6 +21,7 @@ import { createKeyGuard } from "./auth.js";
 import { createIpRateLimiter } from "./rate-limit.js";
 import { createWireRouter } from "./routes.js";
 import { createRssHandler } from "./rss.js";
+import { createShellHandler, createSitemapHandler } from "./shell.js";
 import { transparencyLabel } from "./label.js";
 import { errorHandler } from "./http.js";
 
@@ -38,6 +40,12 @@ export function mountWire(app, opts = {}) {
 
   app.use("/api/wire", createWireRouter({ pool, requireKey, limiter, publishPolicy, label }), errorHandler);
   app.get("/wire/rss.xml", createRssHandler({ pool, label }));
+  // S3 — real-path SEO surfaces, DB-served per request (posts published after
+  // boot must appear; unpublished must vanish — boot-time generate-shells.mjs
+  // can see neither). rss/sitemap register first; the :slug matcher excludes
+  // dots anyway, so the fixed paths can never be shadowed.
+  app.get("/wire/sitemap.xml", createSitemapHandler({ pool }));
+  app.get("/wire/:slug([a-z0-9-]+)", createShellHandler({ pool, label }));
 
   return { pool, publishPolicy, label };
 }

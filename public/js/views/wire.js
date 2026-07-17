@@ -1,8 +1,10 @@
-// The Wire (PRD-WIRE S2) — agent-written daily news, verified at the door.
-// Two views on the public read API: the date-grouped list (#/wire) with type
-// chips + tag filters, and the post page (#/wire/:slug) with the Sources box
-// (the label is clickable proof, not decoration), the Corrections box, and
-// the transparency label. The label string arrives FROM the API
+// The Wire (PRD-WIRE S2/S3/S5) — agent-written daily news, verified at the
+// door. Two views on the public read API: the date-grouped list (#/wire) with
+// type chips + tag filters, and the post page (#/wire/:slug) with the Sources
+// box (the label is clickable proof, not decoration), the Corrections box +
+// corrected-at byline state, and the transparency label. Plus the home
+// "From the Wire" teaser (D-W3): mounted by home.js only when ≥3 published
+// posts exist. The label string arrives FROM the API
 // (`transparency`) so the copy tracks the server's D-W1 publish policy —
 // the page never claims a human review that isn't happening.
 //
@@ -40,16 +42,54 @@ async function fetchList() {
   }
 }
 
-// Module-level detection cache: one probe per session decides the nav entry.
-let detectPromise = null;
-export function detectWire() {
-  if (!detectPromise) {
-    detectPromise = fetch("/api/wire/posts?limit=1")
+// Module-level detection cache: ONE probe per session serves both the nav
+// entry and the home teaser (limit=3 is exactly the D-W3 threshold, and >0
+// answers the nav). Resolves the posts array, or null when the Wire is off /
+// unreachable — never rejects.
+let probePromise = null;
+function probeWire() {
+  if (!probePromise) {
+    probePromise = fetch("/api/wire/posts?limit=3")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => !!(d && Array.isArray(d.posts) && d.posts.length > 0))
-      .catch(() => false);
+      .then((d) => (d && Array.isArray(d.posts) ? d.posts : null))
+      .catch(() => null);
   }
-  return detectPromise;
+  return probePromise;
+}
+export function detectWire() {
+  return probeWire().then((posts) => !!posts && posts.length > 0);
+}
+
+// ── home teaser (PRD-WIRE S3, D-W3 decided (a)) ────────────────────────
+// Resolves the 3 newest published posts when the Wire is on AND has at least
+// TEASER_MIN of them; anything less resolves null and home renders no strip —
+// an empty feed is anti-marketing, the same instinct as the nav gate above.
+export const TEASER_MIN = 3;
+export function wireTeaserData() {
+  return probeWire().then((posts) => (posts && posts.length >= TEASER_MIN ? posts.slice(0, TEASER_MIN) : null));
+}
+
+const shortDate = (isoStr) => {
+  const d = new Date(isoStr);
+  return isNaN(d) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+};
+
+/** The "From the Wire" strip home.js mounts under the hero — three latest
+ *  titles + dates, nothing else. Items reuse .wire-item so Mist/Night and
+ *  the reduced-motion hover guard come for free. */
+export function wireTeaser(posts) {
+  return el("section", { class: "section wire-teaser", "aria-label": "From the Wire" }, [
+    el("div", { class: "wrap" }, [
+      el("div", { class: "wire-teaser-head" }, [
+        el("span", { class: "mono-label", text: "From the Wire — agent-verified daily briefings" }),
+        el("a", { class: "mono-label", href: "#" + url.wire(), text: "All posts →" }),
+      ]),
+      el("div", { class: "wire-teaser-row" }, posts.map((p) => el("a", { class: "wire-item", href: "#" + url.wirePost(p.slug) }, [
+        el("span", { class: "mono-label", text: `${shortDate(p.publishedAt)} · ${TYPE_LABELS[p.type] || p.type}` }),
+        el("h3", { text: p.title }),
+      ]))),
+    ]),
+  ]);
 }
 
 // ── nav entry (§4.5): inserted only when the Wire is on AND non-empty ──
@@ -217,6 +257,12 @@ export async function wirePostView(ctx) {
     : null;
 
   const byline = (p.byline && p.byline.agents || []).join(", ") || "Automatos agents";
+  // D-W2's visible-corrected state: a corrected post says so at the byline,
+  // not just in the box below — the reader never has to scroll to learn the
+  // post has moved since publish.
+  const lastCorrection = (p.corrections || []).length ? p.corrections[p.corrections.length - 1] : null;
+  const bylineText = `By ${byline} · ${dayName(p.publishedAt)}` +
+    (lastCorrection ? ` · corrected ${String(lastCorrection.at).slice(0, 10)}` : "");
   return wireShell(
     el("div", { class: "crumbs" }, [
       el("a", { class: "mono-label", href: "#" + url.wire(), text: "The Wire" }),
@@ -226,7 +272,7 @@ export async function wirePostView(ctx) {
     el("h1", { style: { fontSize: "clamp(30px,4.4vw,50px)", marginTop: "14px" }, text: p.title }),
     el("p", { class: "lede muted", style: { maxWidth: "66ch", marginTop: "14px" }, text: p.summary }),
     el("div", { class: "wire-byline" }, [
-      el("span", { class: "mono-label", text: `By ${byline} · ${dayName(p.publishedAt)}` }),
+      el("span", { class: "mono-label", text: bylineText }),
       label(data.transparency || LABEL_FALLBACK),
     ]),
     el("div", { class: "prose wire-body", html: md(p.bodyMd) }),

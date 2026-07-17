@@ -105,10 +105,13 @@ if (CONTENT_SOURCE === "db") {
 
 // SEO landing shells + sitemap render FROM THE INDEX (PRD-U3 S4 — the index
 // exists first; shells never re-read disk). Failure is non-fatal — the SPA
-// serves fine without shells.
+// serves fine without shells. Wire-enabled deploys additionally get the
+// static /wire/ index shell + the robots.txt line pointing at the DB-served
+// /wire/sitemap.xml (PRD-WIRE S3 — post shells themselves are per-request,
+// mounted with the Wire below).
 try {
   const { generateShells } = await import("./scripts/generate-shells.mjs");
-  generateShells(getContentIndex());
+  generateShells(getContentIndex(), { wire: !!process.env.WIRE_INGEST_KEY });
 } catch (e) { console.warn("[shells] generation skipped:", e.message); }
 
 // ── Hydrate the tutor's chat config from env at startup ───────────────
@@ -264,9 +267,10 @@ if (process.env.WIRE_INGEST_KEY) {
     ingestKey: process.env.WIRE_INGEST_KEY,
     publishPolicy: process.env.WIRE_PUBLISH_POLICY, // unset → "review" (D-W1)
   });
-  console.log(`[wire] news API mounted (/api/wire, /wire/rss.xml) — publish policy: ${wire.publishPolicy}`);
+  console.log(`[wire] news API mounted (/api/wire, /wire/rss.xml, /wire/:slug shells) — publish policy: ${wire.publishPolicy}`);
 } else {
   app.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
+  app.get("/wire/sitemap.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
 }
 
 // ── API namespace fallback ─────────────────────────────────────────────
