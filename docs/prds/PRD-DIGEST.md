@@ -1,6 +1,11 @@
 # PRD-DIGEST — The weekly progress email: "your week: 43 questions, streak intact, IAM up 12%, 23 days to exam"
 
-**Status:** DRAFT · Wave D ([execution plan](../EXECUTION-PLAN-2026-07-17.md) — build gated on D-D1/D-D2) · **Owner:** Academy (Gerard for D-D2 spend + DNS) · **Last updated:** 2026-07-17
+**Status:** BUILT (S1–S5, env-dark until SMTP creds land) · D-D1 signed 2026-07-17: **(a) in-process tick**;
+D-D2 signed 2026-07-17: **the existing PrivateEmail mailbox over SMTP** (`mail.privateemail.com`, SSL 465 /
+STARTTLS 587, nodemailer) — NOT an API provider, so §4.4's provider webhook is replaced by SMTP reality:
+synchronous send failures skip-and-log (code only, never the message — rejection strings can echo addresses);
+async DSN bounces land in the mailbox and are a manual check at pilot volume, revisited if volume grows.
+D-D3/D-D4 recommendations adopted as written. · **Owner:** Academy (Gerard: SMTP creds + envs) · **Last updated:** 2026-07-17
 **Repo:** `automatos-academy` (server + one profile toggle; Spine required — the digest has no signed-out variant by construction)
 **Related:** PRD-MT-12 (push = channel 1, widget = channel 2; this is **channel 3**, the only one that reaches a learner who isn't opening anything) ·
 [PRD-U2](./PRD-UNIFIED/PRD-U2-SHARED-PROFILES-PROGRESS.md) (streak rollup, GDPR endpoints this PRD must extend) ·
@@ -166,6 +171,6 @@ S1–S2 are buildable before any provider decision; S3 is where D-D2 must be sig
 | # | Decision | Recommendation |
 |---|---|---|
 | D-D1 | Where the job runs | **(a) in-process weekly tick** + pg advisory lock + snapshot ledger; `POST /api/digest/run` ships for manual/backfill; revisit (b) platform mission once the Wire's platform-side pattern is proven in production |
-| D-D2 | Email provider | **Resend** — free tier (~3k/mo) covers the pilot, ~$20/mo at 50k, clean API + signed webhooks; Postmark (~$15/mo per 10k) if deliverability ever wobbles; SES only if volume makes cost the problem (cheapest per-mail, most suppression tooling to own). Verify current pricing at signature time |
+| D-D2 | Email provider | ~~Resend / Postmark / SES~~ **SIGNED 2026-07-17: existing PrivateEmail mailbox over plain SMTP** (`mail.privateemail.com`, 465/587) — zero new spend, domain mail already warm. Consequences: no provider webhooks (bounce/complaint automation deferred to SMTP-time failures + mailbox DSNs, manual at pilot volume); Namecheap send-rate limits are fine at pilot scale, revisit provider if volume grows |
 | D-D3 | Send window + cadence | Weekly, **Sunday 18:00 UTC**, one global window v1 (no tz data exists); per-timezone windows only if opens say it matters — measured via `?src=digest` traffic, not pixels |
 | D-D4 | Zero-activity policy | One gentle variant, auto-pause after 3 consecutive zero weeks, auto-resume on activity — derived from the ledger, no new state |

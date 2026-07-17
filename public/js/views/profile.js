@@ -36,6 +36,7 @@ import { streakMilestone } from "../engine/sharecard.js";
 import { syncStatus, syncNow } from "../sync/syncer.js";
 import { maybeOfferBackfill } from "../sync/backfill.js";
 import { exportMyData, deleteMyData, deleteMyAccount } from "../sync/account.js";
+import { spineRequest } from "../sync/client.js";
 import { getExamDate, examDateLabel } from "../exam-date.js";
 
 const signedIn = () => isConfigured() && !!user();
@@ -435,6 +436,27 @@ function dataSection(status) {
   });
   const toggle = (panel) => { const hid = panel.hasAttribute("hidden"); if (hid) panel.removeAttribute("hidden"); else panel.setAttribute("hidden", ""); };
 
+  // ── weekly digest opt-in (PRD-DIGEST S1) — strictly off by default; the
+  // copy states exactly what arrives and how often (§7: no consent theatre).
+  // Feature-detected: on a deploy without the prefs endpoint (501) the button
+  // simply reports unavailable instead of pretending.
+  const digestBtn = el("button", { class: "ac-btn", type: "button", disabled: true }, ["Weekly progress email — checking…"]);
+  let digestOn = false;
+  const digestLabel = (available) => {
+    digestBtn.textContent = available ? `Weekly progress email — ${digestOn ? "On" : "Off"}` : "Weekly progress email — unavailable on this deploy";
+    digestBtn.disabled = !available;
+  };
+  spineRequest("/api/me/prefs").then((r) => {
+    if (r.status === 200 && !r.code) { digestOn = !!(r.data && r.data.digestEnabled); digestLabel(true); }
+    else digestLabel(false);
+  });
+  digestBtn.addEventListener("click", async () => {
+    digestBtn.disabled = true;
+    const r = await spineRequest("/api/me/prefs", { method: "PUT", body: { digestEnabled: !digestOn } });
+    if (r.status === 200 && !r.code) digestOn = !!(r.data && r.data.digestEnabled);
+    digestLabel(true);
+  });
+
   return el("div", { class: "panel", style: { marginTop: "34px" } }, [
     kicker,
     el("p", { class: "muted", style: { margin: "10px 0 0", maxWidth: "66ch", fontSize: "14px" }, text: "Signed in, the Spine stores your answer history (item, correct, timing), spaced-repetition state, mock and scenario results, and PII-minimised study telemetry — keyed to your account, never sold, never shared. You can take all of it with you or erase it, any time, right here." }),
@@ -445,6 +467,8 @@ function dataSection(status) {
       exportBtn,
       exportMsg,
     ]),
+    el("div", { class: "row", style: { gap: "10px", marginTop: "14px", flexWrap: "wrap" } }, [digestBtn]),
+    el("p", { class: "muted", style: { fontSize: "13px", margin: "6px 0 0", maxWidth: "62ch" }, text: "One email, Sunday evening: questions practised, streak, your biggest mastery move, due count, and the exam countdown when you've set a date. Only your own numbers, and every send carries a one-click unsubscribe." }),
     el("div", { class: "row", style: { gap: "10px", marginTop: "18px", flexWrap: "wrap" } }, [
       el("button", { class: "ac-btn profile-danger-btn", type: "button", onClick: () => toggle(dataConfirm) }, ["Delete my data…"]),
       el("button", { class: "ac-btn profile-danger-btn", type: "button", onClick: () => toggle(acctConfirm) }, ["Delete my account…"]),

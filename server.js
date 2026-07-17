@@ -305,6 +305,26 @@ if (process.env.WIRE_INGEST_KEY) {
   app.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
 }
 
+// ── The Digest — weekly progress email (PRD-DIGEST) ────────────────────
+// Default OFF, same posture again: absent DIGEST_ENABLED the feature is
+// dark (no routes, no scheduler, no nodemailer import). Enabled, it REQUIRES
+// the Spine (users/prefs/Clerk are the substrate) and a complete SMTP
+// config — anything half-configured refuses to boot rather than limp into
+// a mailer that can't mail (§4.1).
+if (process.env.DIGEST_ENABLED === "true") {
+  if (process.env.SPINE_ENABLED !== "true" || !spinePool) {
+    console.error("[digest] DIGEST_ENABLED=true requires SPINE_ENABLED=true (users, prefs and Clerk live there) — refusing to boot.");
+    process.exit(1);
+  }
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.DIGEST_ADMIN_KEY) {
+    console.error("[digest] DIGEST_ENABLED=true but SMTP_HOST/SMTP_USER/SMTP_PASS/DIGEST_ADMIN_KEY are not all set — refusing to boot.");
+    process.exit(1);
+  }
+  const { mountDigest } = await import("./server/digest/index.js");
+  mountDigest(app, { pool: spinePool, getIndex: getContentIndex });
+  console.log("[digest] weekly digest armed — window Sunday 18:00 UTC (D-D3), manual: POST /api/digest/run");
+}
+
 // ── API namespace fallback ─────────────────────────────────────────────
 // Anything not handled above (catalog/notify/badge always; /api/me + /api/sync
 // once the Spine is enabled) returns 501 so client code can feature-detect
