@@ -12,9 +12,10 @@
 // rows underneath the queue would leave queued events to re-upload to the
 // server that just confirmed the deletion — then removes every
 // `automatos-academy:` key (progress, sync meta, backfill manifest, claim
-// name). The keep-list philosophy holds: the theme (`automatos-mood`) and
-// nothing else survives. Account deletion additionally signs out via the U1
-// auth seam.
+// name — and PRD-WEB-LOOP's exam dates, pathfinder lane and account-ask
+// ledger, which all ride the same prefix by design, §7). The keep-list
+// philosophy holds: the theme (`automatos-mood`) and nothing else survives.
+// Account deletion additionally signs out via the U1 auth seam.
 
 import { signOut, user } from "../auth.js";
 import { spineRequest } from "./client.js";

@@ -36,6 +36,9 @@ import { isConfigured, user } from "../auth.js";
 import { syncStatus } from "../sync/syncer.js";
 import { verdict } from "../engine/readiness.js";
 import { completion } from "../engine/certificate.js";
+import { dueSummary } from "./next-step.js";
+import { getExamDate, examDateMs, examDateLabel } from "../exam-date.js";
+import { pace, paceInputs } from "../engine/pace.js";
 
 // newest activity timestamp in one track's raw state — lessons store bare
 // completedAt millis; questions/exams/scenarios store records with `at`
@@ -48,18 +51,9 @@ function lastActiveAt(s) {
   return t;
 }
 
-// due-review count + the single most-loaded domain (for the quiz deep link)
-function dueSummary(s, now) {
-  let due = 0;
-  const byDomain = {};
-  for (const r of Object.values(s.q || {})) {
-    if (!r || !r.due || r.due > now) continue;
-    due += 1;
-    if (r.domainId) byDomain[r.domainId] = (byDomain[r.domainId] || 0) + 1;
-  }
-  const top = Object.entries(byDomain).sort((a, b) => b[1] - a[1])[0];
-  return { due, domainId: top ? top[0] : null };
-}
+// due-review count + most-loaded domain: dueSummary now lives in
+// views/next-step.js (PRD-WEB-LOOP §4.4) — ONE math for the hero chips and
+// every session end-state, imported above.
 
 // server-computed streak, read exactly the way profile.js reads it — no local
 // reinvention. Signed out (or before the first sync) there is none: skip.
@@ -138,6 +132,46 @@ export function continueData(cat) {
     return build(cat);
   } catch (e) {
     console.warn("[continue] selectors skipped:", (e && e.message) || e);
+    return null;
+  }
+}
+
+/**
+ * The hero Today/pacing data (PRD-WEB-LOOP §4.1) — binds to the SAME
+ * most-advanced started track as the readiness widget and rides the same
+ * session-cached tree fetch (content.js loadTrack); without an exam date it
+ * never fetches at all — the due count is already in cont, and no date means
+ * no verdict, ever. Null for new visitors / skills-only progress with
+ * nothing due / any internal error. Never throws.
+ */
+export async function heroPace(cont) {
+  try {
+    const top = cont && cont.top;
+    if (!top) return null;
+    const dueTotal = cont.reviews ? cont.reviews.count : 0;
+    const iso = top.hasExam ? getExamDate(top.vendorId, top.trackId) : null;
+    if (!iso) {
+      // a no-exam track with nothing due has nothing to say — stay quiet
+      if (!top.hasExam && dueTotal === 0) return null;
+      return {
+        verdict: "no-date",
+        dueTotal,
+        setHref: top.hasExam ? "#" + url.readiness(top.vendorId, top.trackId) : null,
+      };
+    }
+    const track = await loadTrack(top.vendorId, top.trackId);
+    const now = Date.now();
+    const inp = paceInputs(track, new Store(top.vendorId, top.trackId).s, now);
+    const p = pace(examDateMs(iso), inp.dueNow, inp.unseenInScope, inp.observedPerDay, now);
+    return {
+      verdict: p.verdict,
+      dueTotal,
+      requiredPerDay: p.requiredPerDay,
+      dateLabel: examDateLabel(iso),
+      setHref: "#" + url.readiness(top.vendorId, top.trackId),
+    };
+  } catch (e) {
+    console.warn("[continue] pace line skipped:", (e && e.message) || e);
     return null;
   }
 }

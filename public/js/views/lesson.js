@@ -1,11 +1,13 @@
 // Lesson reader: TOC, objective banner, markdown body, inline knowledge
 // check, mark-complete, prev/next.
-import { el } from "../ui.js";
+import { el, clear } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
 import { url } from "../router.js";
 import { domainById, lessonById } from "../content.js";
 import { md, toc } from "../markdown.js";
 import { questionCard } from "./question.js";
+import { nextStep, endNote } from "./next-step.js";
+import { accountAsk } from "../account-ask.js";
 
 export function lessonView(ctx) {
   const { track, store, params } = ctx;
@@ -47,9 +49,31 @@ export function lessonView(ctx) {
     });
   }
 
+  // Session end-state (PRD-WEB-LOOP §4.4): one line under the nav row — the
+  // due pull when something is due (the Next button already IS the next
+  // lesson, so it never repeats here); nothing due and nothing next ⇒ the
+  // closing line. The §4.2 earned-value ask composes in on Mark complete —
+  // right after value was created, never before.
+  const endHost = el("div", {});
+  const renderEnd = (withAsk) => {
+    clear(endHost);
+    const cands = nextStep({ track, store, domainId: d.id });
+    const due = cands.find((c) => c.kind === "due");
+    if (due || !next) endHost.appendChild(endNote(cands));
+    if (withAsk) {
+      const ask = accountAsk("lesson");
+      if (ask) endHost.appendChild(ask);
+    }
+  };
+
   const doneBtn = el("button", { class: "ac-btn" + (store.lessonDone(lesson.id) ? " ac-btn-solid" : ""), type: "button" },
     [store.lessonDone(lesson.id) ? "✓ Completed" : "Mark complete"]);
-  doneBtn.addEventListener("click", () => { store.markLesson(lesson.id); doneBtn.classList.add("ac-btn-solid"); doneBtn.textContent = "✓ Completed"; });
+  doneBtn.addEventListener("click", () => {
+    store.markLesson(lesson.id);
+    doneBtn.classList.add("ac-btn-solid");
+    doneBtn.textContent = "✓ Completed";
+    renderEnd(true);
+  });
 
   prose.appendChild(el("div", { class: "lesson-nav" }, [
     prev ? el("a", { class: "ac-btn", href: "#" + url.lesson(v, t, d.id, prev.id) }, ["← Previous"])
@@ -58,6 +82,8 @@ export function lessonView(ctx) {
     next ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.lesson(v, t, d.id, next.id) }, ["Next →"])
          : el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.quiz(v, t, d.id) }, ["Quiz this domain →"]),
   ]));
+  prose.appendChild(endHost);
+  if (!next) renderEnd(false); // last-lesson render gets the line up front
 
   return el("div", {}, [
     trackHeader(track, "overview"),

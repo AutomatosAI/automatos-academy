@@ -521,6 +521,23 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .tut-page-main { display: flex; flex-direction: column; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); min-height: 60vh; overflow: hidden; }
 .tut-list-page { min-height: 50vh; max-height: 64vh; }
 @media (max-width: 760px) { .tut-page-grid { grid-template-columns: 1fr; } .tut-aside { position: static; } }
+
+/* consented learner context (PRD-TUTOR-LIVE S3): the "let the tutor see my
+   progress" toggle + the D-T1(c) ask-once explainer card. Additive only. */
+.tut-consent { display: flex; align-items: center; gap: 9px; padding: 9px 16px; border-bottom: 1px solid var(--rule); cursor: pointer; font-family: var(--label); font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--fg-2); }
+.tut-consent[hidden] { display: none; }
+.tut-consent:hover { color: var(--fg); }
+.tut-consent-check { appearance: auto; accent-color: var(--accent); width: 15px; height: 15px; margin: 0; flex: none; cursor: pointer; }
+.tut-aside .tut-consent { border: 1px solid var(--glass-border); border-radius: var(--radius); background: var(--glass); padding: 10px 12px; }
+.tut-consent-card { border: 1px solid var(--glass-border); border-radius: var(--radius); background: var(--glass); padding: 14px 16px; font-size: 13px; line-height: 1.55; color: var(--fg-2); }
+.tut-consent-card p { margin: 0 0 8px; }
+.tut-consent-title { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--fg); }
+.tut-consent-fields { margin: 0 0 12px; padding-left: 18px; }
+.tut-consent-fields li { margin: 2px 0; }
+.tut-consent-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tut-consent-later { font-family: var(--label); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); border: 1px solid var(--glass-border); background: transparent; color: var(--fg-2); cursor: pointer; }
+.tut-consent-later:hover { border-color: var(--accent); color: var(--fg); }
+.tut-consent-card .tut-consent-note { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; }
 .vid-card .frame.placeholder { color: var(--muted); }
 .vid-card .play { width: 56px; height: 56px; border: 0; background: var(--glass-strong); backdrop-filter: blur(4px); border-radius: 50%; display: grid; place-items: center; color: var(--accent); }
 .vid-card .cap { padding: 16px 18px; }
@@ -705,13 +722,22 @@ a.verify-chip:hover { background: var(--accent-soft); }
 }
 .ac-hero__cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
 .ac-hero__cta .orb { width: 64px; height: 64px; border-radius: 50%; background: var(--muted-fill); display: grid; place-items: center; color: var(--accent); flex: none; }
-.ac-hero__cta .lbl { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--fg); letter-spacing: -0.02em; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-hero__cta .lbl {
+  font-family: var(--sans); font-weight: 600; font-size: 16px; line-height: 1.2;
+  color: var(--fg); letter-spacing: -0.02em; max-width: 20ch;
+  /* two-line clamp, not nowrap — "Continue Claude Certified Architect" wraps
+     whole words instead of dying mid-word ("Claude Certifie…") */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  overflow: hidden; text-overflow: ellipsis; white-space: normal;
+}
 
 /* CTA row + resume chips (personal hero) — the ghost .ac-btn rides beside the
-   orb pill, and the chips reuse .continue-pill: the welcome-back strip's
-   actions in the strip's own voice, folded into the hero */
-.ac-hero__actions { margin-top: 34px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; }
+   orb pill at the pill's full height (stretch; min-height covers the wrapped
+   single-item case), and the chips reuse .continue-pill: the welcome-back
+   strip's actions in the strip's own voice, folded into the hero */
+.ac-hero__actions { margin-top: 34px; display: flex; align-items: stretch; flex-wrap: wrap; gap: 12px 14px; }
 .ac-hero__actions .ac-hero__cta { margin-top: 0; }
+.ac-hero__actions .ac-btn { align-self: stretch; min-height: 56px; padding: 0 28px; font-size: 16px; }
 .ac-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
 /* floating glass stat widgets */
@@ -792,7 +818,7 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .ac-hero__inner p { font-size: 14.5px; line-height: 1.45; max-width: none; margin-top: 12px; }
   .ac-hero__kicker { margin-bottom: 10px; padding: 6px 12px; }
   .ac-hero__actions { margin-top: 16px; gap: 10px; }
-  .ac-hero__actions .ac-btn { padding: 10px 18px; font-size: 13.5px; }
+  .ac-hero__actions .ac-btn { padding: 0 20px; font-size: 14px; min-height: 48px; }
   .ac-hero__chips { margin-top: 10px; }
   .ac-hero__cta { margin-top: 16px; padding: 4px 26px 4px 4px; }
   .ac-hero__cta .orb { width: 52px; height: 52px; }
@@ -970,17 +996,25 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .continue-pill:hover { border-color: var(--accent); }
 .continue-pill b { font-weight: 700; }
 
-/* ── The Wire (PRD-WIRE S2) — list + post surfaces ──────────────────────
-   ADDITIVE rules only, tokens only (scripts/token-parity.mjs greps the
-   canonical tables above — nothing here moves or renames them). Glass cards
-   in the .res-row family; the transparency label and the Sources box are
-   load-bearing honesty surfaces, not decoration. */
-.wire-label {
-  font: 500 12px/1.5 var(--label); letter-spacing: 0.04em;
-  color: var(--fg-2); margin: 12px 0 0;
-  display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid var(--glass-border); background: var(--glass);
-  border-radius: var(--radius-pill); padding: 8px 14px;
+/* ── PRD-WEB-LOOP: Today/pacing line · exam date · end-states · the ask ──
+   Additive, tokens only — Mist and Night both come free from the var()
+   swap. No new animation, so nothing needs a reduced-motion gate: hovers
+   shift colour, never position. */
+
+/* the pacing line (D-WL2): under the hero chips row + under the readiness
+   verdict — a verdict, not decoration */
+.pace-line { margin: 12px 0 0; font: 500 13.5px/1.5 var(--label); color: var(--fg-2); letter-spacing: 0.01em; }
+.pace-line b { font-weight: 700; color: var(--fg); }
+.pace-line a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.ac-hero__pace { max-width: 46ch; }
+
+/* readiness: the per-track exam-date control (S1) — a plain date input in
+   house tokens; color-scheme keeps the native picker legible in Night */
+.exam-date-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.exam-date-row input[type="date"] {
+  background: transparent; border: 1px solid var(--rule-strong); color: var(--fg);
+  border-radius: var(--radius-sm); padding: 8px 12px; font: 500 14px var(--sans);
+  color-scheme: light;
 }
 .wire-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
 .wire-chip { cursor: pointer; }
@@ -1032,6 +1066,24 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 
 @media (prefers-reduced-motion: reduce) {
   .wire-item:hover { transform: none; }
+}
+
+[data-mood="night"] .exam-date-row input[type="date"] { color-scheme: dark; }
+.exam-date-row input[type="date"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.exam-date-row .cap { font-size: 12.5px; color: var(--muted); }
+
+/* session end-states (S3): one quiet line under a finish panel / nav row */
+.end-note { margin-top: 14px; font-size: 14px; color: var(--fg-2); }
+.end-note a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* the earned-value ask (S4): inline and dismissible — never a modal, never
+   a wall. Inside the claim box it flattens to one extra line (D-WL3). */
+.ask-line { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 18px 20px; }
+.ask-line .ask-copy { margin: 0; font-size: 14px; }
+.claim-box .ask-line { border: none; background: transparent; border-radius: 0; padding: 14px 0 0; margin-top: 14px; border-top: 1px dashed var(--rule); }
+
+@media (max-width: 900px) {
+  .ac-hero__pace { margin-top: 8px; font-size: 12.5px; }
 }
 
 /* ============================================================================
@@ -1095,3 +1147,15 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .sync-offer { animation: none; }
   .ac-burger span, .ac-nav-drawer a, .ac-drawer-mood { transition: none; } /* burger fold + drawer rows */
 }
+
+/* ── share cards (PRD-COMMUNITY S1) ───────────────────────────────────
+   Additive block only — the canonical Mist/Night/radius token tables
+   above are untouched (scripts/token-parity.mjs greps those keys). */
+.share-aff { margin-top: 14px; }
+.profile-stat .share-aff { margin-top: 10px; }
+.share-open { font-size: 13px; padding: 8px 14px; }
+.share-pop { margin-top: 12px; padding: 16px 18px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); text-align: left; }
+.share-check { display: inline-flex; gap: 8px; align-items: center; margin-top: 12px; font-size: 13.5px; color: var(--fg-2); cursor: pointer; }
+.share-check input { accent-color: var(--accent); }
+.share-name { margin-top: 10px; }
+.share-pop .cap { font-size: 12px; line-height: 1.45; color: var(--muted); max-width: 52ch; }

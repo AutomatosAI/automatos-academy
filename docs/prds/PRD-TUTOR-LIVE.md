@@ -1,7 +1,7 @@
 # PRD-TUTOR-LIVE — Bring "Ask the Academy" back, then let it open knowing the learner
 
 **Status:** DRAFT · S0 blocked on a platform-repo CORS fix (interface dependency, spelled out in §4.1) ·
-S3 blocked on D-T1/D-T2/D-T3
+D-T1–D-T4 answered 2026-07-17 (recommendations adopted) — S3 built
 **Repos:** `automatos-academy` (all client slices) · `automatos-ai` platform (S0 only — a preflight
 contract, not an implementation plan)
 **Prior art:** tutor client `public/js/tutor.js` · agent setup [ACADEMY_TUTOR_PROMPT.md](../ACADEMY_TUTOR_PROMPT.md) ·
@@ -236,18 +236,29 @@ markup, zero engine work here.
   (a) opt-in, toggle starts off · (b) opt-out for signed-in learners · (c) ask-once card on first
   tutor open, no silent default; signed-out starts off.
   *Recommendation: (c) — an explicit choice beats either silent default, and it doubles as the
-  feature's announcement.* **Answer: ☐**
+  feature's announcement.* **Answer: (c)** — ask-once card in the tutor panel, dismissible
+  ("Not now" persists), toggle stays for later; offered only when signed in AND synced learner
+  state exists, so signed-out behaviour is byte-identical.
 - **D-T2 — Context transport.**
   (a) client-side preamble block prepended to the first message text (no platform change; visible in
   transcript) · (b) additive optional `context` field on `POST /api/widgets/chat`, injected into the
   agent's prompt server-side (small platform ask, clean transcripts).
-  *Recommendation: (a) to ship with S3, (b) requested alongside S0 as the durable form.* **Answer: ☐**
+  *Recommendation: (a) to ship with S3, (b) requested alongside S0 as the durable form.*
+  **Answer: (a)** now — a delimited `<learner_context>` preamble on the wire message (the
+  transcript bubble stays clean); (b) remains the durable form, requested alongside S0
+  (seam commented in `tutor-context-core.js#preambleFor`).
 - **D-T3 — Context cadence.**
   (a) every message · (b) once per conversation, re-sent when the numbers materially change (new due
   items, readiness ±5) or the conversation is stale.
-  *Recommendation: (b) — the tutor needs fresh-enough state, not a telemetry stream.* **Answer: ☐**
+  *Recommendation: (b) — the tutor needs fresh-enough state, not a telemetry stream.*
+  **Answer: (b)** — once per conversation, re-sent on material change (due count moved,
+  readiness ±5, track switched) or 30-minute staleness; cadence marks only after the
+  platform accepts the request, so failed sends retry with context.
 - **D-T4 — Tutor telemetry.**
   `track("tutor_message")` already fires (analytics.js — a no-op unless `ACADEMY_ANALYTICS_ENDPOINT`
   is set). Add privacy-clean counts for error states, consent flips, and context-attached sends?
   (a) yes, counts only · (b) no, leave the single event.
-  *Recommendation: (a) — S2's error states are only provably rare if we can count them.* **Answer: ☐**
+  *Recommendation: (a) — S2's error states are only provably rare if we can count them.*
+  **Answer: (a)** — `tutor_message` gains a `ctx` prop ("sent"/"held"/"off", present only when
+  the feature is offered so signed-out events are unchanged) and consent flips emit
+  `tutor_consent` `{granted}` — counts only, never the shared numbers.

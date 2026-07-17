@@ -31,9 +31,13 @@ import { Store } from "../store.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { isConfigured, user, openSignIn } from "../auth.js";
+import { shareAffordance } from "../share.js";
+import { streakMilestone } from "../engine/sharecard.js";
 import { syncStatus, syncNow } from "../sync/syncer.js";
 import { maybeOfferBackfill } from "../sync/backfill.js";
 import { exportMyData, deleteMyData, deleteMyAccount } from "../sync/account.js";
+import { spineRequest } from "../sync/client.js";
+import { getExamDate, examDateLabel } from "../exam-date.js";
 
 const signedIn = () => isConfigured() && !!user();
 const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -136,11 +140,23 @@ function heroStats(entries, status) {
     ? `best ${streak.best} · counted in UTC, across your devices`
     : (signedIn() ? "appears after your first sync" : "sign in to keep a streak across devices");
 
+  // PRD-COMMUNITY S1: from the first milestone (7 days) the streak becomes
+  // shareable — the card carries the real current number, no name by default.
+  const streakTile = statTile(streakVal, "Day streak", streakCap);
+  if (streak && streakMilestone(streak.current)) {
+    streakTile.appendChild(shareAffordance({
+      kind: "streak",
+      label: "Share streak",
+      title: `${streak.current}-day study streak · Automatos Academy`,
+      buildCard: () => ({ n: streak.current }),
+    }));
+  }
+
   return el("div", { class: "profile-stats" }, [
     statTile(timeValue(t.minutes), "Time invested", "estimated from lessons, reviews and mock exams"),
     statTile(lessons, "Lessons completed", `across ${n} started track${n === 1 ? "" : "s"}`),
     statTile(el("b", {}, [countTo(t.qDistinct)]), "Questions answered", `${t.qAttempts.toLocaleString()} attempt${t.qAttempts === 1 ? "" : "s"} in total`),
-    statTile(streakVal, "Day streak", streakCap),
+    streakTile,
   ]);
 }
 
@@ -249,6 +265,10 @@ function trackPanel(track, store) {
     readinessRing.setAttribute("aria-label", `${ringPct}% readiness — grade ${ringGrade}`);
   }
 
+  // PRD-WEB-LOOP §4.1: the exam date is SET on the readiness view; here it
+  // mirrors read-only (skills tracks have no exam to date).
+  const examIso = skills ? null : getExamDate(track.vendorId, track.trackId);
+
   return el("div", { class: "panel profile-track" }, [
     el("div", { class: "profile-track-head" }, [
       readinessRing,
@@ -256,6 +276,10 @@ function trackPanel(track, store) {
         el("span", { class: "mono-label", text: `${track.vendorName || track.vendorId} · ${track.code || track.trackId}` }),
         el("h3", {}, [el("a", { href: "#" + url.track(track.vendorId, track.trackId), text: track.name })]),
         el("p", { class: "muted", style: { fontSize: "13px" }, text: headline }),
+        examIso ? el("p", { class: "muted", style: { fontSize: "12.5px", marginTop: "2px" } }, [
+          `Exam date: ${examDateLabel(examIso, { long: true })} · `,
+          el("a", { href: "#" + url.readiness(track.vendorId, track.trackId), text: "change on readiness" }),
+        ]) : null,
       ]),
       gradeSeal,
     ]),
@@ -275,6 +299,14 @@ function trackPanel(track, store) {
       ]),
     ]),
     credentialLine(track, comp),
+    // PRD-COMMUNITY S1: per-track share affordance — the same number the
+    // ring shows, bound to the PREP TRACK (never an exam-pass claim).
+    ringPct > 0 ? shareAffordance({
+      kind: "readiness",
+      label: skills ? "Share progress" : "Share readiness",
+      title: `${ringPct}% ${skills ? "complete" : "readiness"} — ${track.name} · Automatos Academy`,
+      buildCard: () => ({ n: ringPct, vendorId: track.vendorId, trackId: track.trackId }),
+    }) : null,
   ]);
 }
 
@@ -404,6 +436,27 @@ function dataSection(status) {
   });
   const toggle = (panel) => { const hid = panel.hasAttribute("hidden"); if (hid) panel.removeAttribute("hidden"); else panel.setAttribute("hidden", ""); };
 
+  // ── weekly digest opt-in (PRD-DIGEST S1) — strictly off by default; the
+  // copy states exactly what arrives and how often (§7: no consent theatre).
+  // Feature-detected: on a deploy without the prefs endpoint (501) the button
+  // simply reports unavailable instead of pretending.
+  const digestBtn = el("button", { class: "ac-btn", type: "button", disabled: true }, ["Weekly progress email — checking…"]);
+  let digestOn = false;
+  const digestLabel = (available) => {
+    digestBtn.textContent = available ? `Weekly progress email — ${digestOn ? "On" : "Off"}` : "Weekly progress email — unavailable on this deploy";
+    digestBtn.disabled = !available;
+  };
+  spineRequest("/api/me/prefs").then((r) => {
+    if (r.status === 200 && !r.code) { digestOn = !!(r.data && r.data.digestEnabled); digestLabel(true); }
+    else digestLabel(false);
+  });
+  digestBtn.addEventListener("click", async () => {
+    digestBtn.disabled = true;
+    const r = await spineRequest("/api/me/prefs", { method: "PUT", body: { digestEnabled: !digestOn } });
+    if (r.status === 200 && !r.code) digestOn = !!(r.data && r.data.digestEnabled);
+    digestLabel(true);
+  });
+
   return el("div", { class: "panel", style: { marginTop: "34px" } }, [
     kicker,
     el("p", { class: "muted", style: { margin: "10px 0 0", maxWidth: "66ch", fontSize: "14px" }, text: "Signed in, the Spine stores your answer history (item, correct, timing), spaced-repetition state, mock and scenario results, and PII-minimised study telemetry — keyed to your account, never sold, never shared. You can take all of it with you or erase it, any time, right here." }),
@@ -414,6 +467,8 @@ function dataSection(status) {
       exportBtn,
       exportMsg,
     ]),
+    el("div", { class: "row", style: { gap: "10px", marginTop: "14px", flexWrap: "wrap" } }, [digestBtn]),
+    el("p", { class: "muted", style: { fontSize: "13px", margin: "6px 0 0", maxWidth: "62ch" }, text: "One email, Sunday evening: questions practised, streak, your biggest mastery move, due count, and the exam countdown when you've set a date. Only your own numbers, and every send carries a one-click unsubscribe." }),
     el("div", { class: "row", style: { gap: "10px", marginTop: "18px", flexWrap: "wrap" } }, [
       el("button", { class: "ac-btn profile-danger-btn", type: "button", onClick: () => toggle(dataConfirm) }, ["Delete my data…"]),
       el("button", { class: "ac-btn profile-danger-btn", type: "button", onClick: () => toggle(acctConfirm) }, ["Delete my account…"]),

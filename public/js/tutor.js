@@ -15,6 +15,7 @@
 // the workspace is connected.
 import { el, clear } from "./ui.js";
 import { loadCatalog } from "./content.js";
+import { attachContext, consentCard, consentStrip, onContextChange, refreshOffer } from "./tutor-context.js";
 
 const cfg = () => window.ACADEMY_CHAT || {};
 const apiBase = () => (cfg().apiBase || "https://api.automatos.app").replace(/\/$/, "");
@@ -169,7 +170,7 @@ async function drawMermaid(container, blocks) {
 // rejected: platform down, CORS preflight refused, DNS…) · "auth" (401/403) ·
 // "http" (other non-OK status) · "agent" (server-sent error event) ·
 // "stream" (connection dropped mid-answer).
-async function streamChat(text, { onChunk, onDone, onError }) {
+async function streamChat(text, { onChunk, onDone, onError, onAccepted }) {
   const c = cfg();
   let res;
   try {
@@ -180,6 +181,7 @@ async function streamChat(text, { onChunk, onDone, onError }) {
     });
   } catch (e) { onError({ kind: navigator.onLine === false ? "offline" : "unreachable" }); return; }
   if (!res.ok || !res.body) { onError(res.status === 401 || res.status === 403 ? { kind: "auth", status: res.status } : { kind: "http", status: res.status }); return; }
+  if (onAccepted) onAccepted(); // the platform took the request — any learner_context has landed
   const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
   try {
     while (true) {
@@ -254,6 +256,10 @@ function statusRow(msg, listEl) {
 
 function renderList(listEl) {
   clear(listEl);
+  // D-T1(c) ask-once consent card — first thing in the list while the choice
+  // is unmade (deep-link opens included); null once answered or ineligible.
+  const card = consentCard();
+  if (card) listEl.appendChild(card);
   if (!session.messages.length) {
     listEl.appendChild(el("div", { class: "tut-empty" }, [
       el("p", { class: "tut-empty-title", text: "Your Academy tutor." }),
@@ -285,32 +291,43 @@ function send(text, listEl) {
 
 // Stream the assistant reply to `text` (already in the transcript). Retry
 // re-enters here with the same text, so retried sends never duplicate the
-// learner's bubble.
+// learner's bubble — and re-decides the context attach, so a send the
+// platform never accepted retries WITH its learner_context.
 function stream(text, listEl) {
-  session.busy = true;
+  session.busy = true; // set before the async attach — no double-send window
   const bot = { role: "assistant", text: "", done: false };
   session.messages.push(bot);
   let body = renderList(listEl);
   const repaint = () => { body = renderList(listEl); };
-  import("./analytics.js").then((a) => a.track("tutor_message")).catch(() => {});
-  streamChat(text, {
-    onChunk: (c) => { bot.text += c; if (body) { body.textContent = bot.text; listEl.scrollTop = listEl.scrollHeight; } },
-    onDone: () => { bot.done = true; session.busy = false; setHealth(true); repaint(); },
-    onError: (f) => {
-      session.busy = false;
-      setHealth(false);
-      import("./analytics.js").then((a) => a.track("tutor_error", { kind: f.kind, status: f.status })).catch(() => {});
-      if (bot.text) {
-        // mid-answer failure — keep the partial text, offer to continue
-        bot.done = true;
-        session.messages.push({ role: "status", text: failureCopy(f), action: { label: "Continue", run: (le) => send("Continue from where you stopped.", le) } });
-      } else {
-        session.messages.pop(); // drop the empty typing bubble — no fake reply
-        const retry = { label: "Retry", run: (le) => stream(text, le) };
-        session.messages.push({ role: "status", text: failureCopy(f), action: f.kind === "auth" ? null : retry });
-      }
-      repaint();
-    },
+  // Consented learner context (PRD-TUTOR-LIVE §4.4/S3): the WIRE message may
+  // carry a learner_context preamble; the transcript bubble never does. This
+  // is the single attach point, so every send path — chips, input, retry,
+  // askTutor() deep links — honours consent by construction. attachContext
+  // never rejects and never stalls (bounded build; plain text on any failure).
+  attachContext(text).catch(() => ({ wire: text, ctx: null, accepted: null })).then(({ wire, ctx, accepted }) => {
+    // D-T4: context-presence ride-along on the existing event — counts only,
+    // and only when the feature is offered (signed-out events stay identical)
+    import("./analytics.js").then((a) => a.track("tutor_message", ctx ? { ctx } : {})).catch(() => {});
+    streamChat(wire, {
+      onAccepted: accepted || undefined,
+      onChunk: (c) => { bot.text += c; if (body) { body.textContent = bot.text; listEl.scrollTop = listEl.scrollHeight; } },
+      onDone: () => { bot.done = true; session.busy = false; setHealth(true); repaint(); },
+      onError: (f) => {
+        session.busy = false;
+        setHealth(false);
+        import("./analytics.js").then((a) => a.track("tutor_error", { kind: f.kind, status: f.status })).catch(() => {});
+        if (bot.text) {
+          // mid-answer failure — keep the partial text, offer to continue
+          bot.done = true;
+          session.messages.push({ role: "status", text: failureCopy(f), action: { label: "Continue", run: (le) => send("Continue from where you stopped.", le) } });
+        } else {
+          session.messages.pop(); // drop the empty typing bubble — no fake reply
+          const retry = { label: "Retry", run: (le) => stream(text, le) };
+          session.messages.push({ role: "status", text: failureCopy(f), action: f.kind === "auth" ? null : retry });
+        }
+        repaint();
+      },
+    });
   });
 }
 
@@ -359,6 +376,7 @@ export function tutorPageView() {
       ]),
       el("div", { class: "tut-page-grid" }, [
         el("aside", { class: "tut-aside" }, [
+          consentStrip(),
           el("span", { class: "mono-label", text: "Try" }),
           chips(list),
         ]),
@@ -366,8 +384,11 @@ export function tutorPageView() {
       ]),
     ])]),
   ]);
-  // defer initial render until mounted
+  // defer initial render until mounted; consent/offer changes repaint this
+  // surface's list (the strip syncs itself) until the view unmounts
   setTimeout(() => renderList(list), 0);
+  onContextChange(list, () => renderList(list));
+  refreshOffer();
   return page;
 }
 
@@ -387,6 +408,7 @@ export function mountTutor() {
         el("button", { class: "tut-icon", type: "button", title: "Close", "aria-label": "Close tutor", html: "&times;", onclick: () => setOpen(false) }),
       ]),
     ]),
+    consentStrip(), // S3 — "let the tutor see my progress"; hidden until offered
     list,
     chipBox,
     inputRow(list, false),
@@ -395,7 +417,7 @@ export function mountTutor() {
   const setOpen = (open) => {
     panel.setAttribute("data-open", open ? "true" : "false");
     fab.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) { renderList(list); fillChips(chipBox, list); const ta = panel.querySelector(".tut-input"); if (ta && !ta.disabled) setTimeout(() => ta.focus(), 60); }
+    if (open) { refreshOffer(); renderList(list); fillChips(chipBox, list); const ta = panel.querySelector(".tut-input"); if (ta && !ta.disabled) setTimeout(() => ta.focus(), 60); }
   };
   fab.addEventListener("click", () => setOpen(panel.getAttribute("data-open") !== "true"));
   document.body.appendChild(panel);
@@ -405,6 +427,12 @@ export function mountTutor() {
   dock.list = list;
   dock.setOpen = setOpen;
   dock.fab = fab;
+
+  // S3: consent/offer changes repaint the open panel (card appears/retires);
+  // the boot-time refreshOffer arms the auth watch, so signing in mid-session
+  // surfaces the toggle without a reload. Signed out both are inert.
+  onContextChange(list, () => { if (panel.getAttribute("data-open") === "true") renderList(list); });
+  refreshOffer();
 
   // re-theme mermaid on mood flip (next render picks up the new theme)
   new MutationObserver(() => { mermaidPromise = null; }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-mood"] });
