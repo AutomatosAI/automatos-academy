@@ -530,7 +530,7 @@ await request("POST", "/api/sync/progress", { token: sam, body: { events: [progr
 const s3 = await request("GET", "/api/me/state", { token: sam });
 ok(s3.body.data.streak.current === 3 && s3.body.data.streak.best === 3, `progress + telemetry days chain into one 3-day run — got ${JSON.stringify(s3.body.data.streak)}`);
 
-const sDelta = await request("GET", `/api/me/state?since=${encodeURIComponent(new Date(Date.now() + 3_600_000).toISOString())}`, { token: sam });
+const sDelta = await request("GET", `/api/me/state?since=${encodeURIComponent(new Date(Math.max(Date.now(), utcNoon(0)) + 3_600_000).toISOString())}`, { token: sam });
 ok(sDelta.body.data.progress.length === 0 && sDelta.body.data.streak.best === 3, "a since-delta pull still carries the FULL streak (absolute, never since-filtered)");
 
 const tess = "fixture:user_tess";
