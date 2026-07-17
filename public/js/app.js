@@ -17,6 +17,7 @@ import { libraryView, videosView } from "./views/library.js";
 import { certificateView } from "./views/certificate.js";
 import { pathFinderView } from "./views/pathfinder.js";
 import { profileView } from "./views/profile.js";
+import { wireListView, wirePostView, mountWireNav } from "./views/wire.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
 import { mountAuthUI } from "./auth-ui.js";
 import { mountNav } from "./nav.js";
@@ -64,6 +65,11 @@ route("/tutor", tutorPageView);
 route("/start", pathFinderView);
 route("/cert/:payload", certificateView);
 route("/profile", profileView);
+// Wire routes register unconditionally — deep links on no-Wire deploys get
+// the friendly "isn't switched on" state (PRD-WIRE §4.5); the nav entry is
+// what feature-detection controls (mountWireNav below).
+route("/wire", wireListView);
+route("/wire/:slug", wirePostView);
 
 async function handle(match) {
   setProgress(18);
@@ -94,7 +100,7 @@ function syncTopnav(path) {
   // whichever is visible at this width.
   document.querySelectorAll(".ac-topnav a[data-nav], .ac-nav-drawer a[data-nav]").forEach((a) => {
     const k = a.getAttribute("data-nav");
-    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "start" && path === "/start");
+    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "start" && path === "/start") || (k === "wire" && (path === "/wire" || path.startsWith("/wire/")));
     if (on) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
@@ -118,5 +124,6 @@ start(handle);
 mountTutor();
 mountAuthUI();
 mountNav(); // burger + drawer ≤900px; after theme() so its mood row syncs
+mountWireNav(); // after mountNav so the drawer exists; no-op on no-Wire deploys
 initSync(); // PRD-U2: no-op on unconfigured deploys; inert signed-out
 mountCtaTracking();
