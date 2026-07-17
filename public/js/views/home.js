@@ -4,6 +4,7 @@ import { loadCatalog } from "../content.js";
 import { url } from "../router.js";
 import { track as tk } from "../analytics.js";
 import { continueData, heroReadiness, heroPace } from "./continue.js";
+import { wireTeaserData, wireTeaser } from "./wire.js";
 import { paceLine } from "./pace-line.js";
 import { loadLane, laneSort } from "../lane.js";
 
@@ -421,6 +422,11 @@ function periwinkleHero(flagship, stats, personal) {
 
 export async function catalog() {
   const statsReady = fetchHeroStats(); // in flight while the catalog loads — adds ~zero latency
+  // "From the Wire" teaser (PRD-WIRE S3, D-W3): resolves the 3 newest posts
+  // or null (Wire off / fewer than 3 / fetch slow) — raced against the same
+  // 1.5 s cap as /stats so home never waits on a dead endpoint. Null → the
+  // strip simply isn't in the tree: no reserved space, zero layout shift.
+  const teaserReady = Promise.race([wireTeaserData(), new Promise((res) => setTimeout(() => res(null), 1500))]);
   const cat = await loadCatalog();
   const cont = continueData(cat); // null for new visitors — their hero is unchanged
   // the readiness widget's one tree fetch (signed-in returning learners only),
@@ -436,6 +442,7 @@ export async function catalog() {
     ? Promise.race([heroPace(cont), new Promise((res) => setTimeout(() => res(null), 1500))])
     : Promise.resolve(null);
   const stats = await statsReady;
+  const teaserPosts = await teaserReady;
   const personal = cont ? { ...cont, ready: await readyP, pace: await paceP } : null;
   const laneRec = loadLane(); // PRD-WEB-LOOP §4.3 — the persisted pathfinder walk (90-day TTL)
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
@@ -471,7 +478,9 @@ export async function catalog() {
     ]),
   ])]);
 
-  return el("div", {}, [heroVisual, intro, cards]);
+  // Teaser sits straight under the hero — the daily-return habit starts where
+  // the returning eye lands first. Absent (null) it contributes nothing.
+  return el("div", {}, [heroVisual, teaserPosts ? wireTeaser(teaserPosts) : null, intro, cards]);
 }
 
 export async function method() {

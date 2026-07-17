@@ -1016,6 +1016,58 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   border-radius: var(--radius-sm); padding: 8px 12px; font: 500 14px var(--sans);
   color-scheme: light;
 }
+.wire-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.wire-chip { cursor: pointer; }
+.wire-chip[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+}
+.wire-day { margin: 30px 0 12px; }
+.wire-list { display: grid; gap: 12px; }
+.wire-item {
+  display: block; background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 18px 22px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.wire-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-card); }
+.wire-item h3 { font-size: 21px; margin: 10px 0 6px; }
+.wire-item p { margin: 0; font-size: 14.5px; max-width: 70ch; }
+.wire-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.wire-type { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.wire-tag::before { content: "#"; opacity: 0.6; }
+.wire-corrected { color: var(--warn); }
+.wire-byline { margin: 18px 0 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.wire-byline .wire-label { margin-top: 8px; }
+.wire-body { margin-top: 22px; }
+.wire-sources { margin-top: 30px; }
+.wire-sources ul, .wire-corrections ul { margin: 0; padding-left: 20px; }
+.wire-sources li { margin: 12px 0; }
+.wire-sources li > a { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.wire-corrections { margin-top: 18px; }
+.wire-corrections li { margin: 8px 0; }
+.wire-empty { padding: 40px 0 20px; }
+
+/* ── "From the Wire" home teaser (PRD-WIRE S3, D-W3) ────────────────────
+   home.js mounts this strip ONLY when the Wire is on AND ≥3 posts are
+   published (wireTeaserData) — absent, the node never enters the tree: no
+   reserved space, zero layout shift. Additive rules, tokens only; items
+   reuse .wire-item so Mist/Night theming and the reduced-motion hover guard
+   below come for free. */
+.wire-teaser { padding: clamp(26px, 4vw, 44px) 0 0; }
+.wire-teaser-head {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 8px 16px; margin-bottom: 14px;
+}
+.wire-teaser-head a { text-decoration: none; color: var(--accent); }
+.wire-teaser-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.wire-teaser-row .wire-item h3 { font-size: 17px; margin: 8px 0 0; }
+@media (max-width: 900px) {
+  .wire-teaser-row { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wire-item:hover { transform: none; }
+}
+
 [data-mood="night"] .exam-date-row input[type="date"] { color-scheme: dark; }
 .exam-date-row input[type="date"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .exam-date-row .cap { font-size: 12.5px; color: var(--muted); }

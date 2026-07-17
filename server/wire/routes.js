@@ -1,6 +1,7 @@
 // The Wire's API surface (PRD-WIRE §4.2) — the platform-facing ingest
-// contract plus the public read side. Writes authenticate with X-Wire-Key
-// (timing-safe, rate-limited, auth.js); reads are public and cached 60 s.
+// contract plus the public read side, plus the S5 key-gated admin reads
+// (review queue + unpublish audit). Writes and admin reads authenticate with
+// X-Wire-Key (timing-safe, rate-limited, auth.js); public reads are cached 60 s.
 //
 // Idempotency (US-W4) lives in ONE statement: INSERT … ON CONFLICT (post_id)
 // DO UPDATE … WHERE status = 'draft' — a re-run mission replaces its own
@@ -151,6 +152,62 @@ export function createWireRouter({ pool, requireKey, limiter, publishPolicy, lab
     const { rows: cur } = await pool.query("SELECT status FROM wire_posts WHERE post_id = $1", [req.params.postId]);
     if (cur.length === 0) return notFound(res);
     return conflict(res, "not_published"); // drafts are replaced by re-POST, not corrected
+  }));
+
+  // ── S5: the review queue + unpublish audit surface ───────────────────
+  // D-W1(b)'s human review pass and US-W3's "retained for audit" both need a
+  // READ: drafts are invisible on every public surface by design, and an
+  // unpublished row's reason lives nowhere public. These two key-gated GETs
+  // are that surface — authenticated API calls, not a dashboard (§3
+  // non-goal). Never cached: a review/audit view must be current.
+  const toAuditWire = (r) => ({
+    postId: r.post_id, slug: r.slug, type: r.type, tags: r.tags, title: r.title,
+    summary: r.summary, status: r.status, unpublishReason: r.unpublish_reason,
+    correctionsCount: r.corrections_count, publishedAt: iso(r.published_at),
+    createdAt: iso(r.created_at), updatedAt: iso(r.updated_at),
+  });
+
+  router.get("/admin/posts", limiter, requireKey, wrap(async (req, res) => {
+    const q = req.query;
+    const where = [];
+    const params = [];
+    if (q.status !== undefined) {
+      if (!["draft", "published", "unpublished"].includes(q.status)) {
+        return invalidInput(res, "status", "must_be_one_of_draft|published|unpublished");
+      }
+      params.push(q.status); where.push(`status = $${params.length}`);
+    }
+    let limit = 50;
+    if (q.limit !== undefined) {
+      limit = Number(q.limit);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 200) return invalidInput(res, "limit", "must_be_integer_1_to_200");
+    }
+    params.push(limit);
+    const { rows } = await pool.query(
+      `SELECT post_id, slug, type, tags, title, summary, status, unpublish_reason,
+              jsonb_array_length(corrections)::int AS corrections_count,
+              published_at, created_at, updated_at
+       FROM wire_posts ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+       ORDER BY updated_at DESC LIMIT $${params.length}`,
+      params,
+    );
+    res.set("Cache-Control", "no-store");
+    res.json({ posts: rows.map(toAuditWire) });
+  }));
+
+  // Full row for one post, any status — the body the reviewer reads before
+  // the publish call, or the complete audit record after an unpublish.
+  router.get("/admin/posts/:postId", limiter, requireKey, wrap(async (req, res) => {
+    const { rows } = await pool.query("SELECT * FROM wire_posts WHERE post_id = $1", [req.params.postId]);
+    if (rows.length === 0) return notFound(res);
+    const r = rows[0];
+    res.set("Cache-Control", "no-store");
+    res.json({
+      post: {
+        ...toAuditWire({ ...r, corrections_count: (r.corrections || []).length }),
+        bodyMd: r.body_md, sources: r.sources, byline: r.byline, corrections: r.corrections,
+      },
+    });
   }));
 
   // ── GET /api/wire/posts — public list (published only, newest first) ─
