@@ -7,6 +7,7 @@ import { url } from "../router.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { claimPanel } from "./certificate.js";
+import { shareAffordance } from "../share.js";
 import { trackOnce, track as tk } from "../analytics.js";
 import { downloadBackup, importBackup } from "../progress-io.js";
 import { noteRestore } from "../sync/backfill.js";
