@@ -8,6 +8,7 @@ import { el, clear } from "../ui.js";
 import { url } from "../router.js";
 import { loadCatalog } from "../content.js";
 import { track as tk } from "../analytics.js";
+import { saveLane } from "../lane.js";
 
 // A small decision tree. Each node is either a question {q, opts:[[value,
 // label, next|result]]} or a result (ordered track ids, most-recommended
@@ -106,6 +107,16 @@ export async function pathFinderView() {
     const recs = ids.map((id) => byId[id]).filter(Boolean);
     const voice = TONE[tone] || TONE.default;
     tk("path_finder", { ...answers, rec: recs.map((r) => r.trackId).join(",") });
+    // PRD-WEB-LOOP §4.3: the walk persists as a LOCAL preference (lane.js,
+    // 90-day TTL, D-WL4) — home leads with this lane until real progress
+    // outranks it. Nothing is sent anywhere; a re-run overwrites.
+    if (recs.length) {
+      saveLane({
+        answers: { ...answers },
+        recs: recs.map((r) => ({ trackId: r.trackId, name: r.name })),
+        lane: recs[0].lane || "practitioner",
+      });
+    }
     clear(root);
     root.appendChild(el("section", { class: "hero" }, [el("div", { class: "wrap", style: { maxWidth: "760px" } }, [
       el("span", { class: "mono-label", text: voice.kicker }),

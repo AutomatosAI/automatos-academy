@@ -7,7 +7,10 @@
 // module_complete · mock_start · mock_score · readiness_a_plus · badge_claim
 // · badge_view · cta_automatos_click · notify_me · tutor_message ·
 // tutor_error (props: kind, status? — counts only, never message text;
-// PRD-TUTOR-LIVE D-T4) · tutor_deep_link · path_finder
+// PRD-TUTOR-LIVE D-T4) · tutor_deep_link · path_finder · pace_line_shown
+// (props: verdict, surface) · exam_date_set (props: track, action) ·
+// account_ask_shown · account_ask_clicked · account_ask_dismissed (props:
+// surface — PRD-WEB-LOOP §4.2)
 
 const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim();
 
