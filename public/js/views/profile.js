@@ -31,6 +31,8 @@ import { Store } from "../store.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { isConfigured, user, openSignIn } from "../auth.js";
+import { shareAffordance } from "../share.js";
+import { streakMilestone } from "../engine/sharecard.js";
 import { syncStatus, syncNow } from "../sync/syncer.js";
 import { maybeOfferBackfill } from "../sync/backfill.js";
 import { exportMyData, deleteMyData, deleteMyAccount } from "../sync/account.js";
@@ -136,11 +138,23 @@ function heroStats(entries, status) {
     ? `best ${streak.best} · counted in UTC, across your devices`
     : (signedIn() ? "appears after your first sync" : "sign in to keep a streak across devices");
 
+  // PRD-COMMUNITY S1: from the first milestone (7 days) the streak becomes
+  // shareable — the card carries the real current number, no name by default.
+  const streakTile = statTile(streakVal, "Day streak", streakCap);
+  if (streak && streakMilestone(streak.current)) {
+    streakTile.appendChild(shareAffordance({
+      kind: "streak",
+      label: "Share streak",
+      title: `${streak.current}-day study streak · Automatos Academy`,
+      buildCard: () => ({ n: streak.current }),
+    }));
+  }
+
   return el("div", { class: "profile-stats" }, [
     statTile(timeValue(t.minutes), "Time invested", "estimated from lessons, reviews and mock exams"),
     statTile(lessons, "Lessons completed", `across ${n} started track${n === 1 ? "" : "s"}`),
     statTile(el("b", {}, [countTo(t.qDistinct)]), "Questions answered", `${t.qAttempts.toLocaleString()} attempt${t.qAttempts === 1 ? "" : "s"} in total`),
-    statTile(streakVal, "Day streak", streakCap),
+    streakTile,
   ]);
 }
 
@@ -275,6 +289,14 @@ function trackPanel(track, store) {
       ]),
     ]),
     credentialLine(track, comp),
+    // PRD-COMMUNITY S1: per-track share affordance — the same number the
+    // ring shows, bound to the PREP TRACK (never an exam-pass claim).
+    ringPct > 0 ? shareAffordance({
+      kind: "readiness",
+      label: skills ? "Share progress" : "Share readiness",
+      title: `${ringPct}% ${skills ? "complete" : "readiness"} — ${track.name} · Automatos Academy`,
+      buildCard: () => ({ n: ringPct, vendorId: track.vendorId, trackId: track.trackId }),
+    }) : null,
   ]);
 }
 

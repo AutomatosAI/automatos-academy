@@ -18,9 +18,13 @@ import compression from "compression";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { createHmac, timingSafeEqual } from "crypto";
 import { decodeCert, linkedInAddUrl } from "./public/js/engine/certificate.js";
+import { decodeShare } from "./public/js/engine/sharecard.js";
 import { buildContentIndex, createCatalogRouter } from "./server/catalog.js";
+import { createSigner } from "./server/signing.js";
+import { initCardRenderer, cardsAvailable } from "./server/share-cards.js";
+import { mountShareRoutes } from "./server/share-routes.js";
+import { createShareAttestor } from "./server/share-attest.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(__dirname, "public");
@@ -31,21 +35,14 @@ const PORT = process.env.PORT || 4321;
 // it says NOTHING about exam results. Copy is always "Signed by the Academy",
 // never "verified". Stateless: nothing is stored; the HMAC is recomputable
 // from the payload alone, so this works on ephemeral (Railway) instances.
+// The mechanism lives in server/signing.js (PRD-COMMUNITY S1 reuses it for
+// share cards, and tests round-trip it there).
 const DEV_SIGNING_SECRET = "automatos-academy-dev-signing-secret-not-for-production";
 const BADGE_SIGNING_SECRET = process.env.BADGE_SIGNING_SECRET || DEV_SIGNING_SECRET;
 if (BADGE_SIGNING_SECRET === DEV_SIGNING_SECRET) {
   console.warn("[badge] BADGE_SIGNING_SECRET not set — signing badges in DEV mode with a public default secret. Set BADGE_SIGNING_SECRET in production.");
 }
-// HMAC-SHA256(payload) as lowercase hex — chars are [0-9a-f] only, so a sig
-// never collides with base64url ([A-Za-z0-9-_]), the "." checksum separator,
-// or the "~" payload~sig separator used in cert URLs.
-const signPayload = (payload) => createHmac("sha256", BADGE_SIGNING_SECRET).update(payload).digest("hex");
-const sigMatches = (payload, sig) => {
-  if (typeof sig !== "string" || !/^[0-9a-f]{64}$/.test(sig)) return false;
-  const expected = Buffer.from(signPayload(payload), "utf8");
-  const got = Buffer.from(sig, "utf8");
-  return expected.length === got.length && timingSafeEqual(expected, got);
-};
+const { sign: signPayload, matches: sigMatches } = createSigner(BADGE_SIGNING_SECRET);
 
 // Light in-memory rate limit for the sign endpoint (per IP) — deters abuse
 // without any store. Ephemeral by design; resets on restart.
@@ -193,28 +190,47 @@ app.post("/api/notify", async (req, res) => {
   }
 });
 
-// ── Badge signing (PRD-CREDENTIALS §4) ─────────────────────────────────
-// POST /api/badge/sign {payload} → {sig}. We re-decode the payload with the
-// SAME codec the client used (decodeCert) before signing, so we never sign
-// arbitrary strings — only well-formed Academy certificates.
-app.post("/api/badge/sign", (req, res) => {
+// ── Badge + share-card signing (PRD-CREDENTIALS §4 · PRD-COMMUNITY S1) ─
+// POST /api/badge/sign {payload} → {sig}. Payloads are re-decoded with the
+// SAME codec the client used before signing — never arbitrary strings.
+//   - certificate payloads (decodeCert): signed as before; the sig attests
+//     that the Academy issued the LINK, nothing about exam results.
+//   - share payloads (decodeShare): a share card claims a NUMBER, so it is
+//     signed ONLY when the Spine attests it against the learner's own synced
+//     data (server/share-attest.js). No Spine on this deploy / signed out /
+//     number higher than the data supports → 4xx, and the client ships the
+//     honest UNSIGNED link instead (v1 social-proof posture, no chip).
+let shareAttestor = null; // set when the Spine mounts below
+app.post("/api/badge/sign", async (req, res) => {
   const ip = req.ip || req.socket?.remoteAddress || "unknown";
   if (signRateLimited(ip)) return res.status(429).json({ error: "rate_limited" });
   const payload = req.body && req.body.payload;
-  if (typeof payload !== "string" || !payload || !decodeCert(payload)) {
+  if (typeof payload !== "string" || !payload) {
     return res.status(400).json({ error: "invalid_payload" });
   }
-  res.json({ sig: signPayload(payload) });
+  if (decodeCert(payload)) return res.json({ sig: signPayload(payload) });
+  const share = decodeShare(payload);
+  if (!share) return res.status(400).json({ error: "invalid_payload" });
+  if (!shareAttestor) return res.status(403).json({ error: "attestation_unavailable" });
+  try {
+    const att = await shareAttestor(req, share);
+    if (!att.ok) return res.status(att.status).json({ error: att.error });
+    return res.json({ sig: signPayload(payload) });
+  } catch (e) {
+    console.error("[share] attestation errored:", e.message);
+    return res.status(500).json({ error: "attestation_failed" });
+  }
 });
 
 // GET /api/badge/verify?payload=&sig= → {valid}. Timing-safe compare. Never
 // leaks why a sig failed; the client renders the "Signed by the Academy" chip
-// only on valid:true and nothing at all on false.
+// only on valid:true and nothing at all on false. Share payloads verify with
+// the same contract as certificates.
 app.get("/api/badge/verify", (req, res) => {
   const payload = typeof req.query.payload === "string" ? req.query.payload : "";
   const sig = typeof req.query.sig === "string" ? req.query.sig : "";
-  const valid = !!payload && !!decodeCert(payload) && sigMatches(payload, sig);
-  res.json({ valid });
+  const wellFormed = !!payload && (!!decodeCert(payload) || !!decodeShare(payload));
+  res.json({ valid: wellFormed && sigMatches(payload, sig) });
 });
 
 // ── Content API v1 (PRD-MT-01) ─────────────────────────────────────────
@@ -229,6 +245,22 @@ let spinePool = null;
 app.use("/api/catalog", createCatalogRouter(getContentIndex, { getPool: () => spinePool }));
 console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks, source=${CONTENT_SOURCE})`);
 
+// ── Share cards (PRD-COMMUNITY S1) ─────────────────────────────────────
+// /s/:payload share pages + per-card 1200×630 OG images for streaks,
+// readiness and certificates. Renderer init is non-fatal (the shells
+// posture): unavailable → pages still render, unfurls fall back to the
+// static og-academy.png. /api/share/config gates the client affordances —
+// a deploy without a REAL signing secret can attest nothing, so it doesn't
+// invite shares (share buttons hide; existing links keep rendering).
+await initCardRenderer();
+mountShareRoutes(app, {
+  getIndex: getContentIndex,
+  sigMatches,
+  sharingEnabled: () => !!process.env.BADGE_SIGNING_SECRET,
+  publicDir: PUBLIC,
+});
+console.log(`[share] share pages mounted (card renderer ${cardsAvailable() ? "ready" : "unavailable — static OG fallback"})`);
+
 // ── Spine — per-user state: Postgres + Clerk + sync + GDPR (PRD-MT-02) ─
 // Default OFF: without SPINE_ENABLED=true the service boots exactly as
 // today — pure static/catalog, no DB, no auth (academy deploy safety).
@@ -239,8 +271,12 @@ if (process.env.SPINE_ENABLED === "true") {
     process.exit(1);
   }
   const { mountSpine } = await import("./server/spine/index.js");
-  spinePool = mountSpine(app, { contentIndex }).pool; // shared with /api/catalog/stats (learner counts)
-  console.log("[spine] user-state API mounted (/api/me, /api/sync)");
+  const spine = mountSpine(app, { contentIndex });
+  spinePool = spine.pool; // shared with /api/catalog/stats (learner counts)
+  // With a Spine to check against, share payloads become attestable — the
+  // sign endpoint above only co-signs numbers this deploy can stand behind.
+  shareAttestor = createShareAttestor({ pool: spine.pool, verifier: spine.verifier, getIndex: getContentIndex });
+  console.log("[spine] user-state API mounted (/api/me, /api/sync) — share attestation on");
 }
 
 // ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────
@@ -307,6 +343,9 @@ app.get("/cert/:payload", (req, res) => {
   const title = `${cert.name} — ${trackName} · Automatos Academy`;
   const desc = `${cert.name} completed the Automatos Academy ${trackName} track (${cert.date}). Free, honest AI training — independent of any certification body.`;
   const li = linkedInAddUrl({ certName: `Automatos Academy — ${trackName}`, certUrl, certId: cert.certId, issued: cert.date });
+  // PRD-COMMUNITY S1a: per-cert periwinkle card when the renderer is up;
+  // og-academy.png stays the site-wide fallback.
+  const ogImage = cardsAvailable() ? `${certUrl}/card.png` : `${base}/og-academy.png?v=2`;
   res.setHeader("Cache-Control", "public, max-age=300");
   res.send(`<!doctype html>
 <html lang="en"><head>
@@ -315,7 +354,8 @@ app.get("/cert/:payload", (req, res) => {
 <meta name="description" content="${esc(desc)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Automatos Academy">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${esc(certUrl)}"><meta property="og:image" content="${esc(base)}/og-academy.png?v=2">
+<meta property="og:url" content="${esc(certUrl)}"><meta property="og:image" content="${esc(ogImage)}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
 </head><body data-mood="mist" style="display:block">

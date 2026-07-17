@@ -34,5 +34,7 @@ export function mountSpine(app, opts = {}) {
   app.use("/api/sync", auth, createSyncRouter({ pool, index: contentIndex, limiter }), errorHandler);
   app.use("/api/me", auth, createMeRouter({ pool, index: contentIndex, clerkUserDeleter }), errorHandler);
 
-  return { pool };
+  // verifier rides along for callers outside the spine mount that need to
+  // authenticate a request themselves (PRD-COMMUNITY S1 share attestation).
+  return { pool, verifier };
 }
