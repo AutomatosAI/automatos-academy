@@ -5,9 +5,12 @@
 //
 // Events (keep this the single vocabulary): page_view · track_start ·
 // module_complete · mock_start · mock_score · readiness_a_plus · badge_claim
-// · badge_view · cta_automatos_click · notify_me · tutor_message ·
+// · badge_view · cta_automatos_click · notify_me · tutor_message (props:
+// ctx? — "sent"|"held"|"off" context presence, only present when the
+// progress-context feature is offered; PRD-TUTOR-LIVE D-T4) ·
 // tutor_error (props: kind, status? — counts only, never message text;
-// PRD-TUTOR-LIVE D-T4) · tutor_deep_link · path_finder
+// PRD-TUTOR-LIVE D-T4) · tutor_consent (props: granted — consent flips,
+// a boolean only, never the shared numbers) · tutor_deep_link · path_finder
 
 const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim();
 
