@@ -1,13 +1,18 @@
 #!/usr/bin/env node
-// Wire tests (PRD-WIRE S1/S2) — same zero-framework style as the other suites.
+// Wire tests (PRD-WIRE S1–S5) — same zero-framework style as the other suites.
 //
 // Unit tests always run: the §4.3 verification gate (pure validate.js), the
 // timing-safe key comparator, the D-W5 transparency label, the Atom feed
-// builder, and the hardened markdown render path (PRD-WIRE §7). Integration
-// tests need a real Postgres and run only when DATABASE_URL is set (the CI
-// `spine` job provides a service container and applies migrations first);
-// without it they skip loudly so `npm test` stays green with zero env.
+// builder, the hardened markdown render path (PRD-WIRE §7), the S3 shell +
+// sitemap builders, the generate-shells wire statics, and the S4 seed-script
+// safety guard. Integration tests need a real Postgres and run only when
+// DATABASE_URL is set (the CI `spine` job provides a service container and
+// applies migrations first); without it they skip loudly so `npm test` stays
+// green with zero env.
 import { createServer } from "http";
+import { existsSync, readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import express from "express";
 import {
   validateIngest, registrableDomain,
@@ -16,7 +21,11 @@ import {
 import { keyMatcher } from "../server/wire/auth.js";
 import { transparencyLabel } from "../server/wire/label.js";
 import { buildFeedXml } from "../server/wire/rss.js";
+import { buildPostShellHtml, buildWireSitemapXml } from "../server/wire/shell.js";
 import { mountWire } from "../server/wire/index.js";
+import { assertLocalDatabase, buildSeedPosts, seedWire } from "../scripts/seed-wire.mjs";
+import { generateShells } from "../scripts/generate-shells.mjs";
+import { buildContentIndex } from "../server/catalog.js";
 import { md } from "../public/js/markdown.js";
 
 const DAY = 86_400_000;
@@ -147,6 +156,77 @@ ok(quoted.includes("&quot;onmouseover"), "…the quote survives as data, dead as
 ok(md("[x](https://a.example/p?q=1&r=2)").includes('href="https://a.example/p?q=1&amp;r=2"'), "http(s) links keep working, ampersands entity-encoded");
 ok(md("[jump](#anchor)").includes('<a href="#anchor">') && !md("[jump](#anchor)").includes("_blank"), "in-app hash links allowed, same-tab");
 ok(md("<script>alert(1)</script>") === "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>", "raw HTML never passes through");
+
+// ═══════════════════════ unit — S3 shell + sitemap builders ════════════
+console.log("post shell builder (per-request SEO shells)");
+const ldOf = (html) => {
+  const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  try { return m ? JSON.parse(m[1]) : null; } catch (_) { return null; }
+};
+const shellRow = {
+  slug: "claude-4-2-launch", type: "model-news", tags: ["anthropic"],
+  title: 'Claude & the "2M" <context> era',
+  summary: "Summary & dek",
+  body_md: "Body with **bold** and [a link](https://a.example/x)\n\n<script>alert(1)</script>",
+  sources: validSources(),
+  corrections: [{ at: isoAgo(0), note: "Fixed the price figure" }],
+  byline: { agents: ["the-wire"], missionRun: "r1" },
+  published_at: new Date(nowMs - DAY), updated_at: new Date(nowMs),
+};
+const shellHtml = buildPostShellHtml({ post: shellRow, baseUrl: "https://academy.automatos.app", label: transparencyLabel("review") });
+ok(shellHtml.includes('<link rel="canonical" href="https://academy.automatos.app/wire/claude-4-2-launch/">'), "canonical is the trailing-slash real path");
+ok(shellHtml.includes("Claude &amp; the &quot;2M&quot; &lt;context&gt; era"), "title escaped in markup");
+const shellLdUnit = ldOf(shellHtml);
+ok(shellLdUnit && shellLdUnit["@type"] === "NewsArticle", "factual type → NewsArticle JSON-LD");
+ok(shellLdUnit.headline === shellRow.title && shellLdUnit.dateModified === new Date(nowMs).toISOString(), "headline round-trips; dateModified = updated_at (the corrections bump)");
+ok(Array.isArray(shellLdUnit.citation) && shellLdUnit.citation.length === 2 && shellLdUnit.citation[0].url === validSources()[0].url, "citation carries the §4.3 sources — the verification travels with the SEO");
+ok(Array.isArray(shellLdUnit.correction) && /Fixed the price figure/.test(shellLdUnit.correction[0]), "NewsArticle carries its corrections in the open");
+ok(shellHtml.includes("reviewed by a human"), "transparency label rides the shell (S5: the fourth surface)");
+ok(shellHtml.includes("<strong>bold</strong>") && shellHtml.includes("&lt;script&gt;alert(1)&lt;/script&gt;"), "body renders through the hardened markdown path — raw HTML dies");
+ok(shellHtml.includes('href="/#/wire/claude-4-2-launch"'), "shell links into the SPA deep link");
+ok(shellHtml.includes("Pricing is unchanged") && shellHtml.includes("retrieved"), "the Sources box carries link + retrieved date + claim mapping");
+ok(shellHtml.includes('property="article:published_time"') && shellHtml.includes('rel="alternate" type="application/atom+xml"'), "article timestamps + feed discovery present");
+// a hostile title must not be able to terminate the JSON-LD <script> element:
+// if the < escape were missing, the capture would truncate mid-JSON and fail
+// to parse — this asserts the whole round trip.
+const hostile = buildPostShellHtml({ post: { ...shellRow, corrections: [], title: "x</script><b>pwn</b>" }, baseUrl: "https://a.example", label: "L" });
+const hostileLd = ldOf(hostile);
+ok(hostileLd && hostileLd.headline === "x</script><b>pwn</b>", "JSON-LD escapes < — no script-element breakout, payload survives as data");
+const bpHtml = buildPostShellHtml({ post: { ...shellRow, type: "changelog", corrections: [] }, baseUrl: "https://a.example", label: "L" });
+ok(ldOf(bpHtml)["@type"] === "BlogPosting" && ldOf(bpHtml).correction === undefined, "first-party type → BlogPosting (correction is a NewsArticle-only property)");
+
+console.log("wire sitemap builder");
+const smUnit = buildWireSitemapXml({ posts: [{ slug: "a-post", updated_at: new Date(nowMs) }], baseUrl: "https://a.example" });
+ok(smUnit.includes("<loc>https://a.example/wire/</loc>") && smUnit.includes("<loc>https://a.example/wire/a-post/</loc>"), "sitemap lists the /wire/ index + each shell");
+ok(smUnit.includes(`<lastmod>${new Date(nowMs).toISOString()}</lastmod>`), "lastmod = updated_at (corrections move it)");
+ok(buildWireSitemapXml({ posts: [], baseUrl: "https://a.example" }).includes("<urlset"), "empty wire → still a well-formed sitemap");
+
+// ═══════════════════ unit — S4 seed script safety + fixtures ═══════════
+console.log("seed script (never a prod path; fixtures pass the gate)");
+const throws = (fn) => { try { fn(); return null; } catch (e) { return e; } };
+ok(/refusing/.test((throws(() => assertLocalDatabase("postgres://u:p@db.prod.example.com:5432/wire")) || { message: "" }).message), "non-local DATABASE_URL refused");
+ok(throws(() => assertLocalDatabase("postgres://postgres:postgres@localhost:5432/t")) === null, "localhost allowed");
+ok(throws(() => assertLocalDatabase("postgres://postgres@127.0.0.1:5432/t")) === null, "127.0.0.1 allowed");
+ok(throws(() => assertLocalDatabase("postgres://u:p@db.prod.example.com:5432/wire", true)) === null, "--allow-remote-db is a deliberate override");
+ok(throws(() => assertLocalDatabase(undefined)) !== null, "missing DATABASE_URL refused");
+const seeds = buildSeedPosts(5, nowMs);
+ok(seeds.length === 5 && new Set(seeds.map((p) => p.type)).size === 5, "5 seeds cycle all five post types");
+ok(seeds.every((p) => !validateIngest(p, { nowMs, publishPolicy: "review" }).error), "every generated seed passes the §4.3 gate");
+ok(seeds.every((p) => p.slug.startsWith("seed-example-") && /Seed example/.test(p.title)), "seeds are visibly synthetic — never mistakable for news");
+
+// ═══════════════ unit — S3 static parts (generate-shells wire mode) ════
+console.log("generate-shells wire statics (/wire/ index shell + robots line)");
+const PUB = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+const contentIdx = buildContentIndex(join(PUB, "content"));
+generateShells(contentIdx, { wire: true });
+ok(existsSync(join(PUB, "wire", "index.html")), "wire on → /wire/ index shell emitted");
+const wireIdxHtml = readFileSync(join(PUB, "wire", "index.html"), "utf8");
+ok(wireIdxHtml.includes('rel="canonical"') && wireIdxHtml.includes("/wire/rss.xml") && wireIdxHtml.includes("Open the Wire"), "index shell: canonical + feed + door into #/wire");
+ok(/reviewed by a human/.test(wireIdxHtml), "index shell carries the review-mode label (D-W5, no WIRE_PUBLISH_POLICY set)");
+ok(/Sitemap: .*\/wire\/sitemap\.xml/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "robots.txt points at the DB-served wire sitemap");
+generateShells(contentIdx, { wire: false });
+ok(!existsSync(join(PUB, "wire", "index.html")), "wire off → the stale index shell is removed");
+ok(!/wire\/sitemap/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "…and robots.txt drops the wire line");
 
 // ══════════════════════════════════════════════════════ integration ════
 if (!process.env.DATABASE_URL) {
@@ -305,6 +385,65 @@ const rePub = await request("POST", "/api/wire/posts/run-2026-07-17-001/publish"
 ok(rePub.status === 200 && rePub.body.status === "published", "publish re-instates a mistakenly killed post (the kill-switch is reversible)");
 ok((await request("GET", "/api/wire/posts/claude-4-2-launch")).status === 200, "…and it is back on the public surface");
 
+// ── S3: per-request post shells — the /cert/:payload posture ──────────
+const shellOk = await request("GET", "/wire/claude-4-2-launch");
+ok(shellOk.status === 200 && (shellOk.headers.get("content-type") || "").includes("text/html"), "published post shell → 200 HTML");
+ok(shellOk.headers.get("cache-control") === "public, max-age=60", "shell cached 60 s — the kill-switch is visible on the next request");
+ok(shellOk.text.includes(`<link rel="canonical" href="${main.base}/wire/claude-4-2-launch/">`), "canonical built from the request host, trailing-slash form");
+const shellLd = ldOf(shellOk.text);
+ok(shellLd && shellLd["@type"] === "NewsArticle" && shellLd.citation.some((c) => String(c.url).includes("anthropic.com")), "NewsArticle JSON-LD with sources[] as citation");
+const freshPost = await request("GET", "/api/wire/posts/claude-4-2-launch");
+ok(shellLd.dateModified === freshPost.body.post.updatedAt, "JSON-LD dateModified tracks updated_at (corrections + lifecycle bumps)");
+ok(shellOk.text.includes("misstated the price"), "the correction renders on the shell (no-JS body)");
+ok(shellOk.text.includes("/#/wire/claude-4-2-launch"), "shell deep-links into the SPA");
+ok((await request("GET", "/wire/claude-4-2-launch/")).status === 200, "trailing-slash request serves too (the canonical shape)");
+ok((await request("GET", "/wire/still-a-draft")).status === 404, "draft shell → 404 (drafts are invisible everywhere)");
+ok((await request("GET", "/wire/never-was")).status === 404, "unknown slug shell → 404");
+
+const smapOn = await request("GET", "/wire/sitemap.xml");
+ok(smapOn.status === 200 && (smapOn.headers.get("content-type") || "").includes("application/xml"), "GET /wire/sitemap.xml → 200 XML");
+ok(smapOn.text.includes(`<loc>${main.base}/wire/claude-4-2-launch/</loc>`) && smapOn.text.includes(`<loc>${main.base}/wire/</loc>`), "sitemap lists the /wire/ index + the published shell");
+ok(!smapOn.text.includes("still-a-draft"), "…and never a draft");
+
+// ── S5: the transparency label on all four surfaces (D-W5) ────────────
+const surfList = await request("GET", "/api/wire/posts");
+ok(/reviewed by a human$/.test(surfList.body.transparency), "label surface 1: list API");
+ok(/reviewed by a human$/.test(freshPost.body.transparency), "label surface 2: post API");
+ok((await request("GET", "/wire/rss.xml")).text.includes("reviewed by a human"), "label surface 3: RSS subtitle");
+ok(shellOk.text.includes("reviewed by a human"), "label surface 4: the shell");
+const autoShell = await request("GET", "/wire/context-windows-trend", { base: auto.base });
+ok(autoShell.status === 200 && !/reviewed by a human/.test(autoShell.text), "auto-mode shell drops the review clause — the label states track the policy");
+
+// ── S5: review queue + unpublish audit (key-gated admin reads) ────────
+ok((await request("GET", "/api/wire/admin/posts")).status === 401, "admin list without the key → 401");
+const adminAll = await request("GET", "/api/wire/admin/posts", { key: KEY });
+ok(adminAll.status === 200 && adminAll.body.posts.length === 3, "admin list sees every state (2 published + 1 draft)");
+ok(adminAll.headers.get("cache-control") === "no-store", "admin reads are never cached");
+const queue = await request("GET", "/api/wire/admin/posts?status=draft", { key: KEY });
+ok(queue.body.posts.length === 1 && queue.body.posts[0].postId === "r-draft" && queue.body.posts[0].status === "draft", "the D-W1 review queue: drafts are listable");
+ok((await request("GET", "/api/wire/admin/posts?status=bogus", { key: KEY })).status === 400, "unknown status filter → 400");
+const adminDetail = await request("GET", "/api/wire/admin/posts/r-draft", { key: KEY });
+ok(adminDetail.status === 200 && adminDetail.body.post.bodyMd.includes("Claude 4.2") && adminDetail.body.post.sources.length === 2, "admin detail serves the full draft for the review pass");
+ok((await request("GET", "/api/wire/admin/posts/r-draft")).status === 401, "admin detail without the key → 401");
+ok((await request("GET", "/api/wire/admin/posts/nope", { key: KEY })).status === 404, "unknown postId → 404");
+
+// the kill-switch across the S3 surfaces + the audit view of the reason
+await request("POST", "/api/wire/posts/run-2026-07-17-001/unpublish", { key: KEY, body: { reason: "second kill: audit-surface check" } });
+ok((await request("GET", "/wire/claude-4-2-launch")).status === 404, "unpublish vanishes the shell on the next request");
+ok(!(await request("GET", "/wire/sitemap.xml")).text.includes("claude-4-2-launch"), "…and its sitemap entry");
+const audit2 = await request("GET", "/api/wire/admin/posts?status=unpublished", { key: KEY });
+ok(audit2.body.posts.length === 1 && audit2.body.posts[0].unpublishReason === "second kill: audit-surface check" && audit2.body.posts[0].correctionsCount === 1, "audit surface: the retained row is readable with its reason + corrections count");
+
+// ── S4: the seed script, end-to-end through the real API ──────────────
+const seeded = await seedWire({ databaseUrl: process.env.DATABASE_URL, count: 5, key: "wk_seed_ci" });
+ok(seeded.length === 5 && seeded.every((r) => r.ok), "seed-wire drove 5 example drafts through the real ingest gate");
+const { rows: seedRows } = await pool.query("SELECT status FROM wire_posts WHERE post_id LIKE 'seed-example-%'");
+ok(seedRows.length === 5 && seedRows.every((r) => r.status === "draft"), "seeds land as drafts — the review posture, never straight to the public list");
+const seededAgain = await seedWire({ databaseUrl: process.env.DATABASE_URL, count: 5, key: "wk_seed_ci" });
+ok(seededAgain.every((r) => r.ok && r.status === 200), "re-seeding replaces the drafts (US-W4 through the seed path)…");
+ok((await pool.query("SELECT count(*)::int AS n FROM wire_posts WHERE post_id LIKE 'seed-example-%'")).rows[0].n === 5, "…and the row count holds at 5");
+ok(!(await request("GET", "/api/wire/posts")).body.posts.some((p) => p.slug.startsWith("seed-example-")), "seeded drafts never reach the public list");
+
 // ── rate limit on writes ───────────────────────────────────────────────
 const limited = await mkApp({ rateLimit: { max: 2, windowMs: 60_000 } });
 await request("POST", "/api/wire/posts", { key: KEY, body: {}, base: limited.base });
@@ -315,7 +454,9 @@ ok(third.status === 429 && third.body.error === "rate_limited", "write routes ra
 // ── unmounted deploy (US-W6): honest degrade, byte-identical boot ──────
 const bare = express();
 bare.use(express.json());
-bare.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" })); // server.js's else-branch
+// server.js's else-branch: both real-path XML surfaces answer machine-readable
+bare.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
+bare.get("/wire/sitemap.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
 bare.use("/api", (_req, res) => res.status(501).json({ error: "not_implemented" }));
 const bareServer = createServer(bare);
 await new Promise((r) => bareServer.listen(0, r));
@@ -325,6 +466,8 @@ const unmounted = await request("GET", "/api/wire/posts", { base: bareBase });
 ok(unmounted.status === 501, "no-Wire deploy: /api/wire/posts answers the 501 fallback (SPA feature-detects)");
 const rssOff = await request("GET", "/wire/rss.xml", { base: bareBase });
 ok(rssOff.status === 503 && rssOff.body.error === "not_configured", "no-Wire deploy: /wire/rss.xml → 503 not_configured (the /api/notify pattern)");
+const smapOff = await request("GET", "/wire/sitemap.xml", { base: bareBase });
+ok(smapOff.status === 503 && smapOff.body.error === "not_configured", "no-Wire deploy: /wire/sitemap.xml → 503 not_configured too");
 
 for (const s of servers) s.close();
 await pool.end();
