@@ -1,6 +1,11 @@
 // Minimal, dependency-free Markdown → HTML for authored lesson/explanation
-// bodies. Content is first-party (we author it), but we still HTML-escape
-// before applying inline formatting so stray < > render correctly.
+// bodies AND Wire post bodies. Lessons are first-party (we author them), but
+// Wire bodies arrive over the network from the ingest API (PRD-WIRE §7), so
+// the render path is hardened for untrusted input: all text is HTML-escaped
+// before inline formatting (no raw HTML, ever), link hrefs are
+// attribute-escaped (quotes can't break out of href="…"), and URL schemes
+// are allowlisted — http(s) plus in-app "#/…" hash links; anything else
+// (javascript:, data:, …) renders as plain text, not a link.
 
 export function slug(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -10,12 +15,25 @@ function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Attribute context needs quotes dead too (esc() has already handled & < >).
+const attrEsc = (s) => String(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+// Allowlist, checked against the RAW url text: absolute http(s), or an
+// in-app hash route. Everything else is refused (the caller renders text).
+const HREF_OK = /^(https?:\/\/|#)/i;
+
+function link(text, url) {
+  if (!HREF_OK.test(url)) return text;
+  const external = /^https?:/i.test(url);
+  return `<a href="${attrEsc(url)}"${external ? ' target="_blank" rel="noopener"' : ""}>${text}</a>`;
+}
+
 function inline(s) {
   return esc(s)
     .replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`);
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => link(t, u));
 }
 
 export function md(src) {

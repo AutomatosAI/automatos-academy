@@ -51,4 +51,6 @@ export const url = {
   exam: (v, t) => `/t/${v}/${t}/exam`,
   readiness: (v, t) => `/t/${v}/${t}/readiness`,
   profile: () => "/profile",
+  wire: () => "/wire",
+  wirePost: (slug) => `/wire/${slug}`,
 };

@@ -18,11 +18,13 @@
     "test:api": "node tests/content-api.test.mjs",
     "test:content-db": "node tests/content-db.test.mjs",
     "test:spine": "node tests/spine.test.mjs",
+    "test:wire": "node tests/wire.test.mjs",
     "shells": "node scripts/generate-shells.mjs",
     "tutor-corpus": "node scripts/export-tutor-corpus.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^1.15.0",
+    "@resvg/resvg-wasm": "2.6.2",
     "compression": "^1.7.4",
     "express": "^4.21.2",
     "node-pg-migrate": "^7.5.0",
