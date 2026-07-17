@@ -722,13 +722,22 @@ a.verify-chip:hover { background: var(--accent-soft); }
 }
 .ac-hero__cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
 .ac-hero__cta .orb { width: 64px; height: 64px; border-radius: 50%; background: var(--muted-fill); display: grid; place-items: center; color: var(--accent); flex: none; }
-.ac-hero__cta .lbl { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--fg); letter-spacing: -0.02em; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-hero__cta .lbl {
+  font-family: var(--sans); font-weight: 600; font-size: 16px; line-height: 1.2;
+  color: var(--fg); letter-spacing: -0.02em; max-width: 20ch;
+  /* two-line clamp, not nowrap — "Continue Claude Certified Architect" wraps
+     whole words instead of dying mid-word ("Claude Certifie…") */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  overflow: hidden; text-overflow: ellipsis; white-space: normal;
+}
 
 /* CTA row + resume chips (personal hero) — the ghost .ac-btn rides beside the
-   orb pill, and the chips reuse .continue-pill: the welcome-back strip's
-   actions in the strip's own voice, folded into the hero */
-.ac-hero__actions { margin-top: 34px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; }
+   orb pill at the pill's full height (stretch; min-height covers the wrapped
+   single-item case), and the chips reuse .continue-pill: the welcome-back
+   strip's actions in the strip's own voice, folded into the hero */
+.ac-hero__actions { margin-top: 34px; display: flex; align-items: stretch; flex-wrap: wrap; gap: 12px 14px; }
 .ac-hero__actions .ac-hero__cta { margin-top: 0; }
+.ac-hero__actions .ac-btn { align-self: stretch; min-height: 56px; padding: 0 28px; font-size: 16px; }
 .ac-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
 /* floating glass stat widgets */
@@ -809,7 +818,7 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .ac-hero__inner p { font-size: 14.5px; line-height: 1.45; max-width: none; margin-top: 12px; }
   .ac-hero__kicker { margin-bottom: 10px; padding: 6px 12px; }
   .ac-hero__actions { margin-top: 16px; gap: 10px; }
-  .ac-hero__actions .ac-btn { padding: 10px 18px; font-size: 13.5px; }
+  .ac-hero__actions .ac-btn { padding: 0 20px; font-size: 14px; min-height: 48px; }
   .ac-hero__chips { margin-top: 10px; }
   .ac-hero__cta { margin-top: 16px; padding: 4px 26px 4px 4px; }
   .ac-hero__cta .orb { width: 52px; height: 52px; }
