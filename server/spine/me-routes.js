@@ -36,6 +36,7 @@ const masteryRowFromDb = (r) => ({
 });
 
 // Study streak (PRD-U2 S4.3) — a rollup computed ON READ, no schema change:
+// (exported for PRD-COMMUNITY S1 share attestation — one SQL, two callers)
 // an "active day" is any distinct UTC calendar day carrying an answer
 // (progress.answered_at — device wall-clock, the same truth the merge uses)
 // or a telemetry row (telemetry.created_at). Consecutive days group via the
@@ -43,7 +44,7 @@ const masteryRowFromDb = (r) => ({
 // island, `current` the island still touching today OR yesterday (UTC) — a
 // streak isn't broken until a full UTC day passes with no activity. UTC
 // boundaries are v1, stated in the profile copy ("days are UTC").
-const STREAK_SQL = `
+export const STREAK_SQL = `
   WITH days AS (
     SELECT (answered_at AT TIME ZONE 'UTC')::date AS day FROM progress WHERE user_id = $1
     UNION

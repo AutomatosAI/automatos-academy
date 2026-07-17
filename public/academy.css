@@ -1031,3 +1031,15 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .sync-offer { animation: none; }
   .ac-burger span, .ac-nav-drawer a, .ac-drawer-mood { transition: none; } /* burger fold + drawer rows */
 }
+
+/* ── share cards (PRD-COMMUNITY S1) ───────────────────────────────────
+   Additive block only — the canonical Mist/Night/radius token tables
+   above are untouched (scripts/token-parity.mjs greps those keys). */
+.share-aff { margin-top: 14px; }
+.profile-stat .share-aff { margin-top: 10px; }
+.share-open { font-size: 13px; padding: 8px 14px; }
+.share-pop { margin-top: 12px; padding: 16px 18px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); text-align: left; }
+.share-check { display: inline-flex; gap: 8px; align-items: center; margin-top: 12px; font-size: 13.5px; color: var(--fg-2); cursor: pointer; }
+.share-check input { accent-color: var(--accent); }
+.share-name { margin-top: 10px; }
+.share-pop .cap { font-size: 12px; line-height: 1.45; color: var(--muted); max-width: 52ch; }

@@ -7,6 +7,7 @@ import { url } from "../router.js";
 import { loadCatalog, loadTrack } from "../content.js";
 import { encodeCert, decodeCert, badgeCopy, linkedInAddUrl, isSkillsTrack } from "../engine/certificate.js";
 import { user as authUser } from "../auth.js";
+import { nativeShareButton } from "../share.js";
 import { track as tk } from "../analytics.js";
 
 const NAME_KEY = "automatos-academy:v1:claim-name";
@@ -170,6 +171,9 @@ export async function certificateView({ params }) {
       el("div", { class: "row no-print", style: { gap: "10px", marginTop: "22px", flexWrap: "wrap" } }, [
         el("a", { class: "ac-btn ac-btn-solid", href: liHref, target: "_blank", rel: "noopener" }, ["Add to LinkedIn profile ↗"]),
         copyBtn,
+        // PRD-COMMUNITY S1: native share sheet where the platform has one
+        // (el() skips the null this returns elsewhere; Copy link covers it).
+        nativeShareButton({ title: certName, url: absoluteCertUrl(params.payload) }),
         el("button", { class: "ac-btn", type: "button", onClick: () => window.print() }, ["Save as PDF"]),
         el("a", { class: "ac-btn", href: "#" + url.track(cert.vendorId, cert.trackId) }, ["Start this track →"]),
       ]),
