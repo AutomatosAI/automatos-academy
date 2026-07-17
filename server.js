@@ -279,6 +279,32 @@ if (process.env.SPINE_ENABLED === "true") {
   console.log("[spine] user-state API mounted (/api/me, /api/sync) — share attestation on");
 }
 
+// ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────
+// Default OFF, same posture as the Spine: without WIRE_INGEST_KEY nothing
+// mounts — /api/wire/* answers through the 501 fallback below (the SPA
+// feature-detects and hides the nav entry), and /wire/rss.xml answers an
+// honest 503 not_configured (the /api/notify pattern) so a feed reader gets
+// a machine-readable error, never an HTML 404. Key without a database is a
+// misconfigured deploy → loud boot failure. Mounted after the Spine so a
+// full deploy shares the Spine's pg pool (one DATABASE_URL, one pool —
+// the same sharing /api/catalog/stats rides); wire-only deploys build their
+// own pool inside mountWire.
+if (process.env.WIRE_INGEST_KEY) {
+  if (!process.env.DATABASE_URL) {
+    console.error("[wire] WIRE_INGEST_KEY is set but DATABASE_URL is missing — refusing to boot.");
+    process.exit(1);
+  }
+  const { mountWire } = await import("./server/wire/index.js");
+  const wire = mountWire(app, {
+    pool: spinePool, // null on spine-less deploys → mountWire creates its own
+    ingestKey: process.env.WIRE_INGEST_KEY,
+    publishPolicy: process.env.WIRE_PUBLISH_POLICY, // unset → "review" (D-W1)
+  });
+  console.log(`[wire] news API mounted (/api/wire, /wire/rss.xml) — publish policy: ${wire.publishPolicy}`);
+} else {
+  app.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
+}
+
 // ── API namespace fallback ─────────────────────────────────────────────
 // Anything not handled above (catalog/notify/badge always; /api/me + /api/sync
 // once the Spine is enabled) returns 501 so client code can feature-detect
