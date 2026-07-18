@@ -1,6 +1,6 @@
 # PRD-WAVE-APP-DELIGHT — feedback you can see, voices worth hearing, a boot that says TRAIN YOUR AI MIND
 
-**Status:** DRAFT for review — decision boxes D-A1…D-A10 await Gerard · **Owner:** Academy (app-heavy; W4/W5 touch the web publish pipeline; W6 touches the spine)
+**Status:** IN BUILD — P1 + the overnight batch SHIPPED as app PRs **#31–#38** (2026-07-18: nav un-trap+dock · verdict-in-view+type · burger · boot "TRAIN YOUR AI MIND" · mistakes hub · the one haptic · shimmer+dock spring · podcast speed); boxes D-A1…D-A10 still await Gerard (D-A1's stem/caps shipped as direct response to the on-device complaint; the S/M/L text-size setting still awaits the box) · **Owner:** Academy (app-heavy; W4/W5 touch the web publish pipeline; W6 touches the spine)
 **Authored:** 2026-07-17, from Gerard's first on-device session (Expo Go, iOS) + a three-agent evidence pass: full app UX audit (file:line), live competitor/voice research ([app-competitor-voice-scan-2026-07-17](../research/app-competitor-voice-scan-2026-07-17.md)), and web-home DNA extraction.
 **North star (Gerard's words):** *"The app needs to be cool as fuck."* Specifically: fonts oversized · love the floating dock, wants a burger · scroll-to-bottom Backs and stuck pages · loves podcast, wants voice/video-as-audio · **robot voice is a 100% NO** · questions never say right/wrong/why + wants a post-scroll review · tutor should be a real conversation (paid).
 **Prerequisite:** app PR #30 (feed black-screen fix + lockfile) merges first.
@@ -41,6 +41,8 @@ What the complaints actually are, in code:
 | W1-S4 | **The one haptic** | Add `expo-haptics`; fire exactly ONE reward haptic per session, frame-timed to the summary/celebration beat (+ streak-milestone celebrations). Nowhere else — scarcity is the mechanism (research: Duolingo) | Haptic lands on session-complete beat; none anywhere else; respects OS reduce-motion/haptics settings | S |
 
 ### W2 — Navigation (stuck pages die)
+
+> **AMENDED 2026-07-18 (Gerard, on device):** *"I assumed we agreed on a floating menu bar for all pages"* — W2-S1 now ships the dock on root-stack screens too (GlobalDock overlay, pathname-allowlisted), not TopBack alone. Deliberate exclusions (each has TopBack as its escape): the running mock paper (focus), tutor (composer collision), chooser (confirm-bar collision), the delete flows (destructive-confirm panels). Shipped in app #31. **New: W2-S3** — the chooser/pathfinder *flow itself* ("track your path is shit"): trap fixed in #31; the UX redesign awaits Gerard's specifics on what grates (steps? recommendations? confirm friction?).
 
 | # | Slice | What / where | DoD | Effort |
 |---|---|---|---|---|
