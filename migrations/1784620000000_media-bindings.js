@@ -22,7 +22,9 @@
  *    (track.json `videos[]`), validated at the API boundary against the live
  *    content index, not by the database (the exam_dates precedent).
  */
-exports.up = (pgm) => {
+export const shorthands = undefined;
+
+export async function up(pgm) {
   pgm.sql(`
     CREATE TABLE IF NOT EXISTS media_bindings (
       id            bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -42,8 +44,8 @@ exports.up = (pgm) => {
     CREATE INDEX IF NOT EXISTS media_bindings_track_idx
       ON media_bindings (vendor_id, track_id);
   `);
-};
+}
 
-exports.down = (pgm) => {
+export async function down(pgm) {
   pgm.sql(`DROP TABLE IF EXISTS media_bindings;`);
-};
+}
