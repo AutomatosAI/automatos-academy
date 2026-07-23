@@ -41,6 +41,14 @@ export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getI
   const base = (cdnBase || "https://widgets.automatos.app").replace(/\/+$/, "");
   const json = express.json({ limit: "8kb" });
 
+  // Identity probe for the browser admin UI: 200 ⇒ this signed-in user is an
+  // allow-listed admin (render the Upload affordances); 403 ⇒ hide them. No
+  // body needed — it reuses the one gate so the client never re-implements the
+  // allowlist check, and a signed-out visitor simply never calls it.
+  app.get("/api/admin/media/session", requireAdmin, (req, res) => {
+    res.json({ admin: true, actor: req.adminActor || null });
+  });
+
   app.get("/api/admin/media/slots", requireAdmin, (req, res, next) => {
     (async () => {
       const { vendor, track } = req.query;
