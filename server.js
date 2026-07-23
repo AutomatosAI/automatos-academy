@@ -245,7 +245,17 @@ app.get("/api/badge/verify", (req, res) => {
 // doesn't exist yet at mount time, and on static deploys it never will (the
 // stats route then serves learner fields as null; content numbers always work).
 let spinePool = null;
-app.use("/api/catalog", createCatalogRouter(getContentIndex, { getPool: () => spinePool }));
+// C3 PR2 — media bindings overlay: the cache is created after the Spine (it
+// needs the pool); the catalog reads it through this getter, which returns
+// null until the cache exists (so files/spine-less deploys are unchanged).
+let bindingsCache = null;
+app.use(
+  "/api/catalog",
+  createCatalogRouter(getContentIndex, {
+    getPool: () => spinePool,
+    getBindings: (v, t) => (bindingsCache ? bindingsCache.get(v, t) : null),
+  }),
+);
 console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks, source=${CONTENT_SOURCE})`);
 
 // ── Share cards (PRD-COMMUNITY S1) ─────────────────────────────────────
@@ -285,9 +295,16 @@ if (process.env.SPINE_ENABLED === "true") {
   // presigned uploads, gated by ACADEMY_ADMIN_KEY (machine) / ACADEMY_ADMIN_CLERK_IDS
   // (browser). Shares the Spine pool + Clerk verifier. Fail-closed when
   // unconfigured (every route 403), so mounting alongside the Spine is safe.
+  const { createBindingsCache } = await import("./server/media/bindings-cache.js");
+  bindingsCache = createBindingsCache({ pool: spine.pool }).start();
   const { mountMediaAdmin } = await import("./server/media/index.js");
-  const media = mountMediaAdmin(app, { pool: spine.pool, verifier: spine.verifier, getIndex: getContentIndex });
-  console.log(`[media] admin plane mounted (/api/admin/media) — configured=${media.configured} s3=${media.s3Ready}`);
+  const media = mountMediaAdmin(app, {
+    pool: spine.pool,
+    verifier: spine.verifier,
+    getIndex: getContentIndex,
+    onChange: () => bindingsCache.refresh(), // bind/unbind → overlay live at once
+  });
+  console.log(`[media] admin plane mounted (/api/admin/media) — configured=${media.configured} s3=${media.s3Ready}; bindings overlay on`);
 }
 
 // ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────
