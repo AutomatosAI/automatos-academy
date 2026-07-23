@@ -11,7 +11,7 @@
     "validate": "node scripts/validate-content.mjs",
     "migrate": "node-pg-migrate -m migrations up",
     "publish-content": "node scripts/publish-content.mjs",
-    "test": "node tests/engine.test.mjs && node tests/tutor-context.test.mjs && node tests/share.test.mjs && node tests/web-loop.test.mjs && node tests/content-api.test.mjs && node tests/content-db.test.mjs && node tests/spine.test.mjs && node tests/digest.test.mjs && node tests/media.test.mjs && node scripts/token-parity.mjs",
+    "test": "node tests/engine.test.mjs && node tests/tutor-context.test.mjs && node tests/share.test.mjs && node tests/web-loop.test.mjs && node tests/content-api.test.mjs && node tests/content-db.test.mjs && node tests/spine.test.mjs && node tests/digest.test.mjs && node tests/media.test.mjs && node tests/bulk-bind.test.mjs && node scripts/token-parity.mjs",
     "tokens": "node scripts/token-parity.mjs",
     "test:engine": "node tests/engine.test.mjs",
     "test:tutor-context": "node tests/tutor-context.test.mjs",
@@ -22,6 +22,7 @@
     "test:spine": "node tests/spine.test.mjs",
     "test:wire": "node tests/wire.test.mjs",
     "test:digest": "node tests/digest.test.mjs",
+    "bulk-bind": "node scripts/bulk-bind-media.mjs",
     "shells": "node scripts/generate-shells.mjs",
     "seed-wire": "node scripts/seed-wire.mjs",
     "tutor-corpus": "node scripts/export-tutor-corpus.mjs"

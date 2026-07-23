@@ -15,8 +15,11 @@
 #      MP4s get git rm'd (see docs/VIDEO_HOSTING.md).
 #   2. ONGOING: push new videos to a short-lived branch under media-staging/<vendor>/<track>/,
 #      dispatch this workflow with that ref — files sync to s3://$BUCKET/academy/<vendor>/<track>/,
-#      then delete the branch. Name files after their video-slot id (e.g. v-d1-2.mp4) so
-#      scripts/register-videos.mjs --publish can register them automatically.
+#      then delete the branch. Name files after their video-slot id (e.g. v-d1-2.mp4).
+#      Set bind=true to ALSO register each into media_bindings via the C3 admin API
+#      (scripts/bulk-bind-media.mjs) — renders published with no redeploy, no committed
+#      JSON (needs the ACADEMY_ADMIN_KEY secret). Legacy alt: scripts/register-videos.mjs
+#      --publish writes the urls into git JSON instead. See docs/VIDEO_HOSTING.md.
 
 name: Deploy academy media to CDN
 
@@ -30,6 +33,10 @@ on:
         default: staging
       dry_run:
         description: "Print what would sync without uploading"
+        type: boolean
+        default: false
+      bind:
+        description: "staging only — after syncing, bind each media-staging/<vendor>/<track>/<slotId>.mp4 to its slot (media_bindings) so it renders published without a redeploy"
         type: boolean
         default: false
 
@@ -105,7 +112,41 @@ jobs:
             --distribution-id "$DISTRIBUTION_ID" \
             --paths "/academy/*"
 
+      # Bulk-bind (staging only): after the bytes are on S3, register each
+      # media-staging/<vendor>/<track>/<slotId>.mp4 into media_bindings via the
+      # C3 admin API, so it renders published with no redeploy and no committed
+      # JSON. The DB-native bulk equivalent of the browser Upload button.
+      - name: Set up Node
+        if: ${{ inputs.mode == 'staging' && inputs.bind == true }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bind staged videos to their slots (media_bindings)
+        if: ${{ inputs.mode == 'staging' && inputs.bind == true }}
+        env:
+          # env indirection only — no inline expansion in run: (injection hygiene).
+          ACADEMY_ADMIN_KEY: ${{ secrets.ACADEMY_ADMIN_KEY }}
+          ACADEMY_SERVER_URL: ${{ vars.ACADEMY_SERVER_URL }}
+          MEDIA_CDN_BASE: ${{ vars.MEDIA_CDN_BASE }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ACADEMY_ADMIN_KEY:-}" ]; then
+            echo "::error::ACADEMY_ADMIN_KEY secret is not set — cannot bind. Add it (same value as the server's ACADEMY_ADMIN_KEY env) and re-run."
+            exit 1
+          fi
+          ARGS=""
+          if [ "$DRY_RUN" = "true" ]; then ARGS="--dry-run"; fi
+          node scripts/bulk-bind-media.mjs $ARGS
+
       - name: Summary
+        env:
+          BOUND: ${{ inputs.mode == 'staging' && inputs.bind == true }}
         run: |
           echo "Synced under s3://…/academy/ — serve via the CDN domain (widgets.automatos.app/academy/...)." >> "$GITHUB_STEP_SUMMARY"
-          echo "Next: node scripts/register-videos.mjs (see docs/VIDEO_HOSTING.md)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$BOUND" = "true" ]; then
+            echo "Bound staged videos into media_bindings (see the bind step log) — they render published now." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Next: bind them — re-run with bind=true, or node scripts/register-videos.mjs (see docs/VIDEO_HOSTING.md)." >> "$GITHUB_STEP_SUMMARY"
+          fi
