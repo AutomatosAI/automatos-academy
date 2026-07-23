@@ -24,7 +24,9 @@ if (existsSync(OUT)) rmSync(OUT, { recursive: true });
 mkdirSync(OUT, { recursive: true });
 
 const index = [];
+const corpusFiles = []; // per-file {file, vendor, track, domain, lane, kind, title, tags} → sync tags each doc to its course
 let files = 0, lessons = 0, questions = 0;
+const tagStr = (...xs) => xs.filter(Boolean).join(",");
 
 for (const v of manifest.vendors) {
   for (const t of v.tracks || []) {
@@ -46,6 +48,12 @@ for (const v of manifest.vendors) {
     ].join("\n");
     writeFileSync(join(OUT, slug, "00-track-overview.md"), head + "\n");
     files++;
+    const lane = t.lane || "practitioner";
+    corpusFiles.push({
+      file: `${slug}/00-track-overview.md`, vendor: v.id, track: t.trackId, domain: null, lane,
+      kind: "track-overview", title: `${tj.name} — overview`,
+      tags: tagStr("academy", v.id, t.trackId, tj.code, lane),
+    });
 
     for (const df of tj.domainFiles || []) {
       let d;
@@ -83,6 +91,11 @@ for (const v of manifest.vendors) {
       writeFileSync(join(OUT, slug, fname), parts.filter(Boolean).join("\n") + "\n");
       files++;
       index.push(`- ${slug}/${fname} — ${tj.code || t.trackId} ${d.code || ""} ${d.name}`);
+      corpusFiles.push({
+        file: `${slug}/${fname}`, vendor: v.id, track: t.trackId, domain: d.id, lane: t.lane || "practitioner",
+        kind: "domain", title: `${tj.name} · ${d.name}`,
+        tags: tagStr("academy", v.id, t.trackId, d.id, d.code),
+      });
     }
   }
 }
@@ -90,4 +103,9 @@ for (const v of manifest.vendors) {
 writeFileSync(join(OUT, "INDEX.md"),
   `# Tutor corpus — upload checklist\n\nGenerated ${new Date().toISOString().slice(0, 10)} from the live tracks. Upload every file below to the Academy workspace Knowledge Base (the knowledge graph builds automatically). Re-export + re-upload after content releases.\n\n${index.join("\n")}\n`);
 
-console.log(`tutor-corpus: ${files} files · ${lessons} lessons · ${questions} Q/A across ${index.length} domain docs — ready to upload`);
+// Machine-readable sibling of INDEX.md — scripts/sync-tutor-corpus.mjs reads it
+// to push each doc to the Academy workspace with per-course `tags` (so the
+// knowledge graph maps every chunk back to its vendor/track/domain).
+writeFileSync(join(OUT, "corpus-manifest.json"), JSON.stringify({ generatedAt: new Date().toISOString(), files: corpusFiles }, null, 2) + "\n");
+
+console.log(`tutor-corpus: ${files} files · ${lessons} lessons · ${questions} Q/A across ${index.length} domain docs — ready to upload (corpus-manifest.json written)`);
