@@ -25,13 +25,32 @@
           "difficulty": 1,
           "stem": "Why are a text-writing AI, an image-painting AI, and a video-making AI considered the same idea rather than three unrelated technologies?",
           "options": [
-            { "id": "a", "text": "Each one learned the patterns in a huge pile of examples of its own material, then generates more of that material — same trick, different diet", "correct": true },
-            { "id": "b", "text": "They all secretly search a giant library and hand you the closest text, picture, or clip they find already stored", "correct": false },
-            { "id": "c", "text": "They only look like different tools; underneath, a single program does writing, painting, and filming in one fixed way", "correct": false },
-            { "id": "d", "text": "They share the word \"AI\" for marketing reasons but actually work on completely different principles", "correct": false }
+            {
+              "id": "a",
+              "text": "Each one learned the patterns in a huge pile of examples of its own material, then generates more of that material — same trick, different diet",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "They all secretly search a giant library and hand you the closest text, picture, or clip they find already stored",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "They only look like different tools; underneath, a single program does writing, painting, and filming in one fixed way",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "They share the word \"AI\" for marketing reasons but actually work on completely different principles",
+              "correct": false
+            }
           ],
           "explanation": "The unifying idea is one trick — learn patterns from millions of examples, then generate new material that fits — applied to different materials: fed text it writes, fed images it paints, fed video it makes clips. It is not looking things up in a stored library and returning a match (b); it generates something fresh, the same way the text AI writes a sentence nobody wrote before. It also isn't a single monolithic program (c) — these are often separate tools with the same underlying approach, which is exactly why \"same family, different diet\" fits. And they share more than a marketing label (d): they genuinely share the learn-then-generate principle.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gb-documents"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gb-documents"
+          ]
         },
         {
           "id": "kc-m05-2",
@@ -40,13 +59,31 @@
           "difficulty": 1,
           "stem": "You photograph a two-page contract and ask the AI \"what am I actually agreeing to here?\" Which direction is this, and why?",
           "options": [
-            { "id": "a", "text": "Understanding — you showed it material you already have and asked it to make sense of what's in it", "correct": true },
-            { "id": "b", "text": "Making — because it produces a written answer, so it is generating new material from your description", "correct": false },
-            { "id": "c", "text": "Neither — reading a document isn't something AI can do, only writing new text is", "correct": false },
-            { "id": "d", "text": "Both are identical, so the direction doesn't matter and isn't worth separating", "correct": false }
+            {
+              "id": "a",
+              "text": "Understanding — you showed it material you already have and asked it to make sense of what's in it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Making — because it produces a written answer, so it is generating new material from your description",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Neither — reading a document isn't something AI can do, only writing new text is",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Both are identical, so the direction doesn't matter and isn't worth separating",
+              "correct": false
+            }
           ],
           "explanation": "You supplied the material — the photographed contract — and asked the AI to tell you what's in it; that's the understanding (input) direction, \"reading\" something you provided. It isn't making (b): making is when you describe what you want and it generates brand-new material like a poster or a clip — here you didn't ask it to invent a contract, you asked it to read yours. AI genuinely can take in images and documents, so \"it can't read\" is wrong (c). And the two directions are worth keeping apart (d) — asking \"is this reading what I gave it, or making something new?\" is the quickest way to understand any AI tool that confuses you.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -64,13 +101,32 @@
           "difficulty": 1,
           "stem": "Which honest summary of today's maturity — the durable part worth remembering — is right?",
           "options": [
-            { "id": "a", "text": "Text is the most mature and dependable, images are strong, and video is the newest and improving fastest", "correct": true },
-            { "id": "b", "text": "Video is the most reliable of the three because it's the most impressive to watch", "correct": false },
-            { "id": "c", "text": "They're all the same trick, so they must all work equally well right now", "correct": false },
-            { "id": "d", "text": "None of them is usable for real work yet, so it's safest to avoid all three", "correct": false }
+            {
+              "id": "a",
+              "text": "Text is the most mature and dependable, images are strong, and video is the newest and improving fastest",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Video is the most reliable of the three because it's the most impressive to watch",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "They're all the same trick, so they must all work equally well right now",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "None of them is usable for real work yet, so it's safest to avoid all three",
+              "correct": false
+            }
           ],
           "explanation": "The durable ordering is text steadiest, images strong, video newest and moving fastest — that order is the part to remember, while exact capabilities shift month to month. Impressiveness isn't reliability (b): video is the frontier, the most dazzling to watch and the least dependable to lean on. Being the same underlying trick doesn't make them equally mature (c) — same idea, different amounts of time and refinement. And they're plainly usable for real work (d): text is dependable and images are strong enough to use, with a review.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gemini-multimodal"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gemini-multimodal"
+          ]
         },
         {
           "id": "kc-m05-4",
@@ -79,13 +135,32 @@
           "difficulty": 2,
           "stem": "A generated product image looks crisp and professional, but the logo on the box is subtly wrong and a sign in the background reads as garbled letters. What is this, and what should you do?",
           "options": [
-            { "id": "a", "text": "It's hallucination in visual form — the AI generated plausible-looking detail it never verified; treat the image as a draft and give it a human look before it represents you", "correct": true },
-            { "id": "b", "text": "The image tool is broken and can't be trusted for anything again", "correct": false },
-            { "id": "c", "text": "Because the image looks polished and professional, it must be accurate and needs no review", "correct": false },
-            { "id": "d", "text": "Hallucination only happens in text, so a wrong logo in an image must be something else entirely", "correct": false }
+            {
+              "id": "a",
+              "text": "It's hallucination in visual form — the AI generated plausible-looking detail it never verified; treat the image as a draft and give it a human look before it represents you",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The image tool is broken and can't be trusted for anything again",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Because the image looks polished and professional, it must be accurate and needs no review",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Hallucination only happens in text, so a wrong logo in an image must be something else entirely",
+              "correct": false
+            }
           ],
           "explanation": "A wrong logo and garbled sign text are hallucination wearing a visual costume — the same confidently-wrong behaviour as an invented sentence, because the AI generated what fit the pattern without checking it, so the fix is the same: treat it as a draft and review it. It isn't a broken tool (b) — this is normal behaviour for how generation works. Polish is not proof (c); a crisp picture can fool you faster than a paragraph precisely because it looks authoritative. And hallucination is not text-only (d) — it shows up as extra fingers, wrong logos, garbled signs, and warping video too.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gb-documents"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gb-documents"
+          ]
         }
       ]
     }
@@ -98,13 +173,32 @@
       "difficulty": 1,
       "stem": "What is the single idea that explains why text, image, and video AIs are one family?",
       "options": [
-        { "id": "a", "text": "Each learned patterns from a huge pile of examples of its material, then generates more of that material — one trick, different diets", "correct": true },
-        { "id": "b", "text": "Each stores a copy of the whole internet and hands back the closest match it can find", "correct": false },
-        { "id": "c", "text": "Each has genuine understanding of the world and creates from real knowledge", "correct": false },
-        { "id": "d", "text": "Each is powered by a different, unrelated breakthrough that happens to be called AI", "correct": false }
+        {
+          "id": "a",
+          "text": "Each learned patterns from a huge pile of examples of its material, then generates more of that material — one trick, different diets",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Each stores a copy of the whole internet and hands back the closest match it can find",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Each has genuine understanding of the world and creates from real knowledge",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Each is powered by a different, unrelated breakthrough that happens to be called AI",
+          "correct": false
+        }
       ],
       "explanation": "The one idea is learn-patterns-then-generate, pointed at different materials — text makes writing, images make pictures, video makes clips. It doesn't store and return matches (b): it generates fresh material from learned patterns, the way it writes a never-before-seen sentence. It isn't understanding the world from real knowledge (c) — it's pattern completion, which is why it can be confidently wrong. And they're not unrelated breakthroughs (d); they share the very same principle, just fed different material.",
-      "sourceRefs": ["r-genai-leader-guide", "r-hf-multimodal"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-hf-multimodal"
+      ]
     },
     {
       "id": "q-m05-2",
@@ -113,13 +207,32 @@
       "difficulty": 1,
       "stem": "What does \"multimodal\" mean, in plain words?",
       "options": [
-        { "id": "a", "text": "An AI that can handle several kinds of material at once — for example read a photo, take a typed question, and answer in text", "correct": true },
-        { "id": "b", "text": "An AI that is faster and more powerful than a normal one", "correct": false },
-        { "id": "c", "text": "An AI that can only work with one kind of material at a time", "correct": false },
-        { "id": "d", "text": "A special premium mode you switch on to unlock better answers", "correct": false }
+        {
+          "id": "a",
+          "text": "An AI that can handle several kinds of material at once — for example read a photo, take a typed question, and answer in text",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "An AI that is faster and more powerful than a normal one",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "An AI that can only work with one kind of material at a time",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A special premium mode you switch on to unlock better answers",
+          "correct": false
+        }
       ],
       "explanation": "A \"mode\" is a kind of material — text, images, audio, video — so multimodal means several modes: one AI that works across more than one kind of material at once. It's not a claim about raw speed or power (b). It's the opposite of single-material (c) — that would be handling only one kind. And it isn't a premium toggle (d); it simply describes the range of materials an AI can take in and produce.",
-      "sourceRefs": ["r-gemini-multimodal", "r-hf-multimodal"]
+      "sourceRefs": [
+        "r-gemini-multimodal",
+        "r-hf-multimodal"
+      ]
     },
     {
       "id": "q-m05-3",
@@ -128,13 +241,31 @@
       "difficulty": 1,
       "stem": "You describe a scene in words and the AI generates a short video clip of it. Which direction is that?",
       "options": [
-        { "id": "a", "text": "Making — you supplied a description and it generated brand-new material", "correct": true },
-        { "id": "b", "text": "Understanding — because it had to understand your words first", "correct": false },
-        { "id": "c", "text": "Neither — generating video isn't something AI can attempt", "correct": false },
-        { "id": "d", "text": "Both at once, which is why the two directions can't be told apart", "correct": false }
+        {
+          "id": "a",
+          "text": "Making — you supplied a description and it generated brand-new material",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Understanding — because it had to understand your words first",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Neither — generating video isn't something AI can attempt",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Both at once, which is why the two directions can't be told apart",
+          "correct": false
+        }
       ],
       "explanation": "You brought a description and it produced new material — that's the making (output) direction. The label follows what the AI produced, not the fact that it parsed your words along the way, so calling it understanding misses the point (b): understanding is when you show it existing material and it tells you what's in it. AI genuinely can generate short clips (c) — that's video generation, the newest of the three. And the directions are distinct and useful to separate (d): here you clearly asked it to make something new, not to read something you gave it.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m05-4",
@@ -143,13 +274,32 @@
       "difficulty": 2,
       "stem": "When an image AI produces a picture of a lighthouse, what is actually happening?",
       "options": [
-        { "id": "a", "text": "It generates a new image from the patterns it learned linking the idea of a lighthouse to shapes and colours — it isn't fetching a stored photo", "correct": true },
-        { "id": "b", "text": "It searches a photo library and returns the best real lighthouse photo it finds", "correct": false },
-        { "id": "c", "text": "It copies an existing image and lightly edits it to look new", "correct": false },
-        { "id": "d", "text": "It looks up a definition of \"lighthouse\" and renders that definition exactly", "correct": false }
+        {
+          "id": "a",
+          "text": "It generates a new image from the patterns it learned linking the idea of a lighthouse to shapes and colours — it isn't fetching a stored photo",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It searches a photo library and returns the best real lighthouse photo it finds",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It copies an existing image and lightly edits it to look new",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It looks up a definition of \"lighthouse\" and renders that definition exactly",
+          "correct": false
+        }
       ],
       "explanation": "It generates a fresh image from learned patterns — the same generate-don't-retrieve behaviour as the text AI writing a new sentence. It isn't searching a library and returning a found photo (b), which is the most common misconception this module corrects. It isn't copying and lightly editing one existing image (c) — it's producing something new from patterns across millions of examples. And it isn't rendering a dictionary definition (d); there's no literal definition being drawn, just patterns turned into pixels.",
-      "sourceRefs": ["r-genai-leader-guide", "r-hf-multimodal"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-hf-multimodal"
+      ]
     },
     {
       "id": "q-m05-5",
@@ -158,13 +308,32 @@
       "difficulty": 2,
       "stem": "Which statement about how good these AIs are today is both honest and durable — unlikely to go out of date?",
       "options": [
-        { "id": "a", "text": "As a rough order, text is the most dependable, images are strong, and video is newest and improving fastest — while exact capabilities keep changing", "correct": true },
-        { "id": "b", "text": "Video AI has now surpassed text AI in reliability for everyday work", "correct": false },
-        { "id": "c", "text": "Image AI is flawless and its output never needs checking", "correct": false },
-        { "id": "d", "text": "A specific product is the definitive best at all three and will stay that way", "correct": false }
+        {
+          "id": "a",
+          "text": "As a rough order, text is the most dependable, images are strong, and video is newest and improving fastest — while exact capabilities keep changing",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Video AI has now surpassed text AI in reliability for everyday work",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Image AI is flawless and its output never needs checking",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A specific product is the definitive best at all three and will stay that way",
+          "correct": false
+        }
       ],
       "explanation": "The durable claim is the relative order plus the caveat that specifics move — text steadiest, images strong, video newest and fastest-changing. A firm reliability ranking of video over text (b) is both currently backwards and the kind of dated claim to avoid. \"Flawless, never check\" (c) contradicts the whole review discipline — images still slip on fine detail. And crowning one product as permanently best (d) is exactly the sort of statement that rots, which this track deliberately refuses to make.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gemini-multimodal"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gemini-multimodal"
+      ]
     },
     {
       "id": "q-m05-6",
@@ -173,13 +342,32 @@
       "difficulty": 2,
       "stem": "A teammate says: \"The image came out looking really professional, so we can skip the review and publish it.\" What's the problem with that reasoning?",
       "options": [
-        { "id": "a", "text": "Polish isn't accuracy — hallucination shows up in images too (wrong logos, garbled text, impossible details), and a crisp picture can fool you faster, so it still gets a human look", "correct": true },
-        { "id": "b", "text": "There's no problem — a professional-looking image is reliable evidence that every detail is correct", "correct": false },
-        { "id": "c", "text": "The only issue is that images always take too long to review to be worth it", "correct": false },
-        { "id": "d", "text": "Images can't contain mistakes, so the real risk is only ever in generated text", "correct": false }
+        {
+          "id": "a",
+          "text": "Polish isn't accuracy — hallucination shows up in images too (wrong logos, garbled text, impossible details), and a crisp picture can fool you faster, so it still gets a human look",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "There's no problem — a professional-looking image is reliable evidence that every detail is correct",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The only issue is that images always take too long to review to be worth it",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Images can't contain mistakes, so the real risk is only ever in generated text",
+          "correct": false
+        }
       ],
       "explanation": "Beautiful is not true: a generated image can carry confident errors — a subtly wrong logo, garbled sign text, an impossible reflection — and its polish actively lowers your guard, so it earns a review, not a pass. Professional appearance is not proof of correctness (b); that's the exact trap. Review isn't skipped for being slow (c) — a quick glance is cheap next to publishing a visible mistake. And images absolutely can contain mistakes (d) — hallucination isn't text-only.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-documents"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-documents"
+      ]
     },
     {
       "id": "q-m05-7",
@@ -188,13 +376,32 @@
       "difficulty": 1,
       "stem": "You hold up your phone camera to a shelf of products and ask the AI \"which of these is low stock and needs reordering?\" Setting aside whether it has your live data, which capability of the AI does the reading-the-photo part rely on?",
       "options": [
-        { "id": "a", "text": "Understanding — showing it an image and having it make sense of what's in the picture", "correct": true },
-        { "id": "b", "text": "Making — because it generates a helpful answer at the end", "correct": false },
-        { "id": "c", "text": "Multimodal is a myth; AI can only ever read text you type", "correct": false },
-        { "id": "d", "text": "It must be searching the internet for a matching photo of your shelf", "correct": false }
+        {
+          "id": "a",
+          "text": "Understanding — showing it an image and having it make sense of what's in the picture",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Making — because it generates a helpful answer at the end",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Multimodal is a myth; AI can only ever read text you type",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It must be searching the internet for a matching photo of your shelf",
+          "correct": false
+        }
       ],
       "explanation": "Taking in a photo and interpreting what's in it is the understanding direction — \"reading\" an image rather than words, which is what makes multimodal AI feel striking. The making label (b) fixes on the wrong step: producing a sentence at the end doesn't change that the core skill here is reading the picture you supplied. Reading images is real, not a myth (c) — that's exactly what a multimodal AI does. And it isn't finding your shelf online (d); it's interpreting the specific image you gave it.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-documents"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-documents"
+      ]
     },
     {
       "id": "q-m05-8",
@@ -203,13 +410,32 @@
       "difficulty": 1,
       "stem": "What's the most useful first question to ask yourself when a new AI tool confuses you?",
       "options": [
-        { "id": "a", "text": "\"Is this reading something I gave it, or making something new for me?\" — understanding versus making", "correct": true },
-        { "id": "b", "text": "\"Which brand made it?\" — since the brand decides everything about what it can do", "correct": false },
-        { "id": "c", "text": "\"How large is its training data?\" — the only number that matters", "correct": false },
-        { "id": "d", "text": "\"Is it conscious?\" — because that determines whether it's safe to use", "correct": false }
+        {
+          "id": "a",
+          "text": "\"Is this reading something I gave it, or making something new for me?\" — understanding versus making",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "\"Which brand made it?\" — since the brand decides everything about what it can do",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "\"How large is its training data?\" — the only number that matters",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "\"Is it conscious?\" — because that determines whether it's safe to use",
+          "correct": false
+        }
       ],
       "explanation": "Sorting a tool into understanding (it reads what you supply) versus making (it generates new material) is the fastest way to grasp what it's actually for. The brand isn't the deciding factor (b) — different products run the same underlying trick, a point this whole track leans on. A raw training-data figure isn't a practical guide for a beginner (c) and isn't \"the only number that matters.\" And consciousness is a category error (d): these systems aren't conscious, and that's not the useful question — what you gave it versus what it makes is.",
-      "sourceRefs": ["r-genai-leader-guide", "r-hf-multimodal"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-hf-multimodal"
+      ]
     }
   ],
   "scenarios": [],
@@ -221,7 +447,9 @@
       "url": "automatos-gitbook/knowledge/documents.md",
       "kind": "official-doc",
       "annotation": "The platform's own document area, and the grounding for this module's peek. It lists the material you can upload — text and Office files, plus PDFs including scanned documents read via text recognition — and has a dedicated Multimodal section for rich-media documents: images with extracted text, PDFs with embedded graphics, mixed-content files. Concrete proof of the module's point that \"if it learned from a kind of material, it can read it\" applies to a real workspace, not just plain paragraphs.",
-      "domainIds": ["m05-text-images-video"]
+      "domainIds": [
+        "m05-text-images-video"
+      ]
     },
     {
       "id": "r-genai-leader-guide",
@@ -229,7 +457,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, business-toned primer on what generative AI is and how it behaves. For this module, read the \"Fundamentals of gen AI\" material: it backs the one-trick idea — a system that learns from examples and generates new content that fits the patterns — across text and other materials, and supports the honest note that generated output is plausible, not guaranteed true. Beginner-friendly and non-technical.",
-      "domainIds": ["m05-text-images-video"]
+      "domainIds": [
+        "m05-text-images-video"
+      ]
     },
     {
       "id": "r-hf-multimodal",
@@ -237,7 +467,9 @@
       "url": "https://huggingface.co/tasks",
       "kind": "reference",
       "annotation": "A maker's plain catalogue of AI tasks by the kind of material involved — text generation, image generation, image-to-text, text-to-video, and more. Useful here purely as a map: it makes visible that the same generate-from-patterns idea is applied task by task across materials, and that understanding (reading what you supply) and making (generating something new) are genuinely different jobs. Skim for orientation, not depth; ignore the technical model listings.",
-      "domainIds": ["m05-text-images-video"]
+      "domainIds": [
+        "m05-text-images-video"
+      ]
     },
     {
       "id": "r-gemini-multimodal",
@@ -245,7 +477,9 @@
       "url": "https://ai.google/get-started/our-approach-to-ai/",
       "kind": "reference",
       "annotation": "A general-audience overview of AI that works across several kinds of material — text, images, audio, video — rather than text alone. Used here only to reinforce the plain meaning of \"multimodal\" (several modes) and the honest framing that different materials are at different stages of maturity. Orientation reading; take no specific capability claim from it as fixed, since those move quickly.",
-      "domainIds": ["m05-text-images-video"]
+      "domainIds": [
+        "m05-text-images-video"
+      ]
     }
   ],
   "videos": [
@@ -253,9 +487,11 @@
       "id": "v-m05-1",
       "title": "05 · One trick, different materials — how one idea makes writing, image, and video AI in 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m05-text-images-video"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-explained/v-m05-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m05-text-images-video"
+      ],
       "sourceNotebook": "ai-explained / m05 / one-trick-different-materials"
     },
     {
@@ -264,7 +500,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m05-text-images-video"],
+      "domainIds": [
+        "m05-text-images-video"
+      ],
       "sourceNotebook": "ai-explained / m05 / deep-dive-modalities"
     }
   ]

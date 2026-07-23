@@ -25,13 +25,29 @@
           "difficulty": 1,
           "stem": "In plain terms, what is \"context\" for an AI?",
           "options": [
-            { "id": "a", "text": "Everything the AI can see right now while answering — your question plus whatever you've shown it in this conversation", "correct": true },
-            { "id": "b", "text": "Everything the AI has ever been told by anyone, permanently stored and always available" },
-            { "id": "c", "text": "The AI's personal opinion about your question" },
-            { "id": "d", "text": "A hidden setting you have to turn on before the AI will read your messages" }
+            {
+              "id": "a",
+              "text": "Everything the AI can see right now while answering — your question plus whatever you've shown it in this conversation",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Everything the AI has ever been told by anyone, permanently stored and always available"
+            },
+            {
+              "id": "c",
+              "text": "The AI's personal opinion about your question"
+            },
+            {
+              "id": "d",
+              "text": "A hidden setting you have to turn on before the AI will read your messages"
+            }
           ],
           "explanation": "Context is simply what's on the desk right now: your question plus whatever you've shown it in this conversation — that's all the AI has to work with. It is not a permanent store of everything ever said (b) — that's the memory-across-sessions idea this module is about to correct. It isn't an opinion (c); it's the raw material the AI answers from. And it isn't a setting you toggle (d) — the AI always reads what's in the conversation; \"context\" is just the name for that pile.",
-          "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-gb-chat",
+            "r-genai-leader-guide"
+          ]
         },
         {
           "id": "kc-m07-2",
@@ -40,13 +56,28 @@
           "difficulty": 1,
           "stem": "Using the desk picture, what does \"context window\" mean?",
           "options": [
-            { "id": "a", "text": "How big the desk is — how much the AI can hold on the surface in front of it at one time", "correct": true },
-            { "id": "b", "text": "How intelligent the AI is compared to other AIs" },
-            { "id": "c", "text": "A window on your screen where the AI's answer appears" },
-            { "id": "d", "text": "How fast the AI can type out its reply" }
+            {
+              "id": "a",
+              "text": "How big the desk is — how much the AI can hold on the surface in front of it at one time",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "How intelligent the AI is compared to other AIs"
+            },
+            {
+              "id": "c",
+              "text": "A window on your screen where the AI's answer appears"
+            },
+            {
+              "id": "d",
+              "text": "How fast the AI can type out its reply"
+            }
           ],
           "explanation": "The context window is nothing more than the size of the desk — how much the AI can hold at once while it answers. It is not a measure of intelligence (b): a bigger desk lets it consider more, not think better — a distinction the next lesson leans on. It's not a window on your screen (c); the word \"window\" here is about how much fits, not about the display. And it has nothing to do with typing speed (d).",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -64,13 +95,30 @@
           "difficulty": 2,
           "stem": "Deep in a very long chat, the AI seems to \"forget\" something you told it near the start. In desk terms, what most likely happened?",
           "options": [
-            { "id": "a", "text": "The desk filled up and the earliest messages slid off the edge — that's what \"running out of context\" means", "correct": true },
-            { "id": "b", "text": "The AI broke or malfunctioned and needs to be reported" },
-            { "id": "c", "text": "The AI decided your earlier message wasn't important and deliberately ignored it", "correct": false },
-            { "id": "d", "text": "It got confused with a different user's conversation" }
+            {
+              "id": "a",
+              "text": "The desk filled up and the earliest messages slid off the edge — that's what \"running out of context\" means",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The AI broke or malfunctioned and needs to be reported"
+            },
+            {
+              "id": "c",
+              "text": "The AI decided your earlier message wasn't important and deliberately ignored it",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It got confused with a different user's conversation"
+            }
           ],
           "explanation": "In a long conversation the oldest messages get pushed off the desk to make room for newer ones, so that part is no longer in front of the AI — that's precisely \"running out of context.\" Nothing malfunctioned (b); it's normal behaviour once a chat gets long enough. The AI didn't judge it unimportant and ignore it (c) — it literally can't see what has slid off the desk. And it isn't mixing you up with someone else (d); your own conversation just outgrew the surface.",
-          "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-gb-chat",
+            "r-genai-leader-guide"
+          ]
         },
         {
           "id": "kc-m07-4",
@@ -79,13 +127,28 @@
           "difficulty": 1,
           "stem": "You told an AI something important in a chat yesterday. Today you open a brand-new conversation. What should you expect?",
           "options": [
-            { "id": "a", "text": "The new chat starts with an empty desk — it won't remember yesterday unless you've deliberately given it a lasting memory", "correct": true },
-            { "id": "b", "text": "It remembers everything from yesterday automatically, like a messaging app history" },
-            { "id": "c", "text": "It remembers, but only if you were polite yesterday" },
-            { "id": "d", "text": "It remembers yesterday but forgets everything older than that" }
+            {
+              "id": "a",
+              "text": "The new chat starts with an empty desk — it won't remember yesterday unless you've deliberately given it a lasting memory",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It remembers everything from yesterday automatically, like a messaging app history"
+            },
+            {
+              "id": "c",
+              "text": "It remembers, but only if you were polite yesterday"
+            },
+            {
+              "id": "d",
+              "text": "It remembers yesterday but forgets everything older than that"
+            }
           ],
           "explanation": "Every new conversation begins with a clean, empty desk, so by default the AI has no memory of yesterday's separate chat — you'd need to give it a lasting memory (the next module) for that to carry over. It does not keep history automatically the way a messaging app does (b); that's the exact expectation that trips people up. Politeness has nothing to do with it (c). And it isn't a rolling one-day memory (d) — across separate conversations, nothing carries over on its own.",
-          "sourceRefs": ["r-gb-chat"]
+          "sourceRefs": [
+            "r-gb-chat"
+          ]
         }
       ]
     }
@@ -98,13 +161,29 @@
       "difficulty": 1,
       "stem": "Which one-sentence description of \"context\" is most accurate for a beginner?",
       "options": [
-        { "id": "a", "text": "Everything the AI can see right now while answering — your question plus whatever you've shown it in this conversation", "correct": true },
-        { "id": "b", "text": "A permanent record of every conversation you've ever had with the AI" },
-        { "id": "c", "text": "The AI's built-in general knowledge from its training, and nothing else" },
-        { "id": "d", "text": "A special mode that makes the AI more creative" }
+        {
+          "id": "a",
+          "text": "Everything the AI can see right now while answering — your question plus whatever you've shown it in this conversation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A permanent record of every conversation you've ever had with the AI"
+        },
+        {
+          "id": "c",
+          "text": "The AI's built-in general knowledge from its training, and nothing else"
+        },
+        {
+          "id": "d",
+          "text": "A special mode that makes the AI more creative"
+        }
       ],
       "explanation": "Context is what's on the desk right now: your question plus what you've shown it in this conversation. It isn't a permanent record across all chats (b) — that's the memory idea this module corrects. It's more than just training knowledge (c): context is the specific stuff you've put in front of it this time, which is what makes an answer about *your* situation possible. And it isn't a creativity mode (d).",
-      "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-chat",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m07-2",
@@ -113,13 +192,29 @@
       "difficulty": 1,
       "stem": "Someone asks \"how big is the context window on this AI?\" In the desk picture, what are they really asking?",
       "options": [
-        { "id": "a", "text": "How big the desk is — how much the AI can hold in front of it at one time", "correct": true },
-        { "id": "b", "text": "How intelligent or accurate the AI is", "correct": false },
-        { "id": "c", "text": "How many people can use the AI at the same time" },
-        { "id": "d", "text": "How long the AI has existed" }
+        {
+          "id": "a",
+          "text": "How big the desk is — how much the AI can hold in front of it at one time",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "How intelligent or accurate the AI is",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "How many people can use the AI at the same time"
+        },
+        {
+          "id": "d",
+          "text": "How long the AI has existed"
+        }
       ],
       "explanation": "\"How big is the context window\" just means \"how big is the desk\" — how much it can hold on the surface at once. It's not a measure of intelligence or accuracy (b): capacity and cleverness are different things, and a bigger desk doesn't mean smarter answers. It has nothing to do with how many users are on it (c) or how old the AI is (d) — those are unrelated to the size of the working surface.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m07-3",
@@ -128,13 +223,29 @@
       "difficulty": 2,
       "stem": "You want an AI to answer a question about a long contract, but the contract is bigger than the AI's desk. What happens?",
       "options": [
-        { "id": "a", "text": "The part that doesn't fit never makes it onto the desk, so the AI can't see or use it — its answer only reflects what fit", "correct": true },
-        { "id": "b", "text": "The AI reads the whole thing anyway; desk size doesn't affect what it can consider" },
-        { "id": "c", "text": "The AI reads it all but chooses to ignore the boring parts" },
-        { "id": "d", "text": "The AI automatically fetches the rest from the internet to fill the gap" }
+        {
+          "id": "a",
+          "text": "The part that doesn't fit never makes it onto the desk, so the AI can't see or use it — its answer only reflects what fit",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI reads the whole thing anyway; desk size doesn't affect what it can consider"
+        },
+        {
+          "id": "c",
+          "text": "The AI reads it all but chooses to ignore the boring parts"
+        },
+        {
+          "id": "d",
+          "text": "The AI automatically fetches the rest from the internet to fill the gap"
+        }
       ],
       "explanation": "If something doesn't fit on the desk, the AI simply can't see it — so an answer about an over-large contract only reflects the part that fit, which is why a bigger desk matters here. Desk size absolutely affects what it can consider (b): that's the whole point of the context window. It isn't ignoring boring parts by choice (c) — it never had them in front of it. And it doesn't go and fetch the rest itself (d); the AI works with what's on the desk.",
-      "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-chat",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m07-4",
@@ -143,13 +254,29 @@
       "difficulty": 1,
       "stem": "What does \"running out of context\" actually mean?",
       "options": [
-        { "id": "a", "text": "The conversation got long enough that the earliest messages slid off the desk and are no longer in front of the AI", "correct": true },
-        { "id": "b", "text": "The AI has used up its total allowance and can never be used again" },
-        { "id": "c", "text": "The internet connection dropped mid-answer" },
-        { "id": "d", "text": "The AI ran out of interesting things to say" }
+        {
+          "id": "a",
+          "text": "The conversation got long enough that the earliest messages slid off the desk and are no longer in front of the AI",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI has used up its total allowance and can never be used again"
+        },
+        {
+          "id": "c",
+          "text": "The internet connection dropped mid-answer"
+        },
+        {
+          "id": "d",
+          "text": "The AI ran out of interesting things to say"
+        }
       ],
       "explanation": "It means the desk filled up in a long chat and the oldest content got pushed off the edge, so the AI can no longer see it — that's the literal meaning. It's not a permanent, use-it-up limit on the whole AI (b); a fresh conversation gives you a clean desk again. It has nothing to do with your connection (c). And it isn't about the AI being out of ideas (d) — it's about capacity on the desk, not creativity.",
-      "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-chat",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m07-5",
@@ -158,13 +285,28 @@
       "difficulty": 2,
       "stem": "\"A bigger context window makes the AI smarter.\" Is that right?",
       "options": [
-        { "id": "a", "text": "No — a bigger desk lets it consider more at once (a longer document or thread), but it doesn't make the AI think better", "correct": true },
-        { "id": "b", "text": "Yes — a bigger context window directly raises the AI's intelligence" },
-        { "id": "c", "text": "Yes — the bigger the desk, the more correct every answer becomes" },
-        { "id": "d", "text": "No — a bigger desk actually makes the AI worse at everything" }
+        {
+          "id": "a",
+          "text": "No — a bigger desk lets it consider more at once (a longer document or thread), but it doesn't make the AI think better",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — a bigger context window directly raises the AI's intelligence"
+        },
+        {
+          "id": "c",
+          "text": "Yes — the bigger the desk, the more correct every answer becomes"
+        },
+        {
+          "id": "d",
+          "text": "No — a bigger desk actually makes the AI worse at everything"
+        }
       ],
       "explanation": "A bigger desk is about capacity, not cleverness: it can hold more at once, so you can brief it more fully, but it reasons no better than before. So the \"it makes it smarter\" claims (b) and \"every answer becomes more correct\" (c) both overstate it — more room to consider things isn't the same as better judgement. And a bigger desk doesn't make it worse (d) either; it's simply neutral on intelligence — more capacity, same brains.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m07-6",
@@ -173,13 +315,28 @@
       "difficulty": 2,
       "stem": "You had a helpful chat with an AI last week. This week, in a brand-new conversation, it acts as if that never happened. Why?",
       "options": [
-        { "id": "a", "text": "Each new conversation starts with an empty desk — by default the AI has no memory of separate past chats unless it's been given a lasting memory", "correct": true },
-        { "id": "b", "text": "The AI is malfunctioning; it's supposed to remember all past conversations automatically" },
-        { "id": "c", "text": "It remembers, but is pretending not to" },
-        { "id": "d", "text": "Last week's conversation was too short to be worth remembering" }
+        {
+          "id": "a",
+          "text": "Each new conversation starts with an empty desk — by default the AI has no memory of separate past chats unless it's been given a lasting memory",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI is malfunctioning; it's supposed to remember all past conversations automatically"
+        },
+        {
+          "id": "c",
+          "text": "It remembers, but is pretending not to"
+        },
+        {
+          "id": "d",
+          "text": "Last week's conversation was too short to be worth remembering"
+        }
       ],
       "explanation": "A new conversation begins with a clean, empty desk, so last week's separate chat isn't in front of it — that's normal, not a fault. It is not supposed to remember all past chats by default (b); expecting messaging-app-style history is the classic mistake. It isn't pretending (c) — it genuinely doesn't have that content on this desk. And length has nothing to do with it (d); nothing carries across separate conversations on its own, short or long. Giving it a lasting memory is the next module.",
-      "sourceRefs": ["r-gb-chat"]
+      "sourceRefs": [
+        "r-gb-chat"
+      ]
     },
     {
       "id": "q-m07-7",
@@ -188,13 +345,29 @@
       "difficulty": 2,
       "stem": "Is pasting a very large document into a chat always free?",
       "options": [
-        { "id": "a", "text": "No — the desk's contents are counted in tokens and cost tracks with tokens, so a bigger load costs more to run", "correct": true },
-        { "id": "b", "text": "Yes — the size of what you paste never affects anything at all" },
-        { "id": "c", "text": "Yes — pasting more is always free and also always makes answers better" },
-        { "id": "d", "text": "No — pasting anything at all is forbidden" }
+        {
+          "id": "a",
+          "text": "No — the desk's contents are counted in tokens and cost tracks with tokens, so a bigger load costs more to run",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — the size of what you paste never affects anything at all"
+        },
+        {
+          "id": "c",
+          "text": "Yes — pasting more is always free and also always makes answers better"
+        },
+        {
+          "id": "d",
+          "text": "No — pasting anything at all is forbidden"
+        }
       ],
       "explanation": "What sits on the desk is measured in tokens (from the last module), and cost tracks tokens — so a bigger load generally costs more, which is worth knowing before pasting in a whole book. Size does affect things (b): both what fits and what it costs. Pasting more isn't automatically better (c) — more on the desk doesn't guarantee a better answer, just more to consider. And pasting is completely normal and allowed (d); the point is only that a bigger desk isn't free.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-chat"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-chat"
+      ]
     },
     {
       "id": "q-m07-8",
@@ -203,13 +376,29 @@
       "difficulty": 1,
       "stem": "Which everyday habit follows most directly from the desk picture?",
       "options": [
-        { "id": "a", "text": "Keep the important stuff in the same conversation, and don't assume it remembers last week", "correct": true },
-        { "id": "b", "text": "Start a brand-new chat for every single message so the desk stays tidy" },
-        { "id": "c", "text": "Assume the AI already knows everything from all your previous chats" },
-        { "id": "d", "text": "Only ever ask one-word questions so nothing falls off the desk" }
+        {
+          "id": "a",
+          "text": "Keep the important stuff in the same conversation, and don't assume it remembers last week",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Start a brand-new chat for every single message so the desk stays tidy"
+        },
+        {
+          "id": "c",
+          "text": "Assume the AI already knows everything from all your previous chats"
+        },
+        {
+          "id": "d",
+          "text": "Only ever ask one-word questions so nothing falls off the desk"
+        }
       ],
       "explanation": "Because everything on one desk is available while the AI answers — and each new chat starts empty — the sensible habit is to keep related, important things in the same conversation and not rely on it remembering past ones. Starting a new chat per message (b) throws away the useful shared desk every time. Assuming it knows your previous chats (c) is exactly the confusion this module corrects. And one-word questions (d) aren't necessary — normal conversations are fine; things only slide off once a chat gets very long.",
-      "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-chat",
+        "r-genai-leader-guide"
+      ]
     }
   ],
   "labs": [],
@@ -220,7 +409,9 @@
       "url": "automatos-gitbook/chat/README.md",
       "kind": "official-doc",
       "annotation": "The page behind the peek. It's the plain confirmation of the desk in Automatos: each conversation works to a context budget, long conversations are automatically summarised so the important gist survives, and starting a new chat resets the context window (an empty desk). Grounds the two ideas the module says you'll now recognise — a chat that watches how full the desk is, and a fresh desk every new conversation.",
-      "domainIds": ["m07-context"]
+      "domainIds": [
+        "m07-context"
+      ]
     },
     {
       "id": "r-genai-leader-guide",
@@ -228,7 +419,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, beginner-toned primer. Read only the \"Fundamentals of gen AI\" section for this module: it backs the plain idea that an AI answers from the material in front of it (the desk), and — carried over from the last module — that this material is measured in tokens, which is why the desk has a size and why a bigger one holds more. Orientation, not a technical spec.",
-      "domainIds": ["m07-context"]
+      "domainIds": [
+        "m07-context"
+      ]
     },
     {
       "id": "r-gb-knowledge",
@@ -236,7 +429,9 @@
       "url": "automatos-gitbook/knowledge/README.md",
       "kind": "official-doc",
       "annotation": "The forward pointer the peek makes. Because the desk is wiped clean each new conversation, Automatos lets you upload documents once so your agents can reference them without re-pasting — the separate knowledge store that solves the empty-desk problem. Not needed to understand context itself; it's here to show where the next module goes.",
-      "domainIds": ["m07-context"]
+      "domainIds": [
+        "m07-context"
+      ]
     }
   ],
   "videos": [
@@ -244,9 +439,11 @@
       "id": "v-m07-1",
       "title": "07 · Context: the AI's desk — what a context window is, in 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m07-context"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-explained/v-m07-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m07-context"
+      ],
       "sourceNotebook": "ai-explained / m07 / context-the-desk"
     },
     {
@@ -255,7 +452,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m07-context"],
+      "domainIds": [
+        "m07-context"
+      ],
       "sourceNotebook": "ai-explained / m07 / deep-dive-context"
     }
   ]

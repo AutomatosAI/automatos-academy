@@ -28,13 +28,32 @@
           "difficulty": 1,
           "stem": "In Automatos, what is a skill?",
           "options": [
-            { "id": "a", "text": "A git-based capability defined by a SKILL.md file that gets injected into an agent's system prompt, teaching it how to do a job", "correct": true },
-            { "id": "b", "text": "A single external app action the agent can call, like sending an email or creating an issue", "correct": false },
-            { "id": "c", "text": "A bundled package containing skills, commands, agent configurations, and prompt templates", "correct": false },
-            { "id": "d", "text": "A live database connection that gives the agent access to your workspace data", "correct": false }
+            {
+              "id": "a",
+              "text": "A git-based capability defined by a SKILL.md file that gets injected into an agent's system prompt, teaching it how to do a job",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A single external app action the agent can call, like sending an email or creating an issue",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A bundled package containing skills, commands, agent configurations, and prompt templates",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A live database connection that gives the agent access to your workspace data",
+              "correct": false
+            }
           ],
           "explanation": "A skill is a SKILL.md (instructions, process, output format, guardrails) loaded from git and injected into the agent's system prompt — it teaches the agent *how* to do a job. Option b describes a Tool, one external app action (Composio) — a skill references tools by name but is not itself a tool. Option c describes a Plugin, which is the bundle that can *contain* skills. Option d describes knowledge/RAG access (Module 03), not a skill.",
-          "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+          "sourceRefs": [
+            "r-gitbook-capabilities",
+            "r-skills-readme"
+          ]
         },
         {
           "id": "kc-m02-l1-2",
@@ -43,13 +62,32 @@
           "difficulty": 2,
           "stem": "Using the drill / instruction-sheet / flat-pack-box analogy, which mapping is correct?",
           "options": [
-            { "id": "a", "text": "Tool = the power drill; Skill = the instruction sheet for building the shelf; Plugin = the flat-pack box with drill bits, instructions, and panels together", "correct": true },
-            { "id": "b", "text": "Skill = the power drill; Tool = the instruction sheet; Plugin = a single drill bit", "correct": false },
-            { "id": "c", "text": "Plugin = the power drill; Skill = a single drill bit; Tool = the instruction sheet", "correct": false },
-            { "id": "d", "text": "Tool = the instruction sheet; Skill = the flat-pack box; Plugin = the power drill", "correct": false }
+            {
+              "id": "a",
+              "text": "Tool = the power drill; Skill = the instruction sheet for building the shelf; Plugin = the flat-pack box with drill bits, instructions, and panels together",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Skill = the power drill; Tool = the instruction sheet; Plugin = a single drill bit",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Plugin = the power drill; Skill = a single drill bit; Tool = the instruction sheet",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Tool = the instruction sheet; Skill = the flat-pack box; Plugin = the power drill",
+              "correct": false
+            }
           ],
           "explanation": "A tool is the action-performing verb (the drill), a skill is the procedure that says when and how to use those actions (the instructions), and a plugin is the bundle that ships several things together (the flat-pack box). Options b, c, and d all swap at least one role — the give-away is that a skill is never the raw action-performer and a plugin is never a single item; a plugin is by definition a bundle.",
-          "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+          "sourceRefs": [
+            "r-gitbook-capabilities",
+            "r-skills-readme"
+          ]
         },
         {
           "id": "kc-m02-l1-3",
@@ -58,13 +96,31 @@
           "difficulty": 2,
           "stem": "The automatos-skills README shows the same Jira-ticket job 'before' (a long playbook spelling out project key, summary format, priority mapping, and labels) and 'after' assigning the jira-admin skill (a two-line 'file the P0/P1 bugs, label them, export keys'). What changed?",
           "options": [
-            { "id": "a", "text": "The mechanical detail moved from the per-run playbook into the reusable skill — 'the skill owns the mechanical detail; the recipe owns the intent'", "correct": true },
-            { "id": "b", "text": "The agent gained a new tool it didn't have before; the skill installed JIRA_CREATE_ISSUE for it", "correct": false },
-            { "id": "c", "text": "The job now runs without any tools at all, because the skill replaces tool calls with plain text", "correct": false },
-            { "id": "d", "text": "The skill made the job run faster by caching the previous Jira tickets", "correct": false }
+            {
+              "id": "a",
+              "text": "The mechanical detail moved from the per-run playbook into the reusable skill — 'the skill owns the mechanical detail; the recipe owns the intent'",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The agent gained a new tool it didn't have before; the skill installed JIRA_CREATE_ISSUE for it",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The job now runs without any tools at all, because the skill replaces tool calls with plain text",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The skill made the job run faster by caching the previous Jira tickets",
+              "correct": false
+            }
           ],
           "explanation": "The field mappings, priority translation, and label conventions shifted from the fragile per-run prompt into the skill, so the playbook shrinks to intent — the README's exact summary. Option b confuses a skill with a tool: the skill references JIRA_CREATE_ISSUE but does not install a tool. Option c is wrong — the skill still drives real tool calls; only the *instructions for them* moved. Option d invents a caching behaviour that isn't part of what a skill does.",
-          "sourceRefs": ["r-skills-readme"]
+          "sourceRefs": [
+            "r-skills-readme"
+          ]
         }
       ]
     },
@@ -82,13 +138,31 @@
           "difficulty": 1,
           "stem": "According to the automatos-skills README, how is the skill library described?",
           "options": [
-            { "id": "a", "text": "128 skills indexed, organised into 16 top-level groups", "correct": true },
-            { "id": "b", "text": "Exactly 137 live skills, and you should always quote that precise live count", "correct": false },
-            { "id": "c", "text": "9 skills, one per signature agent", "correct": false },
-            { "id": "d", "text": "An unbounded, user-generated set with no groups or index", "correct": false }
+            {
+              "id": "a",
+              "text": "128 skills indexed, organised into 16 top-level groups",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Exactly 137 live skills, and you should always quote that precise live count",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "9 skills, one per signature agent",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "An unbounded, user-generated set with no groups or index",
+              "correct": false
+            }
           ],
           "explanation": "The README publishes '128 skills indexed' across 16 groups — that's the figure to cite. Option b names the on-disk file count, which drifts from the indexed number; the guidance is explicitly *not* to assert a precise live count, but to cite the README's 128. Option c confuses the whole library with just the `team/` group (the nine signature agents). Option d contradicts the README's clear 16-group structure and index.",
-          "sourceRefs": ["r-skills-readme"]
+          "sourceRefs": [
+            "r-skills-readme"
+          ]
         },
         {
           "id": "kc-m02-l2-2",
@@ -97,13 +171,31 @@
           "difficulty": 2,
           "stem": "FORGE's blurb in the skills repo reads 'recipe builder.' How should you describe FORGE to a learner, and why?",
           "options": [
-            { "id": "a", "text": "The playbook builder — turns natural language into a multi-step workflow; 'recipe' is legacy naming and the user-facing term is playbook", "correct": true },
-            { "id": "b", "text": "The recipe builder — 'recipe' is the correct current platform term for a multi-step workflow", "correct": false },
-            { "id": "c", "text": "The knowledge curator that keeps RAG content fresh", "correct": false },
-            { "id": "d", "text": "A tool for cooking-related automations", "correct": false }
+            {
+              "id": "a",
+              "text": "The playbook builder — turns natural language into a multi-step workflow; 'recipe' is legacy naming and the user-facing term is playbook",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The recipe builder — 'recipe' is the correct current platform term for a multi-step workflow",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The knowledge curator that keeps RAG content fresh",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A tool for cooking-related automations",
+              "correct": false
+            }
           ],
           "explanation": "FORGE builds multi-step workflows, and the current user-facing vocabulary is 'playbook' — the repo's 'recipe builder' label is legacy and should be read as 'playbook.' Option b keeps the outdated term as if it were current. Option c describes ORACLE, a different signature agent. Option d takes 'recipe' literally, which is nonsense in this context.",
-          "sourceRefs": ["r-skills-readme"]
+          "sourceRefs": [
+            "r-skills-readme"
+          ]
         },
         {
           "id": "kc-m02-l2-3",
@@ -112,13 +204,33 @@
           "difficulty": 2,
           "stem": "You installed a skill from Marketplace → Capabilities → Skills, but the agent you wanted it for still behaves exactly as before. What's the most likely reason?",
           "options": [
-            { "id": "a", "text": "Installing only adds the skill to your workspace inventory — you still have to assign it to the agent (Agent Details → Plugins, or create-flow Step 5)", "correct": true },
-            { "id": "b", "text": "Skills take 24 hours to activate after installation", "correct": false },
-            { "id": "c", "text": "The skill needs its own paid subscription before it will run", "correct": false },
-            { "id": "d", "text": "You must restart the whole workspace for any skill to take effect", "correct": false }
+            {
+              "id": "a",
+              "text": "Installing only adds the skill to your workspace inventory — you still have to assign it to the agent (Agent Details → Plugins, or create-flow Step 5)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Skills take 24 hours to activate after installation",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The skill needs its own paid subscription before it will run",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "You must restart the whole workspace for any skill to take effect",
+              "correct": false
+            }
           ],
           "explanation": "Installing and assigning are two separate actions: installing lands the skill in your inventory ('Installed' vs 'Available'), but it does nothing until you assign it to a specific agent via Agent Details → Plugins or at Step 5 of creation. Option b invents a delay that isn't in the docs. Option c invents a paywall — there's no per-skill subscription described. Option d is wrong: the docs say assignment changes take effect immediately with no restart.",
-          "sourceRefs": ["r-gitbook-capabilities", "r-gitbook-agent-details", "r-gitbook-agent-creating"]
+          "sourceRefs": [
+            "r-gitbook-capabilities",
+            "r-gitbook-agent-details",
+            "r-gitbook-agent-creating"
+          ]
         }
       ]
     },
@@ -136,13 +248,32 @@
           "difficulty": 1,
           "stem": "What are the four required body sections of a SKILL.md, in order?",
           "options": [
-            { "id": "a", "text": "Identity, Workflow (numbered steps with JSON tool calls), Output Format, What NOT To Do", "correct": true },
-            { "id": "b", "text": "Summary, Installation, Pricing, Changelog", "correct": false },
-            { "id": "c", "text": "Frontmatter, Tags, Version, License", "correct": false },
-            { "id": "d", "text": "Introduction, Background, Conclusion, References", "correct": false }
+            {
+              "id": "a",
+              "text": "Identity, Workflow (numbered steps with JSON tool calls), Output Format, What NOT To Do",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Summary, Installation, Pricing, Changelog",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Frontmatter, Tags, Version, License",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Introduction, Background, Conclusion, References",
+              "correct": false
+            }
           ],
           "explanation": "The author guide mandates Identity, Workflow, Output Format, and What NOT To Do — establish who the agent is, the exact steps with real tool calls, the output template, and the role-specific anti-patterns. Option b lists package-management sections that don't belong in a skill body. Option c lists frontmatter fields (metadata), not body sections. Option d is a generic essay structure, not the actionable skill format.",
-          "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+          "sourceRefs": [
+            "r-skill-guide",
+            "r-skills-reference-patterns"
+          ]
         },
         {
           "id": "kc-m02-l3-2",
@@ -151,13 +282,32 @@
           "difficulty": 2,
           "stem": "You rename a skill's directory from team/old-name/ to team/new-name/ but leave the frontmatter name: unchanged, then re-import. What happens, and why?",
           "options": [
-            { "id": "a", "text": "Nothing re-registers as new — the loader upserts by the name: field, which didn't change, so the skill updates in place", "correct": true },
-            { "id": "b", "text": "A brand-new skill is created, because identity comes from the directory path", "correct": false },
-            { "id": "c", "text": "The skill breaks and must be manually deleted and re-added", "correct": false },
-            { "id": "d", "text": "Both the old and new skills now exist as duplicates because the loader keys on the folder", "correct": false }
+            {
+              "id": "a",
+              "text": "Nothing re-registers as new — the loader upserts by the name: field, which didn't change, so the skill updates in place",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A brand-new skill is created, because identity comes from the directory path",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The skill breaks and must be manually deleted and re-added",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Both the old and new skills now exist as duplicates because the loader keys on the folder",
+              "correct": false
+            }
           ],
           "explanation": "The README is explicit that identity is the `name:` field and the loader upserts by it — so a folder rename with a stable `name` just updates in place. Option b repeats the older, superseded 'directory is the identifier' idea that the README's loader statement overrides. Option c invents a breakage that doesn't occur. Option d would only happen if the loader keyed on path or if you changed `name:` — neither is the case here.",
-          "sourceRefs": ["r-skills-readme", "r-skill-guide"]
+          "sourceRefs": [
+            "r-skills-readme",
+            "r-skill-guide"
+          ]
         },
         {
           "id": "kc-m02-l3-3",
@@ -166,13 +316,32 @@
           "difficulty": 3,
           "stem": "In a SKILL.md tools: list, how should an agent that needs to send a Slack message and create a Jira issue declare those capabilities?",
           "options": [
-            { "id": "a", "text": "Declare composio_execute once (the single meta-tool for external app actions); the agent selects SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE at run time", "correct": true },
-            { "id": "b", "text": "Register SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE as two separate tool entries in the frontmatter", "correct": false },
-            { "id": "c", "text": "List workspace_exec and shell out to the Slack and Jira CLIs", "correct": false },
-            { "id": "d", "text": "Leave the tools list empty; external actions don't need declaring", "correct": false }
+            {
+              "id": "a",
+              "text": "Declare composio_execute once (the single meta-tool for external app actions); the agent selects SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE at run time",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Register SLACK_SEND_MESSAGE and JIRA_CREATE_ISSUE as two separate tool entries in the frontmatter",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "List workspace_exec and shell out to the Slack and Jira CLIs",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Leave the tools list empty; external actions don't need declaring",
+              "correct": false
+            }
           ],
           "explanation": "Every external app action goes through the single `composio_execute` meta-tool — you declare it once and the agent picks the specific action; you never register individual Composio actions as their own tools. Option b is the anti-pattern: individual actions are not separate tools. Option c is wrong and unsafe — shelling out via workspace_exec bypasses the integration layer. Option d is wrong because the agent can only call tools its skill declares; an empty list gives it nothing.",
-          "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+          "sourceRefs": [
+            "r-skill-guide",
+            "r-skills-reference-patterns"
+          ]
         }
       ]
     },
@@ -190,13 +359,32 @@
           "difficulty": 2,
           "stem": "You need to coordinate three agents — a researcher, a writer, and a reviewer — so their outputs feed each other in sequence. Skill, playbook, chat message, or new agent?",
           "options": [
-            { "id": "a", "text": "A playbook — orchestration across multiple agents and steps is exactly what playbooks are for", "correct": true },
-            { "id": "b", "text": "A skill — write one skill whose workflow hands off between the three agents", "correct": false },
-            { "id": "c", "text": "A chat message — just describe the whole three-agent flow in one prompt", "correct": false },
-            { "id": "d", "text": "A new agent — create a fourth agent that contains the other three", "correct": false }
+            {
+              "id": "a",
+              "text": "A playbook — orchestration across multiple agents and steps is exactly what playbooks are for",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A skill — write one skill whose workflow hands off between the three agents",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A chat message — just describe the whole three-agent flow in one prompt",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A new agent — create a fourth agent that contains the other three",
+              "correct": false
+            }
           ],
           "explanation": "Chaining several agents so their outputs feed each other is multi-agent orchestration — a playbook's job (and what FORGE builds). Option b is the classic error: a skill teaches *one* agent *one* job and shouldn't contain cross-agent hand-offs. Option c might work once by luck but isn't a reusable, coordinated workflow. Option d misunderstands agents — an agent is a single worker, not a container for other agents.",
-          "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+          "sourceRefs": [
+            "r-skills-readme",
+            "r-gitbook-agent-creating"
+          ]
         },
         {
           "id": "kc-m02-l4-2",
@@ -205,13 +393,32 @@
           "difficulty": 2,
           "stem": "You're authoring a monitoring skill whose only job is to observe workspace health and file a report. Which tool-scoping choice best follows least privilege, using SENTINEL as the model?",
           "options": [
-            { "id": "a", "text": "Declare only read-and-report tools (health checks, submit report); omit write, exec, and admin-only tools the role doesn't need", "correct": true },
-            { "id": "b", "text": "Declare every available platform, workspace, and composio tool so the agent is never blocked", "correct": false },
-            { "id": "c", "text": "Declare workspace_exec so the agent can shell out to fix any problem it finds", "correct": false },
-            { "id": "d", "text": "Declare no tools at all and describe the checks in prose", "correct": false }
+            {
+              "id": "a",
+              "text": "Declare only read-and-report tools (health checks, submit report); omit write, exec, and admin-only tools the role doesn't need",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Declare every available platform, workspace, and composio tool so the agent is never blocked",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Declare workspace_exec so the agent can shell out to fix any problem it finds",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Declare no tools at all and describe the checks in prose",
+              "correct": false
+            }
           ],
           "explanation": "SENTINEL declares only read-and-report tools and explicitly refuses admin-only ones that bypass workspace scoping — the narrowest set that still does the job. Option b is the opposite of least privilege and hands the agent power it can misuse. Option c contradicts a monitoring role's own guardrail ('report only, do not fix') and adds a dangerous capability. Option d is wrong because an agent can only call tools its skill declares — prose alone gives it nothing to call.",
-          "sourceRefs": ["r-skills-reference-patterns", "r-skill-guide"]
+          "sourceRefs": [
+            "r-skills-reference-patterns",
+            "r-skill-guide"
+          ]
         }
       ]
     }
@@ -224,13 +431,32 @@
       "difficulty": 1,
       "stem": "Which statement best distinguishes a skill from a tool?",
       "options": [
-        { "id": "a", "text": "A skill teaches an agent how to do a job (a SKILL.md injected into the system prompt); a tool is one external app action the agent can call", "correct": true },
-        { "id": "b", "text": "A skill is one external app action; a tool is a bundle of instructions", "correct": false },
-        { "id": "c", "text": "A skill and a tool are the same thing with different names", "correct": false },
-        { "id": "d", "text": "A skill is a paid feature; a tool is free", "correct": false }
+        {
+          "id": "a",
+          "text": "A skill teaches an agent how to do a job (a SKILL.md injected into the system prompt); a tool is one external app action the agent can call",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A skill is one external app action; a tool is a bundle of instructions",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A skill and a tool are the same thing with different names",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A skill is a paid feature; a tool is free",
+          "correct": false
+        }
       ],
       "explanation": "A skill is procedural know-how injected into the prompt; a tool is a single callable action (Composio and the built-in platform_*/workspace_* functions). Option b inverts the two. Option c is wrong — the distinction is load-bearing on this platform. Option d invents a pricing difference that doesn't define either term.",
-      "sourceRefs": ["r-gitbook-capabilities", "r-skills-readme"]
+      "sourceRefs": [
+        "r-gitbook-capabilities",
+        "r-skills-readme"
+      ]
     },
     {
       "id": "q-m02-2",
@@ -239,13 +465,31 @@
       "difficulty": 1,
       "stem": "What is a plugin, per the platform docs?",
       "options": [
-        { "id": "a", "text": "A bundled package that can include skills, commands, agent configurations, and prompt templates", "correct": true },
-        { "id": "b", "text": "A single SKILL.md file loaded from git", "correct": false },
-        { "id": "c", "text": "One Composio app action", "correct": false },
-        { "id": "d", "text": "The system prompt of an agent", "correct": false }
+        {
+          "id": "a",
+          "text": "A bundled package that can include skills, commands, agent configurations, and prompt templates",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A single SKILL.md file loaded from git",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "One Composio app action",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The system prompt of an agent",
+          "correct": false
+        }
       ],
       "explanation": "The docs define a plugin as a bundle that can contain skills, commands, agent configs, and prompt templates — the shipping container. Option b is a skill (one of the things a plugin can contain), not the plugin itself. Option c is a tool. Option d is a component of an agent, not a plugin.",
-      "sourceRefs": ["r-gitbook-capabilities"]
+      "sourceRefs": [
+        "r-gitbook-capabilities"
+      ]
     },
     {
       "id": "q-m02-3",
@@ -254,13 +498,32 @@
       "difficulty": 1,
       "stem": "Where do you install a skill in the platform?",
       "options": [
-        { "id": "a", "text": "Marketplace → Capabilities → Skills sub-tab → Install", "correct": true },
-        { "id": "b", "text": "Settings → Billing → Add-ons", "correct": false },
-        { "id": "c", "text": "Chat → type '/install-skill'", "correct": false },
-        { "id": "d", "text": "Knowledge Base → Upload", "correct": false }
+        {
+          "id": "a",
+          "text": "Marketplace → Capabilities → Skills sub-tab → Install",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Settings → Billing → Add-ons",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Chat → type '/install-skill'",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Knowledge Base → Upload",
+          "correct": false
+        }
       ],
       "explanation": "Skills live under the Marketplace's Capabilities tab, in the Skills sub-tab, where you click Install. Option b is a billing surface, not where skills are installed. Option c invents a chat command not described in the docs. Option d is where you upload documents for RAG (Module 03), not skills.",
-      "sourceRefs": ["r-gitbook-capabilities", "r-gitbook-marketplace"]
+      "sourceRefs": [
+        "r-gitbook-capabilities",
+        "r-gitbook-marketplace"
+      ]
     },
     {
       "id": "q-m02-4",
@@ -269,13 +532,31 @@
       "difficulty": 1,
       "stem": "How many groups does the automatos-skills README say the library is organised into, and how many skills does it index?",
       "options": [
-        { "id": "a", "text": "16 groups, 128 skills indexed", "correct": true },
-        { "id": "b", "text": "9 groups, one per signature agent", "correct": false },
-        { "id": "c", "text": "16 groups, exactly 137 live skills you should always quote", "correct": false },
-        { "id": "d", "text": "One flat group of uncategorised skills", "correct": false }
+        {
+          "id": "a",
+          "text": "16 groups, 128 skills indexed",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "9 groups, one per signature agent",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "16 groups, exactly 137 live skills you should always quote",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "One flat group of uncategorised skills",
+          "correct": false
+        }
       ],
       "explanation": "The README publishes 128 skills indexed across 16 top-level groups. Option b confuses the nine signature agents (the `team/` group) with the whole 16-group library. Option c cites the on-disk file count, which drifts — the guidance is to quote the README's 128, not a live figure. Option d contradicts the documented 16-group structure.",
-      "sourceRefs": ["r-skills-readme"]
+      "sourceRefs": [
+        "r-skills-readme"
+      ]
     },
     {
       "id": "q-m02-5",
@@ -284,13 +565,31 @@
       "difficulty": 1,
       "stem": "Which of the nine signature agents is the bug-fixer that reads a ticket, writes a failing test, makes a minimal fix, and drafts a PR?",
       "options": [
-        { "id": "a", "text": "PATCHER", "correct": true },
-        { "id": "b", "text": "SENTINEL", "correct": false },
-        { "id": "c", "text": "HARPER", "correct": false },
-        { "id": "d", "text": "RALLY", "correct": false }
+        {
+          "id": "a",
+          "text": "PATCHER",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "SENTINEL",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "HARPER",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "RALLY",
+          "correct": false
+        }
       ],
       "explanation": "PATCHER is the end-to-end bug fixer (ticket → find code → failing test → minimal fix → verify → draft PR). SENTINEL is the infrastructure/workspace watchdog. HARPER is the content machine. RALLY is community growth. Each signature agent has a distinct beat.",
-      "sourceRefs": ["r-skills-readme"]
+      "sourceRefs": [
+        "r-skills-readme"
+      ]
     },
     {
       "id": "q-m02-6",
@@ -299,13 +598,31 @@
       "difficulty": 2,
       "stem": "FORGE is described in the repo as a 'recipe builder.' What does FORGE actually build, and what is the correct term?",
       "options": [
-        { "id": "a", "text": "Playbooks — multi-step workflows with agent assignments and triggers; 'recipe' is legacy naming for 'playbook'", "correct": true },
-        { "id": "b", "text": "Recipes — a distinct concept from playbooks that FORGE alone produces", "correct": false },
-        { "id": "c", "text": "SKILL.md files for other agents", "correct": false },
-        { "id": "d", "text": "Knowledge Base documents", "correct": false }
+        {
+          "id": "a",
+          "text": "Playbooks — multi-step workflows with agent assignments and triggers; 'recipe' is legacy naming for 'playbook'",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Recipes — a distinct concept from playbooks that FORGE alone produces",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "SKILL.md files for other agents",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Knowledge Base documents",
+          "correct": false
+        }
       ],
       "explanation": "FORGE turns natural language into multi-step workflows — playbooks — and the 'recipe builder' label is outdated vocabulary that should be read as 'playbook builder.' Option b treats the legacy term as a separate live concept; it isn't. Option c describes what a skill author does, not FORGE. Option d is knowledge/RAG, unrelated to FORGE's role.",
-      "sourceRefs": ["r-skills-readme"]
+      "sourceRefs": [
+        "r-skills-readme"
+      ]
     },
     {
       "id": "q-m02-7",
@@ -314,13 +631,32 @@
       "difficulty": 2,
       "stem": "After installing a skill, where can you assign it to an existing agent?",
       "options": [
-        { "id": "a", "text": "Open the agent from the roster → Agent Details → Plugins tab (which manages plugins, skills, and tools)", "correct": true },
-        { "id": "b", "text": "You cannot assign to an existing agent — only agents created after the install get it", "correct": false },
-        { "id": "c", "text": "Only by editing the skill's git repository directly", "correct": false },
-        { "id": "d", "text": "In the Knowledge Base document list", "correct": false }
+        {
+          "id": "a",
+          "text": "Open the agent from the roster → Agent Details → Plugins tab (which manages plugins, skills, and tools)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You cannot assign to an existing agent — only agents created after the install get it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Only by editing the skill's git repository directly",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "In the Knowledge Base document list",
+          "correct": false
+        }
       ],
       "explanation": "The Agent Details → Plugins tab manages the plugins, skills, and tools assigned to that agent; you add an installed skill there and it takes effect immediately. (You can also assign at Step 5 of creation.) Option b is false — existing agents can be given new skills any time. Option c confuses authoring the skill with assigning it. Option d is the RAG surface, not agent configuration.",
-      "sourceRefs": ["r-gitbook-agent-details", "r-gitbook-agent-creating"]
+      "sourceRefs": [
+        "r-gitbook-agent-details",
+        "r-gitbook-agent-creating"
+      ]
     },
     {
       "id": "q-m02-8",
@@ -329,13 +665,32 @@
       "difficulty": 2,
       "stem": "In a SKILL.md, what determines the skill's identity for the platform loader?",
       "options": [
-        { "id": "a", "text": "The name: field in the YAML frontmatter — the loader upserts by name, not by directory path", "correct": true },
-        { "id": "b", "text": "The directory the SKILL.md lives in — rename the folder and it becomes a new skill", "correct": false },
-        { "id": "c", "text": "The version: field — bumping the version creates a new identity", "correct": false },
-        { "id": "d", "text": "A random ID assigned at install time", "correct": false }
+        {
+          "id": "a",
+          "text": "The name: field in the YAML frontmatter — the loader upserts by name, not by directory path",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The directory the SKILL.md lives in — rename the folder and it becomes a new skill",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The version: field — bumping the version creates a new identity",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A random ID assigned at install time",
+          "correct": false
+        }
       ],
       "explanation": "The README states the identity is the `name:` field and the loader upserts by it, so a folder move with a stable name doesn't re-register. Option b repeats the older, superseded 'directory is the identifier' idea. Option c is wrong — version tracks revisions of the same skill, not identity. Option d invents a mechanism the docs don't describe.",
-      "sourceRefs": ["r-skills-readme", "r-skill-guide"]
+      "sourceRefs": [
+        "r-skills-readme",
+        "r-skill-guide"
+      ]
     },
     {
       "id": "q-m02-9",
@@ -344,13 +699,32 @@
       "difficulty": 2,
       "stem": "Which is the correct set of required SKILL.md body sections?",
       "options": [
-        { "id": "a", "text": "Identity; Workflow (numbered steps with JSON tool calls); Output Format; What NOT To Do", "correct": true },
-        { "id": "b", "text": "Identity; Pricing; Screenshots; FAQ", "correct": false },
-        { "id": "c", "text": "Workflow only — the other sections are optional", "correct": false },
-        { "id": "d", "text": "Overview; Dependencies; Tests; Roadmap", "correct": false }
+        {
+          "id": "a",
+          "text": "Identity; Workflow (numbered steps with JSON tool calls); Output Format; What NOT To Do",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Identity; Pricing; Screenshots; FAQ",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Workflow only — the other sections are optional",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Overview; Dependencies; Tests; Roadmap",
+          "correct": false
+        }
       ],
       "explanation": "All four are required: Identity, Workflow with real tool calls, Output Format template, and What NOT To Do anti-patterns. Option b lists marketing/listing sections that don't belong in a skill. Option c is wrong — all four are mandatory, not just Workflow. Option d is a software-project layout, not the skill format.",
-      "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+      "sourceRefs": [
+        "r-skill-guide",
+        "r-skills-reference-patterns"
+      ]
     },
     {
       "id": "q-m02-10",
@@ -359,13 +733,32 @@
       "difficulty": 2,
       "stem": "A skill needs the agent to send a Gmail message, post to LinkedIn, and create a GitHub issue. How should the tools: frontmatter declare these?",
       "options": [
-        { "id": "a", "text": "Declare composio_execute once — the single meta-tool for all external app actions — and let the agent select the specific action per app", "correct": true },
-        { "id": "b", "text": "Declare GMAIL_SEND_EMAIL, LINKEDIN_CREATE_POST, and GITHUB_CREATE_ISSUE as three separate tools", "correct": false },
-        { "id": "c", "text": "Declare three separate plugins, one per app", "correct": false },
-        { "id": "d", "text": "Declare workspace_exec and call each app's CLI", "correct": false }
+        {
+          "id": "a",
+          "text": "Declare composio_execute once — the single meta-tool for all external app actions — and let the agent select the specific action per app",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Declare GMAIL_SEND_EMAIL, LINKEDIN_CREATE_POST, and GITHUB_CREATE_ISSUE as three separate tools",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Declare three separate plugins, one per app",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Declare workspace_exec and call each app's CLI",
+          "correct": false
+        }
       ],
       "explanation": "External app actions all route through the single `composio_execute` meta-tool; you declare it once, not each action separately. Option b is the anti-pattern the guidance explicitly warns against (never register individual Composio actions as separate function tools). Option c confuses tools with plugins. Option d bypasses the integration layer unsafely.",
-      "sourceRefs": ["r-skill-guide", "r-skills-reference-patterns"]
+      "sourceRefs": [
+        "r-skill-guide",
+        "r-skills-reference-patterns"
+      ]
     },
     {
       "id": "q-m02-11",
@@ -374,13 +767,31 @@
       "difficulty": 2,
       "stem": "The automatos-skills README says 1–3 skills per agent is the sweet spot. Why not simply assign ten skills to make an agent maximally capable?",
       "options": [
-        { "id": "a", "text": "Skills are injected into the system prompt, so piling on many bloats the prompt and blurs the agent's identity; a focused agent behaves better", "correct": true },
-        { "id": "b", "text": "The platform hard-caps agents at three skills and rejects the fourth", "correct": false },
-        { "id": "c", "text": "Each skill beyond the third costs extra money", "correct": false },
-        { "id": "d", "text": "Skills conflict and the agent randomly picks only one to obey", "correct": false }
+        {
+          "id": "a",
+          "text": "Skills are injected into the system prompt, so piling on many bloats the prompt and blurs the agent's identity; a focused agent behaves better",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The platform hard-caps agents at three skills and rejects the fourth",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Each skill beyond the third costs extra money",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Skills conflict and the agent randomly picks only one to obey",
+          "correct": false
+        }
       ],
       "explanation": "Because a skill's body is prepended to the system prompt, stacking many dilutes focus and muddies identity — a role skill plus a thin integration skill beats a jack-of-all-trades. Option b invents a hard cap; 1–3 is a recommended sweet spot, not an enforced limit. Option c invents per-skill pricing. Option d overstates 'conflict' into random behaviour, which isn't how prompt injection works.",
-      "sourceRefs": ["r-skills-readme"]
+      "sourceRefs": [
+        "r-skills-readme"
+      ]
     },
     {
       "id": "q-m02-12",
@@ -389,13 +800,32 @@
       "difficulty": 2,
       "stem": "You've written the same 40-line 'how to draft our client proposals' instruction into three different chat sessions this month. What does this signal you should do?",
       "options": [
-        { "id": "a", "text": "Turn it into a skill — repeated, reusable procedure attached to an agent is exactly what skills are for", "correct": true },
-        { "id": "b", "text": "Keep pasting it — chat is the right home for any instruction, however often you repeat it", "correct": false },
-        { "id": "c", "text": "Turn it into a playbook, because any repeated text is a workflow", "correct": false },
-        { "id": "d", "text": "Create a new agent for each proposal", "correct": false }
+        {
+          "id": "a",
+          "text": "Turn it into a skill — repeated, reusable procedure attached to an agent is exactly what skills are for",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Keep pasting it — chat is the right home for any instruction, however often you repeat it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Turn it into a playbook, because any repeated text is a workflow",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Create a new agent for each proposal",
+          "correct": false
+        }
       ],
       "explanation": "Repeating the same procedure is the textbook signal to promote it to a skill — reusable know-how attached to an agent. Option b ignores that signal; chat is for one-offs. Option c misapplies playbooks, which are for orchestrating *multiple agents/steps*, not storing one agent's procedure. Option d is wasteful and doesn't address the reuse problem — the agent, not the count of agents, needs the know-how.",
-      "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+      "sourceRefs": [
+        "r-skills-readme",
+        "r-gitbook-agent-creating"
+      ]
     },
     {
       "id": "q-m02-13",
@@ -404,13 +834,32 @@
       "difficulty": 3,
       "stem": "You're deciding between installing a whole marketplace agent versus installing a skill and attaching it to an agent you already have. Which framing is correct?",
       "options": [
-        { "id": "a", "text": "A marketplace agent is a turnkey package (prompt + model + pre-assigned skills) — install it for a complete role; a skill sharpens an existing agent at one job", "correct": true },
-        { "id": "b", "text": "They're identical; a marketplace agent and a skill are the same install", "correct": false },
-        { "id": "c", "text": "Always install the marketplace agent; skills can't be attached to existing agents", "correct": false },
-        { "id": "d", "text": "Always install the skill; marketplace agents can't be customised after install", "correct": false }
+        {
+          "id": "a",
+          "text": "A marketplace agent is a turnkey package (prompt + model + pre-assigned skills) — install it for a complete role; a skill sharpens an existing agent at one job",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They're identical; a marketplace agent and a skill are the same install",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Always install the marketplace agent; skills can't be attached to existing agents",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Always install the skill; marketplace agents can't be customised after install",
+          "correct": false
+        }
       ],
       "explanation": "A marketplace agent ships the whole role (system prompt, recommended model, pre-assigned skill set), so you install one when you want a complete worker; a skill is right when you already have an agent you like and want to sharpen it at a specific job. Option b erases a real distinction. Option c is false — skills attach to existing agents freely. Option d is false — installed marketplace agents are copies you can modify.",
-      "sourceRefs": ["r-gitbook-marketplace-agents", "r-gitbook-capabilities"]
+      "sourceRefs": [
+        "r-gitbook-marketplace-agents",
+        "r-gitbook-capabilities"
+      ]
     },
     {
       "id": "q-m02-14",
@@ -419,13 +868,32 @@
       "difficulty": 3,
       "stem": "Using SENTINEL and SCOUT as models: you're writing a skill for an agent that posts approved marketing tweets on your behalf. Which authoring choices best follow the reference patterns?",
       "options": [
-        { "id": "a", "text": "Declare composio_execute for the external post, and add a What-NOT-To-Do guardrail like 'do not post without human approval' — scope the capability and gate its use", "correct": true },
-        { "id": "b", "text": "Declare every platform_* and workspace_* tool as well, so the agent is flexible", "correct": false },
-        { "id": "c", "text": "Omit the tools list and describe posting in prose, to avoid over-permissioning", "correct": false },
-        { "id": "d", "text": "Give it workspace_exec so it can run scripts if the post fails", "correct": false }
+        {
+          "id": "a",
+          "text": "Declare composio_execute for the external post, and add a What-NOT-To-Do guardrail like 'do not post without human approval' — scope the capability and gate its use",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Declare every platform_* and workspace_* tool as well, so the agent is flexible",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Omit the tools list and describe posting in prose, to avoid over-permissioning",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Give it workspace_exec so it can run scripts if the post fails",
+          "correct": false
+        }
       ],
       "explanation": "SCOUT is the model here: it declares composio_execute for outreach but fences it with 'do not send without human approval' — scope the exact capability, then gate its use in What NOT To Do. Option b over-permissions (SENTINEL's lesson is to declare only what the role needs). Option c is self-defeating — an empty tools list means the agent can't post at all; prose gives it nothing to call. Option d adds an unrelated, dangerous shell capability a posting role never needs.",
-      "sourceRefs": ["r-skills-reference-patterns", "r-skill-guide"]
+      "sourceRefs": [
+        "r-skills-reference-patterns",
+        "r-skill-guide"
+      ]
     },
     {
       "id": "q-m02-15",
@@ -434,13 +902,32 @@
       "difficulty": 3,
       "stem": "A colleague writes a 'skill' whose Workflow reads: 'Step 1: hand the research to the writer agent. Step 2: pass the draft to the reviewer agent for approval.' What's wrong, and what's the fix?",
       "options": [
-        { "id": "a", "text": "That's multi-agent orchestration, which belongs in a playbook — a skill teaches one agent one job, so the cross-agent hand-offs should move into a playbook", "correct": true },
-        { "id": "b", "text": "Nothing is wrong; skills routinely orchestrate hand-offs between multiple agents", "correct": false },
-        { "id": "c", "text": "The only problem is the step count; trim it to one step and it's a valid skill", "correct": false },
-        { "id": "d", "text": "It should be a chat message instead, because it mentions more than one agent", "correct": false }
+        {
+          "id": "a",
+          "text": "That's multi-agent orchestration, which belongs in a playbook — a skill teaches one agent one job, so the cross-agent hand-offs should move into a playbook",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing is wrong; skills routinely orchestrate hand-offs between multiple agents",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The only problem is the step count; trim it to one step and it's a valid skill",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It should be a chat message instead, because it mentions more than one agent",
+          "correct": false
+        }
       ],
       "explanation": "A skill lives inside a single agent and teaches it a job; coordinating a researcher, writer, and reviewer is orchestration — a playbook's role (what FORGE builds). Option b is exactly the confusion to avoid. Option c misdiagnoses — the issue is cross-agent hand-offs, not the number of steps. Option d is wrong: this is a reusable coordinated workflow, not a one-off, so a playbook (not a chat message) is the fix.",
-      "sourceRefs": ["r-skills-readme", "r-gitbook-agent-creating"]
+      "sourceRefs": [
+        "r-skills-readme",
+        "r-gitbook-agent-creating"
+      ]
     },
     {
       "id": "q-m02-16",
@@ -449,13 +936,32 @@
       "difficulty": 2,
       "stem": "What is the documented quality bar for a SKILL.md?",
       "options": [
-        { "id": "a", "text": "60–100 lines total, every line actionable, real tool calls with realistic parameters, Automatos-native identity", "correct": true },
-        { "id": "b", "text": "At least 500 lines of thorough documentation with background and rationale", "correct": false },
-        { "id": "c", "text": "As short as possible — a title and a one-line description are enough", "correct": false },
-        { "id": "d", "text": "Whatever length you like, as long as it references external tools like Cursor or Qwen for examples", "correct": false }
+        {
+          "id": "a",
+          "text": "60–100 lines total, every line actionable, real tool calls with realistic parameters, Automatos-native identity",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "At least 500 lines of thorough documentation with background and rationale",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "As short as possible — a title and a one-line description are enough",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Whatever length you like, as long as it references external tools like Cursor or Qwen for examples",
+          "correct": false
+        }
       ],
       "explanation": "The guide sets 60–100 lines, every line actionable, real tool calls with realistic params, and an Automatos-native identity. Option b is far too long — a skill is an instruction sheet the agent follows, not a manual. Option c is too thin to encode a real procedure (no workflow, output format, or guardrails). Option d violates the explicit rule against external-tool references and the Automatos-native identity requirement.",
-      "sourceRefs": ["r-skill-guide", "r-skills-readme"]
+      "sourceRefs": [
+        "r-skill-guide",
+        "r-skills-readme"
+      ]
     }
   ],
   "scenarios": [],
@@ -500,7 +1006,9 @@
       "url": "automatos-gitbook/marketplace/capabilities.md",
       "kind": "first-party-doc",
       "annotation": "The canonical live-proof page for this module: the Capabilities tab splits into Plugins (bundles of skills + commands + agent configs + prompt templates) and Skills (git-based capability modules defined by a SKILL.md). Read it for the exact skill/plugin distinction and the Install → assign flow. Note: you can also create custom skills from your own repos.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-gitbook-marketplace",
@@ -508,7 +1016,9 @@
       "url": "automatos-gitbook/marketplace/README.md",
       "kind": "first-party-doc",
       "annotation": "The five marketplace tabs — Applications, Agents, Playbooks, LLMs, and Capabilities (where Skills live). Read it to place skills in context and to see the browse/install/Submit-to-Marketplace flow. Currency note: install and publish-with-review are live; there is no contributor-economy or monetization language — that's 'coming', not shipped.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-gitbook-marketplace-agents",
@@ -516,7 +1026,9 @@
       "url": "automatos-gitbook/marketplace/agents.md",
       "kind": "first-party-doc",
       "annotation": "Grounds the 'install a whole agent vs install a skill' judgment: a marketplace agent is a turnkey package — tested system prompt, recommended model, and a pre-assigned skill set. This is how the nine signature agents ship. Installed agents are copies you can modify freely.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-gitbook-agent-details",
@@ -524,7 +1036,9 @@
       "url": "automatos-gitbook/agents/details.md",
       "kind": "first-party-doc",
       "annotation": "Where you assign a skill to an existing agent: the Agent Details → Plugins tab manages the plugins, skills, and tools for that agent, and changes take effect immediately (no restart). Also the home of per-agent Performance and Reports.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-gitbook-agent-creating",
@@ -532,7 +1046,9 @@
       "url": "automatos-gitbook/agents/creating.md",
       "kind": "first-party-doc",
       "annotation": "The other place skills attach: Step 5 of the create-agent flow, where you pick Tools (Composio apps), Skills (git packages), and Plugins (marketplace bundles). Its prompt-engineering tips (be specific about the role, define output format, set boundaries, include examples) map neatly onto the four SKILL.md sections. Confirms the Code Reviewer template used in the lab.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-skills-readme",
@@ -540,7 +1056,9 @@
       "url": "automatos-skills/README.md",
       "kind": "first-party-doc",
       "annotation": "The source of truth for the library: '128 skills indexed' across 16 groups, the nine signature agents and their beats, the SKILL.md format quick-reference, the loader behaviour (identity = the name: field; upsert by name; 1–3 skills per agent), and the before/after Jira example. Cite the 128 figure; don't assert a precise live count (the working tree drifts). Note FORGE's 'recipe builder' blurb is legacy — read 'playbook'.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-skill-guide",
@@ -548,7 +1066,9 @@
       "url": "automatos-skills/SKILL-GUIDE.md",
       "kind": "first-party-doc",
       "annotation": "The authoring checklist: required frontmatter (name, description, version, tags, category: agent-role, tools[]), the four body sections (Identity, Workflow with JSON tool calls, Output Format, What NOT To Do), the 60–100-line quality bar, and the tool reference tables (platform_*, workspace_*, composio_execute). Note: where an older line calls the directory the identifier, the README's loader statement governs — identity is the name: field.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     },
     {
       "id": "r-skills-reference-patterns",
@@ -556,7 +1076,9 @@
       "url": "automatos-skills/team/sentinel/SKILL.md",
       "kind": "first-party-doc",
       "annotation": "The two skills every author is told to read first. SENTINEL (team/sentinel/SKILL.md) is the observe-and-report pattern — five ordered platform_* health checks, evidence discipline ('no evidence = no claim'), and least-privilege guardrails that refuse admin-only tools. SCOUT (team/scout/SKILL.md) is the act-on-the-outside-world pattern — an explicit scoring rubric and restraint guardrails ('do not send outreach without human approval', data minimisation). Study both before writing your own.",
-      "domainIds": ["m02-skills"]
+      "domainIds": [
+        "m02-skills"
+      ]
     }
   ],
   "videos": [
@@ -564,9 +1086,11 @@
       "id": "v-02-1",
       "title": "02 · Skills — what a skill is, the library, and the nine signature agents",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m02-skills"],
+      "url": "https://widgets.automatos.app/academy/automatos/platform-architect/v-02-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m02-skills"
+      ],
       "sourceNotebook": "platform-architect / m02 / skills-library-and-signature-agents"
     },
     {
@@ -575,7 +1099,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m02-skills"],
+      "domainIds": [
+        "m02-skills"
+      ],
       "sourceNotebook": "platform-architect / m02 / authoring-skill-md"
     }
   ]

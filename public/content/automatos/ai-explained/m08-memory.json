@@ -25,13 +25,32 @@
           "difficulty": 1,
           "stem": "You had a detailed chat with an AI last week; today, in a new conversation, it doesn't remember any of it. Why — in plain terms?",
           "options": [
-            { "id": "a", "text": "Each new conversation starts at a fresh, swept-clean desk — by default there's no memory across chats, so last week's desk was cleared away", "correct": true },
-            { "id": "b", "text": "The AI is malfunctioning; a working AI would automatically remember every past conversation", "correct": false },
-            { "id": "c", "text": "It's deliberately ignoring you or pretending not to know you", "correct": false },
-            { "id": "d", "text": "It remembers everything but is choosing to hide that it does", "correct": false }
+            {
+              "id": "a",
+              "text": "Each new conversation starts at a fresh, swept-clean desk — by default there's no memory across chats, so last week's desk was cleared away",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The AI is malfunctioning; a working AI would automatically remember every past conversation",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "It's deliberately ignoring you or pretending not to know you",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It remembers everything but is choosing to hide that it does",
+              "correct": false
+            }
           ],
           "explanation": "The desk — the context window — holds only the current conversation and is swept clean when the chat ends, so by default nothing carries across conversations; that's why last week is gone. It isn't a malfunction (b) — forgetting across chats is the normal default, not a broken feature, and remembering is the thing that takes something extra. It isn't ignoring or pretending (c): there's genuinely nothing there to recall unless it was saved. And it isn't secretly holding your history back (d) — without a memory feature, that history simply wasn't kept.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gb-memory"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gb-memory"
+          ]
         },
         {
           "id": "kc-m08-2",
@@ -40,13 +59,32 @@
           "difficulty": 1,
           "stem": "When an AI does remember you across conversations, what is actually happening — the notebook-beside-the-desk idea?",
           "options": [
-            { "id": "a", "text": "Important notes from your earlier chats were saved in a notebook that isn't swept, and the relevant ones are placed back on the desk at the start of a new conversation", "correct": true },
-            { "id": "b", "text": "It is reading your mind or watching everything you do to know things about you", "correct": false },
-            { "id": "c", "text": "The desk is never actually cleared, so every past conversation is always sitting there in full", "correct": false },
-            { "id": "d", "text": "It genuinely knew you all along, the way a person who's met you would", "correct": false }
+            {
+              "id": "a",
+              "text": "Important notes from your earlier chats were saved in a notebook that isn't swept, and the relevant ones are placed back on the desk at the start of a new conversation",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It is reading your mind or watching everything you do to know things about you",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The desk is never actually cleared, so every past conversation is always sitting there in full",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It genuinely knew you all along, the way a person who's met you would",
+              "correct": false
+            }
           ],
           "explanation": "Memory is a notebook kept beside the desk: a few important things get written down during your chats, the notebook survives when the desk is swept, and the relevant notes are laid back on the fresh desk next time — saved notes, retrieved. It's not mind-reading or surveillance (b); it's ordinary retrieval of things that were captured in earlier conversations. The desk really is cleared each conversation (c) — the notebook, not the desk, is what persists. And it didn't know you all along (d): it knows only what made it into the notebook.",
-          "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+          "sourceRefs": [
+            "r-gb-memory",
+            "r-openai-memory"
+          ]
         }
       ]
     },
@@ -64,13 +102,32 @@
           "difficulty": 2,
           "stem": "What's the difference between an AI's memory and the documents you upload to it — the notebook versus the binder?",
           "options": [
-            { "id": "a", "text": "Memory is what the AI picked up about you from your conversations (the notebook); documents are material you deliberately handed it to work from (the binder)", "correct": true },
-            { "id": "b", "text": "They're the same thing — memory and uploaded documents are just two names for one feature", "correct": false },
-            { "id": "c", "text": "Memory is the files you upload, while documents are the things the AI quietly noticed about you", "correct": false },
-            { "id": "d", "text": "Memory is more reliable than documents because the AI created it itself rather than being given it", "correct": false }
+            {
+              "id": "a",
+              "text": "Memory is what the AI picked up about you from your conversations (the notebook); documents are material you deliberately handed it to work from (the binder)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "They're the same thing — memory and uploaded documents are just two names for one feature",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Memory is the files you upload, while documents are the things the AI quietly noticed about you",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Memory is more reliable than documents because the AI created it itself rather than being given it",
+              "correct": false
+            }
           ],
           "explanation": "The notebook (memory) fills up on its own from your chats — your name, preferences, decisions — while the binder (documents) is material you chose to hand over, like a report or price list; they arrive completely differently. They're not one feature under two names (b): one accumulates from talking, the other you place deliberately. Option (c) has the two swapped — memory is what the AI noted about you, documents are the files you uploaded. And \"self-created memory is more reliable\" (d) is a false claim about accuracy; the distinction is about where each comes from, not which to trust more.",
-          "sourceRefs": ["r-gb-memory", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-gb-memory",
+            "r-genai-leader-guide"
+          ]
         },
         {
           "id": "kc-m08-4",
@@ -79,13 +136,32 @@
           "difficulty": 1,
           "stem": "An AI product tells you it remembers things about you. What's the single most useful test of whether its memory is trustworthy?",
           "options": [
-            { "id": "a", "text": "Whether you can see what it stored, edit anything that's wrong, and permanently delete what you don't want kept", "correct": true },
-            { "id": "b", "text": "Whether the memory feature sounds advanced and impressive in the marketing", "correct": false },
-            { "id": "c", "text": "Whether it remembers as much as possible about you, since more stored means better", "correct": false },
-            { "id": "d", "text": "Nothing — if an AI keeps a memory about you, there's no way to know or control what's in it", "correct": false }
+            {
+              "id": "a",
+              "text": "Whether you can see what it stored, edit anything that's wrong, and permanently delete what you don't want kept",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Whether the memory feature sounds advanced and impressive in the marketing",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Whether it remembers as much as possible about you, since more stored means better",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Nothing — if an AI keeps a memory about you, there's no way to know or control what's in it",
+              "correct": false
+            }
           ],
           "explanation": "The control test is exactly the three questions — can I see it, edit it, and delete from it? — and a trustworthy tool answers yes to all three, because the notebook is yours to open and manage. Impressive-sounding marketing (b) tells you nothing about whether you can actually inspect and control the notebook. \"More stored is better\" (c) is backwards — a large notebook you can't see or delete from is worse, not better; control matters more than volume. And it's simply untrue that you can't know or control it (d) — good tools let you view, edit, and delete, and that's the standard to demand.",
-          "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+          "sourceRefs": [
+            "r-gb-memory",
+            "r-openai-memory"
+          ]
         }
       ]
     }
@@ -98,13 +174,32 @@
       "difficulty": 1,
       "stem": "Why does an AI forget everything from a previous conversation by default?",
       "options": [
-        { "id": "a", "text": "Each new conversation starts at a fresh, swept-clean desk — by default nothing carries across chats", "correct": true },
-        { "id": "b", "text": "It has a poor memory that better AIs don't have", "correct": false },
-        { "id": "c", "text": "It saves everything permanently but refuses to show it to you", "correct": false },
-        { "id": "d", "text": "The internet connection resets and wipes the stored history each time", "correct": false }
+        {
+          "id": "a",
+          "text": "Each new conversation starts at a fresh, swept-clean desk — by default nothing carries across chats",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It has a poor memory that better AIs don't have",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It saves everything permanently but refuses to show it to you",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The internet connection resets and wipes the stored history each time",
+          "correct": false
+        }
       ],
       "explanation": "The desk (the context window) holds only the current conversation and is cleared when the chat ends, so across conversations there's no memory unless something extra keeps it — forgetting is the default. It isn't that some AIs simply have \"better memory\" (b) — remembering across chats takes an added feature, a notebook, not a superior model. It isn't secretly hoarding your history (c) — without a memory feature, nothing was kept. And it has nothing to do with a connection resetting (d); it's simply that the working desk is swept between conversations.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-memory"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-memory"
+      ]
     },
     {
       "id": "q-m08-2",
@@ -113,13 +208,32 @@
       "difficulty": 1,
       "stem": "In this module's analogy, what is \"memory\" — the thing that lets an AI remember you across conversations?",
       "options": [
-        { "id": "a", "text": "A notebook kept beside the desk: notes captured from your chats that persist, and get placed back on the desk when relevant", "correct": true },
-        { "id": "b", "text": "The desk itself, which quietly keeps all your past conversations laid out", "correct": false },
-        { "id": "c", "text": "A live feed that watches everything you do so the AI always knows about you", "correct": false },
-        { "id": "d", "text": "A guarantee that the AI understands you the way a person who's known you for years would", "correct": false }
+        {
+          "id": "a",
+          "text": "A notebook kept beside the desk: notes captured from your chats that persist, and get placed back on the desk when relevant",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The desk itself, which quietly keeps all your past conversations laid out",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A live feed that watches everything you do so the AI always knows about you",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A guarantee that the AI understands you the way a person who's known you for years would",
+          "correct": false
+        }
       ],
       "explanation": "Memory is the notebook beside the desk — a few important things get written down during your chats, the notebook survives when the desk is swept, and the relevant notes are restored to the desk next time. It isn't the desk (b): the desk is short-term and gets cleared every conversation, which is precisely why a separate, persistent notebook is needed. It isn't a surveillance feed (c) — it's retrieval of notes saved from your own conversations, not watching. And it's not deep human-style understanding (d); it's saved notes, nothing more mystical than that.",
-      "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-openai-memory"
+      ]
     },
     {
       "id": "q-m08-3",
@@ -128,13 +242,32 @@
       "difficulty": 1,
       "stem": "How do short-term memory and long-term memory map onto the desk-and-notebook picture?",
       "options": [
-        { "id": "a", "text": "Short-term memory is the desk (this conversation only, swept each time); long-term memory is the notebook (persists across conversations)", "correct": true },
-        { "id": "b", "text": "Short-term is the notebook that persists; long-term is the desk that's wiped each chat", "correct": false },
-        { "id": "c", "text": "They're the same thing — the two names describe one identical store", "correct": false },
-        { "id": "d", "text": "Short-term means fast answers and long-term means slow answers", "correct": false }
+        {
+          "id": "a",
+          "text": "Short-term memory is the desk (this conversation only, swept each time); long-term memory is the notebook (persists across conversations)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Short-term is the notebook that persists; long-term is the desk that's wiped each chat",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "They're the same thing — the two names describe one identical store",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Short-term means fast answers and long-term means slow answers",
+          "correct": false
+        }
       ],
       "explanation": "Short-term memory is the desk — it holds the current conversation and is swept clean each time — while long-term memory is the notebook that survives and carries things from one chat to the next. Option (b) reverses them: the persistent thing is the notebook (long-term), and the wiped thing is the desk (short-term). They're not one identical store (c) — the whole point is that one is cleared each conversation and the other persists. And the labels are about how long things are kept, not the speed of replies (d).",
-      "sourceRefs": ["r-gb-memory", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m08-4",
@@ -143,13 +276,32 @@
       "difficulty": 2,
       "stem": "A friend says: \"AI memory is creepy — it's basically spying on me.\" Based on this module, what's the accurate, calming correction?",
       "options": [
-        { "id": "a", "text": "It's retrieval of notes saved from your own conversations, not surveillance — and in a trustworthy tool you can see, edit, and delete those notes", "correct": true },
-        { "id": "b", "text": "They're right — memory means the AI is secretly monitoring everything you do everywhere", "correct": false },
-        { "id": "c", "text": "It's fine because the AI forgets it all instantly anyway, so nothing is ever stored", "correct": false },
-        { "id": "d", "text": "There's no way to know what's stored, so the only safe move is to never use any AI", "correct": false }
+        {
+          "id": "a",
+          "text": "It's retrieval of notes saved from your own conversations, not surveillance — and in a trustworthy tool you can see, edit, and delete those notes",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They're right — memory means the AI is secretly monitoring everything you do everywhere",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It's fine because the AI forgets it all instantly anyway, so nothing is ever stored",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "There's no way to know what's stored, so the only safe move is to never use any AI",
+          "correct": false
+        }
       ],
       "explanation": "The mechanism is saved notes from your own chats, retrieved when relevant — not spying — and the cure for the unease is control: a good tool lets you see the notebook, correct it, and delete from it. It isn't secret monitoring of everything you do (b): it only captures things from your conversations with it, and you can inspect them. It's not that nothing is stored (c) — long-term memory genuinely persists; that's the point of it. And \"never use any AI\" (d) overshoots — the sensible response is to demand a memory you can view, edit, and delete, not to avoid the tools.",
-      "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-openai-memory"
+      ]
     },
     {
       "id": "q-m08-5",
@@ -158,13 +310,32 @@
       "difficulty": 2,
       "stem": "You want a fact you mentioned once — say, that you prefer replies in British English — to still apply in next month's conversations. What has to happen?",
       "options": [
-        { "id": "a", "text": "That preference has to make it into the notebook (long-term memory); the desk alone won't carry it past today's conversation", "correct": true },
-        { "id": "b", "text": "Nothing — the desk keeps everything you've ever said available forever", "correct": false },
-        { "id": "c", "text": "You need a more powerful AI, because memory is purely a matter of model strength", "correct": false },
-        { "id": "d", "text": "It's impossible for any AI to apply a preference across separate conversations", "correct": false }
+        {
+          "id": "a",
+          "text": "That preference has to make it into the notebook (long-term memory); the desk alone won't carry it past today's conversation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing — the desk keeps everything you've ever said available forever",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "You need a more powerful AI, because memory is purely a matter of model strength",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It's impossible for any AI to apply a preference across separate conversations",
+          "correct": false
+        }
       ],
       "explanation": "For a fact to outlive today's chat it must be written into the notebook — long-term memory — because the desk (short-term) is swept every conversation and can't carry anything to next month on its own. The desk does not keep everything forever (b): it's cleared when the conversation ends, which is the core idea of the module. It's not about raw model power (c) — persistence comes from having a memory feature, a notebook, not from a stronger model. And it's very much possible (d): that's exactly what long-term memory is for.",
-      "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-openai-memory"
+      ]
     },
     {
       "id": "q-m08-6",
@@ -173,13 +344,32 @@
       "difficulty": 2,
       "stem": "You upload your company handbook so the AI can answer questions from it, and separately the AI has noted that you like concise answers. Which is the \"binder\" and which is the \"notebook\"?",
       "options": [
-        { "id": "a", "text": "The handbook is the binder (documents you handed it); the concise-answers preference is the notebook (memory it picked up about you)", "correct": true },
-        { "id": "b", "text": "The handbook is the notebook and the preference is the binder", "correct": false },
-        { "id": "c", "text": "Both are the binder, because anything the AI knows counts as a document", "correct": false },
-        { "id": "d", "text": "Both are the notebook, because everything the AI holds is memory", "correct": false }
+        {
+          "id": "a",
+          "text": "The handbook is the binder (documents you handed it); the concise-answers preference is the notebook (memory it picked up about you)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The handbook is the notebook and the preference is the binder",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Both are the binder, because anything the AI knows counts as a document",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Both are the notebook, because everything the AI holds is memory",
+          "correct": false
+        }
       ],
       "explanation": "The handbook is material you deliberately handed over as reference — the binder (documents, the next module's topic) — while the preference for concise answers is something the AI picked up about you from your chats — the notebook (memory). Option (b) swaps them. Not everything is the binder (c): a preference you never filed as a document is memory, not an uploaded file. And not everything is the notebook (d): a handbook you chose to upload is a document you supplied, not something the AI quietly learned about you. The two arrive differently, and keeping them apart is what sets up the next module.",
-      "sourceRefs": ["r-gb-memory", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m08-7",
@@ -188,13 +378,32 @@
       "difficulty": 1,
       "stem": "Which three questions make up the control test for any AI product that remembers you?",
       "options": [
-        { "id": "a", "text": "Can I see what's stored, can I edit what's wrong, and can I permanently delete what I don't want kept?", "correct": true },
-        { "id": "b", "text": "Is it fast, is it cheap, and does it have a nice interface?", "correct": false },
-        { "id": "c", "text": "Which company made it, how big is it, and is it the most popular?", "correct": false },
-        { "id": "d", "text": "Does it remember as much as possible, and does it do so without ever asking me?", "correct": false }
+        {
+          "id": "a",
+          "text": "Can I see what's stored, can I edit what's wrong, and can I permanently delete what I don't want kept?",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Is it fast, is it cheap, and does it have a nice interface?",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Which company made it, how big is it, and is it the most popular?",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Does it remember as much as possible, and does it do so without ever asking me?",
+          "correct": false
+        }
       ],
       "explanation": "The control test is see, edit, delete — and a trustworthy tool answers yes to all three, because a notebook kept about you should be yours to open and manage. Speed, cost, and looks (b) are ordinary product questions that say nothing about whether you can inspect and control the memory. Vendor, size, and popularity (c) don't tell you whether you can view or delete what's stored. And option (d) is the opposite of the standard: maximising what's remembered while removing your say is exactly the pattern to be wary of.",
-      "sourceRefs": ["r-gb-memory", "r-openai-memory"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-openai-memory"
+      ]
     },
     {
       "id": "q-m08-8",
@@ -203,13 +412,32 @@
       "difficulty": 1,
       "stem": "What's the one-line takeaway that ties this whole module together?",
       "options": [
-        { "id": "a", "text": "The desk gets swept (short-term); the notebook persists (long-term) — forgetting is the default, remembering is a feature, and a good notebook is one you can open", "correct": true },
-        { "id": "b", "text": "AI has a perfect photographic memory of every conversation you've ever had with it", "correct": false },
-        { "id": "c", "text": "AI can never remember anything across conversations under any circumstances", "correct": false },
-        { "id": "d", "text": "Memory and uploaded documents are the same thing, so there's nothing to keep separate", "correct": false }
+        {
+          "id": "a",
+          "text": "The desk gets swept (short-term); the notebook persists (long-term) — forgetting is the default, remembering is a feature, and a good notebook is one you can open",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "AI has a perfect photographic memory of every conversation you've ever had with it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "AI can never remember anything across conversations under any circumstances",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Memory and uploaded documents are the same thing, so there's nothing to keep separate",
+          "correct": false
+        }
       ],
       "explanation": "The takeaway is precisely that: the desk is swept each conversation (short-term), the notebook persists (long-term), so forgetting is the default and remembering is an added feature — and a trustworthy notebook is one you can see, edit, and delete from. It's not a perfect photographic memory (b): only a few important notes are kept, and only if a memory feature exists. It's not \"never remembers\" either (c) — with a notebook, it can and does persist. And memory is not the same as documents (d) — notebook versus binder is a distinction worth keeping, and it sets up the next module.",
-      "sourceRefs": ["r-gb-memory", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-memory",
+        "r-genai-leader-guide"
+      ]
     }
   ],
   "scenarios": [],
@@ -221,7 +449,9 @@
       "url": "automatos-gitbook/activity/memory.md",
       "kind": "official-doc",
       "annotation": "The grounding for this module's peek. It describes the two tiers in the platform's own words — a short-term memory for recent conversation and active task state, and a long-term memory that persists across sessions for important facts, decisions, and preferences — which is exactly the desk-and-notebook picture. It also documents the control test directly: a Memory tab to browse and search stored memories, plus edit, delete (noted as permanent), and pin. Read it as proof that \"a notebook you can open\" is a real, managed thing, not a slogan.",
-      "domainIds": ["m08-memory"]
+      "domainIds": [
+        "m08-memory"
+      ]
     },
     {
       "id": "r-genai-leader-guide",
@@ -229,7 +459,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, business-toned primer on what generative AI is and how it behaves. For this module, use it to reinforce the plain foundation the analogy sits on — that a model works from what's in front of it in a conversation, which is why anything meant to persist beyond that conversation needs to be stored and supplied again. Beginner-friendly and non-technical; read only the fundamentals section, and take no dated capability claim from it as fixed.",
-      "domainIds": ["m08-memory"]
+      "domainIds": [
+        "m08-memory"
+      ]
     },
     {
       "id": "r-openai-memory",
@@ -237,7 +469,9 @@
       "url": "https://help.openai.com/en/articles/8590148-memory-faq",
       "kind": "reference",
       "annotation": "A general-audience help page describing how a mainstream consumer AI's memory works: it can remember things across conversations, you can see what it has stored, and you can edit or delete those memories (or turn the feature off). Used here purely to show the module's control test — see, edit, delete — is a real expectation of good tools in the wild, named vendor-neutrally as one example among several. Orientation only; specific behaviours and settings change over time, so treat the durable idea (you should be able to view and delete), not any exact menu, as the takeaway.",
-      "domainIds": ["m08-memory"]
+      "domainIds": [
+        "m08-memory"
+      ]
     }
   ],
   "videos": [
@@ -245,9 +479,11 @@
       "id": "v-m08-1",
       "title": "08 · Why it forgot — the swept desk and the notebook beside it, in 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m08-memory"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-explained/v-m08-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m08-memory"
+      ],
       "sourceNotebook": "ai-explained / m08 / notebook-beside-the-desk"
     },
     {
@@ -256,7 +492,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m08-memory"],
+      "domainIds": [
+        "m08-memory"
+      ],
       "sourceNotebook": "ai-explained / m08 / deep-dive-memory-control"
     }
   ]

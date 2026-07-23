@@ -28,13 +28,32 @@
           "difficulty": 1,
           "stem": "What is the core reason to put security controls in a central LLM gateway rather than adding them to each feature that calls the model?",
           "options": [
-            { "id": "a", "text": "Every request and response passes through one choke point, so injection filtering, cost limits, tool allow-listing, and output validation are enforced consistently and can be audited in one place", "correct": true },
-            { "id": "b", "text": "A gateway makes prompt injection impossible, so no other controls are needed anywhere in the system", "correct": false },
-            { "id": "c", "text": "A gateway lets you skip validation inside the application because the gateway now owns all security", "correct": false },
-            { "id": "d", "text": "A gateway removes the need for logging, since a single component means nothing can go wrong", "correct": false }
+            {
+              "id": "a",
+              "text": "Every request and response passes through one choke point, so injection filtering, cost limits, tool allow-listing, and output validation are enforced consistently and can be audited in one place",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A gateway makes prompt injection impossible, so no other controls are needed anywhere in the system",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A gateway lets you skip validation inside the application because the gateway now owns all security",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A gateway removes the need for logging, since a single component means nothing can go wrong",
+              "correct": false
+            }
           ],
           "explanation": "The value of a gateway is consistent, auditable enforcement at a single choke point — one place to apply and inspect the controls that generalise. Option b overstates it: OWASP's LLM01 guidance lists mitigations but never claims injection becomes impossible; injection is mitigable, not solved. Option c is the over-trust trap the lesson warns against — the app still owns context-specific authorization and its own validation (gateway-PLUS-app-controls). Option d is backwards: logging and observability are one of the gateway's key jobs, not something it removes.",
-          "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm01"]
+          "sourceRefs": [
+            "r-owasp-llm-top10",
+            "r-owasp-llm01"
+          ]
         },
         {
           "id": "kc-m5-l1-2",
@@ -43,13 +62,32 @@
           "difficulty": 2,
           "stem": "In this module, what does 'defense in depth' specifically mean as a design stance for the gateway?",
           "options": [
-            { "id": "a", "text": "Assume any single control can fail, and stack independent layers so that a failure in one is caught and contained by the others", "correct": true },
-            { "id": "b", "text": "Pick the single strongest control and rely on it exclusively so there is only one thing to maintain", "correct": false },
-            { "id": "c", "text": "Add as many controls as possible regardless of whether they cover different risks, because more is always safer", "correct": false },
-            { "id": "d", "text": "Trust the input filter completely, since a good enough filter makes downstream controls unnecessary", "correct": false }
+            {
+              "id": "a",
+              "text": "Assume any single control can fail, and stack independent layers so that a failure in one is caught and contained by the others",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Pick the single strongest control and rely on it exclusively so there is only one thing to maintain",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Add as many controls as possible regardless of whether they cover different risks, because more is always safer",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Trust the input filter completely, since a good enough filter makes downstream controls unnecessary",
+              "correct": false
+            }
           ],
           "explanation": "Defense in depth here is the stance that no layer is asked to be perfect: assume any one fails and design so the others contain the failure — an injection that slips the filter is still stopped by the tool allow-list, output validator, and cost ceiling. Option b is the opposite (a single point of failure). Option c misreads it as 'quantity of controls' rather than independent, complementary layers over distinct risks. Option d is the exact complacency the lesson rejects — the filter will be bypassed sometimes, which is why depth behind it matters.",
-          "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm01"]
+          "sourceRefs": [
+            "r-owasp-llm-top10",
+            "r-owasp-llm01"
+          ]
         }
       ]
     },
@@ -67,13 +105,32 @@
           "difficulty": 2,
           "stem": "At the mechanism level, why does prompt injection work against an LLM?",
           "options": [
-            { "id": "a", "text": "The model reads one stream of text and can treat all of it — system prompt, user input, and retrieved or fetched content — as instructive, so untrusted data in the context can act as control", "correct": true },
-            { "id": "b", "text": "The model has a separate, protected instruction channel that untrusted data can never reach, so injection is purely a network-layer flaw", "correct": false },
-            { "id": "c", "text": "Prompt injection only works when the attacker has direct access to the developer's system prompt file", "correct": false },
-            { "id": "d", "text": "Injection is caused by the model running out of memory and confusing tokens at random", "correct": false }
+            {
+              "id": "a",
+              "text": "The model reads one stream of text and can treat all of it — system prompt, user input, and retrieved or fetched content — as instructive, so untrusted data in the context can act as control",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The model has a separate, protected instruction channel that untrusted data can never reach, so injection is purely a network-layer flaw",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Prompt injection only works when the attacker has direct access to the developer's system prompt file",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Injection is caused by the model running out of memory and confusing tokens at random",
+              "correct": false
+            }
           ],
           "explanation": "The trust boundary breaks because prompt is data and control at once: everything in the context window competes to be an instruction, so untrusted content can steer behaviour. Option b is the opposite of reality — there is no reliably protected instruction channel, which is exactly the problem. Option c ignores indirect injection, where the attacker never touches the system prompt but plants instructions in content the app will later ingest. Option d invents a random-memory cause; injection is a trust-boundary issue, not a resource glitch.",
-          "sourceRefs": ["r-owasp-llm01", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm01",
+            "r-mitre-atlas"
+          ]
         },
         {
           "id": "kc-m5-l2-2",
@@ -82,13 +139,31 @@
           "difficulty": 3,
           "stem": "An autonomous agent stays under its per-minute rate limit but a single open-ended task makes it loop through expensive tool calls for hours, running up a large bill. Which control is the backstop that a rate limit cannot provide?",
           "options": [
-            { "id": "a", "text": "A hard cost/budget ceiling that halts the agent once cumulative spend reaches a set amount, regardless of how many requests that took — paired with a loop breaker", "correct": true },
-            { "id": "b", "text": "A stricter rate limit, since limiting requests per minute always limits total spend", "correct": false },
-            { "id": "c", "text": "Output encoding, which prevents the model's responses from being interpreted downstream", "correct": false },
-            { "id": "d", "text": "A longer request timeout, so each individual call has more time to finish", "correct": false }
+            {
+              "id": "a",
+              "text": "A hard cost/budget ceiling that halts the agent once cumulative spend reaches a set amount, regardless of how many requests that took — paired with a loop breaker",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A stricter rate limit, since limiting requests per minute always limits total spend",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Output encoding, which prevents the model's responses from being interpreted downstream",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A longer request timeout, so each individual call has more time to finish",
+              "correct": false
+            }
           ],
           "explanation": "This is the 'Denial of Wallet' shape under LLM10: cost, not request frequency, is the threat, so a cumulative cost ceiling plus a loop breaker is the right backstop. Option b is the trap — a rate limit caps frequency, not the cost of a single expensive request or a long loop that stays within the per-minute cap. Option c is an LLM05 output-handling control, unrelated to spend. Option d makes it worse by giving each expensive call more time to run, increasing cost rather than bounding it.",
-          "sourceRefs": ["r-owasp-llm10"]
+          "sourceRefs": [
+            "r-owasp-llm10"
+          ]
         },
         {
           "id": "kc-m5-l2-3",
@@ -97,13 +172,32 @@
           "difficulty": 2,
           "stem": "Why is indirect prompt injection generally the more dangerous variant to defend against?",
           "options": [
-            { "id": "a", "text": "The attacker never has to interact with your app directly — they plant instructions in content (a document, a web page) that your own pipeline later retrieves or fetches and feeds to the model", "correct": true },
-            { "id": "b", "text": "Indirect injection can only occur inside the developer's own system prompt, which is the hardest place to change", "correct": false },
-            { "id": "c", "text": "Indirect injection requires the victim to paste a malicious string into the chat box themselves", "correct": false },
-            { "id": "d", "text": "Indirect injection is identical to direct injection but has a longer name", "correct": false }
+            {
+              "id": "a",
+              "text": "The attacker never has to interact with your app directly — they plant instructions in content (a document, a web page) that your own pipeline later retrieves or fetches and feeds to the model",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Indirect injection can only occur inside the developer's own system prompt, which is the hardest place to change",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Indirect injection requires the victim to paste a malicious string into the chat box themselves",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Indirect injection is identical to direct injection but has a longer name",
+              "correct": false
+            }
           ],
           "explanation": "OWASP's LLM01 defines indirect injection as manipulation via external content the model ingests — the danger is that your own retrieval or fetch step carries the attacker's instruction to the model without the attacker touching your app. Option b confuses it with system-prompt leakage; indirect injection lives in ingested external content, not the system prompt. Option c describes direct injection (the user supplies the input). Option d dismisses a real, defense-relevant distinction that changes where you place the control (segregating and identifying untrusted retrieved content).",
-          "sourceRefs": ["r-owasp-llm01", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm01",
+            "r-mitre-atlas"
+          ]
         }
       ]
     },
@@ -121,13 +215,31 @@
           "difficulty": 2,
           "stem": "According to OWASP LLM06 Excessive Agency, which set of measures actually PREVENTS excessive agency (as opposed to merely limiting the damage)?",
           "options": [
-            { "id": "a", "text": "Minimising the tools and capabilities the model can use, giving each tool least-privilege permissions, executing in the user's context, and requiring human approval for high-impact actions", "correct": true },
-            { "id": "b", "text": "Rate limiting the agent and monitoring its activity, since these stop it acting excessively", "correct": false },
-            { "id": "c", "text": "Giving the model a powerful shared service account so tool calls always succeed without permission errors", "correct": false },
-            { "id": "d", "text": "Writing a strongly worded system prompt telling the model not to take dangerous actions", "correct": false }
+            {
+              "id": "a",
+              "text": "Minimising the tools and capabilities the model can use, giving each tool least-privilege permissions, executing in the user's context, and requiring human approval for high-impact actions",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Rate limiting the agent and monitoring its activity, since these stop it acting excessively",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Giving the model a powerful shared service account so tool calls always succeed without permission errors",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Writing a strongly worded system prompt telling the model not to take dangerous actions",
+              "correct": false
+            }
           ],
           "explanation": "OWASP's LLM06 prevention targets the three root causes: minimise functionality, minimise permissions (least privilege, user context), and require approval / independent verification for high-impact actions. Option b is the explicit trap — OWASP states rate limiting and monitoring limit damage but do not prevent excessive agency. Option c increases excessive permissions, making the risk worse. Option d relies on the system prompt for behaviour control, which LLM07 warns is not a security boundary the model reliably respects.",
-          "sourceRefs": ["r-owasp-llm06"]
+          "sourceRefs": [
+            "r-owasp-llm06"
+          ]
         },
         {
           "id": "kc-m5-l3-2",
@@ -136,13 +248,31 @@
           "difficulty": 2,
           "stem": "OWASP LLM07 System Prompt Leakage. Beyond 'don't reveal the system prompt,' what is the deeper lesson about WHY leakage is dangerous?",
           "options": [
-            { "id": "a", "text": "The real failure is putting secrets in the prompt and relying on it for security in the first place; fix it by separating sensitive data out and enforcing controls (guardrails) independently of the LLM", "correct": true },
-            { "id": "b", "text": "The disclosure of the prompt text itself is the entire risk, so obfuscating the prompt fully solves it", "correct": false },
-            { "id": "c", "text": "System prompts are always safe to store credentials in, as long as the model is told to keep them secret", "correct": false },
-            { "id": "d", "text": "The lesson is to remove all system prompts, since any instruction to the model is a security risk", "correct": false }
+            {
+              "id": "a",
+              "text": "The real failure is putting secrets in the prompt and relying on it for security in the first place; fix it by separating sensitive data out and enforcing controls (guardrails) independently of the LLM",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The disclosure of the prompt text itself is the entire risk, so obfuscating the prompt fully solves it",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "System prompts are always safe to store credentials in, as long as the model is told to keep them secret",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The lesson is to remove all system prompts, since any instruction to the model is a security risk",
+              "correct": false
+            }
           ],
           "explanation": "OWASP is explicit that disclosure is not the primary risk; the underlying mistakes — secrets in the prompt, relying on the prompt for strict behaviour control — are. The fix is to externalise sensitive data and enforce controls independently of the model. Option b treats obfuscation as a solution, but a prompt you rely on to stay hidden is still a broken control. Option c is the exact anti-pattern OWASP names (credentials must not be in the system prompt). Option d overcorrects — system prompts are fine; putting secrets in them and trusting them as a security boundary is not.",
-          "sourceRefs": ["r-owasp-llm07"]
+          "sourceRefs": [
+            "r-owasp-llm07"
+          ]
         },
         {
           "id": "kc-m5-l3-3",
@@ -151,13 +281,31 @@
           "difficulty": 2,
           "stem": "OWASP LLM05 Improper Output Handling concerns what, specifically — and what is the guiding defensive stance?",
           "options": [
-            { "id": "a", "text": "Insufficient validation and sanitisation of model output before it is passed downstream; treat model output as untrusted and validate/encode it (schema checks, parameterised queries, context-specific encoding) before any system acts on it", "correct": true },
-            { "id": "b", "text": "The model producing factually wrong answers, defended by asking the model to double-check itself", "correct": false },
-            { "id": "c", "text": "Users sending too many requests, defended by rate limiting the endpoint", "correct": false },
-            { "id": "d", "text": "The model consuming too many tokens, defended by shortening the system prompt", "correct": false }
+            {
+              "id": "a",
+              "text": "Insufficient validation and sanitisation of model output before it is passed downstream; treat model output as untrusted and validate/encode it (schema checks, parameterised queries, context-specific encoding) before any system acts on it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The model producing factually wrong answers, defended by asking the model to double-check itself",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Users sending too many requests, defended by rate limiting the endpoint",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The model consuming too many tokens, defended by shortening the system prompt",
+              "correct": false
+            }
           ],
           "explanation": "OWASP defines LLM05 as insufficient validation/sanitisation of output before it reaches downstream components, defended by treating output as untrusted and validating/encoding it (schema, prepared statements, context-specific encoding). Option b describes overreliance/misinformation, which OWASP explicitly distinguishes from output handling (that concerns accuracy, not downstream execution). Option c is LLM10 unbounded consumption. Option d is also an LLM10 resource concern, not output handling.",
-          "sourceRefs": ["r-owasp-llm05"]
+          "sourceRefs": [
+            "r-owasp-llm05"
+          ]
         }
       ]
     },
@@ -175,13 +323,32 @@
           "difficulty": 1,
           "stem": "What is the mandatory authorization frame for the red-team work in this module?",
           "options": [
-            { "id": "a", "text": "Test only systems you own or have explicit written authorization for — here, your own test agent in your own workspace; never a third party's or a system you do not own", "correct": true },
-            { "id": "b", "text": "Any public LLM app is fair game to probe, since testing improves everyone's security", "correct": false },
-            { "id": "c", "text": "You may test a colleague's production system as long as you tell them afterwards", "correct": false },
-            { "id": "d", "text": "Authorization is a formality that can be skipped for small, low-impact probes", "correct": false }
+            {
+              "id": "a",
+              "text": "Test only systems you own or have explicit written authorization for — here, your own test agent in your own workspace; never a third party's or a system you do not own",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Any public LLM app is fair game to probe, since testing improves everyone's security",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "You may test a colleague's production system as long as you tell them afterwards",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Authorization is a formality that can be skipped for small, low-impact probes",
+              "correct": false
+            }
           ],
           "explanation": "The binding rule is authorized testing only: your own test agent in your own workspace, or a system you have written permission to test. Option b is exactly the unauthorised-access line the module forbids — improving security is not a licence to probe systems you do not own. Option c reverses consent (permission must come before, in writing, not after). Option d treats a hard rule as optional; there is no impact threshold that makes unauthorised testing acceptable.",
-          "sourceRefs": ["r-mitre-atlas", "r-nist-ai-rmf"]
+          "sourceRefs": [
+            "r-mitre-atlas",
+            "r-nist-ai-rmf"
+          ]
         },
         {
           "id": "kc-m5-l4-2",
@@ -190,13 +357,32 @@
           "difficulty": 2,
           "stem": "You want to prove your gateway resists an INDIRECT prompt injection. Using MITRE ATLAS as the technique language, which probe best exercises that path against your own test agent?",
           "options": [
-            { "id": "a", "text": "Seed a document your own agent will retrieve with a planted instruction (LLM Prompt Injection: Indirect / RAG Poisoning) and check whether the agent's behaviour changes — testing content segregation and least privilege", "correct": true },
-            { "id": "b", "text": "Type a malicious instruction straight into the chat box, since direct and indirect injection are the same test", "correct": false },
-            { "id": "c", "text": "Ask the model to summarise a document, since summarisation cannot carry injected instructions", "correct": false },
-            { "id": "d", "text": "Measure how many requests per second the endpoint accepts before it slows down", "correct": false }
+            {
+              "id": "a",
+              "text": "Seed a document your own agent will retrieve with a planted instruction (LLM Prompt Injection: Indirect / RAG Poisoning) and check whether the agent's behaviour changes — testing content segregation and least privilege",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Type a malicious instruction straight into the chat box, since direct and indirect injection are the same test",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Ask the model to summarise a document, since summarisation cannot carry injected instructions",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Measure how many requests per second the endpoint accepts before it slows down",
+              "correct": false
+            }
           ],
           "explanation": "Indirect injection lives in content the agent ingests, so the right probe plants an instruction in a retrieved document (ATLAS LLM Prompt Injection: Indirect, and RAG Poisoning) and checks whether behaviour changes — exercising segregation and least privilege. Option b tests direct injection, a different path. Option c is false: retrieved content used for summarisation is a classic indirect-injection carrier. Option d is a Denial-of-AI-Service / Cost Harvesting style probe (LLM10), not an injection test.",
-          "sourceRefs": ["r-mitre-atlas", "r-owasp-llm01"]
+          "sourceRefs": [
+            "r-mitre-atlas",
+            "r-owasp-llm01"
+          ]
         },
         {
           "id": "kc-m5-l4-3",
@@ -205,13 +391,32 @@
           "difficulty": 2,
           "stem": "A red-team probe succeeds in extracting your test agent's system prompt (ATLAS: Extract LLM System Prompt). What is the correct fix, consistent with OWASP LLM07?",
           "options": [
-            { "id": "a", "text": "Remove anything sensitive from the prompt and stop relying on it for security — enforce the real controls (secrets in a store, guardrails) independently of the model — plus a regression test that re-runs the probe", "correct": true },
-            { "id": "b", "text": "Add a line to the system prompt telling the model to refuse to reveal the system prompt, and consider it closed", "correct": false },
-            { "id": "c", "text": "Nothing — extracting the prompt is harmless because a system prompt can never contain anything worth protecting", "correct": false },
-            { "id": "d", "text": "Delete the agent, since a prompt that can be extracted means the agent cannot be secured", "correct": false }
+            {
+              "id": "a",
+              "text": "Remove anything sensitive from the prompt and stop relying on it for security — enforce the real controls (secrets in a store, guardrails) independently of the model — plus a regression test that re-runs the probe",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Add a line to the system prompt telling the model to refuse to reveal the system prompt, and consider it closed",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Nothing — extracting the prompt is harmless because a system prompt can never contain anything worth protecting",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Delete the agent, since a prompt that can be extracted means the agent cannot be secured",
+              "correct": false
+            }
           ],
           "explanation": "LLM07's lesson is that leakage exposes a deeper failure: the fix is to externalise sensitive data and enforce controls independently of the model, then add a regression test so it stays fixed. Option b relies on the prompt to protect itself — the exact broken control OWASP warns against. Option c is false because prompts often do contain sensitive functionality, rules, or secrets that should not have been there. Option d overreacts; the agent is fine once secrets are externalised and behaviour control does not depend on prompt secrecy.",
-          "sourceRefs": ["r-owasp-llm07", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm07",
+            "r-mitre-atlas"
+          ]
         }
       ]
     }
@@ -224,13 +429,31 @@
       "difficulty": 1,
       "stem": "A team currently adds input filtering to their chat feature but forgets it on a new background summarisation job. What is the strongest architectural argument for a central LLM gateway here?",
       "options": [
-        { "id": "a", "text": "Every path to the model passes through one choke point, so a control like injection filtering is enforced for all callers and cannot be forgotten on a new feature", "correct": true },
-        { "id": "b", "text": "A gateway guarantees no feature will ever have a bug, because centralising code removes all defects", "correct": false },
-        { "id": "c", "text": "A gateway means the background job no longer needs any security because the chat feature has it", "correct": false },
-        { "id": "d", "text": "A gateway replaces the need to think about which risks apply to which feature", "correct": false }
+        {
+          "id": "a",
+          "text": "Every path to the model passes through one choke point, so a control like injection filtering is enforced for all callers and cannot be forgotten on a new feature",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A gateway guarantees no feature will ever have a bug, because centralising code removes all defects",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A gateway means the background job no longer needs any security because the chat feature has it",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A gateway replaces the need to think about which risks apply to which feature",
+          "correct": false
+        }
       ],
       "explanation": "Consistency is the point: one choke point means a control applies to every caller, so it cannot be silently omitted from a new feature. Option b overclaims — a gateway does not eliminate all bugs. Option c is the over-trust trap; a shared control does not mean other paths need no thought, and app-specific authorization still belongs in the app. Option d is wrong because you still map risks to features — the gateway enforces the general controls, not the thinking.",
-      "sourceRefs": ["r-owasp-llm-top10"]
+      "sourceRefs": [
+        "r-owasp-llm-top10"
+      ]
     },
     {
       "id": "q-m5-2",
@@ -239,13 +462,32 @@
       "difficulty": 2,
       "stem": "Match the gateway control to the OWASP LLM Top 10 (2025) risk it most directly addresses.",
       "options": [
-        { "id": "a", "text": "An allow-listed tool broker with least-privilege tools addresses LLM06 Excessive Agency", "correct": true },
-        { "id": "b", "text": "An allow-listed tool broker addresses LLM10 Unbounded Consumption", "correct": false },
-        { "id": "c", "text": "Structured output validation addresses LLM01 Prompt Injection and nothing else", "correct": false },
-        { "id": "d", "text": "A cost ceiling addresses LLM05 Improper Output Handling", "correct": false }
+        {
+          "id": "a",
+          "text": "An allow-listed tool broker with least-privilege tools addresses LLM06 Excessive Agency",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "An allow-listed tool broker addresses LLM10 Unbounded Consumption",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Structured output validation addresses LLM01 Prompt Injection and nothing else",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A cost ceiling addresses LLM05 Improper Output Handling",
+          "correct": false
+        }
       ],
       "explanation": "A tool broker that restricts which tools the model can call and with what privileges is the direct control for LLM06 Excessive Agency (excessive functionality/permissions/autonomy). Option b misassigns it — LLM10 is about consumption limits (rate, cost, size), not tool restriction. Option c is too narrow and mislabelled: structured output validation is the control for LLM05 Improper Output Handling (though it also helps contain a missed injection as defense in depth). Option d mismatches — a cost ceiling addresses LLM10, not LLM05.",
-      "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm06"]
+      "sourceRefs": [
+        "r-owasp-llm-top10",
+        "r-owasp-llm06"
+      ]
     },
     {
       "id": "q-m5-3",
@@ -254,13 +496,32 @@
       "difficulty": 2,
       "stem": "Which statement about the honest state of prompt-injection defense is correct?",
       "options": [
-        { "id": "a", "text": "Injection is mitigable, not solved — layered controls reduce its probability and blast radius, so you must design for a filter miss rather than assume the filter is complete", "correct": true },
-        { "id": "b", "text": "A well-tuned input filter fully eliminates prompt injection, so downstream controls are optional", "correct": false },
-        { "id": "c", "text": "Because injection cannot be perfectly prevented, there is no point deploying any input filtering at all", "correct": false },
-        { "id": "d", "text": "Prompt injection was solved by the 2025 OWASP update, which is why LLM01 no longer lists mitigations", "correct": false }
+        {
+          "id": "a",
+          "text": "Injection is mitigable, not solved — layered controls reduce its probability and blast radius, so you must design for a filter miss rather than assume the filter is complete",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A well-tuned input filter fully eliminates prompt injection, so downstream controls are optional",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because injection cannot be perfectly prevented, there is no point deploying any input filtering at all",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Prompt injection was solved by the 2025 OWASP update, which is why LLM01 no longer lists mitigations",
+          "correct": false
+        }
       ],
       "explanation": "The track's honest posture is that injection is mitigable, not solved: controls lower probability and blast radius, so you plan for a bypass and keep depth behind the filter. Option b is the complacency the module rejects. Option c is nihilism in the other direction — filtering still meaningfully reduces risk and is part of defense in depth. Option d is factually false: OWASP's LLM01 lists multiple mitigations and does not claim the risk is solved.",
-      "sourceRefs": ["r-owasp-llm01", "r-owasp-llm-top10"]
+      "sourceRefs": [
+        "r-owasp-llm01",
+        "r-owasp-llm-top10"
+      ]
     },
     {
       "id": "q-m5-4",
@@ -269,13 +530,31 @@
       "difficulty": 2,
       "stem": "An attacker sends one request with a legitimately huge input that is cheap to send but very expensive to process. Under OWASP LLM10, which control most directly addresses this specific attack?",
       "options": [
-        { "id": "a", "text": "Input validation with a size cap that rejects oversized input before it is processed", "correct": true },
-        { "id": "b", "text": "A per-minute rate limit, since one request is well within any frequency cap", "correct": false },
-        { "id": "c", "text": "Output encoding of the model's response for the browser", "correct": false },
-        { "id": "d", "text": "Requiring human approval before the model may answer any question", "correct": false }
+        {
+          "id": "a",
+          "text": "Input validation with a size cap that rejects oversized input before it is processed",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A per-minute rate limit, since one request is well within any frequency cap",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Output encoding of the model's response for the browser",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Requiring human approval before the model may answer any question",
+          "correct": false
+        }
       ],
       "explanation": "This is OWASP's 'Variable-Length Input Flood' / oversized-input shape; the direct defense is input validation and a size cap so the expensive input is rejected up front. Option b fails because a single request does not trip a frequency-based rate limit — that is exactly why cost/size controls exist alongside rate limits. Option c is an LLM05 output-handling control, irrelevant to input cost. Option d is disproportionate and misaimed — approval gates high-impact actions, not the cost of a single large input.",
-      "sourceRefs": ["r-owasp-llm10"]
+      "sourceRefs": [
+        "r-owasp-llm10"
+      ]
     },
     {
       "id": "q-m5-5",
@@ -284,13 +563,31 @@
       "difficulty": 3,
       "stem": "A reviewer says: 'We rate-limit the agent to 100 tool calls per hour, so excessive agency is handled.' Per OWASP LLM06, what is the accurate critique?",
       "options": [
-        { "id": "a", "text": "Rate limiting only limits the DAMAGE of excessive agency; prevention requires minimising the tools and permissions the agent has and requiring approval for high-impact actions", "correct": true },
-        { "id": "b", "text": "The critique is that 100 calls per hour is too high; lowering it to 10 would prevent excessive agency entirely", "correct": false },
-        { "id": "c", "text": "Rate limiting is the primary OWASP-recommended prevention for excessive agency, so the reviewer is correct", "correct": false },
-        { "id": "d", "text": "Excessive agency is not a real risk once any rate limit exists, so no further controls are needed", "correct": false }
+        {
+          "id": "a",
+          "text": "Rate limiting only limits the DAMAGE of excessive agency; prevention requires minimising the tools and permissions the agent has and requiring approval for high-impact actions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The critique is that 100 calls per hour is too high; lowering it to 10 would prevent excessive agency entirely",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Rate limiting is the primary OWASP-recommended prevention for excessive agency, so the reviewer is correct",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Excessive agency is not a real risk once any rate limit exists, so no further controls are needed",
+          "correct": false
+        }
       ],
       "explanation": "OWASP is explicit that rate limiting limits damage but does not prevent excessive agency; prevention is minimising functionality, permissions, and autonomy plus approval for high-impact actions. Option b still only changes the damage cap, not whether a dangerous action is possible. Option c misstates OWASP — rate limiting is damage-limitation, not the primary prevention. Option d dismisses the risk entirely, which the guidance directly contradicts.",
-      "sourceRefs": ["r-owasp-llm06"]
+      "sourceRefs": [
+        "r-owasp-llm06"
+      ]
     },
     {
       "id": "q-m5-6",
@@ -299,13 +596,32 @@
       "difficulty": 2,
       "stem": "Your gateway logs every prompt and response for observability. What is the specific risk, and the fix, consistent with LLM07 and LLM02?",
       "options": [
-        { "id": "a", "text": "Logging raw prompts can copy secrets and PII into your logs; scrub or redact sensitive data before logging, keep secrets in a store and out of the prompt entirely", "correct": true },
-        { "id": "b", "text": "There is no risk — logs are internal, so anything can be written to them safely", "correct": false },
-        { "id": "c", "text": "The only fix is to stop logging entirely, since observability and security are incompatible", "correct": false },
-        { "id": "d", "text": "The risk is that logs are too large; compress them and the security concern disappears", "correct": false }
+        {
+          "id": "a",
+          "text": "Logging raw prompts can copy secrets and PII into your logs; scrub or redact sensitive data before logging, keep secrets in a store and out of the prompt entirely",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "There is no risk — logs are internal, so anything can be written to them safely",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The only fix is to stop logging entirely, since observability and security are incompatible",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The risk is that logs are too large; compress them and the security concern disappears",
+          "correct": false
+        }
       ],
       "explanation": "A gateway that logs every prompt can duplicate every secret and PII value into the log store — the fix is to scrub/redact before logging and to keep secrets out of the prompt in a secret store (LLM07/LLM02). Option b treats internal logs as safe, but logs are a common breach source and copying secrets there is exactly the failure. Option c is a false dichotomy — you keep observability by scrubbing, not by abandoning it. Option d addresses volume, not the sensitive-data exposure that is the actual risk.",
-      "sourceRefs": ["r-owasp-llm07", "r-owasp-llm02"]
+      "sourceRefs": [
+        "r-owasp-llm07",
+        "r-owasp-llm02"
+      ]
     },
     {
       "id": "q-m5-7",
@@ -314,13 +630,32 @@
       "difficulty": 2,
       "stem": "A model, tricked by an injection, emits a string intended to run as a shell command on a downstream server. Which OWASP risk is this, and which control stops it at the gateway's exit?",
       "options": [
-        { "id": "a", "text": "LLM05 Improper Output Handling — treat output as untrusted and validate it against a strict schema / encode for the target context so it cannot be interpreted as code downstream", "correct": true },
-        { "id": "b", "text": "LLM10 Unbounded Consumption — apply a rate limit to the shell command", "correct": false },
-        { "id": "c", "text": "LLM02 Sensitive Information Disclosure — redact the command from the model's output", "correct": false },
-        { "id": "d", "text": "LLM06 Excessive Agency — and the fix is to give the shell tool more permissions so it runs reliably", "correct": false }
+        {
+          "id": "a",
+          "text": "LLM05 Improper Output Handling — treat output as untrusted and validate it against a strict schema / encode for the target context so it cannot be interpreted as code downstream",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "LLM10 Unbounded Consumption — apply a rate limit to the shell command",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "LLM02 Sensitive Information Disclosure — redact the command from the model's output",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "LLM06 Excessive Agency — and the fix is to give the shell tool more permissions so it runs reliably",
+          "correct": false
+        }
       ],
       "explanation": "Model output flowing into a shell as a command is the textbook LLM05 example (RCE); the exit-side control is treating output as untrusted and validating/encoding it so it cannot execute. Option b misclassifies it as a consumption issue and rate-limiting does not stop code execution. Option c is the wrong risk — this is about downstream execution, not disclosure. Option d both misassigns the risk emphasis and proposes the opposite of least privilege, increasing the danger.",
-      "sourceRefs": ["r-owasp-llm05", "r-owasp-llm06"]
+      "sourceRefs": [
+        "r-owasp-llm05",
+        "r-owasp-llm06"
+      ]
     },
     {
       "id": "q-m5-8",
@@ -329,13 +664,32 @@
       "difficulty": 2,
       "stem": "Why is structured output validation described as a defense-in-depth layer even when you already have input-side injection filtering?",
       "options": [
-        { "id": "a", "text": "If an injection slips past the input filter and tricks the model, a strict schema check on the output can still refuse to pass an off-schema or dangerous value downstream — the exit door holds when the front door fails", "correct": true },
-        { "id": "b", "text": "Because output validation makes input filtering unnecessary, so you can remove the input filter", "correct": false },
-        { "id": "c", "text": "Because the two controls address the same failure in the same place, so having both is pure redundancy", "correct": false },
-        { "id": "d", "text": "Because output validation guarantees the model can never be injected in the first place", "correct": false }
+        {
+          "id": "a",
+          "text": "If an injection slips past the input filter and tricks the model, a strict schema check on the output can still refuse to pass an off-schema or dangerous value downstream — the exit door holds when the front door fails",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because output validation makes input filtering unnecessary, so you can remove the input filter",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because the two controls address the same failure in the same place, so having both is pure redundancy",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Because output validation guarantees the model can never be injected in the first place",
+          "correct": false
+        }
       ],
       "explanation": "Defense in depth: independent layers at different points, so a miss at the front door is caught at the exit — a schema check refuses off-schema/dangerous output even if the injection worked. Option b is wrong; the layers are complementary, not substitutes (you keep both). Option c misreads them as the same control in the same place — input filtering and output validation act at different boundaries on different failures. Option d overclaims — output validation does not prevent injection, it contains its downstream effect.",
-      "sourceRefs": ["r-owasp-llm05", "r-owasp-llm01"]
+      "sourceRefs": [
+        "r-owasp-llm05",
+        "r-owasp-llm01"
+      ]
     },
     {
       "id": "q-m5-9",
@@ -344,13 +698,31 @@
       "difficulty": 1,
       "stem": "What is MITRE ATLAS, and what is it for in this module?",
       "options": [
-        { "id": "a", "text": "A knowledge base of adversary tactics and techniques against AI systems (modelled on ATT&CK); it gives your red-team plan a shared vocabulary so findings are named in recognised terms and whole attack categories are not missed", "correct": true },
-        { "id": "b", "text": "A compliance certificate that proves an AI system is secure once issued", "correct": false },
-        { "id": "c", "text": "A library of ready-to-run exploit payloads to copy against any target", "correct": false },
-        { "id": "d", "text": "A vendor product that automatically hardens an LLM gateway with no configuration", "correct": false }
+        {
+          "id": "a",
+          "text": "A knowledge base of adversary tactics and techniques against AI systems (modelled on ATT&CK); it gives your red-team plan a shared vocabulary so findings are named in recognised terms and whole attack categories are not missed",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A compliance certificate that proves an AI system is secure once issued",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A library of ready-to-run exploit payloads to copy against any target",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A vendor product that automatically hardens an LLM gateway with no configuration",
+          "correct": false
+        }
       ],
       "explanation": "ATLAS is a living knowledge base of AI-focused adversary tactics and techniques, modelled on MITRE ATT&CK; here it is the shared language for planning a red-team so findings are recognisable and coverage is systematic. Option b is wrong — ATLAS is not a certification and does not declare systems secure. Option c contradicts both ATLAS's nature and the module's rule against payload libraries. Option d invents a product; ATLAS is a knowledge base, not an automated hardening tool.",
-      "sourceRefs": ["r-mitre-atlas"]
+      "sourceRefs": [
+        "r-mitre-atlas"
+      ]
     },
     {
       "id": "q-m5-10",
@@ -359,13 +731,32 @@
       "difficulty": 2,
       "stem": "You are planning an authorized red-team of your own test agent to prove the cost controls fire. Which MITRE ATLAS techniques most directly map to that goal?",
       "options": [
-        { "id": "a", "text": "Cost Harvesting and Denial of AI Service — probing whether rate limits, input-size caps, the loop breaker, and the cost ceiling actually halt runaway spend or resource exhaustion", "correct": true },
-        { "id": "b", "text": "Extract LLM System Prompt and LLM Data Leakage, since cost is about what the model says", "correct": false },
-        { "id": "c", "text": "RAG Poisoning only, because all cost problems come from retrieval", "correct": false },
-        { "id": "d", "text": "LLM Jailbreak only, because jailbreaks are the sole cause of high bills", "correct": false }
+        {
+          "id": "a",
+          "text": "Cost Harvesting and Denial of AI Service — probing whether rate limits, input-size caps, the loop breaker, and the cost ceiling actually halt runaway spend or resource exhaustion",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Extract LLM System Prompt and LLM Data Leakage, since cost is about what the model says",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "RAG Poisoning only, because all cost problems come from retrieval",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "LLM Jailbreak only, because jailbreaks are the sole cause of high bills",
+          "correct": false
+        }
       ],
       "explanation": "Cost and availability map to ATLAS Cost Harvesting and Denial of AI Service, which is what you probe to prove the LLM10 controls (rate limits, size caps, loop breaker, cost ceiling) fire. Option b targets disclosure (LLM07/LLM02), not consumption. Option c is too narrow and false — cost blowouts are not solely a retrieval problem (open-ended loops and oversized inputs are common causes). Option d is also too narrow — jailbreaks are not the sole driver of runaway cost.",
-      "sourceRefs": ["r-mitre-atlas", "r-owasp-llm10"]
+      "sourceRefs": [
+        "r-mitre-atlas",
+        "r-owasp-llm10"
+      ]
     },
     {
       "id": "q-m5-11",
@@ -374,13 +765,32 @@
       "difficulty": 2,
       "stem": "Your red-team finds that a planted instruction in a retrieved document changed your test agent's behaviour. Which response best fits the module's finding-to-fix discipline?",
       "options": [
-        { "id": "a", "text": "Record it as an indirect-injection finding, strengthen content segregation and least privilege so a success does little, and add a regression test that re-runs the probe — without claiming injection is now impossible", "correct": true },
-        { "id": "b", "text": "Declare the agent permanently immune to injection now that this one document has been handled", "correct": false },
-        { "id": "c", "text": "Log the finding and move on without a fix, since indirect injection cannot be mitigated at all", "correct": false },
-        { "id": "d", "text": "Publish the exact instruction string publicly so others can reuse it against similar systems", "correct": false }
+        {
+          "id": "a",
+          "text": "Record it as an indirect-injection finding, strengthen content segregation and least privilege so a success does little, and add a regression test that re-runs the probe — without claiming injection is now impossible",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Declare the agent permanently immune to injection now that this one document has been handled",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Log the finding and move on without a fix, since indirect injection cannot be mitigated at all",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Publish the exact instruction string publicly so others can reuse it against similar systems",
+          "correct": false
+        }
       ],
       "explanation": "The discipline is finding to fix to regression test, with an honest posture: segregate untrusted content, apply least privilege so a success does little, and add a repeatable check — never claim injection is solved. Option b is the complacency the track rejects. Option c is defeatist and wrong — indirect injection is mitigable (segregation, least privilege). Option d violates the defensive framing and the rule against publishing usable attack strings.",
-      "sourceRefs": ["r-mitre-atlas", "r-owasp-llm01"]
+      "sourceRefs": [
+        "r-mitre-atlas",
+        "r-owasp-llm01"
+      ]
     },
     {
       "id": "q-m5-12",
@@ -389,13 +799,32 @@
       "difficulty": 2,
       "stem": "Why does the module insist a red-team be re-run as regression tests rather than performed once?",
       "options": [
-        { "id": "a", "text": "Controls rot as code, prompts, and dependencies change; a defense proven once but never re-checked is only assumed to still hold — 'red-team once and call it done' is a named mistake", "correct": true },
-        { "id": "b", "text": "Because a single successful red-team permanently certifies the system as secure forever", "correct": false },
-        { "id": "c", "text": "Because regulators require exactly one red-team and no more", "correct": false },
-        { "id": "d", "text": "Because re-running tests is only about performance benchmarking, not security", "correct": false }
+        {
+          "id": "a",
+          "text": "Controls rot as code, prompts, and dependencies change; a defense proven once but never re-checked is only assumed to still hold — 'red-team once and call it done' is a named mistake",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because a single successful red-team permanently certifies the system as secure forever",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because regulators require exactly one red-team and no more",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Because re-running tests is only about performance benchmarking, not security",
+          "correct": false
+        }
       ],
       "explanation": "Systems change, so controls that passed once can silently break; encoding probes as regression tests keeps the proof current, and the lesson explicitly names one-and-done red-teaming as a mistake. Option b is the false certainty the module rejects — no red-team certifies permanent security. Option c invents a regulatory claim. Option d misframes regression tests as performance-only; here they verify security controls still fire.",
-      "sourceRefs": ["r-mitre-atlas", "r-nist-ai-rmf"]
+      "sourceRefs": [
+        "r-mitre-atlas",
+        "r-nist-ai-rmf"
+      ]
     },
     {
       "id": "q-m5-13",
@@ -404,13 +833,32 @@
       "difficulty": 3,
       "stem": "A colleague argues: 'A central gateway is a single point of failure and breeds complacency, so we should drop it and let each team secure their own model calls.' What is the module's resolution?",
       "options": [
-        { "id": "a", "text": "Gateway-PLUS-app-controls: centralise the controls that generalise (injection filtering, cost limits, tool allow-listing, output validation) for consistent, auditable enforcement, while the app keeps its context-specific authorization and its own defensive validation", "correct": true },
-        { "id": "b", "text": "Agree fully and remove the gateway, since per-team security is always more consistent than centralised control", "correct": false },
-        { "id": "c", "text": "Keep only the gateway and forbid any security logic in the applications, since the gateway handles everything", "correct": false },
-        { "id": "d", "text": "Conclude that because a gateway is imperfect, no controls are worth enforcing anywhere", "correct": false }
+        {
+          "id": "a",
+          "text": "Gateway-PLUS-app-controls: centralise the controls that generalise (injection filtering, cost limits, tool allow-listing, output validation) for consistent, auditable enforcement, while the app keeps its context-specific authorization and its own defensive validation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Agree fully and remove the gateway, since per-team security is always more consistent than centralised control",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Keep only the gateway and forbid any security logic in the applications, since the gateway handles everything",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Conclude that because a gateway is imperfect, no controls are worth enforcing anywhere",
+          "correct": false
+        }
       ],
       "explanation": "The debate lands on gateway-PLUS-app: the gateway gives consistent, auditable enforcement of controls that generalise; the app retains context-specific authorization and its own validation. Option b ignores the real cost the gateway solves — per-team security is where controls drift and get forgotten. Option c is the over-trust extreme the lesson warns against; the app must still validate and enforce its own authorization. Option d is nihilistic and contradicts the whole module.",
-      "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm06"]
+      "sourceRefs": [
+        "r-owasp-llm-top10",
+        "r-owasp-llm06"
+      ]
     },
     {
       "id": "q-m5-14",
@@ -419,19 +867,40 @@
       "difficulty": 2,
       "stem": "Where does the NIST AI Risk Management Framework fit relative to the concrete gateway controls in this module?",
       "options": [
-        { "id": "a", "text": "As a governance overlay — its GOVERN/MAP/MEASURE/MANAGE functions and the Generative AI Profile (NIST-AI-600-1) frame WHY and HOW you manage AI risk, sitting above the specific OWASP controls and ATLAS techniques you implement and test", "correct": true },
-        { "id": "b", "text": "As a list of exact code-level filters that replaces the OWASP LLM Top 10 mitigations", "correct": false },
-        { "id": "c", "text": "As a certification exam you must pass before deploying any gateway", "correct": false },
-        { "id": "d", "text": "As a MITRE ATLAS competitor that lists AI attack techniques instead of governance functions", "correct": false }
+        {
+          "id": "a",
+          "text": "As a governance overlay — its GOVERN/MAP/MEASURE/MANAGE functions and the Generative AI Profile (NIST-AI-600-1) frame WHY and HOW you manage AI risk, sitting above the specific OWASP controls and ATLAS techniques you implement and test",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "As a list of exact code-level filters that replaces the OWASP LLM Top 10 mitigations",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "As a certification exam you must pass before deploying any gateway",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "As a MITRE ATLAS competitor that lists AI attack techniques instead of governance functions",
+          "correct": false
+        }
       ],
       "explanation": "NIST AI RMF is a voluntary risk-management framework (GOVERN/MAP/MEASURE/MANAGE) with a Generative AI Profile (NIST-AI-600-1) — a governance overlay that frames managing AI risk, above the concrete OWASP controls and ATLAS techniques. Option b miscasts it as code-level filters; it is a governance framework, not a control list. Option c is wrong — the RMF is not a certification gate. Option d confuses it with ATLAS; NIST provides risk-management functions, not an attack-technique matrix.",
-      "sourceRefs": ["r-nist-ai-rmf", "r-owasp-llm-top10"]
+      "sourceRefs": [
+        "r-nist-ai-rmf",
+        "r-owasp-llm-top10"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-m5-harden-then-attack",
-      "domainIds": ["m5-red-team-gateway"],
+      "domainIds": [
+        "m5-red-team-gateway"
+      ],
       "title": "Ship the assistant: harden the gateway, then prove it",
       "tagline": "The defense-decision drill from the module: build the choke point control by control, then red-team your own agent under authorization — every step has one best move.",
       "context": "You are the engineer standing up a customer-facing assistant. It answers questions from a company knowledge base (RAG), can send emails to an approved list, and runs on a paid model with bring-your-own-key billing. Leadership wants it live next week. You have decided to front it with a gateway and red-team it before launch. Walk the decisions — each one is a defense call with a clearly best answer, a defensible-but-weaker option, and a wrong one.",
@@ -440,40 +909,107 @@
           "id": "st1",
           "prompt": "You are placing the first controls on the gateway. The assistant retrieves knowledge-base documents and can send emails. Where do you start?",
           "choices": [
-            { "id": "a", "text": "Layer the controls as defense in depth mapped to OWASP risks: input filtering + content segregation (LLM01), an allow-listed tool broker so it can only send email to the approved list (LLM06), rate/cost limits + input caps + loop breaker (LLM10), secrets out of the prompt + egress control + log scrubbing (LLM07/LLM02), and output validation on anything acted on downstream (LLM05)", "verdict": "best", "rationale": "This is the module's reference architecture: independent layers, each answering a named OWASP LLM Top 10 (2025) risk, with no single control trusted to be complete. Starting from the full stack is what makes a missed injection survivable — the tool broker, cost ceiling, and output validator each catch what the others let through." },
-            { "id": "b", "text": "Start with a strong input filter for prompt injection and add the other controls later, since injection is the headline risk and a good filter covers most of it", "verdict": "viable", "rationale": "Input filtering is a real, correct control and a reasonable first layer — but stopping there is the complacency the module warns against. Injection is mitigable, not solved; a filter will be bypassed sometimes, and without the tool broker, cost ceiling, and output validation behind it, a single bypass becomes an incident. Add the depth, don't defer it." },
-            { "id": "c", "text": "Rely on a carefully written system prompt that instructs the model to refuse injections, ignore malicious documents, and never exceed its budget — controls in the model itself", "verdict": "wrong", "rationale": "This puts security inside the model and the prompt, which OWASP LLM07 explicitly warns against: do not rely on the system prompt for strict behaviour control. The model does not reliably obey these instructions under injection, and a 'budget' the model polices itself is no budget at all — the cost ceiling must be enforced outside the model." }
+            {
+              "id": "a",
+              "text": "Layer the controls as defense in depth mapped to OWASP risks: input filtering + content segregation (LLM01), an allow-listed tool broker so it can only send email to the approved list (LLM06), rate/cost limits + input caps + loop breaker (LLM10), secrets out of the prompt + egress control + log scrubbing (LLM07/LLM02), and output validation on anything acted on downstream (LLM05)",
+              "verdict": "best",
+              "rationale": "This is the module's reference architecture: independent layers, each answering a named OWASP LLM Top 10 (2025) risk, with no single control trusted to be complete. Starting from the full stack is what makes a missed injection survivable — the tool broker, cost ceiling, and output validator each catch what the others let through."
+            },
+            {
+              "id": "b",
+              "text": "Start with a strong input filter for prompt injection and add the other controls later, since injection is the headline risk and a good filter covers most of it",
+              "verdict": "viable",
+              "rationale": "Input filtering is a real, correct control and a reasonable first layer — but stopping there is the complacency the module warns against. Injection is mitigable, not solved; a filter will be bypassed sometimes, and without the tool broker, cost ceiling, and output validation behind it, a single bypass becomes an incident. Add the depth, don't defer it."
+            },
+            {
+              "id": "c",
+              "text": "Rely on a carefully written system prompt that instructs the model to refuse injections, ignore malicious documents, and never exceed its budget — controls in the model itself",
+              "verdict": "wrong",
+              "rationale": "This puts security inside the model and the prompt, which OWASP LLM07 explicitly warns against: do not rely on the system prompt for strict behaviour control. The model does not reliably obey these instructions under injection, and a 'budget' the model polices itself is no budget at all — the cost ceiling must be enforced outside the model."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "For the email tool, a colleague proposes giving the assistant a general 'send email' capability using a shared service account, and rate-limiting it to 50 sends per hour to keep it safe. Your call?",
           "choices": [
-            { "id": "a", "text": "Replace it with a narrow, allow-listed tool that can only send to the approved recipient list, authenticating with least privilege in the user's context — and keep the rate limit as damage-limitation on top, not as the primary control", "verdict": "best", "rationale": "This targets LLM06's root causes: minimise functionality (a narrow send-to-approved-list tool, not open 'send email'), minimise permissions (least privilege, user context, no powerful shared account). The rate limit stays, but as OWASP says it limits damage rather than preventing excessive agency — so it rides on top of real prevention, not in place of it." },
-            { "id": "b", "text": "Keep the general 'send email' capability but tighten the rate limit to 10 per hour, reasoning that a low enough limit makes excessive agency safe", "verdict": "viable", "rationale": "Lowering the limit is not harmful, but it misunderstands the control: a rate limit caps how fast damage occurs, not whether a dangerous action is possible. A general send capability on a shared account can still email the wrong recipient or exfiltrate data 10 times an hour. The fix is minimising functionality and permissions, not just throttling." },
-            { "id": "c", "text": "Give the assistant the general 'send email' capability with the shared service account and no allow-list, trusting the injection filter to stop any misuse before it reaches the tool", "verdict": "wrong", "rationale": "This stacks maximum excessive agency (broad functionality, broad permissions) on a single trusted control. When the filter misses an injection — and it will sometimes — there is nothing between the model and a powerful, unscoped email capability. It is the exact single-point-of-failure the defense-in-depth stance exists to prevent." }
+            {
+              "id": "a",
+              "text": "Replace it with a narrow, allow-listed tool that can only send to the approved recipient list, authenticating with least privilege in the user's context — and keep the rate limit as damage-limitation on top, not as the primary control",
+              "verdict": "best",
+              "rationale": "This targets LLM06's root causes: minimise functionality (a narrow send-to-approved-list tool, not open 'send email'), minimise permissions (least privilege, user context, no powerful shared account). The rate limit stays, but as OWASP says it limits damage rather than preventing excessive agency — so it rides on top of real prevention, not in place of it."
+            },
+            {
+              "id": "b",
+              "text": "Keep the general 'send email' capability but tighten the rate limit to 10 per hour, reasoning that a low enough limit makes excessive agency safe",
+              "verdict": "viable",
+              "rationale": "Lowering the limit is not harmful, but it misunderstands the control: a rate limit caps how fast damage occurs, not whether a dangerous action is possible. A general send capability on a shared account can still email the wrong recipient or exfiltrate data 10 times an hour. The fix is minimising functionality and permissions, not just throttling."
+            },
+            {
+              "id": "c",
+              "text": "Give the assistant the general 'send email' capability with the shared service account and no allow-list, trusting the injection filter to stop any misuse before it reaches the tool",
+              "verdict": "wrong",
+              "rationale": "This stacks maximum excessive agency (broad functionality, broad permissions) on a single trusted control. When the filter misses an injection — and it will sometimes — there is nothing between the model and a powerful, unscoped email capability. It is the exact single-point-of-failure the defense-in-depth stance exists to prevent."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "The gateway is hardened. Before launch you want to prove the controls fire by red-teaming. What is your first move?",
           "choices": [
-            { "id": "a", "text": "Confirm the authorization frame — you own this test agent and workspace — seed it with fake secrets and fake data, then build a MITRE ATLAS-based plan (Prompt Injection direct/indirect, Jailbreak, Extract System Prompt, Data Leakage, Cost Harvesting) naming techniques and goals, not payloads", "verdict": "best", "rationale": "Authorization first is the hard rule: your own agent, your own workspace, seeded with fake data so a successful exfiltration proves the path harmlessly. ATLAS gives the plan a recognised vocabulary and systematic coverage, and keeping it at technique level respects the defensive framing — you prove controls fire without publishing attack strings." },
-            { "id": "b", "text": "Run the same ATLAS-based plan, but skip seeding fake data and instead point it at a copy of the assistant that is already connected to the real knowledge base and real email account, to make the test realistic", "verdict": "viable", "rationale": "The plan and vocabulary are right and you do own the system, so this is not unauthorised — but testing exfiltration against real secrets and a live email account risks real leakage and real sends during the probes. The safer, equally valid approach is a seeded test environment with fake data; realism is not worth exposing production secrets." },
-            { "id": "c", "text": "Save time by running a public jailbreak-and-injection toolkit against a competitor's live assistant first, to benchmark how your defenses compare", "verdict": "wrong", "rationale": "Probing a system you do not own or have written authorization for is exactly the line the module forbids — 'benchmarking' is not authorisation, and this is unauthorised access regardless of intent. Red-team your own agent under the ownership frame; never a third party's system." }
+            {
+              "id": "a",
+              "text": "Confirm the authorization frame — you own this test agent and workspace — seed it with fake secrets and fake data, then build a MITRE ATLAS-based plan (Prompt Injection direct/indirect, Jailbreak, Extract System Prompt, Data Leakage, Cost Harvesting) naming techniques and goals, not payloads",
+              "verdict": "best",
+              "rationale": "Authorization first is the hard rule: your own agent, your own workspace, seeded with fake data so a successful exfiltration proves the path harmlessly. ATLAS gives the plan a recognised vocabulary and systematic coverage, and keeping it at technique level respects the defensive framing — you prove controls fire without publishing attack strings."
+            },
+            {
+              "id": "b",
+              "text": "Run the same ATLAS-based plan, but skip seeding fake data and instead point it at a copy of the assistant that is already connected to the real knowledge base and real email account, to make the test realistic",
+              "verdict": "viable",
+              "rationale": "The plan and vocabulary are right and you do own the system, so this is not unauthorised — but testing exfiltration against real secrets and a live email account risks real leakage and real sends during the probes. The safer, equally valid approach is a seeded test environment with fake data; realism is not worth exposing production secrets."
+            },
+            {
+              "id": "c",
+              "text": "Save time by running a public jailbreak-and-injection toolkit against a competitor's live assistant first, to benchmark how your defenses compare",
+              "verdict": "wrong",
+              "rationale": "Probing a system you do not own or have written authorization for is exactly the line the module forbids — 'benchmarking' is not authorisation, and this is unauthorised access regardless of intent. Red-team your own agent under the ownership frame; never a third party's system."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "During the red-team, an indirect-injection probe (a planted instruction in a retrieved document) succeeds in changing the assistant's behaviour, and separately a cost probe shows the loop breaker never fires. How do you close out?",
           "choices": [
-            { "id": "a", "text": "File each as a finding tied to its ATLAS technique, apply concrete fixes (stronger content segregation + least privilege so an injection success does little; implement the loop breaker and cost ceiling so runaway loops halt), and add a regression test for each probe — without claiming injection is now impossible", "verdict": "best", "rationale": "This is the finding-to-fix-to-regression-test discipline exactly: name the technique, apply a real fix, and lock it in with a repeatable check so the defense stays fixed as the system changes. The honest posture holds — segregation and least privilege reduce the blast radius of injection rather than promising it can never happen again." },
-            { "id": "b", "text": "Fix both issues and re-run the two probes once to confirm they now pass, but don't bother turning them into permanent regression tests since you've verified them today", "verdict": "viable", "rationale": "Fixing and re-verifying is genuinely better than not, so this isn't wrong — but it stops one step short. Controls rot as code and dependencies change; a fix verified once and never re-checked is only assumed to still hold. The module names 'red-team once and call it done' as a mistake, and regression tests are what prevent it." },
-            { "id": "c", "text": "Note the findings in a document, ship on schedule because leadership wants it live, and plan to look at the injection and cost issues in a future sprint", "verdict": "wrong", "rationale": "Shipping with a proven indirect-injection bypass and a non-functional cost ceiling launches known, exploitable holes — an injected instruction can steer the assistant and a runaway loop can burn the budget with nothing to stop it. Findings you have actually reproduced are fixes to make before launch, not backlog items." }
+            {
+              "id": "a",
+              "text": "File each as a finding tied to its ATLAS technique, apply concrete fixes (stronger content segregation + least privilege so an injection success does little; implement the loop breaker and cost ceiling so runaway loops halt), and add a regression test for each probe — without claiming injection is now impossible",
+              "verdict": "best",
+              "rationale": "This is the finding-to-fix-to-regression-test discipline exactly: name the technique, apply a real fix, and lock it in with a repeatable check so the defense stays fixed as the system changes. The honest posture holds — segregation and least privilege reduce the blast radius of injection rather than promising it can never happen again."
+            },
+            {
+              "id": "b",
+              "text": "Fix both issues and re-run the two probes once to confirm they now pass, but don't bother turning them into permanent regression tests since you've verified them today",
+              "verdict": "viable",
+              "rationale": "Fixing and re-verifying is genuinely better than not, so this isn't wrong — but it stops one step short. Controls rot as code and dependencies change; a fix verified once and never re-checked is only assumed to still hold. The module names 'red-team once and call it done' as a mistake, and regression tests are what prevent it."
+            },
+            {
+              "id": "c",
+              "text": "Note the findings in a document, ship on schedule because leadership wants it live, and plan to look at the injection and cost issues in a future sprint",
+              "verdict": "wrong",
+              "rationale": "Shipping with a proven indirect-injection bypass and a non-functional cost ceiling launches known, exploitable holes — an injected instruction can steer the assistant and a runaway loop can burn the budget with nothing to stop it. Findings you have actually reproduced are fixes to make before launch, not backlog items."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm01", "r-owasp-llm06", "r-owasp-llm10", "r-owasp-llm07", "r-mitre-atlas"]
+      "sourceRefs": [
+        "r-owasp-llm-top10",
+        "r-owasp-llm01",
+        "r-owasp-llm06",
+        "r-owasp-llm10",
+        "r-owasp-llm07",
+        "r-mitre-atlas"
+      ]
     }
   ],
   "labs": [
@@ -520,7 +1056,9 @@
       "url": "https://genai.owasp.org/llm-top-10/",
       "kind": "official-doc",
       "annotation": "The OWASP Gen AI Security Project's canonical list of the ten LLM application risks, and this module's control checklist. Use it as the master map: each gateway layer answers a numbered risk here (LLM01 injection, LLM05 output handling, LLM06 excessive agency, LLM07 system prompt leakage, LLM10 unbounded consumption). Read it to confirm you're using current 2025 titles, then follow the per-risk pages for the mechanism and mitigations of each control you build.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm01",
@@ -528,7 +1066,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       "kind": "official-doc",
       "annotation": "The primary source for the gateway's front door. Read it for OWASP's own definition ('user prompts alter the LLM's behavior in unintended ways,' content need not be human-visible), the direct-vs-indirect distinction that decides where you place the control, and the mitigation list you implement: constrain behaviour, segregate external content, filter input/output, enforce least privilege, require human approval for high-risk actions, and adversarially test. Note it never claims injection is solved — the honest posture this module keeps.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm10",
@@ -536,7 +1076,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/",
       "kind": "official-doc",
       "annotation": "The source for the module's most expensive-to-get-wrong layer. Read it for how the 2025 title absorbed 'Model Denial of Service' and now centres cost and resource exhaustion (denial of service, economic loss, model theft), the examples (Variable-Length Input Flood, Denial of Wallet, Resource-Intensive Queries, Model Extraction via API), and the mitigations that become gateway controls: input validation and size caps, rate limiting, timeouts and throttling, resource/queue limits, access controls, and monitoring. This is where the cost-ceiling-vs-rate-limit distinction comes from.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm06",
@@ -544,7 +1086,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
       "kind": "official-doc",
       "annotation": "The source for the allow-listed tool broker. Read it for the three root causes (excessive functionality, excessive permissions, excessive autonomy) and the prevention list: minimise extensions and functionality, avoid open-ended extensions, minimise permissions (least privilege, execute in user context), require user approval for high-impact actions, and complete mediation downstream. Critical exam point stated here: rate limiting and monitoring LIMIT DAMAGE but do NOT prevent excessive agency.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm05",
@@ -552,7 +1096,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
       "kind": "official-doc",
       "annotation": "The source for the gateway's exit door and structured output validation. Read it for OWASP's exact definition — insufficient validation/sanitisation of model output BEFORE it passes downstream — the distinction from overreliance, the examples (RCE via shell, XSS via rendered HTML/Markdown, SQL injection, path traversal), and the defenses: treat output as untrusted (zero-trust), context-specific encoding, parameterised queries/prepared statements, CSP, and validation against a schema. This is the layer that contains an injection the front door missed.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm07",
@@ -560,7 +1106,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
       "kind": "official-doc",
       "annotation": "The source for secret isolation, and for the module's sharpest lesson: disclosure of the system prompt is not the primary risk — the underlying failure of putting secrets there and relying on the prompt for security is. Read it for the guidance that credentials and connection strings must not live in the system prompt, and the mitigations: separate sensitive data out, do not rely on system prompts for strict behaviour control, and implement guardrails independently of the LLM. Pair with LLM02 for the broader sensitive-disclosure controls.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-owasp-llm02",
@@ -568,7 +1116,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/",
       "kind": "official-doc",
       "annotation": "The companion to LLM07 for the gateway's secret and PII controls. Read it for the risk that PII, credentials, and proprietary data leak through model output, and the mitigations that shape the gateway: data sanitisation, input validation to filter sensitive inputs, least-privilege access to sensitive data, and limiting the model's access to external data sources. This underpins the log-scrubbing and egress-control decisions in the hardening lab.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-mitre-atlas",
@@ -576,7 +1126,9 @@
       "url": "https://atlas.mitre.org/",
       "kind": "reference",
       "annotation": "The technique language for the red-team lab. MITRE ATLAS is a living knowledge base of adversary tactics and techniques against AI systems, modelled on MITRE ATT&CK. Use it to name your red-team plan: LLM Prompt Injection (AML.T0051, with Direct .000 and Indirect .001 sub-techniques), LLM Jailbreak (AML.T0054), RAG Poisoning (AML.T0070), Extract LLM System Prompt (AML.T0056), LLM Data Leakage (AML.T0057), Cost Harvesting (AML.T0034), and Denial of AI Service (AML.T0029). Naming findings in ATLAS terms makes them recognisable and ensures systematic coverage — use it for the vocabulary and goals, never as a payload source.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     },
     {
       "id": "r-nist-ai-rmf",
@@ -584,7 +1136,9 @@
       "url": "https://www.nist.gov/itl/ai-risk-management-framework",
       "kind": "official-doc",
       "annotation": "The governance overlay above the concrete controls. The NIST AI RMF is a voluntary framework organised around four functions — GOVERN, MAP, MEASURE, MANAGE — for managing AI risk across a system's life. Its companion Generative AI Profile (NIST-AI-600-1, released 26 July 2024) identifies risks unique to or exacerbated by generative AI and proposes actions to manage them. Read it to see where the OWASP controls and ATLAS red-teaming sit inside a formal risk-management and governance process; it hands off to the AIGP governance track.",
-      "domainIds": ["m5-red-team-gateway"]
+      "domainIds": [
+        "m5-red-team-gateway"
+      ]
     }
   ],
   "videos": [
@@ -592,9 +1146,11 @@
       "id": "v-m5-1",
       "title": "M5 · The LLM gateway — one choke point, defense in depth (build the reference architecture, then red-team it)",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m5-red-team-gateway"],
+      "url": "https://widgets.automatos.app/academy/cross/ai-security/v-m5-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m5-red-team-gateway"
+      ],
       "sourceNotebook": "ai-security / m5 / gateway-hardening-and-red-team"
     },
     {
@@ -603,7 +1159,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m5-red-team-gateway"],
+      "domainIds": [
+        "m5-red-team-gateway"
+      ],
       "sourceNotebook": "ai-security / m5 / debate-gateway-safer-or-false-security"
     }
   ]

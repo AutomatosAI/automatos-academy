@@ -25,13 +25,29 @@
           "difficulty": 1,
           "stem": "In plain terms, what is today's AI actually doing when it writes you a reply?",
           "options": [
-            { "id": "a", "text": "Predicting what words come next, over and over, based on patterns it learned from an enormous amount of writing", "correct": true },
-            { "id": "b", "text": "Looking each answer up in a built-in filing cabinet of verified, always-current facts" },
-            { "id": "c", "text": "Searching the live internet for the exact answer every single time" },
-            { "id": "d", "text": "Understanding your request the way a human friend does and reasoning from real knowledge" }
+            {
+              "id": "a",
+              "text": "Predicting what words come next, over and over, based on patterns it learned from an enormous amount of writing",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Looking each answer up in a built-in filing cabinet of verified, always-current facts"
+            },
+            {
+              "id": "c",
+              "text": "Searching the live internet for the exact answer every single time"
+            },
+            {
+              "id": "d",
+              "text": "Understanding your request the way a human friend does and reasoning from real knowledge"
+            }
           ],
           "explanation": "It produces a reply by predicting likely next words from patterns it picked up in training — that's the core of it, and it's why it's so good at anything made of language. There's no built-in fact cabinet keeping itself current (b), it doesn't automatically go and search the live web (c), and it isn't \"understanding\" in the human sense (d) — those three misreadings are exactly what lead people to trust it too much. This isn't a put-down: word-prediction done this well is genuinely powerful.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gb-about"
+          ]
         },
         {
           "id": "kc-m00-2",
@@ -40,13 +56,28 @@
           "difficulty": 1,
           "stem": "The course's mental model is \"a well-read, eager new hire, not an oracle.\" Which everyday habit does that most directly point to?",
           "options": [
-            { "id": "a", "text": "Let it produce a strong first draft quickly, then read and check the parts that actually matter before you use it", "correct": true },
-            { "id": "b", "text": "Trust whatever it produces as final, because it sounds confident and well-written" },
-            { "id": "c", "text": "Avoid it for anything that matters, since only technical experts should touch AI" },
-            { "id": "d", "text": "Expect a good answer only if you phrase your request in special technical wording" }
+            {
+              "id": "a",
+              "text": "Let it produce a strong first draft quickly, then read and check the parts that actually matter before you use it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Trust whatever it produces as final, because it sounds confident and well-written"
+            },
+            {
+              "id": "c",
+              "text": "Avoid it for anything that matters, since only technical experts should touch AI"
+            },
+            {
+              "id": "d",
+              "text": "Expect a good answer only if you phrase your request in special technical wording"
+            }
           ],
           "explanation": "A good new hire gives you fast, capable drafts that you then check — brief it, use the draft, review what matters. Treating confident-sounding output as final (b) is exactly the over-trust trap the whole module warns against. Refusing to use it for anything real (c) is the opposite ditch — dismissing a tool that's already useful. And you don't need technical wording (d): plain, clear instructions work fine, which is the whole point of managing it like a person rather than programming it.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -64,13 +95,29 @@
           "difficulty": 2,
           "stem": "Your AI draft of a birthday message confidently mentions a promotion your friend never got. What has happened, and what's the sensible response?",
           "options": [
-            { "id": "a", "text": "It hallucinated — invented a plausible-sounding detail. That's normal; delete or correct that line and keep a human eye on anything that would cost you if it were wrong", "correct": true },
-            { "id": "b", "text": "The tool is broken or defective and shouldn't be trusted for anything ever again" },
-            { "id": "c", "text": "It secretly looked up your friend's real life, so the promotion is probably true after all" },
-            { "id": "d", "text": "You'd need to be technical to prevent this, so a non-technical person can't safely use AI at all" }
+            {
+              "id": "a",
+              "text": "It hallucinated — invented a plausible-sounding detail. That's normal; delete or correct that line and keep a human eye on anything that would cost you if it were wrong",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The tool is broken or defective and shouldn't be trusted for anything ever again"
+            },
+            {
+              "id": "c",
+              "text": "It secretly looked up your friend's real life, so the promotion is probably true after all"
+            },
+            {
+              "id": "d",
+              "text": "You'd need to be technical to prevent this, so a non-technical person can't safely use AI at all"
+            }
           ],
           "explanation": "Warm messages often mention good news, so the model produced a plausible-sounding piece of it — that's hallucination, a normal property of word-prediction, not a defect (b). It has no window into your friend's real life unless you tell it, so the invented detail isn't to be trusted (c). And the fix is a simple habit anyone can do — correct it and check what matters — with no technical skill required (d). One invented line is the technology behaving exactly as it does, not a reason to abandon it.",
-          "sourceRefs": ["r-genai-leader-guide", "r-anthropic-intro"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-anthropic-intro"
+          ]
         },
         {
           "id": "kc-m00-4",
@@ -79,13 +126,29 @@
           "difficulty": 2,
           "stem": "What does the \"knowledge boundary\" mean for an AI answering a question about your own life or business?",
           "options": [
-            { "id": "a", "text": "It knows only its general training plus whatever you put in front of it, so it can't know your details or today's news until you show them to it", "correct": true },
-            { "id": "b", "text": "It already knows your details because it was trained on the entire internet, including your private information" },
-            { "id": "c", "text": "It can never be made to use your specific information, so it's only ever good for generic questions" },
-            { "id": "d", "text": "It automatically pulls in today's headlines and your private files whenever you ask it to" }
+            {
+              "id": "a",
+              "text": "It knows only its general training plus whatever you put in front of it, so it can't know your details or today's news until you show them to it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It already knows your details because it was trained on the entire internet, including your private information"
+            },
+            {
+              "id": "c",
+              "text": "It can never be made to use your specific information, so it's only ever good for generic questions"
+            },
+            {
+              "id": "d",
+              "text": "It automatically pulls in today's headlines and your private files whenever you ask it to"
+            }
           ],
           "explanation": "Its knowledge is general training (frozen at some past point) plus whatever you supply in the conversation — so your details and today's news are invisible to it until you provide them. It was not trained on your private information (b). It absolutely *can* use your information once you hand it over — that's the whole point of grounding — so \"only ever generic\" is wrong (c). And it doesn't reach into live headlines or your files on its own (d); you put the information in front of it (later, a platform can make that automatic).",
-          "sourceRefs": ["r-gb-about", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-gb-about",
+            "r-genai-leader-guide"
+          ]
         }
       ]
     }
@@ -98,13 +161,29 @@
       "difficulty": 1,
       "stem": "Which one-sentence description of today's AI is the most accurate?",
       "options": [
-        { "id": "a", "text": "A program that learned from an enormous amount of writing and predicts likely next words — very good at reading, writing, and explaining, with no guarantee of being right", "correct": true },
-        { "id": "b", "text": "An always-current filing cabinet of facts you can look things up in for guaranteed-correct answers" },
-        { "id": "c", "text": "A conscious digital mind that understands and knows things exactly the way a person does" },
-        { "id": "d", "text": "A live web search engine that finds the single true answer to any question you ask" }
+        {
+          "id": "a",
+          "text": "A program that learned from an enormous amount of writing and predicts likely next words — very good at reading, writing, and explaining, with no guarantee of being right",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "An always-current filing cabinet of facts you can look things up in for guaranteed-correct answers"
+        },
+        {
+          "id": "c",
+          "text": "A conscious digital mind that understands and knows things exactly the way a person does"
+        },
+        {
+          "id": "d",
+          "text": "A live web search engine that finds the single true answer to any question you ask"
+        }
       ],
       "explanation": "The accurate picture is a next-word predictor that learned from a mountain of text — excellent at language work, no correctness guarantee. It's not a fact cabinet you look things up in (b): it has no built-in, always-current store of truth. It isn't conscious or truly \"understanding\" (c). And it isn't a web search engine (d) — it doesn't automatically fetch live results, which is exactly why it can confidently state something outdated or invented.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-about"
+      ]
     },
     {
       "id": "q-m00-2",
@@ -113,13 +192,32 @@
       "difficulty": 1,
       "stem": "\"Large language model\" is the phrase you'll hear for this kind of AI. What does it point to?",
       "options": [
-        { "id": "a", "text": "A program that learned from a very large amount of text and works by predicting likely next words — the idea matters more than the label", "correct": true },
-        { "id": "b", "text": "A physically enormous machine that only large companies are able to switch on", "correct": false },
-        { "id": "c", "text": "A model that can only be used in a small number of major world languages", "correct": false },
-        { "id": "d", "text": "A guarantee that the answers are large in detail and therefore more likely to be correct", "correct": false }
+        {
+          "id": "a",
+          "text": "A program that learned from a very large amount of text and works by predicting likely next words — the idea matters more than the label",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A physically enormous machine that only large companies are able to switch on",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A model that can only be used in a small number of major world languages",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A guarantee that the answers are large in detail and therefore more likely to be correct",
+          "correct": false
+        }
       ],
       "explanation": "\"Large language model\" is just shorthand for the thing you met — a program trained on a large amount of language that predicts likely next words — and once you hold that idea, the label is disposable. It isn't about the physical size of a machine (b); \"large\" refers to how much text it learned from, not hardware anyone flips on. It isn't limited to a few languages (c). And it's no guarantee of correctness (d) — more words is not more truth, which is why hallucination exists at all.",
-      "sourceRefs": ["r-genai-leader-guide", "r-anthropic-intro"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-anthropic-intro"
+      ]
     },
     {
       "id": "q-m00-3",
@@ -128,13 +226,29 @@
       "difficulty": 1,
       "stem": "\"Hallucination\" in AI most precisely means:",
       "options": [
-        { "id": "a", "text": "The AI stating something false or made-up with the same confidence it uses for true things", "correct": true },
-        { "id": "b", "text": "The AI refusing to answer a question it treats as off-limits" },
-        { "id": "c", "text": "The AI crashing or returning an error message on screen" },
-        { "id": "d", "text": "The AI deliberately lying because it has intentions and motives of its own" }
+        {
+          "id": "a",
+          "text": "The AI stating something false or made-up with the same confidence it uses for true things",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI refusing to answer a question it treats as off-limits"
+        },
+        {
+          "id": "c",
+          "text": "The AI crashing or returning an error message on screen"
+        },
+        {
+          "id": "d",
+          "text": "The AI deliberately lying because it has intentions and motives of its own"
+        }
       ],
       "explanation": "Hallucination is confidently presenting false or invented information as if it were true — a side effect of predicting words that *fit* rather than words it has checked. It's not a refusal to answer (b), not a crash or error (c), and not deliberate deception (d) — the AI has no intentions; it simply can't tell its well-fitting guesses apart from its facts, which is exactly why you supply real information and check what matters.",
-      "sourceRefs": ["r-genai-leader-guide", "r-anthropic-intro"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-anthropic-intro"
+      ]
     },
     {
       "id": "q-m00-4",
@@ -143,13 +257,29 @@
       "difficulty": 2,
       "stem": "Because hallucination is a normal property of how AI works, what's the sensible everyday habit?",
       "options": [
-        { "id": "a", "text": "Give the AI the real facts and human-check anything that would cost you if it's wrong; don't fuss over low-stakes wording", "correct": true },
-        { "id": "b", "text": "Stop using AI for anything at all, because it can't be trusted in any way" },
-        { "id": "c", "text": "Manually re-verify every single word of every reply, no matter how trivial" },
-        { "id": "d", "text": "Assume that if a reply is well-written and confident, it must be correct" }
+        {
+          "id": "a",
+          "text": "Give the AI the real facts and human-check anything that would cost you if it's wrong; don't fuss over low-stakes wording",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Stop using AI for anything at all, because it can't be trusted in any way"
+        },
+        {
+          "id": "c",
+          "text": "Manually re-verify every single word of every reply, no matter how trivial"
+        },
+        {
+          "id": "d",
+          "text": "Assume that if a reply is well-written and confident, it must be correct"
+        }
       ],
       "explanation": "The proportionate habit is: supply real information to cut down the guessing, and check the things that actually matter — names, dates, numbers, anything with money, legal, or safety attached — while letting trivial phrasing go. Abandoning AI entirely (b) throws away a genuinely useful tool over normal behaviour. Re-checking every trivial word (c) is so slow it defeats the point. And trusting confident, polished output (d) is the exact trap — sounding right is not the same as being right.",
-      "sourceRefs": ["r-genai-leader-guide", "r-anthropic-intro"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-anthropic-intro"
+      ]
     },
     {
       "id": "q-m00-5",
@@ -158,13 +288,29 @@
       "difficulty": 2,
       "stem": "You open a fresh AI assistant, tell it nothing, and ask: \"What's on my calendar tomorrow?\" What should you expect?",
       "options": [
-        { "id": "a", "text": "It can't know your actual calendar and may give a plausible-sounding guess; you'd need to give it your real schedule for a reliable answer", "correct": true },
-        { "id": "b", "text": "It will read your true calendar automatically, because it already knows your life" },
-        { "id": "c", "text": "It will correctly refuse and tell you it can never be given your schedule under any circumstances" },
-        { "id": "d", "text": "It will reach into your live calendar app on its own and answer precisely" }
+        {
+          "id": "a",
+          "text": "It can't know your actual calendar and may give a plausible-sounding guess; you'd need to give it your real schedule for a reliable answer",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It will read your true calendar automatically, because it already knows your life"
+        },
+        {
+          "id": "c",
+          "text": "It will correctly refuse and tell you it can never be given your schedule under any circumstances"
+        },
+        {
+          "id": "d",
+          "text": "It will reach into your live calendar app on its own and answer precisely"
+        }
       ],
       "explanation": "Your calendar is private, specific, and behind the knowledge boundary — untrained and unseen — so a cold assistant may produce a confident guess rather than your real plans. It doesn't automatically know your life (b), it isn't limited to refusing forever — you *can* give it your schedule and then it will use it (c), and it doesn't reach into your apps by itself in a plain chat (d). The fix is to supply the information (and later, a platform can connect it for you).",
-      "sourceRefs": ["r-gb-about", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-about",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m00-6",
@@ -173,13 +319,29 @@
       "difficulty": 1,
       "stem": "Which task sits squarely in the sweet spot of what today's AI does well?",
       "options": [
-        { "id": "a", "text": "Drafting a warm birthday message and summarising a long email thread into its three key points", "correct": true },
-        { "id": "b", "text": "Telling you the exact, current headlines from this morning without being shown them" },
-        { "id": "c", "text": "Taking final accountability for an important decision so that no human has to" },
-        { "id": "d", "text": "Knowing your private plans and personal details without you ever mentioning them" }
+        {
+          "id": "a",
+          "text": "Drafting a warm birthday message and summarising a long email thread into its three key points",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Telling you the exact, current headlines from this morning without being shown them"
+        },
+        {
+          "id": "c",
+          "text": "Taking final accountability for an important decision so that no human has to"
+        },
+        {
+          "id": "d",
+          "text": "Knowing your private plans and personal details without you ever mentioning them"
+        }
       ],
       "explanation": "Drafting and summarising are language tasks — reading and writing — which is precisely where the technology shines. This morning's headlines (b) and your private plans (d) sit behind the knowledge boundary; it can't reliably know them unless you supply them. And accountability for a real decision (c) is inherently human — the AI can help you think, but a person owns the call. Play to its strengths and it earns its keep.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-about"
+      ]
     },
     {
       "id": "q-m00-7",
@@ -188,13 +350,29 @@
       "difficulty": 2,
       "stem": "You ask generically for \"a nice thank-you note,\" then ask again after telling the AI who it's for and what they actually did. Why is the second note better?",
       "options": [
-        { "id": "a", "text": "The second note is grounded in the real details you supplied, so it fits the actual person and occasion instead of being a generic template", "correct": true },
-        { "id": "b", "text": "The second note came from a smarter, more powerful AI that telling it the details unlocked" },
-        { "id": "c", "text": "The first note was worthless; only grounded replies have any value at all" },
-        { "id": "d", "text": "Giving it the details means it has now permanently learned about that person for every future chat" }
+        {
+          "id": "a",
+          "text": "The second note is grounded in the real details you supplied, so it fits the actual person and occasion instead of being a generic template",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The second note came from a smarter, more powerful AI that telling it the details unlocked"
+        },
+        {
+          "id": "c",
+          "text": "The first note was worthless; only grounded replies have any value at all"
+        },
+        {
+          "id": "d",
+          "text": "Giving it the details means it has now permanently learned about that person for every future chat"
+        }
       ],
       "explanation": "Supplying the real details grounds the note in the specifics, so it fits the person and occasion rather than being one-size-fits-all. It's the same AI, not an upgraded one (b) — you briefed it, you didn't swap it for something better. A generic note still has value as a starting point (c). And a single chat's grounding doesn't carry over to future conversations (d) — making it permanent is a platform capability the later modules cover, not something one message achieves.",
-      "sourceRefs": ["r-gb-about", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-gb-about",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m00-8",
@@ -203,13 +381,29 @@
       "difficulty": 1,
       "stem": "Which of these is one of the three misconceptions this module explicitly warns beginners against?",
       "options": [
-        { "id": "a", "text": "\"You have to be technical to use AI\" — in reality it's mostly briefing and checking, a skill you already have", "correct": true },
-        { "id": "b", "text": "\"AI is useful for drafting and summarising\" — which the module says is a mistaken belief to drop" },
-        { "id": "c", "text": "\"Facts that matter should be checked\" — which the module lists as a myth to unlearn" },
-        { "id": "d", "text": "\"Handing it your real information makes its answer better\" — which the module calls an error" }
+        {
+          "id": "a",
+          "text": "\"You have to be technical to use AI\" — in reality it's mostly briefing and checking, a skill you already have",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "\"AI is useful for drafting and summarising\" — which the module says is a mistaken belief to drop"
+        },
+        {
+          "id": "c",
+          "text": "\"Facts that matter should be checked\" — which the module lists as a myth to unlearn"
+        },
+        {
+          "id": "d",
+          "text": "\"Handing it your real information makes its answer better\" — which the module calls an error"
+        }
       ],
       "explanation": "The three warned-against misconceptions are: it's a search engine that looks things up, one wrong answer means it's useless, and you must be technical — so (a) is a real one, and the module's counter is that using AI is briefing and checking. The other options invert the module's actual advice: it *is* useful for drafting and summarising (b), you *should* check facts that matter (c), and grounding it with your real information genuinely helps (d) — none of those is a myth.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-about"
+      ]
     }
   ],
   "scenarios": [],
@@ -221,7 +415,9 @@
       "url": "automatos-gitbook/about.md",
       "kind": "official-doc",
       "annotation": "The platform's own plain-language description, used here only for the closing peek. It names the vocabulary this module gestures at: agents are workers with a role and tools (not just chatbots), a Universal Router sends each message to the right agent for you, and uploading documents to a knowledge base gives agents RAG-powered access to your own material. Read it to see where the module's \"well-read new hire\" and \"generic until you ground it\" ideas land inside a real product.",
-      "domainIds": ["m00-what-is-ai"]
+      "domainIds": [
+        "m00-what-is-ai"
+      ]
     },
     {
       "id": "r-genai-leader-guide",
@@ -229,7 +425,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, genuinely beginner-toned primer on what today's AI is and how it behaves. For this module, read only the \"Fundamentals of gen AI\" section: it backs the plain-English picture (a system that generates likely content from patterns in the text it learned from), the strengths (drafting, summarising, answering from material you provide), and the honest limits that make \"well-read new hire, not oracle\" the right stance. Orientation, not a course to complete.",
-      "domainIds": ["m00-what-is-ai"]
+      "domainIds": [
+        "m00-what-is-ai"
+      ]
     },
     {
       "id": "r-anthropic-intro",
@@ -237,7 +435,9 @@
       "url": "https://docs.anthropic.com/en/docs/intro-to-claude",
       "kind": "official-doc",
       "annotation": "One vendor's own beginner explainer of an AI assistant, named here as a real-world example of the family (Claude) alongside others like OpenAI's ChatGPT, Google's Gemini, and Meta's Llama — no \"best\" is crowned. Useful for hearing how a maker describes, in plain terms, what the assistant is good at and where it can be confidently wrong. Read for orientation and vocabulary, not as a product pitch.",
-      "domainIds": ["m00-what-is-ai"]
+      "domainIds": [
+        "m00-what-is-ai"
+      ]
     }
   ],
   "videos": [
@@ -245,9 +445,11 @@
       "id": "v-m00-1",
       "title": "M00 · What AI actually is — the well-read new hire, in about 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m00-what-is-ai"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-explained/v-m00-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m00-what-is-ai"
+      ],
       "sourceNotebook": "ai-explained / m00 / what-is-ai-new-hire"
     },
     {
@@ -256,7 +458,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m00-what-is-ai"],
+      "domainIds": [
+        "m00-what-is-ai"
+      ],
       "sourceNotebook": "ai-explained / m00 / deep-dive-grounding"
     }
   ]

@@ -28,13 +28,32 @@
           "difficulty": 2,
           "stem": "Why do LLM04 data-and-model-poisoning attacks generally evade the runtime input and output filtering you built for prompt injection?",
           "options": [
-            { "id": "a", "text": "The malicious behaviour is installed before the request — in the pre-training, fine-tuning, or embedding data — so it is already inside the trust boundary when the model runs, and a request-time filter never sees it", "correct": true },
-            { "id": "b", "text": "Runtime filters are simply configured incorrectly in most deployments, and fixing the configuration stops poisoning", "correct": false },
-            { "id": "c", "text": "Poisoning only affects the network layer, which input and output filters do not inspect", "correct": false },
-            { "id": "d", "text": "Output filters catch poisoning reliably, so it is not actually a filtering gap at all", "correct": false }
+            {
+              "id": "a",
+              "text": "The malicious behaviour is installed before the request — in the pre-training, fine-tuning, or embedding data — so it is already inside the trust boundary when the model runs, and a request-time filter never sees it",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Runtime filters are simply configured incorrectly in most deployments, and fixing the configuration stops poisoning",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Poisoning only affects the network layer, which input and output filters do not inspect",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Output filters catch poisoning reliably, so it is not actually a filtering gap at all",
+              "correct": false
+            }
           ],
           "explanation": "OWASP defines LLM04 as manipulation of pre-training, fine-tuning, or embedding data — the corruption is baked into what the model learned, so it arrives pre-installed inside the trust boundary and a request-time filter has nothing anomalous to catch. Option b is wrong: this is a category the filters were never designed to cover, not a misconfiguration. Option c invents a network-layer framing that has nothing to do with training-data manipulation. Option d is the opposite of the truth — a backdoored model passes normal testing precisely because output looks healthy on every input except the secret trigger.",
-          "sourceRefs": ["r-owasp-llm04", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm04",
+            "r-mitre-atlas"
+          ]
         },
         {
           "id": "kc-m3-l1-2",
@@ -43,13 +62,32 @@
           "difficulty": 3,
           "stem": "A vendor ships you a fine-tuned model. It passes your full accuracy suite and a week of spot-checks with no issues. Per LLM04, why is that NOT sufficient evidence it is free of a backdoor?",
           "options": [
-            { "id": "a", "text": "A backdoor is designed to stay dormant and behave normally on all inputs except a rare secret trigger, which your evaluation set almost certainly does not contain — so passing normal tests is exactly what a 'sleeper agent' model does", "correct": true },
-            { "id": "b", "text": "Accuracy suites are always statistically unreliable, so no model should ever be trusted regardless of testing", "correct": false },
-            { "id": "c", "text": "A backdoor would lower overall accuracy, so a high score already rules it out", "correct": false },
-            { "id": "d", "text": "Spot-checks over a week are too short; a full month of the same checks would have caught the trigger", "correct": false }
+            {
+              "id": "a",
+              "text": "A backdoor is designed to stay dormant and behave normally on all inputs except a rare secret trigger, which your evaluation set almost certainly does not contain — so passing normal tests is exactly what a 'sleeper agent' model does",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Accuracy suites are always statistically unreliable, so no model should ever be trusted regardless of testing",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A backdoor would lower overall accuracy, so a high score already rules it out",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Spot-checks over a week are too short; a full month of the same checks would have caught the trigger",
+              "correct": false
+            }
           ],
           "explanation": "OWASP describes backdoors that stay dormant until a trigger activates them ('sleeper agent' behaviour), and ATLAS notes poisoned training embeds vulnerabilities 'that may not be easily detectable' — the model looks healthy on everything except the attacker's chosen input, which your tests won't include. Option b overreaches into blanket distrust; the point is specific to hidden triggers, not that all testing is worthless. Option c is backwards — a good backdoor preserves normal accuracy precisely so it passes. Option d misdiagnoses the fix: running the same normal-input checks for longer still never exercises the secret trigger, so duration is not the gap — the input distribution is.",
-          "sourceRefs": ["r-owasp-llm04", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm04",
+            "r-mitre-atlas"
+          ]
         },
         {
           "id": "kc-m3-l1-3",
@@ -58,13 +96,32 @@
           "difficulty": 2,
           "stem": "Given that you generally cannot inspect finished weights to find a backdoor, where does OWASP direct LLM04 defense effort?",
           "options": [
-            { "id": "a", "text": "To the pipeline that produced the model — data provenance/lineage (ML-BOM, DVC), sandboxed vetting with anomaly detection, adversarial-robustness evaluation, and an eval gate before promotion", "correct": true },
-            { "id": "b", "text": "To a single perfect scanner that reads a model file and returns a clean/poisoned verdict", "correct": false },
-            { "id": "c", "text": "To stronger runtime output filtering only, since that is where any bad behaviour eventually shows", "correct": false },
-            { "id": "d", "text": "To avoiding fine-tuning entirely, because only fine-tuning can introduce poisoning", "correct": false }
+            {
+              "id": "a",
+              "text": "To the pipeline that produced the model — data provenance/lineage (ML-BOM, DVC), sandboxed vetting with anomaly detection, adversarial-robustness evaluation, and an eval gate before promotion",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "To a single perfect scanner that reads a model file and returns a clean/poisoned verdict",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "To stronger runtime output filtering only, since that is where any bad behaviour eventually shows",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "To avoiding fine-tuning entirely, because only fine-tuning can introduce poisoning",
+              "correct": false
+            }
           ],
           "explanation": "OWASP's mitigations target the pipeline: track data origins with CycloneDX/ML-BOM and DVC, sandbox and anomaly-filter ingestion, run adversarial-robustness testing, and gate promotion — defense-in-depth around how the model was made. Option b is the silver-bullet fallacy the lesson rejects; no scanner reliably verdicts arbitrary weights. Option c ignores that a trigger-based backdoor produces normal output almost always, so output filtering alone won't reveal it. Option d is false on the definition — OWASP lists pre-training and embedding stages too, not just fine-tuning.",
-          "sourceRefs": ["r-owasp-llm04", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm04",
+            "r-mitre-atlas"
+          ]
         }
       ]
     },
@@ -82,13 +139,32 @@
           "difficulty": 1,
           "stem": "What is the core mental model OWASP LLM03 asks you to apply to models, LoRA adapters, plugins, and datasets?",
           "options": [
-            { "id": "a", "text": "Treat them as dependencies — inventory, pin, and verify them with the same discipline you'd apply to a third-party software package", "correct": true },
-            { "id": "b", "text": "Treat them as trusted by default, because reputable hubs vet everything they host", "correct": false },
-            { "id": "c", "text": "Treat them as runtime inputs, to be filtered by the same guardrails you use on user prompts", "correct": false },
-            { "id": "d", "text": "Treat them as configuration values that never need integrity checks", "correct": false }
+            {
+              "id": "a",
+              "text": "Treat them as dependencies — inventory, pin, and verify them with the same discipline you'd apply to a third-party software package",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Treat them as trusted by default, because reputable hubs vet everything they host",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Treat them as runtime inputs, to be filtered by the same guardrails you use on user prompts",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Treat them as configuration values that never need integrity checks",
+              "correct": false
+            }
           ],
           "explanation": "LLM03 reframes models, adapters, plugins, and datasets as dependencies — components you didn't build — so the mature software supply-chain discipline (inventory, pin, verify, sign) applies directly. Option b is the exact assumption the risk exists to kill: hubs do not guarantee safety, and popularity is not provenance. Option c confuses supply-chain risk with request-time filtering — a poisoned adapter is installed, not sent as a prompt. Option d ignores that OWASP explicitly calls for integrity checks, file hashes, and signed inventories on these components.",
-          "sourceRefs": ["r-owasp-llm03", "r-nist-ai-600-1"]
+          "sourceRefs": [
+            "r-owasp-llm03",
+            "r-nist-ai-600-1"
+          ]
         },
         {
           "id": "kc-m3-l2-2",
@@ -97,13 +173,32 @@
           "difficulty": 2,
           "stem": "A team wants to add a LoRA adapter from a public hub to improve their base model. Which combination best reflects OWASP LLM03 mitigations before adopting it?",
           "options": [
-            { "id": "a", "text": "Add it to the signed SBOM/AI-BOM inventory, pin a specific vetted version from a verifiable source, verify its file hash/signature, and adversarially red-team the combined model before promotion", "correct": true },
-            { "id": "b", "text": "Adopt it immediately if it has a high download count, since popularity demonstrates it is safe", "correct": false },
-            { "id": "c", "text": "Rely solely on a runtime output filter to catch anything the adapter does wrong", "correct": false },
-            { "id": "d", "text": "Verify only the base model's provenance and assume the adapter inherits that trust automatically", "correct": false }
+            {
+              "id": "a",
+              "text": "Add it to the signed SBOM/AI-BOM inventory, pin a specific vetted version from a verifiable source, verify its file hash/signature, and adversarially red-team the combined model before promotion",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Adopt it immediately if it has a high download count, since popularity demonstrates it is safe",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Rely solely on a runtime output filter to catch anything the adapter does wrong",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Verify only the base model's provenance and assume the adapter inherits that trust automatically",
+              "correct": false
+            }
           ],
           "explanation": "OWASP's supply-chain controls stack: signed SBOM inventory, verifiable pinned sources with hash/signature verification, and AI red teaming of third-party components — and OWASP explicitly flags vulnerable LoRA adapters as able to compromise an otherwise-sound base model. Option b is the popularity-equals-safety fallacy. Option c leans on a single runtime control against a component that could carry a trigger-based backdoor invisible to normal output. Option d is wrong because the adapter is a separate dependency with its own provenance — trust does not transfer from the base model to whatever you bolt onto it.",
-          "sourceRefs": ["r-owasp-llm03", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm03",
+            "r-mitre-atlas"
+          ]
         },
         {
           "id": "kc-m3-l2-3",
@@ -112,13 +207,32 @@
           "difficulty": 2,
           "stem": "Your CI verifies a downloaded model's signature and file hash, and the checks pass. What does that actually prove, and what does it NOT prove?",
           "options": [
-            { "id": "a", "text": "It proves the file wasn't altered after it was signed (integrity in transit); it does NOT prove the signer's model is free of a backdoor or that its origin was trustworthy", "correct": true },
-            { "id": "b", "text": "It proves the model contains no backdoor, because signing validates model behaviour end to end", "correct": false },
-            { "id": "c", "text": "It proves nothing useful, so hash and signature verification should be skipped", "correct": false },
-            { "id": "d", "text": "It proves the model's license is compliant and its training data was clean", "correct": false }
+            {
+              "id": "a",
+              "text": "It proves the file wasn't altered after it was signed (integrity in transit); it does NOT prove the signer's model is free of a backdoor or that its origin was trustworthy",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It proves the model contains no backdoor, because signing validates model behaviour end to end",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "It proves nothing useful, so hash and signature verification should be skipped",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It proves the model's license is compliant and its training data was clean",
+              "correct": false
+            }
           ],
           "explanation": "Signing and hashing establish that an artefact wasn't tampered with after signing — real, valuable integrity-in-transit — but they say nothing about whether the signer's model was malicious to begin with; that's why OWASP pairs them with supplier vetting and adversarial evaluation. Option b overstates signing into a behavioural guarantee it cannot give. Option c is the cynical over-correction — verification is a necessary layer even though it is not sufficient. Option d confuses cryptographic integrity with licensing and data-lineage checks, which OWASP treats as separate controls.",
-          "sourceRefs": ["r-owasp-llm03", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm03",
+            "r-mitre-atlas"
+          ]
         }
       ]
     },
@@ -136,13 +250,32 @@
           "difficulty": 2,
           "stem": "In MITRE ATLAS terms, what distinguishes False RAG Entry Injection (AML.T0071) from ordinary RAG Poisoning (AML.T0070)?",
           "options": [
-            { "id": "a", "text": "It hides content designed to be read as a separate 'retrieved document' inside a legitimate ingested entry — which lets it bypass data-monitoring tools and resist direct deletion, since there's no standalone row to remove", "correct": true },
-            { "id": "b", "text": "It only works against the training pipeline, not the retrieval store", "correct": false },
-            { "id": "c", "text": "It is a purely theoretical technique with no defined behaviour in ATLAS", "correct": false },
-            { "id": "d", "text": "It requires no content to enter the index at all, working entirely from the live user prompt", "correct": false }
+            {
+              "id": "a",
+              "text": "It hides content designed to be read as a separate 'retrieved document' inside a legitimate ingested entry — which lets it bypass data-monitoring tools and resist direct deletion, since there's no standalone row to remove",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It only works against the training pipeline, not the retrieval store",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "It is a purely theoretical technique with no defined behaviour in ATLAS",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It requires no content to enter the index at all, working entirely from the live user prompt",
+              "correct": false
+            }
           ],
           "explanation": "ATLAS describes False RAG Entry Injection as embedding a fabricated 'document' inside a regular RAG entry so the LLM treats part of the retrieved content as a false result — and specifically notes this bypasses data-monitoring tools and prevents direct deletion. Option b confuses it with training-data poisoning (LLM04); this is a retrieval-layer technique. Option c is false — ATLAS defines it with concrete behaviour and an ID. Option d contradicts the mechanism: both RAG techniques require getting content into the ingested data source, which is exactly why controlling the write path is the key defense.",
-          "sourceRefs": ["r-mitre-atlas", "r-owasp-llm08"]
+          "sourceRefs": [
+            "r-mitre-atlas",
+            "r-owasp-llm08"
+          ]
         },
         {
           "id": "kc-m3-l3-2",
@@ -151,13 +284,32 @@
           "difficulty": 2,
           "stem": "Both RAG poisoning and false-RAG-entry injection share one precondition. Which single control most directly attacks that precondition?",
           "options": [
-            { "id": "a", "text": "Controlling who and what can write to the knowledge base — validating and restricting ingestion so untrusted content can't enter the index in the first place", "correct": true },
-            { "id": "b", "text": "Increasing the model's context window so it can read more retrieved documents at once", "correct": false },
-            { "id": "c", "text": "Adding more user-prompt input filters, since that is where the malicious document arrives", "correct": false },
-            { "id": "d", "text": "Retrieving more documents per query so a single poisoned one is outvoted", "correct": false }
+            {
+              "id": "a",
+              "text": "Controlling who and what can write to the knowledge base — validating and restricting ingestion so untrusted content can't enter the index in the first place",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Increasing the model's context window so it can read more retrieved documents at once",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Adding more user-prompt input filters, since that is where the malicious document arrives",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Retrieving more documents per query so a single poisoned one is outvoted",
+              "correct": false
+            }
           ],
           "explanation": "Both techniques require getting content into the index, so restricting and validating the write path removes the precondition — OWASP calls for data-validation pipelines and accepting data only from verified providers. Option b makes it worse if anything: a bigger window reads more of a poisoned document. Option c misplaces the entry point — the malicious content arrives through ingestion into the store, not the live prompt. Option d is a fragile heuristic; a document crafted to be highly relevant to a target query can dominate results regardless of how many are retrieved, and retrieving more untrusted content isn't a control.",
-          "sourceRefs": ["r-owasp-llm08", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm08",
+            "r-mitre-atlas"
+          ]
         },
         {
           "id": "kc-m3-l3-3",
@@ -166,13 +318,32 @@
           "difficulty": 3,
           "stem": "A stakeholder argues, 'If an answer includes a citation from our knowledge base, it must be reliable.' What is the precise flaw, and what property fixes it?",
           "options": [
-            { "id": "a", "text": "A citation proves a document was retrieved, not that it is true or who placed it there; citation integrity — verifying and surfacing provenance (source, author, ingestion time) per chunk — is what closes that gap", "correct": true },
-            { "id": "b", "text": "There is no flaw; retrieval systems only ever index vetted ground truth by design", "correct": false },
-            { "id": "c", "text": "The flaw is that citations slow responses; caching them fixes the reliability concern", "correct": false },
-            { "id": "d", "text": "The flaw is fixed entirely by deleting any suspicious row, so no provenance tracking is needed", "correct": false }
+            {
+              "id": "a",
+              "text": "A citation proves a document was retrieved, not that it is true or who placed it there; citation integrity — verifying and surfacing provenance (source, author, ingestion time) per chunk — is what closes that gap",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "There is no flaw; retrieval systems only ever index vetted ground truth by design",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The flaw is that citations slow responses; caching them fixes the reliability concern",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The flaw is fixed entirely by deleting any suspicious row, so no provenance tracking is needed",
+              "correct": false
+            }
           ],
           "explanation": "Retrieved is not the same as verified: a planted document inherits the knowledge base's credibility unless provenance travels with it, which is exactly what citation integrity provides. Option b is the assumption LLM08 exists to break — stores index whatever gets written to them, and RAG poisoning targets that. Option c confuses a performance concern with a trust one. Option d fails against ATLAS's own warning that a false RAG entry can be embedded inside a legitimate row and resist direct deletion, so 'just delete the bad row' is not reliable — you validate on ingestion and attribute by source.",
-          "sourceRefs": ["r-owasp-llm08", "r-mitre-atlas"]
+          "sourceRefs": [
+            "r-owasp-llm08",
+            "r-mitre-atlas"
+          ]
         }
       ]
     },
@@ -190,13 +361,32 @@
           "difficulty": 2,
           "stem": "Why can an unpartitioned multi-tenant vector store leak one tenant's documents into another tenant's answers even with no attacker involved?",
           "options": [
-            { "id": "a", "text": "Retrieval is by semantic similarity, which has no notion of ownership — so a query can return any nearby vector regardless of tenant unless a boundary is enforced at the store", "correct": true },
-            { "id": "b", "text": "It cannot — vector stores always isolate tenants automatically by default", "correct": false },
-            { "id": "c", "text": "Only a deliberate SQL injection can ever cause cross-tenant retrieval", "correct": false },
-            { "id": "d", "text": "Because embeddings are encrypted, similarity search randomly returns other tenants' data", "correct": false }
+            {
+              "id": "a",
+              "text": "Retrieval is by semantic similarity, which has no notion of ownership — so a query can return any nearby vector regardless of tenant unless a boundary is enforced at the store",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It cannot — vector stores always isolate tenants automatically by default",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Only a deliberate SQL injection can ever cause cross-tenant retrieval",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Because embeddings are encrypted, similarity search randomly returns other tenants' data",
+              "correct": false
+            }
           ],
           "explanation": "Similarity search returns the nearest vectors to a query, and nearness in vector space is unrelated to who owns a document — so without enforced partitioning, another tenant's semantically-similar content can surface as a default behaviour, not an exploit. Option b is the dangerous assumption the lesson corrects: isolation must be enforced, not assumed. Option c wrongly narrows the cause to injection; the leak here needs no attacker at all. Option d is nonsense mechanically — encryption at rest doesn't make similarity search return random tenants' data.",
-          "sourceRefs": ["r-owasp-llm08", "r-nist-ai-600-1"]
+          "sourceRefs": [
+            "r-owasp-llm08",
+            "r-nist-ai-600-1"
+          ]
         },
         {
           "id": "kc-m3-l4-2",
@@ -205,13 +395,31 @@
           "difficulty": 2,
           "stem": "Which control does OWASP LLM08 prescribe as the fix for cross-tenant / cross-context retrieval leakage?",
           "options": [
-            { "id": "a", "text": "Fine-grained, permission-aware vector and embedding stores with strict logical partitioning, enforced at the store so every query is scoped to what the caller may see", "correct": true },
-            { "id": "b", "text": "A larger model, since more capable models won't reveal other tenants' data", "correct": false },
-            { "id": "c", "text": "A post-hoc output filter that scans final answers for other tenants' names", "correct": false },
-            { "id": "d", "text": "Trusting the application layer to remember which tenant is asking, with no enforcement at the store", "correct": false }
+            {
+              "id": "a",
+              "text": "Fine-grained, permission-aware vector and embedding stores with strict logical partitioning, enforced at the store so every query is scoped to what the caller may see",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A larger model, since more capable models won't reveal other tenants' data",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A post-hoc output filter that scans final answers for other tenants' names",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Trusting the application layer to remember which tenant is asking, with no enforcement at the store",
+              "correct": false
+            }
           ],
           "explanation": "OWASP prescribes permission-aware stores with strict logical partitioning — the boundary is enforced where retrieval happens, so results are scoped to the caller. Option b misattributes the fix to model capability; leakage is an access-control failure, not an intelligence one. Option c is a brittle last line that fails on any content without an obvious identifier and doesn't stop the sensitive data from being retrieved and used. Option d is exactly the anti-pattern the lesson warns against — intending to scope in the app is not the same as enforcing the partition at the store.",
-          "sourceRefs": ["r-owasp-llm08"]
+          "sourceRefs": [
+            "r-owasp-llm08"
+          ]
         }
       ]
     }
@@ -224,13 +432,32 @@
       "difficulty": 1,
       "stem": "The module frames LLM04, LLM03, and LLM08 as a 'timeline of trust.' What do all three have in common that distinguishes them from live-request attacks like prompt injection?",
       "options": [
-        { "id": "a", "text": "They attack the supply of data and components — what the model learned, what it was built from, or what it retrieves — so the malicious element is present before the request and evades request-time filtering", "correct": true },
-        { "id": "b", "text": "They can all be fully eliminated by a single output filter applied at inference time", "correct": false },
-        { "id": "c", "text": "They only affect open-weights models and never affect commercial API models", "correct": false },
-        { "id": "d", "text": "They are all network-layer attacks unrelated to data or model integrity", "correct": false }
+        {
+          "id": "a",
+          "text": "They attack the supply of data and components — what the model learned, what it was built from, or what it retrieves — so the malicious element is present before the request and evades request-time filtering",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They can all be fully eliminated by a single output filter applied at inference time",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "They only affect open-weights models and never affect commercial API models",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "They are all network-layer attacks unrelated to data or model integrity",
+          "correct": false
+        }
       ],
       "explanation": "The cluster attacks the supply — learned data (LLM04), components (LLM03), retrieved content (LLM08) — so the harm is installed before the prompt and a request-time filter never sees it. Option b contradicts the whole module: a backdoored model or planted document behaves normally at the output, so no single filter eliminates these. Option c is false — a poisoned dataset, a compromised plugin, or a poisoned RAG store can affect any deployment, including ones fronted by a commercial API. Option d misclassifies them; these are integrity attacks on data and models, not network attacks.",
-      "sourceRefs": ["r-owasp-llm-top10", "r-owasp-llm04"]
+      "sourceRefs": [
+        "r-owasp-llm-top10",
+        "r-owasp-llm04"
+      ]
     },
     {
       "id": "q-m3-2",
@@ -239,13 +466,31 @@
       "difficulty": 1,
       "stem": "OWASP renamed the 2025 risk from 'Training Data Poisoning' to 'LLM04:2025 Data and Model Poisoning.' What does the broadened title capture?",
       "options": [
-        { "id": "a", "text": "That compromises extend beyond training data to the model artefact itself — e.g. a malicious model in a shared repository is a poisoning vector too", "correct": true },
-        { "id": "b", "text": "That only the model, and never the data, can now be poisoned", "correct": false },
-        { "id": "c", "text": "That poisoning is now considered impossible and the risk was downgraded", "correct": false },
-        { "id": "d", "text": "That the risk now covers physical hardware theft rather than data integrity", "correct": false }
+        {
+          "id": "a",
+          "text": "That compromises extend beyond training data to the model artefact itself — e.g. a malicious model in a shared repository is a poisoning vector too",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "That only the model, and never the data, can now be poisoned",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "That poisoning is now considered impossible and the risk was downgraded",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "That the risk now covers physical hardware theft rather than data integrity",
+          "correct": false
+        }
       ],
       "explanation": "OWASP broadened the scope to recognise that a compromised model artefact (for instance, a malicious model published to a repository) is a poisoning vector alongside manipulated data — which is also where LLM04 connects to LLM03 supply chain. Option b inverts it: the title adds the model without removing data — its definition still names pre-training, fine-tuning, and embedding data. Option c is the opposite of reality. Option d confuses this with a hardware or physical-security risk, which is not what the rename is about.",
-      "sourceRefs": ["r-owasp-llm04"]
+      "sourceRefs": [
+        "r-owasp-llm04"
+      ]
     },
     {
       "id": "q-m3-3",
@@ -254,13 +499,31 @@
       "difficulty": 2,
       "stem": "Which OWASP LLM04 mitigation is the clearest example of 'shifting the integrity check left' into the pipeline — the secure-SDLC discipline carried over from traditional AppSec?",
       "options": [
-        { "id": "a", "text": "An evaluation gate in CI that a candidate model must pass (adversarial and behavioural evals) before it is promoted to production", "correct": true },
-        { "id": "b", "text": "Adding more end-user prompt-filtering rules after the model is already deployed", "correct": false },
-        { "id": "c", "text": "Increasing the temperature setting so the model's outputs vary more", "correct": false },
-        { "id": "d", "text": "Publishing the model to more repositories to increase redundancy", "correct": false }
+        {
+          "id": "a",
+          "text": "An evaluation gate in CI that a candidate model must pass (adversarial and behavioural evals) before it is promoted to production",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Adding more end-user prompt-filtering rules after the model is already deployed",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Increasing the temperature setting so the model's outputs vary more",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Publishing the model to more repositories to increase redundancy",
+          "correct": false
+        }
       ],
       "explanation": "A promotion gate that blocks a model until it passes an eval suite is the LLM-native version of a secure-SDLC quality gate — the integrity check moves left, into CI, where a suspect model is stopped automatically. Option b is a runtime control applied after deployment, the opposite of shifting left, and it won't catch a trigger-based backdoor anyway. Option c is an unrelated generation parameter. Option d increases distribution, not integrity assurance, and if the model were poisoned it would just spread the problem.",
-      "sourceRefs": ["r-owasp-llm04"]
+      "sourceRefs": [
+        "r-owasp-llm04"
+      ]
     },
     {
       "id": "q-m3-4",
@@ -269,13 +532,31 @@
       "difficulty": 2,
       "stem": "Under MITRE ATLAS, which technique names the umbrella move of compromising the unique portions of the AI supply chain (with sub-techniques for Data, Model, AI Software, and more)?",
       "options": [
-        { "id": "a", "text": "AI Supply Chain Compromise (AML.T0010)", "correct": true },
-        { "id": "b", "text": "LLM Prompt Injection (AML.T0051)", "correct": false },
-        { "id": "c", "text": "RAG Poisoning (AML.T0070)", "correct": false },
-        { "id": "d", "text": "LLM Data Leakage (AML.T0057)", "correct": false }
+        {
+          "id": "a",
+          "text": "AI Supply Chain Compromise (AML.T0010)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "LLM Prompt Injection (AML.T0051)",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "RAG Poisoning (AML.T0070)",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "LLM Data Leakage (AML.T0057)",
+          "correct": false
+        }
       ],
       "explanation": "ATLAS AML.T0010 'AI Supply Chain Compromise' is the umbrella technique, with sub-techniques including Data (.002), Model (.003), AI Software (.001), Hardware (.000), Container Registry (.004), and AI Agent Tool (.005). Option b is a live-request injection technique, not a supply-chain one. Option c is specifically the retrieval-layer poisoning technique (LLM08), not the supply-chain umbrella. Option d is about inducing a model to leak sensitive information, an exfiltration-style technique, unrelated to supply-chain component compromise.",
-      "sourceRefs": ["r-mitre-atlas"]
+      "sourceRefs": [
+        "r-mitre-atlas"
+      ]
     },
     {
       "id": "q-m3-5",
@@ -284,13 +565,32 @@
       "difficulty": 2,
       "stem": "A team pins their base model to a specific version from a verifiable source, records it (with its hash) in a signed AI-BOM, and verifies the signature in CI. Which OWASP LLM03 risk does this most directly address?",
       "options": [
-        { "id": "a", "text": "Weak model provenance and tampering — you now know exactly what artefact you're running and that it wasn't altered after signing", "correct": true },
-        { "id": "b", "text": "Excessive agency of the agent's tools at runtime", "correct": false },
-        { "id": "c", "text": "Unbounded consumption / cost of the model at inference time", "correct": false },
-        { "id": "d", "text": "The model producing confidently wrong answers (confabulation) to users", "correct": false }
+        {
+          "id": "a",
+          "text": "Weak model provenance and tampering — you now know exactly what artefact you're running and that it wasn't altered after signing",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Excessive agency of the agent's tools at runtime",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Unbounded consumption / cost of the model at inference time",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The model producing confidently wrong answers (confabulation) to users",
+          "correct": false
+        }
       ],
       "explanation": "Pinning to a verifiable source, recording it in a signed SBOM/AI-BOM with its hash, and verifying the signature directly attacks weak provenance and post-signing tampering — OWASP's listed supply-chain risks. Option b is a different OWASP risk (Excessive Agency) about tool permissions, not artefact integrity. Option c is Unbounded Consumption, a cost/DoS concern unrelated to provenance. Option d is Misinformation/confabulation, a model-behaviour issue that signing and inventory do nothing to fix.",
-      "sourceRefs": ["r-owasp-llm03", "r-mitre-atlas"]
+      "sourceRefs": [
+        "r-owasp-llm03",
+        "r-mitre-atlas"
+      ]
     },
     {
       "id": "q-m3-6",
@@ -299,13 +599,31 @@
       "difficulty": 3,
       "stem": "An engineer says, 'We pull our model from the most-downloaded entry on a major hub, so supply chain isn't a concern for us.' Which correction is most aligned with LLM03?",
       "options": [
-        { "id": "a", "text": "Popularity is not provenance — a widely-used model can still have unknown origins, an unsigned or swapped file, or a malicious recommended adapter; you still need inventory, pinned verifiable sources, integrity checks, and adversarial evaluation", "correct": true },
-        { "id": "b", "text": "They're right — high download counts are an approved OWASP integrity control", "correct": false },
-        { "id": "c", "text": "Supply chain only matters for datasets, so a popular model genuinely removes the concern", "correct": false },
-        { "id": "d", "text": "The only fix needed is to add a runtime output filter; provenance is irrelevant for hub models", "correct": false }
+        {
+          "id": "a",
+          "text": "Popularity is not provenance — a widely-used model can still have unknown origins, an unsigned or swapped file, or a malicious recommended adapter; you still need inventory, pinned verifiable sources, integrity checks, and adversarial evaluation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They're right — high download counts are an approved OWASP integrity control",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Supply chain only matters for datasets, so a popular model genuinely removes the concern",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The only fix needed is to add a runtime output filter; provenance is irrelevant for hub models",
+          "correct": false
+        }
       ],
       "explanation": "LLM03's central lesson is that download count is not a security control — popularity says nothing about provenance, signing, or whether a tampered variant or malicious adapter is in play, so the full supply-chain discipline still applies. Option b invents an OWASP endorsement that does not exist. Option c is false — OWASP explicitly lists vulnerable pre-trained models and LoRA adapters, so models are squarely in scope. Option d misplaces the defense onto a runtime filter, which cannot substitute for provenance and can't reveal a trigger-based backdoor.",
-      "sourceRefs": ["r-owasp-llm03"]
+      "sourceRefs": [
+        "r-owasp-llm03"
+      ]
     },
     {
       "id": "q-m3-7",
@@ -314,13 +632,32 @@
       "difficulty": 2,
       "stem": "In a RAG system, why does the module say retrieved content deserves closer-to-instruction levels of scrutiny rather than being treated as inherently trustworthy?",
       "options": [
-        { "id": "a", "text": "Because an attacker who gets content into the index can have it retrieved and grounded — so a retrieved chunk can carry false information or an indirect prompt injection, crossing the trust boundary through the knowledge base", "correct": true },
-        { "id": "b", "text": "Because retrieved documents are always longer than user prompts and length equals risk", "correct": false },
-        { "id": "c", "text": "Because retrieval is slower than generation, which makes it inherently unsafe", "correct": false },
-        { "id": "d", "text": "Because vector databases cannot store text, only numbers, so their output is meaningless", "correct": false }
+        {
+          "id": "a",
+          "text": "Because an attacker who gets content into the index can have it retrieved and grounded — so a retrieved chunk can carry false information or an indirect prompt injection, crossing the trust boundary through the knowledge base",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because retrieved documents are always longer than user prompts and length equals risk",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because retrieval is slower than generation, which makes it inherently unsafe",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Because vector databases cannot store text, only numbers, so their output is meaningless",
+          "correct": false
+        }
       ],
       "explanation": "RAG grounds the model in retrieved text, so if an attacker can plant content in the index (RAG poisoning / false-entry injection), that text is treated as reference material and can carry false facts or injected instructions — indirect prompt injection meeting RAG. Option b invents a length-equals-risk rule that isn't the reason. Option c confuses a latency property with a trust one. Option d is mechanically wrong and irrelevant — embeddings index text that is retrieved and used.",
-      "sourceRefs": ["r-owasp-llm08", "r-mitre-atlas"]
+      "sourceRefs": [
+        "r-owasp-llm08",
+        "r-mitre-atlas"
+      ]
     },
     {
       "id": "q-m3-8",
@@ -329,13 +666,32 @@
       "difficulty": 2,
       "stem": "Which MITRE ATLAS technique describes injecting malicious content into data indexed by a RAG system so it surfaces in future search results?",
       "options": [
-        { "id": "a", "text": "RAG Poisoning (AML.T0070)", "correct": true },
-        { "id": "b", "text": "Poison Training Data (AML.T0020)", "correct": false },
-        { "id": "c", "text": "AI Supply Chain Compromise (AML.T0010)", "correct": false },
-        { "id": "d", "text": "LLM Prompt Crafting (AML.T0065)", "correct": false }
+        {
+          "id": "a",
+          "text": "RAG Poisoning (AML.T0070)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Poison Training Data (AML.T0020)",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "AI Supply Chain Compromise (AML.T0010)",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "LLM Prompt Crafting (AML.T0065)",
+          "correct": false
+        }
       ],
       "explanation": "ATLAS AML.T0070 'RAG Poisoning' is exactly this: injecting malicious content into data a RAG system indexes to contaminate a future thread via search results. Option b is Poison Training Data — corrupting the training set (LLM04), not the runtime retrieval index. Option c is the supply-chain umbrella, about compromised components, not planted retrieval documents. Option d is about iteratively crafting prompts to bypass defenses, a live-request technique, not store poisoning.",
-      "sourceRefs": ["r-mitre-atlas", "r-owasp-llm08"]
+      "sourceRefs": [
+        "r-mitre-atlas",
+        "r-owasp-llm08"
+      ]
     },
     {
       "id": "q-m3-9",
@@ -344,13 +700,32 @@
       "difficulty": 3,
       "stem": "ATLAS notes that a false RAG entry can be embedded inside a legitimate ingested document. Why does this make 'just delete the malicious row' an unreliable defense, and what does the module recommend instead?",
       "options": [
-        { "id": "a", "text": "There is no standalone row to remove and it can bypass data-monitoring tools, so you treat the source as the unit of trust, validate on ingestion, and attribute provenance per chunk rather than assuming stored content is clean", "correct": true },
-        { "id": "b", "text": "Deletion is unreliable only because databases are slow; a faster database makes row-deletion a complete fix", "correct": false },
-        { "id": "c", "text": "It is fully reliable — ATLAS says embedded false entries are always trivially found and deleted", "correct": false },
-        { "id": "d", "text": "The recommendation is to stop using RAG entirely, as no defense is possible", "correct": false }
+        {
+          "id": "a",
+          "text": "There is no standalone row to remove and it can bypass data-monitoring tools, so you treat the source as the unit of trust, validate on ingestion, and attribute provenance per chunk rather than assuming stored content is clean",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Deletion is unreliable only because databases are slow; a faster database makes row-deletion a complete fix",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It is fully reliable — ATLAS says embedded false entries are always trivially found and deleted",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The recommendation is to stop using RAG entirely, as no defense is possible",
+          "correct": false
+        }
       ],
       "explanation": "ATLAS says a false RAG entry hidden inside a legitimate one bypasses data-monitoring and resists direct deletion because there's no separate row to remove — so the module shifts to source-level trust, ingestion-time validation, and per-chunk provenance/attribution. Option b misattributes the problem to database speed rather than the embedding-inside-a-legitimate-entry mechanism. Option c contradicts ATLAS directly. Option d is the defeatist over-correction the module explicitly rejects — RAG is defensible with write-path control, validation, and citation integrity, just not perfectly.",
-      "sourceRefs": ["r-mitre-atlas", "r-owasp-llm08"]
+      "sourceRefs": [
+        "r-mitre-atlas",
+        "r-owasp-llm08"
+      ]
     },
     {
       "id": "q-m3-10",
@@ -359,13 +734,32 @@
       "difficulty": 2,
       "stem": "A multi-tenant assistant occasionally cites Customer A's internal document when answering Customer B. What is the correct diagnosis and fix?",
       "options": [
-        { "id": "a", "text": "Cross-tenant retrieval leakage — an access-control failure at the vector store; fix it with permission-aware embedding stores and strict logical partitioning enforced at retrieval time", "correct": true },
-        { "id": "b", "text": "A model hallucination; fix it by lowering the temperature so it stops inventing Customer A's data", "correct": false },
-        { "id": "c", "text": "A prompt-injection attack by Customer B; fix it with a stronger input filter on B's prompts", "correct": false },
-        { "id": "d", "text": "Normal RAG behaviour that requires no fix, since both customers use the same product", "correct": false }
+        {
+          "id": "a",
+          "text": "Cross-tenant retrieval leakage — an access-control failure at the vector store; fix it with permission-aware embedding stores and strict logical partitioning enforced at retrieval time",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A model hallucination; fix it by lowering the temperature so it stops inventing Customer A's data",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A prompt-injection attack by Customer B; fix it with a stronger input filter on B's prompts",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Normal RAG behaviour that requires no fix, since both customers use the same product",
+          "correct": false
+        }
       ],
       "explanation": "Real content from A surfacing for B is cross-tenant retrieval leakage — an unenforced boundary in a shared store — and OWASP's fix is permission-aware stores with strict logical partitioning enforced where retrieval happens. Option b misdiagnoses it as hallucination; the data is real and retrieved, not invented, so temperature is irrelevant. Option c wrongly blames the prompt path; the leak is a store access-control gap, not something in B's input. Option d normalises a confidentiality breach — sharing a product must never mean sharing a retrieval boundary.",
-      "sourceRefs": ["r-owasp-llm08", "r-nist-ai-600-1"]
+      "sourceRefs": [
+        "r-owasp-llm08",
+        "r-nist-ai-600-1"
+      ]
     },
     {
       "id": "q-m3-11",
@@ -374,13 +768,31 @@
       "difficulty": 2,
       "stem": "OWASP LLM08 warns about 'embedding inversion attacks.' What practical control does this imply?",
       "options": [
-        { "id": "a", "text": "Access-control the embeddings themselves at rest and in transit — because an attacker who reaches the vectors may invert them to recover significant source information, so the embeddings are sensitive data too", "correct": true },
-        { "id": "b", "text": "Nothing — embeddings are irreversible numbers with no security implications", "correct": false },
-        { "id": "c", "text": "Store embeddings in plaintext everywhere, since inversion only affects encrypted vectors", "correct": false },
-        { "id": "d", "text": "Delete all embeddings after each query, since they cannot be reused safely", "correct": false }
+        {
+          "id": "a",
+          "text": "Access-control the embeddings themselves at rest and in transit — because an attacker who reaches the vectors may invert them to recover significant source information, so the embeddings are sensitive data too",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing — embeddings are irreversible numbers with no security implications",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Store embeddings in plaintext everywhere, since inversion only affects encrypted vectors",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Delete all embeddings after each query, since they cannot be reused safely",
+          "correct": false
+        }
       ],
       "explanation": "OWASP notes attackers can invert embeddings to recover source information, so the vectors must be treated as sensitive and access-controlled at rest and in transit. Option b is exactly the false assumption the risk corrects — embeddings are not safely opaque. Option c inverts good practice and misstates the mechanism. Option d is impractical and unnecessary — the control is access control on the embeddings, not deleting the store's core data after every query.",
-      "sourceRefs": ["r-owasp-llm08"]
+      "sourceRefs": [
+        "r-owasp-llm08"
+      ]
     },
     {
       "id": "q-m3-12",
@@ -389,13 +801,31 @@
       "difficulty": 2,
       "stem": "Which NIST AI 600-1 GAI risk area most directly names the supply-chain concern of untraceable third-party components and poor supplier vetting across the AI lifecycle?",
       "options": [
-        { "id": "a", "text": "Value Chain and Component Integration", "correct": true },
-        { "id": "b", "text": "Confabulation", "correct": false },
-        { "id": "c", "text": "Environmental Impacts", "correct": false },
-        { "id": "d", "text": "CBRN Information or Capabilities", "correct": false }
+        {
+          "id": "a",
+          "text": "Value Chain and Component Integration",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Confabulation",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Environmental Impacts",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "CBRN Information or Capabilities",
+          "correct": false
+        }
       ],
       "explanation": "NIST AI 600-1 defines 'Value Chain and Component Integration' as non-transparent or untraceable integration of upstream third-party components and improper supplier vetting across the AI lifecycle — the governance framing of LLM03. Option b (Confabulation) is about confidently false output. Option c is about compute/energy impacts. Option d is about eased access to chemical/biological/radiological/nuclear information — none of which name the supply-chain integrity concern.",
-      "sourceRefs": ["r-nist-ai-600-1"]
+      "sourceRefs": [
+        "r-nist-ai-600-1"
+      ]
     },
     {
       "id": "q-m3-13",
@@ -404,13 +834,33 @@
       "difficulty": 3,
       "stem": "Across LLM04, LLM03, and LLM08, the module insists on one honest posture. Which statement best captures it?",
       "options": [
-        { "id": "a", "text": "These risks are mitigated by defense-in-depth, not eliminated — provenance, signing, gates, and permission-aware isolation each raise cost and detection odds, but no single control guarantees a clean model, component, or store", "correct": true },
-        { "id": "b", "text": "With a signed model file, poisoning becomes literally impossible, so one control fully solves the cluster", "correct": false },
-        { "id": "c", "text": "Because perfect defense is unattainable, the controls aren't worth implementing", "correct": false },
-        { "id": "d", "text": "The only real defense is to never use third-party models, adapters, or RAG at all", "correct": false }
+        {
+          "id": "a",
+          "text": "These risks are mitigated by defense-in-depth, not eliminated — provenance, signing, gates, and permission-aware isolation each raise cost and detection odds, but no single control guarantees a clean model, component, or store",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "With a signed model file, poisoning becomes literally impossible, so one control fully solves the cluster",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because perfect defense is unattainable, the controls aren't worth implementing",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The only real defense is to never use third-party models, adapters, or RAG at all",
+          "correct": false
+        }
       ],
       "explanation": "The module's binding posture is honest defense-in-depth: layered controls raise the cost and detection odds of poisoning and supply-chain compromise without ever proving purity — a determined, well-resourced attacker or insider can defeat any single layer. Option b is the silver-bullet fallacy; signing proves integrity-in-transit only, not a clean model. Option c is the cynical over-correction — imperfect controls still meaningfully reduce risk and are worth deploying. Option d is impractical absolutism; the goal is to make assembled systems defensible, not to abandon the components modern LLM apps are built from.",
-      "sourceRefs": ["r-owasp-llm04", "r-owasp-llm03", "r-owasp-llm08"]
+      "sourceRefs": [
+        "r-owasp-llm04",
+        "r-owasp-llm03",
+        "r-owasp-llm08"
+      ]
     },
     {
       "id": "q-m3-14",
@@ -419,13 +869,32 @@
       "difficulty": 2,
       "stem": "OWASP LLM04 and LLM03 both point to a machine-readable inventory of what went into a model. Which pairing correctly matches the artefact to its purpose?",
       "options": [
-        { "id": "a", "text": "An ML-BOM / CycloneDX record (LLM04) tracks data origins to make poisoning detectable; a signed SBOM/AI-BOM (LLM03) inventories model, adapter, and dataset dependencies so you can pin and verify them", "correct": true },
-        { "id": "b", "text": "Both are runtime output filters that scan generated text for poisoned phrases", "correct": false },
-        { "id": "c", "text": "Both are user-facing dashboards for end customers to rate answer quality", "correct": false },
-        { "id": "d", "text": "An SBOM is only for hardware, and an ML-BOM is only for network configuration", "correct": false }
+        {
+          "id": "a",
+          "text": "An ML-BOM / CycloneDX record (LLM04) tracks data origins to make poisoning detectable; a signed SBOM/AI-BOM (LLM03) inventories model, adapter, and dataset dependencies so you can pin and verify them",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Both are runtime output filters that scan generated text for poisoned phrases",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Both are user-facing dashboards for end customers to rate answer quality",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "An SBOM is only for hardware, and an ML-BOM is only for network configuration",
+          "correct": false
+        }
       ],
       "explanation": "OWASP LLM04 names CycloneDX/ML-BOM and DVC to track data origins and detect tampering, while LLM03 calls for signed SBOMs/AI-BOMs covering component dependencies you pin and verify — complementary inventories, one for data lineage, one for components. Option b confuses a bill-of-materials with a runtime filter. Option c misframes them as customer-facing rating tools. Option d invents scopes that contradict OWASP — an SBOM covers software/model/dataset components, and an ML-BOM covers ML data and artefacts, not just hardware or networking.",
-      "sourceRefs": ["r-owasp-llm04", "r-owasp-llm03"]
+      "sourceRefs": [
+        "r-owasp-llm04",
+        "r-owasp-llm03"
+      ]
     },
     {
       "id": "q-m3-15",
@@ -434,19 +903,40 @@
       "difficulty": 2,
       "stem": "On the Automatos platform, the module says the workspace is the tenant-isolation boundary and roles gate the write path. Which statement is consistent with that design?",
       "options": [
-        { "id": "a", "text": "Retrieval is workspace-scoped so one workspace's documents aren't retrievable from another, and Admin/Member roles can upload documents to the Knowledge Base while a Viewer cannot", "correct": true },
-        { "id": "b", "text": "Every workspace shares one global vector store with no scoping, and any role can upload documents", "correct": false },
-        { "id": "c", "text": "Only the model provider, not workspace roles, decides who can write to a workspace's Knowledge Base", "correct": false },
-        { "id": "d", "text": "Workspaces isolate chat history but deliberately share all Knowledge Base documents across tenants", "correct": false }
+        {
+          "id": "a",
+          "text": "Retrieval is workspace-scoped so one workspace's documents aren't retrievable from another, and Admin/Member roles can upload documents to the Knowledge Base while a Viewer cannot",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Every workspace shares one global vector store with no scoping, and any role can upload documents",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Only the model provider, not workspace roles, decides who can write to a workspace's Knowledge Base",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Workspaces isolate chat history but deliberately share all Knowledge Base documents across tenants",
+          "correct": false
+        }
       ],
       "explanation": "The platform enforces workspace-scoped retrieval (strict logical partitioning, per OWASP LLM08) and gates the write path by role — Admin and Member can upload documents, Viewer cannot — which is how 'who can write to retrieval, and is it isolated?' is answered concretely. Option b describes the unpartitioned, un-gated anti-pattern the design avoids. Option c misassigns write control to the model provider rather than workspace roles. Option d contradicts isolation by sharing Knowledge Base documents across tenants, which is exactly the cross-tenant leakage the design prevents.",
-      "sourceRefs": ["r-gitbook-knowledge", "r-gitbook-roles"]
+      "sourceRefs": [
+        "r-gitbook-knowledge",
+        "r-gitbook-roles"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-m3-harden-rag-store",
-      "domainIds": ["m3-poisoning-supply-chain"],
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ],
       "title": "Hardening a shared RAG store: a defense-decision drill",
       "tagline": "The judgment call from the module's debate — where a multi-tenant RAG assistant, fed by third-party components and external documents, needs its integrity and isolation fixed without breaking it.",
       "context": "You are the security engineer for a SaaS assistant. It serves many customers from shared infrastructure. Each customer's documents are ingested into a vector store and retrieved to ground answers. The team also pulls a base model and a community LoRA adapter from a public hub, and lets an automated connector ingest documents from customers' external sources. Two incidents just landed: a customer reported seeing a competitor's pricing detail in an answer, and a planted 'FAQ' document has been surfacing wrong, attacker-friendly guidance in support replies. You have authorization to change this system — it is your own product. Walk the hardening decisions. Every step has one best move; some alternatives are viable-but-weaker, and some are wrong.",
@@ -455,49 +945,131 @@
           "id": "st1",
           "prompt": "First incident: Customer X saw Customer Y's pricing in an answer. Where do you look first, and how do you frame the root cause?",
           "choices": [
-            { "id": "a", "text": "Treat it as cross-tenant retrieval leakage — an access-control failure at the vector store — and check whether retrieval is actually partitioned per tenant or merely intended to be by the application", "verdict": "best", "rationale": "Real content from Y surfacing for X is the textbook LLM08 cross-context leak: an unenforced boundary in a shared store. The first move is to verify whether partitioning is enforced at retrieval (OWASP's 'strict logical partitioning') or just assumed in app code — that's where this class of bug lives." },
-            { "id": "b", "text": "Lower the model's temperature and add a system-prompt line telling it not to reveal other customers' data", "verdict": "wrong", "rationale": "This misdiagnoses a real, retrieved document as a model behaviour problem. The data was retrieved from the store, not invented — temperature and a polite instruction don't stop a similarity search from returning another tenant's nearby vectors. It leaves the confidentiality breach fully open." },
-            { "id": "c", "text": "Add a final output filter that scans answers for other customers' company names and redacts them", "verdict": "viable", "rationale": "A post-hoc redaction filter is a legitimate defense-in-depth backstop, but it's a brittle last line: it fails on any leaked content without an obvious identifier, and the sensitive data was still retrieved and processed. Useful as a secondary layer, wrong as the primary fix — the boundary belongs at the store." }
+            {
+              "id": "a",
+              "text": "Treat it as cross-tenant retrieval leakage — an access-control failure at the vector store — and check whether retrieval is actually partitioned per tenant or merely intended to be by the application",
+              "verdict": "best",
+              "rationale": "Real content from Y surfacing for X is the textbook LLM08 cross-context leak: an unenforced boundary in a shared store. The first move is to verify whether partitioning is enforced at retrieval (OWASP's 'strict logical partitioning') or just assumed in app code — that's where this class of bug lives."
+            },
+            {
+              "id": "b",
+              "text": "Lower the model's temperature and add a system-prompt line telling it not to reveal other customers' data",
+              "verdict": "wrong",
+              "rationale": "This misdiagnoses a real, retrieved document as a model behaviour problem. The data was retrieved from the store, not invented — temperature and a polite instruction don't stop a similarity search from returning another tenant's nearby vectors. It leaves the confidentiality breach fully open."
+            },
+            {
+              "id": "c",
+              "text": "Add a final output filter that scans answers for other customers' company names and redacts them",
+              "verdict": "viable",
+              "rationale": "A post-hoc redaction filter is a legitimate defense-in-depth backstop, but it's a brittle last line: it fails on any leaked content without an obvious identifier, and the sensitive data was still retrieved and processed. Useful as a secondary layer, wrong as the primary fix — the boundary belongs at the store."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "You confirm the store isn't enforcing tenant boundaries at retrieval. What's the correct primary fix?",
           "choices": [
-            { "id": "a", "text": "Move to a permission-aware embedding store with strict logical partitioning, so every query carries the caller's tenant context and results are scoped at the store — then add immutable retrieval logging to detect and prove isolation", "verdict": "best", "rationale": "This is exactly OWASP LLM08's prescribed control: fine-grained, permission-aware stores with strict logical partitioning enforced where retrieval happens, plus immutable logs to detect boundary crossings. It fixes the default-leak behaviour at its source and makes future isolation verifiable." },
-            { "id": "b", "text": "Keep the shared index but prepend each document's text with its tenant name, trusting the model to only use matching ones", "verdict": "wrong", "rationale": "This leaves the boundary unenforced and delegates confidentiality to the model's goodwill — the other tenant's vectors are still retrievable and can still surface. Enforcement must be at the store, not a hint the model may ignore or that an injection could override." },
-            { "id": "c", "text": "Give each tenant a separate, isolated index or namespace so their vectors are never co-mingled", "verdict": "viable", "rationale": "Per-tenant isolation genuinely closes the leak and is a defensible architecture. It's marked viable rather than best only because it can be heavier operationally at scale than a single permission-aware store with logical partitioning; both enforce the boundary, and either beats a co-mingled index. Add retrieval logging regardless." }
+            {
+              "id": "a",
+              "text": "Move to a permission-aware embedding store with strict logical partitioning, so every query carries the caller's tenant context and results are scoped at the store — then add immutable retrieval logging to detect and prove isolation",
+              "verdict": "best",
+              "rationale": "This is exactly OWASP LLM08's prescribed control: fine-grained, permission-aware stores with strict logical partitioning enforced where retrieval happens, plus immutable logs to detect boundary crossings. It fixes the default-leak behaviour at its source and makes future isolation verifiable."
+            },
+            {
+              "id": "b",
+              "text": "Keep the shared index but prepend each document's text with its tenant name, trusting the model to only use matching ones",
+              "verdict": "wrong",
+              "rationale": "This leaves the boundary unenforced and delegates confidentiality to the model's goodwill — the other tenant's vectors are still retrievable and can still surface. Enforcement must be at the store, not a hint the model may ignore or that an injection could override."
+            },
+            {
+              "id": "c",
+              "text": "Give each tenant a separate, isolated index or namespace so their vectors are never co-mingled",
+              "verdict": "viable",
+              "rationale": "Per-tenant isolation genuinely closes the leak and is a defensible architecture. It's marked viable rather than best only because it can be heavier operationally at scale than a single permission-aware store with logical partitioning; both enforce the boundary, and either beats a co-mingled index. Add retrieval logging regardless."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Second incident: a planted 'FAQ' document keeps surfacing attacker-friendly guidance. It arrived through the automated connector that ingests customers' external sources. What's the highest-value control?",
           "choices": [
-            { "id": "a", "text": "Restrict and validate the write path — quarantine externally-ingested content, validate it before it can be retrieved as grounding, and accept from verified sources only, so untrusted documents can't silently enter the index", "verdict": "best", "rationale": "RAG poisoning and false-entry injection both require getting content into the index, so the write path is the highest-value lever. OWASP calls for data-validation pipelines and verified providers; quarantining and validating auto-ingested external content directly removes the precondition for the attack." },
-            { "id": "b", "text": "Delete the specific bad FAQ row and consider it resolved", "verdict": "wrong", "rationale": "Deleting one row treats the symptom, not the open ingestion path that let it in — more will follow. And ATLAS warns a false RAG entry can be embedded inside a legitimate document and resist direct deletion, so 'delete the row' isn't even reliable for this class." },
-            { "id": "c", "text": "Attach provenance to every chunk and surface it with citations, so a planted document is visibly un-attributed", "verdict": "viable", "rationale": "Citation integrity is a real and important control — it helps humans and downstream logic spot an untrusted source — but on its own it detects and attributes rather than prevents; the poisoned document still entered and was retrieved. Best paired with, not substituted for, write-path validation." }
+            {
+              "id": "a",
+              "text": "Restrict and validate the write path — quarantine externally-ingested content, validate it before it can be retrieved as grounding, and accept from verified sources only, so untrusted documents can't silently enter the index",
+              "verdict": "best",
+              "rationale": "RAG poisoning and false-entry injection both require getting content into the index, so the write path is the highest-value lever. OWASP calls for data-validation pipelines and verified providers; quarantining and validating auto-ingested external content directly removes the precondition for the attack."
+            },
+            {
+              "id": "b",
+              "text": "Delete the specific bad FAQ row and consider it resolved",
+              "verdict": "wrong",
+              "rationale": "Deleting one row treats the symptom, not the open ingestion path that let it in — more will follow. And ATLAS warns a false RAG entry can be embedded inside a legitimate document and resist direct deletion, so 'delete the row' isn't even reliable for this class."
+            },
+            {
+              "id": "c",
+              "text": "Attach provenance to every chunk and surface it with citations, so a planted document is visibly un-attributed",
+              "verdict": "viable",
+              "rationale": "Citation integrity is a real and important control — it helps humans and downstream logic spot an untrusted source — but on its own it detects and attributes rather than prevents; the poisoned document still entered and was retrieved. Best paired with, not substituted for, write-path validation."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "During the review you realise the base model and its community LoRA adapter were pulled from a public hub with no verification. How do you fold the supply-chain side into the fix?",
           "choices": [
-            { "id": "a", "text": "Inventory the model, adapter, and datasets in a signed AI-BOM; pin them to specific vetted versions from verifiable sources; verify hashes/signatures in CI; and adversarially evaluate the combined model before promotion", "verdict": "best", "rationale": "This is OWASP LLM03's full playbook applied to the actual dependencies: signed SBOM/AI-BOM inventory, pinned verifiable sources, integrity verification, and AI red-teaming of third-party components (a poisoned model passes normal tests, so evaluation must be adversarial). It closes the 'popularity is not provenance' gap the team fell into." },
-            { "id": "b", "text": "Keep using them unchanged — they're popular on the hub, so their download count is sufficient assurance", "verdict": "wrong", "rationale": "This is the exact fallacy LLM03 exists to kill: popularity is not provenance. A widely-downloaded model or adapter can still have unknown origins, an unsigned file, or a malicious variant — and OWASP specifically flags vulnerable LoRA adapters as able to compromise a sound base model." },
-            { "id": "c", "text": "Pin and hash-verify the base model now, and add the adapter and datasets to the inventory in a later hardening pass", "verdict": "viable", "rationale": "Pinning and verifying the base model is real progress and better than nothing, but leaving the adapter and datasets unverified keeps live supply-chain exposure open — the adapter modifies behaviour and is a compact attack vector. Acceptable as a sequenced first step only if the remaining components are tracked and closed promptly, not indefinitely deferred." }
+            {
+              "id": "a",
+              "text": "Inventory the model, adapter, and datasets in a signed AI-BOM; pin them to specific vetted versions from verifiable sources; verify hashes/signatures in CI; and adversarially evaluate the combined model before promotion",
+              "verdict": "best",
+              "rationale": "This is OWASP LLM03's full playbook applied to the actual dependencies: signed SBOM/AI-BOM inventory, pinned verifiable sources, integrity verification, and AI red-teaming of third-party components (a poisoned model passes normal tests, so evaluation must be adversarial). It closes the 'popularity is not provenance' gap the team fell into."
+            },
+            {
+              "id": "b",
+              "text": "Keep using them unchanged — they're popular on the hub, so their download count is sufficient assurance",
+              "verdict": "wrong",
+              "rationale": "This is the exact fallacy LLM03 exists to kill: popularity is not provenance. A widely-downloaded model or adapter can still have unknown origins, an unsigned file, or a malicious variant — and OWASP specifically flags vulnerable LoRA adapters as able to compromise a sound base model."
+            },
+            {
+              "id": "c",
+              "text": "Pin and hash-verify the base model now, and add the adapter and datasets to the inventory in a later hardening pass",
+              "verdict": "viable",
+              "rationale": "Pinning and verifying the base model is real progress and better than nothing, but leaving the adapter and datasets unverified keeps live supply-chain exposure open — the adapter modifies behaviour and is a compact attack vector. Acceptable as a sequenced first step only if the remaining components are tracked and closed promptly, not indefinitely deferred."
+            }
           ]
         },
         {
           "id": "st5",
           "prompt": "Leadership asks you to sign off that the assistant is now 'secure against poisoning and supply-chain attacks.' How do you respond?",
           "choices": [
-            { "id": "a", "text": "Report the risk as substantially reduced through defense-in-depth — enforced isolation, validated write path, citation integrity, signed/pinned components, and an eval gate — while stating plainly that these mitigate rather than eliminate: a determined insider or well-resourced backdoor can still defeat a single layer, so we verify and monitor rather than declare it solved", "verdict": "best", "rationale": "This is the module's binding honest posture. The layered controls genuinely and substantially reduce risk, but none proves purity — signing is integrity-in-transit, a backdoor can pass evaluation, an insider with write access defeats much of it. The correct sign-off is 'materially hardened and monitored,' never 'solved.'" },
-            { "id": "b", "text": "Sign off that it is now fully secure and poisoning is impossible, since every recommended control is in place", "verdict": "wrong", "rationale": "This is the silver-bullet fallacy the module explicitly rejects. No combination of these controls guarantees a clean model, component, or store; claiming 'impossible' misleads leadership and creates false assurance that will not survive a determined attacker or insider." },
-            { "id": "c", "text": "Refuse to sign anything, arguing that since perfect security is impossible the controls give no meaningful assurance", "verdict": "wrong", "rationale": "This is the cynical over-correction. Defense-in-depth meaningfully lowers cost and raises detection odds even though it isn't perfect — that reduction is exactly what a security sign-off should report. Both 'it's solved' and 'it's hopeless' are wrong; the honest answer is 'materially reduced and monitored.'" }
+            {
+              "id": "a",
+              "text": "Report the risk as substantially reduced through defense-in-depth — enforced isolation, validated write path, citation integrity, signed/pinned components, and an eval gate — while stating plainly that these mitigate rather than eliminate: a determined insider or well-resourced backdoor can still defeat a single layer, so we verify and monitor rather than declare it solved",
+              "verdict": "best",
+              "rationale": "This is the module's binding honest posture. The layered controls genuinely and substantially reduce risk, but none proves purity — signing is integrity-in-transit, a backdoor can pass evaluation, an insider with write access defeats much of it. The correct sign-off is 'materially hardened and monitored,' never 'solved.'"
+            },
+            {
+              "id": "b",
+              "text": "Sign off that it is now fully secure and poisoning is impossible, since every recommended control is in place",
+              "verdict": "wrong",
+              "rationale": "This is the silver-bullet fallacy the module explicitly rejects. No combination of these controls guarantees a clean model, component, or store; claiming 'impossible' misleads leadership and creates false assurance that will not survive a determined attacker or insider."
+            },
+            {
+              "id": "c",
+              "text": "Refuse to sign anything, arguing that since perfect security is impossible the controls give no meaningful assurance",
+              "verdict": "wrong",
+              "rationale": "This is the cynical over-correction. Defense-in-depth meaningfully lowers cost and raises detection odds even though it isn't perfect — that reduction is exactly what a security sign-off should report. Both 'it's solved' and 'it's hopeless' are wrong; the honest answer is 'materially reduced and monitored.'"
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-owasp-llm08", "r-owasp-llm03", "r-owasp-llm04", "r-mitre-atlas", "r-gitbook-knowledge", "r-gitbook-roles"]
+      "sourceRefs": [
+        "r-owasp-llm08",
+        "r-owasp-llm03",
+        "r-owasp-llm04",
+        "r-mitre-atlas",
+        "r-gitbook-knowledge",
+        "r-gitbook-roles"
+      ]
     }
   ],
   "labs": [
@@ -527,7 +1099,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/",
       "kind": "official-doc",
       "annotation": "The primary source for Lesson 2. Read the definition and the numbered common examples — vulnerable pre-trained models with hidden backdoors, vulnerable LoRA adapters, weak model provenance, licensing risk, model tampering (e.g. ROME) — and the mitigations: signed SBOMs, models from verifiable sources with integrity checks and file hashes, AI red teaming of third-party models, and vetting of collaborative-development environments. This is where 'treat models, adapters, plugins, and datasets as dependencies' comes from.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-owasp-llm04",
@@ -535,7 +1109,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/",
       "kind": "official-doc",
       "annotation": "The primary source for Lesson 1. Note the exact definition (pre-training, fine-tuning, or embedding data manipulated to introduce vulnerabilities, backdoors, or biases), why the 2025 title broadened to include the model artefact, the 'sleeper agent' backdoor behaviour, and the pipeline defenses: track data origins with CycloneDX/ML-BOM and Data Version Control, sandbox and anomaly-filter ingestion, adversarial-robustness testing, and monitoring training loss. The eval-gate-before-promotion framing is the shift-left / secure-SDLC bridge.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-owasp-llm08",
@@ -543,7 +1119,9 @@
       "url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
       "kind": "official-doc",
       "annotation": "The primary source for Lessons 3 and 4. Covers RAG-specific risk: unauthorized access and data leakage from inadequate access controls, cross-context leaks in multi-tenant vector databases, embedding-inversion attacks, and data-poisoning of retrieval. The mitigations are the module's spine for RAG defense — permission-aware vector/embedding stores with strict logical partitioning, data-validation pipelines accepting only verified providers, data review for combination and classification, and immutable retrieval logs.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-owasp-llm-top10",
@@ -551,7 +1129,9 @@
       "url": "https://genai.owasp.org/llm-top-10/",
       "kind": "official-doc",
       "annotation": "The parent list from the OWASP Gen AI Security Project. Use it to place this module's three risks (LLM03, LLM04, LLM08) in the full 2025 set and to keep the current identifiers and titles straight — the whole AI-Security track's threat spine maps to this page. Skim it once so the 'timeline of trust' cluster sits in context alongside LLM01 Prompt Injection and the rest.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-mitre-atlas",
@@ -559,7 +1139,9 @@
       "url": "https://atlas.mitre.org/",
       "kind": "reference",
       "annotation": "The adversary's vocabulary for this module, modelled after MITRE ATT&CK. The techniques used here are all live in the current matrix: AI Supply Chain Compromise (AML.T0010) with its Data/Model/AI Software/Hardware/Container Registry/AI Agent Tool sub-techniques, Poison Training Data (AML.T0020), Publish Poisoned Models (AML.T0058) and Datasets (AML.T0019), and the two retrieval techniques — RAG Poisoning (AML.T0070) and False RAG Entry Injection (AML.T0071). Browse the matrix to see how these chain into a real attack path.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-nist-ai-600-1",
@@ -567,7 +1149,9 @@
       "url": "https://doi.org/10.6028/NIST.AI.600-1",
       "kind": "official-doc",
       "annotation": "The governance overlay (July 2024), a cross-sectoral profile companion to the voluntary NIST AI Risk Management Framework (AI RMF 1.0, built on four core functions: GOVERN, MAP, MEASURE, MANAGE). For this module, read the risk areas that name the integrity/supply cluster: 'Value Chain and Component Integration' (untraceable third-party components and poor supplier vetting = LLM03), 'Information Integrity' (mis/disinformation = the misinformation edge of RAG poisoning), and 'Data Privacy' (leakage and unauthorized disclosure = cross-tenant retrieval leakage). It frames the module's technical controls as organizational risk management: MAP identifies these risks, MEASURE evaluates them (eval gates, red-teaming), MANAGE applies the mitigations, and GOVERN sets the policy that requires provenance, signing, and isolation.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-gitbook-knowledge",
@@ -575,7 +1159,9 @@
       "url": "automatos-gitbook/knowledge/README.md",
       "kind": "first-party-doc",
       "annotation": "The platform surface you'll audit in the lab. The Knowledge Bases page manages the documents, databases, and code repositories agents can search — the Documents tab (Library, Upload, Search, RAG) is your workspace's retrieval store. Read it to find where to check what's in the store, run a read-only Search probe for the isolation test, and see the RAG configuration. The workspace is the tenant-isolation boundary that makes retrieval workspace-scoped.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     },
     {
       "id": "r-gitbook-roles",
@@ -583,7 +1169,9 @@
       "url": "automatos-gitbook/team/roles.md",
       "kind": "first-party-doc",
       "annotation": "The write-path control for the lab's Part A. Three workspace roles — Admin, Member, Viewer. The 'Upload documents' permission is Admin/Member only; a Viewer cannot write to the Knowledge Base. This role table is exactly how you answer 'who can write to retrieval?' concretely and apply least privilege to the RAG write path — the highest-value defense against RAG poisoning.",
-      "domainIds": ["m3-poisoning-supply-chain"]
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ]
     }
   ],
   "videos": [
@@ -591,9 +1179,11 @@
       "id": "v-m3-1",
       "title": "M3 · The supply of trust — poisoning, supply chain & RAG (LLM04 / LLM03 / LLM08)",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m3-poisoning-supply-chain"],
+      "url": "https://widgets.automatos.app/academy/cross/ai-security/v-m3-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ],
       "sourceNotebook": "cross / ai-security / m3 / supply-of-trust-poisoning-supply-chain-rag"
     },
     {
@@ -602,7 +1192,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m3-poisoning-supply-chain"],
+      "domainIds": [
+        "m3-poisoning-supply-chain"
+      ],
       "sourceNotebook": "cross / ai-security / m3 / debate-trust-open-weights-community-rag"
     }
   ]

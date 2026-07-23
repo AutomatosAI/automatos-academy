@@ -29,13 +29,32 @@
           "difficulty": 1,
           "stem": "A playbook defines four things. Which set names them correctly?",
           "options": [
-            { "id": "a", "text": "Ordered steps (each assigned to an agent), inputs, flow control (conditional logic / branching / error handling), and an optional cron schedule", "correct": true },
-            { "id": "b", "text": "A prompt, a model, a temperature, and a token budget", "correct": false },
-            { "id": "c", "text": "A trigger, a webhook secret, a retry count, and a timeout", "correct": false },
-            { "id": "d", "text": "A knowledge base, a set of tools, a memory scope, and a channel", "correct": false }
+            {
+              "id": "a",
+              "text": "Ordered steps (each assigned to an agent), inputs, flow control (conditional logic / branching / error handling), and an optional cron schedule",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A prompt, a model, a temperature, and a token budget",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A trigger, a webhook secret, a retry count, and a timeout",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A knowledge base, a set of tools, a memory scope, and a channel",
+              "correct": false
+            }
           ],
           "explanation": "The documented anatomy is exactly steps + inputs + flow control + optional schedule — that is what a playbook 'defines'. Option b describes the settings of a single LLM call, not a multi-step workflow. Option c lists real-but-narrower trigger mechanics (webhook/retry/timeout are pieces, not the four defining parts). Option d describes the makeup of an agent or workspace, not a playbook.",
-          "sourceRefs": ["r-gb-playbooks", "r-forge-skill"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-forge-skill"
+          ]
         },
         {
           "id": "kc-m04-l1-2",
@@ -44,13 +63,32 @@
           "difficulty": 2,
           "stem": "In the nightly-code-review playbook, how does the Sentinel security-scan step get the list of changed files it needs to scan?",
           "options": [
-            { "id": "a", "text": "It reads the previous steps' output from the scratchpad (the workflow pipeline), which carries intermediate state forward from Scout's commits and Code Reviewer's findings", "correct": true },
-            { "id": "b", "text": "A human copies the file list from the review step and pastes it into the scan step before it runs", "correct": false },
-            { "id": "c", "text": "Sentinel re-fetches the entire repository from GitHub independently, ignoring what earlier steps produced", "correct": false },
-            { "id": "d", "text": "Each step runs in isolation with no shared state, so Sentinel scans a fixed, hard-coded file list", "correct": false }
+            {
+              "id": "a",
+              "text": "It reads the previous steps' output from the scratchpad (the workflow pipeline), which carries intermediate state forward from Scout's commits and Code Reviewer's findings",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A human copies the file list from the review step and pastes it into the scan step before it runs",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Sentinel re-fetches the entire repository from GitHub independently, ignoring what earlier steps produced",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Each step runs in isolation with no shared state, so Sentinel scans a fixed, hard-coded file list",
+              "correct": false
+            }
           ],
           "explanation": "Playbook execution uses a scratchpad for intermediate state, and each step reads the previous step's output through the workflow pipeline — that is precisely how Sentinel receives the changed files. Option b describes manual copy-paste, which is the very thing the pipeline removes. Option c (re-fetching everything) defeats the purpose of chaining and isn't how the pipeline works. Option d contradicts the documented behaviour: steps share state via the scratchpad, they are not isolated.",
-          "sourceRefs": ["r-gb-playbooks", "r-gb-coordination"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-gb-coordination"
+          ]
         },
         {
           "id": "kc-m04-l1-3",
@@ -59,13 +97,32 @@
           "difficulty": 2,
           "stem": "Why does the nightly-review playbook assign the security scan to Sentinel as its own separate step, rather than folding 'also scan for vulnerabilities' into the Code Reviewer step?",
           "options": [
-            { "id": "a", "text": "One step, one job — each step goes to the agent genuinely best at that task, and its output flows cleanly to the next step through the scratchpad", "correct": true },
-            { "id": "b", "text": "Playbooks technically cannot assign more than one instruction to a single step", "correct": false },
-            { "id": "c", "text": "Security scans must always run last in any playbook, after every other kind of step", "correct": false },
-            { "id": "d", "text": "Combining tasks in one step is cheaper, so the split exists purely to increase token usage", "correct": false }
+            {
+              "id": "a",
+              "text": "One step, one job — each step goes to the agent genuinely best at that task, and its output flows cleanly to the next step through the scratchpad",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Playbooks technically cannot assign more than one instruction to a single step",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Security scans must always run last in any playbook, after every other kind of step",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Combining tasks in one step is cheaper, so the split exists purely to increase token usage",
+              "correct": false
+            }
           ],
           "explanation": "The 'one step, one job' principle keeps each step assigned to a verified specialist (Sentinel for security, Code Reviewer for code quality) with a clean hand-off via the scratchpad. Option b is false — a step's prompt could contain multiple instructions; the split is a design choice, not a platform limit. Option c invents a rule that doesn't exist (in this example the scan is step 3, not last). Option d is backwards: the split is about clarity and specialisation, not deliberately burning tokens.",
-          "sourceRefs": ["r-gb-playbooks", "r-forge-skill"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-forge-skill"
+          ]
         }
       ]
     },
@@ -83,13 +140,32 @@
           "difficulty": 1,
           "stem": "Which three ways to run a saved playbook are documented?",
           "options": [
-            { "id": "a", "text": "Manual (click Run + fill inputs), Scheduled (a cron expression), and From Chat (the Universal Router triggers it)", "correct": true },
-            { "id": "b", "text": "Manual, email-reply, and voice command only", "correct": false },
-            { "id": "c", "text": "Only on a cron schedule — playbooks cannot be run on demand", "correct": false },
-            { "id": "d", "text": "By exporting to a script and running it outside the platform", "correct": false }
+            {
+              "id": "a",
+              "text": "Manual (click Run + fill inputs), Scheduled (a cron expression), and From Chat (the Universal Router triggers it)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Manual, email-reply, and voice command only",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Only on a cron schedule — playbooks cannot be run on demand",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "By exporting to a script and running it outside the platform",
+              "correct": false
+            }
           ],
           "explanation": "The three run modes are Manual, Scheduled (cron), and From Chat via the Router — exactly the documented tabs. Option b invents channels (email-reply/voice) that aren't the documented run modes for a playbook. Option c is false — Manual (Run on the card) is a first-class way to fire it, and you should always run manually before scheduling. Option d describes exporting/external execution, which isn't how playbooks run.",
-          "sourceRefs": ["r-gb-playbooks", "r-gb-tools"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-gb-tools"
+          ]
         },
         {
           "id": "kc-m04-l2-2",
@@ -98,13 +174,32 @@
           "difficulty": 2,
           "stem": "You want a playbook to run automatically the moment a pull request is opened, not on a clock. What do you configure, and what does the platform do for you?",
           "options": [
-            { "id": "a", "text": "A GitHub webhook trigger in the playbook's trigger configuration — and the platform automatically registers the webhook URL with GitHub for you", "correct": true },
-            { "id": "b", "text": "A cron expression of 0 0 * * *, because cron is the only way to trigger any playbook", "correct": false },
-            { "id": "c", "text": "Nothing on Automatos — you must manually paste a webhook URL into GitHub's settings yourself", "correct": false },
-            { "id": "d", "text": "A voice-chat command that you repeat each time a PR is opened", "correct": false }
+            {
+              "id": "a",
+              "text": "A GitHub webhook trigger in the playbook's trigger configuration — and the platform automatically registers the webhook URL with GitHub for you",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A cron expression of 0 0 * * *, because cron is the only way to trigger any playbook",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Nothing on Automatos — you must manually paste a webhook URL into GitHub's settings yourself",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A voice-chat command that you repeat each time a PR is opened",
+              "correct": false
+            }
           ],
           "explanation": "Event-driven runs use webhook triggers configured per-playbook, and the platform registers the webhook URL with the external service (here GitHub) automatically — that is the documented convenience. Option b is a schedule, which fires on a clock, not on the PR event. Option c is the opposite of the documented behaviour: Automatos does the registration, you don't paste URLs by hand. Option d isn't a trigger mechanism and wouldn't fire on an event.",
-          "sourceRefs": ["r-gb-playbooks", "r-gb-tools"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-gb-tools"
+          ]
         },
         {
           "id": "kc-m04-l2-3",
@@ -113,13 +208,32 @@
           "difficulty": 2,
           "stem": "In a playbook, step 1 fetches data that every later step depends on. Which error-handling mode is the sensible default for that step, and why?",
           "options": [
-            { "id": "a", "text": "stop (or retry-then-stop) — if the fetch fails, halting prevents later steps running on missing data and silently producing an empty result", "correct": true },
-            { "id": "b", "text": "skip — carry on regardless, because every step is optional", "correct": false },
-            { "id": "c", "text": "skip — later steps will invent the missing data themselves", "correct": false },
-            { "id": "d", "text": "There is no per-step error handling; a failure always cancels the entire workspace", "correct": false }
+            {
+              "id": "a",
+              "text": "stop (or retry-then-stop) — if the fetch fails, halting prevents later steps running on missing data and silently producing an empty result",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "skip — carry on regardless, because every step is optional",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "skip — later steps will invent the missing data themselves",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "There is no per-step error handling; a failure always cancels the entire workspace",
+              "correct": false
+            }
           ],
           "explanation": "A data-fetch that everything downstream needs should stop on failure (retry first if the call is flaky) — skipping it would let later steps run on nothing and produce a hollow report. Option b misapplies skip: this step is the opposite of optional. Option c is wrong on both counts — skip doesn't fabricate data, and downstream agents shouldn't invent it. Option d is false: error handling is set per step (stop / skip / retry), and it affects the run, not the whole workspace.",
-          "sourceRefs": ["r-forge-skill", "r-gb-playbooks"]
+          "sourceRefs": [
+            "r-forge-skill",
+            "r-gb-playbooks"
+          ]
         }
       ]
     },
@@ -137,13 +251,31 @@
           "difficulty": 2,
           "stem": "You want agents in a playbook to be able to pull in a specialist teammate when they genuinely need one, but you want to see and confirm each hand-off rather than let it happen silently. Which delegation rule fits?",
           "options": [
-            { "id": "a", "text": "Approval required — delegation is allowed but each hand-off needs your confirmation", "correct": true },
-            { "id": "b", "text": "Auto-delegate — agents pass tasks to teammates automatically with no confirmation", "correct": false },
-            { "id": "c", "text": "Disabled — agents work independently only and can never delegate", "correct": false },
-            { "id": "d", "text": "Approval required means delegation is turned off entirely", "correct": false }
+            {
+              "id": "a",
+              "text": "Approval required — delegation is allowed but each hand-off needs your confirmation",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Auto-delegate — agents pass tasks to teammates automatically with no confirmation",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Disabled — agents work independently only and can never delegate",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Approval required means delegation is turned off entirely",
+              "correct": false
+            }
           ],
           "explanation": "Approval required is exactly the least-privilege middle ground: agents can delegate, but you confirm each one — capability with a checkpoint. Option b (Auto-delegate) removes the confirmation you specifically wanted. Option c (Disabled) forbids delegation altogether, so the specialist can never be pulled in. Option d misreads the rule — Approval required permits delegation gated by confirmation; it does not disable it.",
-          "sourceRefs": ["r-gb-coordination"]
+          "sourceRefs": [
+            "r-gb-coordination"
+          ]
         },
         {
           "id": "kc-m04-l3-2",
@@ -152,13 +284,32 @@
           "difficulty": 2,
           "stem": "A scheduled playbook's step 5 (post to Slack) fails almost every night. You open Analytics → Workflows and see step 5 is the consistent failure. What's the documented way to read this, and what do you do next?",
           "options": [
-            { "id": "a", "text": "A consistently-failing step usually signals a tool-connection issue or a prompt problem — check the Slack connection and Comms's prompt via the Feed's error detail, rather than rebuilding the whole playbook", "correct": true },
-            { "id": "b", "text": "Delete the playbook and build a brand-new one from scratch, since a failing step means the whole design is wrong", "correct": false },
-            { "id": "c", "text": "Ignore it — failure rate in Analytics → Workflows has no diagnostic value", "correct": false },
-            { "id": "d", "text": "Switch every step to 'skip' error handling so the failure stops appearing in the metrics", "correct": false }
+            {
+              "id": "a",
+              "text": "A consistently-failing step usually signals a tool-connection issue or a prompt problem — check the Slack connection and Comms's prompt via the Feed's error detail, rather than rebuilding the whole playbook",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Delete the playbook and build a brand-new one from scratch, since a failing step means the whole design is wrong",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Ignore it — failure rate in Analytics → Workflows has no diagnostic value",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Switch every step to 'skip' error handling so the failure stops appearing in the metrics",
+              "correct": false
+            }
           ],
           "explanation": "The docs say a consistently-failing step usually means a tool-connection issue or an agent needing a better prompt, and to check the Feed for error details — so you inspect the Slack connection and the Comms prompt, not the whole playbook. Option b overreacts: one failing step points at a localised cause, not a doomed design. Option c ignores the exact metric built to surface failure patterns. Option d hides the symptom (skip suppresses the failure) without fixing the broken Slack step — the notification still never sends.",
-          "sourceRefs": ["r-gb-analytics-workflows", "r-gb-playbooks"]
+          "sourceRefs": [
+            "r-gb-analytics-workflows",
+            "r-gb-playbooks"
+          ]
         },
         {
           "id": "kc-m04-l3-3",
@@ -167,13 +318,31 @@
           "difficulty": 2,
           "stem": "You install a playbook from the Marketplace. Which two statements are true about what you actually get?",
           "options": [
-            { "id": "a", "text": "It references agent roles (e.g. 'code reviewer') that the platform maps to your existing agents on install, and it's an independent copy that won't auto-update when the marketplace version changes", "correct": true },
-            { "id": "b", "text": "It hard-codes specific named agents from the author's workspace, and it stays permanently linked so it auto-updates whenever the author edits it", "correct": false },
-            { "id": "c", "text": "It runs only in the Marketplace and can never be copied into your own workspace's playbook library", "correct": false },
-            { "id": "d", "text": "It arrives fully configured with your inputs and schedule already set, requiring no changes before running", "correct": false }
+            {
+              "id": "a",
+              "text": "It references agent roles (e.g. 'code reviewer') that the platform maps to your existing agents on install, and it's an independent copy that won't auto-update when the marketplace version changes",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It hard-codes specific named agents from the author's workspace, and it stays permanently linked so it auto-updates whenever the author edits it",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "It runs only in the Marketplace and can never be copied into your own workspace's playbook library",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "It arrives fully configured with your inputs and schedule already set, requiring no changes before running",
+              "correct": false
+            }
           ],
           "explanation": "Marketplace playbooks reference roles (mapped to your agents on install) and are independent copies that don't auto-sync — both documented facts. Option b is doubly wrong: they use roles not named agents, and they don't stay linked for auto-updates. Option c is false — Install copies the playbook into your workspace library (it appears under Agents → Playbooks). Option d overstates it — you still configure inputs and schedule, and may need to map a role that has no match.",
-          "sourceRefs": ["r-gb-marketplace-playbooks"]
+          "sourceRefs": [
+            "r-gb-marketplace-playbooks"
+          ]
         }
       ]
     },
@@ -191,13 +360,32 @@
           "difficulty": 2,
           "stem": "Which statement most precisely distinguishes a Playbook from a Mission?",
           "options": [
-            { "id": "a", "text": "A Playbook is a defined, ordered workflow you author (deterministic steps, same every run, schedulable); a Mission is an autonomous objective where an agent plans the steps, you approve, and it executes (open-ended, one-off)", "correct": true },
-            { "id": "b", "text": "A Playbook is a single agent answering one question now; a Mission is a multi-step workflow you design in advance", "correct": false },
-            { "id": "c", "text": "A Playbook is always one-off and never repeatable; a Mission is what you schedule on a cron", "correct": false },
-            { "id": "d", "text": "They are the same feature under two names — the platform uses them interchangeably", "correct": false }
+            {
+              "id": "a",
+              "text": "A Playbook is a defined, ordered workflow you author (deterministic steps, same every run, schedulable); a Mission is an autonomous objective where an agent plans the steps, you approve, and it executes (open-ended, one-off)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A Playbook is a single agent answering one question now; a Mission is a multi-step workflow you design in advance",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A Playbook is always one-off and never repeatable; a Mission is what you schedule on a cron",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "They are the same feature under two names — the platform uses them interchangeably",
+              "correct": false
+            }
           ],
           "explanation": "The defining difference is who decides the steps and repeatability: you author a Playbook's deterministic, schedulable steps, whereas an agent plans a Mission's steps at runtime for a one-off objective you approve. Option b swaps the definitions (a single agent answering now is Chat, not a Playbook). Option c inverts both — Playbooks are the repeatable, schedulable ones; Missions are the one-offs. Option d is false: they are distinct execution modes with different behaviours and a one-way Save-as-Routine bridge between them.",
-          "sourceRefs": ["r-gb-playbooks", "r-gb-missions"]
+          "sourceRefs": [
+            "r-gb-playbooks",
+            "r-gb-missions"
+          ]
         },
         {
           "id": "kc-m04-l4-2",
@@ -206,13 +394,32 @@
           "difficulty": 3,
           "stem": "You ran a Mission to investigate a messy, open-ended problem; it completed and produced a genuinely useful result you now realise you'll want to repeat monthly. What's the intended path to make it repeatable?",
           "options": [
-            { "id": "a", "text": "Open the completed mission and click 'Save as Routine' — the system extracts the task pattern into a playbook you can run on demand or schedule", "correct": true },
-            { "id": "b", "text": "Re-run the identical Mission from scratch every month, since Missions are the only way to do multi-step work", "correct": false },
-            { "id": "c", "text": "Copy the mission's chat transcript into a new single Chat message each month", "correct": false },
-            { "id": "d", "text": "You can't — there is no way to turn a Mission into anything reusable", "correct": false }
+            {
+              "id": "a",
+              "text": "Open the completed mission and click 'Save as Routine' — the system extracts the task pattern into a playbook you can run on demand or schedule",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Re-run the identical Mission from scratch every month, since Missions are the only way to do multi-step work",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Copy the mission's chat transcript into a new single Chat message each month",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "You can't — there is no way to turn a Mission into anything reusable",
+              "correct": false
+            }
           ],
           "explanation": "Save as Routine is the documented bridge: a completed Mission's task pattern is extracted into a playbook that's then repeatable and schedulable — exactly right for a one-off that became a recurring need. Option b ignores that bridge and wastes the planning work every month. Option c loses the multi-step orchestration entirely by collapsing it into a single chat turn. Option d is false — the Save-as-Routine conversion exists precisely for this.",
-          "sourceRefs": ["r-gb-missions", "r-gb-playbooks"]
+          "sourceRefs": [
+            "r-gb-missions",
+            "r-gb-playbooks"
+          ]
         }
       ]
     }
@@ -225,13 +432,32 @@
       "difficulty": 1,
       "stem": "In Automatos, what is the canonical term for a multi-step workflow that chains agents together?",
       "options": [
-        { "id": "a", "text": "A Playbook", "correct": true },
-        { "id": "b", "text": "A Recipe", "correct": false },
-        { "id": "c", "text": "A Pipeline", "correct": false },
-        { "id": "d", "text": "A Blueprint", "correct": false }
+        {
+          "id": "a",
+          "text": "A Playbook",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Recipe",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A Pipeline",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A Blueprint",
+          "correct": false
+        }
       ],
       "explanation": "The platform's canonical noun is Playbook, and its own playbook-builder agent (FORGE) insists on it. Option b, 'Recipe', is legacy/backend naming — it survives only in one REST API path (/api/workflow-recipes) and is never user-facing vocabulary. Option c, 'Pipeline', names the internal scratchpad mechanism that passes data between steps, not the workflow object itself. Option d, 'Blueprint', is design/internal vocabulary, not the term for a multi-step workflow.",
-      "sourceRefs": ["r-gb-playbooks", "r-forge-skill"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-forge-skill"
+      ]
     },
     {
       "id": "q-m04-2",
@@ -240,13 +466,32 @@
       "difficulty": 1,
       "stem": "How does a later step in a playbook access the output produced by an earlier step?",
       "options": [
-        { "id": "a", "text": "Through the scratchpad — the workflow pipeline that carries intermediate state forward from step to step", "correct": true },
-        { "id": "b", "text": "By opening a new chat session and asking the user to paste it in", "correct": false },
-        { "id": "c", "text": "It can't — each step is fully isolated and shares nothing", "correct": false },
-        { "id": "d", "text": "By querying the Analytics → Workflows dashboard mid-run", "correct": false }
+        {
+          "id": "a",
+          "text": "Through the scratchpad — the workflow pipeline that carries intermediate state forward from step to step",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "By opening a new chat session and asking the user to paste it in",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It can't — each step is fully isolated and shares nothing",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "By querying the Analytics → Workflows dashboard mid-run",
+          "correct": false
+        }
       ],
       "explanation": "Playbook execution uses a scratchpad for intermediate state, and each step reads the previous step's output through the workflow pipeline. Option b describes manual copy-paste, which the pipeline exists to eliminate. Option c contradicts the documented behaviour — steps share state via the scratchpad. Option d confuses monitoring (Analytics → Workflows reports on runs) with the runtime data-passing mechanism.",
-      "sourceRefs": ["r-gb-playbooks", "r-gb-coordination"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-gb-coordination"
+      ]
     },
     {
       "id": "q-m04-3",
@@ -255,13 +500,31 @@
       "difficulty": 1,
       "stem": "In the documented nightly-code-review playbook, which agent posts the final report to Slack?",
       "options": [
-        { "id": "a", "text": "Comms", "correct": true },
-        { "id": "b", "text": "Scout", "correct": false },
-        { "id": "c", "text": "Sentinel", "correct": false },
-        { "id": "d", "text": "Code Reviewer", "correct": false }
+        {
+          "id": "a",
+          "text": "Comms",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Scout",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Sentinel",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Code Reviewer",
+          "correct": false
+        }
       ],
       "explanation": "In the example, step 5 assigns Comms to post the report to Slack. Scout (option b) is step 1, pulling the latest commits from GitHub. Sentinel (option c) is step 3, running the security scan on changed files. Code Reviewer (option d) is step 2, reviewing each commit. Each step is one job, one agent — Comms handles the posting.",
-      "sourceRefs": ["r-gb-playbooks"]
+      "sourceRefs": [
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-4",
@@ -270,13 +533,32 @@
       "difficulty": 2,
       "stem": "What does the cron expression 0 9 * * 1-5 schedule?",
       "options": [
-        { "id": "a", "text": "9:00 AM on weekdays (Monday–Friday)", "correct": true },
-        { "id": "b", "text": "Every 9 hours, every day of the week", "correct": false },
-        { "id": "c", "text": "Once, at 9:00 AM on the 1st through 5th of each month", "correct": false },
-        { "id": "d", "text": "Every minute between 9 AM and 5 PM", "correct": false }
+        {
+          "id": "a",
+          "text": "9:00 AM on weekdays (Monday–Friday)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Every 9 hours, every day of the week",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Once, at 9:00 AM on the 1st through 5th of each month",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Every minute between 9 AM and 5 PM",
+          "correct": false
+        }
       ],
       "explanation": "Cron fields are minute · hour · day-of-month · month · day-of-week, so 0 9 * * 1-5 means minute 0 of hour 9, any day/month, on days-of-week 1–5 — 9 AM on weekdays. Option b misreads hour 9 as an interval. Option c wrongly reads 1-5 as day-of-month; that field is the day-of-week (the 5th field), which is Mon–Fri. Option d would require a range in the minute/hour fields, which this expression doesn't have.",
-      "sourceRefs": ["r-gb-tools", "r-gb-playbooks"]
+      "sourceRefs": [
+        "r-gb-tools",
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-5",
@@ -285,13 +567,31 @@
       "difficulty": 2,
       "stem": "Which three delegation rules can you set on the Coordination tab, and what do they control?",
       "options": [
-        { "id": "a", "text": "Auto-delegate, Approval required, and Disabled — they control whether one agent can hand a subtask to a teammate automatically, only with your confirmation, or not at all", "correct": true },
-        { "id": "b", "text": "Read, Write, and Admin — they control a user's permissions on the workspace", "correct": false },
-        { "id": "c", "text": "Manual, Scheduled, and Webhook — they control how a playbook is triggered", "correct": false },
-        { "id": "d", "text": "Stop, Skip, and Retry — they control what happens when a step errors", "correct": false }
+        {
+          "id": "a",
+          "text": "Auto-delegate, Approval required, and Disabled — they control whether one agent can hand a subtask to a teammate automatically, only with your confirmation, or not at all",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Read, Write, and Admin — they control a user's permissions on the workspace",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Manual, Scheduled, and Webhook — they control how a playbook is triggered",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Stop, Skip, and Retry — they control what happens when a step errors",
+          "correct": false
+        }
       ],
       "explanation": "The Coordination tab's delegation rules are Auto-delegate / Approval required / Disabled, governing inter-agent hand-offs. Option b lists role-style permissions, not delegation rules. Option c lists trigger modes for running a playbook, a different setting. Option d lists per-step error-handling modes (from FORGE), which govern failure behaviour, not delegation.",
-      "sourceRefs": ["r-gb-coordination"]
+      "sourceRefs": [
+        "r-gb-coordination"
+      ]
     },
     {
       "id": "q-m04-6",
@@ -300,13 +600,32 @@
       "difficulty": 2,
       "stem": "You've built a playbook and want it to run automatically when someone files a bug in Jira. What's true about setting this up?",
       "options": [
-        { "id": "a", "text": "You add a Jira webhook trigger in the playbook's trigger configuration, and the platform registers the webhook URL with Jira for you", "correct": true },
-        { "id": "b", "text": "Webhook triggers are configured globally for the whole workspace, not per playbook", "correct": false },
-        { "id": "c", "text": "Jira can't trigger playbooks — only GitHub events are supported", "correct": false },
-        { "id": "d", "text": "You must give Automatos your Jira admin password so it can poll for new issues every minute", "correct": false }
+        {
+          "id": "a",
+          "text": "You add a Jira webhook trigger in the playbook's trigger configuration, and the platform registers the webhook URL with Jira for you",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Webhook triggers are configured globally for the whole workspace, not per playbook",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Jira can't trigger playbooks — only GitHub events are supported",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "You must give Automatos your Jira admin password so it can poll for new issues every minute",
+          "correct": false
+        }
       ],
       "explanation": "Triggers are configured per-playbook, Jira 'issue created/updated' is a documented trigger source, and the platform auto-registers the webhook URL with the service. Option b is wrong — triggers are per-playbook, not workspace-global. Option c is false — Jira, GitHub, and Slack are all documented trigger sources. Option d describes password-based polling, which isn't how it works; triggers ride on your existing (OAuth/API-key) tool connection and use webhooks, not credential sharing.",
-      "sourceRefs": ["r-gb-playbooks", "r-gb-tools"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-gb-tools"
+      ]
     },
     {
       "id": "q-m04-7",
@@ -315,13 +634,32 @@
       "difficulty": 2,
       "stem": "You need to see, over the past month, which playbook step fails most often and how long each step takes. Where do you look?",
       "options": [
-        { "id": "a", "text": "Analytics → Workflows — completion/failure rates, average duration, and drill-down to step-level timing and error details", "correct": true },
-        { "id": "b", "text": "Activity → Feed — the chronological log of a single run", "correct": false },
-        { "id": "c", "text": "The Coordination tab — team assignments and delegation rules", "correct": false },
-        { "id": "d", "text": "The Marketplace → Playbooks tab — installable pre-built playbooks", "correct": false }
+        {
+          "id": "a",
+          "text": "Analytics → Workflows — completion/failure rates, average duration, and drill-down to step-level timing and error details",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Activity → Feed — the chronological log of a single run",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The Coordination tab — team assignments and delegation rules",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The Marketplace → Playbooks tab — installable pre-built playbooks",
+          "correct": false
+        }
       ],
       "explanation": "Analytics → Workflows is the trends-and-health surface: total runs, completion/failure rate, average duration, and step-level drill-down showing which steps fail most. Option b (Feed) shows one run's play-by-play, not aggregated trends over a month. Option c governs delegation, not run analytics. Option d is where you install playbooks, not where you analyse their performance.",
-      "sourceRefs": ["r-gb-analytics-workflows", "r-gb-playbooks"]
+      "sourceRefs": [
+        "r-gb-analytics-workflows",
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-8",
@@ -330,13 +668,32 @@
       "difficulty": 2,
       "stem": "A colleague wants to review a single function they just wrote, right now, one time. Which execution mode is the right tool?",
       "options": [
-        { "id": "a", "text": "Plain Chat — a single agent answers immediately; building a playbook or mission for a one-shot question is over-engineering", "correct": true },
-        { "id": "b", "text": "A Playbook — because all code review must go through a defined multi-step workflow", "correct": false },
-        { "id": "c", "text": "A Mission — because an agent should always plan and get approval before answering anything", "correct": false },
-        { "id": "d", "text": "A webhook-triggered playbook fired by a GitHub push", "correct": false }
+        {
+          "id": "a",
+          "text": "Plain Chat — a single agent answers immediately; building a playbook or mission for a one-shot question is over-engineering",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Playbook — because all code review must go through a defined multi-step workflow",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A Mission — because an agent should always plan and get approval before answering anything",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A webhook-triggered playbook fired by a GitHub push",
+          "correct": false
+        }
       ],
       "explanation": "A one-off question answered now is exactly what Chat is for — the Router picks an agent and it responds, no machinery required. Option b over-engineers a single question into a repeatable workflow that pays back only when reused. Option c invokes Mission's plan-approve-execute overhead for something that needs neither planning nor repetition. Option d adds event-driven automation for a manual, one-time ask — the wrong shape entirely.",
-      "sourceRefs": ["r-gb-playbooks", "r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m04-9",
@@ -345,13 +702,32 @@
       "difficulty": 2,
       "stem": "Which situation is the clearest fit for a Playbook rather than a Mission?",
       "options": [
-        { "id": "a", "text": "You know the exact steps and will run the same sequence every weekday morning", "correct": true },
-        { "id": "b", "text": "You have an open-ended goal and don't yet know what steps are needed to reach it", "correct": false },
-        { "id": "c", "text": "You want an agent to plan an investigation and get your approval before starting", "correct": false },
-        { "id": "d", "text": "You need a single quick answer to one question right now", "correct": false }
+        {
+          "id": "a",
+          "text": "You know the exact steps and will run the same sequence every weekday morning",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You have an open-ended goal and don't yet know what steps are needed to reach it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "You want an agent to plan an investigation and get your approval before starting",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "You need a single quick answer to one question right now",
+          "correct": false
+        }
       ],
       "explanation": "A Playbook fits known, repeatable steps you'll run on a schedule — deterministic and reusable. Option b (unknown steps, open-ended goal) is the textbook Mission case, where the agent plans at runtime. Option c (agent plans, you approve) is again a Mission by definition. Option d (one quick answer) is Chat. The Playbook is the right call only when you can author the steps and will reuse them.",
-      "sourceRefs": ["r-gb-playbooks", "r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m04-10",
@@ -360,13 +736,31 @@
       "difficulty": 2,
       "stem": "When you install a playbook from the Marketplace, how are its agent assignments handled?",
       "options": [
-        { "id": "a", "text": "It references agent roles (e.g. 'code reviewer'), and the platform maps those roles to your existing agents on install", "correct": true },
-        { "id": "b", "text": "It imports the original author's specific named agents into your workspace", "correct": false },
-        { "id": "c", "text": "It runs with no agents until you rebuild every step from scratch", "correct": false },
-        { "id": "d", "text": "It permanently shares agents with the author's workspace over the network", "correct": false }
+        {
+          "id": "a",
+          "text": "It references agent roles (e.g. 'code reviewer'), and the platform maps those roles to your existing agents on install",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It imports the original author's specific named agents into your workspace",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It runs with no agents until you rebuild every step from scratch",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It permanently shares agents with the author's workspace over the network",
+          "correct": false
+        }
       ],
       "explanation": "Marketplace playbooks reference roles, not specific agents, and the platform maps those roles to your own agents at install time (you may need to map a role that has no match). Option b is wrong — it doesn't import the author's agents. Option c overstates it: the steps come pre-defined; you map roles and configure inputs, you don't rebuild. Option d invents cross-workspace agent sharing, which isn't how installation works — you get an independent copy.",
-      "sourceRefs": ["r-gb-marketplace-playbooks"]
+      "sourceRefs": [
+        "r-gb-marketplace-playbooks"
+      ]
     },
     {
       "id": "q-m04-11",
@@ -375,13 +769,31 @@
       "difficulty": 1,
       "stem": "You ask in Chat, 'Run the nightly code review playbook.' What makes this work?",
       "options": [
-        { "id": "a", "text": "The Universal Router recognises the intent and triggers the named playbook", "correct": true },
-        { "id": "b", "text": "Nothing — playbooks can only be started by clicking Run or by a cron schedule", "correct": false },
-        { "id": "c", "text": "The message is posted to Slack, which then starts the playbook", "correct": false },
-        { "id": "d", "text": "You must first paste the playbook's full step list into the chat for it to run", "correct": false }
+        {
+          "id": "a",
+          "text": "The Universal Router recognises the intent and triggers the named playbook",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing — playbooks can only be started by clicking Run or by a cron schedule",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The message is posted to Slack, which then starts the playbook",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "You must first paste the playbook's full step list into the chat for it to run",
+          "correct": false
+        }
       ],
       "explanation": "'From Chat' is a documented run mode: the Universal Router reads your instruction and triggers the playbook you named. Option b omits the Chat run mode entirely (there are three: manual, scheduled, from chat). Option c invents a Slack round-trip that isn't part of the mechanism. Option d is unnecessary — you name the playbook, you don't re-specify its steps.",
-      "sourceRefs": ["r-gb-playbooks"]
+      "sourceRefs": [
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-12",
@@ -390,13 +802,32 @@
       "difficulty": 3,
       "stem": "A playbook's step 3 makes an external API call that fails intermittently — maybe one run in ten — due to network flakiness, but always succeeds on a second try. Steps 4–5 depend on step 3's output. Which per-step error-handling choice is the best fit?",
       "options": [
-        { "id": "a", "text": "retry — attempt once more, then stop; it recovers from transient network blips without letting steps 4–5 run on missing data", "correct": true },
-        { "id": "b", "text": "skip — move straight to step 4, because occasional failures don't matter", "correct": false },
-        { "id": "c", "text": "stop always, with no retry, so any single blip kills the entire nightly run permanently", "correct": false },
-        { "id": "d", "text": "There's no per-step control, so the whole workspace pauses until you intervene", "correct": false }
+        {
+          "id": "a",
+          "text": "retry — attempt once more, then stop; it recovers from transient network blips without letting steps 4–5 run on missing data",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "skip — move straight to step 4, because occasional failures don't matter",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "stop always, with no retry, so any single blip kills the entire nightly run permanently",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "There's no per-step control, so the whole workspace pauses until you intervene",
+          "correct": false
+        }
       ],
       "explanation": "retry is designed exactly for flaky external calls — one more attempt usually succeeds, and if it still fails it stops rather than corrupting downstream steps. Option b (skip) would let steps 4–5 run without step 3's output, producing a hollow result — bad when they depend on it. Option c (plain stop) is over-strict for a transient blip that self-heals on retry; you'd needlessly fail one run in ten. Option d is false — error handling is set per step (stop / skip / retry), not workspace-wide.",
-      "sourceRefs": ["r-forge-skill", "r-gb-playbooks"]
+      "sourceRefs": [
+        "r-forge-skill",
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-13",
@@ -405,13 +836,32 @@
       "difficulty": 2,
       "stem": "You want to build a playbook but would rather describe it in plain language than click through the step editor. What does FORGE do for you?",
       "options": [
-        { "id": "a", "text": "It converts a natural-language description into a playbook — designs the steps, assigns agents, wires the trigger, and verifies with a test run before declaring done", "correct": true },
-        { "id": "b", "text": "It writes marketing copy for your playbook but doesn't build anything", "correct": false },
-        { "id": "c", "text": "It replaces the Universal Router for all chat messages", "correct": false },
-        { "id": "d", "text": "It deletes duplicate playbooks automatically without asking", "correct": false }
+        {
+          "id": "a",
+          "text": "It converts a natural-language description into a playbook — designs the steps, assigns agents, wires the trigger, and verifies with a test run before declaring done",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It writes marketing copy for your playbook but doesn't build anything",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It replaces the Universal Router for all chat messages",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It deletes duplicate playbooks automatically without asking",
+          "correct": false
+        }
       ],
       "explanation": "FORGE is the signature playbook-builder agent: describe the automation and it designs steps, picks agents, wires the trigger, and does a test run to confirm it works. Option b misdescribes it — FORGE builds and tests workflows, it isn't a copywriter. Option c confuses it with the Router (a different system that routes chat messages to agents). Option d is wrong — FORGE checks for existing playbooks to avoid duplicates and proposes extending them, it doesn't silently delete anything.",
-      "sourceRefs": ["r-forge-skill", "r-gb-playbooks"]
+      "sourceRefs": [
+        "r-forge-skill",
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-14",
@@ -420,13 +870,31 @@
       "difficulty": 2,
       "stem": "You're about to schedule a five-agent playbook to run unattended every night, and you're deciding the delegation rule. You've never watched its inter-agent hand-offs behave. What's the least-privilege choice for now?",
       "options": [
-        { "id": "a", "text": "Approval required — let agents pull in a specialist when needed, but confirm each hand-off until you've seen it behave and can trust Auto-delegate", "correct": true },
-        { "id": "b", "text": "Auto-delegate immediately — it's less clicking, and convenience should decide", "correct": false },
-        { "id": "c", "text": "Disabled forever — agents should never be allowed to delegate under any circumstances", "correct": false },
-        { "id": "d", "text": "It doesn't matter which you pick, since delegation rules have no effect on multi-agent playbooks", "correct": false }
+        {
+          "id": "a",
+          "text": "Approval required — let agents pull in a specialist when needed, but confirm each hand-off until you've seen it behave and can trust Auto-delegate",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Auto-delegate immediately — it's less clicking, and convenience should decide",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Disabled forever — agents should never be allowed to delegate under any circumstances",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It doesn't matter which you pick, since delegation rules have no effect on multi-agent playbooks",
+          "correct": false
+        }
       ],
       "explanation": "Approval required is the least-privilege middle ground: capability with a confirmation checkpoint, which is exactly right before you've observed the delegations and earned enough trust to relax to Auto-delegate. Option b picks the most autonomous mode for convenience rather than after observing behaviour — the anti-pattern the lesson warns against. Option c is needlessly absolute — Disabled removes a genuinely useful capability permanently, when the goal is to gate it, not ban it. Option d is false: delegation rules matter most precisely for multi-agent playbooks.",
-      "sourceRefs": ["r-gb-coordination"]
+      "sourceRefs": [
+        "r-gb-coordination"
+      ]
     },
     {
       "id": "q-m04-15",
@@ -435,13 +903,32 @@
       "difficulty": 2,
       "stem": "One run of a scheduled playbook finished with status 'failed' at step 4. You want the exact play-by-play of what happened in that specific run, including the tool call and error detail. Where do you look?",
       "options": [
-        { "id": "a", "text": "Activity → Feed — the chronological, step-by-step execution log where every action, tool call, and agent response for that run appears", "correct": true },
-        { "id": "b", "text": "Activity → Dashboard — which shows the schedule and live status, not a single run's detailed log", "correct": false },
-        { "id": "c", "text": "The Marketplace, to install a replacement playbook", "correct": false },
-        { "id": "d", "text": "Settings → General, where all execution logs are stored", "correct": false }
+        {
+          "id": "a",
+          "text": "Activity → Feed — the chronological, step-by-step execution log where every action, tool call, and agent response for that run appears",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Activity → Dashboard — which shows the schedule and live status, not a single run's detailed log",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The Marketplace, to install a replacement playbook",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Settings → General, where all execution logs are stored",
+          "correct": false
+        }
       ],
       "explanation": "Activity → Feed is the chronological execution log — the right place to read exactly what happened in one run, tool calls and errors included. Option b (Dashboard) answers 'what's running/scheduled', not 'what happened step-by-step in this failed run'. Option c is irrelevant to diagnosing a run. Option d is wrong — Settings → General holds configuration (like cost alerts), not per-run execution logs.",
-      "sourceRefs": ["r-gb-analytics-workflows", "r-gb-playbooks"]
+      "sourceRefs": [
+        "r-gb-analytics-workflows",
+        "r-gb-playbooks"
+      ]
     },
     {
       "id": "q-m04-16",
@@ -450,19 +937,40 @@
       "difficulty": 3,
       "stem": "You designed a playbook where step 2 (write the summary) is placed BEFORE step 3 (run the security scan), but the summary is supposed to include the scan's findings. What's wrong, and why?",
       "options": [
-        { "id": "a", "text": "Step ordering breaks the scratchpad data flow — a step can only read what an earlier step produced, so step 2 would summarise scan findings that don't exist yet; the scan must come before the summary", "correct": true },
-        { "id": "b", "text": "Nothing is wrong — steps run in parallel, so order never matters", "correct": false },
-        { "id": "c", "text": "The summary step will automatically pause and wait for step 3 to finish, then include its output", "correct": false },
-        { "id": "d", "text": "The problem is the agent assignment, not the order; swapping which agents run the steps fixes it", "correct": false }
+        {
+          "id": "a",
+          "text": "Step ordering breaks the scratchpad data flow — a step can only read what an earlier step produced, so step 2 would summarise scan findings that don't exist yet; the scan must come before the summary",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing is wrong — steps run in parallel, so order never matters",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The summary step will automatically pause and wait for step 3 to finish, then include its output",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The problem is the agent assignment, not the order; swapping which agents run the steps fixes it",
+          "correct": false
+        }
       ],
       "explanation": "The scratchpad carries state forward, so each step reads only what earlier steps produced — placing the summary before the scan means it has no scan findings to include, which is the defect. Option b is false — playbook steps are ordered and pass data forward, not run in parallel with no order. Option c invents look-ahead waiting that the pipeline doesn't do; you fix it by reordering. Option d misdiagnoses it — the agents are fine; the data-flow order is the problem, so reordering (scan before summary), not reassigning, is the fix.",
-      "sourceRefs": ["r-gb-playbooks", "r-forge-skill"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-forge-skill"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-m04-chat-playbook-mission",
-      "domainIds": ["m04-playbooks"],
+      "domainIds": [
+        "m04-playbooks"
+      ],
       "title": "One request, three possible tools: Chat, Playbook, or Mission?",
       "tagline": "The central Automatos judgment call from the module's debate — steering a teammate to the right execution mode as their request evolves.",
       "context": "A teammate on your workspace wants help with code quality and comes to you, the resident Automatos power user, for advice on how to set it up. Their needs shift over the conversation — from a quick one-off, to a repeatable nightly job, to an open-ended investigation, and finally to making that investigation repeatable. Each time, steer them to the right one of the three execution modes (Chat, Playbook, Mission) and the Save-as-Routine bridge. Ground every call in what each mode actually is: Chat is a single agent answering now; a Playbook is a defined, ordered, repeatable workflow you author and can schedule; a Mission is an autonomous objective an agent plans, you approve, and it executes.",
@@ -471,40 +979,104 @@
           "id": "st1",
           "prompt": "They start: 'I just wrote this one function and I want a quick sanity check on it — is there anything obviously wrong? Should I build a playbook for this?' What do you advise?",
           "choices": [
-            { "id": "a", "text": "Just use Chat — paste the function, let the Router pick a reviewer agent, and read the answer. A playbook for a single one-off check is over-engineering.", "verdict": "best", "rationale": "A single question answered now is the textbook Chat case: one agent, immediate, no machinery. Building a playbook only pays back when you'll reuse the steps, which you won't here. This is the 'don't build machinery for one answer' rule applied cleanly." },
-            { "id": "b", "text": "Build a one-step playbook for it, so it's saved and reusable later just in case.", "verdict": "viable", "rationale": "Not harmful, and if they genuinely expect to reuse it, a playbook is defensible — but for a stated one-off it's premature design cost. The honest advice is to answer it in Chat now and build a playbook later if a repeating need actually emerges (or promote it via Save as Routine). You're solving a future problem they may never have." },
-            { "id": "c", "text": "Kick off a Mission so an agent can plan a full review process and get their approval before answering.", "verdict": "wrong", "rationale": "A Mission's plan-approve-execute cycle is built for open-ended objectives where you don't know the steps — massive overkill for 'glance at this function.' You'd add planning and approval overhead to a question that needs neither. Wrong shape of tool entirely." }
+            {
+              "id": "a",
+              "text": "Just use Chat — paste the function, let the Router pick a reviewer agent, and read the answer. A playbook for a single one-off check is over-engineering.",
+              "verdict": "best",
+              "rationale": "A single question answered now is the textbook Chat case: one agent, immediate, no machinery. Building a playbook only pays back when you'll reuse the steps, which you won't here. This is the 'don't build machinery for one answer' rule applied cleanly."
+            },
+            {
+              "id": "b",
+              "text": "Build a one-step playbook for it, so it's saved and reusable later just in case.",
+              "verdict": "viable",
+              "rationale": "Not harmful, and if they genuinely expect to reuse it, a playbook is defensible — but for a stated one-off it's premature design cost. The honest advice is to answer it in Chat now and build a playbook later if a repeating need actually emerges (or promote it via Save as Routine). You're solving a future problem they may never have."
+            },
+            {
+              "id": "c",
+              "text": "Kick off a Mission so an agent can plan a full review process and get their approval before answering.",
+              "verdict": "wrong",
+              "rationale": "A Mission's plan-approve-execute cycle is built for open-ended objectives where you don't know the steps — massive overkill for 'glance at this function.' You'd add planning and approval overhead to a question that needs neither. Wrong shape of tool entirely."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "They come back: 'That was great. Now I want the SAME thing every night — pull the day's commits, review them, security-scan them, and post a summary to our #dev channel. Automatically.' What's the right tool now?",
           "choices": [
-            { "id": "a", "text": "A Playbook. You know the exact steps (Scout → Code Reviewer → Sentinel → Scribe → Comms) and you'll run them every night — author it once, give it a cron schedule like 0 23 * * *, done.", "verdict": "best", "rationale": "Known steps plus a recurring cadence is the definition of a Playbook: deterministic, repeatable, schedulable. This is precisely the up-front-design-for-reuse trade-off a playbook is built to pay back — and cron scheduling is a first-class playbook feature." },
-            { "id": "b", "text": "Keep doing it in Chat, but set yourself a reminder to run the review manually each night.", "verdict": "wrong", "rationale": "This throws away the whole point of a playbook — repeatability without a human remembering. Manual Chat every night is exactly the error-prone, un-schedulable path playbooks exist to replace; one bad evening and step 3 gets skipped. The work is known and recurring, so it should be authored and scheduled, not hand-run." },
-            { "id": "c", "text": "Run it as a Mission each night so an agent can re-plan the review fresh every time.", "verdict": "viable", "rationale": "It would technically produce reviews, but re-planning identical, well-understood steps every night is wasted flexibility and gives you no clean, schedulable, deterministic sequence. Missions shine when steps are unknown; here they're fully known, so a Playbook is the better-fitting tool. You'd be paying for planning you don't need." }
+            {
+              "id": "a",
+              "text": "A Playbook. You know the exact steps (Scout → Code Reviewer → Sentinel → Scribe → Comms) and you'll run them every night — author it once, give it a cron schedule like 0 23 * * *, done.",
+              "verdict": "best",
+              "rationale": "Known steps plus a recurring cadence is the definition of a Playbook: deterministic, repeatable, schedulable. This is precisely the up-front-design-for-reuse trade-off a playbook is built to pay back — and cron scheduling is a first-class playbook feature."
+            },
+            {
+              "id": "b",
+              "text": "Keep doing it in Chat, but set yourself a reminder to run the review manually each night.",
+              "verdict": "wrong",
+              "rationale": "This throws away the whole point of a playbook — repeatability without a human remembering. Manual Chat every night is exactly the error-prone, un-schedulable path playbooks exist to replace; one bad evening and step 3 gets skipped. The work is known and recurring, so it should be authored and scheduled, not hand-run."
+            },
+            {
+              "id": "c",
+              "text": "Run it as a Mission each night so an agent can re-plan the review fresh every time.",
+              "verdict": "viable",
+              "rationale": "It would technically produce reviews, but re-planning identical, well-understood steps every night is wasted flexibility and gives you no clean, schedulable, deterministic sequence. Missions shine when steps are unknown; here they're fully known, so a Playbook is the better-fitting tool. You'd be paying for planning you don't need."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "Weeks later: 'Different problem — our test suite has gotten slow and flaky over the last month and nobody knows why. I want to get to the bottom of it and propose a fix. It's a one-off.' What do you recommend?",
           "choices": [
-            { "id": "a", "text": "A Mission. You don't know the steps — investigating flakiness is open-ended — so describe the objective, let an agent plan the investigation, approve the plan, and let it execute.", "verdict": "best", "rationale": "Unknown steps plus a one-off objective is the Mission case exactly: the agent decomposes the goal at runtime, you approve, it executes with monitoring. A playbook can't be authored here because you can't yet enumerate the steps — that's the whole signal to reach for a Mission." },
-            { "id": "b", "text": "Force it into a Playbook now by guessing the investigation steps up front.", "verdict": "wrong", "rationale": "You can't author a reliable playbook for steps you don't know yet — guessing them defeats the determinism a playbook is for and will likely miss the actual cause. This is the anti-pattern of using a Playbook when the steps are genuinely undiscovered; the correct move is a Mission that discovers them." },
-            { "id": "c", "text": "Handle it in a single long Chat message, packing the whole investigation into one turn.", "verdict": "viable", "rationale": "A capable agent in Chat could make a start, so it isn't useless — but a genuinely open-ended, multi-step investigation is what Missions are built for: a planned, approvable, monitored objective with checkpoints, rather than one unstructured turn. Chat under-serves the 'plan it and let me approve' need. Reach for the Mission." }
+            {
+              "id": "a",
+              "text": "A Mission. You don't know the steps — investigating flakiness is open-ended — so describe the objective, let an agent plan the investigation, approve the plan, and let it execute.",
+              "verdict": "best",
+              "rationale": "Unknown steps plus a one-off objective is the Mission case exactly: the agent decomposes the goal at runtime, you approve, it executes with monitoring. A playbook can't be authored here because you can't yet enumerate the steps — that's the whole signal to reach for a Mission."
+            },
+            {
+              "id": "b",
+              "text": "Force it into a Playbook now by guessing the investigation steps up front.",
+              "verdict": "wrong",
+              "rationale": "You can't author a reliable playbook for steps you don't know yet — guessing them defeats the determinism a playbook is for and will likely miss the actual cause. This is the anti-pattern of using a Playbook when the steps are genuinely undiscovered; the correct move is a Mission that discovers them."
+            },
+            {
+              "id": "c",
+              "text": "Handle it in a single long Chat message, packing the whole investigation into one turn.",
+              "verdict": "viable",
+              "rationale": "A capable agent in Chat could make a start, so it isn't useless — but a genuinely open-ended, multi-step investigation is what Missions are built for: a planned, approvable, monitored objective with checkpoints, rather than one unstructured turn. Chat under-serves the 'plan it and let me approve' need. Reach for the Mission."
+            }
           ]
         },
         {
           "id": "st4",
           "prompt": "The Mission worked brilliantly and found the culprit. They say: 'This flaky-test audit was so useful I want to run it every month.' What do you tell them?",
           "choices": [
-            { "id": "a", "text": "Open the completed mission and click 'Save as Routine' — it extracts the task pattern into a playbook you can then run on demand or put on a monthly schedule.", "verdict": "best", "rationale": "This is the exact bridge the platform provides: a proven one-off Mission becomes a repeatable Playbook via Save as Routine. The Mission discovered the steps; now that they're known and wanted recurringly, promoting them to a scheduled Playbook is precisely right — and it reuses the planning work instead of throwing it away." },
-            { "id": "b", "text": "Re-run the whole Mission from scratch every month, letting the agent re-plan each time.", "verdict": "viable", "rationale": "It would work and stays adaptive if the investigation genuinely differs each month — but now that the pattern is known and wanted on a cadence, re-planning every month wastes the planning effort and gives no schedulable, deterministic run. Save as Routine captures the pattern once; prefer it unless the audit really needs re-planning each time." },
-            { "id": "c", "text": "Tell them one-off Missions can't be reused, so they'll have to rebuild a playbook by hand from memory.", "verdict": "wrong", "rationale": "This is factually wrong and wasteful — the Save-as-Routine conversion exists specifically to turn a completed Mission into a reusable playbook, so there's no need to rebuild anything from memory. Denying the bridge sends them on needless manual work and misses the platform's intended path." }
+            {
+              "id": "a",
+              "text": "Open the completed mission and click 'Save as Routine' — it extracts the task pattern into a playbook you can then run on demand or put on a monthly schedule.",
+              "verdict": "best",
+              "rationale": "This is the exact bridge the platform provides: a proven one-off Mission becomes a repeatable Playbook via Save as Routine. The Mission discovered the steps; now that they're known and wanted recurringly, promoting them to a scheduled Playbook is precisely right — and it reuses the planning work instead of throwing it away."
+            },
+            {
+              "id": "b",
+              "text": "Re-run the whole Mission from scratch every month, letting the agent re-plan each time.",
+              "verdict": "viable",
+              "rationale": "It would work and stays adaptive if the investigation genuinely differs each month — but now that the pattern is known and wanted on a cadence, re-planning every month wastes the planning effort and gives no schedulable, deterministic run. Save as Routine captures the pattern once; prefer it unless the audit really needs re-planning each time."
+            },
+            {
+              "id": "c",
+              "text": "Tell them one-off Missions can't be reused, so they'll have to rebuild a playbook by hand from memory.",
+              "verdict": "wrong",
+              "rationale": "This is factually wrong and wasteful — the Save-as-Routine conversion exists specifically to turn a completed Mission into a reusable playbook, so there's no need to rebuild anything from memory. Denying the bridge sends them on needless manual work and misses the platform's intended path."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-gb-playbooks", "r-gb-missions", "r-gb-coordination"]
+      "sourceRefs": [
+        "r-gb-playbooks",
+        "r-gb-missions",
+        "r-gb-coordination"
+      ]
     }
   ],
   "labs": [
@@ -550,7 +1122,9 @@
       "url": "automatos-gitbook/agents/playbooks.md",
       "kind": "first-party-doc",
       "annotation": "The core source for this module: what a playbook is (steps, inputs, flow control, optional schedule), the +Create Playbook flow, the canonical nightly-code-review example (Scout → Code Reviewer → Sentinel → Scribe → Comms), the three run modes (Manual / Scheduled / From Chat), the scratchpad/workflow-pipeline that passes data between steps, webhook triggers (Jira/GitHub/Slack — the platform registers the URL for you), and Save-as-Routine. Read this first; the whole module hangs off it.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-coordination",
@@ -558,7 +1132,9 @@
       "url": "automatos-gitbook/agents/coordination.md",
       "kind": "first-party-doc",
       "annotation": "How agents work together inside a playbook: team assignments, the three delegation rules (Auto-delegate / Approval required / Disabled), the worked Code-Reviewer-delegates-to-Sentinel example, and how context passes between agents via the workflow pipeline and scratchpad. The source for the least-privilege 'which delegation rule?' judgment — coordination settings matter most exactly when a playbook chains multiple agents.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-tools",
@@ -566,7 +1142,9 @@
       "url": "automatos-gitbook/tools/README.md",
       "kind": "first-party-doc",
       "annotation": "Where webhook triggers and cron scheduling are documented alongside the tool connections they ride on: Composio powers 1,000+ integrations; triggers are configured per-playbook (Jira/GitHub/Slack); real cron patterns (0 9 * * 1-5 weekdays 9am, 0 */6 * * * every 6 hours, 0 22 * * 0 Sundays 10pm). Note that a trigger needs its app connected first — no GitHub connection, no GitHub event to fire on.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-analytics-workflows",
@@ -574,7 +1152,9 @@
       "url": "automatos-gitbook/analytics/workflows.md",
       "kind": "first-party-doc",
       "annotation": "The health-and-trends surface for playbook runs: total runs, completion rate, average duration, failure rate; a table of recent runs with status, step progress (e.g. 4/5) and triggering method; and step-level drill-down (per-step timing, which agent handled it, token usage, error details). The key practitioner instinct lives here: a consistently-failing step usually means a tool-connection issue or an agent needing a better prompt — pair it with Activity → Feed for the per-run error detail.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-marketplace-playbooks",
@@ -582,7 +1162,9 @@
       "url": "automatos-gitbook/marketplace/playbooks.md",
       "kind": "first-party-doc",
       "annotation": "Installing pre-built playbooks: preview steps → Install → it's copied into your workspace library (appears under Agents → Playbooks) → configure and Run. Two facts that trip people up: playbooks reference agent ROLES (mapped to your agents on install; map manually if a role has no match), and installed playbooks are INDEPENDENT COPIES that don't auto-update when the marketplace version changes. Note: the gitbook documents browse/install today; a contributor economy/monetization is not part of the live docs — treat any 'earn from playbooks' framing as not-yet.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-missions",
@@ -590,7 +1172,9 @@
       "url": "automatos-gitbook/activity/missions.md",
       "kind": "first-party-doc",
       "annotation": "The other side of the central judgment call: a Mission is an autonomous objective an agent PLANS (you approve the plan), then executes — open-ended and one-off, with a lifecycle (Plan Pending → Active → Paused → Completed) and cost-by-task monitoring. Crucially, the source for the Save-as-Routine bridge: a completed mission's task pattern can be extracted into a repeatable playbook. Note on budgets: missions offer cost-by-task plus pause / resume-with-increased-budget and cost alerts — not a pre-set hard spend ceiling.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-gb-activity",
@@ -598,7 +1182,9 @@
       "url": "automatos-gitbook/activity/README.md",
       "kind": "first-party-doc",
       "annotation": "Where running work surfaces, the two monitoring tabs this module uses: Dashboard (schedule of upcoming automated runs + Active Now live status + status cards) and Feed (the chronological, step-by-step execution log — every action, tool call, and agent response). Use the Dashboard for 'what's running/coming up' and the Feed for 'what exactly happened in this run'.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     },
     {
       "id": "r-forge-skill",
@@ -606,7 +1192,9 @@
       "url": "automatos-skills/team/forge/SKILL.md",
       "kind": "first-party-doc",
       "annotation": "The signature 'describe it and it builds it' agent: FORGE converts a natural-language description into a playbook — discovers your agents/tools, designs steps (one step, one job; descriptive output keys, never step1_output), assigns verified-fit agents, wires the trigger (manual/cron/event), and does a test run before declaring done. Also the clearest statement of the per-step error-handling choices (stop / skip / retry) and the 'Playbook, never recipe' vocabulary rule. This is a skills-repo source (grounds the WHY/how of building well); the gitbook remains the proof of what's live in the UI.",
-      "domainIds": ["m04-playbooks"]
+      "domainIds": [
+        "m04-playbooks"
+      ]
     }
   ],
   "videos": [
@@ -614,9 +1202,11 @@
       "id": "v-04-1",
       "title": "04 · Build a Playbook, then schedule and trigger it — the nightly code review, three ways to run, and webhooks",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m04-playbooks"],
+      "url": "https://widgets.automatos.app/academy/automatos/platform-architect/v-04-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m04-playbooks"
+      ],
       "sourceNotebook": "platform-architect / m04 / build-schedule-trigger-a-playbook"
     },
     {
@@ -625,7 +1215,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m04-playbooks"],
+      "domainIds": [
+        "m04-playbooks"
+      ],
       "sourceNotebook": "platform-architect / m04 / debate-chat-vs-playbook-vs-mission"
     }
   ]
