@@ -11,14 +11,21 @@
 import { fail } from "./http.js";
 
 // First authenticated call creates the users row, minting a fresh
-// workspace_id (workspace-per-user tenancy, 02 §3). The no-op DO UPDATE makes
-// RETURNING yield the row on the existing-user path too, race-free.
+// workspace_id (workspace-per-user tenancy, 02 §3). $2 is the bootstrap role:
+// 'owner' when the caller's clerk id is in the ACADEMY_ADMIN_CLERK_IDS allowlist,
+// else 'learner'. The DO UPDATE promotes an allow-listed user to owner on any
+// sign-in but NEVER demotes (a role set later via the admin console is kept),
+// and still makes RETURNING yield the row on the existing-user path, race-free.
 const UPSERT_USER_SQL = `
-  INSERT INTO users (clerk_user_id, workspace_id)
-  VALUES ($1, gen_random_uuid())
-  ON CONFLICT (clerk_user_id) DO UPDATE SET clerk_user_id = EXCLUDED.clerk_user_id
-  RETURNING id, clerk_user_id, workspace_id, plan, created_at
+  INSERT INTO users (clerk_user_id, workspace_id, role)
+  VALUES ($1, gen_random_uuid(), $2)
+  ON CONFLICT (clerk_user_id) DO UPDATE
+    SET role = CASE WHEN $2 = 'owner' THEN 'owner' ELSE users.role END
+  RETURNING id, clerk_user_id, workspace_id, plan, role, created_at
 `;
+
+// Role hierarchy (PRD-ADMIN-CONSOLE S1): owner ⊇ admin ⊇ learner.
+export const ROLE_RANK = { learner: 0, admin: 1, owner: 2 };
 
 /** ACADEMY_AUTHORIZED_PARTIES ("https://a.example,https://b.example") → array.
  *  Exported pure so a unit test can cover it without env games. */
@@ -57,9 +64,11 @@ export function createClerkUserDeleter(secretKey) {
 
 /**
  * Express middleware guarding every /api/me/* + /api/sync/* route.
- * @param {{verifier: (token:string)=>Promise<object>, pool: import("pg").Pool}} deps
+ * @param {{verifier: (token:string)=>Promise<object>, pool: import("pg").Pool,
+ *          adminAllowlist?: Set<string>}} deps — adminAllowlist bootstraps owners.
  */
-export function createAuthMiddleware({ verifier, pool }) {
+export function createAuthMiddleware({ verifier, pool, adminAllowlist }) {
+  const allow = adminAllowlist instanceof Set ? adminAllowlist : new Set();
   return async function spineAuth(req, res, next) {
     try {
       const header = req.headers.authorization || "";
@@ -75,11 +84,26 @@ export function createAuthMiddleware({ verifier, pool }) {
       const clerkUserId = claims && typeof claims.sub === "string" && claims.sub ? claims.sub : null;
       if (!clerkUserId) return fail(res, 403, "token_missing_subject");
 
-      const { rows } = await pool.query(UPSERT_USER_SQL, [clerkUserId]);
+      const bootstrapRole = allow.has(clerkUserId) ? "owner" : "learner";
+      const { rows } = await pool.query(UPSERT_USER_SQL, [clerkUserId, bootstrapRole]);
       req.spineUser = rows[0];
       next();
     } catch (e) {
       next(e);
     }
+  };
+}
+
+/**
+ * Gate a route on a minimum role (owner ⊇ admin ⊇ learner). Runs AFTER
+ * spineAuth (which sets req.spineUser). Fail-closed: an unknown/absent role is
+ * treated as below everything. e.g. app.use("/api/admin", auth, requireRole("admin"), router).
+ */
+export function requireRole(minRole) {
+  const min = ROLE_RANK[minRole] ?? Infinity;
+  return function requireRoleMw(req, res, next) {
+    const role = (req.spineUser && req.spineUser.role) || "learner";
+    if ((ROLE_RANK[role] ?? -1) >= min) return next();
+    return fail(res, 403, "forbidden_role");
   };
 }
