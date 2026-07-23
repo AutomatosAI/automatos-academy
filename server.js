@@ -163,7 +163,9 @@ const app = express();
 app.use(compression());
 // 1mb body cap: sync batches (PRD-MT-02, up to 500 events) outgrow the 100kb
 // express default; every consumer of req.body validates its input regardless.
-app.use(express.json({ limit: "1mb" }));
+// verify hook stashes the raw body so the Stripe webhook (PRD-ADMIN-CONSOLE S4)
+// can verify its signature against the exact bytes — harmless for every other route.
+app.use(express.json({ limit: "1mb", verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // ── Health check (Railway / uptime) ───────────────────────────────────
 app.get("/healthz", (_req, res) => res.json({ ok: true, service: "automatos-academy" }));
@@ -305,6 +307,16 @@ if (process.env.SPINE_ENABLED === "true") {
     onChange: () => bindingsCache.refresh(), // bind/unbind → overlay live at once
   });
   console.log(`[media] admin plane mounted (/api/admin/media) — configured=${media.configured} s3=${media.s3Ready}; bindings overlay on`);
+
+  // ── Admin console (PRD-ADMIN-CONSOLE) — users · progress · payments. Shares
+  // the Spine pool + auth + role gate. /api/admin/* is admin-role-gated;
+  // /api/billing is learner-authed (checkout/portal) or Stripe-signed (webhook).
+  const { mountAdminConsole } = await import("./server/admin/index.js");
+  const admin = mountAdminConsole(app, {
+    pool: spine.pool, index: contentIndex,
+    auth: spine.auth, requireRole: spine.requireRole, clerkUserDeleter: spine.clerkUserDeleter,
+  });
+  console.log(`[admin] console mounted (/api/admin/users, /api/billing) — billing configured=${admin.billing.configured}`);
 }
 
 // ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────

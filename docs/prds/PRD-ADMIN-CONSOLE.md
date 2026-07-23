@@ -1,7 +1,9 @@
 # PRD — Admin Console (users · payments · progress · content)
 
-**Status:** approved to build (first build after Part 1) · **Owner decision 2026-07-23:** academy-native Stripe
-**Depends on:** the Spine live (PRD-PLATFORM-ACTIVATION) for user/progress data; the extended media plane (PRD-MEDIA-DOMAIN-SLOTS) for content upload.
+**Status:** BUILT 2026-07-23 (PR #60) — S1–S4 + S6 complete; S5 text-editing deferred to PRD-CONTENT-LIFECYCLE. **Owner decision:** academy-native Stripe.
+**Depends on:** the Spine live (PRD-PLATFORM-ACTIVATION) for user/progress data at runtime; the extended media plane (PRD-MEDIA-DOMAIN-SLOTS) for domain-slot content upload.
+
+**Build status:** S1 RBAC ✅ · S2 users ✅ · S3 progress ✅ · S4 Stripe ✅ · S5 content ⏳ (media tab points to the per-track Upload; in-app text editor lands with PRD-CONTENT-LIFECYCLE's write-back) · S6 `#/admin` UI ✅. Dormant until `SPINE_ENABLED`; billing dormant until `STRIPE_*`.
 
 ## Why
 

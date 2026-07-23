@@ -39,8 +39,9 @@ export function mountSpine(app, opts = {}) {
   app.use("/api/sync", auth, createSyncRouter({ pool, index: contentIndex, limiter }), errorHandler);
   app.use("/api/me", auth, createMeRouter({ pool, index: contentIndex, clerkUserDeleter }), errorHandler);
 
-  // verifier + auth + requireRole ride along for callers outside the spine mount:
-  // the media plane authenticates its own requests (PRD-COMMUNITY S1), and the
-  // admin console (PRD-ADMIN-CONSOLE) mounts /api/admin/* with `auth, requireRole("admin")`.
-  return { pool, verifier, auth, requireRole };
+  // verifier + auth + requireRole + clerkUserDeleter ride along for callers
+  // outside the spine mount: the media plane authenticates its own requests
+  // (PRD-COMMUNITY S1), and the admin console (PRD-ADMIN-CONSOLE) mounts
+  // /api/admin/* with `auth, requireRole("admin")` and reuses the deleter.
+  return { pool, verifier, auth, requireRole, clerkUserDeleter };
 }
