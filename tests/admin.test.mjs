@@ -22,12 +22,12 @@ function fakePool(state = {}) {
   const query = async (sql, args) => {
     const s = sql.replace(/\s+/g, " ").trim();
     calls.push({ s: s.slice(0, 48), args });
-    if (/count\(\*\)::int AS n FROM users/.test(s)) return { rows: [{ n: state.total ?? 1 }] };
+    if (/count\(\*\)::int AS n FROM users/.test(s)) return { rows: [{ n: /WHERE role = 'owner'/.test(s) ? (state.owners ?? 2) : (state.total ?? 1) }] };
     if (/FROM users .*LIMIT/.test(s)) return { rows: state.list ?? [USER] };
     if (/FROM users WHERE id = \$1/.test(s)) return { rows: state.user === null ? [] : [state.user || USER] };
     if (/count\(\*\)::int AS n FROM (progress|mock_attempts)/.test(s)) return { rows: [{ n: 3 }] };
     if (/^UPDATE users SET/.test(s)) return { rows: state.user === null ? [] : [{ ...(state.user || USER), ...state.updated }] };
-    if (/SELECT clerk_user_id FROM users/.test(s)) return { rows: state.user === null ? [] : [{ clerk_user_id: (state.user || USER).clerk_user_id }] };
+    if (/SELECT role, clerk_user_id FROM users/.test(s)) return { rows: state.user === null ? [] : [{ role: (state.user || USER).role, clerk_user_id: (state.user || USER).clerk_user_id }] };
     if (/UPDATE subscriptions SET .*RETURNING user_id/.test(s)) return { rows: state.subUser ? [{ user_id: state.subUser }] : [] };
     if (/WITH days|mastery_map|FROM progress WHERE user_id|FROM mock_attempts WHERE user_id/.test(s)) {
       return /WITH days/.test(s) ? { rows: [{ current: 1, best: 3 }] } : { rows: [] };
@@ -88,6 +88,25 @@ console.log("users routes — the guards");
   ok(r.status === 400 && r.body.error === "use_self_service_delete", "an admin can't delete themselves via the admin route");
   r = await s.call("DELETE", "/api/admin/users/u-1");
   ok(r.status === 200 && r.body.data.clerkDeleted === true, "delete wipes rows + the clerk identity, audited");
+
+  // HIGH fix — an admin cannot delete a peer/higher-ranked target
+  const vsOwner = await serveUsers({ pool: fakePool({ user: { ...USER, role: "owner" } }), actorRole: "admin" });
+  r = await vsOwner.call("DELETE", "/api/admin/users/u-1");
+  ok(r.status === 403 && r.body.error === "forbidden_target", "an admin cannot delete an owner (privilege boundary)");
+  r = await vsOwner.call("PATCH", "/api/admin/users/u-1", { plan: "pro" });
+  ok(r.status === 403 && r.body.error === "forbidden_target", "an admin cannot modify an owner either");
+  await vsOwner.close();
+  // an owner cannot delete the LAST owner
+  const last = await serveUsers({ pool: fakePool({ user: { ...USER, role: "owner" }, owners: 1 }), actorRole: "owner" });
+  r = await last.call("DELETE", "/api/admin/users/u-1");
+  ok(r.status === 400 && r.body.error === "last_owner", "the last owner cannot be deleted");
+  await last.close();
+  // plan is allow-listed
+  const badPlan = await serveUsers({ pool: fakePool(), actorRole: "owner" });
+  r = await badPlan.call("PATCH", "/api/admin/users/u-1", { plan: "enterprise-hack" });
+  ok(r.status === 400 && r.body.error === "bad_plan", "an unknown plan is rejected");
+  await badPlan.close();
+
   const missing = await serveUsers({ pool: fakePool({ user: null }) });
   r = await missing.call("GET", "/api/admin/users/nope");
   ok(r.status === 404 && r.body.error === "user_not_found", "unknown user → 404");

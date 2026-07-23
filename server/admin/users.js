@@ -7,8 +7,18 @@ import express from "express";
 import { ok, fail, wrap } from "../spine/http.js";
 import { wipeUserRows, STREAK_SQL } from "../spine/me-routes.js";
 import { scopeWeightResolver, masteryToWire } from "../spine/rollups.js";
+import { ROLE_RANK } from "../spine/auth.js";
 
 const VALID_ROLES = ["learner", "admin", "owner"];
+const VALID_PLANS = ["free", "pro"];
+
+// Privilege boundary: a non-owner admin may only act on strictly-lower-ranked
+// targets (learners). Owners may act on anyone. Prevents an admin from
+// deleting/modifying a peer admin or an owner. Returns an error code or null.
+function targetGuard(callerRole, targetRole) {
+  if (callerRole === "owner") return null;
+  return (ROLE_RANK[targetRole] ?? 0) >= (ROLE_RANK[callerRole] ?? 0) ? "forbidden_target" : null;
+}
 const USER_COLS = "id, clerk_user_id, workspace_id, plan, role, created_at";
 const toWire = (r) => ({
   id: r.id, clerkUserId: r.clerk_user_id, workspaceId: r.workspace_id,
@@ -78,33 +88,46 @@ export function createUsersRouter({ pool, index, audit, clerkUserDeleter }) {
     });
   }));
 
-  // PATCH /:id  — set role and/or plan. Role change is OWNER-only.
+  // PATCH /:id  — set role and/or plan. Role change is OWNER-only; a non-owner
+  // admin cannot modify a peer/higher-ranked target; plan is allow-listed.
   router.patch("/:id", json, wrap(async (req, res) => {
     const { role, plan } = req.body || {};
     if (role !== undefined && !VALID_ROLES.includes(role)) return fail(res, 400, "bad_role");
+    if (plan !== undefined && !VALID_PLANS.includes(String(plan))) return fail(res, 400, "bad_plan");
     if (role !== undefined && req.spineUser.role !== "owner") return fail(res, 403, "owner_only_role_change");
+    const { rows: tgt } = await pool.query("SELECT role FROM users WHERE id = $1", [req.params.id]);
+    if (!tgt.length) return fail(res, 404, "user_not_found");
+    const g = targetGuard(req.spineUser.role, tgt[0].role);
+    if (g) return fail(res, 403, g);
+
     const sets = [], p = [];
     if (role !== undefined) { p.push(role); sets.push(`role = $${p.length}`); }
     if (plan !== undefined) { p.push(String(plan)); sets.push(`plan = $${p.length}`); }
     if (!sets.length) return fail(res, 400, "nothing_to_update");
     p.push(req.params.id);
     const { rows } = await pool.query(`UPDATE users SET ${sets.join(", ")} WHERE id = $${p.length} RETURNING ${USER_COLS}`, p);
-    if (!rows.length) return fail(res, 404, "user_not_found");
     await audit(req, "user.update", req.params.id, { role, plan });
     return ok(res, { user: toWire(rows[0]) });
   }));
 
-  // DELETE /:id  — wipe the user's rows (+ optional Clerk identity), audited.
+  // DELETE /:id  — wipe rows (+ optional Clerk). Guards: not yourself, not a
+  // peer/higher-ranked target (unless owner), and never the last owner.
   router.delete("/:id", wrap(async (req, res) => {
     if (req.params.id === req.spineUser.id) return fail(res, 400, "use_self_service_delete");
-    const { rows } = await pool.query("SELECT clerk_user_id FROM users WHERE id = $1", [req.params.id]);
+    const { rows } = await pool.query("SELECT role, clerk_user_id FROM users WHERE id = $1", [req.params.id]);
     if (!rows.length) return fail(res, 404, "user_not_found");
+    const g = targetGuard(req.spineUser.role, rows[0].role);
+    if (g) return fail(res, 403, g);
+    if (rows[0].role === "owner") {
+      const { rows: oc } = await pool.query("SELECT count(*)::int AS n FROM users WHERE role = 'owner'");
+      if (oc[0].n <= 1) return fail(res, 400, "last_owner");
+    }
     const deleted = await wipeUserRows(pool, req.params.id);
     let clerkDeleted = false;
     if (clerkUserDeleter && rows[0].clerk_user_id) {
       try { await clerkUserDeleter(rows[0].clerk_user_id); clerkDeleted = true; } catch (_e) { /* rows already gone */ }
     }
-    await audit(req, "user.delete", req.params.id, { clerkDeleted });
+    await audit(req, "user.delete", req.params.id, { clerkDeleted, targetRole: rows[0].role });
     return ok(res, { deleted, clerkDeleted });
   }));
 

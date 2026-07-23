@@ -8,27 +8,30 @@
 //   POST /api/billing/portal    (learner-authed)  → { url } billing portal
 //   POST /api/billing/webhook   (Stripe-signed)   → writes users.plan
 
-import express from "express";
 import crypto from "node:crypto";
-import { ok, fail } from "../spine/http.js";
+import { ok, fail, errorHandler } from "../spine/http.js";
+import { createUserRateLimiter } from "../spine/rate-limit.js";
 
 const STRIPE_API = "https://api.stripe.com/v1";
 
-/** Verify a Stripe `Stripe-Signature` header (t=..,v1=..) over the RAW body.
- *  Pure — nowSec injectable for tests. */
+/** Verify a Stripe `Stripe-Signature` header (t=..,v1=..[,v1=..]) over the RAW
+ *  body. Accepts ANY of the v1 signatures (Stripe sends several during
+ *  webhook-secret rotation). Pure — nowSec injectable for tests. */
 export function verifyStripeSig(rawBody, sigHeader, secret, { toleranceSec = 300, nowSec = Math.floor(Date.now() / 1000) } = {}) {
   if (!sigHeader || !secret) return false;
-  const parts = {};
+  let t = null;
+  const v1s = [];
   for (const kv of String(sigHeader).split(",")) {
     const i = kv.indexOf("=");
-    if (i > 0) parts[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
+    if (i <= 0) continue;
+    const k = kv.slice(0, i).trim(), v = kv.slice(i + 1).trim();
+    if (k === "t") t = v;
+    else if (k === "v1") v1s.push(v);
   }
-  const t = parts.t, v1 = parts.v1;
-  if (!t || !v1 || !/^\d+$/.test(t)) return false;
+  if (!t || !v1s.length || !/^\d+$/.test(t)) return false;
   if (Math.abs(nowSec - Number(t)) > toleranceSec) return false; // replay window
-  const expected = crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
-  const a = Buffer.from(expected), b = Buffer.from(v1);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+  const a = Buffer.from(crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex"));
+  return v1s.some((v1) => { const b = Buffer.from(v1); return a.length === b.length && crypto.timingSafeEqual(a, b); });
 }
 
 /** Map a Stripe subscription status to the plan we gate on. */
@@ -92,12 +95,15 @@ const baseUrl = (req, env) => env.ACADEMY_BASE_URL || `${req.protocol}://${req.g
 export function mountBilling(app, { pool, auth, env = process.env } = {}) {
   const secret = env.STRIPE_SECRET_KEY;
   const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
-  const json = express.json({ limit: "8kb" });
+  // Cap outbound Stripe session creation per user (each is a live Stripe POST).
+  const limiter = createUserRateLimiter({ max: 20, windowMs: 60_000 });
 
-  app.post("/api/billing/checkout", auth, json, (req, res, next) => (async () => {
+  app.post("/api/billing/checkout", auth, limiter, (req, res, next) => (async () => {
     if (!secret) return fail(res, 503, "billing_not_configured");
-    const priceId = (req.body && req.body.priceId) || env.STRIPE_DEFAULT_PRICE_ID;
-    if (!priceId) return fail(res, 400, "missing_price");
+    // The price is SERVER-configured, never client-supplied — otherwise a
+    // learner could name any active (cheaper/$0) price and still get 'pro'.
+    const priceId = env.STRIPE_DEFAULT_PRICE_ID;
+    if (!priceId) return fail(res, 503, "no_price_configured");
     const base = baseUrl(req, env);
     const session = await stripePost("/checkout/sessions", {
       mode: "subscription",
@@ -110,7 +116,7 @@ export function mountBilling(app, { pool, auth, env = process.env } = {}) {
     return ok(res, { url: session.url, id: session.id });
   })().catch(next));
 
-  app.post("/api/billing/portal", auth, json, (req, res, next) => (async () => {
+  app.post("/api/billing/portal", auth, limiter, (req, res, next) => (async () => {
     if (!secret) return fail(res, 503, "billing_not_configured");
     const { rows } = await pool.query("SELECT stripe_customer_id FROM subscriptions WHERE user_id = $1", [req.spineUser.id]);
     const customer = rows[0] && rows[0].stripe_customer_id;
@@ -134,6 +140,10 @@ export function mountBilling(app, { pool, auth, env = process.env } = {}) {
     const result = await handleStripeEvent(pool, event);
     return res.json({ received: true, ...result });
   })().catch(next));
+
+  // Terminal handler so a thrown Stripe/DB error returns the {success:false}
+  // envelope, never Express's default stack-trace page.
+  app.use("/api/billing", errorHandler);
 
   return { configured: Boolean(secret), webhookReady: Boolean(webhookSecret) };
 }
