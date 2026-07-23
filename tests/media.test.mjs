@@ -210,5 +210,28 @@ async function serve({ pool, s3 }) {
   await s.close();
 }
 
+// The browser admin UI (public/js/admin/media.js) probes this to decide whether
+// to render Upload affordances. 200 ⇒ show; 403 ⇒ hide. serve()'s call helper
+// always sends the key, so mount directly to exercise the keyless (403) path.
+console.log("session probe (browser admin identity)");
+{
+  const app = express();
+  const requireAdmin = createRequireAdmin({ adminKey: "K", allowlist: new Set(), verifier: null });
+  registerMediaRoutes(app, { pool: fakePool(), requireAdmin, s3: fakeS3(true), cdnBase: CDN, getIndex: miniIndex });
+  const server = createServer(app);
+  await new Promise((r) => server.listen(0, r));
+  const port = server.address().port;
+  const hit = (headers) => fetch(`http://127.0.0.1:${port}/api/admin/media/session`, { headers });
+
+  let r = await hit({ "x-admin-key": "K" });
+  const j = await r.json();
+  ok(r.status === 200 && j.admin === true && j.actor === "machine", "session: valid admin → {admin:true, actor}");
+
+  r = await hit({});
+  ok(r.status === 403, "session: no credentials → 403 (affordances hidden)");
+
+  await new Promise((r2) => server.close(r2));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
