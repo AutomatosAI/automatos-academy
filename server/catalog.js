@@ -35,7 +35,7 @@ import { join, dirname } from "path";
 import { createHash } from "crypto";
 import { buildPodcastIndex } from "./podcasts.js";
 import { buildInventory } from "./media/inventory.js";
-import { overlayTrackVideos } from "./media/overlay.js";
+import { overlayVideos } from "./media/overlay.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -412,7 +412,7 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     // binding version rides the ETag so an upload busts the cache within one
     // refresh (immediate on bind via onChange).
     const b = getBindings(req.params.vendorId, req.params.trackId);
-    const body = b ? overlayTrackVideos(t.track.data, b.bySlot) : t.track.data;
+    const body = b ? overlayVideos(t.track.data, b.bySlot) : t.track.data;
     const hash = b ? `${t.track.hash}-${b.version}` : t.track.hash;
     return send(res, req, idx, body, hash);
   });
@@ -421,7 +421,14 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     const idx = getIdx();
     const t = idx.tracks.get(`${req.params.vendorId}/${req.params.trackId}`);
     const d = t && t.domains.get(req.params.domainId);
-    return d ? send(res, req, idx, d.data, d.hash) : notFound(res);
+    if (!d) return notFound(res);
+    // PRD-MEDIA-DOMAIN-SLOTS — overlay bound DOMAIN videos so an uploaded lesson
+    // video serves published, ETag folded on the binding version like the track
+    // scope. Same per-track bySlot map (it holds every slot for the track).
+    const b = getBindings(req.params.vendorId, req.params.trackId);
+    const body = b ? overlayVideos(d.data, b.bySlot) : d.data;
+    const hash = b ? `${d.hash}-${b.version}` : d.hash;
+    return send(res, req, idx, body, hash);
   });
 
   return router;

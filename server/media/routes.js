@@ -33,8 +33,15 @@ const DELETE_SQL = `DELETE FROM media_bindings WHERE vendor_id=$1 AND track_id=$
 function trackOf(getIndex, vendor, track) {
   return getIndex().tracks.get(`${vendor}/${track}`) || null;
 }
+// A video slot may be defined at the track scope (track.json videos[] — the
+// v-ov-* overviews) OR in any domain (m*/d* files videos[] — v-m00-1, the
+// deep-dives). PRD-MEDIA-DOMAIN-SLOTS: both are uploadable/bindable.
 function videoSlotExists(t, slotId) {
-  return (t.track.data.videos || []).some((v) => v.id === slotId);
+  if ((t.track.data.videos || []).some((v) => v.id === slotId)) return true;
+  for (const [, d] of t.domains) {
+    if ((d.data.videos || []).some((v) => v.id === slotId)) return true;
+  }
+  return false;
 }
 
 export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getIndex, onChange }) {

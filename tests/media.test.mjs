@@ -49,6 +49,7 @@ const miniIndex = () => ({
                 lessons: [{ id: "l1", title: "The loop" }],
                 questions: [{ id: "q1", stem: "Which statement best captures…" }],
                 scenarios: [{ id: "s1", title: "Design a coordinator" }],
+                videos: [{ id: "v-dom-1", title: "A domain lesson video", status: "placeholder", url: "" }],
               },
               hash: "hd1",
             },
@@ -179,6 +180,13 @@ async function serve({ pool, s3 }) {
     vendor: "anthropic", track: "cca-f", slotId: "v-nope", kind: "video", filename: "a.mp4", contentType: "video/mp4",
   });
   ok(r.status === 404 && (await r.json()).error === "unknown_slot", "presign: unknown video slot → 404 unknown_slot");
+
+  // PRD-MEDIA-DOMAIN-SLOTS: a DOMAIN-only slot (v-dom-1, defined in d1's videos[]
+  // not track.json) is now accepted — it 404'd before the plane knew domains.
+  r = await s.call("POST", "/api/admin/media/presign", {
+    vendor: "anthropic", track: "cca-f", slotId: "v-dom-1", kind: "video", filename: "d.mp4", contentType: "video/mp4",
+  });
+  ok(r.status === 200 && (await r.json()).finalUrl === `${CDN}/academy/anthropic/cca-f/v-dom-1-d.mp4`, "presign: a DOMAIN video slot is accepted");
 
   r = await s.call("POST", "/api/admin/media/bind", {
     vendor: "anthropic", track: "cca-f", slotId: "v-d1-1", kind: "video", url: `${CDN}/academy/anthropic/cca-f/v-d1-1-a.mp4`,

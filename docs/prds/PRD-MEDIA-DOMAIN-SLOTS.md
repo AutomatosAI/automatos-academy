@@ -1,6 +1,6 @@
 # PRD — Media plane: domain-level slots + audio kinds
 
-**Status:** ready to build (Part 1b). **Why:** the admin Upload button + serve-overlay recognise **only track-level `videos[]`** (the `v-ov-*` overview slots). Domain videos (`v-m00-1`, every `-2`) render an Upload button but **presign 404s (`unknown_slot`)** — so the button can't map the videos that make up ~90% of the content.
+**Status:** domain VIDEO slots BUILT 2026-07-23 (overlay + slot-lookup + domain endpoint); audio-kind overlay + podcast `.m4a`→CDN are the remaining follow-up. **Why:** the admin Upload button + serve-overlay recognised **only track-level `videos[]`** (the `v-ov-*` overview slots). Domain videos (`v-m00-1`, every `-2`) rendered an Upload button but **presign 404'd (`unknown_slot`)** — so the button couldn't map the videos that make up ~90% of the content. Now fixed for video.
 
 ## Root cause (file:line)
 - `server/media/routes.js:36-38` `videoSlotExists` checks only `t.track.data.videos`.

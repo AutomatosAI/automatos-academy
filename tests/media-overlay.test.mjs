@@ -84,7 +84,10 @@ console.log("catalog router serves the overlay + a binding-busted ETag");
 const idx = {
   contentVersion: "v1",
   generatedAt: "t",
-  tracks: new Map([["anthropic/cca-f", { track: { data: JSON.parse(JSON.stringify(track)), hash: "htrack" } }]]),
+  tracks: new Map([["anthropic/cca-f", {
+    track: { data: JSON.parse(JSON.stringify(track)), hash: "htrack" },
+    domains: new Map([["d1", { data: { name: "D1", videos: [{ id: "v-dm-1", status: "placeholder", url: "" }] }, hash: "hd1" }]]),
+  }]]),
 };
 async function serveWith(getBindings) {
   const app = express();
@@ -112,6 +115,24 @@ async function serveWith(getBindings) {
   body = await r.json();
   ok(body.videos[0].status === "published" && body.videos[0].url.endsWith("v-d1-1-a.mp4"), "with a binding → the served track shows it published");
   ok(r.headers.get("etag") !== etagNoBind, "the ETag differs once bound (cache busts)");
+  await bound.close();
+}
+
+// PRD-MEDIA-DOMAIN-SLOTS — the DOMAIN endpoint now overlays bound domain videos.
+{
+  const domBySlot = new Map([["v-dm-1:video", { url: `${CDN}/academy/anthropic/cca-f/v-dm-1-x.mp4` }]]);
+  const plain = await serveWith(() => null);
+  let r = await plain.get("/api/catalog/anthropic/cca-f/d1");
+  let body = await r.json();
+  const etagNoBind = r.headers.get("etag");
+  ok(body.videos[0].status === "placeholder", "domain endpoint: no binding → placeholder");
+  await plain.close();
+
+  const bound = await serveWith((v, t) => (v === "anthropic" && t === "cca-f" ? { bySlot: domBySlot, version: "domver123456" } : null));
+  r = await bound.get("/api/catalog/anthropic/cca-f/d1");
+  body = await r.json();
+  ok(body.videos[0].status === "published" && body.videos[0].url.endsWith("v-dm-1-x.mp4"), "domain endpoint: a bound domain video serves published");
+  ok(r.headers.get("etag") !== etagNoBind, "domain endpoint ETag busts on the binding version");
   await bound.close();
 }
 
