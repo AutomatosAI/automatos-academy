@@ -27,13 +27,28 @@
           "difficulty": 1,
           "stem": "In the mission pattern, at which point does the human make the go/no-go decision before any work is executed?",
           "options": [
-            { "id": "a", "text": "When the mission reaches Plan Pending — you Approve or Reject the plan before it runs", "correct": true },
-            { "id": "b", "text": "After the mission has run, when you read the final report" },
-            { "id": "c", "text": "You don't — missions run fully autonomously once created" },
-            { "id": "d", "text": "Halfway through execution, when the agent pauses to ask" }
+            {
+              "id": "a",
+              "text": "When the mission reaches Plan Pending — you Approve or Reject the plan before it runs",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "After the mission has run, when you read the final report"
+            },
+            {
+              "id": "c",
+              "text": "You don't — missions run fully autonomously once created"
+            },
+            {
+              "id": "d",
+              "text": "Halfway through execution, when the agent pauses to ask"
+            }
           ],
           "explanation": "The go/no-go gate is the **approval of the plan** while the mission sits at Plan Pending — nothing executes until you Approve. Reading the final report (b) happens after the work is already done, so it's too late to prevent it. Missions are not fully autonomous (c) — the whole point is the approval gate. And while you *can* pause mid-run, the deliberate decision point is the plan approval up front, not a mid-execution question (d).",
-          "sourceRefs": ["r-gb-missions"]
+          "sourceRefs": [
+            "r-gb-missions"
+          ]
         },
         {
           "id": "kc-m5-l1-2",
@@ -42,13 +57,28 @@
           "difficulty": 2,
           "stem": "In the consultancy example, the owner edited the plan to strike off a client who had actually paid. What does that illustrate about the approval step?",
           "options": [
-            { "id": "a", "text": "The approval gate is where your knowledge of the business corrects the AI's plan — the agent couldn't have known the payment had cleared", "correct": true },
-            { "id": "b", "text": "That the AI made an error serious enough to abandon missions entirely" },
-            { "id": "c", "text": "That approval is a rubber-stamp formality with no real effect" },
-            { "id": "d", "text": "That the budget guardrail caught the mistake automatically" }
+            {
+              "id": "a",
+              "text": "The approval gate is where your knowledge of the business corrects the AI's plan — the agent couldn't have known the payment had cleared",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "That the AI made an error serious enough to abandon missions entirely"
+            },
+            {
+              "id": "c",
+              "text": "That approval is a rubber-stamp formality with no real effect"
+            },
+            {
+              "id": "d",
+              "text": "That the budget guardrail caught the mistake automatically"
+            }
           ],
           "explanation": "The catch shows approval doing its real job: **your business context meets the AI's plan** at the gate, and you correct what the agent had no way to know. It's not a reason to abandon missions (b) — it's the system working as designed. It's the opposite of a rubber stamp (c) — the edit changed the outcome. And it was human judgement at the approval gate, not the budget guardrail (d), that caught it.",
-          "sourceRefs": ["r-gb-missions"]
+          "sourceRefs": [
+            "r-gb-missions"
+          ]
         }
       ]
     },
@@ -66,13 +96,33 @@
           "difficulty": 2,
           "stem": "You're setting the budget guardrail on a mission. Which description matches what the platform actually gives you?",
           "options": [
-            { "id": "a", "text": "A live cost breakdown by task, cost alerts at a threshold you set, and the ability to pause and resume-with-more-budget — a way to watch and stop, not a hard cap that blocks the run up front", "correct": true },
-            { "id": "b", "text": "A mandatory dollar ceiling you enter before the mission starts, which blocks execution the instant it's hit", "correct": false },
-            { "id": "c", "text": "No cost controls at all — you only find out the bill afterwards", "correct": false },
-            { "id": "d", "text": "A cap that automatically refunds any overspend to your account", "correct": false }
+            {
+              "id": "a",
+              "text": "A live cost breakdown by task, cost alerts at a threshold you set, and the ability to pause and resume-with-more-budget — a way to watch and stop, not a hard cap that blocks the run up front",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A mandatory dollar ceiling you enter before the mission starts, which blocks execution the instant it's hit",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "No cost controls at all — you only find out the bill afterwards",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A cap that automatically refunds any overspend to your account",
+              "correct": false
+            }
           ],
           "explanation": "The real controls are a **live per-task cost breakdown, threshold cost alerts, and pause / resume-with-increased-budget** — you watch and stop, rather than pre-set a hard blocking ceiling (b), which the platform doesn't offer. It's not true that there are no controls (c) — you can see spend live and pause. And there's no refund mechanism (d); that's not how metered AI cost works. Setting expectations honestly here matters, because over-promising a hard cap is exactly the mistake to avoid.",
-          "sourceRefs": ["r-gb-missions", "r-gb-settings-general", "r-gb-llm-costs"]
+          "sourceRefs": [
+            "r-gb-missions",
+            "r-gb-settings-general",
+            "r-gb-llm-costs"
+          ]
         },
         {
           "id": "kc-m5-l2-2",
@@ -81,13 +131,32 @@
           "difficulty": 2,
           "stem": "By the mistake-cost rule, which task belongs in the 'never alone' lane rather than 'auto-run' or 'propose first'?",
           "options": [
-            { "id": "a", "text": "Paying a supplier invoice on the company's behalf", "correct": true },
-            { "id": "b", "text": "Drafting an internal summary of this week's customer reviews", "correct": false },
-            { "id": "c", "text": "Drafting (not sending) a reply to a customer question", "correct": false },
-            { "id": "d", "text": "Producing a first-pass research note for your own eyes", "correct": false }
+            {
+              "id": "a",
+              "text": "Paying a supplier invoice on the company's behalf",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Drafting an internal summary of this week's customer reviews",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Drafting (not sending) a reply to a customer question",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Producing a first-pass research note for your own eyes",
+              "correct": false
+            }
           ],
           "explanation": "**Paying an invoice** is money leaving the business — an expensive, hard-to-undo commitment — so it stays never-alone indefinitely. An internal summary (b) and a private research note (d) are cheap to undo and stay inside, so they're auto-run candidates. Drafting a customer reply (c) is customer-facing but it's only a draft until a human sends it, which is the classic propose-first case, not never-alone. The lane is set by consequence, not by how capable the AI is.",
-          "sourceRefs": ["r-gb-assigning", "r-gen-ai-leader"]
+          "sourceRefs": [
+            "r-gb-assigning",
+            "r-gen-ai-leader"
+          ]
         }
       ]
     },
@@ -105,13 +174,31 @@
           "difficulty": 2,
           "stem": "Why is 'approve everything, forever' considered a failure mode rather than the safest choice?",
           "options": [
-            { "id": "a", "text": "It leads to approval fatigue — you start rubber-stamping without reading, so nobody is genuinely checking anymore", "correct": true },
-            { "id": "b", "text": "It's the safest possible policy and the module recommends it permanently", "correct": false },
-            { "id": "c", "text": "The platform forbids approving more than a set number of actions per day", "correct": false },
-            { "id": "d", "text": "Approving anything at all removes your legal responsibility for the outcome", "correct": false }
+            {
+              "id": "a",
+              "text": "It leads to approval fatigue — you start rubber-stamping without reading, so nobody is genuinely checking anymore",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It's the safest possible policy and the module recommends it permanently",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The platform forbids approving more than a set number of actions per day",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Approving anything at all removes your legal responsibility for the outcome",
+              "correct": false
+            }
           ],
           "explanation": "Approving everything indefinitely causes **approval fatigue**: the volume turns your review into a reflex click, so the checkpoint stops actually checking — worse than honest autonomy in a small, low-stakes lane. So it's not the recommended permanent policy (b). There's no platform-imposed daily approval limit (c) — this is a human-behaviour problem, not a system rule. And approving work doesn't offload your responsibility (d); if anything, you own what you approved.",
-          "sourceRefs": ["r-gen-ai-leader"]
+          "sourceRefs": [
+            "r-gen-ai-leader"
+          ]
         },
         {
           "id": "kc-m5-l3-2",
@@ -120,13 +207,32 @@
           "difficulty": 1,
           "stem": "During a weekly review you skim the activity feed for the trusted lane. Which three questions is that review meant to answer?",
           "options": [
-            { "id": "a", "text": "What ran, what did it touch, and what did it cost", "correct": true },
-            { "id": "b", "text": "Which competitor is cheaper, which model is newest, and which agent is fastest", "correct": false },
-            { "id": "c", "text": "How to write better prompts, which tools to buy, and who to hire", "correct": false },
-            { "id": "d", "text": "Nothing specific — you just glance at it and hope it looks fine", "correct": false }
+            {
+              "id": "a",
+              "text": "What ran, what did it touch, and what did it cost",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Which competitor is cheaper, which model is newest, and which agent is fastest",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "How to write better prompts, which tools to buy, and who to hire",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Nothing specific — you just glance at it and hope it looks fine",
+              "correct": false
+            }
           ],
           "explanation": "The manager's weekly read is exactly **what ran / what did it touch / what did it cost** — did the expected work happen, did it stay on the right data and tools, and is spend where you'd expect. The other options drift into vendor comparison (b) or unrelated planning (c), which aren't what the log review is for, and 'just hope' (d) is the un-disciplined version the whole habit exists to replace. The feed and each mission's cost breakdown give you the answers.",
-          "sourceRefs": ["r-gb-feed", "r-gb-missions"]
+          "sourceRefs": [
+            "r-gb-feed",
+            "r-gb-missions"
+          ]
         }
       ]
     }
@@ -139,13 +245,31 @@
       "difficulty": 1,
       "stem": "What is a 'mission' on Automatos, in plain terms?",
       "options": [
-        { "id": "a", "text": "An objective you describe in plain language that agents plan and then execute after you approve the plan", "correct": true },
-        { "id": "b", "text": "A single chat message you send to a chatbot", "correct": false },
-        { "id": "c", "text": "A paid subscription tier that unlocks premium features", "correct": false },
-        { "id": "d", "text": "A report the platform emails you every morning", "correct": false }
+        {
+          "id": "a",
+          "text": "An objective you describe in plain language that agents plan and then execute after you approve the plan",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A single chat message you send to a chatbot",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A paid subscription tier that unlocks premium features",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A report the platform emails you every morning",
+          "correct": false
+        }
       ],
       "explanation": "A mission is an **autonomous, multi-step objective**: you state the goal, an agent plans it, and after you approve the plan the agents run it and report back. It's not a single chat message (b) — agents here are workers, not a chatbot, and a mission is multi-step. It's not a pricing tier (c) or a scheduled email (d); those describe other things entirely.",
-      "sourceRefs": ["r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m5-2",
@@ -154,13 +278,31 @@
       "difficulty": 1,
       "stem": "Put the mission beats in the right order.",
       "options": [
-        { "id": "a", "text": "Goal → plan → approve → run → report", "correct": true },
-        { "id": "b", "text": "Run → goal → report → approve → plan", "correct": false },
-        { "id": "c", "text": "Approve → goal → plan → report → run", "correct": false },
-        { "id": "d", "text": "Plan → run → approve → report → goal", "correct": false }
+        {
+          "id": "a",
+          "text": "Goal → plan → approve → run → report",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Run → goal → report → approve → plan",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Approve → goal → plan → report → run",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Plan → run → approve → report → goal",
+          "correct": false
+        }
       ],
       "explanation": "You set the **goal**, the agent produces a **plan**, you **approve** it, the agents **run** it, and you get the **report** — in that order. The other sequences scramble the beats; the load-bearing fact is that approval comes *before* the run, never after, because that's the gate that keeps execution from starting without your sign-off.",
-      "sourceRefs": ["r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m5-3",
@@ -169,13 +311,33 @@
       "difficulty": 1,
       "stem": "Which set correctly names the four guardrails covered in this module?",
       "options": [
-        { "id": "a", "text": "Scope, approval, budget, and visibility", "correct": true },
-        { "id": "b", "text": "Speed, accuracy, tone, and formatting", "correct": false },
-        { "id": "c", "text": "Login, password, backup, and encryption", "correct": false },
-        { "id": "d", "text": "Marketing, sales, support, and finance", "correct": false }
+        {
+          "id": "a",
+          "text": "Scope, approval, budget, and visibility",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Speed, accuracy, tone, and formatting",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Login, password, backup, and encryption",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Marketing, sales, support, and finance",
+          "correct": false
+        }
       ],
       "explanation": "The four guardrails are **scope** (what it can touch), **approval** (sign-off before action), **budget** (watching cost), and **visibility** (everything logged). The other sets describe output qualities (b), generic account security (c), or business functions (d) — none of which is the delegation-guardrail framework this module teaches.",
-      "sourceRefs": ["r-gb-missions", "r-gb-assigning", "r-gb-feed"]
+      "sourceRefs": [
+        "r-gb-missions",
+        "r-gb-assigning",
+        "r-gb-feed"
+      ]
     },
     {
       "id": "q-m5-4",
@@ -184,13 +346,31 @@
       "difficulty": 2,
       "stem": "The 'scope' guardrail is about limiting what an agent can touch. On Automatos, which mechanism most directly enforces it?",
       "options": [
-        { "id": "a", "text": "Assigning tools to specific agents with a permission level — Read only, Full access, or Custom actions", "correct": true },
-        { "id": "b", "text": "Setting the agent's response temperature", "correct": false },
-        { "id": "c", "text": "Choosing which AI provider the agent uses", "correct": false },
-        { "id": "d", "text": "Writing a longer goal description", "correct": false }
+        {
+          "id": "a",
+          "text": "Assigning tools to specific agents with a permission level — Read only, Full access, or Custom actions",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Setting the agent's response temperature",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Choosing which AI provider the agent uses",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Writing a longer goal description",
+          "correct": false
+        }
       ],
       "explanation": "Scope is enforced by **which tools an agent is assigned and at what permission level** — Read only, Full access, or Custom — because an agent can only act through the tools you give it. Temperature (b) tunes creativity, and provider choice (c) affects the model, but neither bounds reach. A longer goal (d) describes the task but doesn't restrict what the agent can access. The safe default the docs recommend is starting read-only and expanding once the agent has proven itself.",
-      "sourceRefs": ["r-gb-assigning"]
+      "sourceRefs": [
+        "r-gb-assigning"
+      ]
     },
     {
       "id": "q-m5-5",
@@ -199,13 +379,32 @@
       "difficulty": 2,
       "stem": "A mission you approved is running hotter on cost than you expected. Which of these can you actually do on the platform?",
       "options": [
-        { "id": "a", "text": "Pause the mission, review the per-task cost breakdown, and resume with an increased budget if it's justified", "correct": true },
-        { "id": "b", "text": "Nothing — once a mission is approved it cannot be paused or inspected", "correct": false },
-        { "id": "c", "text": "Automatically claw back the money already spent", "correct": false },
-        { "id": "d", "text": "Rely on a hard pre-set dollar cap that already blocked it before it started", "correct": false }
+        {
+          "id": "a",
+          "text": "Pause the mission, review the per-task cost breakdown, and resume with an increased budget if it's justified",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing — once a mission is approved it cannot be paused or inspected",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Automatically claw back the money already spent",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Rely on a hard pre-set dollar cap that already blocked it before it started",
+          "correct": false
+        }
       ],
       "explanation": "You can **pause, inspect the cost breakdown by task, and resume with increased budget** — the platform gives you a live meter and a stop button. You are not stuck (b); pausing and inspecting are exactly the controls provided. There's no clawback of spent tokens (c). And there's no hard pre-set blocking cap (d) — the honest picture is watch-and-stop plus cost alerts, not a ceiling that prevents the run.",
-      "sourceRefs": ["r-gb-missions", "r-gb-settings-general"]
+      "sourceRefs": [
+        "r-gb-missions",
+        "r-gb-settings-general"
+      ]
     },
     {
       "id": "q-m5-6",
@@ -214,13 +413,31 @@
       "difficulty": 2,
       "stem": "You want to draw your approval line by mistake-cost. Which task most clearly belongs in the 'propose first' lane — not 'auto-run', not 'never alone'?",
       "options": [
-        { "id": "a", "text": "Sending a reply to a customer's 'where's my order?' question", "correct": true },
-        { "id": "b", "text": "Writing an internal summary of this week's sales figures", "correct": false },
-        { "id": "c", "text": "Transferring payment to a supplier", "correct": false },
-        { "id": "d", "text": "Drafting a private brainstorm list only you will read", "correct": false }
+        {
+          "id": "a",
+          "text": "Sending a reply to a customer's 'where's my order?' question",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Writing an internal summary of this week's sales figures",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Transferring payment to a supplier",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Drafting a private brainstorm list only you will read",
+          "correct": false
+        }
       ],
       "explanation": "A **customer-facing reply** is the textbook propose-first case: a person outside the business sees it, so the worst case is a relationship, and the agent should draft while a human approves the send — at least until it's earned standing approval. An internal summary (b) and a private brainstorm (d) are cheap to undo and stay inside, so they're auto-run candidates. A supplier payment (c) is money out, which is never-alone. The lane is chosen by what a mistake would cost.",
-      "sourceRefs": ["r-gen-ai-leader"]
+      "sourceRefs": [
+        "r-gen-ai-leader"
+      ]
     },
     {
       "id": "q-m5-7",
@@ -229,13 +446,31 @@
       "difficulty": 2,
       "stem": "What is the correct way to use the graduated-trust ladder with a new agent?",
       "options": [
-        { "id": "a", "text": "Approve everything at first, then grant standing approval to one proven low-stakes lane, and keep reviewing weekly", "correct": true },
-        { "id": "b", "text": "Grant full standing approval across all lanes on day one to save time", "correct": false },
-        { "id": "c", "text": "Approve everything forever and never widen the lane", "correct": false },
-        { "id": "d", "text": "Let the agent decide for itself which lanes it should be trusted with", "correct": false }
+        {
+          "id": "a",
+          "text": "Approve everything at first, then grant standing approval to one proven low-stakes lane, and keep reviewing weekly",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Grant full standing approval across all lanes on day one to save time",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Approve everything forever and never widen the lane",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Let the agent decide for itself which lanes it should be trusted with",
+          "correct": false
+        }
       ],
       "explanation": "The ladder is **approve-everything first → standing approval for one proven, low-stakes lane → weekly review, forever**, widening only as track record earns it. Full trust on day one (b) is the reckless failure mode. Approving everything forever (c) causes approval fatigue and never captures the value of delegation. And the agent doesn't self-authorise its own trust (d) — that decision is yours, set by mistake-cost and evidence.",
-      "sourceRefs": ["r-gen-ai-leader"]
+      "sourceRefs": [
+        "r-gen-ai-leader"
+      ]
     },
     {
       "id": "q-m5-8",
@@ -244,13 +479,31 @@
       "difficulty": 2,
       "stem": "Where on Automatos do you go to see a chronological, timestamped record of every action your agents took — the raw material for a weekly review?",
       "options": [
-        { "id": "a", "text": "The activity Feed, which logs every tool call and agent response and can be filtered by action type", "correct": true },
-        { "id": "b", "text": "The billing page", "correct": false },
-        { "id": "c", "text": "The agent's system prompt", "correct": false },
-        { "id": "d", "text": "Nothing — agent actions aren't recorded anywhere you can see", "correct": false }
+        {
+          "id": "a",
+          "text": "The activity Feed, which logs every tool call and agent response and can be filtered by action type",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The billing page",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The agent's system prompt",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Nothing — agent actions aren't recorded anywhere you can see",
+          "correct": false
+        }
       ],
       "explanation": "The activity **Feed** is the chronological, timestamped log of every significant action — tool calls, responses — and you can filter it by action type to focus your review. Billing (b) shows charges, not the action-by-action record. A system prompt (c) is the agent's instructions, not a log of what it did. And it's simply not true that actions are invisible (d) — visibility is one of the four guardrails, and the feed is where it lives.",
-      "sourceRefs": ["r-gb-feed"]
+      "sourceRefs": [
+        "r-gb-feed"
+      ]
     },
     {
       "id": "q-m5-9",
@@ -259,13 +512,32 @@
       "difficulty": 3,
       "stem": "The module says 'checkpoints shrink the blast radius, they don't abolish mistakes.' Which statement best captures what that means for how you set guardrails?",
       "options": [
-        { "id": "a", "text": "Because an approved plan can still produce a bad result, you set scope and budget too — so that when a mistake slips through, it can only reach so far and cost so much", "correct": true },
-        { "id": "b", "text": "Because mistakes are impossible once you approve a plan, the other guardrails are unnecessary", "correct": false },
-        { "id": "c", "text": "Because mistakes are inevitable, guardrails are pointless and you should either avoid AI or go fully hands-off", "correct": false },
-        { "id": "d", "text": "It means you should approve every single action forever to eliminate all risk", "correct": false }
+        {
+          "id": "a",
+          "text": "Because an approved plan can still produce a bad result, you set scope and budget too — so that when a mistake slips through, it can only reach so far and cost so much",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because mistakes are impossible once you approve a plan, the other guardrails are unnecessary",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because mistakes are inevitable, guardrails are pointless and you should either avoid AI or go fully hands-off",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It means you should approve every single action forever to eliminate all risk",
+          "correct": false
+        }
       ],
       "explanation": "The point is that **no single checkpoint is the whole safety net**: approval reduces the odds of a bad outcome, and scope + budget contain how far and how expensive any mistake that slips through can get. It's the reason the guardrails work as a set. It's the opposite of 'mistakes are impossible, so skip the rest' (b), and it's not a counsel of despair (c) — guardrails are precisely how you make AI usable despite fallibility. Approving everything forever (d) is the approval-fatigue trap, not the lesson here.",
-      "sourceRefs": ["r-gb-missions", "r-gb-assigning"]
+      "sourceRefs": [
+        "r-gb-missions",
+        "r-gb-assigning"
+      ]
     },
     {
       "id": "q-m5-10",
@@ -274,13 +546,32 @@
       "difficulty": 2,
       "stem": "Approval shows up in two documented places on Automatos. Besides approving a mission plan, where else can you require your sign-off?",
       "options": [
-        { "id": "a", "text": "Agent-to-agent delegation can be set to 'Approval required', so one agent handing work to another waits for your confirmation", "correct": true },
-        { "id": "b", "text": "You must approve each word an agent types before it appears", "correct": false },
-        { "id": "c", "text": "You approve the monthly invoice from the AI provider", "correct": false },
-        { "id": "d", "text": "There is no second approval surface — mission plans are the only one", "correct": false }
+        {
+          "id": "a",
+          "text": "Agent-to-agent delegation can be set to 'Approval required', so one agent handing work to another waits for your confirmation",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You must approve each word an agent types before it appears",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "You approve the monthly invoice from the AI provider",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "There is no second approval surface — mission plans are the only one",
+          "correct": false
+        }
       ],
       "explanation": "Delegation rules include **Approval required** (alongside Auto-delegate and Disabled), so an agent passing a task to a teammate can be gated on your confirmation — a second, real approval surface. Word-by-word approval (b) isn't a thing and would be unusable. Approving a provider invoice (c) is billing, not an agent-action gate. And it's wrong that mission plans are the only surface (d) — delegation is the documented second one.",
-      "sourceRefs": ["r-gb-coordination", "r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-coordination",
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m5-11",
@@ -289,13 +580,31 @@
       "difficulty": 1,
       "stem": "After a mission completes and you're happy with how it went, what does 'Save as Routine' let you do?",
       "options": [
-        { "id": "a", "text": "Turn the one-off mission into a reusable playbook you can run again on demand or on a schedule", "correct": true },
-        { "id": "b", "text": "Permanently delete the mission and its record", "correct": false },
-        { "id": "c", "text": "Grant the agent admin rights over your workspace", "correct": false },
-        { "id": "d", "text": "Refund the tokens the mission used", "correct": false }
+        {
+          "id": "a",
+          "text": "Turn the one-off mission into a reusable playbook you can run again on demand or on a schedule",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Permanently delete the mission and its record",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Grant the agent admin rights over your workspace",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Refund the tokens the mission used",
+          "correct": false
+        }
       ],
       "explanation": "**Save as Routine** extracts the completed mission's task pattern into a reusable **playbook** you can rerun or schedule — the bridge from a one-off job to a repeatable workflow. It doesn't delete anything (b), it has nothing to do with granting admin rights (c), and it isn't a refund mechanism (d). It's how a mission that worked becomes something you don't have to reassemble by hand next time.",
-      "sourceRefs": ["r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-missions"
+      ]
     },
     {
       "id": "q-m5-12",
@@ -304,19 +613,40 @@
       "difficulty": 2,
       "stem": "You open your workspace to run your first mission but there's no Missions tab. What's the most likely explanation given how the platform is set up?",
       "options": [
-        { "id": "a", "text": "Mission mode is a feature flag that may be off on a new workspace; as admin of your own personal workspace you can enable it in General settings", "correct": true },
-        { "id": "b", "text": "Missions require a paid plan you haven't purchased", "correct": false },
-        { "id": "c", "text": "Missions only work after you've run a hundred chats first", "correct": false },
-        { "id": "d", "text": "Your workspace is broken and needs to be recreated", "correct": false }
+        {
+          "id": "a",
+          "text": "Mission mode is a feature flag that may be off on a new workspace; as admin of your own personal workspace you can enable it in General settings",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Missions require a paid plan you haven't purchased",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Missions only work after you've run a hundred chats first",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Your workspace is broken and needs to be recreated",
+          "correct": false
+        }
       ],
       "explanation": "Missions run behind the **Mission mode feature flag**, which can be off on a fresh workspace; since a personal workspace makes you its admin, you can toggle it on in General settings. It's not gated behind a purchase (b) in the way described, there's no hundred-chat prerequisite (c), and a missing flag doesn't mean a broken workspace (d) — it's a setting, not a fault.",
-      "sourceRefs": ["r-gb-settings-general", "r-gb-missions"]
+      "sourceRefs": [
+        "r-gb-settings-general",
+        "r-gb-missions"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-m5-order-status-autonomy",
-      "domainIds": ["m5-delegation-guardrails"],
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ],
       "title": "How much autonomy for the 'where's my order?' replies?",
       "tagline": "The e-commerce shop's judgement call: propose-first forever, or earned auto-send?",
       "context": "You run a small e-commerce shop. Dozens of customers a day email 'where's my order?', and answering them by hand eats your mornings. The information needed is simple — a tracking status against an order number. You want AI to take this off your desk, but these are messages a real customer reads, so you're weighing how much autonomy to give. Walk the decision the way the module's debate frames it: earned and widening, with guardrails, not all-or-nothing.",
@@ -325,31 +655,81 @@
           "id": "st1",
           "prompt": "It's day one with a new agent on order-status replies. How do you set the approval line to start?",
           "choices": [
-            { "id": "a", "text": "Propose-first: the agent drafts each reply, you approve before it sends — for now", "verdict": "best", "rationale": "These are customer-facing, so by the mistake-cost rule they start propose-first while the agent builds a track record. That's the graduated-trust ladder's week-one rung applied honestly." },
-            { "id": "b", "text": "Auto-send everything from day one — the task is simple, so trust it immediately", "verdict": "wrong", "rationale": "Full trust on day one is the reckless failure mode: the first mistake goes straight to a customer with no record earned. Simplicity of the task isn't the same as proven reliability." },
-            { "id": "c", "text": "Refuse to let AI near customer replies at all, indefinitely", "verdict": "viable", "rationale": "It's safe, and defensible if you have no capacity to review — but it forfeits the whole point of delegation and, done reflexively, is the 'terrified' half of all-or-nothing thinking. Propose-first captures the value while staying safe." }
+            {
+              "id": "a",
+              "text": "Propose-first: the agent drafts each reply, you approve before it sends — for now",
+              "verdict": "best",
+              "rationale": "These are customer-facing, so by the mistake-cost rule they start propose-first while the agent builds a track record. That's the graduated-trust ladder's week-one rung applied honestly."
+            },
+            {
+              "id": "b",
+              "text": "Auto-send everything from day one — the task is simple, so trust it immediately",
+              "verdict": "wrong",
+              "rationale": "Full trust on day one is the reckless failure mode: the first mistake goes straight to a customer with no record earned. Simplicity of the task isn't the same as proven reliability."
+            },
+            {
+              "id": "c",
+              "text": "Refuse to let AI near customer replies at all, indefinitely",
+              "verdict": "viable",
+              "rationale": "It's safe, and defensible if you have no capacity to review — but it forfeits the whole point of delegation and, done reflexively, is the 'terrified' half of all-or-nothing thinking. Propose-first captures the value while staying safe."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "Two weeks in, the drafts have been consistently accurate and on-tone. You're tempted to grant standing approval so this lane auto-sends. What's the sound way to do it?",
           "choices": [
-            { "id": "a", "text": "Grant standing approval to this one narrow lane (order-status replies only), keep scope tight, and commit to a weekly review of what it sent", "verdict": "best", "rationale": "This is the ladder's second rung done right: standing approval for one proven, low-stakes lane, with scope and a weekly log review as the safety net. The value finally leaves your desk without going unwatched." },
-            { "id": "b", "text": "Grant standing approval to order-status replies AND all other customer emails at once, since it's proven itself", "verdict": "wrong", "rationale": "The track record is for order-status replies only — widening to complaints, refunds, and everything else extrapolates trust the agent hasn't earned in those lanes. Widen one lane at a time." },
-            { "id": "c", "text": "Keep approving every reply by hand forever, to be safe", "verdict": "viable", "rationale": "Safe on paper, but two clean weeks is exactly the evidence the ladder waits for, and approving-forever invites approval fatigue — you'll start rubber-stamping. Standing approval on the narrow lane is the better use of a proven record." }
+            {
+              "id": "a",
+              "text": "Grant standing approval to this one narrow lane (order-status replies only), keep scope tight, and commit to a weekly review of what it sent",
+              "verdict": "best",
+              "rationale": "This is the ladder's second rung done right: standing approval for one proven, low-stakes lane, with scope and a weekly log review as the safety net. The value finally leaves your desk without going unwatched."
+            },
+            {
+              "id": "b",
+              "text": "Grant standing approval to order-status replies AND all other customer emails at once, since it's proven itself",
+              "verdict": "wrong",
+              "rationale": "The track record is for order-status replies only — widening to complaints, refunds, and everything else extrapolates trust the agent hasn't earned in those lanes. Widen one lane at a time."
+            },
+            {
+              "id": "c",
+              "text": "Keep approving every reply by hand forever, to be safe",
+              "verdict": "viable",
+              "rationale": "Safe on paper, but two clean weeks is exactly the evidence the ladder waits for, and approving-forever invites approval fatigue — you'll start rubber-stamping. Standing approval on the narrow lane is the better use of a proven record."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "You give the order-status lane standing approval. Which guardrails do you keep in place so a mistake that slips through stays small?",
           "choices": [
-            { "id": "a", "text": "Tight scope (the agent can read order/tracking data only, not payments or customer accounts), a cost alert, and a five-minute weekly log review", "verdict": "best", "rationale": "Exactly the point that checkpoints shrink blast radius but don't abolish mistakes: scope caps what a bad reply can reach, the cost alert catches runaway spend, and the weekly review catches drift early. Standing approval is safe only because the other three guardrails still hold." },
-            { "id": "b", "text": "Drop all guardrails — standing approval means the lane is fully trusted and needs no further oversight", "verdict": "wrong", "rationale": "Standing approval removes the per-item gate, not the other three guardrails. Dropping scope, budget, and visibility is how a small misfire becomes a large, invisible, expensive one." },
-            { "id": "c", "text": "Keep only the weekly review and rely on it alone to catch anything", "verdict": "viable", "rationale": "The review is essential but reactive — it finds problems after they've happened. Scope (so a mistake can't touch payments) and a cost alert are cheap, proactive containment you'd be foolish to give up. Keep all three, not just the review." }
+            {
+              "id": "a",
+              "text": "Tight scope (the agent can read order/tracking data only, not payments or customer accounts), a cost alert, and a five-minute weekly log review",
+              "verdict": "best",
+              "rationale": "Exactly the point that checkpoints shrink blast radius but don't abolish mistakes: scope caps what a bad reply can reach, the cost alert catches runaway spend, and the weekly review catches drift early. Standing approval is safe only because the other three guardrails still hold."
+            },
+            {
+              "id": "b",
+              "text": "Drop all guardrails — standing approval means the lane is fully trusted and needs no further oversight",
+              "verdict": "wrong",
+              "rationale": "Standing approval removes the per-item gate, not the other three guardrails. Dropping scope, budget, and visibility is how a small misfire becomes a large, invisible, expensive one."
+            },
+            {
+              "id": "c",
+              "text": "Keep only the weekly review and rely on it alone to catch anything",
+              "verdict": "viable",
+              "rationale": "The review is essential but reactive — it finds problems after they've happened. Scope (so a mistake can't touch payments) and a cost alert are cheap, proactive containment you'd be foolish to give up. Keep all three, not just the review."
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-gb-missions", "r-gb-assigning", "r-gb-feed", "r-gen-ai-leader"]
+      "sourceRefs": [
+        "r-gb-missions",
+        "r-gb-assigning",
+        "r-gb-feed",
+        "r-gen-ai-leader"
+      ]
     }
   ],
   "labs": [
@@ -377,7 +757,9 @@
       "url": "automatos-gitbook/activity/missions.md",
       "kind": "official-doc",
       "annotation": "The load-bearing page for this whole module: the mission lifecycle you delegate through — describe a goal, an agent plans it, you Approve/Reject at Plan Pending, agents run it, it Completes with a report. Also the honest budget picture (cost breakdown by task, Pause, Resume with increased budget) and Save as Routine. Read the lifecycle table and Budget management section.",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gb-assigning",
@@ -385,7 +767,9 @@
       "url": "automatos-gitbook/tools/assigning.md",
       "kind": "official-doc",
       "annotation": "Where the scope guardrail actually lives: tools are assigned to specific agents, each with a permission level — Read only, Full access, or Custom actions. The sanctioned safe default is here in the platform's own words: 'Start with read-only for new agents. Expand permissions once you've verified the agent behaves correctly.'",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gb-coordination",
@@ -393,7 +777,9 @@
       "url": "automatos-gitbook/agents/coordination.md",
       "kind": "official-doc",
       "annotation": "The second place approval lives: delegation rules — Auto-delegate, Approval required, or Disabled — govern whether one agent may hand work to another automatically or must wait for your confirmation. Grounds the 'approval shows up in two places' point.",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gb-feed",
@@ -401,7 +787,9 @@
       "url": "automatos-gitbook/activity/feed.md",
       "kind": "official-doc",
       "annotation": "The visibility guardrail: a real-time, chronological log of every significant action — tool calls, agent responses — each timestamped, filterable by action type. This is the raw material for the five-minute weekly manager's review (what ran, what it touched, what it cost).",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gb-settings-general",
@@ -409,7 +797,9 @@
       "url": "automatos-gitbook/settings/general.md",
       "kind": "official-doc",
       "annotation": "Two facts this module needs: Mission mode is a feature flag (may be off on a fresh workspace — enable it here as the admin of your own workspace), and 'Cost alerts — notify on budget thresholds' is the reactive budget control the platform actually offers.",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gb-llm-costs",
@@ -417,7 +807,9 @@
       "url": "automatos-gitbook/analytics/llm-costs.md",
       "kind": "official-doc",
       "annotation": "Backs the honest budget framing: you can 'Set cost alerts — configure budget thresholds in Settings' and see cost per request / by agent and model. Confirms the budget guardrail is watch-and-alert, not a hard pre-set spend ceiling that blocks a run before it starts.",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-gen-ai-leader",
@@ -425,7 +817,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "reference",
       "annotation": "Vendor-light, business-toned source for the delegation-by-mistake-cost and human-oversight ideas behind this module: where to keep a human in the loop, how to escalate autonomy responsibly, and matching oversight to stakes. Use the business-strategy and responsible-AI framing, not any product specifics. (The optional real-credential bridge for this track, per the track brief.)",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     },
     {
       "id": "r-owasp-llm",
@@ -433,7 +827,9 @@
       "url": "https://genai.owasp.org/llm-top-10/",
       "kind": "reference",
       "annotation": "The plain reason the guardrails exist. Two entries speak straight to this module: 'Excessive Agency' (an AI agent with more permissions or autonomy than its task needs is a risk in itself — the case for tight scope and a narrow approval lane) and 'Sensitive Information Disclosure' (why scope keeps the supplies agent away from payroll). Skim these two; the rest is background for Module 06.",
-      "domainIds": ["m5-delegation-guardrails"]
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ]
     }
   ],
   "videos": [
@@ -441,9 +837,11 @@
       "id": "v-m5-1",
       "title": "M5 · Delegating with guardrails — the mission pattern and the four guardrails",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m5-delegation-guardrails"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-business/v-m5-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ],
       "sourceNotebook": "ai-business / m5 / delegation-and-guardrails"
     },
     {
@@ -452,7 +850,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m5-delegation-guardrails"],
+      "domainIds": [
+        "m5-delegation-guardrails"
+      ],
       "sourceNotebook": "ai-business / m5 / autonomy-debate"
     }
   ]

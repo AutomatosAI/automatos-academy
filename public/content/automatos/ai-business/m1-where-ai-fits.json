@@ -28,13 +28,29 @@
           "difficulty": 1,
           "stem": "The 'repetitive knowledge work' test asks three things about a task. Which three?",
           "options": [
-            { "id": "a", "text": "Done more than about weekly, follows a rough pattern, and the raw material is words or numbers", "correct": true },
-            { "id": "b", "text": "Important to the business, done by a senior person, and disliked by whoever does it" },
-            { "id": "c", "text": "Cheap to fix, low-risk, and already partly automated" },
-            { "id": "d", "text": "Customer-facing, revenue-generating, and measurable" }
+            {
+              "id": "a",
+              "text": "Done more than about weekly, follows a rough pattern, and the raw material is words or numbers",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Important to the business, done by a senior person, and disliked by whoever does it"
+            },
+            {
+              "id": "c",
+              "text": "Cheap to fix, low-risk, and already partly automated"
+            },
+            {
+              "id": "d",
+              "text": "Customer-facing, revenue-generating, and measurable"
+            }
           ],
           "explanation": "The test is deliberately about the shape of the work: frequency (more than weekly), pattern (a rough repeatable shape), and material (words or numbers). Option b describes feelings and seniority, which mislead you — a task can be important and senior and still be a bad first candidate. Option c is about cost and risk, which matter later but aren't the spotting test. Option d lists desirable business traits but none of them is what makes a task suit AI.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gitbook-about"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gitbook-about"
+          ]
         },
         {
           "id": "kc-m1-l1-2",
@@ -43,13 +59,31 @@
           "difficulty": 2,
           "stem": "The cafe owner finds two tasks painful: turning weekly supplier emails into an order sheet, and deciding whether to sign a five-year lease. Why is the first a strong AI candidate and the second a poor one?",
           "options": [
-            { "id": "a", "text": "The order sheet is frequent, patterned, and made of words and numbers; the lease decision happens once, has no repeatable pattern, and a wrong answer is ruinous", "correct": true },
-            { "id": "b", "text": "The order sheet is more important to the business than the lease decision", "correct": false },
-            { "id": "c", "text": "The lease decision involves money, and AI can never help with anything involving money", "correct": false },
-            { "id": "d", "text": "The order sheet is disliked more, and dislike is what qualifies a task for AI", "correct": false }
+            {
+              "id": "a",
+              "text": "The order sheet is frequent, patterned, and made of words and numbers; the lease decision happens once, has no repeatable pattern, and a wrong answer is ruinous",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The order sheet is more important to the business than the lease decision",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The lease decision involves money, and AI can never help with anything involving money",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The order sheet is disliked more, and dislike is what qualifies a task for AI",
+              "correct": false
+            }
           ],
           "explanation": "The order sheet passes all three checks (weekly, clear pattern, words and numbers) while the lease fails all three (one-off, no pattern, catastrophic if wrong) — that is the whole reason. Option b is backwards: the lease is arguably far more important, yet it's still the worse candidate, which is exactly the point that importance doesn't decide this. Option c overstates things — AI can help gather and summarise information for money decisions; the lease is a bad candidate because it's a one-off high-stakes judgement, not because money is involved. Option d repeats the trap that dislike qualifies a task; it doesn't.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -67,13 +101,32 @@
           "difficulty": 1,
           "stem": "You're mapping candidates across the four areas. The e-commerce shop answering 'where's my order?' all day sits in which area?",
           "options": [
-            { "id": "a", "text": "Serving customers (support and delivery)", "correct": true },
-            { "id": "b", "text": "Getting customers (sales and marketing)", "correct": false },
-            { "id": "c", "text": "Running the place (operations and admin)", "correct": false },
-            { "id": "d", "text": "The numbers (finance and reporting)", "correct": false }
+            {
+              "id": "a",
+              "text": "Serving customers (support and delivery)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Getting customers (sales and marketing)",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Running the place (operations and admin)",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The numbers (finance and reporting)",
+              "correct": false
+            }
           ],
           "explanation": "Answering order-status questions is support for an existing customer, so it's 'serving customers.' It isn't 'getting customers' — that's sales and marketing work like ads and proposals, not helping someone who has already bought. It isn't 'running the place,' which is internal operations like turning supplier emails into orders. And it isn't 'the numbers,' which is finance and reporting like timesheet summaries.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gitbook-activity"
+          ]
         },
         {
           "id": "kc-m1-l2-2",
@@ -82,13 +135,31 @@
           "difficulty": 2,
           "stem": "Using the three scoring axes, which candidate profile is the strongest place to start?",
           "options": [
-            { "id": "a", "text": "High frequency, high pain, low mistake-cost", "correct": true },
-            { "id": "b", "text": "Low frequency, high pain, high mistake-cost", "correct": false },
-            { "id": "c", "text": "High frequency, low pain, high mistake-cost", "correct": false },
-            { "id": "d", "text": "Low frequency, low pain, low mistake-cost", "correct": false }
+            {
+              "id": "a",
+              "text": "High frequency, high pain, low mistake-cost",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Low frequency, high pain, high mistake-cost",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "High frequency, low pain, high mistake-cost",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Low frequency, low pain, low mistake-cost",
+              "correct": false
+            }
           ],
           "explanation": "The ideal first project happens a lot (payback), genuinely hurts (worth fixing), and is cheap to get wrong (safe to try) — high frequency, high pain, low mistake-cost. Option b is a poor start: rare tasks don't pay back the setup, and high mistake-cost makes a first project risky. Option c mixes a high mistake-cost (risky) with low pain (little reason to bother), so it's not where you'd begin. Option d is low-stakes but also low-frequency and low-pain, so there's little to gain — you wouldn't prioritise it.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -106,13 +177,32 @@
           "difficulty": 2,
           "stem": "A task scores HIGH on mistake-cost. According to the module, what does that tell you?",
           "options": [
-            { "id": "a", "text": "How to deploy it — lean toward draft-for-a-human or act-with-approval so a person checks the work — not whether to use AI at all", "correct": true },
-            { "id": "b", "text": "That AI should never be used for this task under any circumstances", "correct": false },
-            { "id": "c", "text": "That the task should be run fully automatically to remove human error", "correct": false },
-            { "id": "d", "text": "That the task is automatically your best first project", "correct": false }
+            {
+              "id": "a",
+              "text": "How to deploy it — lean toward draft-for-a-human or act-with-approval so a person checks the work — not whether to use AI at all",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "That AI should never be used for this task under any circumstances",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "That the task should be run fully automatically to remove human error",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "That the task is automatically your best first project",
+              "correct": false
+            }
           ],
           "explanation": "Mistake-cost decides the how, not the whether: a high cost pushes you toward keeping a human in the loop (draft-for-a-human or act-with-approval), not toward abandoning AI. Option b is the trap the module explicitly rejects — high stakes mean 'carefully,' not 'never.' Option c is backwards: high mistake-cost is the last profile you'd run fully automatically. Option d confuses the axes — a strong first project is low mistake-cost (plus high frequency and pain), so a high-cost task is not automatically the best starting point.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gitbook-activity"
+          ]
         },
         {
           "id": "kc-m1-l3-2",
@@ -121,13 +211,31 @@
           "difficulty": 2,
           "stem": "An owner wants to automate a task, but nobody can agree on how the task is actually done today — the steps are unclear and information goes missing. What does the module advise?",
           "options": [
-            { "id": "a", "text": "Fix the process first — write down the steps and agree what good looks like — because automating a broken process just gives you faster chaos", "correct": true },
-            { "id": "b", "text": "Automate it immediately; AI will work out the missing steps and impose order on its own", "correct": false },
-            { "id": "c", "text": "Automate this task plus every other messy task at the same time to fix them all together", "correct": false },
-            { "id": "d", "text": "Abandon AI entirely, because unclear processes mean AI can never help this business", "correct": false }
+            {
+              "id": "a",
+              "text": "Fix the process first — write down the steps and agree what good looks like — because automating a broken process just gives you faster chaos",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Automate it immediately; AI will work out the missing steps and impose order on its own",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Automate this task plus every other messy task at the same time to fix them all together",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Abandon AI entirely, because unclear processes mean AI can never help this business",
+              "correct": false
+            }
           ],
           "explanation": "The fix-the-process-first rule is exactly this situation: tidy the process before you automate, or you scale the mess. Option b is the mistake the rule warns against — AI amplifies whatever process you point it at, so it makes chaos faster, not cleaner. Option c compounds two traps at once (unfixed process plus boiling the ocean). Option d over-corrects; the advice is to fix the process, not to give up — once the steps are clear, this task may be a fine candidate.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     }
@@ -140,13 +248,32 @@
       "difficulty": 1,
       "stem": "Which task best fits the definition of 'repetitive knowledge work'?",
       "options": [
-        { "id": "a", "text": "Drafting the same kind of customer-onboarding email several times a week from a rough template", "correct": true },
-        { "id": "b", "text": "Choosing which new market to expand into next year", "correct": false },
-        { "id": "c", "text": "Physically restocking the shelves each morning", "correct": false },
-        { "id": "d", "text": "Coming up with an original brand name for a new product line", "correct": false }
+        {
+          "id": "a",
+          "text": "Drafting the same kind of customer-onboarding email several times a week from a rough template",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Choosing which new market to expand into next year",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Physically restocking the shelves each morning",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Coming up with an original brand name for a new product line",
+          "correct": false
+        }
       ],
       "explanation": "The onboarding email is frequent, follows a pattern, and is made of words — all three checks pass, so it's repetitive knowledge work. The market-expansion choice is a rare, one-off strategic judgement with no repeatable pattern. Restocking shelves is physical work, not knowledge work (its material isn't words or numbers). Inventing an original brand name is creative and one-off, not a repeating pattern — so it fails the test too.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gitbook-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gitbook-about"
+      ]
     },
     {
       "id": "q-m1-2",
@@ -155,13 +282,32 @@
       "difficulty": 1,
       "stem": "The module lists four areas to walk when hunting for AI candidates. Which set names them?",
       "options": [
-        { "id": "a", "text": "Getting customers, serving customers, running the place, the numbers", "correct": true },
-        { "id": "b", "text": "Hardware, software, networking, security", "correct": false },
-        { "id": "c", "text": "Hiring, firing, promoting, training", "correct": false },
-        { "id": "d", "text": "Short-term, medium-term, long-term, strategic", "correct": false }
+        {
+          "id": "a",
+          "text": "Getting customers, serving customers, running the place, the numbers",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Hardware, software, networking, security",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Hiring, firing, promoting, training",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Short-term, medium-term, long-term, strategic",
+          "correct": false
+        }
       ],
       "explanation": "The four areas are getting customers (sales/marketing), serving customers (support/delivery), running the place (operations/admin), and the numbers (finance/reporting) — a plain-language walk through any business. Option b is an IT-infrastructure list, unrelated to the business-function map. Option c covers only HR activities, which is one slice of one area, not the whole map. Option d is a time-horizon framing, not the functional areas the module uses.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gitbook-activity"
+      ]
     },
     {
       "id": "q-m1-3",
@@ -170,13 +316,32 @@
       "difficulty": 2,
       "stem": "What is the correct role of the mistake-cost axis when you score a candidate?",
       "options": [
-        { "id": "a", "text": "It decides how you deploy AI on the task (draft-for-a-human, act-with-approval, or fully automatic), not whether to use AI", "correct": true },
-        { "id": "b", "text": "It decides whether the task is allowed to use AI at all — high cost means no AI", "correct": false },
-        { "id": "c", "text": "It measures how often the task happens", "correct": false },
-        { "id": "d", "text": "It is the only axis that matters, so frequency and pain can be ignored", "correct": false }
+        {
+          "id": "a",
+          "text": "It decides how you deploy AI on the task (draft-for-a-human, act-with-approval, or fully automatic), not whether to use AI",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It decides whether the task is allowed to use AI at all — high cost means no AI",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It measures how often the task happens",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It is the only axis that matters, so frequency and pain can be ignored",
+          "correct": false
+        }
       ],
       "explanation": "Mistake-cost sets the deployment method: the higher the cost of a wrong answer, the more you keep a human in the loop. Option b is the exact misconception the module corrects — high stakes change the how, not the whether. Option c confuses mistake-cost with frequency, which is a separate axis. Option d is wrong because all three axes matter together; mistake-cost tells you how to deploy, while frequency and pain tell you whether it's worth prioritising.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gitbook-activity"
+      ]
     },
     {
       "id": "q-m1-4",
@@ -185,13 +350,31 @@
       "difficulty": 2,
       "stem": "Which is the clearest example of a 'quick win' rather than a 'transformation'?",
       "options": [
-        { "id": "a", "text": "Having AI draft first-pass replies to product reviews for a person to approve, starting this month", "correct": true },
-        { "id": "b", "text": "Building a system where orders, replies, and reports flow between agents mostly untouched by humans", "correct": false },
-        { "id": "c", "text": "Re-platforming the entire business onto a new set of AI-run workflows over the coming year", "correct": false },
-        { "id": "d", "text": "Replacing the customer-service team with a fully autonomous agent handling every case end to end", "correct": false }
+        {
+          "id": "a",
+          "text": "Having AI draft first-pass replies to product reviews for a person to approve, starting this month",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Building a system where orders, replies, and reports flow between agents mostly untouched by humans",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Re-platforming the entire business onto a new set of AI-run workflows over the coming year",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Replacing the customer-service team with a fully autonomous agent handling every case end to end",
+          "correct": false
+        }
       ],
       "explanation": "Drafting review replies for a human to approve is small, low-risk, and shippable this month — the definition of a quick win. Option b describes chained workflows running with little human touch, which is a transformation (Modules 04 and 05 territory). Option c is an explicitly year-long, whole-business change — the opposite of a quick win. Option d is a fully automatic, high-stakes replacement, which is both a transformation and a poor place to start.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m1-5",
@@ -200,13 +383,31 @@
       "difficulty": 2,
       "stem": "Which task should you specifically NOT choose as a first AI project?",
       "options": [
-        { "id": "a", "text": "Deciding the final terms of a five-year commercial lease", "correct": true },
-        { "id": "b", "text": "Summarising this week's meeting notes into an action list for a person to review", "correct": false },
-        { "id": "c", "text": "Drafting routine social posts from a rough brief", "correct": false },
-        { "id": "d", "text": "Turning weekly supplier emails into an order sheet the owner checks", "correct": false }
+        {
+          "id": "a",
+          "text": "Deciding the final terms of a five-year commercial lease",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Summarising this week's meeting notes into an action list for a person to review",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Drafting routine social posts from a rough brief",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Turning weekly supplier emails into an order sheet the owner checks",
+          "correct": false
+        }
       ],
       "explanation": "A five-year lease decision is a rare, high-stakes, legally weighty one-off — it fails the frequency test and carries a ruinous mistake-cost, so it's the wrong first project. The other three are all strong first candidates: summarising meeting notes, drafting social posts, and building an order sheet are frequent, patterned, word-and-number tasks with a human check and low mistake-cost.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m1-6",
@@ -215,13 +416,31 @@
       "difficulty": 2,
       "stem": "'Automating a broken process just gives you faster chaos.' What does this rule tell you to do?",
       "options": [
-        { "id": "a", "text": "Tidy the process first — clarify the steps and agree what good looks like — before you automate it", "correct": true },
-        { "id": "b", "text": "Automate the broken process anyway, since speed is more valuable than order", "correct": false },
-        { "id": "c", "text": "Only ever automate processes that are already fully automated", "correct": false },
-        { "id": "d", "text": "Avoid automation forever if a process has ever been messy", "correct": false }
+        {
+          "id": "a",
+          "text": "Tidy the process first — clarify the steps and agree what good looks like — before you automate it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Automate the broken process anyway, since speed is more valuable than order",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Only ever automate processes that are already fully automated",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Avoid automation forever if a process has ever been messy",
+          "correct": false
+        }
       ],
       "explanation": "The rule is fix-the-process-first: AI amplifies whatever it's pointed at, so a messy process must be cleaned up before automation or the mess just scales. Option b ignores the warning — faster chaos is still chaos. Option c is nonsensical (a fully automated process needs no further automation). Option d over-reads the rule; the advice is to fix the process, not to abandon automation permanently.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m1-7",
@@ -230,13 +449,32 @@
       "difficulty": 3,
       "stem": "The consultancy's Friday status note scored LOW on mistake-cost because a partner reviews it before it reaches the client. If that review step were removed, what changes?",
       "options": [
-        { "id": "a", "text": "The mistake-cost rises, because an unreviewed error now reaches the client directly — so the safe deployment rung and the task's ranking both change", "correct": true },
-        { "id": "b", "text": "Nothing — mistake-cost is a fixed property of the task and never depends on whether a human checks the output", "correct": false },
-        { "id": "c", "text": "The mistake-cost falls, because removing a step always makes a task safer", "correct": false },
-        { "id": "d", "text": "The frequency rises, because the note now goes out faster", "correct": false }
+        {
+          "id": "a",
+          "text": "The mistake-cost rises, because an unreviewed error now reaches the client directly — so the safe deployment rung and the task's ranking both change",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Nothing — mistake-cost is a fixed property of the task and never depends on whether a human checks the output",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The mistake-cost falls, because removing a step always makes a task safer",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The frequency rises, because the note now goes out faster",
+          "correct": false
+        }
       ],
       "explanation": "The low score depended on the human check catching errors; remove it and a mistake now lands on the client, so mistake-cost rises and you'd need a safer deployment (keep a human in the loop). Option b is wrong because mistake-cost is about consequences in context, and the review step is part of that context. Option c is backwards — removing the safety check raises risk, it doesn't lower it. Option d confuses axes: removing a review affects mistake-cost, not how often the task occurs.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gitbook-activity"
+      ]
     },
     {
       "id": "q-m1-8",
@@ -245,19 +483,39 @@
       "difficulty": 2,
       "stem": "You've mapped eight promising candidates across the four areas. What does the module tell you to do next?",
       "options": [
-        { "id": "a", "text": "Score them on frequency, pain, and mistake-cost, then pick ONE to start with", "correct": true },
-        { "id": "b", "text": "Start automating all eight at once so you make progress everywhere", "correct": false },
-        { "id": "c", "text": "Pick the single most emotionally painful one regardless of the other axes", "correct": false },
-        { "id": "d", "text": "Choose the one with the highest mistake-cost, since that's where AI adds the most value", "correct": false }
+        {
+          "id": "a",
+          "text": "Score them on frequency, pain, and mistake-cost, then pick ONE to start with",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Start automating all eight at once so you make progress everywhere",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Pick the single most emotionally painful one regardless of the other axes",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Choose the one with the highest mistake-cost, since that's where AI adds the most value",
+          "correct": false
+        }
       ],
       "explanation": "The method is to score all candidates and commit to one starting task — ranking beats guessing, and one shipped project beats eight stalled ones. Option b is 'boiling the ocean,' which the module warns guarantees you finish nothing. Option c ignores two of the three axes; pain alone doesn't make a good first project (a rare or high-stakes task can be very painful yet a poor start). Option d inverts the guidance — a high mistake-cost task is a riskier, not better, first project.",
-      "sourceRefs": ["r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-genai-leader-guide"
+      ]
     }
   ],
   "scenarios": [
     {
       "id": "s-m1-quick-win-vs-system",
-      "domainIds": ["m1-where-ai-fits"],
+      "domainIds": [
+        "m1-where-ai-fits"
+      ],
       "title": "The e-commerce inbox: start small, or build the system?",
       "tagline": "The judgment call from the module's debate — quick win this week versus transformation this year, on one real inbox.",
       "context": "You advise the e-commerce shop from the recurring cast. Its customer-service inbox is overwhelmed: dozens of 'where's my order?' messages a day, plus product reviews to reply to, plus the occasional genuinely upset customer. The owner has read about AI 'transforming' support and wants to automate the whole inbox. Your job is to steer them to the right first move without either over-promising or dismissing the ambition. Walk the decision with them.",
@@ -266,31 +524,80 @@
           "id": "st1",
           "prompt": "The owner opens with: 'Let's put AI on the entire inbox — every message, answered automatically, no staff needed.' What's your first move?",
           "choices": [
-            { "id": "a", "text": "Slow it down and split the inbox by task and mistake-cost — the repetitive 'where's my order?' questions are one candidate, review replies another, upset-customer messages a third — and score each before automating anything", "verdict": "best", "rationale": "This is the method: don't treat 'the inbox' as one thing. Splitting by task and mistake-cost reveals that routine order-status questions are a great first candidate while sensitive messages are not — which is exactly what stops the owner over-automating." },
-            { "id": "b", "text": "Agree, but insist that everything stays as draft-for-a-human so a person approves every single reply before it sends", "verdict": "viable", "rationale": "The human-in-the-loop instinct is right and safe, but blanket-drafting the whole inbox misses the real insight: different messages have very different mistake-costs, so they deserve different treatment. You'd be leaving easy wins slow and treating trivial and sensitive messages the same." },
-            { "id": "c", "text": "Agree and switch the whole inbox to fully automatic replies to prove AI can handle it end to end", "verdict": "wrong", "rationale": "Fully automatic across an entire inbox — including upset customers — is the highest-mistake-cost deployment on the least-suitable messages. This is exactly the over-reach the module warns against; one bad automated reply to a distressed customer is the kind of thing you'd be embarrassed to have discovered." }
+            {
+              "id": "a",
+              "text": "Slow it down and split the inbox by task and mistake-cost — the repetitive 'where's my order?' questions are one candidate, review replies another, upset-customer messages a third — and score each before automating anything",
+              "verdict": "best",
+              "rationale": "This is the method: don't treat 'the inbox' as one thing. Splitting by task and mistake-cost reveals that routine order-status questions are a great first candidate while sensitive messages are not — which is exactly what stops the owner over-automating."
+            },
+            {
+              "id": "b",
+              "text": "Agree, but insist that everything stays as draft-for-a-human so a person approves every single reply before it sends",
+              "verdict": "viable",
+              "rationale": "The human-in-the-loop instinct is right and safe, but blanket-drafting the whole inbox misses the real insight: different messages have very different mistake-costs, so they deserve different treatment. You'd be leaving easy wins slow and treating trivial and sensitive messages the same."
+            },
+            {
+              "id": "c",
+              "text": "Agree and switch the whole inbox to fully automatic replies to prove AI can handle it end to end",
+              "verdict": "wrong",
+              "rationale": "Fully automatic across an entire inbox — including upset customers — is the highest-mistake-cost deployment on the least-suitable messages. This is exactly the over-reach the module warns against; one bad automated reply to a distressed customer is the kind of thing you'd be embarrassed to have discovered."
+            }
           ]
         },
         {
           "id": "st2",
           "prompt": "You've singled out the 'where's my order?' questions as the first candidate. How should AI be deployed on them for a quick win this week?",
           "choices": [
-            { "id": "a", "text": "Draft-for-a-human: AI drafts the order-status reply, a staff member glances at it and approves before it sends — a quick win with a human check while trust is built", "verdict": "best", "rationale": "High frequency, high pain, and — with a quick human glance — low mistake-cost: the ideal quick-win profile, deployed at the draft-for-a-human rung. It ships this week and teaches the owner how AI behaves on their real messages." },
-            { "id": "b", "text": "Fully automatic from day one: these questions are simple and repetitive, so let AI answer them with no human check at all", "verdict": "viable", "rationale": "Order-status questions are genuinely low-stakes, so this isn't reckless — but jumping straight to no human check on day one skips the 'watch it behave for a while first' step. Start with a check, then relax it once it's proven; that's the safer path to the same place." },
-            { "id": "c", "text": "Don't automate these at all — save AI for the upset-customer messages, since that's where staff struggle most", "verdict": "wrong", "rationale": "This inverts the mistake-cost logic. Upset-customer messages are where the human touch matters most and the cost of a wrong answer is highest — the worst first candidate, not the best. The routine questions are where the quick win lives." }
+            {
+              "id": "a",
+              "text": "Draft-for-a-human: AI drafts the order-status reply, a staff member glances at it and approves before it sends — a quick win with a human check while trust is built",
+              "verdict": "best",
+              "rationale": "High frequency, high pain, and — with a quick human glance — low mistake-cost: the ideal quick-win profile, deployed at the draft-for-a-human rung. It ships this week and teaches the owner how AI behaves on their real messages."
+            },
+            {
+              "id": "b",
+              "text": "Fully automatic from day one: these questions are simple and repetitive, so let AI answer them with no human check at all",
+              "verdict": "viable",
+              "rationale": "Order-status questions are genuinely low-stakes, so this isn't reckless — but jumping straight to no human check on day one skips the 'watch it behave for a while first' step. Start with a check, then relax it once it's proven; that's the safer path to the same place."
+            },
+            {
+              "id": "c",
+              "text": "Don't automate these at all — save AI for the upset-customer messages, since that's where staff struggle most",
+              "verdict": "wrong",
+              "rationale": "This inverts the mistake-cost logic. Upset-customer messages are where the human touch matters most and the cost of a wrong answer is highest — the worst first candidate, not the best. The routine questions are where the quick win lives."
+            }
           ]
         },
         {
           "id": "st3",
           "prompt": "The quick win is live and saving real time. The owner now asks about their bigger dream: order → auto-reply → weekly report, all chained together with little human touch. How do you frame it?",
           "choices": [
-            { "id": "a", "text": "As a transformation for later (Modules 04–05): reachable by chaining proven quick wins with checkpoints — but only after each piece works on its own and the underlying processes are tidy", "verdict": "best", "rationale": "This lands the debate honestly: the transformation is real and reachable, but it's built from compounding quick wins with checkpoints, not leapt to. It also carries the fix-the-process-first rule into the bigger build." },
-            { "id": "b", "text": "As something to start building right now in parallel, wiring all three steps together before the first quick win has really settled", "verdict": "viable", "rationale": "The ambition is correct and the direction is right, but building the full chain before the first piece has settled risks boiling the ocean and automating steps whose processes aren't yet proven. Sequence it: prove each piece, then chain." },
-            { "id": "c", "text": "As hype to forget — small drafting help is all AI will ever realistically do for a business this size", "verdict": "wrong", "rationale": "This is the cynical over-correction the debate explicitly rejects. Quick wins compound into systems; dismissing the transformation entirely is as wrong as leaping straight to it. The honest answer is 'yes, later, built from proven pieces.'" }
+            {
+              "id": "a",
+              "text": "As a transformation for later (Modules 04–05): reachable by chaining proven quick wins with checkpoints — but only after each piece works on its own and the underlying processes are tidy",
+              "verdict": "best",
+              "rationale": "This lands the debate honestly: the transformation is real and reachable, but it's built from compounding quick wins with checkpoints, not leapt to. It also carries the fix-the-process-first rule into the bigger build."
+            },
+            {
+              "id": "b",
+              "text": "As something to start building right now in parallel, wiring all three steps together before the first quick win has really settled",
+              "verdict": "viable",
+              "rationale": "The ambition is correct and the direction is right, but building the full chain before the first piece has settled risks boiling the ocean and automating steps whose processes aren't yet proven. Sequence it: prove each piece, then chain."
+            },
+            {
+              "id": "c",
+              "text": "As hype to forget — small drafting help is all AI will ever realistically do for a business this size",
+              "verdict": "wrong",
+              "rationale": "This is the cynical over-correction the debate explicitly rejects. Quick wins compound into systems; dismissing the transformation entirely is as wrong as leaping straight to it. The honest answer is 'yes, later, built from proven pieces.'"
+            }
           ]
         }
       ],
-      "sourceRefs": ["r-genai-leader-guide", "r-gitbook-activity", "r-gitbook-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gitbook-activity",
+        "r-gitbook-about"
+      ]
     }
   ],
   "labs": [
@@ -318,7 +625,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, business-toned guide. For this module, read the 'Business strategies for a successful gen AI solution' material: how to spot where generative AI genuinely fits, the difference between quick wins and larger transformations, and why fit-to-task (not hype) drives adoption. Skip the vendor-product specifics — you want the plain business framing.",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     },
     {
       "id": "r-gitbook-about",
@@ -326,7 +635,9 @@
       "url": "automatos-gitbook/about.md",
       "kind": "first-party-doc",
       "annotation": "The plain-English description of what the platform is: agents are AI workers (not chatbots), the Universal Router sends each message to the best worker automatically, and you upload documents so agents get RAG-powered access to your data. Read it to understand what 'doing work on the platform' actually means before the hands-on step.",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     },
     {
       "id": "r-gitbook-readme",
@@ -334,7 +645,9 @@
       "url": "automatos-gitbook/README.md",
       "kind": "first-party-doc",
       "annotation": "The quick-start you'll follow for the lab: sign in (a personal workspace is created automatically on first login), then open Chat and type — the platform routes your message to the right agent. This is the 'free platform' entry point for every hands-on step in the track.",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     },
     {
       "id": "r-gitbook-activity",
@@ -342,7 +655,9 @@
       "url": "automatos-gitbook/activity/README.md",
       "kind": "first-party-doc",
       "annotation": "A look at what 'running knowledge work' looks like once it's on the platform: a dashboard of what agents are doing now, scheduled routines, reports they file, and long-running missions. Useful context for picturing where a candidate task from your map would eventually live — you don't need to do anything here yet.",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     },
     {
       "id": "r-owasp-llm-top10",
@@ -350,7 +665,9 @@
       "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
       "kind": "reference",
       "annotation": "An external, vendor-neutral catalogue of the main ways AI language systems go wrong. You don't need the technical detail here — skim it only to reinforce the module's honest point that AI has real failure modes, which is exactly why mistake-cost decides how carefully you deploy. It's covered properly in Module 06 (risk and safety).",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     },
     {
       "id": "r-eu-ai-act-timeline",
@@ -358,7 +675,9 @@
       "url": "https://artificialintelligenceact.eu/implementation-timeline/",
       "kind": "reference",
       "annotation": "Orientation, not legal advice. The stable frame to take from it: AI-specific law is phasing in over the next few years, most small-business uses sit in the lower-risk categories, and existing data-protection law already applies to what you do. The exact dates are still in flux, so treat this as a sense of direction — Module 06 returns to it, and the AIGP track goes deep for anyone who needs it.",
-      "domainIds": ["m1-where-ai-fits"]
+      "domainIds": [
+        "m1-where-ai-fits"
+      ]
     }
   ],
   "videos": [
@@ -366,9 +685,11 @@
       "id": "v-m1-1",
       "title": "M1 · Where AI fits — the repetitive-knowledge-work test and the four-area map",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m1-where-ai-fits"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-business/v-m1-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m1-where-ai-fits"
+      ],
       "sourceNotebook": "ai-business / m1 / where-ai-fits-test-and-map"
     },
     {
@@ -377,7 +698,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m1-where-ai-fits"],
+      "domainIds": [
+        "m1-where-ai-fits"
+      ],
       "sourceNotebook": "ai-business / m1 / debate-quick-wins-vs-transformation"
     }
   ]

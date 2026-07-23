@@ -27,13 +27,29 @@
           "difficulty": 1,
           "stem": "What's the core reframe this module is built on?",
           "options": [
-            { "id": "a", "text": "You're not 'prompting' the AI — you're delegating to it, the way you'd brief a capable new hire", "correct": true },
-            { "id": "b", "text": "AI works best when you use as few words as possible, like a search engine" },
-            { "id": "c", "text": "You need to learn technical prompt syntax before AI is useful for a business" },
-            { "id": "d", "text": "The tool decides the quality of the output, so the wording of your request barely matters" }
+            {
+              "id": "a",
+              "text": "You're not 'prompting' the AI — you're delegating to it, the way you'd brief a capable new hire",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "AI works best when you use as few words as possible, like a search engine"
+            },
+            {
+              "id": "c",
+              "text": "You need to learn technical prompt syntax before AI is useful for a business"
+            },
+            {
+              "id": "d",
+              "text": "The tool decides the quality of the output, so the wording of your request barely matters"
+            }
           ],
           "explanation": "The reframe is delegation, not prompting (a) — briefing the AI like a new hire is exactly the mindset the module builds on. A search-engine, keyword mindset (b) is the habit that produces garbage. There's no technical syntax to learn first (c) — the skill is managerial clarity, not code. And (d) is backwards: the quality of your brief sets the quality of the output almost entirely.",
-          "sourceRefs": ["r-chat", "r-genai-leader"]
+          "sourceRefs": [
+            "r-chat",
+            "r-genai-leader"
+          ]
         },
         {
           "id": "kc-m2-2",
@@ -42,13 +58,29 @@
           "difficulty": 1,
           "stem": "In Automatos Chat, what does the Universal Router do when you send a message on Auto mode?",
           "options": [
-            { "id": "a", "text": "It reads your message and automatically sends it to the best AI worker (agent) for the job, though you can override and pick a specific agent yourself", "correct": true },
-            { "id": "b", "text": "It blocks your message until you manually choose which agent should answer" },
-            { "id": "c", "text": "It rewrites your message into technical prompt syntax before anyone sees it" },
-            { "id": "d", "text": "It sends your message to every agent at once and shows you all their replies" }
+            {
+              "id": "a",
+              "text": "It reads your message and automatically sends it to the best AI worker (agent) for the job, though you can override and pick a specific agent yourself",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It blocks your message until you manually choose which agent should answer"
+            },
+            {
+              "id": "c",
+              "text": "It rewrites your message into technical prompt syntax before anyone sees it"
+            },
+            {
+              "id": "d",
+              "text": "It sends your message to every agent at once and shows you all their replies"
+            }
           ],
           "explanation": "On Auto, the router analyses your message and routes it to the best-suited agent, and you retain the option to override via the Auto dropdown (a). It doesn't force you to choose first (b) — the whole point is you don't have to. It doesn't rewrite your wording into syntax (c); how well you brief is still on you. And it routes to one chosen agent, not a broadcast to all of them (d).",
-          "sourceRefs": ["r-chat", "r-routing"]
+          "sourceRefs": [
+            "r-chat",
+            "r-routing"
+          ]
         }
       ]
     },
@@ -66,13 +98,29 @@
           "difficulty": 1,
           "stem": "What are the five parts of the delegation brief?",
           "options": [
-            { "id": "a", "text": "Role, task, raw material, shape, and example", "correct": true },
-            { "id": "b", "text": "Greeting, keywords, urgency, budget, and deadline" },
-            { "id": "c", "text": "Model, temperature, tokens, provider, and persona" },
-            { "id": "d", "text": "Question, follow-up, correction, retry, and accept" }
+            {
+              "id": "a",
+              "text": "Role, task, raw material, shape, and example",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Greeting, keywords, urgency, budget, and deadline"
+            },
+            {
+              "id": "c",
+              "text": "Model, temperature, tokens, provider, and persona"
+            },
+            {
+              "id": "d",
+              "text": "Question, follow-up, correction, retry, and accept"
+            }
           ],
           "explanation": "The five parts are role (who to act as), task (what exactly), raw material (the facts), shape (format and tone), and example (a 'good' sample) — (a). Option (c) lists agent model settings, which live in agent configuration, not in a chat brief. Options (b) and (d) are invented sequences that don't match the brief the module teaches.",
-          "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+          "sourceRefs": [
+            "r-genai-leader",
+            "r-agent-prompting"
+          ]
         },
         {
           "id": "kc-m2-4",
@@ -81,13 +129,29 @@
           "difficulty": 2,
           "stem": "Devi's café proposal came out generic on the first try. Which single part of the brief, added, most directly turns 'a proposal for any café' into 'a proposal for THIS café'?",
           "options": [
-            { "id": "a", "text": "Raw material — pasting the discovery-call notes so the AI works from the café's real situation instead of inventing filler", "correct": true },
-            { "id": "b", "text": "A more urgent tone in the request, so the AI tries harder" },
-            { "id": "c", "text": "Asking the same question several more times until a better version appears by luck" },
-            { "id": "d", "text": "Making the request shorter so the AI isn't distracted by detail" }
+            {
+              "id": "a",
+              "text": "Raw material — pasting the discovery-call notes so the AI works from the café's real situation instead of inventing filler",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A more urgent tone in the request, so the AI tries harder"
+            },
+            {
+              "id": "c",
+              "text": "Asking the same question several more times until a better version appears by luck"
+            },
+            {
+              "id": "d",
+              "text": "Making the request shorter so the AI isn't distracted by detail"
+            }
           ],
           "explanation": "Raw material is the biggest lever (a): with the real notes, the AI writes from this café's facts; without them it has no choice but to invent plausible filler. Urgency (b) does nothing — the AI isn't motivated by tone. Re-asking blindly (c) is not a fix; it's the accept-and-retry-by-luck trap the next lesson warns against. And making it shorter (d) removes the very context that makes the answer specific.",
-          "sourceRefs": ["r-genai-leader", "r-chat"]
+          "sourceRefs": [
+            "r-genai-leader",
+            "r-chat"
+          ]
         }
       ]
     },
@@ -105,13 +169,29 @@
           "difficulty": 2,
           "stem": "The AI's first answer is 80% right but the tone is a bit off and one paragraph repeats. What's the manager's move?",
           "options": [
-            { "id": "a", "text": "Stay in the same conversation and critique the draft — 'loosen the tone, cut the repeated paragraph' — keeping the good 80%", "correct": true },
-            { "id": "b", "text": "Throw it out and rewrite the whole brief from scratch to start clean" },
-            { "id": "c", "text": "Accept it as-is — 80% is good enough and refining is a waste of time" },
-            { "id": "d", "text": "Re-send the exact same brief unchanged and hope the next attempt is better" }
+            {
+              "id": "a",
+              "text": "Stay in the same conversation and critique the draft — 'loosen the tone, cut the repeated paragraph' — keeping the good 80%",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Throw it out and rewrite the whole brief from scratch to start clean"
+            },
+            {
+              "id": "c",
+              "text": "Accept it as-is — 80% is good enough and refining is a waste of time"
+            },
+            {
+              "id": "d",
+              "text": "Re-send the exact same brief unchanged and hope the next attempt is better"
+            }
           ],
           "explanation": "Iteration is management: point at what to change and keep the good parts, in the same conversation so the agent holds the context (a). Restarting from scratch (b) throws away the 80% that was already fine. Accepting an 80% draft unread (c) ships known problems. And re-sending the identical brief (d) is the accept-by-luck trap — with no new feedback, there's no reason for a better result.",
-          "sourceRefs": ["r-chat", "r-genai-leader"]
+          "sourceRefs": [
+            "r-chat",
+            "r-genai-leader"
+          ]
         },
         {
           "id": "kc-m2-6",
@@ -120,13 +200,29 @@
           "difficulty": 2,
           "stem": "Priya is drafting a client report page that contains cost-savings figures. How hard should she verify it, and why?",
           "options": [
-            { "id": "a", "text": "Full check plus demand sources — it has numbers and promises in it, so she verifies every figure against her own records and asks where each came from", "correct": true },
-            { "id": "b", "text": "A quick glance — the AI wrote it confidently, so the figures are almost certainly right" },
-            { "id": "c", "text": "No check at all — verification is only for legal documents" },
-            { "id": "d", "text": "She should ask the AI to confirm its own numbers are correct and trust that confirmation" }
+            {
+              "id": "a",
+              "text": "Full check plus demand sources — it has numbers and promises in it, so she verifies every figure against her own records and asks where each came from",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A quick glance — the AI wrote it confidently, so the figures are almost certainly right"
+            },
+            {
+              "id": "c",
+              "text": "No check at all — verification is only for legal documents"
+            },
+            {
+              "id": "d",
+              "text": "She should ask the AI to confirm its own numbers are correct and trust that confirmation"
+            }
           ],
           "explanation": "Numbers, dates and promises are high-stakes, so the check is the hardest tier: verify every figure against real records and demand sources (a). A confident tone is no evidence of correctness — that's exactly the hallucination trap, so a glance (b) is reckless here. Verification isn't reserved for legal documents (c); anything with figures or promises qualifies. And asking the AI to vouch for itself (d) is worthless — it will confirm a wrong number just as fluently as a right one; the check has to be against *your* reality.",
-          "sourceRefs": ["r-genai-leader", "r-chat"]
+          "sourceRefs": [
+            "r-genai-leader",
+            "r-chat"
+          ]
         }
       ]
     }
@@ -139,13 +235,29 @@
       "difficulty": 1,
       "stem": "Why is a vague one-line request to an AI often described as worse than the same request to a human?",
       "options": [
-        { "id": "a", "text": "The AI returns a confident, fluent guess that looks finished, so it's easy to accept without reading — whereas a person would signal uncertainty", "correct": true },
-        { "id": "b", "text": "The AI refuses to answer vague requests, wasting your time" },
-        { "id": "c", "text": "The AI is slower than a person at producing a first draft" },
-        { "id": "d", "text": "There is no difference — both give equally useful results from a one-liner" }
+        {
+          "id": "a",
+          "text": "The AI returns a confident, fluent guess that looks finished, so it's easy to accept without reading — whereas a person would signal uncertainty",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI refuses to answer vague requests, wasting your time"
+        },
+        {
+          "id": "c",
+          "text": "The AI is slower than a person at producing a first draft"
+        },
+        {
+          "id": "d",
+          "text": "There is no difference — both give equally useful results from a one-liner"
+        }
       ],
       "explanation": "The danger is that the AI dresses a guess in fluent, finished-looking prose and won't flag its own uncertainty, so a weak answer sails through unchecked (a). It doesn't refuse vague requests (b) — it happily answers them, which is the problem. Speed (c) isn't the issue; quality is. And (d) is the mistake the whole module corrects — the brief absolutely changes the result.",
-      "sourceRefs": ["r-genai-leader", "r-chat"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-chat"
+      ]
     },
     {
       "id": "q-m2-2",
@@ -154,13 +266,29 @@
       "difficulty": 1,
       "stem": "In the five-part brief, what does the 'role' part do?",
       "options": [
-        { "id": "a", "text": "Tells the AI who to act as — the expertise, judgement and voice to write from, e.g. 'you're our senior account manager'", "correct": true },
-        { "id": "b", "text": "Sets which human on your team is responsible for the task" },
-        { "id": "c", "text": "Chooses which AI model and provider the agent uses" },
-        { "id": "d", "text": "Decides how many times you're allowed to iterate on the answer" }
+        {
+          "id": "a",
+          "text": "Tells the AI who to act as — the expertise, judgement and voice to write from, e.g. 'you're our senior account manager'",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Sets which human on your team is responsible for the task"
+        },
+        {
+          "id": "c",
+          "text": "Chooses which AI model and provider the agent uses"
+        },
+        {
+          "id": "d",
+          "text": "Decides how many times you're allowed to iterate on the answer"
+        }
       ],
       "explanation": "Role sets the persona the AI writes from — its expertise and voice (a); a senior account manager and an intern produce very different work from the same task. It's not about assigning a human owner (b), it's not the model/provider setting (c) — that's agent configuration, not a chat brief — and it has nothing to do with iteration limits (d).",
-      "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-agent-prompting"
+      ]
     },
     {
       "id": "q-m2-3",
@@ -169,13 +297,29 @@
       "difficulty": 2,
       "stem": "Which part of the brief is the one most people skip, and the one with the biggest effect on whether the answer is specific to your business?",
       "options": [
-        { "id": "a", "text": "Raw material — the actual notes, numbers, or documents the AI should work from", "correct": true },
-        { "id": "b", "text": "Role — telling the AI who to be" },
-        { "id": "c", "text": "Shape — the format and tone" },
-        { "id": "d", "text": "Task — the one-sentence description of what you want" }
+        {
+          "id": "a",
+          "text": "Raw material — the actual notes, numbers, or documents the AI should work from",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Role — telling the AI who to be"
+        },
+        {
+          "id": "c",
+          "text": "Shape — the format and tone"
+        },
+        {
+          "id": "d",
+          "text": "Task — the one-sentence description of what you want"
+        }
       ],
       "explanation": "Raw material is the most-skipped, highest-leverage part (a): with your real facts the AI writes from your reality; without them it invents plausible filler. Role, shape and task all matter and all belong in a good brief, but each is usually at least attempted — it's the raw material (the discovery notes, the numbers, the customer's email) that people leave out, and that omission is what makes answers generic.",
-      "sourceRefs": ["r-genai-leader", "r-chat"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-chat"
+      ]
     },
     {
       "id": "q-m2-4",
@@ -184,13 +328,28 @@
       "difficulty": 2,
       "stem": "In Automatos Chat, how do you get a long PDF brief in front of the agent as raw material?",
       "options": [
-        { "id": "a", "text": "Use the attachment button in the input bar to upload the file into the conversation, where the agent can read and reference it", "correct": true },
-        { "id": "b", "text": "Email the PDF to the agent and wait for it to import" },
-        { "id": "c", "text": "You can't — agents can only work from text you type by hand" },
-        { "id": "d", "text": "Convert the PDF to code first, then paste the code" }
+        {
+          "id": "a",
+          "text": "Use the attachment button in the input bar to upload the file into the conversation, where the agent can read and reference it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Email the PDF to the agent and wait for it to import"
+        },
+        {
+          "id": "c",
+          "text": "You can't — agents can only work from text you type by hand"
+        },
+        {
+          "id": "d",
+          "text": "Convert the PDF to code first, then paste the code"
+        }
       ],
       "explanation": "The attachment button in the chat input bar uploads files (PDFs, images, documents) into the conversation for the agent to read and reference (a). There's no email-to-agent import for this (b); agents are not limited to hand-typed text (c) — attachments and pasting both work; and nothing needs converting to code (d), which isn't a real step.",
-      "sourceRefs": ["r-chat"]
+      "sourceRefs": [
+        "r-chat"
+      ]
     },
     {
       "id": "q-m2-5",
@@ -199,13 +358,29 @@
       "difficulty": 2,
       "stem": "The first draft's problem is that the tone and feel are wrong. According to the module, what's the most effective fix?",
       "options": [
-        { "id": "a", "text": "Give a better example — one 'more like this' sample shows the feel you want better than more adjectives", "correct": true },
-        { "id": "b", "text": "Restart with a completely new brief" },
-        { "id": "c", "text": "Add tighter factual instructions and a rigid section structure" },
-        { "id": "d", "text": "Lower your expectations — tone can't really be steered" }
+        {
+          "id": "a",
+          "text": "Give a better example — one 'more like this' sample shows the feel you want better than more adjectives",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Restart with a completely new brief"
+        },
+        {
+          "id": "c",
+          "text": "Add tighter factual instructions and a rigid section structure"
+        },
+        {
+          "id": "d",
+          "text": "Lower your expectations — tone can't really be steered"
+        }
       ],
       "explanation": "For a tone-or-feel problem, an example beats instructions — showing outperforms telling (a). Restarting (b) discards the parts that were already fine. Tighter factual instructions and structure (c) are the right fix for a *facts-or-structure* problem, not a feel problem. And tone is very steerable (d) — an example or a clear tone note both move it.",
-      "sourceRefs": ["r-genai-leader", "r-agent-prompting"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-agent-prompting"
+      ]
     },
     {
       "id": "q-m2-6",
@@ -214,13 +389,29 @@
       "difficulty": 2,
       "stem": "A team member wants to post the AI's draft of a public reply to a customer review. What's the right verification depth?",
       "options": [
-        { "id": "a", "text": "A line-by-line read of every word before posting, because it's external-facing and carries the business's name", "correct": true },
-        { "id": "b", "text": "A quick glance is enough — review replies are low-stakes internal notes" },
-        { "id": "c", "text": "A full source-audit of every claim, the same as a document full of financial figures" },
-        { "id": "d", "text": "No check — the AI wrote it, so it's ready to publish" }
+        {
+          "id": "a",
+          "text": "A line-by-line read of every word before posting, because it's external-facing and carries the business's name",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A quick glance is enough — review replies are low-stakes internal notes"
+        },
+        {
+          "id": "c",
+          "text": "A full source-audit of every claim, the same as a document full of financial figures"
+        },
+        {
+          "id": "d",
+          "text": "No check — the AI wrote it, so it's ready to publish"
+        }
       ],
       "explanation": "A public, external-facing reply is medium stakes: read every line as if you're saying it to the customer's face (a). It's not a low-stakes internal note (b) — it's public and branded. A full financial-grade source audit (c) is more than a plain-text review reply needs (reserve that for numbers, dates and promises). And publishing unread (d) is exactly the accept-it-unchecked failure the module warns against.",
-      "sourceRefs": ["r-genai-leader", "r-chat"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-chat"
+      ]
     },
     {
       "id": "q-m2-7",
@@ -229,13 +420,29 @@
       "difficulty": 1,
       "stem": "What is the 'delegation library' this module has you build, and why does it matter for the next module?",
       "options": [
-        { "id": "a", "text": "Your saved set of winning five-part briefs for your most-repeated tasks — reusable assets, and the best one becomes a playbook (an automated workflow) in Module 04", "correct": true },
-        { "id": "b", "text": "A folder of AI-written articles you can republish as your own content" },
-        { "id": "c", "text": "A list of every agent on the platform and which model each one uses" },
-        { "id": "d", "text": "A log of every chat you've ever had, kept for compliance reasons" }
+        {
+          "id": "a",
+          "text": "Your saved set of winning five-part briefs for your most-repeated tasks — reusable assets, and the best one becomes a playbook (an automated workflow) in Module 04",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A folder of AI-written articles you can republish as your own content"
+        },
+        {
+          "id": "c",
+          "text": "A list of every agent on the platform and which model each one uses"
+        },
+        {
+          "id": "d",
+          "text": "A log of every chat you've ever had, kept for compliance reasons"
+        }
       ],
       "explanation": "The delegation library is your saved, reusable five-part briefs for repeated tasks, and it feeds Module 04, where the best brief becomes an automated playbook (a). It's not a content mill of republishable articles (b), not a roster of agents and their models (c), and not a compliance chat log (d) — it's the small set of proven briefs you reuse and eventually automate.",
-      "sourceRefs": ["r-chat", "r-agent-prompting"]
+      "sourceRefs": [
+        "r-chat",
+        "r-agent-prompting"
+      ]
     },
     {
       "id": "q-m2-8",
@@ -244,13 +451,29 @@
       "difficulty": 3,
       "stem": "Someone says: 'I don't need to learn briefs — if the first answer is bad I'll just keep re-sending the same request until the AI gets it right.' What's the best correction?",
       "options": [
-        { "id": "a", "text": "Re-sending the same request gives the AI no new information, so there's no reason for a better result; quality comes from a better brief and from critiquing the draft, not from repetition", "correct": true },
-        { "id": "b", "text": "They're right — enough repeats will eventually force a correct answer out of any AI" },
-        { "id": "c", "text": "Repetition works, but only if you send the request to several different agents at once" },
-        { "id": "d", "text": "The real fix is to use a more expensive model; the brief makes no difference" }
+        {
+          "id": "a",
+          "text": "Re-sending the same request gives the AI no new information, so there's no reason for a better result; quality comes from a better brief and from critiquing the draft, not from repetition",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "They're right — enough repeats will eventually force a correct answer out of any AI"
+        },
+        {
+          "id": "c",
+          "text": "Repetition works, but only if you send the request to several different agents at once"
+        },
+        {
+          "id": "d",
+          "text": "The real fix is to use a more expensive model; the brief makes no difference"
+        }
       ],
       "explanation": "An identical re-send carries no new signal, so the AI has nothing to work with differently — improvement comes from a stronger brief and from specific critique of the draft (a). Blind repetition doesn't 'force' correctness (b); you can get the same weak answer ten times. Fanning the same vague request out to more agents (c) just multiplies the same weak input. And reaching for a pricier model (d) can't rescue a brief with no role, no raw material and no shape — the brief is the lever.",
-      "sourceRefs": ["r-genai-leader", "r-chat"]
+      "sourceRefs": [
+        "r-genai-leader",
+        "r-chat"
+      ]
     }
   ],
   "labs": [
@@ -276,7 +499,9 @@
       "url": "automatos-gitbook/chat/README.md",
       "kind": "official-doc",
       "annotation": "The primary surface for this whole module: type a message and the Universal Router sends it to the best AI worker (agent) for the job, responses stream in real time, and you can paste text or use the attachment button to add files (up to 20 MB) as raw material. Grounds where and how the learner practises the five-part brief.",
-      "domainIds": ["m2-working-with-ai"]
+      "domainIds": [
+        "m2-working-with-ai"
+      ]
     },
     {
       "id": "r-routing",
@@ -284,7 +509,9 @@
       "url": "automatos-gitbook/chat/routing.md",
       "kind": "official-doc",
       "annotation": "How Auto mode picks the agent for you (and how to override it and select a specific agent). Confirms the operator can leave everything on Auto for this module — the skill is the brief, not knowing which agent to choose.",
-      "domainIds": ["m2-working-with-ai"]
+      "domainIds": [
+        "m2-working-with-ai"
+      ]
     },
     {
       "id": "r-agent-prompting",
@@ -292,7 +519,9 @@
       "url": "automatos-gitbook/agents/creating.md",
       "kind": "official-doc",
       "annotation": "The platform's own guidance for writing an agent's standing instructions — be specific about the role, define the output format, set boundaries, and include one or two examples. It's the same five-part recipe as the delegation brief, which is why learning the brief in Chat also teaches how to configure a good agent later.",
-      "domainIds": ["m2-working-with-ai"]
+      "domainIds": [
+        "m2-working-with-ai"
+      ]
     },
     {
       "id": "r-genai-leader",
@@ -300,7 +529,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "Vendor-light, business-toned source behind the module's craft: the 'Techniques to improve gen AI model output' section covers giving the model clear instructions, context, a defined format, and examples — the same levers as role/task/raw-material/shape/example. Use it to reinforce that briefing well is a recognised technique, not a course invention.",
-      "domainIds": ["m2-working-with-ai"]
+      "domainIds": [
+        "m2-working-with-ai"
+      ]
     },
     {
       "id": "r-history",
@@ -308,7 +539,9 @@
       "url": "automatos-gitbook/chat/history.md",
       "kind": "official-doc",
       "annotation": "Past conversations are saved in the chat-history sidebar (auto-titled, workspace-scoped) and can be reopened to continue or reuse a brief. Grounds the honest version of the 'save your briefs' step — the platform keeps your chats, but your delegation library is a document you keep for yourself.",
-      "domainIds": ["m2-working-with-ai"]
+      "domainIds": [
+        "m2-working-with-ai"
+      ]
     }
   ],
   "videos": [
@@ -316,9 +549,11 @@
       "id": "v-m2-1",
       "title": "M2 · Delegation, not prompting — brief the AI like a capable new hire",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m2-working-with-ai"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-business/v-m2-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m2-working-with-ai"
+      ],
       "sourceNotebook": "ai-business / m2 / delegation-and-the-five-part-brief"
     },
     {
@@ -327,7 +562,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m2-working-with-ai"],
+      "domainIds": [
+        "m2-working-with-ai"
+      ],
       "sourceNotebook": "ai-business / m2 / iteration-verification-and-library"
     }
   ]
