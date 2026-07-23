@@ -280,6 +280,14 @@ if (process.env.SPINE_ENABLED === "true") {
   // sign endpoint above only co-signs numbers this deploy can stand behind.
   shareAttestor = createShareAttestor({ pool: spine.pool, verifier: spine.verifier, getIndex: getContentIndex });
   console.log("[spine] user-state API mounted (/api/me, /api/sync) — share attestation on");
+
+  // ── Content-ops admin plane (PRD-WAVE-CONTENT-OPS C3) — media_bindings +
+  // presigned uploads, gated by ACADEMY_ADMIN_KEY (machine) / ACADEMY_ADMIN_CLERK_IDS
+  // (browser). Shares the Spine pool + Clerk verifier. Fail-closed when
+  // unconfigured (every route 403), so mounting alongside the Spine is safe.
+  const { mountMediaAdmin } = await import("./server/media/index.js");
+  const media = mountMediaAdmin(app, { pool: spine.pool, verifier: spine.verifier, getIndex: getContentIndex });
+  console.log(`[media] admin plane mounted (/api/admin/media) — configured=${media.configured} s3=${media.s3Ready}`);
 }
 
 // ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────

@@ -34,6 +34,7 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { createHash } from "crypto";
 import { buildPodcastIndex } from "./podcasts.js";
+import { buildInventory } from "./media/inventory.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -357,6 +358,14 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   router.get("/levels", (req, res) => {
     const idx = getIdx();
     send(res, req, idx, idx.levels.data, idx.levels.hash);
+  });
+
+  // C6 (PRD-WAVE-CONTENT-OPS) — flat inventory of everything that exists, for
+  // Automatos to diff before generating (no duplicate content). Public: the
+  // content is already public; this is its map. ETag'd on the content version.
+  router.get("/inventory", (req, res) => {
+    const idx = getIdx();
+    send(res, req, idx, buildInventory(idx), `${idx.contentVersion}-inventory`);
   });
   router.get("/levels/:levelId", (req, res) => {
     const idx = getIdx();
