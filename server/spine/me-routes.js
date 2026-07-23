@@ -67,9 +67,11 @@ export const STREAK_SQL = `
 // then the users row itself — "all 7 tables" (US-025). The next authenticated
 // call re-mints a users row with a FRESH workspace_id, which is exactly the
 // "deleted user re-signs-up clean" semantic the PRD tests demand.
-const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots"];
+export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots"];
 
-async function wipeUserRows(pool, userId) {
+// Exported so the admin console (PRD-ADMIN-CONSOLE S2) reuses the one canonical
+// wipe — an admin-scoped delete must match the self-service delete exactly.
+export async function wipeUserRows(pool, userId) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
