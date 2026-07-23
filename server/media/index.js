@@ -7,7 +7,7 @@ import { createRequireAdmin, parseAllowlist } from "./admin.js";
 import { registerMediaRoutes } from "./routes.js";
 import { mediaS3FromEnv } from "./s3.js";
 
-export function mountMediaAdmin(app, { pool, verifier, getIndex, env = process.env } = {}) {
+export function mountMediaAdmin(app, { pool, verifier, getIndex, onChange, env = process.env } = {}) {
   const requireAdmin = createRequireAdmin({
     adminKey: env.ACADEMY_ADMIN_KEY,
     allowlist: parseAllowlist(env.ACADEMY_ADMIN_CLERK_IDS),
@@ -20,6 +20,7 @@ export function mountMediaAdmin(app, { pool, verifier, getIndex, env = process.e
     s3,
     cdnBase: env.MEDIA_CDN_BASE,
     getIndex,
+    onChange, // bind/unbind → refresh the overlay cache immediately
   });
   return { configured: Boolean(env.ACADEMY_ADMIN_KEY || env.ACADEMY_ADMIN_CLERK_IDS), s3Ready: Boolean(s3) };
 }

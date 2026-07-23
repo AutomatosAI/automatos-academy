@@ -35,6 +35,7 @@ import { join, dirname } from "path";
 import { createHash } from "crypto";
 import { buildPodcastIndex } from "./podcasts.js";
 import { buildInventory } from "./media/inventory.js";
+import { overlayTrackVideos } from "./media/overlay.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -291,6 +292,9 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   const getIdx = typeof idxOrGetter === "function" ? idxOrGetter : () => idxOrGetter;
   const router = express.Router();
   const learnerStats = createLearnerStats(opts.getPool);
+  // C3 PR2 — media bindings overlay accessor: (vendor, track) → {bySlot, version}
+  // or null. Absent ⇒ no overlay (files/tests behave exactly as before).
+  const getBindings = typeof opts.getBindings === "function" ? opts.getBindings : () => null;
   // content stats keyed by index identity: files mode computes once per boot,
   // db mode once per index swap — never per request
   const contentStatsCache = new WeakMap();
@@ -403,7 +407,14 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   router.get("/:vendorId/:trackId", (req, res) => {
     const idx = getIdx();
     const t = idx.tracks.get(`${req.params.vendorId}/${req.params.trackId}`);
-    return t ? send(res, req, idx, t.track.data, t.track.hash) : notFound(res);
+    if (!t) return notFound(res);
+    // C3 PR2 — overlay media bindings so a bound slot serves published; the
+    // binding version rides the ETag so an upload busts the cache within one
+    // refresh (immediate on bind via onChange).
+    const b = getBindings(req.params.vendorId, req.params.trackId);
+    const body = b ? overlayTrackVideos(t.track.data, b.bySlot) : t.track.data;
+    const hash = b ? `${t.track.hash}-${b.version}` : t.track.hash;
+    return send(res, req, idx, body, hash);
   });
 
   router.get("/:vendorId/:trackId/:domainId", (req, res) => {
