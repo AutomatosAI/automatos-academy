@@ -30,13 +30,32 @@
           "difficulty": 1,
           "stem": "A message arrives from Slack and another from the website widget. Why do they get consistent agent behaviour, tools, and knowledge?",
           "options": [
-            { "id": "a", "text": "Every surface routes through the same Universal Router (Tier 0 → 1 cache → 2 rules → 2.5 semantic → 3 LLM) and normalises to one RequestEnvelope, so all channels are handled identically", "correct": true },
-            { "id": "b", "text": "Each channel runs its own separate copy of the agent, and they are manually kept in sync", "correct": false },
-            { "id": "c", "text": "Slack and the widget both bypass routing and always call a fixed default agent", "correct": false },
-            { "id": "d", "text": "Consistency is configured per channel by the operator, one rule set at a time", "correct": false }
+            {
+              "id": "a",
+              "text": "Every surface routes through the same Universal Router (Tier 0 → 1 cache → 2 rules → 2.5 semantic → 3 LLM) and normalises to one RequestEnvelope, so all channels are handled identically",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Each channel runs its own separate copy of the agent, and they are manually kept in sync",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Slack and the widget both bypass routing and always call a fixed default agent",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Consistency is configured per channel by the operator, one rule set at a time",
+              "correct": false
+            }
           ],
           "explanation": "The documented reason is that all surfaces share one Universal Router and a uniform RequestEnvelope, so behaviour is consistent by construction. Option b is the opposite of the design — there is one brain, not per-channel copies to sync. Option c is wrong: channels go through the multi-tier routing, they don't skip it to a fixed agent (Tier 0 is a user override you choose, not a channel default). Option d misplaces the work — consistency is a property of the shared Router, not something you re-configure per channel.",
-          "sourceRefs": ["r-gb-channels", "r-gb-routing"]
+          "sourceRefs": [
+            "r-gb-channels",
+            "r-gb-routing"
+          ]
         },
         {
           "id": "kc-m08-l1-2",
@@ -45,13 +64,31 @@
           "difficulty": 1,
           "stem": "You want to reach your agents from a messaging app with the least setup effort. Which channel does the documentation recommend starting with, and how is it connected?",
           "options": [
-            { "id": "a", "text": "Telegram — create a bot via @BotFather and paste the bot token into Tools & Integrations", "correct": true },
-            { "id": "b", "text": "Microsoft Teams — because an Azure AD app registration is the simplest path", "correct": false },
-            { "id": "c", "text": "WhatsApp — because the WhatsApp Business API needs no external setup", "correct": false },
-            { "id": "d", "text": "iMessage — because it works on any operating system with no local adapter", "correct": false }
+            {
+              "id": "a",
+              "text": "Telegram — create a bot via @BotFather and paste the bot token into Tools & Integrations",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Microsoft Teams — because an Azure AD app registration is the simplest path",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "WhatsApp — because the WhatsApp Business API needs no external setup",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "iMessage — because it works on any operating system with no local adapter",
+              "correct": false
+            }
           ],
           "explanation": "The docs call Telegram the easiest to set up: create a bot with @BotFather and paste the bot token. Option b is backwards — Teams requires an Azure AD app registration, which is more involved, not less. Option c misstates WhatsApp, which is webhook-based and requires WhatsApp Business API setup. Option d is wrong on two counts — iMessage uses a local adapter and requires macOS with Messages access, so it is not the low-friction, any-OS option.",
-          "sourceRefs": ["r-gb-channels"]
+          "sourceRefs": [
+            "r-gb-channels"
+          ]
         },
         {
           "id": "kc-m08-l1-3",
@@ -60,13 +97,32 @@
           "difficulty": 2,
           "stem": "A connected Slack channel has stopped delivering replies. Where do you go to check its connection status and rotate its credentials, and what should you NOT do casually?",
           "options": [
-            { "id": "a", "text": "Settings → Credentials to view status, rotate, and test the connection — and avoid disconnecting the channel casually, since that immediately stops all message flow", "correct": true },
-            { "id": "b", "text": "Analytics → Tools to rotate the token, because that is where credentials are edited", "correct": false },
-            { "id": "c", "text": "Disconnect and reconnect first as a routine reflex, since disconnection has no side effects", "correct": false },
-            { "id": "d", "text": "The Activity Feed, because credentials are managed from the message log", "correct": false }
+            {
+              "id": "a",
+              "text": "Settings → Credentials to view status, rotate, and test the connection — and avoid disconnecting the channel casually, since that immediately stops all message flow",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Analytics → Tools to rotate the token, because that is where credentials are edited",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Disconnect and reconnect first as a routine reflex, since disconnection has no side effects",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The Activity Feed, because credentials are managed from the message log",
+              "correct": false
+            }
           ],
           "explanation": "Settings → Credentials is the documented place to view status (without exposing the full token), rotate, and test — and the docs warn that disconnecting immediately stops all message flow, so it isn't a casual reflex. Option b is wrong: Analytics → Tools shows usage statistics, it isn't where you edit credentials. Option c contradicts the warning — disconnection is a hard stop on message flow, not side-effect-free. Option d misplaces credential management to the Feed, which is for watching messages flow, not managing tokens.",
-          "sourceRefs": ["r-gb-channels", "r-gb-analytics-tools"]
+          "sourceRefs": [
+            "r-gb-channels",
+            "r-gb-analytics-tools"
+          ]
         }
       ]
     },
@@ -84,13 +140,32 @@
           "difficulty": 2,
           "stem": "Describe the widget's auth-and-chat contract from init onward.",
           "options": [
-            { "id": "a", "text": "The origin-allow-listed public key (ak_pub_*) is exchanged on init for a short-lived JWT, then chat streams over SSE from /api/widgets/chat, backed by an agent in your workspace", "correct": true },
-            { "id": "b", "text": "The public key is sent with every chat message as the permanent credential, and there is no token exchange", "correct": false },
-            { "id": "c", "text": "The widget connects directly to the LLM provider from the browser using your model API key", "correct": false },
-            { "id": "d", "text": "The widget opens a raw database connection to your workspace and queries it client-side", "correct": false }
+            {
+              "id": "a",
+              "text": "The origin-allow-listed public key (ak_pub_*) is exchanged on init for a short-lived JWT, then chat streams over SSE from /api/widgets/chat, backed by an agent in your workspace",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The public key is sent with every chat message as the permanent credential, and there is no token exchange",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The widget connects directly to the LLM provider from the browser using your model API key",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The widget opens a raw database connection to your workspace and queries it client-side",
+              "correct": false
+            }
           ],
           "explanation": "The documented contract is public key → short-lived JWT on init → SSE chat over /api/widgets/chat backed by a workspace agent. Option b is wrong: after the handshake the JWT does the talking, not the public key, and there IS a token exchange. Option c is a security non-starter — the browser never holds the LLM/model key; the agent runs server-side. Option d invents a client-side DB connection that doesn't exist; all data flows through the orchestrator API.",
-          "sourceRefs": ["r-widget-embedding", "r-gb-api-widgets"]
+          "sourceRefs": [
+            "r-widget-embedding",
+            "r-gb-api-widgets"
+          ]
         },
         {
           "id": "kc-m08-l2-2",
@@ -99,13 +174,32 @@
           "difficulty": 1,
           "stem": "The Academy tutor in the corner of this site is used as the module's live proof point. What is it, precisely?",
           "options": [
-            { "id": "a", "text": "A separate agent in the Academy workspace, embedded on the widget contract, with a public key origin-locked to academy.automatos.app", "correct": true },
-            { "id": "b", "text": "A hard-coded chatbot script with answers baked into the Academy's frontend, unrelated to Automatos", "correct": false },
-            { "id": "c", "text": "The main automatos.app site bot, shared across every Automatos property", "correct": false },
-            { "id": "d", "text": "A Telegram channel embedded as an iframe", "correct": false }
+            {
+              "id": "a",
+              "text": "A separate agent in the Academy workspace, embedded on the widget contract, with a public key origin-locked to academy.automatos.app",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A hard-coded chatbot script with answers baked into the Academy's frontend, unrelated to Automatos",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "The main automatos.app site bot, shared across every Automatos property",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A Telegram channel embedded as an iframe",
+              "correct": false
+            }
           ],
           "explanation": "The tutor is a separate agent living in the Academy workspace, embedded via the widget contract, with an ak_pub_* key whose allowed domains are locked to academy.automatos.app — the exact 'any site becomes AI-driven' pattern. Option b is wrong: it's a real workspace agent with retrieval, not a baked-in script. Option c is explicitly wrong — it's a separate agent, not the shared main-site bot. Option d confuses two different surfaces; it's a widget embed, not a Telegram channel in an iframe.",
-          "sourceRefs": ["r-academy-tutor", "r-widget-embedding"]
+          "sourceRefs": [
+            "r-academy-tutor",
+            "r-widget-embedding"
+          ]
         },
         {
           "id": "kc-m08-l2-3",
@@ -114,13 +208,31 @@
           "difficulty": 2,
           "stem": "A merchant wants the widget to greet shoppers after 20 seconds on a product page, and later wants to change that timing without touching their site code. What's true about proactive engagement?",
           "options": [
-            { "id": "a", "text": "It's opt-in per workspace and driven by config the widget fetches on init (triggers: time_on_page, scroll_depth, exit_intent, idle) — so behaviour can be flipped live with no embed change or theme republish", "correct": true },
-            { "id": "b", "text": "It's on by default for every embed, and the timing is hard-coded into the script tag", "correct": false },
-            { "id": "c", "text": "Changing the trigger timing requires editing the embed's init() call and redeploying the site each time", "correct": false },
-            { "id": "d", "text": "The only supported trigger is a manual button the shopper must click", "correct": false }
+            {
+              "id": "a",
+              "text": "It's opt-in per workspace and driven by config the widget fetches on init (triggers: time_on_page, scroll_depth, exit_intent, idle) — so behaviour can be flipped live with no embed change or theme republish",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It's on by default for every embed, and the timing is hard-coded into the script tag",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Changing the trigger timing requires editing the embed's init() call and redeploying the site each time",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "The only supported trigger is a manual button the shopper must click",
+              "correct": false
+            }
           ],
           "explanation": "Proactive engagement is opt-in and workspace-config-driven — the widget fetches its config on init, so triggers (time_on_page/scroll_depth/exit_intent/idle) and timing can change live without republishing. Option b is wrong twice: it's off by default and timing lives in config, not the tag. Option c is the opposite of the benefit — the whole point is no embed edit or redeploy is needed. Option d ignores the four documented automatic triggers; it isn't a click-only feature.",
-          "sourceRefs": ["r-widget-embedding"]
+          "sourceRefs": [
+            "r-widget-embedding"
+          ]
         }
       ]
     },
@@ -138,13 +250,32 @@
           "difficulty": 2,
           "stem": "In the Shopify worked instance, what is the essential difference between the storefront agents (Flow W) and the admin agents (Flow E)?",
           "options": [
-            { "id": "a", "text": "They share one Operations Manager brain and workspace; they differ mainly in auth tier — storefront uses the origin-locked widget public key (read-only, scoped), admin uses the Shopify App Bridge session token (write-scope allowed)", "correct": true },
-            { "id": "b", "text": "They are two entirely separate agent products with separate knowledge bases that must be kept in sync", "correct": false },
-            { "id": "c", "text": "Storefront agents run on App Bridge and admin agents run on the widget — the flows are reversed", "correct": false },
-            { "id": "d", "text": "Both use the same public widget key, so both can perform write operations on the store", "correct": false }
+            {
+              "id": "a",
+              "text": "They share one Operations Manager brain and workspace; they differ mainly in auth tier — storefront uses the origin-locked widget public key (read-only, scoped), admin uses the Shopify App Bridge session token (write-scope allowed)",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "They are two entirely separate agent products with separate knowledge bases that must be kept in sync",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Storefront agents run on App Bridge and admin agents run on the widget — the flows are reversed",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Both use the same public widget key, so both can perform write operations on the store",
+              "correct": false
+            }
           ],
           "explanation": "Both sides are scoped children of one Operations Manager on one workspace, differing in auth tier: Flow W (widget public key) is read-only and scoped, Flow E (App Bridge session token) permits write-scope operations. Option b is wrong — the whole benefit is one shared brain and knowledge, not two synced products. Option c reverses the flows (storefront is the widget, admin is App Bridge). Option d is a security error: the storefront public key is deliberately read-only; write-scope comes only via the higher App Bridge tier.",
-          "sourceRefs": ["r-shopify-architecture", "r-shopify-widget-agents"]
+          "sourceRefs": [
+            "r-shopify-architecture",
+            "r-shopify-widget-agents"
+          ]
         },
         {
           "id": "kc-m08-l3-2",
@@ -153,13 +284,32 @@
           "difficulty": 2,
           "stem": "A merchant asks whether they can switch on the admin-side Business Analyst and Inventory Watchdog agents on their production store today. What's the accurate answer per the sources?",
           "options": [
-            { "id": "a", "text": "Not yet — the architecture supports storefront and admin agents from one workspace, but currently only the storefront Support Agent is confirmed live on production; admin agents and multi-widget seeding are in-development pending PRD-004", "correct": true },
-            { "id": "b", "text": "Yes — all storefront and admin agents are fully live and auto-seeded on every install today", "correct": false },
-            { "id": "c", "text": "No admin agents are even designed; Automatos only ever supports storefront chat", "correct": false },
-            { "id": "d", "text": "Yes, but only if the merchant writes the admin agents themselves from scratch, because none are specified", "correct": false }
+            {
+              "id": "a",
+              "text": "Not yet — the architecture supports storefront and admin agents from one workspace, but currently only the storefront Support Agent is confirmed live on production; admin agents and multi-widget seeding are in-development pending PRD-004",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Yes — all storefront and admin agents are fully live and auto-seeded on every install today",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "No admin agents are even designed; Automatos only ever supports storefront chat",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Yes, but only if the merchant writes the admin agents themselves from scratch, because none are specified",
+              "correct": false
+            }
           ],
           "explanation": "The source's exact caveat: the architecture supports both sides, but only the storefront Support Agent is confirmed live on production; admin agents and multi-widget seeding are in-development pending PRD-004. Option b overstates reality — full seeding and admin agents aren't live yet. Option c understates it — the admin agents (Business Analyst, Inventory Watchdog) are fully specified as documented architecture. Option d is wrong — they're specified templates, not something the merchant must invent; they're just not shipped to production yet.",
-          "sourceRefs": ["r-shopify-status", "r-shopify-widget-agents"]
+          "sourceRefs": [
+            "r-shopify-status",
+            "r-shopify-widget-agents"
+          ]
         },
         {
           "id": "kc-m08-l3-3",
@@ -168,13 +318,32 @@
           "difficulty": 1,
           "stem": "What is the automatos-ide surface?",
           "options": [
-            { "id": "a", "text": "A VS Code extension that brings the workspace — board, chat with the orchestrator, and agents — into the editor, so a developer reaches the same workspace brain without leaving their code", "correct": true },
-            { "id": "b", "text": "A separate cloud IDE that hosts a distinct set of agents unrelated to your workspace", "correct": false },
-            { "id": "c", "text": "A messaging channel like Slack or Telegram, connected via a bot token", "correct": false },
-            { "id": "d", "text": "A replacement for the Automatos chat page that removes the need for a workspace", "correct": false }
+            {
+              "id": "a",
+              "text": "A VS Code extension that brings the workspace — board, chat with the orchestrator, and agents — into the editor, so a developer reaches the same workspace brain without leaving their code",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A separate cloud IDE that hosts a distinct set of agents unrelated to your workspace",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A messaging channel like Slack or Telegram, connected via a bot token",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A replacement for the Automatos chat page that removes the need for a workspace",
+              "correct": false
+            }
           ],
           "explanation": "The IDE surface is a VS Code extension exposing the workspace (board, chat, agents) inside the editor — another front door to the same brain. Option b is wrong: it surfaces your existing workspace, not a distinct separate set of agents. Option c miscategorises it — it's an editor surface, not a bot-token messaging channel. Option d is wrong: it's an additional door to the workspace, not a workspace replacement.",
-          "sourceRefs": ["r-ide-auto", "r-shopify-architecture"]
+          "sourceRefs": [
+            "r-ide-auto",
+            "r-shopify-architecture"
+          ]
         }
       ]
     }
@@ -187,13 +356,31 @@
       "difficulty": 1,
       "stem": "How many messaging channels are documented, and which set names them?",
       "options": [
-        { "id": "a", "text": "Nine — Telegram, Slack, WhatsApp, Discord, Microsoft Teams, Google Chat, iMessage, Matrix, Signal", "correct": true },
-        { "id": "b", "text": "Four — Telegram, Slack, WhatsApp, and email", "correct": false },
-        { "id": "c", "text": "Nine — Telegram, Slack, WhatsApp, Discord, Teams, Google Chat, iMessage, Instagram, TikTok", "correct": false },
-        { "id": "d", "text": "Three — Slack, Teams, and Google Chat only", "correct": false }
+        {
+          "id": "a",
+          "text": "Nine — Telegram, Slack, WhatsApp, Discord, Microsoft Teams, Google Chat, iMessage, Matrix, Signal",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Four — Telegram, Slack, WhatsApp, and email",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Nine — Telegram, Slack, WhatsApp, Discord, Teams, Google Chat, iMessage, Instagram, TikTok",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Three — Slack, Teams, and Google Chat only",
+          "correct": false
+        }
       ],
       "explanation": "The documented channels are exactly the nine in option a. Option b is too few and adds email, which isn't in the documented channel list. Option c has the right count but swaps in Instagram and TikTok, which aren't documented channels (Matrix and Signal are). Option d lists only three of the nine.",
-      "sourceRefs": ["r-gb-channels"]
+      "sourceRefs": [
+        "r-gb-channels"
+      ]
     },
     {
       "id": "q-m08-2",
@@ -202,13 +389,31 @@
       "difficulty": 1,
       "stem": "After you connect a channel via Tools & Integrations and save its credentials, where does it show as connected?",
       "options": [
-        { "id": "a", "text": "It appears as 'Live' on the Activity Dashboard (the 'Channels Live' card)", "correct": true },
-        { "id": "b", "text": "It appears only in the raw database logs and nowhere in the UI", "correct": false },
-        { "id": "c", "text": "It appears under Settings → Models as an available model", "correct": false },
-        { "id": "d", "text": "Nowhere — connected channels are invisible until a message arrives", "correct": false }
+        {
+          "id": "a",
+          "text": "It appears as 'Live' on the Activity Dashboard (the 'Channels Live' card)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It appears only in the raw database logs and nowhere in the UI",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It appears under Settings → Models as an available model",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Nowhere — connected channels are invisible until a message arrives",
+          "correct": false
+        }
       ],
       "explanation": "Once connected, the channel shows 'Live' on the Activity Dashboard, and the 'Channels Live' card counts active channels. Option b is wrong — it's surfaced in the UI, not hidden in logs. Option c confuses channels with models; channels don't appear under Settings → Models. Option d is wrong — the 'Live' status appears on connection, before any message flows.",
-      "sourceRefs": ["r-gb-channels"]
+      "sourceRefs": [
+        "r-gb-channels"
+      ]
     },
     {
       "id": "q-m08-3",
@@ -217,13 +422,31 @@
       "difficulty": 1,
       "stem": "A Slack reply needs Slack block formatting and a Telegram reply needs Telegram markdown. Who handles that formatting?",
       "options": [
-        { "id": "a", "text": "The platform applies channel-specific formatting (Slack blocks, Telegram markdown) automatically", "correct": true },
-        { "id": "b", "text": "You must write per-channel formatting code for every agent reply", "correct": false },
-        { "id": "c", "text": "Formatting is impossible outside the Automatos chat page, so external replies are plain text only", "correct": false },
-        { "id": "d", "text": "Each agent must be duplicated once per channel to hold that channel's formatting rules", "correct": false }
+        {
+          "id": "a",
+          "text": "The platform applies channel-specific formatting (Slack blocks, Telegram markdown) automatically",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You must write per-channel formatting code for every agent reply",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Formatting is impossible outside the Automatos chat page, so external replies are plain text only",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Each agent must be duplicated once per channel to hold that channel's formatting rules",
+          "correct": false
+        }
       ],
       "explanation": "Channel-specific formatting is handled automatically — the same agent reply renders natively on each platform. Option b is the opposite of the documented behaviour; you don't hand-write formatting per channel. Option c is false — external replies are formatted for their platform, not forced to plain text. Option d misunderstands the model — there's one agent behind all channels, not a duplicate per channel.",
-      "sourceRefs": ["r-gb-channels"]
+      "sourceRefs": [
+        "r-gb-channels"
+      ]
     },
     {
       "id": "q-m08-4",
@@ -232,13 +455,32 @@
       "difficulty": 2,
       "stem": "Which statement best captures why a Telegram message and a website-widget message behave the same way?",
       "options": [
-        { "id": "a", "text": "Both normalise to one RequestEnvelope and go through the same Universal Router, so the same agent responds with the same tools and knowledge and the reply returns via the originating surface", "correct": true },
-        { "id": "b", "text": "The widget and Telegram each ship their own routing engine tuned separately", "correct": false },
-        { "id": "c", "text": "They only match if you manually copy settings from one channel to the other", "correct": false },
-        { "id": "d", "text": "Telegram and the widget both disable routing and always hit the LLM tier directly", "correct": false }
+        {
+          "id": "a",
+          "text": "Both normalise to one RequestEnvelope and go through the same Universal Router, so the same agent responds with the same tools and knowledge and the reply returns via the originating surface",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The widget and Telegram each ship their own routing engine tuned separately",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "They only match if you manually copy settings from one channel to the other",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Telegram and the widget both disable routing and always hit the LLM tier directly",
+          "correct": false
+        }
       ],
       "explanation": "All surfaces normalise to a uniform RequestEnvelope and share one Universal Router, which is why behaviour, tools, and knowledge are identical and the reply goes back out the originating door. Option b invents per-surface routing engines — there's one shared Router. Option c is wrong — consistency is automatic, not a manual copy job. Option d misdescribes the tiers: routing runs cache → rules → semantic → LLM; the LLM is a fallback, not a forced first hop.",
-      "sourceRefs": ["r-gb-routing", "r-gb-channels"]
+      "sourceRefs": [
+        "r-gb-routing",
+        "r-gb-channels"
+      ]
     },
     {
       "id": "q-m08-5",
@@ -247,13 +489,32 @@
       "difficulty": 1,
       "stem": "The module's headline is that the widget 'turns any site into an AI-driven site.' What are the two minimum pieces you add to a page?",
       "options": [
-        { "id": "a", "text": "One SDK loader script tag (registers window.AutomatosWidget) and one init() call with a public key (ak_pub_*)", "correct": true },
-        { "id": "b", "text": "A backend server you host yourself plus a copy of the agent's model weights", "correct": false },
-        { "id": "c", "text": "A full React application and a private server key embedded in the HTML", "correct": false },
-        { "id": "d", "text": "A database connection string and an LLM provider key in client-side JavaScript", "correct": false }
+        {
+          "id": "a",
+          "text": "One SDK loader script tag (registers window.AutomatosWidget) and one init() call with a public key (ak_pub_*)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A backend server you host yourself plus a copy of the agent's model weights",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A full React application and a private server key embedded in the HTML",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A database connection string and an LLM provider key in client-side JavaScript",
+          "correct": false
+        }
       ],
       "explanation": "The two pieces are the SDK loader (one script tag) and one or more init() calls using an ak_pub_* public key — that's the whole embed. Option b is wrong: you host nothing and there are no model weights; the agent runs in your Automatos workspace. Option c is wrong on both counts — plain HTML works (no React required) and you never embed a server key client-side. Option d would be a serious security mistake; no DB string or model key belongs in client JavaScript.",
-      "sourceRefs": ["r-widget-embedding", "r-widget-readme"]
+      "sourceRefs": [
+        "r-widget-embedding",
+        "r-widget-readme"
+      ]
     },
     {
       "id": "q-m08-6",
@@ -262,13 +523,32 @@
       "difficulty": 2,
       "stem": "Why is it safe to put an ak_pub_* public key directly in client-side HTML?",
       "options": [
-        { "id": "a", "text": "It's bound to a workspace and an allow-list of origins — the server rejects any request whose Origin isn't listed, and the key can be revoked instantly", "correct": true },
-        { "id": "b", "text": "Because the key is encrypted in the browser and can never be read by a visitor", "correct": false },
-        { "id": "c", "text": "Because public keys grant no access at all and are purely decorative", "correct": false },
-        { "id": "d", "text": "Because browsers automatically hide any string beginning with 'ak_'", "correct": false }
+        {
+          "id": "a",
+          "text": "It's bound to a workspace and an allow-list of origins — the server rejects any request whose Origin isn't listed, and the key can be revoked instantly",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because the key is encrypted in the browser and can never be read by a visitor",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because public keys grant no access at all and are purely decorative",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Because browsers automatically hide any string beginning with 'ak_'",
+          "correct": false
+        }
       ],
       "explanation": "The public key is origin-bound: the server resolves the workspace from it and rejects requests from domains not in its allowed_domains, and it can be revoked instantly — so exposure in HTML is safe. Option b is wrong — the key is visible in client HTML by design; safety comes from origin-locking, not from hiding it. Option c is wrong — it does grant scoped widget access (that's the point), just constrained to allowed origins. Option d is fictional; browsers don't hide strings by prefix.",
-      "sourceRefs": ["r-widget-embedding", "r-shopify-architecture"]
+      "sourceRefs": [
+        "r-widget-embedding",
+        "r-shopify-architecture"
+      ]
     },
     {
       "id": "q-m08-7",
@@ -277,13 +557,32 @@
       "difficulty": 2,
       "stem": "What does the widget do on init(), before the user sends a message?",
       "options": [
-        { "id": "a", "text": "It exchanges the public key for a short-lived JWT, then opens the SSE chat channel to /api/widgets/chat; every request carries a bearer token and is origin-checked server-side", "correct": true },
-        { "id": "b", "text": "It downloads the entire conversation history of every workspace user to the browser", "correct": false },
-        { "id": "c", "text": "It permanently stores the public key in the browser and sends nothing to Automatos until a message is typed", "correct": false },
-        { "id": "d", "text": "It prompts the visitor to log in with the merchant's admin credentials", "correct": false }
+        {
+          "id": "a",
+          "text": "It exchanges the public key for a short-lived JWT, then opens the SSE chat channel to /api/widgets/chat; every request carries a bearer token and is origin-checked server-side",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It downloads the entire conversation history of every workspace user to the browser",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It permanently stores the public key in the browser and sends nothing to Automatos until a message is typed",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It prompts the visitor to log in with the merchant's admin credentials",
+          "correct": false
+        }
       ],
       "explanation": "On init the widget mints a short-lived JWT from the API key and opens the SSE chat channel; requests carry a bearer token and the server enforces the origin allow-list. Option b is wrong and a privacy non-starter — no bulk history is pulled to the browser. Option c is wrong: init performs the auth handshake up front, it doesn't wait for the first message. Option d is wrong — the widget uses an origin-locked public key, never merchant admin credentials.",
-      "sourceRefs": ["r-widget-embedding", "r-shopify-architecture"]
+      "sourceRefs": [
+        "r-widget-embedding",
+        "r-shopify-architecture"
+      ]
     },
     {
       "id": "q-m08-8",
@@ -292,13 +591,32 @@
       "difficulty": 2,
       "stem": "What does 'Shadow-DOM isolated' specifically buy a widget embedded on an unknown third-party site?",
       "options": [
-        { "id": "a", "text": "Style isolation both ways — the host page's CSS can't leak in and mangle the widget, and the widget's styles can't leak out onto the page", "correct": true },
-        { "id": "b", "text": "It encrypts all chat traffic so no server can read it", "correct": false },
-        { "id": "c", "text": "It guarantees the widget loads faster than any native page element", "correct": false },
-        { "id": "d", "text": "It lets the widget rewrite the host page's HTML to match its own theme", "correct": false }
+        {
+          "id": "a",
+          "text": "Style isolation both ways — the host page's CSS can't leak in and mangle the widget, and the widget's styles can't leak out onto the page",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It encrypts all chat traffic so no server can read it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It guarantees the widget loads faster than any native page element",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It lets the widget rewrite the host page's HTML to match its own theme",
+          "correct": false
+        }
       ],
       "explanation": "Shadow DOM gives two-way style isolation, which is what makes 'drop it on any site' safe regardless of the host's CSS. Option b confuses isolation with encryption — Shadow DOM is about styling boundaries, not transport encryption. Option c overstates it — isolation is about CSS scoping, not a load-speed guarantee (the small ~8KB size helps weight, separately). Option d is the opposite of isolation — the widget deliberately does NOT reach out and rewrite the host page.",
-      "sourceRefs": ["r-widget-readme", "r-widget-embedding"]
+      "sourceRefs": [
+        "r-widget-readme",
+        "r-widget-embedding"
+      ]
     },
     {
       "id": "q-m08-9",
@@ -307,13 +625,31 @@
       "difficulty": 2,
       "stem": "Which four trigger types can fire the widget's proactive engagement popup, and what governs whether it fires at all?",
       "options": [
-        { "id": "a", "text": "time_on_page, scroll_depth, exit_intent, idle — and it only fires when proactive engagement is explicitly enabled for the workspace (opt-in), via config the widget fetches on init", "correct": true },
-        { "id": "b", "text": "time_on_page, scroll_depth, exit_intent, idle — and it's always on by default for every embed", "correct": false },
-        { "id": "c", "text": "page_load, purchase, refund, login — controlled by editing the script tag", "correct": false },
-        { "id": "d", "text": "Only a single click trigger, hard-coded and unchangeable", "correct": false }
+        {
+          "id": "a",
+          "text": "time_on_page, scroll_depth, exit_intent, idle — and it only fires when proactive engagement is explicitly enabled for the workspace (opt-in), via config the widget fetches on init",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "time_on_page, scroll_depth, exit_intent, idle — and it's always on by default for every embed",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "page_load, purchase, refund, login — controlled by editing the script tag",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Only a single click trigger, hard-coded and unchangeable",
+          "correct": false
+        }
       ],
       "explanation": "The supported triggers are time_on_page, scroll_depth, exit_intent, and idle, and proactive engagement is opt-in — it fires only when enabled for the workspace, based on config fetched on init. Option b is wrong on the default: it's off unless explicitly turned on. Option c invents triggers (page_load/purchase/refund/login) that aren't documented and misplaces control into the tag. Option d ignores the four real triggers and the config-driven flexibility.",
-      "sourceRefs": ["r-widget-embedding"]
+      "sourceRefs": [
+        "r-widget-embedding"
+      ]
     },
     {
       "id": "q-m08-10",
@@ -322,13 +658,32 @@
       "difficulty": 2,
       "stem": "In the Shopify worked instance, which agents are the storefront (Flow W) children reaching shoppers through the widget?",
       "options": [
-        { "id": "a", "text": "Support Agent, Product Expert, and Merchandiser", "correct": true },
-        { "id": "b", "text": "Business Analyst and Inventory Watchdog", "correct": false },
-        { "id": "c", "text": "The Universal Router and the Composio broker", "correct": false },
-        { "id": "d", "text": "Sentinel and Code Reviewer", "correct": false }
+        {
+          "id": "a",
+          "text": "Support Agent, Product Expert, and Merchandiser",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Business Analyst and Inventory Watchdog",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The Universal Router and the Composio broker",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Sentinel and Code Reviewer",
+          "correct": false
+        }
       ],
       "explanation": "The storefront-facing children reaching shoppers via the widget (Flow W) are Support Agent, Product Expert, and Merchandiser. Option b names the admin-side children (Flow E, via App Bridge), which reach the merchant, not shoppers. Option c lists infrastructure (routing and the tool broker), not storefront agents. Option d names general engineering agents from other modules, not the Shopify storefront children.",
-      "sourceRefs": ["r-shopify-widget-agents", "r-shopify-architecture"]
+      "sourceRefs": [
+        "r-shopify-widget-agents",
+        "r-shopify-architecture"
+      ]
     },
     {
       "id": "q-m08-11",
@@ -337,13 +692,31 @@
       "difficulty": 3,
       "stem": "Why does the storefront widget agent NOT hold a Shopify token, and how does it get live product/stock data?",
       "options": [
-        { "id": "a", "text": "The widget only ever holds a short-lived Automatos JWT; live Shopify data flows indirectly through the orchestrator, which calls Shopify server-side via the tool broker", "correct": true },
-        { "id": "b", "text": "The widget stores the merchant's Shopify admin token in the browser and calls Shopify directly", "correct": false },
-        { "id": "c", "text": "The widget can't access any live data — it only serves cached static answers", "correct": false },
-        { "id": "d", "text": "Shoppers must paste their own Shopify credentials for the widget to fetch data", "correct": false }
+        {
+          "id": "a",
+          "text": "The widget only ever holds a short-lived Automatos JWT; live Shopify data flows indirectly through the orchestrator, which calls Shopify server-side via the tool broker",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The widget stores the merchant's Shopify admin token in the browser and calls Shopify directly",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The widget can't access any live data — it only serves cached static answers",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Shoppers must paste their own Shopify credentials for the widget to fetch data",
+          "correct": false
+        }
       ],
       "explanation": "By design the widget carries only a short-lived JWT; the storefront never talks to Shopify directly — Shopify data flows via the orchestrator and the server-side tool broker. Option b is the exact security anti-pattern the design avoids: no Shopify token ever reaches the browser. Option c is wrong — it can surface live data (stock, price, order status), just indirectly through the server. Option d is nonsensical — shoppers never provide store credentials.",
-      "sourceRefs": ["r-shopify-architecture"]
+      "sourceRefs": [
+        "r-shopify-architecture"
+      ]
     },
     {
       "id": "q-m08-12",
@@ -352,13 +725,32 @@
       "difficulty": 3,
       "stem": "A merchant asks: 'Can my admin-side Inventory Watchdog auto-run daily on my live store right now?' What's the precise, honest answer?",
       "options": [
-        { "id": "a", "text": "Not yet — the two-sided architecture is documented and the storefront Support Agent is live on production, but admin agents and multi-widget seeding are in-development pending PRD-004; describe the design as the direction and the storefront as what ships today", "correct": true },
-        { "id": "b", "text": "Yes — admin agents are fully live and seeded automatically on every store install today", "correct": false },
-        { "id": "c", "text": "Yes — just enable it in Settings → Models like any other model", "correct": false },
-        { "id": "d", "text": "No — because admin agents are not designed and never will be", "correct": false }
+        {
+          "id": "a",
+          "text": "Not yet — the two-sided architecture is documented and the storefront Support Agent is live on production, but admin agents and multi-widget seeding are in-development pending PRD-004; describe the design as the direction and the storefront as what ships today",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Yes — admin agents are fully live and seeded automatically on every store install today",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Yes — just enable it in Settings → Models like any other model",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "No — because admin agents are not designed and never will be",
+          "correct": false
+        }
       ],
       "explanation": "The honest answer uses the source caveat: architecture supports both sides, storefront Support Agent is confirmed live, but admin agents and multi-widget seeding are in-development pending PRD-004. Option b overstates reality — auto-seeding of admin agents on install isn't live yet. Option c is a category error — an admin agent isn't a model to toggle under Settings → Models. Option d wrongly denies the design — the admin agents are specified templates, they're just not shipped to production.",
-      "sourceRefs": ["r-shopify-status", "r-shopify-widget-agents"]
+      "sourceRefs": [
+        "r-shopify-status",
+        "r-shopify-widget-agents"
+      ]
     },
     {
       "id": "q-m08-13",
@@ -367,13 +759,32 @@
       "difficulty": 2,
       "stem": "You want an Automatos agent on both a plain static HTML marketing page and inside your React/Next.js app. What's the accurate description of how you embed it?",
       "options": [
-        { "id": "a", "text": "The same public-key contract underneath both — a CDN script tag + init() on the static page, and the @automatos/widget-sdk React component (or useAutomatosChat hook) in the app", "correct": true },
-        { "id": "b", "text": "You need two completely different products: the widget works only on static HTML, never in React", "correct": false },
-        { "id": "c", "text": "React apps can't embed the widget because Shadow DOM is incompatible with React", "correct": false },
-        { "id": "d", "text": "You must re-implement the SSE and auth handshake by hand in each host", "correct": false }
+        {
+          "id": "a",
+          "text": "The same public-key contract underneath both — a CDN script tag + init() on the static page, and the @automatos/widget-sdk React component (or useAutomatosChat hook) in the app",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "You need two completely different products: the widget works only on static HTML, never in React",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "React apps can't embed the widget because Shadow DOM is incompatible with React",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "You must re-implement the SSE and auth handshake by hand in each host",
+          "correct": false
+        }
       ],
       "explanation": "The same contract works on any host that renders HTML: a script tag + init() for static pages, and the React package (AutomatosChat component / useAutomatosChat hook) for React/Next — identical underneath. Option b is wrong: the SDK explicitly supports both static HTML and React/Next/Vite. Option c is false — the React wrapper mounts the same Shadow-DOM widget; there's no incompatibility. Option d is the opposite of the point — the SDK handles the auth/SSE handshake for you; you don't hand-roll it per host.",
-      "sourceRefs": ["r-widget-embedding", "r-widget-readme"]
+      "sourceRefs": [
+        "r-widget-embedding",
+        "r-widget-readme"
+      ]
     },
     {
       "id": "q-m08-14",
@@ -382,13 +793,32 @@
       "difficulty": 2,
       "stem": "Which is the clearest expression of the module's core judgment about surfaces?",
       "options": [
-        { "id": "a", "text": "Add whatever front doors meet users where they are, but keep one agent brain in a single workspace so knowledge and guardrails are shared — a surface is a front door, not a second brain", "correct": true },
-        { "id": "b", "text": "Give every channel its own dedicated agent and knowledge base to keep them isolated", "correct": false },
-        { "id": "c", "text": "Prefer a single surface and never expose agents outside the Automatos chat page", "correct": false },
-        { "id": "d", "text": "The choice of surface changes the agent's tools and knowledge, so pick the surface first and design the agent around it", "correct": false }
+        {
+          "id": "a",
+          "text": "Add whatever front doors meet users where they are, but keep one agent brain in a single workspace so knowledge and guardrails are shared — a surface is a front door, not a second brain",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Give every channel its own dedicated agent and knowledge base to keep them isolated",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Prefer a single surface and never expose agents outside the Automatos chat page",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The choice of surface changes the agent's tools and knowledge, so pick the surface first and design the agent around it",
+          "correct": false
+        }
       ],
       "explanation": "The core judgment is: multiply doors freely, keep exactly one brain — surfaces meet users where they are while knowledge and guardrails stay shared in one workspace. Option b fractures the very thing the design protects (shared knowledge and guardrails) into per-channel silos. Option c under-uses the platform — the whole module is about safely extending beyond the chat page. Option d is backwards: the surface is a front door and does NOT change the agent's tools/knowledge (the Router keeps those consistent), so you design the brain once and add doors.",
-      "sourceRefs": ["r-gb-channels", "r-gb-routing"]
+      "sourceRefs": [
+        "r-gb-channels",
+        "r-gb-routing"
+      ]
     },
     {
       "id": "q-m08-15",
@@ -397,13 +827,32 @@
       "difficulty": 3,
       "stem": "You're deciding how to reach three audiences: your sales team (who live in Slack), shoppers on your marketing website, and developers on your team. Which surface fits each, keeping one shared brain?",
       "options": [
-        { "id": "a", "text": "A Slack channel for the sales team, the embeddable widget on the website, and the VS Code (automatos-ide) extension for developers — all front doors to the same workspace agents", "correct": true },
-        { "id": "b", "text": "Build three separate Automatos workspaces, one per audience, with duplicated agents", "correct": false },
-        { "id": "c", "text": "Route everyone through Telegram, because it's the easiest channel to set up", "correct": false },
-        { "id": "d", "text": "Use only the widget for all three, since developers and Slack users can just open a browser tab", "correct": false }
+        {
+          "id": "a",
+          "text": "A Slack channel for the sales team, the embeddable widget on the website, and the VS Code (automatos-ide) extension for developers — all front doors to the same workspace agents",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Build three separate Automatos workspaces, one per audience, with duplicated agents",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Route everyone through Telegram, because it's the easiest channel to set up",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Use only the widget for all three, since developers and Slack users can just open a browser tab",
+          "correct": false
+        }
       ],
       "explanation": "Each audience is met on the surface they already use — Slack channel, website widget, IDE extension — all doors to one shared workspace brain, which is the module's whole thesis. Option b violates the shared-brain principle by fragmenting into duplicated workspaces. Option c forces a mismatched door on everyone (Slack users and developers don't live in Telegram); easiest-to-set-up isn't fit-for-audience. Option d ignores that a Slack team and developers are better served in their own tools; the point is to meet users where they are, not funnel them to one surface.",
-      "sourceRefs": ["r-gb-channels", "r-ide-auto"]
+      "sourceRefs": [
+        "r-gb-channels",
+        "r-ide-auto"
+      ]
     },
     {
       "id": "q-m08-16",
@@ -412,13 +861,32 @@
       "difficulty": 1,
       "stem": "After a couple of days running connected channels, where do you look for channel usage statistics over time (as opposed to the live 'is it connected' view)?",
       "options": [
-        { "id": "a", "text": "Analytics → Tools — channel usage statistics", "correct": true },
-        { "id": "b", "text": "The Activity Dashboard 'Channels Live' card — which shows usage trends over time", "correct": false },
-        { "id": "c", "text": "Settings → Credentials — which reports message volumes", "correct": false },
-        { "id": "d", "text": "There is no usage reporting for channels anywhere", "correct": false }
+        {
+          "id": "a",
+          "text": "Analytics → Tools — channel usage statistics",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The Activity Dashboard 'Channels Live' card — which shows usage trends over time",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Settings → Credentials — which reports message volumes",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "There is no usage reporting for channels anywhere",
+          "correct": false
+        }
       ],
       "explanation": "Analytics → Tools is the documented surface for channel usage statistics. Option b confuses the surfaces — the 'Channels Live' card shows how many channels are active (the at-a-glance status), not usage trends. Option c is wrong — Settings → Credentials is for viewing status, rotating, and testing credentials, not usage metrics. Option d is false — usage is reported, under Analytics → Tools.",
-      "sourceRefs": ["r-gb-channels", "r-gb-analytics-tools"]
+      "sourceRefs": [
+        "r-gb-channels",
+        "r-gb-analytics-tools"
+      ]
     }
   ],
   "scenarios": [],
@@ -465,7 +933,9 @@
       "url": "automatos-gitbook/tools/channels.md",
       "kind": "first-party-doc",
       "annotation": "The core source for this module's channel half: the nine documented channels and their connection methods (Telegram bot token, Slack OAuth, WhatsApp webhook, Discord bot, Teams Azure AD registration, Google Chat service account, iMessage local adapter, Matrix homeserver, Signal CLI), the Tools & Integrations setup flow, the 'Live' status on the Activity Dashboard, automatic per-platform formatting (Slack blocks, Telegram markdown), and the three monitoring surfaces (Dashboard 'Channels Live' card, Feed, Analytics → Tools) plus credential rotation in Settings → Credentials. Note the hard edge: disconnecting a channel immediately stops all message flow.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-gb-routing",
@@ -473,7 +943,9 @@
       "url": "automatos-gitbook/chat/routing.md",
       "kind": "first-party-doc",
       "annotation": "Why every surface behaves the same: the Universal Router's five tiers (Tier 0 user-override → 1 cache → 2 rules → 2.5 semantic → 3 LLM) and, in the 'Channel routing' section, the key fact that messages from all external channels go through the SAME multi-tier routing as the chat page. This is the source for the module's 'same brain, many front doors' thesis — consistency is a property of the shared Router, not per-channel configuration.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-gb-api-widgets",
@@ -481,7 +953,9 @@
       "url": "automatos-gitbook/api-reference.md",
       "kind": "first-party-doc",
       "annotation": "The gitbook's only widget coverage: the Widgets (Embedded SDK) endpoint group — POST /api/widgets/chat (SSE streaming), plus widget document and memory endpoints — alongside the platform's REST conventions (Clerk bearer + X-Workspace-ID auth, SSE responses, Vercel-AI-SDK-compatible streaming). Confirms the chat surface the widget streams over; the SDK repo's EMBEDDING.md is the canonical end-to-end how-to.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-gb-analytics-tools",
@@ -489,7 +963,9 @@
       "url": "automatos-gitbook/activity/README.md",
       "kind": "first-party-doc",
       "annotation": "Where channel activity surfaces for monitoring: the Activity Dashboard (the 'Channels Live' card showing active channels, plus schedule and live status) and the Activity Feed (the chronological log where you watch external-channel messages flow through the Router). Use the Dashboard for 'is it connected and running', the Feed for 'did this specific message travel through the shared Router'; channel usage statistics over time live under Analytics → Tools.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-widget-embedding",
@@ -497,7 +973,9 @@
       "url": "automatos-widget-sdk/docs/EMBEDDING.md",
       "kind": "first-party-doc",
       "annotation": "The canonical how-to for the module's headline: turn any site into an AI-driven site with one script tag from widgets.automatos.app/v0 plus an init() call using an origin-allow-listed public key (ak_pub_*). Covers getting a public key (dashboard or API, bare-host allowed_domains incl. dev hosts and *.myshopify.com wildcards), the static-HTML / Next.js / Vite embeds, the auth contract (public key → short-lived JWT → SSE chat; every request origin-checked; instant revocation), and proactive engagement (opt-in per workspace; triggers time_on_page / scroll_depth / exit_intent / idle; config fetched on init so behaviour flips live with no republish). This is a widget-SDK-repo source — the how-to that grounds embedding; the gitbook's api-reference remains the proof of what the platform exposes.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-widget-readme",
@@ -505,7 +983,9 @@
       "url": "automatos-widget-sdk/README.md",
       "kind": "first-party-doc",
       "annotation": "The SDK at a glance: the Shadow-DOM-isolated, zero-runtime-dependency, ~8KB chat widget; the two embed paths (a CDN script tag with AutomatosWidget.init(), or the React package @automatos/widget-sdk exposing an <AutomatosChat> component and a useAutomatosChat hook); the package breakdown (@automatos/core auth+SSE ~3.6KB, chat-widget ~8KB, loader IIFE, React wrapper); and CSS-variable theming that pierces the Shadow DOM. Note a versioning nuance: this README shows an sdk.automatos.app/v1 example URL, while the canonical EMBEDDING.md and live CDN use widgets.automatos.app/v0 — prefer the EMBEDDING.md/v0 form.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-shopify-architecture",
@@ -513,7 +993,9 @@
       "url": "automatos-shopify/docs/ARCHITECTURE.md",
       "kind": "first-party-doc",
       "annotation": "The flagship worked instance of the widget pattern: Flow W (storefront widget conversation — CDN load → public-key session → short-lived JWT → SSE, agent runs read-only scoped tools, Shopify data flows indirectly via the orchestrator and Composio; the widget never holds a Shopify token) and Flow E (embedded admin via App Bridge — a higher session-token tier that permits write-scope operations). The trust-boundary table makes the security model explicit: the public ak_pub_* key is the ONLY credential that ever appears client-side. Same orchestrator runtime and workspace on both sides; the flows differ only in auth tier.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-shopify-widget-agents",
@@ -521,7 +1003,9 @@
       "url": "automatos-shopify/docs/SHOPIFY/SHOPIFY-WIDGET-AGENTS.md",
       "kind": "first-party-doc",
       "annotation": "The scoped children of the parent Operations Manager (shopify-ops): storefront-facing via the widget — Support Agent (chat FAB, read-only order lookup), Product Expert (PDP, scoped to the viewed product), Merchandiser (conversational shopper) — and admin-facing via App Bridge — Business Analyst (daily brief) and Inventory Watchdog. Key point: these are configured instances of one Operations Manager with a narrower persona and constrained tools, not separate agent types — one shared brain, all children reporting to the parent. Read alongside STATUS for what is live versus in-development.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-shopify-status",
@@ -529,7 +1013,9 @@
       "url": "automatos-shopify/docs/STATUS.md",
       "kind": "first-party-doc",
       "annotation": "The currency anchor for the Shopify section — read it so you teach reality, not the roadmap. Live today: partner app deployed, /api/shopify/* namespace, widget CDN at widgets.automatos.app/v0, storefront widget chat on a production store with proactive engagement. In-development: unified install flow (PRD-004) that auto-registers the Composio connection on App Store install (still a manual step), the widget auth-tier model (design locked), and the public App Store listing. The author caveat to teach verbatim: architecture supports both storefront and admin agents from a single workspace; currently only the storefront Support Agent is confirmed live on production stores; admin agents and multi-widget seeding are in-development pending PRD-004.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-academy-tutor",
@@ -537,7 +1023,9 @@
       "url": "automatos-academy/docs/ACADEMY_TUTOR_PROMPT.md",
       "kind": "first-party-doc",
       "annotation": "The module's live proof point, documented: the Academy tutor is a SEPARATE agent living in the Academy workspace (not the main site bot), grounded in its own knowledge base with retrieval on, embedded on the widget contract with an ak_pub_* public key whose allowed_domains are locked to academy.automatos.app (plus the Railway URL and localhost:4321 for dev). This is exactly the 'any site becomes AI-driven' pattern running in production — the tutor in the corner of this Academy is the widget SDK you're learning to embed.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     },
     {
       "id": "r-ide-auto",
@@ -545,7 +1033,9 @@
       "url": "automatos-ide/AUTO.md",
       "kind": "first-party-doc",
       "annotation": "The fourth documented surface, named in a line: automatos-ide is a VS Code extension that brings the workspace into the editor — chat with the orchestrator (Auto), and the agents are all views over the workspace, so a developer reaches the same brain without leaving their code. Grounds the module's one-line IDE mention; treat the extension's internal git-native mechanics as architecture detail, not a UI feature list for learners.",
-      "domainIds": ["m08-channels-surfaces"]
+      "domainIds": [
+        "m08-channels-surfaces"
+      ]
     }
   ],
   "videos": [
@@ -553,9 +1043,11 @@
       "id": "v-08-1",
       "title": "08 · Same brain, many front doors — connect a channel, then embed the widget on any site",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m08-channels-surfaces"],
+      "url": "https://widgets.automatos.app/academy/automatos/platform-architect/v-08-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m08-channels-surfaces"
+      ],
       "sourceNotebook": "platform-architect / m08 / channels-and-the-universal-widget"
     },
     {
@@ -564,7 +1056,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m08-channels-surfaces"],
+      "domainIds": [
+        "m08-channels-surfaces"
+      ],
       "sourceNotebook": "platform-architect / m08 / shopify-two-sided-store-and-surfaces"
     }
   ]

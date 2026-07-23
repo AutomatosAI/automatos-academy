@@ -25,13 +25,29 @@
           "difficulty": 1,
           "stem": "What is the single difference that separates a closed (hosted) model from an open (open-weight) one?",
           "options": [
-            { "id": "a", "text": "Where the model runs — a hosted model lives on the company's computers and you send your question to it, while an open model is one you download and run on your own machine", "correct": true },
-            { "id": "b", "text": "Closed models are made by real companies and open models are made by hobbyists with no company behind them" },
-            { "id": "c", "text": "Closed models can write and open models can only read — they do fundamentally different jobs" },
-            { "id": "d", "text": "Open models are always smarter than closed ones, which is the whole reason people prefer them" }
+            {
+              "id": "a",
+              "text": "Where the model runs — a hosted model lives on the company's computers and you send your question to it, while an open model is one you download and run on your own machine",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Closed models are made by real companies and open models are made by hobbyists with no company behind them"
+            },
+            {
+              "id": "c",
+              "text": "Closed models can write and open models can only read — they do fundamentally different jobs"
+            },
+            {
+              "id": "d",
+              "text": "Open models are always smarter than closed ones, which is the whole reason people prefer them"
+            }
           ],
           "explanation": "The one thing that actually separates them is where they run: a hosted model sits on the company's computers and you send your question over the internet, while an open-weight model is released for you to download and run on your own machine. Who makes them isn't the line (b) — Meta, a very large company, makes the open Llama family. They do the same kind of language work (c); the difference is location, not capability type. And open isn't automatically smarter (d) — in fact the biggest, most capable models tend to be the hosted ones, though the module crowns no universal winner.",
-          "sourceRefs": ["r-gb-models", "r-ollama"]
+          "sourceRefs": [
+            "r-gb-models",
+            "r-ollama"
+          ]
         },
         {
           "id": "kc-m03-2",
@@ -40,13 +56,28 @@
           "difficulty": 1,
           "stem": "You want the least possible effort and don't mind that your message travels to someone else's computer. Which option fits, and what's the honest cost that comes with it?",
           "options": [
-            { "id": "a", "text": "A closed (hosted) model — effortless, always the latest, usually the most capable; the honest cost is that you're renting it and your text leaves your building", "correct": true },
-            { "id": "b", "text": "An open (open-weight) model — because hosted models are always more expensive and less capable than running one yourself" },
-            { "id": "c", "text": "A closed model, with no trade-off at all — hosted models are simply better in every single way" },
-            { "id": "d", "text": "It makes no difference which you choose; the two options are identical apart from the name" }
+            {
+              "id": "a",
+              "text": "A closed (hosted) model — effortless, always the latest, usually the most capable; the honest cost is that you're renting it and your text leaves your building",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "An open (open-weight) model — because hosted models are always more expensive and less capable than running one yourself"
+            },
+            {
+              "id": "c",
+              "text": "A closed model, with no trade-off at all — hosted models are simply better in every single way"
+            },
+            {
+              "id": "d",
+              "text": "It makes no difference which you choose; the two options are identical apart from the name"
+            }
           ],
           "explanation": "Least effort points squarely at the hosted option: nothing to install, always up to date, and usually the most capable — and its honest cost, which the module never hides, is that you're renting and your text travels to the company's computer. It isn't the open option (b) — open weights are where control and privacy win, not where effort is lowest. There is a trade-off, so \"better in every way\" is false (c) — you give up ownership and keep your data at home only with the open route. And the two are genuinely different (d): the whole module is about that difference.",
-          "sourceRefs": ["r-gb-models"]
+          "sourceRefs": [
+            "r-gb-models"
+          ]
         }
       ]
     },
@@ -64,13 +95,29 @@
           "difficulty": 2,
           "stem": "A friend says \"just use an open model, then your data is always private.\" Where does that reasoning go wrong?",
           "options": [
-            { "id": "a", "text": "Privacy depends on where the model runs, not just whether it's open — an open model used through someone else's hosting still sends your data to their computer", "correct": true },
-            { "id": "b", "text": "It's completely correct — any open model is guaranteed private no matter who runs it or where" },
-            { "id": "c", "text": "Open models can't be private at all, so the friend has it exactly backwards" },
-            { "id": "d", "text": "Privacy is impossible with any model, open or closed, so the question doesn't matter" }
+            {
+              "id": "a",
+              "text": "Privacy depends on where the model runs, not just whether it's open — an open model used through someone else's hosting still sends your data to their computer",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It's completely correct — any open model is guaranteed private no matter who runs it or where"
+            },
+            {
+              "id": "c",
+              "text": "Open models can't be private at all, so the friend has it exactly backwards"
+            },
+            {
+              "id": "d",
+              "text": "Privacy is impossible with any model, open or closed, so the question doesn't matter"
+            }
           ],
           "explanation": "The label \"open\" isn't a privacy guarantee — what protects your data is it staying on a machine you control. An open model on your own computer is very private, but the same open model run for you on a company's servers sends your data away just like any hosted service, so (b)'s \"no matter where\" is exactly the trap. Open models absolutely can be private when you run them yourself (c). And privacy is achievable — by keeping the data on hardware you control — so (d) is too bleak. It's about the where, not the word.",
-          "sourceRefs": ["r-ollama", "r-hf-open"]
+          "sourceRefs": [
+            "r-ollama",
+            "r-hf-open"
+          ]
         },
         {
           "id": "kc-m03-4",
@@ -79,13 +126,29 @@
           "difficulty": 1,
           "stem": "In the eating-out-versus-cooking-at-home analogy, what does \"cooking the same dish at home\" stand for, and what does it cost you?",
           "options": [
-            { "id": "a", "text": "An open model you run yourself — your kitchen, your ingredients, nothing leaves the house; the cost is that the shopping, cooking, and cleanup (setup and computing power) are now your job", "correct": true },
-            { "id": "b", "text": "A closed hosted model — because a professional kitchen you never see does all the work for you" },
-            { "id": "c", "text": "That open models are always cheaper and easier than eating out, with no downside worth mentioning" },
-            { "id": "d", "text": "That you should never use hosted models, the same way you should never eat at a restaurant" }
+            {
+              "id": "a",
+              "text": "An open model you run yourself — your kitchen, your ingredients, nothing leaves the house; the cost is that the shopping, cooking, and cleanup (setup and computing power) are now your job",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A closed hosted model — because a professional kitchen you never see does all the work for you"
+            },
+            {
+              "id": "c",
+              "text": "That open models are always cheaper and easier than eating out, with no downside worth mentioning"
+            },
+            {
+              "id": "d",
+              "text": "That you should never use hosted models, the same way you should never eat at a restaurant"
+            }
           ],
           "explanation": "Cooking at home is the open model: your kitchen, your ingredients, nothing leaves your house — with the effort and equipment (setup and computing power) falling to you, which is exactly the honest cost. The restaurant, where an unseen kitchen does everything, is the hosted model (b), not the home one. Home cooking isn't uniformly cheaper or easier (c) — it trades effort for control, which is the point of the analogy. And it carries no \"never eat out\" moral (d): the module is explicit that neither side wins, and most people start by renting.",
-          "sourceRefs": ["r-hf-open", "r-ollama"]
+          "sourceRefs": [
+            "r-hf-open",
+            "r-ollama"
+          ]
         }
       ]
     }
@@ -98,13 +161,29 @@
       "difficulty": 1,
       "stem": "Which one-sentence summary best captures the closed-versus-open choice for a normal person?",
       "options": [
-        { "id": "a", "text": "It's rent versus own: a closed model runs on the company's computers and you send your question to it, while an open model is one you download and run yourself", "correct": true },
-        { "id": "b", "text": "It's cheap versus expensive: open models always cost less and closed models always cost more" },
-        { "id": "c", "text": "It's smart versus basic: closed models can reason and open models can only autocomplete" },
-        { "id": "d", "text": "It's new versus old: closed models are the modern kind and open models are outdated technology" }
+        {
+          "id": "a",
+          "text": "It's rent versus own: a closed model runs on the company's computers and you send your question to it, while an open model is one you download and run yourself",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It's cheap versus expensive: open models always cost less and closed models always cost more"
+        },
+        {
+          "id": "c",
+          "text": "It's smart versus basic: closed models can reason and open models can only autocomplete"
+        },
+        {
+          "id": "d",
+          "text": "It's new versus old: closed models are the modern kind and open models are outdated technology"
+        }
       ],
       "explanation": "The clean summary is rent versus own, and it hinges on where the model runs — hosted on the company's computers that you send your question to, or downloaded onto your own machine. It isn't simply cheap-versus-expensive (b): open is free-to-run in that nobody charges per question, but running it still costs computing power. It isn't a capability gap of kind (c) — both do real language work. And open isn't outdated (d); families like Llama are current and actively developed. Location is the line, not price, smartness, or age.",
-      "sourceRefs": ["r-gb-models", "r-ollama"]
+      "sourceRefs": [
+        "r-gb-models",
+        "r-ollama"
+      ]
     },
     {
       "id": "q-m03-2",
@@ -113,13 +192,28 @@
       "difficulty": 1,
       "stem": "Which set of traits honestly describes a closed (hosted) model, with nothing airbrushed out?",
       "options": [
-        { "id": "a", "text": "Convenient, always the latest, usually the most capable — but you're renting it and your text leaves your building to be processed", "correct": true },
-        { "id": "b", "text": "Convenient and always the latest, and your data never leaves your own computer" },
-        { "id": "c", "text": "Hard to set up and quickly outdated, but at least it keeps all your data in-house" },
-        { "id": "d", "text": "Free of all cost, fully offline, and entirely under your own control" }
+        {
+          "id": "a",
+          "text": "Convenient, always the latest, usually the most capable — but you're renting it and your text leaves your building to be processed",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Convenient and always the latest, and your data never leaves your own computer"
+        },
+        {
+          "id": "c",
+          "text": "Hard to set up and quickly outdated, but at least it keeps all your data in-house"
+        },
+        {
+          "id": "d",
+          "text": "Free of all cost, fully offline, and entirely under your own control"
+        }
       ],
       "explanation": "The honest picture of hosted is effortless, always current, usually the most capable — with the real cost that you're renting and your text travels to the company's computer. Its data does leave your building, so \"never leaves your computer\" (b) describes the open route, not this one. Hosted is the opposite of hard-to-set-up-and-outdated (c) — it needs no setup and updates automatically. And free/offline/fully-controlled (d) is the open model's profile, and even then only when you run it yourself. The module names the upside and the cost together.",
-      "sourceRefs": ["r-gb-models"]
+      "sourceRefs": [
+        "r-gb-models"
+      ]
     },
     {
       "id": "q-m03-3",
@@ -128,13 +222,29 @@
       "difficulty": 1,
       "stem": "Which set of traits honestly describes an open (open-weight) model that you run yourself?",
       "options": [
-        { "id": "a", "text": "Private, controllable, and able to work offline with your data staying put — but the setup and the computing power are now your job", "correct": true },
-        { "id": "b", "text": "Private and controllable, and it maintains and upgrades itself automatically with zero effort from you" },
-        { "id": "c", "text": "Effortless to run with nothing to install, exactly like opening a website" },
-        { "id": "d", "text": "Guaranteed to be the single most capable AI available, better than any hosted model" }
+        {
+          "id": "a",
+          "text": "Private, controllable, and able to work offline with your data staying put — but the setup and the computing power are now your job",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Private and controllable, and it maintains and upgrades itself automatically with zero effort from you"
+        },
+        {
+          "id": "c",
+          "text": "Effortless to run with nothing to install, exactly like opening a website"
+        },
+        {
+          "id": "d",
+          "text": "Guaranteed to be the single most capable AI available, better than any hosted model"
+        }
       ],
       "explanation": "Run yourself, an open model is private, controllable, and offline-capable with your data staying home — and the honest cost is that hosting it (setup plus computing power) falls to you. It does not maintain or upgrade itself (b); that automatic-update quality belongs to the hosted route. It isn't effortless-like-a-website (c) — that effortlessness is precisely what you trade away for control. And it isn't guaranteed to be the most capable (d): the biggest models tend to be hosted, and in any case the module crowns no universal winner.",
-      "sourceRefs": ["r-gb-models", "r-hf-open"]
+      "sourceRefs": [
+        "r-gb-models",
+        "r-hf-open"
+      ]
     },
     {
       "id": "q-m03-4",
@@ -143,13 +253,29 @@
       "difficulty": 2,
       "stem": "\"Open source means it's totally free\" — why is that only half true?",
       "options": [
-        { "id": "a", "text": "The model may be free to download, but running it still costs computing power — it's free-to-run in the sense that nobody charges per question, not free of all cost", "correct": true },
-        { "id": "b", "text": "It's fully true — open models cost nothing whatsoever to download or to run" },
-        { "id": "c", "text": "It's entirely false — open models actually cost more than hosted ones in every case" },
-        { "id": "d", "text": "The download is what costs money, while running the model afterwards is completely free" }
+        {
+          "id": "a",
+          "text": "The model may be free to download, but running it still costs computing power — it's free-to-run in the sense that nobody charges per question, not free of all cost",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It's fully true — open models cost nothing whatsoever to download or to run"
+        },
+        {
+          "id": "c",
+          "text": "It's entirely false — open models actually cost more than hosted ones in every case"
+        },
+        {
+          "id": "d",
+          "text": "The download is what costs money, while running the model afterwards is completely free"
+        }
       ],
       "explanation": "The nuance is that the model can be free to obtain, yet running it needs a capable computer and the power to drive it — like cooking at home, where the recipe is free but the ingredients, oven, and pots are not. So it's free-to-run only in the no-per-question-fee sense, not free of all cost (b). It isn't universally more expensive than hosted either (c) — that depends on scale and use. And the cost sits in the running, not the download (d) — you have the direction backwards.",
-      "sourceRefs": ["r-hf-open", "r-ollama"]
+      "sourceRefs": [
+        "r-hf-open",
+        "r-ollama"
+      ]
     },
     {
       "id": "q-m03-5",
@@ -158,13 +284,30 @@
       "difficulty": 2,
       "stem": "You use an open model, but through a company that hosts it for you on their servers. How private is your data, and why?",
       "options": [
-        { "id": "a", "text": "No more private than any hosted service — your data travels to their computer, because privacy depends on where the model runs, not whether it's labelled \"open\"", "correct": true },
-        { "id": "b", "text": "Completely private — because the model is open, your data is protected no matter whose computer runs it", "correct": false },
-        { "id": "c", "text": "Completely private only if the company promises it, and the \"open\" label is what makes that promise binding" },
-        { "id": "d", "text": "Impossible to say, because openness has no connection at all to where data goes" }
+        {
+          "id": "a",
+          "text": "No more private than any hosted service — your data travels to their computer, because privacy depends on where the model runs, not whether it's labelled \"open\"",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Completely private — because the model is open, your data is protected no matter whose computer runs it",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Completely private only if the company promises it, and the \"open\" label is what makes that promise binding"
+        },
+        {
+          "id": "d",
+          "text": "Impossible to say, because openness has no connection at all to where data goes"
+        }
       ],
       "explanation": "Because the running happens on the company's servers, your data leaves your building exactly as with any hosted service — the \"open\" label doesn't change that, since privacy is about the where. So \"open makes it private no matter whose computer\" (b) is the precise myth this module targets. The openness label isn't what makes any privacy promise binding (c) — the location of the running is what actually protects data. And openness does connect to privacy indirectly (d): it's what lets you run the model yourself and keep the data home, but only if you do.",
-      "sourceRefs": ["r-ollama", "r-hf-open"]
+      "sourceRefs": [
+        "r-ollama",
+        "r-hf-open"
+      ]
     },
     {
       "id": "q-m03-6",
@@ -173,13 +316,29 @@
       "difficulty": 2,
       "stem": "A colleague insists you must \"pick a side — open or closed — and stick with it.\" What's the better way to think about it?",
       "options": [
-        { "id": "a", "text": "It's a per-job decision, not a permanent identity — you can rent a hosted model for a quick draft and reach for an open one for sensitive in-house work, choosing fresh each time", "correct": true },
-        { "id": "b", "text": "The colleague is right: once you choose open or closed you're committed to it for everything you ever do" },
-        { "id": "c", "text": "You should always choose closed, because open models are never worth the effort for anyone" },
-        { "id": "d", "text": "You should always choose open, because renting a hosted model is never the sensible choice" }
+        {
+          "id": "a",
+          "text": "It's a per-job decision, not a permanent identity — you can rent a hosted model for a quick draft and reach for an open one for sensitive in-house work, choosing fresh each time",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The colleague is right: once you choose open or closed you're committed to it for everything you ever do"
+        },
+        {
+          "id": "c",
+          "text": "You should always choose closed, because open models are never worth the effort for anyone"
+        },
+        {
+          "id": "d",
+          "text": "You should always choose open, because renting a hosted model is never the sensible choice"
+        }
       ],
       "explanation": "There's no side to join — the sensible approach is to choose per job, matching convenience or control to the task in front of you, and the same person often uses both. Committing to one for everything (b) is exactly the myth being corrected. \"Always closed\" (c) ignores the real cases — privacy, offline use, cost-at-scale — where open earns its keep. And \"always open\" (d) ignores that most people rightly start by renting because it's effortless. The module names no universal winner precisely because the answer changes with the job.",
-      "sourceRefs": ["r-gb-models", "r-hf-open"]
+      "sourceRefs": [
+        "r-gb-models",
+        "r-hf-open"
+      ]
     },
     {
       "id": "q-m03-7",
@@ -188,13 +347,31 @@
       "difficulty": 1,
       "stem": "Which pairing of everyday names to categories is correct?",
       "options": [
-        { "id": "a", "text": "The services behind ChatGPT, Claude, and Gemini are hosted (closed) models; Meta's Llama is a well-known open (open-weight) model you can run yourself", "correct": true },
-        { "id": "b", "text": "ChatGPT and Claude are open models you download, while Llama is a closed hosted service", "correct": false },
-        { "id": "c", "text": "All four — GPT, Claude, Gemini, and Llama — are open models with no hosted option anywhere", "correct": false },
-        { "id": "d", "text": "None of these are real model families; they're just brand names with no models behind them" }
+        {
+          "id": "a",
+          "text": "The services behind ChatGPT, Claude, and Gemini are hosted (closed) models; Meta's Llama is a well-known open (open-weight) model you can run yourself",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "ChatGPT and Claude are open models you download, while Llama is a closed hosted service",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "All four — GPT, Claude, Gemini, and Llama — are open models with no hosted option anywhere",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "None of these are real model families; they're just brand names with no models behind them"
+        }
       ],
       "explanation": "The beginner-recognisable hosted services are the ones behind ChatGPT, Claude, and Gemini — you send your question to their computers — while Llama is the open-weight example you can download and run. Flipping them (b) gets both wrong: the ChatGPT/Claude services are hosted, and Llama is the open one. They aren't all open with no hosted option (c) — most of that list is hosted. And these are genuine, widely used model families (d), named honestly here without any of them being crowned best.",
-      "sourceRefs": ["r-ollama", "r-hf-open"]
+      "sourceRefs": [
+        "r-ollama",
+        "r-hf-open"
+      ]
     },
     {
       "id": "q-m03-8",
@@ -203,13 +380,29 @@
       "difficulty": 1,
       "stem": "For a beginner deciding where to start, what's the honest, no-winner advice this module lands on?",
       "options": [
-        { "id": "a", "text": "Rent for convenience, own for control — most people sensibly start by renting a hosted model, and reach for open weights when a real need for privacy, offline use, or cost-at-scale turns up", "correct": true },
-        { "id": "b", "text": "Everyone should run open models from day one, because hosted models are a beginner's mistake" },
-        { "id": "c", "text": "There's a single best model everyone should use, and this module will tell you which one it is" },
-        { "id": "d", "text": "The choice is too complicated for a beginner, so it's safest not to use AI at all until you're an expert" }
+        {
+          "id": "a",
+          "text": "Rent for convenience, own for control — most people sensibly start by renting a hosted model, and reach for open weights when a real need for privacy, offline use, or cost-at-scale turns up",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Everyone should run open models from day one, because hosted models are a beginner's mistake"
+        },
+        {
+          "id": "c",
+          "text": "There's a single best model everyone should use, and this module will tell you which one it is"
+        },
+        {
+          "id": "d",
+          "text": "The choice is too complicated for a beginner, so it's safest not to use AI at all until you're an expert"
+        }
       ],
       "explanation": "The honest landing is rent-for-convenience, own-for-control, with most beginners starting by renting because it's effortless and moving to open only when a genuine need appears. Insisting everyone run open from day one (b) ignores that setup and hardware are real barriers early on. There is deliberately no single best model named (c) — the whole track refuses to crown a winner because the right answer depends on the job. And the choice isn't beyond a beginner (d): it's just rent versus own, which is exactly what you can now explain to a colleague.",
-      "sourceRefs": ["r-gb-models", "r-ollama"]
+      "sourceRefs": [
+        "r-gb-models",
+        "r-ollama"
+      ]
     }
   ],
   "resources": [
@@ -219,7 +412,9 @@
       "url": "automatos-gitbook/settings/models.md",
       "kind": "official-doc",
       "annotation": "The page behind this module's peek. It shows that Automatos lets you configure which providers and models are available in your workspace using your own key — the hosted services (OpenAI, Anthropic, Google) directly, many models at once through a single connection, or a default model of your choosing. Read here for the honest point that the platform is neutral about which model you use: rent-versus-own stays your decision, set in one place, not a lock-in baked into the tool.",
-      "domainIds": ["m03-open-vs-closed"]
+      "domainIds": [
+        "m03-open-vs-closed"
+      ]
     },
     {
       "id": "r-ollama",
@@ -227,7 +422,9 @@
       "url": "https://ollama.com/",
       "kind": "reference",
       "annotation": "The friendliest on-ramp to the \"own\" side of the trade-off: Ollama is a free tool for downloading and running open-weight models (such as Meta's Llama) locally on your own machine. You don't need to install anything for this module — it's here only to make \"you can actually run one yourself\" concrete, and to show why the running (setup and computing power) becomes your job once the model lives on your computer rather than the company's.",
-      "domainIds": ["m03-open-vs-closed"]
+      "domainIds": [
+        "m03-open-vs-closed"
+      ]
     },
     {
       "id": "r-hf-open",
@@ -235,7 +432,9 @@
       "url": "https://huggingface.co/models",
       "kind": "reference",
       "annotation": "A vendor-neutral catalogue of open-weight models the community can download, browse, and run. Useful here purely as evidence that \"open\" is a real, thriving category with named families behind it (Llama among them), and as the backdrop for two of the module's myths — that these models are free to download yet still cost computing power to run, and that using one through someone else's hosting is not the same as running it privately yourself.",
-      "domainIds": ["m03-open-vs-closed"]
+      "domainIds": [
+        "m03-open-vs-closed"
+      ]
     }
   ],
   "videos": [
@@ -243,9 +442,11 @@
       "id": "v-m03-1",
       "title": "03 · Open vs closed — rent versus own, in 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m03-open-vs-closed"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-explained/v-m03-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m03-open-vs-closed"
+      ],
       "sourceNotebook": "ai-explained / m03 / open-vs-closed-rent-vs-own"
     },
     {
@@ -254,7 +455,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m03-open-vs-closed"],
+      "domainIds": [
+        "m03-open-vs-closed"
+      ],
       "sourceNotebook": "ai-explained / m03 / deep-dive-open-vs-closed"
     }
   ]

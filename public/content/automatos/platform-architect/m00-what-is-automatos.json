@@ -28,13 +28,32 @@
           "difficulty": 1,
           "stem": "The docs open with 'Agents are workers, not chatbots.' For someone building on the platform, what is the main practical consequence of that framing?",
           "options": [
-            { "id": "a", "text": "The unit you design is a worker — a role, its own model, a persona, and a scoped set of tools — not just a prompt", "correct": true },
-            { "id": "b", "text": "Agents can only ever answer questions and cannot take actions in external systems", "correct": false },
-            { "id": "c", "text": "Every agent must use the same model and persona so behaviour stays consistent", "correct": false },
-            { "id": "d", "text": "You must write a fresh prompt for every message because agents keep no configuration", "correct": false }
+            {
+              "id": "a",
+              "text": "The unit you design is a worker — a role, its own model, a persona, and a scoped set of tools — not just a prompt",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Agents can only ever answer questions and cannot take actions in external systems",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Every agent must use the same model and persona so behaviour stays consistent",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "You must write a fresh prompt for every message because agents keep no configuration",
+              "correct": false
+            }
           ],
           "explanation": "The worker framing means you design a configured entity — role, model, persona, and a scoped tool set — which is what makes specialised, least-privilege agents possible. Option b is the opposite of the point: 'workers, not chatbots' means they DO work (call tools, take actions), not just answer. Option c contradicts the docs, which say each agent has 'its own model configuration' and persona — variety across the roster is the design. Option d describes prompt-engineering a chatbot; agents carry standing configuration, so you don't rebuild them per message.",
-          "sourceRefs": ["r-gitbook-about", "r-automatos-repo"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-automatos-repo"
+          ]
         },
         {
           "id": "kc-m00-l1-2",
@@ -43,13 +62,32 @@
           "difficulty": 2,
           "stem": "'The platform routes, you don't have to.' Which build-time implication follows most directly from the Universal Router deciding who handles each message?",
           "options": [
-            { "id": "a", "text": "How clearly you describe each agent's role matters a lot, because the Router reads those roles to decide who fits — and you can still override its choice", "correct": true },
-            { "id": "b", "text": "You must manually select which agent handles every message before you send it", "correct": false },
-            { "id": "c", "text": "Once routed, a message can never be reassigned, so a wrong route is permanent", "correct": false },
-            { "id": "d", "text": "Adding a new specialist agent forces every user to learn a new menu of options", "correct": false }
+            {
+              "id": "a",
+              "text": "How clearly you describe each agent's role matters a lot, because the Router reads those roles to decide who fits — and you can still override its choice",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "You must manually select which agent handles every message before you send it",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Once routed, a message can never be reassigned, so a wrong route is permanent",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Adding a new specialist agent forces every user to learn a new menu of options",
+              "correct": false
+            }
           ],
           "explanation": "Because the Router matches messages to agents by their roles/descriptions, vague agent definitions get mis-routed — so clear roles are a real design responsibility, and override plus learning-from-corrections remain available. Option b is exactly what the Router removes: you describe the work and it assigns the worker. Option c contradicts the documented ability to override routing (and let the system learn). Option d is backwards — the Router absorbing the choice is precisely why adding agents does NOT force users into a bigger menu.",
-          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-gitbook-readme"
+          ]
         },
         {
           "id": "kc-m00-l1-3",
@@ -58,13 +96,32 @@
           "difficulty": 2,
           "stem": "Why does the module treat 'visibility is built in' as the foundation for trusting agents with real work?",
           "options": [
-            { "id": "a", "text": "Because every action, tool call, and LLM request is tracked and costed, autonomous workers become auditable rather than a black box — which is what later governance builds on", "correct": true },
-            { "id": "b", "text": "Because visibility makes agents run faster by caching their previous answers", "correct": false },
-            { "id": "c", "text": "Because it means agents never make mistakes once you can watch them", "correct": false },
-            { "id": "d", "text": "Because it lets you disable all logging to reduce cost", "correct": false }
+            {
+              "id": "a",
+              "text": "Because every action, tool call, and LLM request is tracked and costed, autonomous workers become auditable rather than a black box — which is what later governance builds on",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Because visibility makes agents run faster by caching their previous answers",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Because it means agents never make mistakes once you can watch them",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Because it lets you disable all logging to reduce cost",
+              "correct": false
+            }
           ],
           "explanation": "Observability turns an opaque autonomous worker into an auditable one — every step, tool call, and cost is recorded — and you can't govern what you can't see, so this is the base the governance module stands on. Option b confuses visibility with caching (a routing-tier concept), which is unrelated. Option c overclaims: watching agents doesn't make them infallible; it makes their mistakes visible and catchable. Option d inverts the value — the point is that the tracking exists, not that you'd switch it off.",
-          "sourceRefs": ["r-gitbook-about", "r-gitbook-activity"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-gitbook-activity"
+          ]
         }
       ]
     },
@@ -82,13 +139,32 @@
           "difficulty": 2,
           "stem": "A teammate says 'a Plugin and a Skill are basically the same thing.' What's the accurate correction?",
           "options": [
-            { "id": "a", "text": "A Skill is a single git-based capability loaded into an agent; a Plugin is a marketplace-distributed package that can bundle several skills, commands, and agent configs together", "correct": true },
-            { "id": "b", "text": "A Plugin is one capability and a Skill is the bundle that contains many plugins", "correct": false },
-            { "id": "c", "text": "Both are external app integrations provided through Composio", "correct": false },
-            { "id": "d", "text": "A Skill is installed from the marketplace and a Plugin is loaded from a git repository — they're just named differently", "correct": false }
+            {
+              "id": "a",
+              "text": "A Skill is a single git-based capability loaded into an agent; a Plugin is a marketplace-distributed package that can bundle several skills, commands, and agent configs together",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A Plugin is one capability and a Skill is the bundle that contains many plugins",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Both are external app integrations provided through Composio",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A Skill is installed from the marketplace and a Plugin is loaded from a git repository — they're just named differently",
+              "correct": false
+            }
           ],
           "explanation": "Per the Key Concepts table, a Skill is one git-based capability while a Plugin is a distributed package that may bundle several skills/commands/configs — package versus single capability. Option b reverses the containment (a Plugin contains skills, not the other way round). Option c describes Tools (Composio app integrations), which is a different concept entirely. Option d swaps their sources: skills are git-repo-loaded capabilities and plugins are the marketplace-distributed packages, so this inverts both facts.",
-          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-gitbook-readme"
+          ]
         },
         {
           "id": "kc-m00-l2-2",
@@ -97,13 +173,32 @@
           "difficulty": 2,
           "stem": "You need agents to actually reach into GitHub and Slack to perform actions there. Which concept provides that, and how does it differ from a Skill?",
           "options": [
-            { "id": "a", "text": "A Tool — an external app integration via Composio (the 'reach' into another system); a Skill is a capability/know-how loaded from a git repo", "correct": true },
-            { "id": "b", "text": "A Skill — because skills are what connect agents to GitHub and Slack, while Tools are internal-only", "correct": false },
-            { "id": "c", "text": "A Knowledge Base — because connecting to apps is a form of document retrieval", "correct": false },
-            { "id": "d", "text": "A Channel — because any integration with GitHub or Slack is a messaging channel", "correct": false }
+            {
+              "id": "a",
+              "text": "A Tool — an external app integration via Composio (the 'reach' into another system); a Skill is a capability/know-how loaded from a git repo",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A Skill — because skills are what connect agents to GitHub and Slack, while Tools are internal-only",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A Knowledge Base — because connecting to apps is a form of document retrieval",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A Channel — because any integration with GitHub or Slack is a messaging channel",
+              "correct": false
+            }
           ],
           "explanation": "Tools are the external app integrations (via Composio) that let an agent act in GitHub, Slack, Jira, etc. — the reach into another system — whereas a Skill is git-loaded know-how. Option b inverts the two: skills are capabilities, not app connectors. Option c confuses integration with RAG; a Knowledge Base indexes documents for search, it doesn't call the GitHub API. Option d over-extends 'Channel', which specifically means an external messaging platform (Telegram/Slack/WhatsApp) wired for conversation, not a general app integration like GitHub PR access.",
-          "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-gitbook-readme"
+          ]
         },
         {
           "id": "kc-m00-l2-3",
@@ -112,13 +207,33 @@
           "difficulty": 3,
           "stem": "Your team wants: 'every night at 23:45, run a security scan, then summarise the findings, then file a report.' Agent, Playbook, or Mission — and why?",
           "options": [
-            { "id": "a", "text": "A Playbook — the steps are known and fixed in advance and it runs on a schedule, which is exactly a multi-step workflow coordinating several agents", "correct": true },
-            { "id": "b", "text": "A Mission — because any job with more than one step is by definition a Mission", "correct": false },
-            { "id": "c", "text": "A single Agent — because one agent should just do all three steps in one message", "correct": false },
-            { "id": "d", "text": "A Mission — because it runs unattended overnight, and anything unattended is a Mission", "correct": false }
+            {
+              "id": "a",
+              "text": "A Playbook — the steps are known and fixed in advance and it runs on a schedule, which is exactly a multi-step workflow coordinating several agents",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "A Mission — because any job with more than one step is by definition a Mission",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "A single Agent — because one agent should just do all three steps in one message",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "A Mission — because it runs unattended overnight, and anything unattended is a Mission",
+              "correct": false
+            }
           ],
           "explanation": "You know the exact sequence in advance and want it to run reliably on a schedule — that's the definition of a Playbook (a multi-step workflow coordinating agents), and it's what scheduled routines are built from. Option b is the classic error: multi-step alone doesn't mean Mission; a Mission is specifically for goals whose steps you do NOT pre-specify. Option c collapses a genuine multi-step, multi-agent sequence into one agent, losing the coordination and scheduling a Playbook provides. Option d misreads the test — 'unattended' isn't the deciding factor; 'are the steps known in advance?' is, and here they are.",
-          "sourceRefs": ["r-gitbook-about", "r-gitbook-dashboard", "r-gitbook-missions"]
+          "sourceRefs": [
+            "r-gitbook-about",
+            "r-gitbook-dashboard",
+            "r-gitbook-missions"
+          ]
         }
       ]
     },
@@ -136,13 +251,32 @@
           "difficulty": 1,
           "stem": "What happens to your workspace the very first time you sign in?",
           "options": [
-            { "id": "a", "text": "A personal workspace is created automatically with you as its Admin, pre-populated with a roster of ten starter agents", "correct": true },
-            { "id": "b", "text": "You get an empty workspace and must build all your agents from scratch before anything works", "correct": false },
-            { "id": "c", "text": "You're dropped into a shared global workspace that every user of the platform sees", "correct": false },
-            { "id": "d", "text": "Nothing is created until you manually provision a workspace and invite yourself to it", "correct": false }
+            {
+              "id": "a",
+              "text": "A personal workspace is created automatically with you as its Admin, pre-populated with a roster of ten starter agents",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "You get an empty workspace and must build all your agents from scratch before anything works",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "You're dropped into a shared global workspace that every user of the platform sees",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Nothing is created until you manually provision a workspace and invite yourself to it",
+              "correct": false
+            }
           ],
           "explanation": "First login auto-creates your own workspace (you're its Admin), and it ships with ten starter agents so you have a working team immediately. Option b is wrong on two counts: the workspace isn't empty (ten starters ship) and you don't have to build before anything works. Option c contradicts the isolation model — a workspace is scoped to a team and never leaks to others; there's no shared global one. Option d describes manual provisioning, but the docs are explicit that the personal workspace is created automatically.",
-          "sourceRefs": ["r-gitbook-readme", "r-gitbook-about"]
+          "sourceRefs": [
+            "r-gitbook-readme",
+            "r-gitbook-about"
+          ]
         },
         {
           "id": "kc-m00-l3-2",
@@ -151,13 +285,32 @@
           "difficulty": 2,
           "stem": "You want to trace the exact sequence of what an agent did last night — every tool call and the report it filed, step by step. Which Command Centre tab is built for that?",
           "options": [
-            { "id": "a", "text": "Feed — the chronological log of every action, tool call, and response, filterable by agent, event type, and time", "correct": true },
-            { "id": "b", "text": "Dashboard — because the four status cards contain the full step-by-step history", "correct": false },
-            { "id": "c", "text": "Missions — because all agent activity is stored as missions", "correct": false },
-            { "id": "d", "text": "Memory — because tracing past actions means reading the agent's stored memories", "correct": false }
+            {
+              "id": "a",
+              "text": "Feed — the chronological log of every action, tool call, and response, filterable by agent, event type, and time",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Dashboard — because the four status cards contain the full step-by-step history",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Missions — because all agent activity is stored as missions",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Memory — because tracing past actions means reading the agent's stored memories",
+              "correct": false
+            }
           ],
           "explanation": "The Feed is the chronological activity log — every action, tool call, response, and routing decision, filterable by agent and time — which is exactly a step-by-step trace. Option b misuses the Dashboard: the status cards are at-a-glance summaries (counts), not a detailed event history. Option c is wrong because Missions tracks long-running objectives, not the general activity log; most activity isn't a mission. Option d confuses the audit trail with memory — the Memory tab shows what agents remember, not a timeline of what they did.",
-          "sourceRefs": ["r-gitbook-feed", "r-gitbook-activity"]
+          "sourceRefs": [
+            "r-gitbook-feed",
+            "r-gitbook-activity"
+          ]
         },
         {
           "id": "kc-m00-l3-3",
@@ -166,13 +319,32 @@
           "difficulty": 2,
           "stem": "Of the four status cards, which should a builder check first, and why?",
           "options": [
-            { "id": "a", "text": "Needs Attention — it surfaces the items waiting on you (a review, an approval, an intervention), and ignoring it lets work stall", "correct": true },
-            { "id": "b", "text": "Working Now — because the number of busy agents is the only card that ever changes", "correct": false },
-            { "id": "c", "text": "Completed Today — because finished tasks are the only thing that requires action from you", "correct": false },
-            { "id": "d", "text": "Channels Live — because you must approve every channel before agents can run", "correct": false }
+            {
+              "id": "a",
+              "text": "Needs Attention — it surfaces the items waiting on you (a review, an approval, an intervention), and ignoring it lets work stall",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Working Now — because the number of busy agents is the only card that ever changes",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Completed Today — because finished tasks are the only thing that requires action from you",
+              "correct": false
+            },
+            {
+              "id": "d",
+              "text": "Channels Live — because you must approve every channel before agents can run",
+              "correct": false
+            }
           ],
           "explanation": "Needs Attention is where the platform collects the things blocking on you — reviews, approvals, interventions — so it's the card that most directly demands action, and unchecked it stalls real work. Option b is wrong: all four cards update, and 'Working Now' is informational, not action-requiring. Option c inverts the point — completed tasks are done, so they're the least likely to need you, whereas pending items are. Option d invents a rule that isn't there; 'Channels Live' just reports active channels, it isn't an approval gate you clear first.",
-          "sourceRefs": ["r-gitbook-activity", "r-gitbook-dashboard"]
+          "sourceRefs": [
+            "r-gitbook-activity",
+            "r-gitbook-dashboard"
+          ]
         }
       ]
     }
@@ -185,13 +357,32 @@
       "difficulty": 1,
       "stem": "Which sentence best captures the one-line map of the platform this module teaches?",
       "options": [
-        { "id": "a", "text": "Agents do the work, the Router directs it, Knowledge feeds it, and the Command Centre shows it", "correct": true },
-        { "id": "b", "text": "One assistant answers every question, and you switch modes manually depending on the task", "correct": false },
-        { "id": "c", "text": "The platform stores documents and lets you search them, with no autonomous action", "correct": false },
-        { "id": "d", "text": "You write prompts, the model replies, and nothing is tracked or costed", "correct": false }
+        {
+          "id": "a",
+          "text": "Agents do the work, the Router directs it, Knowledge feeds it, and the Command Centre shows it",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "One assistant answers every question, and you switch modes manually depending on the task",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The platform stores documents and lets you search them, with no autonomous action",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "You write prompts, the model replies, and nothing is tracked or costed",
+          "correct": false
+        }
       ],
       "explanation": "The module compresses the architecture (You → Chat → Router → Agents → Tools/Knowledge/Workspace → Reports) into exactly that line: agents work, the Router directs, Knowledge feeds, the Command Centre shows. Option b describes a mode-switching chatbot — the opposite of the Router auto-assigning specialised workers. Option c reduces the platform to a search box, ignoring agents that take action. Option d denies the built-in visibility (every action and cost is tracked), which is one of the three founding ideas.",
-      "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-gitbook-readme"
+      ]
     },
     {
       "id": "q-m00-2",
@@ -200,13 +391,31 @@
       "difficulty": 1,
       "stem": "In the Key Concepts vocabulary, what is a Workspace?",
       "options": [
-        { "id": "a", "text": "An isolated environment for a team, where agents, data, and config are scoped and don't leak to another team", "correct": true },
-        { "id": "b", "text": "A single multi-step workflow that coordinates several agents", "correct": false },
-        { "id": "c", "text": "The system that routes each message to the best agent", "correct": false },
-        { "id": "d", "text": "A collection of documents indexed for semantic search", "correct": false }
+        {
+          "id": "a",
+          "text": "An isolated environment for a team, where agents, data, and config are scoped and don't leak to another team",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A single multi-step workflow that coordinates several agents",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "The system that routes each message to the best agent",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A collection of documents indexed for semantic search",
+          "correct": false
+        }
       ],
       "explanation": "A Workspace is the isolation and ownership boundary — a team's environment where everything is scoped and nothing leaks across teams. Option b defines a Playbook (a multi-step, multi-agent workflow), not a workspace. Option c defines the Universal Router. Option d defines a Knowledge Base. Each distractor is a real concept from the same table, which is why keeping the vocabulary precise matters.",
-      "sourceRefs": ["r-gitbook-about"]
+      "sourceRefs": [
+        "r-gitbook-about"
+      ]
     },
     {
       "id": "q-m00-3",
@@ -215,13 +424,32 @@
       "difficulty": 2,
       "stem": "A colleague asks you to set up 'a quick chatbot to answer questions.' Framed by this module, why is that the wrong way to think about building on Automatos?",
       "options": [
-        { "id": "a", "text": "Because agents are workers, not chatbots — you design a role, model, persona, and scoped tools so the agent can do work, and the Router assigns it, rather than building one Q&A bot", "correct": true },
-        { "id": "b", "text": "Because the platform cannot answer questions at all and only runs scheduled jobs", "correct": false },
-        { "id": "c", "text": "Because you must always build a Mission for any request, never a single agent", "correct": false },
-        { "id": "d", "text": "Because chatbots are faster, so you should avoid agents whenever possible", "correct": false }
+        {
+          "id": "a",
+          "text": "Because agents are workers, not chatbots — you design a role, model, persona, and scoped tools so the agent can do work, and the Router assigns it, rather than building one Q&A bot",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Because the platform cannot answer questions at all and only runs scheduled jobs",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Because you must always build a Mission for any request, never a single agent",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Because chatbots are faster, so you should avoid agents whenever possible",
+          "correct": false
+        }
       ],
       "explanation": "The founding idea is 'workers, not chatbots': you design configured workers (role/model/persona/tools) that take action, and the Router routes to them — a richer unit than a single Q&A bot. Option b overstates it — agents absolutely can answer, they just do more than that. Option c is wrong: a simple question is a single-agent job, not a Mission (matching mechanism to the shape of the work is the whole skill). Option d inverts the value proposition — the point of agents is capability and safety via scoping, not that chatbots are preferable.",
-      "sourceRefs": ["r-gitbook-about", "r-automatos-repo"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-automatos-repo"
+      ]
     },
     {
       "id": "q-m00-4",
@@ -230,13 +458,32 @@
       "difficulty": 2,
       "stem": "Which pairing correctly distinguishes a Tool from a Skill?",
       "options": [
-        { "id": "a", "text": "Tool = an external app integration via Composio (the reach into GitHub/Slack/Jira); Skill = a git-based capability/know-how loaded into an agent", "correct": true },
-        { "id": "b", "text": "Tool = a git-based capability loaded from a repo; Skill = an external app integration", "correct": false },
-        { "id": "c", "text": "Tool = a bundle of skills and configs from the marketplace; Skill = a single external integration", "correct": false },
-        { "id": "d", "text": "Tool and Skill are two names for the same marketplace package", "correct": false }
+        {
+          "id": "a",
+          "text": "Tool = an external app integration via Composio (the reach into GitHub/Slack/Jira); Skill = a git-based capability/know-how loaded into an agent",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Tool = a git-based capability loaded from a repo; Skill = an external app integration",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Tool = a bundle of skills and configs from the marketplace; Skill = a single external integration",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Tool and Skill are two names for the same marketplace package",
+          "correct": false
+        }
       ],
       "explanation": "A Tool is the Composio app integration (how an agent acts in an external system) while a Skill is git-loaded know-how the agent carries — reach versus competence. Option b swaps the two definitions. Option c describes a Plugin (a marketplace package) rather than a Tool, and mislabels a Skill. Option d denies the distinction entirely; they're different axes — integration versus capability.",
-      "sourceRefs": ["r-gitbook-about", "r-gitbook-readme"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-gitbook-readme"
+      ]
     },
     {
       "id": "q-m00-5",
@@ -245,13 +492,32 @@
       "difficulty": 2,
       "stem": "You need a job that, every night on a fixed schedule, runs three known steps in order across a couple of agents. Which mechanism fits, and what's the deciding question?",
       "options": [
-        { "id": "a", "text": "A Playbook — the deciding question is 'do I know the exact steps in advance?', and here the fixed, known sequence on a schedule is exactly a Playbook", "correct": true },
-        { "id": "b", "text": "A Mission — because it involves more than one agent, and multi-agent work is always a Mission", "correct": false },
-        { "id": "c", "text": "A single Agent — because bundling all three steps into one agent is simplest", "correct": false },
-        { "id": "d", "text": "A Channel — because scheduled multi-step work is configured as a messaging channel", "correct": false }
+        {
+          "id": "a",
+          "text": "A Playbook — the deciding question is 'do I know the exact steps in advance?', and here the fixed, known sequence on a schedule is exactly a Playbook",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Mission — because it involves more than one agent, and multi-agent work is always a Mission",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "A single Agent — because bundling all three steps into one agent is simplest",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A Channel — because scheduled multi-step work is configured as a messaging channel",
+          "correct": false
+        }
       ],
       "explanation": "Known steps + fixed order + schedule = a Playbook (a multi-step workflow coordinating agents), and the deciding test is whether you know the steps in advance. Option b misstates the rule: multi-agent doesn't imply Mission; a Mission is for goals whose steps you do NOT pre-specify. Option c loses the coordination and scheduling benefits and blurs three distinct steps into one worker. Option d confuses the concept entirely — a Channel is an external messaging platform, not an execution mechanism.",
-      "sourceRefs": ["r-gitbook-about", "r-gitbook-dashboard"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-gitbook-dashboard"
+      ]
     },
     {
       "id": "q-m00-6",
@@ -260,13 +526,32 @@
       "difficulty": 3,
       "stem": "'Find out why our lead-conversion rate fell last month and recommend fixes.' Why is this a Mission rather than a Playbook, and what would go wrong if you forced it into a Playbook?",
       "options": [
-        { "id": "a", "text": "It's an open-ended objective whose steps can't be pre-specified — agents must plan and investigate independently — so a Playbook (which needs a fixed, known sequence) can't express it; you'd have to guess the steps in advance and would likely miss the real cause", "correct": true },
-        { "id": "b", "text": "It's a Playbook really; you just write the investigation as three fixed steps and it behaves identically to a Mission", "correct": false },
-        { "id": "c", "text": "It's neither — open-ended questions can only be answered by a single agent in one message, never by a Mission", "correct": false },
-        { "id": "d", "text": "It's a Mission only because it's important; importance, not the shape of the work, decides Mission vs Playbook", "correct": false }
+        {
+          "id": "a",
+          "text": "It's an open-ended objective whose steps can't be pre-specified — agents must plan and investigate independently — so a Playbook (which needs a fixed, known sequence) can't express it; you'd have to guess the steps in advance and would likely miss the real cause",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It's a Playbook really; you just write the investigation as three fixed steps and it behaves identically to a Mission",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It's neither — open-ended questions can only be answered by a single agent in one message, never by a Mission",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It's a Mission only because it's important; importance, not the shape of the work, decides Mission vs Playbook",
+          "correct": false
+        }
       ],
       "explanation": "A Mission fits because the goal is open-ended and the steps must be discovered — agents plan and execute independently — which a Playbook's fixed, pre-defined sequence cannot capture; forcing it into fixed steps means pre-committing to a hypothesis and likely missing the actual cause. Option b is the trap: an investigation whose path you can't know in advance isn't reducible to three fixed steps without losing exactly what makes it a Mission. Option c is wrong — open-ended, multi-lead investigations are precisely what Missions are for, not one-shot agent replies. Option d misattributes the decision to importance; the module is explicit that the SHAPE of the work (are the steps known?) decides, not how important it is.",
-      "sourceRefs": ["r-gitbook-about", "r-gitbook-missions"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-gitbook-missions"
+      ]
     },
     {
       "id": "q-m00-7",
@@ -275,13 +560,31 @@
       "difficulty": 2,
       "stem": "What is the difference between a Knowledge Base and a Knowledge Graph?",
       "options": [
-        { "id": "a", "text": "A Knowledge Base is your documents indexed for semantic search (RAG); a Knowledge Graph is the auto-extracted network of entities and relationships that emerges across those documents", "correct": true },
-        { "id": "b", "text": "A Knowledge Base is the network of relationships; a Knowledge Graph is the raw document store", "correct": false },
-        { "id": "c", "text": "They are the same feature under two names", "correct": false },
-        { "id": "d", "text": "A Knowledge Base stores memories from conversations; a Knowledge Graph stores connected apps", "correct": false }
+        {
+          "id": "a",
+          "text": "A Knowledge Base is your documents indexed for semantic search (RAG); a Knowledge Graph is the auto-extracted network of entities and relationships that emerges across those documents",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A Knowledge Base is the network of relationships; a Knowledge Graph is the raw document store",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "They are the same feature under two names",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "A Knowledge Base stores memories from conversations; a Knowledge Graph stores connected apps",
+          "correct": false
+        }
       ],
       "explanation": "A Knowledge Base holds your documents indexed for retrieval; a Knowledge Graph is the map of entities and relationships auto-extracted across them — the passages versus the connections between the things in them. Option b reverses the two definitions. Option c denies a real distinction the docs draw. Option d confuses both terms with unrelated concepts (Memory and Tools), which is exactly the drift precise vocabulary prevents.",
-      "sourceRefs": ["r-gitbook-about"]
+      "sourceRefs": [
+        "r-gitbook-about"
+      ]
     },
     {
       "id": "q-m00-8",
@@ -290,13 +593,31 @@
       "difficulty": 1,
       "stem": "The Command Centre and the Activity page are:",
       "options": [
-        { "id": "a", "text": "The same surface under two names — the place you watch your AI workforce run", "correct": true },
-        { "id": "b", "text": "Two separate pages: the Command Centre for building agents and Activity for chatting", "correct": false },
-        { "id": "c", "text": "Two names for the Chat interface where you talk to agents", "correct": false },
-        { "id": "d", "text": "The Marketplace, where you install plugins and skills", "correct": false }
+        {
+          "id": "a",
+          "text": "The same surface under two names — the place you watch your AI workforce run",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Two separate pages: the Command Centre for building agents and Activity for chatting",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Two names for the Chat interface where you talk to agents",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The Marketplace, where you install plugins and skills",
+          "correct": false
+        }
       ],
       "explanation": "The docs state it directly: the Activity page IS your command centre — one surface, two names, for watching the workforce. Option b invents a split that doesn't exist and misassigns building/chatting to it. Option c confuses it with Chat, a different surface for talking to agents. Option d confuses it with the Marketplace, where capabilities are installed — also different.",
-      "sourceRefs": ["r-gitbook-activity"]
+      "sourceRefs": [
+        "r-gitbook-activity"
+      ]
     },
     {
       "id": "q-m00-9",
@@ -305,13 +626,32 @@
       "difficulty": 2,
       "stem": "On the Command Centre, where do each of these live: an open-ended objective in progress; what an agent remembers; the chronological log of every action?",
       "options": [
-        { "id": "a", "text": "Missions tab; Memory tab; Feed tab — respectively", "correct": true },
-        { "id": "b", "text": "Feed tab; Missions tab; Dashboard tab — respectively", "correct": false },
-        { "id": "c", "text": "Dashboard tab; Reports tab; Missions tab — respectively", "correct": false },
-        { "id": "d", "text": "Reports tab; Feed tab; Memory tab — respectively", "correct": false }
+        {
+          "id": "a",
+          "text": "Missions tab; Memory tab; Feed tab — respectively",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Feed tab; Missions tab; Dashboard tab — respectively",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Dashboard tab; Reports tab; Missions tab — respectively",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Reports tab; Feed tab; Memory tab — respectively",
+          "correct": false
+        }
       ],
       "explanation": "Open-ended objectives live on Missions, remembered facts on Memory, and the chronological action log on Feed — the tabs map cleanly onto the vocabulary. Option b misplaces all three (an objective isn't the Feed; memory isn't Missions; the action log isn't the Dashboard summary). Option c is wrong because the Dashboard is the at-a-glance overview and Reports is for grading filed reports — neither is where an in-progress objective lives, and Missions isn't the raw action log. Option d puts the action log on Reports (that tab grades finished reports, it isn't the live event stream) and mislabels the objective's home as Feed.",
-      "sourceRefs": ["r-gitbook-activity", "r-gitbook-feed"]
+      "sourceRefs": [
+        "r-gitbook-activity",
+        "r-gitbook-feed"
+      ]
     },
     {
       "id": "q-m00-10",
@@ -320,13 +660,31 @@
       "difficulty": 2,
       "stem": "Among the four status cards, why does the module tell builders to treat 'Needs Attention' as the first place to look?",
       "options": [
-        { "id": "a", "text": "It collects items requiring your review or intervention, so it's where real work stalls if you don't act", "correct": true },
-        { "id": "b", "text": "It shows the total number of agents you've created, which you must verify each login", "correct": false },
-        { "id": "c", "text": "It lists your connected channels, and channels must be re-approved daily", "correct": false },
-        { "id": "d", "text": "It is the only card that can be clicked to drill in", "correct": false }
+        {
+          "id": "a",
+          "text": "It collects items requiring your review or intervention, so it's where real work stalls if you don't act",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It shows the total number of agents you've created, which you must verify each login",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "It lists your connected channels, and channels must be re-approved daily",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It is the only card that can be clicked to drill in",
+          "correct": false
+        }
       ],
       "explanation": "Needs Attention aggregates the things waiting on you (reviews, approvals, interventions), so it's the highest-leverage first glance — unattended, it blocks progress. Option b describes an agent count, which isn't what this card is. Option c invents a daily re-approval rule for channels that doesn't exist (that's what 'Channels Live' reports, without any such gate). Option d is false — the docs say ANY status card can be clicked to drill down, not just this one.",
-      "sourceRefs": ["r-gitbook-activity"]
+      "sourceRefs": [
+        "r-gitbook-activity"
+      ]
     },
     {
       "id": "q-m00-11",
@@ -335,13 +693,32 @@
       "difficulty": 2,
       "stem": "A teammate calls the multi-step workflows on the platform 'recipes.' What's the correct term, and why does it matter here?",
       "options": [
-        { "id": "a", "text": "Playbook — 'recipe' is legacy/backend naming that appears in a few older blurbs, but the platform's concept and UI use Playbook, so using the right word keeps you aligned with the docs and product", "correct": true },
-        { "id": "b", "text": "Recipe is the current official term and Playbook is the deprecated one", "correct": false },
-        { "id": "c", "text": "Both terms are wrong; the correct term for a multi-step workflow is Mission", "correct": false },
-        { "id": "d", "text": "It doesn't matter which word you use, since the platform has no concept for multi-step workflows", "correct": false }
+        {
+          "id": "a",
+          "text": "Playbook — 'recipe' is legacy/backend naming that appears in a few older blurbs, but the platform's concept and UI use Playbook, so using the right word keeps you aligned with the docs and product",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Recipe is the current official term and Playbook is the deprecated one",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Both terms are wrong; the correct term for a multi-step workflow is Mission",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "It doesn't matter which word you use, since the platform has no concept for multi-step workflows",
+          "correct": false
+        }
       ],
       "explanation": "The canonical concept is the Playbook; 'recipe' is older naming that survives in a couple of legacy blurbs, so a builder should say Playbook to stay aligned with the product and docs. Option b reverses the currency — Playbook is current, not deprecated. Option c wrongly substitutes Mission (an open-ended, unspecified-steps objective) for a defined multi-step workflow. Option d denies that the platform has multi-step workflows at all, which is false — that's exactly what a Playbook is.",
-      "sourceRefs": ["r-gitbook-about", "r-apa-survey"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-apa-survey"
+      ]
     },
     {
       "id": "q-m00-12",
@@ -350,13 +727,32 @@
       "difficulty": 2,
       "stem": "In the Key Concepts table, Memory is described as having how many documented tiers, and what are they?",
       "options": [
-        { "id": "a", "text": "Two tiers — short-term (within a session) and long-term (across conversations)", "correct": true },
-        { "id": "b", "text": "Five layers, L0 through L4, each a distinct storage engine", "correct": false },
-        { "id": "c", "text": "One tier only, cleared at the end of every message", "correct": false },
-        { "id": "d", "text": "Three tiers — session, workspace, and global — shared across all teams", "correct": false }
+        {
+          "id": "a",
+          "text": "Two tiers — short-term (within a session) and long-term (across conversations)",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Five layers, L0 through L4, each a distinct storage engine",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "One tier only, cleared at the end of every message",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Three tiers — session, workspace, and global — shared across all teams",
+          "correct": false
+        }
       ],
       "explanation": "The documented, user-facing model is two tiers: short-term (session) and long-term (cross-conversation). Option b (five layers L0–L4) is deeper architecture-direction vocabulary from design material, not the shipped user model — treat it as direction, not a live feature. Option c denies long-term memory, which the table explicitly includes. Option d invents a three-tier, cross-team scheme that would break workspace isolation — memory is scoped, not shared globally.",
-      "sourceRefs": ["r-gitbook-about", "r-apa-survey"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-apa-survey"
+      ]
     },
     {
       "id": "q-m00-13",
@@ -365,13 +761,32 @@
       "difficulty": 1,
       "stem": "This track is structured around a five-stage arc. Which is it, and where does Module 00 sit?",
       "options": [
-        { "id": "a", "text": "Learn → Build → Decide → Prove → Ready — and Module 00 is the Learn foundation, while the capstone is the Prove", "correct": true },
-        { "id": "b", "text": "Plan → Code → Test → Deploy → Monitor — and Module 00 is the Deploy stage", "correct": false },
-        { "id": "c", "text": "Install → Configure → Launch → Bill → Support — and Module 00 is Billing", "correct": false },
-        { "id": "d", "text": "Awareness → Interest → Decision → Action → Retention — and Module 00 is the sales funnel", "correct": false }
+        {
+          "id": "a",
+          "text": "Learn → Build → Decide → Prove → Ready — and Module 00 is the Learn foundation, while the capstone is the Prove",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Plan → Code → Test → Deploy → Monitor — and Module 00 is the Deploy stage",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "Install → Configure → Launch → Bill → Support — and Module 00 is Billing",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "Awareness → Interest → Decision → Action → Retention — and Module 00 is the sales funnel",
+          "correct": false
+        }
       ],
       "explanation": "The track's arc is Learn→Build→Decide→Prove→Ready; this orientation module is Learn, and the shipped capstone build is Prove. Option b is a generic software delivery lifecycle, not this track's arc. Option c is an unrelated product-lifecycle list. Option d is a marketing/sales funnel — explicitly not what this free, self-learning track is (per the brief, there's no conversion funnel).",
-      "sourceRefs": ["r-apa-prd", "r-apa-overview"]
+      "sourceRefs": [
+        "r-apa-prd",
+        "r-apa-overview"
+      ]
     },
     {
       "id": "q-m00-14",
@@ -380,13 +795,33 @@
       "difficulty": 3,
       "stem": "You type one message in Chat and get a useful result. Which sequence correctly describes what the three founding ideas say happened behind it?",
       "options": [
-        { "id": "a", "text": "The Universal Router selected a suitable agent (you can override); that agent used its role, model, and scoped tools to do actual work; and the routing decision, tool calls, and cost were all recorded in the Command Centre", "correct": true },
-        { "id": "b", "text": "A single general assistant answered from its own knowledge; no worker was selected and nothing was logged", "correct": false },
-        { "id": "c", "text": "You manually picked the agent, it answered without any tools, and the interaction left no trace", "correct": false },
-        { "id": "d", "text": "The message was stored as a document in a Knowledge Base and searched later; no agent acted on it", "correct": false }
+        {
+          "id": "a",
+          "text": "The Universal Router selected a suitable agent (you can override); that agent used its role, model, and scoped tools to do actual work; and the routing decision, tool calls, and cost were all recorded in the Command Centre",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "A single general assistant answered from its own knowledge; no worker was selected and nothing was logged",
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": "You manually picked the agent, it answered without any tools, and the interaction left no trace",
+          "correct": false
+        },
+        {
+          "id": "d",
+          "text": "The message was stored as a document in a Knowledge Base and searched later; no agent acted on it",
+          "correct": false
+        }
       ],
       "explanation": "That sequence is the three ideas in action: the Router assigns a worker (Idea 2, override available), the worker does real work with its model and scoped tools (Idea 1), and everything is tracked and costed in the Command Centre (Idea 3). Option b denies both the Router's selection and the built-in visibility. Option c contradicts the Router (you don't manually pick), the worker's tool use, and the logging. Option d confuses a chat message with a Knowledge Base document — retrieval isn't what handles a live request; an agent is.",
-      "sourceRefs": ["r-gitbook-about", "r-gitbook-activity", "r-gitbook-feed"]
+      "sourceRefs": [
+        "r-gitbook-about",
+        "r-gitbook-activity",
+        "r-gitbook-feed"
+      ]
     }
   ],
   "scenarios": [],
@@ -415,7 +850,9 @@
       "url": "automatos-gitbook/about.md",
       "kind": "first-party-doc",
       "annotation": "The single most important page for this module: the three founding ideas (agents are workers not chatbots; the platform routes so you don't have to; visibility is built in), the architecture diagram, and — critically — the Key Concepts table you must be able to use word-for-word. Every concept in Lesson 2 comes straight from here. Note the vocabulary discipline: it's 'Playbook' (not 'recipe'), and Memory is the two documented tiers (short/long) — deeper five-layer memory you may see elsewhere is architecture direction, not the shipped user model.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-gitbook-readme",
@@ -423,7 +860,9 @@
       "url": "automatos-gitbook/README.md",
       "kind": "first-party-doc",
       "annotation": "The entry point and the 'what can you do?' map that links every surface (Chat, Agents, Activity, Tools, Knowledge, Marketplace, Team, Analytics, Settings, Channels). It's also the ground truth for the lab: sign in → a personal workspace is created automatically on first login → open Chat and type, and the platform routes your message to the best agent. Follow this for every hands-on step in the track.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-gitbook-activity",
@@ -431,7 +870,9 @@
       "url": "automatos-gitbook/activity/README.md",
       "kind": "first-party-doc",
       "annotation": "The Command Centre itself: the statement that the Activity page IS your command centre, the four status cards (Working Now / Channels Live / Completed Today / Needs Attention, all clickable), and the five tabs (Dashboard / Feed / Reports / Memory / Missions). Lesson 3 and the lab are built on this page — read it to know where every kind of activity lives before you start running real work.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-gitbook-dashboard",
@@ -439,7 +880,9 @@
       "url": "automatos-gitbook/activity/dashboard.md",
       "kind": "first-party-doc",
       "annotation": "The default Command Centre view up close: the weekly Schedule of upcoming automated routines (built from Playbooks with cron triggers — the example rows like '23:45 Sentinel Routine' are exactly what a Playbook produces), Active Now with progress bars and step counts, and the Agent Reports grid. Updates live via server-sent events, so you never refresh. Useful for seeing how the agent-vs-Playbook distinction from Lesson 2 shows up on screen.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-gitbook-feed",
@@ -447,7 +890,9 @@
       "url": "automatos-gitbook/activity/feed.md",
       "kind": "first-party-doc",
       "annotation": "The chronological activity log — the surface where 'visibility is built in' becomes concrete. Every action generates an entry: chat responses, tool calls, Playbook step completions, mission updates, memory operations, report generations, and — worth noticing — routing decisions ('Universal Router selected Code Reviewer'). Filterable by agent, event type, time, and keyword. This is the tab you use to trace exactly what happened, step by step.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-gitbook-missions",
@@ -455,7 +900,9 @@
       "url": "automatos-gitbook/activity/missions.md",
       "kind": "first-party-doc",
       "annotation": "The home of the Mission concept: long-running, open-ended objectives that span multiple tasks and agents, which agents plan and execute independently — the third of the three execution mechanisms (agent / Playbook / Mission). Referenced here to anchor the vocabulary and the agent-vs-Playbook-vs-Mission judgment call; Module 05 goes deep on running missions, plan approval, and cost pause/resume.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-automatos-repo",
@@ -463,7 +910,9 @@
       "url": "automatos-ai/README.md",
       "kind": "reference",
       "annotation": "The platform's own repo (README plus the docs/ tree) explains the WHY behind the concepts — the reasoning for the worker model, the multi-tier router, and the graphs. Treat it as architecture direction, NOT proof of what's shipped: the gitbook is the only evidence of live features. Read it to deepen your mental model of why the platform is shaped this way, and label anything you take from it as design intent when in doubt.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-apa-survey",
@@ -471,7 +920,9 @@
       "url": "automatos-academy/docs/research/apa-source-survey-2026-07-02.md",
       "kind": "reference",
       "annotation": "The track's internal grounding map — the canonical vocabulary (Playbook not recipe; the Router tiers by exact name; roles Admin/Member/Viewer plus the Context Engineering permission; memory as two documented tiers) and the live-vs-roadmap table that flags what's shipped versus what's direction. Not learner-facing, but the authority behind why this module uses the words it does and what it deliberately labels as 'architecture direction' rather than a live feature.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-apa-prd",
@@ -479,7 +930,9 @@
       "url": "automatos-academy/docs/prds/PRD-S1-APA.md",
       "kind": "reference",
       "annotation": "The brief for this whole track: a free, first-party, no-exam platform-mastery curriculum (no A+ gate, no conversion funnel), built to make you 'Automatos-ready.' It sets the judgment-first mandate (when to use an agent vs a Playbook vs a Mission; least-privilege tool scoping; cheaper-model routing as the top cost lever) and the reference-build capstone that is the 'Prove' stage of the arc this module introduces.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     },
     {
       "id": "r-apa-overview",
@@ -487,7 +940,9 @@
       "url": "automatos-academy/docs/roadmap/automatos-apa/00-overview.md",
       "kind": "reference",
       "annotation": "The module's design brief and the source of its practical voice: the mental-model framing (workers not chatbots; the platform routes; knowledge powers everything; visibility is built in), the one-line map 'agents do the work, the Router directs it, Knowledge feeds it, the Command Centre shows it,' and the 'Try it now' Command Centre tour that the lab is built from. Also the origin of the video prompts. Grounding for authors, not learner-facing.",
-      "domainIds": ["m00-what-is-automatos"]
+      "domainIds": [
+        "m00-what-is-automatos"
+      ]
     }
   ],
   "videos": [
@@ -495,9 +950,11 @@
       "id": "v-00-1",
       "title": "00 · What is Automatos? — workers not chatbots, the Router, and the one-line map",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m00-what-is-automatos"],
+      "url": "https://widgets.automatos.app/academy/automatos/platform-architect/v-00-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m00-what-is-automatos"
+      ],
       "sourceNotebook": "platform-architect / m00 / mental-model-and-vocabulary"
     },
     {
@@ -506,7 +963,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m00-what-is-automatos"],
+      "domainIds": [
+        "m00-what-is-automatos"
+      ],
       "sourceNotebook": "platform-architect / m00 / command-centre-tour"
     }
   ]
