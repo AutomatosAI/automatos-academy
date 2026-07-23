@@ -37,9 +37,16 @@ function videoSlotExists(t, slotId) {
   return (t.track.data.videos || []).some((v) => v.id === slotId);
 }
 
-export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getIndex }) {
+export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getIndex, onChange }) {
   const base = (cdnBase || "https://widgets.automatos.app").replace(/\/+$/, "");
   const json = express.json({ limit: "8kb" });
+  const notifyChange = () => {
+    try {
+      if (typeof onChange === "function") onChange();
+    } catch {
+      /* overlay refresh is best-effort — never fail a write on it */
+    }
+  };
 
   app.get("/api/admin/media/slots", requireAdmin, (req, res, next) => {
     (async () => {
@@ -106,6 +113,7 @@ export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getI
       const { rows } = await pool.query(UPSERT_SQL, [
         vendor, track, slotId, kind, url, contentType, sizeBytes, req.adminActor || null,
       ]);
+      notifyChange(); // overlay reflects the new binding at once
       res.json({ ok: true, binding: rows[0] });
     })().catch(next);
   });
@@ -117,6 +125,7 @@ export function registerMediaRoutes(app, { pool, requireAdmin, s3, cdnBase, getI
         return res.status(400).json({ error: "bad_request" });
       }
       await pool.query(DELETE_SQL, [vendor, track, slotId, kind]);
+      notifyChange();
       res.json({ ok: true });
     })().catch(next);
   });
