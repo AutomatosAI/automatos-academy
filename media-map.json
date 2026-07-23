@@ -1,0 +1,34 @@
+{
+  "_note": "Reviewed filename→slot map for bulk video staging (PRD-WAVE-CONTENT-OPS). Each downloaded NotebookLM video (one ~7-min per module, in docs/roadmap order) maps to that module's MAIN slot (v-mN-1 for skills tracks, v-dN-1 for exam tracks). Deep-dive (v-*-2) and overview (v-ov-*) slots stay placeholder until those are produced. `source` is relative to the platform root (this repo's parent). scripts/stage-media.mjs consumes this.",
+  "tracks": [
+    {
+      "code": "ABF",
+      "vendor": "automatos",
+      "track": "ai-business",
+      "source": "DUMPING AREA/ACADEMY/ABF",
+      "files": {
+        "Beyond_The_AI_Hype.mp4": "v-m0-1",
+        "Where_AI_Fits_Your_Business.mp4": "v-m1-1",
+        "From_Garbage_to_Gold.mp4": "v-m2-1",
+        "Teach_AI_Your_Business.mp4": "v-m3-1",
+        "From_Chats_to_Systems.mp4": "v-m4-1",
+        "Delegating_to_AI.mp4": "v-m5-1",
+        "AI_Risks___Defenses.mp4": "v-m6-1",
+        "AI_ROI__The_Numbers.mp4": "v-m7-1",
+        "AI_Operating_Plan.mp4": "v-m8-1"
+      }
+    },
+    {
+      "code": "GAIL",
+      "vendor": "google",
+      "track": "gen-ai-leader",
+      "source": "DUMPING AREA/ACADEMY/GAIL",
+      "files": {
+        "Fundamentals_of_Gen_AI.mp4": "v-d1-1",
+        "Google_Cloud_Gen_AI_Offerings.mp4": "v-d2-1",
+        "Gen_AI_Leader__Improve_Output.mp4": "v-d3-1",
+        "Gen_AI_Leader_Playbook.mp4": "v-d4-1"
+      }
+    }
+  ]
+}
