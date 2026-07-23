@@ -31,7 +31,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # either name works — DATABASE_PUBLIC_URL is the precise one (CI must use
+      # Railway's public proxied URL; .railway.internal is unreachable from CI)
+      DATABASE_URL: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL || secrets.DATABASE_PUBLIC_URL }}
     steps:
       - name: Gate on the DATABASE_URL secret
         id: gate
