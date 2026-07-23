@@ -24,6 +24,13 @@ export async function loadCatalog() {
   return m;
 }
 
+// Drop a cached track so the next loadTrack refetches from the catalog — used
+// after an admin media bind so the overlay-aware content is re-read on the next
+// visit to the track (the card also swaps optimistically in place right away).
+export function invalidateTrack(vendorId, trackId) {
+  cache.delete(`t:${vendorId}/${trackId}`);
+}
+
 export async function loadTrack(vendorId, trackId) {
   const key = `t:${vendorId}/${trackId}`;
   if (cache.has(key)) return cache.get(key);

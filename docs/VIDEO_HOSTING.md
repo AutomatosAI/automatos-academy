@@ -44,7 +44,24 @@ GitHub never exposes secret values, so this is the one step tooling can't do.
 `v-m3-1.mp4` — that's what makes registration automatic. Slot ids live in each
 track/domain JSON's `videos[]` (status `placeholder`).
 
-Route A — no local AWS credentials (the "same as CDN" route):
+**Route A0 — one dispatch, bind the whole batch (recommended, C3 DB path).**
+Binds into `media_bindings`; the serve-time overlay renders the slot published
+with **no redeploy and no committed JSON** — the bulk equivalent of the browser
+Upload button. Needs the `ACADEMY_ADMIN_KEY` repo secret (same value as the
+server's env) and the server's AWS creds set (so it can verify each object).
+1. Branch, drop files under `media-staging/<vendor>/<track>/` (named by slot id), push.
+2. **Actions → Deploy academy media → Run workflow** on that branch, mode
+   **staging**, **bind = true** (tick **dry_run** first to preview the plan).
+   → syncs to S3, then POSTs each `<slotId>.mp4` to `/api/admin/media/bind`.
+3. Delete the branch (media never reaches `main`). Nothing else to commit.
+
+Idempotent — re-running upserts. A file whose slot id isn't in the track JSON is
+reported (`unknown_slot`), never guessed. Or run it yourself against any dir:
+`ACADEMY_ADMIN_KEY=… npm run bulk-bind -- --dir ./out` (`--dry-run` to preview).
+
+Route A — no local AWS credentials, **legacy git-JSON path** (writes urls into
+the track JSON instead of `media_bindings` — use A0 unless you specifically want
+the url baked into git):
 1. Branch, drop files under `media-staging/<vendor>/<track>/`, push the branch.
 2. **Actions → Deploy academy media → Run workflow** on that branch, mode
    **staging** → syncs to `s3://$BUCKET/academy/<vendor>/<track>/`.
