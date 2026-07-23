@@ -27,13 +27,29 @@
           "difficulty": 1,
           "stem": "In plain terms, what is today’s AI (a language model) actually doing when it answers you?",
           "options": [
-            { "id": "a", "text": "Predicting likely next words based on patterns in the huge amount of text it was trained on", "correct": true },
-            { "id": "b", "text": "Looking up verified facts in a built-in, always-current database" },
-            { "id": "c", "text": "Searching the live internet for the exact answer every time" },
-            { "id": "d", "text": "Understanding your question the way a human colleague does and reasoning from true knowledge" }
+            {
+              "id": "a",
+              "text": "Predicting likely next words based on patterns in the huge amount of text it was trained on",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Looking up verified facts in a built-in, always-current database"
+            },
+            {
+              "id": "c",
+              "text": "Searching the live internet for the exact answer every time"
+            },
+            {
+              "id": "d",
+              "text": "Understanding your question the way a human colleague does and reasoning from true knowledge"
+            }
           ],
           "explanation": "It generates a reply by predicting likely next words from patterns it learned in training — that’s the whole trick, and it’s why it’s so good at language work. It has no built-in fact database that stays current (b), it doesn’t automatically search the live web (c), and it isn’t “understanding” in the human sense (d) — those misreadings are exactly what lead people to over-trust it. This isn’t a knock: word-prediction done well is remarkably useful.",
-          "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+          "sourceRefs": [
+            "r-genai-leader-guide",
+            "r-gb-about"
+          ]
         },
         {
           "id": "kc-m0-2",
@@ -42,13 +58,28 @@
           "difficulty": 1,
           "stem": "The course’s mental model is “a tireless, well-read intern, not an oracle.” Which everyday habit does that most directly recommend?",
           "options": [
-            { "id": "a", "text": "Let it produce strong first drafts quickly, then review the parts that actually matter before you act", "correct": true },
-            { "id": "b", "text": "Trust its output as final because it sounds confident and well-written" },
-            { "id": "c", "text": "Avoid using it for anything important, since only experts should touch AI" },
-            { "id": "d", "text": "Expect it to be right only if you phrase the question in special technical language" }
+            {
+              "id": "a",
+              "text": "Let it produce strong first drafts quickly, then review the parts that actually matter before you act",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Trust its output as final because it sounds confident and well-written"
+            },
+            {
+              "id": "c",
+              "text": "Avoid using it for anything important, since only experts should touch AI"
+            },
+            {
+              "id": "d",
+              "text": "Expect it to be right only if you phrase the question in special technical language"
+            }
           ],
           "explanation": "An intern gives you fast, capable drafts you then check — brief it, use the draft, review what matters. Treating confident-sounding output as final (b) is the over-trust trap this whole module warns against; refusing to use it for real work (c) is the opposite trap, dismissing a tool that’s already useful; and you don’t need technical phrasing (d) — plain, clear instructions work, which is the point of managing it like a person.",
-          "sourceRefs": ["r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-genai-leader-guide"
+          ]
         }
       ]
     },
@@ -66,13 +97,29 @@
           "difficulty": 2,
           "stem": "The AI drafts a supplier complaint and confidently includes a delivery date you never gave it. What has happened, and what’s the sensible response?",
           "options": [
-            { "id": "a", "text": "It hallucinated — invented a plausible detail. That’s normal; paste in the real delivery info and keep a human eye on facts that carry a cost if wrong", "correct": true },
-            { "id": "b", "text": "The tool is broken or defective and shouldn’t be trusted for anything again" },
-            { "id": "c", "text": "It secretly looked up your real records, so the date is almost certainly correct" },
-            { "id": "d", "text": "You must be technical to prevent this, so an owner can’t safely use AI for emails" }
+            {
+              "id": "a",
+              "text": "It hallucinated — invented a plausible detail. That’s normal; paste in the real delivery info and keep a human eye on facts that carry a cost if wrong",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "The tool is broken or defective and shouldn’t be trusted for anything again"
+            },
+            {
+              "id": "c",
+              "text": "It secretly looked up your real records, so the date is almost certainly correct"
+            },
+            {
+              "id": "d",
+              "text": "You must be technical to prevent this, so an owner can’t safely use AI for emails"
+            }
           ],
           "explanation": "A complaint email usually contains a date, so the model produced a plausible-looking one — that’s hallucination, a normal property of word-prediction, not a defect (b). It has no access to your records unless you provide them, so the invented date is not to be trusted (c). And the fix is a simple habit any owner can do — supply the real source and check what matters — no technical skill required (d).",
-          "sourceRefs": ["r-owasp-llm", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-owasp-llm",
+            "r-genai-leader-guide"
+          ]
         },
         {
           "id": "kc-m0-4",
@@ -81,13 +128,29 @@
           "difficulty": 2,
           "stem": "What does the “knowledge boundary” mean for an AI answering questions about your specific business?",
           "options": [
-            { "id": "a", "text": "It knows only its general training plus whatever you put in front of it, so it can’t know your prices or policies until you show them", "correct": true },
-            { "id": "b", "text": "It already knows your business because it was trained on the whole internet, including your data" },
-            { "id": "c", "text": "It can never be made to use your specific information, so it’s only ever good for generic tasks" },
-            { "id": "d", "text": "It automatically pulls in today’s orders and your live systems whenever you ask" }
+            {
+              "id": "a",
+              "text": "It knows only its general training plus whatever you put in front of it, so it can’t know your prices or policies until you show them",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "It already knows your business because it was trained on the whole internet, including your data"
+            },
+            {
+              "id": "c",
+              "text": "It can never be made to use your specific information, so it’s only ever good for generic tasks"
+            },
+            {
+              "id": "d",
+              "text": "It automatically pulls in today’s orders and your live systems whenever you ask"
+            }
           ],
           "explanation": "Its knowledge is general training (frozen at some past date) plus what you supply in the conversation — so your prices, policies, and today’s orders are invisible to it until you provide them. It was not trained on your private data (b). It absolutely can use your information once you give it — that’s the whole point of grounding, and later of RAG — so “only ever generic” is false (c). And it doesn’t reach into your live systems on its own (d); you (or, later, a configured setup) put the information in front of it.",
-          "sourceRefs": ["r-gb-about", "r-gb-knowledge"]
+          "sourceRefs": [
+            "r-gb-about",
+            "r-gb-knowledge"
+          ]
         }
       ]
     },
@@ -105,13 +168,29 @@
           "difficulty": 1,
           "stem": "Why is a “grounded” answer (you supplied your real menu, price list, or customer email) so much more useful than a “generic” one?",
           "options": [
-            { "id": "a", "text": "The AI can now anchor its general ability to your actual facts, so the reply reflects your prices, policy, and tone instead of a textbook average", "correct": true },
-            { "id": "b", "text": "Supplying a document upgrades you to a smarter, more powerful AI model" },
-            { "id": "c", "text": "The generic answer is always wrong, while the grounded answer is guaranteed to be perfect and needs no review" },
-            { "id": "d", "text": "Grounding makes the AI permanently remember your business for every future chat automatically" }
+            {
+              "id": "a",
+              "text": "The AI can now anchor its general ability to your actual facts, so the reply reflects your prices, policy, and tone instead of a textbook average",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Supplying a document upgrades you to a smarter, more powerful AI model"
+            },
+            {
+              "id": "c",
+              "text": "The generic answer is always wrong, while the grounded answer is guaranteed to be perfect and needs no review"
+            },
+            {
+              "id": "d",
+              "text": "Grounding makes the AI permanently remember your business for every future chat automatically"
+            }
           ],
           "explanation": "Grounding closes the knowledge boundary: the same model now applies its general competence to *your* specifics, so the answer fits your business. It’s the same model, not a better one (b) — you briefed it, you didn’t upgrade it. The generic answer isn’t worthless, and even a grounded one still deserves a quick review (c) — hallucination doesn’t vanish, it just has less room. And in a single chat the memory ends when the conversation does; making it permanent is Module 03’s RAG, not something one paste achieves (d).",
-          "sourceRefs": ["r-gb-chat", "r-genai-leader-guide"]
+          "sourceRefs": [
+            "r-gb-chat",
+            "r-genai-leader-guide"
+          ]
         },
         {
           "id": "kc-m0-6",
@@ -120,13 +199,29 @@
           "difficulty": 2,
           "stem": "In the generic-vs-grounded experiment you paste your info into one chat. What’s true about that grounding, and where does the course take it next?",
           "options": [
-            { "id": "a", "text": "It grounds only that conversation; making your documents permanently available is Module 03 (RAG), and running whole tasks outside a chat is Module 04", "correct": true },
-            { "id": "b", "text": "One paste permanently teaches the AI your business across all conversations, so there’s nothing left to set up later" },
-            { "id": "c", "text": "Pasting into a chat is unsafe and should be avoided; only Module 04 automation is ever acceptable" },
-            { "id": "d", "text": "Grounding a single chat is the final state — the course doesn’t build on it" }
+            {
+              "id": "a",
+              "text": "It grounds only that conversation; making your documents permanently available is Module 03 (RAG), and running whole tasks outside a chat is Module 04",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "One paste permanently teaches the AI your business across all conversations, so there’s nothing left to set up later"
+            },
+            {
+              "id": "c",
+              "text": "Pasting into a chat is unsafe and should be avoided; only Module 04 automation is ever acceptable"
+            },
+            {
+              "id": "d",
+              "text": "Grounding a single chat is the final state — the course doesn’t build on it"
+            }
           ],
           "explanation": "Correct: a single chat’s grounding lasts only for that conversation — real and valuable, but not permanent. Making it permanent (upload once, always available) is RAG in Module 03, and lifting tasks out of the chat box is Module 04. So (b) is wrong — one paste doesn’t persist across chats; (c) is wrong — the hands-on step deliberately uses exactly this paste-into-chat method, it’s a fine and normal first step; and (d) is wrong — this idea is the spine the rest of the course builds on.",
-          "sourceRefs": ["r-gb-chat", "r-gb-knowledge"]
+          "sourceRefs": [
+            "r-gb-chat",
+            "r-gb-knowledge"
+          ]
         }
       ]
     }
@@ -139,13 +234,29 @@
       "difficulty": 1,
       "stem": "Which one-sentence description of today’s AI is the most accurate for a business owner?",
       "options": [
-        { "id": "a", "text": "A system trained on huge amounts of text that predicts likely next words — very good at reading, writing, and summarising, with no guarantee of being right", "correct": true },
-        { "id": "b", "text": "An always-current fact database you can query for guaranteed-correct answers" },
-        { "id": "c", "text": "A conscious digital mind that understands and knows things the way a person does" },
-        { "id": "d", "text": "A live web search engine that finds the single true answer to any question" }
+        {
+          "id": "a",
+          "text": "A system trained on huge amounts of text that predicts likely next words — very good at reading, writing, and summarising, with no guarantee of being right",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "An always-current fact database you can query for guaranteed-correct answers"
+        },
+        {
+          "id": "c",
+          "text": "A conscious digital mind that understands and knows things the way a person does"
+        },
+        {
+          "id": "d",
+          "text": "A live web search engine that finds the single true answer to any question"
+        }
       ],
       "explanation": "The accurate mental model is a next-word predictor trained on lots of text — excellent at language work, no correctness guarantee. It’s not a queryable fact database (b): it has no built-in, always-current store of truth. It isn’t conscious or truly “understanding” (c). And it isn’t a web search engine (d) — it doesn’t automatically fetch live results, which is why it can confidently state something outdated or invented.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-about"
+      ]
     },
     {
       "id": "q-m0-2",
@@ -154,13 +265,29 @@
       "difficulty": 1,
       "stem": "“Hallucination” in AI most precisely means:",
       "options": [
-        { "id": "a", "text": "The model stating something false or made-up with the same confidence it uses for true things", "correct": true },
-        { "id": "b", "text": "The model refusing to answer a question it considers off-limits" },
-        { "id": "c", "text": "The model crashing or returning an error message" },
-        { "id": "d", "text": "The model deliberately lying because it has intentions of its own" }
+        {
+          "id": "a",
+          "text": "The model stating something false or made-up with the same confidence it uses for true things",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The model refusing to answer a question it considers off-limits"
+        },
+        {
+          "id": "c",
+          "text": "The model crashing or returning an error message"
+        },
+        {
+          "id": "d",
+          "text": "The model deliberately lying because it has intentions of its own"
+        }
       ],
       "explanation": "Hallucination is confidently presenting false or invented information as if it were true — a side effect of predicting words that *fit* rather than words it has verified. It’s not a refusal (b), not a crash or error (c), and not deliberate deception (d) — the model has no intent; it simply can’t tell its well-fitting guesses from its facts, which is exactly why you supply sources and check what matters.",
-      "sourceRefs": ["r-owasp-llm", "r-genai-leader-guide"]
+      "sourceRefs": [
+        "r-owasp-llm",
+        "r-genai-leader-guide"
+      ]
     },
     {
       "id": "q-m0-3",
@@ -169,13 +296,29 @@
       "difficulty": 2,
       "stem": "Because hallucination is a normal property of how AI works, what’s the sensible operating habit for a business owner?",
       "options": [
-        { "id": "a", "text": "Give the AI the real source material and human-check any fact that has a cost if it’s wrong; don’t sweat low-stakes wording", "correct": true },
-        { "id": "b", "text": "Stop using AI for anything, because it can’t be trusted at all" },
-        { "id": "c", "text": "Manually verify every single word of every output, no matter how trivial" },
-        { "id": "d", "text": "Assume that if the answer is well-written and confident, it must be correct" }
+        {
+          "id": "a",
+          "text": "Give the AI the real source material and human-check any fact that has a cost if it’s wrong; don’t sweat low-stakes wording",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Stop using AI for anything, because it can’t be trusted at all"
+        },
+        {
+          "id": "c",
+          "text": "Manually verify every single word of every output, no matter how trivial"
+        },
+        {
+          "id": "d",
+          "text": "Assume that if the answer is well-written and confident, it must be correct"
+        }
       ],
       "explanation": "The proportionate habit is: supply real sources to reduce guessing, and check the things that matter — prices, dates, names, legal or safety claims — while letting trivial phrasing go. Abandoning AI entirely (b) throws away a genuinely useful tool over normal behaviour. Verifying every trivial word (c) is so slow it defeats the purpose. And trusting confident, polished output (d) is the exact trap — fluency is not accuracy.",
-      "sourceRefs": ["r-owasp-llm", "r-nist-ai-rmf"]
+      "sourceRefs": [
+        "r-owasp-llm",
+        "r-nist-ai-rmf"
+      ]
     },
     {
       "id": "q-m0-4",
@@ -184,13 +327,29 @@
       "difficulty": 2,
       "stem": "An AI assistant you’ve just opened, with nothing supplied, is asked: “What’s our refund window?” What should you expect?",
       "options": [
-        { "id": "a", "text": "It can’t know your actual policy and may state a plausible-sounding guess; you need to give it your real policy for a reliable answer", "correct": true },
-        { "id": "b", "text": "It will retrieve your true refund policy automatically because it knows your business" },
-        { "id": "c", "text": "It will correctly refuse and say it has no way to ever use your policy" },
-        { "id": "d", "text": "It will pull your live records and today’s data on its own to answer precisely" }
+        {
+          "id": "a",
+          "text": "It can’t know your actual policy and may state a plausible-sounding guess; you need to give it your real policy for a reliable answer",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "It will retrieve your true refund policy automatically because it knows your business"
+        },
+        {
+          "id": "c",
+          "text": "It will correctly refuse and say it has no way to ever use your policy"
+        },
+        {
+          "id": "d",
+          "text": "It will pull your live records and today’s data on its own to answer precisely"
+        }
       ],
       "explanation": "Your refund window is a private, specific fact behind the knowledge boundary — untrained and unseen — so a cold assistant may produce a confident guess rather than your real number. It doesn’t automatically know your business (b), it isn’t limited to refusing forever — you *can* give it the policy and then it will use it (c), and it doesn’t reach into your live systems by itself (d). The fix is to supply the policy.",
-      "sourceRefs": ["r-gb-about", "r-gb-knowledge"]
+      "sourceRefs": [
+        "r-gb-about",
+        "r-gb-knowledge"
+      ]
     },
     {
       "id": "q-m0-5",
@@ -199,13 +358,29 @@
       "difficulty": 1,
       "stem": "Which task is squarely in the sweet spot of what today’s AI does well?",
       "options": [
-        { "id": "a", "text": "Drafting a polite supplier complaint email and summarising a long customer thread into three action points", "correct": true },
-        { "id": "b", "text": "Guaranteeing the exact, current stock levels in your warehouse right now" },
-        { "id": "c", "text": "Taking final accountability for a legal decision so no human has to" },
-        { "id": "d", "text": "Knowing this week’s news and your private sales figures without being told" }
+        {
+          "id": "a",
+          "text": "Drafting a polite supplier complaint email and summarising a long customer thread into three action points",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "Guaranteeing the exact, current stock levels in your warehouse right now"
+        },
+        {
+          "id": "c",
+          "text": "Taking final accountability for a legal decision so no human has to"
+        },
+        {
+          "id": "d",
+          "text": "Knowing this week’s news and your private sales figures without being told"
+        }
       ],
       "explanation": "Drafting and summarising are language tasks — reading and writing — which is precisely where the technology shines. Exact live stock levels (b) and this week’s news or your private figures (d) sit behind the knowledge boundary; it can’t reliably know them unless you supply them. And accountability for a decision (c) is inherently human — the AI can assist, but a person owns the call.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-about"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-about"
+      ]
     },
     {
       "id": "q-m0-6",
@@ -214,13 +389,29 @@
       "difficulty": 2,
       "stem": "A café owner asks generically for “a good customer apology email,” then re-asks after pasting in the actual complaint and her refund policy. Why is the second reply better?",
       "options": [
-        { "id": "a", "text": "The second reply is grounded in her real facts — it uses the actual complaint and her true policy — while the first was a generic template", "correct": true },
-        { "id": "b", "text": "The second reply came from a more advanced AI model that pasting unlocked" },
-        { "id": "c", "text": "The first reply was worthless; only grounded replies have any value at all" },
-        { "id": "d", "text": "Pasting the details means the AI has now permanently learned her business for all future chats" }
+        {
+          "id": "a",
+          "text": "The second reply is grounded in her real facts — it uses the actual complaint and her true policy — while the first was a generic template",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The second reply came from a more advanced AI model that pasting unlocked"
+        },
+        {
+          "id": "c",
+          "text": "The first reply was worthless; only grounded replies have any value at all"
+        },
+        {
+          "id": "d",
+          "text": "Pasting the details means the AI has now permanently learned her business for all future chats"
+        }
       ],
       "explanation": "Supplying the real complaint and policy grounds the answer in her specifics, so it fits the situation instead of being a one-size-fits-all template. It’s the same model, not an upgraded one (b) — she briefed it. Generic replies still have value as a starting point (c). And a single chat’s grounding doesn’t persist across conversations (d) — making it permanent is Module 03’s RAG, not an effect of one paste.",
-      "sourceRefs": ["r-gb-chat", "r-gb-knowledge"]
+      "sourceRefs": [
+        "r-gb-chat",
+        "r-gb-knowledge"
+      ]
     },
     {
       "id": "q-m0-7",
@@ -229,13 +420,29 @@
       "difficulty": 2,
       "stem": "Which statement best captures the honest division of labour between an AI and a business owner?",
       "options": [
-        { "id": "a", "text": "The AI is faster, more patient, and great at first drafts; the owner brings judgement, current and private facts, and the final decision", "correct": true },
-        { "id": "b", "text": "The AI should own the final decision because it processes more information than a person" },
-        { "id": "c", "text": "The owner should do all the writing themselves because AI drafts are never usable" },
-        { "id": "d", "text": "There’s no meaningful division — the AI can fully replace the owner’s role end to end" }
+        {
+          "id": "a",
+          "text": "The AI is faster, more patient, and great at first drafts; the owner brings judgement, current and private facts, and the final decision",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "The AI should own the final decision because it processes more information than a person"
+        },
+        {
+          "id": "c",
+          "text": "The owner should do all the writing themselves because AI drafts are never usable"
+        },
+        {
+          "id": "d",
+          "text": "There’s no meaningful division — the AI can fully replace the owner’s role end to end"
+        }
       ],
       "explanation": "The honest split plays each to its strength: AI supplies speed, patience, breadth, and drafts; the human supplies taste, accountability, current or private facts, and the final call. The AI shouldn’t own the decision (b) — accountability is human, and volume of information isn’t judgement. AI drafts are frequently usable after a review, so doing everything by hand wastes the tool (c). And it can’t replace the owner end to end (d) — the knowledge boundary and the need for accountability both require a person.",
-      "sourceRefs": ["r-genai-leader-guide", "r-nist-ai-rmf"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-nist-ai-rmf"
+      ]
     },
     {
       "id": "q-m0-8",
@@ -244,13 +451,29 @@
       "difficulty": 1,
       "stem": "Which of these is one of the three misconceptions this module explicitly warns owners against?",
       "options": [
-        { "id": "a", "text": "“You have to be technical to use AI” — in fact it’s mostly briefing and checking, a skill you already have", "correct": true },
-        { "id": "b", "text": "“AI is useful for drafting and summarising” — which the module says is a misconception to avoid" },
-        { "id": "c", "text": "“Facts that matter should be checked” — which the module lists as a myth to unlearn" },
-        { "id": "d", "text": "“Grounding an answer with your real information helps” — which the module calls a mistake" }
+        {
+          "id": "a",
+          "text": "“You have to be technical to use AI” — in fact it’s mostly briefing and checking, a skill you already have",
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": "“AI is useful for drafting and summarising” — which the module says is a misconception to avoid"
+        },
+        {
+          "id": "c",
+          "text": "“Facts that matter should be checked” — which the module lists as a myth to unlearn"
+        },
+        {
+          "id": "d",
+          "text": "“Grounding an answer with your real information helps” — which the module calls a mistake"
+        }
       ],
       "explanation": "The three warned-against misconceptions are: it’s a search engine, one bad answer means it’s useless, and you must be technical — so (a) is a genuine one, and the module’s counter is that managing AI is briefing and checking. The other options invert the module’s actual advice: it *is* useful for drafting and summarising (b), you *should* check facts that matter (c), and grounding with real information genuinely helps (d) — none of those is a myth.",
-      "sourceRefs": ["r-genai-leader-guide", "r-gb-chat"]
+      "sourceRefs": [
+        "r-genai-leader-guide",
+        "r-gb-chat"
+      ]
     }
   ],
   "labs": [
@@ -277,7 +500,9 @@
       "url": "automatos-gitbook/about.md",
       "kind": "official-doc",
       "annotation": "The platform’s own plain-language description: agents are workers (not chatbots), knowledge powers everything (“upload documents for RAG”), and a Universal Router sends each message to the right agent. Useful here for the sanctioned vocabulary — agent, knowledge base, RAG — and for the honest line that these systems work from what you give them, which is the module’s knowledge-boundary point.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     },
     {
       "id": "r-gb-chat",
@@ -285,7 +510,9 @@
       "url": "automatos-gitbook/chat/README.md",
       "kind": "official-doc",
       "annotation": "The page behind the hands-on step: type a message and it’s routed to the best agent, responses stream in real time, and you can attach files (PDFs, images, documents) directly into a conversation. The doc’s own suggested first move — “ask a question about your documents” — is exactly the generic-vs-grounded experiment in miniature.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     },
     {
       "id": "r-gb-knowledge",
@@ -293,7 +520,9 @@
       "url": "automatos-gitbook/knowledge/README.md",
       "kind": "official-doc",
       "annotation": "Where the course goes next: upload documents once and your agents can search and reference them via RAG, so you stop re-pasting into every chat. Not required for this module’s hands-on step (that’s deliberate paste-into-chat grounding) — it’s the forward pointer to Module 03, showing the knowledge boundary can be crossed permanently, not just per conversation.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     },
     {
       "id": "r-genai-leader-guide",
@@ -301,7 +530,9 @@
       "url": "https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf",
       "kind": "official-doc",
       "annotation": "A vendor-light, business-toned primer on what generative AI is and how it behaves. Read only the “Fundamentals of gen AI” section for this module: it backs the plain-English model (a system that generates likely content from patterns in training data), the strengths (drafting, summarising, answering from supplied material), and the honest limits that make “capable intern, not oracle” the right stance.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     },
     {
       "id": "r-owasp-llm",
@@ -309,7 +540,9 @@
       "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
       "kind": "reference",
       "annotation": "The security community’s catalogue of the ways language-model apps go wrong. For this module it’s the grounding for one idea only — that confidently-wrong output (hallucination / misinformation) is a known, expected failure mode you design around, not a scandal. Used gently here; it becomes central in Module 06 (risk & safety). Orientation, not a compliance checklist.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     },
     {
       "id": "r-nist-ai-rmf",
@@ -317,7 +550,9 @@
       "url": "https://www.nist.gov/itl/ai-risk-management-framework",
       "kind": "reference",
       "annotation": "The US government’s plain-ish framework for managing AI risk sensibly and proportionately. For this module it supports one point: keeping a human in the loop for decisions that carry a cost, and checking facts that matter — the “manage it, don’t blame it” discipline. Referenced lightly now; Module 06 uses it properly. Orientation, not legal advice.",
-      "domainIds": ["m0-what-ai-is"]
+      "domainIds": [
+        "m0-what-ai-is"
+      ]
     }
   ],
   "videos": [
@@ -325,9 +560,11 @@
       "id": "v-m0-1",
       "title": "M0 · What AI actually is — the confident intern, in 7 minutes",
       "provider": "file",
-      "url": "",
-      "status": "placeholder",
-      "domainIds": ["m0-what-ai-is"],
+      "url": "https://widgets.automatos.app/academy/automatos/ai-business/v-m0-1.mp4",
+      "status": "published",
+      "domainIds": [
+        "m0-what-ai-is"
+      ],
       "sourceNotebook": "ai-business / m0 / what-ai-is-confident-intern"
     },
     {
@@ -336,7 +573,9 @@
       "provider": "file",
       "url": "",
       "status": "placeholder",
-      "domainIds": ["m0-what-ai-is"],
+      "domainIds": [
+        "m0-what-ai-is"
+      ],
       "sourceNotebook": "ai-business / m0 / deep-dive-grounding"
     }
   ]
