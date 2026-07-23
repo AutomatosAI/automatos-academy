@@ -1,0 +1,67 @@
+# Sync the tutor corpus → the Academy Automatos workspace KB (PRD-TUTOR-CORPUS-SYNC).
+#
+# Exports every live track's teaching content as tagged markdown and pushes each
+# doc to POST /api/documents/upload with per-course `tags` — the platform builds
+# the knowledge graph, so the tutor answers with the right course context.
+# Idempotent (content-hash dedup); tick `replace` after content edits so an
+# edited doc replaces its prior copy instead of leaving a stale twin.
+#
+# Required repository secrets:
+#   ORCHESTRATOR_API_KEY   the workspace machine key (broad — scoped ak_srv_* keys
+#                          are not accepted on the documents plane yet; see the PRD)
+#   ACADEMY_WORKSPACE_ID   the target Academy workspace id
+# Optional repository variable:
+#   AUTOMATOS_API_URL      defaults to https://api.automatos.app
+
+name: Sync tutor corpus to Automatos KB
+
+on:
+  workflow_dispatch:
+    inputs:
+      replace:
+        description: "Replace existing docs (delete same-named first) — use after content edits"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Print the plan without uploading"
+        type: boolean
+        default: true
+
+concurrency:
+  group: sync-tutor-corpus
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Export the corpus (writes tutor-corpus/ + corpus-manifest.json)
+        run: node scripts/export-tutor-corpus.mjs
+
+      - name: Sync to the Academy workspace KB
+        env:
+          # env indirection only — no inline expansion in run: (injection hygiene).
+          ORCHESTRATOR_API_KEY: ${{ secrets.ORCHESTRATOR_API_KEY }}
+          ACADEMY_WORKSPACE_ID: ${{ secrets.ACADEMY_WORKSPACE_ID }}
+          AUTOMATOS_API_URL: ${{ vars.AUTOMATOS_API_URL }}
+          REPLACE: ${{ inputs.replace }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          ARGS=""
+          if [ "$DRY_RUN" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "$REPLACE" = "true" ]; then ARGS="$ARGS --replace"; fi
+          if [ "$DRY_RUN" != "true" ]; then
+            if [ -z "${ORCHESTRATOR_API_KEY:-}" ]; then echo "::error::ORCHESTRATOR_API_KEY secret is not set."; exit 1; fi
+            if [ -z "${ACADEMY_WORKSPACE_ID:-}" ]; then echo "::error::ACADEMY_WORKSPACE_ID secret is not set."; exit 1; fi
+          fi
+          node scripts/sync-tutor-corpus.mjs $ARGS
