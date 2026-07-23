@@ -242,6 +242,7 @@ const mkApp = async (opts = {}) => {
   app.use(express.json({ limit: "1mb" }));
   mountSpine(app, {
     contentIndex, pool, verifier,
+    adminAllowlist: opts.adminAllowlist,
     clerkUserDeleter: "clerkUserDeleter" in opts ? opts.clerkUserDeleter : (async (id) => clerkDeletions.push(id)),
     rateLimit: opts.rateLimit || { max: 10_000, windowMs: 60_000 },
   });
@@ -292,6 +293,17 @@ const { rows: aliceRows } = await pool.query("SELECT * FROM users WHERE clerk_us
 ok(aliceRows.length === 1, "users row minted on first authenticated call");
 ok(/^[0-9a-f-]{36}$/.test(aliceRows[0].workspace_id) && aliceRows[0].plan === "free", "…with a workspace_id and plan 'free'");
 const aliceWorkspace = aliceRows[0].workspace_id;
+
+// ── roles (PRD-ADMIN-CONSOLE S1): default learner · owner bootstrap · GET /api/me ──
+ok(aliceRows[0].role === "learner", "a normal user defaults to role 'learner'");
+const aliceMe = await request("GET", "/api/me", { token: alice });
+ok(aliceMe.status === 200 && aliceMe.body.data.role === "learner", "GET /api/me returns the identity + role");
+const ownerApp = await mkApp({ adminAllowlist: new Set(["user_owner"]) });
+servers.push(ownerApp.server);
+const ownerMe = await request("GET", "/api/me", { token: "fixture:user_owner", base: ownerApp.base });
+ok(ownerMe.status === 200 && ownerMe.body.data.role === "owner", "an allow-listed clerk id boots as owner");
+const { rows: ownerRows } = await pool.query("SELECT role FROM users WHERE clerk_user_id = 'user_owner'");
+ok(ownerRows[0] && ownerRows[0].role === "owner", "…and the owner role is persisted (bootstrap, not demoted)");
 
 // ── sync round-trip + server-derived rollups ──────────────────────────
 const cca = contentIndex.tracks.get("anthropic/cca-f");

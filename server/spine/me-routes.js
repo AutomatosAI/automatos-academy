@@ -94,6 +94,13 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
   const router = express.Router();
   const scopeWeight = scopeWeightResolver(index);
 
+  // ── GET /api/me — light identity + role (the SPA reads role to decide
+  //    whether to show #/admin; far cheaper than the full /state pull). ──
+  router.get("/", wrap(async (req, res) => {
+    const u = req.spineUser;
+    return ok(res, { id: u.id, plan: u.plan, role: u.role, workspaceId: u.workspace_id, createdAt: iso(u.created_at) });
+  }));
+
   // ── GET /api/me/state?since={ts} ─────────────────────────────────────
   router.get("/state", wrap(async (req, res) => {
     const nowMs = Date.now();
@@ -129,7 +136,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       // The mobile client's MeStateSchema is .passthrough() (schemas.ts), so
       // pre-U2 apps ignore these cleanly.
       streak: { current: streak.rows[0].current, best: streak.rows[0].best },
-      user: { createdAt: iso(req.spineUser.created_at), plan: req.spineUser.plan },
+      user: { createdAt: iso(req.spineUser.created_at), plan: req.spineUser.plan, role: req.spineUser.role },
     });
   }));
 
@@ -207,7 +214,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
     // Export is the raw truth: stored (undecayed) competence, full payloads.
     return ok(res, {
       exportedAt: new Date().toISOString(),
-      user: { id: u.id, clerkUserId: u.clerk_user_id, workspaceId: u.workspace_id, plan: u.plan, createdAt: iso(u.created_at) },
+      user: { id: u.id, clerkUserId: u.clerk_user_id, workspaceId: u.workspace_id, plan: u.plan, role: u.role, createdAt: iso(u.created_at) },
       masteryMap: mastery.rows,
       progress: progress.rows,
       contentCache: cache.rows,

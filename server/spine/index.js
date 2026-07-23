@@ -12,7 +12,7 @@
 //   clerkUserDeleter — clerkUserId → ∅  (default: Clerk client; null = unavailable)
 //   rateLimit        — {max, windowMs}  (default: 60/min per user)
 import { createPool } from "./db.js";
-import { createAuthMiddleware, createClerkVerifier, createClerkUserDeleter } from "./auth.js";
+import { createAuthMiddleware, createClerkVerifier, createClerkUserDeleter, requireRole } from "./auth.js";
 import { createUserRateLimiter } from "./rate-limit.js";
 import { createSyncRouter } from "./sync-routes.js";
 import { createMeRouter } from "./me-routes.js";
@@ -28,13 +28,19 @@ export function mountSpine(app, opts = {}) {
     ? opts.clerkUserDeleter
     : (process.env.CLERK_SECRET_KEY ? createClerkUserDeleter(process.env.CLERK_SECRET_KEY) : null);
 
-  const auth = createAuthMiddleware({ verifier, pool });
+  // ACADEMY_ADMIN_CLERK_IDS bootstraps the first owner(s) (PRD-ADMIN-CONSOLE S1);
+  // thereafter roles live in users.role and are managed from the admin console.
+  const adminAllowlist = opts.adminAllowlist instanceof Set
+    ? opts.adminAllowlist
+    : new Set(String(process.env.ACADEMY_ADMIN_CLERK_IDS || "").split(",").map((s) => s.trim()).filter(Boolean));
+  const auth = createAuthMiddleware({ verifier, pool, adminAllowlist });
   const limiter = createUserRateLimiter(opts.rateLimit);
 
   app.use("/api/sync", auth, createSyncRouter({ pool, index: contentIndex, limiter }), errorHandler);
   app.use("/api/me", auth, createMeRouter({ pool, index: contentIndex, clerkUserDeleter }), errorHandler);
 
-  // verifier rides along for callers outside the spine mount that need to
-  // authenticate a request themselves (PRD-COMMUNITY S1 share attestation).
-  return { pool, verifier };
+  // verifier + auth + requireRole ride along for callers outside the spine mount:
+  // the media plane authenticates its own requests (PRD-COMMUNITY S1), and the
+  // admin console (PRD-ADMIN-CONSOLE) mounts /api/admin/* with `auth, requireRole("admin")`.
+  return { pool, verifier, auth, requireRole };
 }
