@@ -85,6 +85,31 @@ export const allResources = (track) => {
 export const allVideos = (track) =>
   track.domains.flatMap((d) => (d.videos || []).map((v) => ({ ...v, domainName: d.name, domainId: d.id })));
 
+// A video slot is "live" only when it's both published and actually has a url.
+export const isPublishedVideo = (v) => v.status === "published" && !!v.url;
+
+// The intro "what is X" module belongs in the "Start here" band alongside the
+// course-overview slots. Skills/foundations tracks id it m0-/m00- (ai-explained,
+// ai-business, platform-architect); exam tracks (cca-f, gen-ai-leader) start at
+// d1 and never match — their "Start here" is just the v-ov-* overviews.
+export const isStartHereDomain = (id) => /^m0+([-_]|$)/i.test(id || "");
+
+/**
+ * Partition a track's videos into the two Video-hub bands. `startHere` = the
+ * course-overview (track-level) slots + the module-00 videos; `byDomain` = the
+ * rest. When includeUnproduced is false (visitors), placeholder slots are
+ * dropped so the grid shows only real videos — no "Video coming" clutter.
+ * Admins pass includeUnproduced:true so they can still see + upload into slots.
+ */
+export function trackVideoSections(track, { includeUnproduced = false } = {}) {
+  const overview = (track.videos || []).map((v) => ({ ...v, domainName: "Course overview" }));
+  const all = allVideos(track);
+  const keep = includeUnproduced ? () => true : isPublishedVideo;
+  const startHere = [...overview, ...all.filter((v) => isStartHereDomain(v.domainId))].filter(keep);
+  const byDomain = all.filter((v) => !isStartHereDomain(v.domainId)).filter(keep);
+  return { startHere, byDomain };
+}
+
 export const allLabs = (track) =>
   track.domains.flatMap((d) => (d.labs || []).map((l) => ({ ...l, domainName: d.name, domainId: d.id })));
 

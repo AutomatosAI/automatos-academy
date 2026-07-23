@@ -9,7 +9,7 @@
 import { el, clear } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
 import { resList } from "./parts.js";
-import { allResources, allVideos, invalidateTrack } from "../content.js";
+import { allResources, invalidateTrack, trackVideoSections } from "../content.js";
 import { isAdminSync, ensureAdmin, uploadVideo } from "../admin/media.js";
 
 export function libraryView(ctx) {
@@ -134,16 +134,19 @@ export function videosView(ctx) {
   if (!isAdminSync()) {
     ensureAdmin().then(({ admin }) => { if (admin) window.dispatchEvent(new HashChangeEvent("hashchange")); });
   }
-  const overview = (track.videos || []).map((v) => ({ ...v, domainName: "Course overview" }));
-  const vids = allVideos(track);
+  // Visitors see only produced videos (module-00 lifted into "Start here", no
+  // placeholder clutter); admins see every slot so they can upload into them.
+  const { startHere, byDomain } = trackVideoSections(track, { includeUnproduced: isAdminSync() });
+  const nothing = !startHere.length && !byDomain.length;
   const grid = (list) => el("div", { class: "vid-grid", style: { marginTop: "20px" } }, list.map((v) => videoCard(v, adminCtx)));
   return el("div", {}, [trackHeader(track, "videos"), section(
     el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Video hub" }),
     el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Short, focused overviews — produced with NotebookLM, hosted on Automatos. Watch the course primers first, then the per-domain deep dives." }),
-    overview.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "34px 0 6px" }, text: "Start here" }) : null,
-    overview.length ? grid(overview) : null,
-    el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 6px" }, text: "By domain" }),
-    vids.length ? grid(vids) : el("p", { class: "muted", text: "Videos coming soon." }),
+    startHere.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "34px 0 6px" }, text: "Start here" }) : null,
+    startHere.length ? grid(startHere) : null,
+    byDomain.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 6px" }, text: "By domain" }) : null,
+    byDomain.length ? grid(byDomain) : null,
+    nothing ? el("p", { class: "muted", text: "Videos coming soon." }) : null,
     el("p", { class: "muted", style: { marginTop: "26px", fontSize: "13px" } }, ["Producing more: see ", el("b", { text: "docs/VIDEO_PIPELINE.md" }), "."]),
   )]);
 }
