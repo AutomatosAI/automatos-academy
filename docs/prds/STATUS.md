@@ -18,6 +18,7 @@ _Last updated: 2026-07-24._
 | [PRD-PLATFORM-ACTIVATION](./PRD-PLATFORM-ACTIVATION.md) | deploy Spine+Postgres+Clerk; flip content→DB | 🟡 owner env work | — |
 | [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3 (Kokoro→ElevenLabs); app consumer already merged | ⏳ needs engine pick + pod URL | — |
 | [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | ✅ tags fix shipped (automatos-ai #599); rest 📋 | #599 |
+| [**PRD-WAVE-LIVING-ACADEMY**](./PRD-WAVE-LIVING-ACADEMY.md) | card registry + concept rollups · CCA-F pilot feed · content factory w/ approval ladder · explain-back · freshness surface · quality flywheel · i18n contracts | 📋 DRAFT — D-LA1..8 await Gerard; P0 = the switches below | — |
 
 Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decision · 📋 designed, not built.
 
