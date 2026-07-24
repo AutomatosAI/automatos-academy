@@ -93,11 +93,15 @@ As a learner, my daily session has a rhythm, not a shuffle.
 - [ ] Unknown card types are skipped without error (forward compatibility — old app builds survive new content)
 - [ ] Selector stays on-device pure TS with tests; MT-12's Today surface consumes it unchanged
 
-**LA-5 · Card components: flashcard flip + registry renderer** `[app]`
-- [ ] Renderer registry maps `card.type → component`; `flashcard` (flip, binary grade), `quiz` (existing, rewired to registry), `minivideo`/`infographic` (media card via existing CDN player/image paths), `changelog` (text card)
-- [ ] All components RTL-safe from birth: logical properties / `I18nManager`-aware layout (§7 — this is the cheap-now-expensive-later item)
-- [ ] Instrumentation: grade/skip/time per card via existing metrics module (PILOT-METRICS.md extended)
-- [ ] Vitest green; Gerard verifies on device via Expo
+**LA-5 · Card components: flashcard flip + registry renderer** `[app]` — ✅ **BUILT** (app #42)
+- [x] Renderer registry (`src/feed/registry.tsx` + pure `registryCore.ts`) maps kind → renderer; `flashcard` (flip, binary grade) new, `quiz` rewired, `minivideo` via the existing CDN clip player, `changelog` as a text card. **Coverage is compile-enforced**, not tested-and-hoped
+- [x] Unknown kinds render NOTHING (FR-1). The chain this replaced ended in a bare `else` that rendered the SUMMARY card — an unrecognised kind would have shown a learner their session summary mid-session
+- [x] RTL from birth: pure `rtl.ts` (takes `rtl` as an argument, so both directions are actually tested) + `rtlRuntime.ts` as the only `I18nManager` touchpoint
+- [x] **Dev card gallery** (`app/dev/cards.tsx`) draws PRODUCTION `/api/catalog/cards` through the adapter + registry — the first surface where P1 is visible end to end on a device
+- [ ] Instrumentation: grade/skip/time already rides `card_review` from LA-3; PILOT-METRICS.md not yet extended
+- [x] Vitest 1076 green, tsc + eslint clean · ⏳ Gerard verifies on device via Expo (Settings → Dev · cards)
+
+**Deferred out of LA-5, deliberately:** `infographic` and `explainback` renderers (LA-9 / LA-10 own them; the adapter drops both today), and mixing typed cards into real sessions — that is LA-4's composer, so flashcards currently appear in the gallery only.
 
 **LA-6 · Pilot: two weeks, CCA-F, user zero** `[both]`
 - [ ] CCA-F's 124 questions + live videos flow through the registry into daily sessions

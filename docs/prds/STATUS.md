@@ -18,7 +18,7 @@ _Last updated: 2026-07-24._
 | [PRD-PLATFORM-ACTIVATION](./PRD-PLATFORM-ACTIVATION.md) | deploy Spine+Postgres+Clerk; flip content→DB | 🟡 owner env work | — |
 | [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3 (Kokoro→ElevenLabs); app consumer already merged | ⏳ needs engine pick + pod URL | — |
 | [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | ✅ tags fix shipped (automatos-ai #599); rest 📋 | #599 |
-| [**PRD-WAVE-LIVING-ACADEMY**](./PRD-WAVE-LIVING-ACADEMY.md) | card registry + concept rollups · CCA-F pilot feed · content factory w/ approval ladder · explain-back · freshness surface · quality flywheel · i18n contracts | ✅ **P1 BUILT** (LA-1/2/3) · P2–P4 📋 designed · D-LA1..6 decided, D-LA7/8 open | #69 · app #41 |
+| [**PRD-WAVE-LIVING-ACADEMY**](./PRD-WAVE-LIVING-ACADEMY.md) | card registry + concept rollups · CCA-F pilot feed · content factory w/ approval ladder · explain-back · freshness surface · quality flywheel · i18n contracts | ✅ **P1 BUILT** (LA-1/2/3) + **LA-5 renderers** · LA-4/LA-6 next · D-LA1..6 decided, D-LA7/8 open | #69/#70/#71 · app #41/#42 |
 
 Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decision · 📋 designed, not built.
 
@@ -42,6 +42,7 @@ Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decis
 AIGP + CH-500 (legacy-source call) · AIX m01 gap regen · the deep-dive `…-2` set across tracks.
 
 ## Recently shipped (this program)
+- **2026-07-24 (late):** **LA-5 card renderers** (app #42) — renderer registry replacing the feed's ternary chain (which fell through to the SUMMARY card on an unknown kind), flashcard flip + binary grading, RTL-safe from birth, and a dev gallery drawing PRODUCTION `/api/catalog/cards` so P1 is finally visible on a device.
 - **2026-07-24 (late):** **PRD-WAVE-LIVING-ACADEMY P1 — the contracts.** LA-1 typed card feed (`GET /api/catalog/cards`; today's 864 questions project into 1 691 cards as a VIEW over the overlaid documents — no card store, so an approved draft changes the feed with no republish) + [CARD-CONTRACT.md](./PRD-MOBILE-TUTOR/build/CARD-CONTRACT.md) · LA-2 language-neutral concept keys + `user_concept_state` derived in the same transaction as the progress upsert, keyed to shared concept ids · LA-3 binary `card_review` grade (SM-2 needed no change — it already takes a boolean). PRs #69 (academy) + #41 (app).
 - **2026-07-24:** **PRD-CONTENT-LIFECYCLE academy side** — text write-back `POST /api/admin/content` + drafts review API + serve-time content overlay + admin Content tab (drafts review); completes ADMIN-CONSOLE S5. Platform half (daily mission + cert-watch) flagged cross-pod.
 - **2026-07-23:** 66 videos live on the CDN (5 tracks uploaded + published); video-page fixes (#58); architecture + 5 PRDs (#59); **admin console S1–S6 (#60/#61)**; media domain slots (#62); admin nav + access diagnostic (#63/#64).
