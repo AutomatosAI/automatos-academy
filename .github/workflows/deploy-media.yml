@@ -89,10 +89,13 @@ jobs:
             done
           else
             # Ongoing layout: media-staging/<vendor>/<track>/*.mp4 → academy/<vendor>/<track>/
+            # and media-staging/<vendor>/podcasts/*.m4a → academy/<vendor>/podcasts/ (whole-track
+            # deep-dive audio; NotebookLM's native .m4a plays in <audio> as AAC-in-MP4). No forced
+            # --content-type here (unlike the migrate step) so S3 labels each extension itself.
             if [ -d media-staging ]; then
               aws s3 sync media-staging/ "s3://$BUCKET/academy/" \
                 $DRY \
-                --exclude "*" --include "*.mp4" --include "*.mp3" --include "*.vtt" \
+                --exclude "*" --include "*.mp4" --include "*.mp3" --include "*.m4a" --include "*.vtt" \
                 --cache-control "public, max-age=2592000"
               synced=1
             fi
