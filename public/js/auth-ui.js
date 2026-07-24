@@ -12,6 +12,7 @@
 import { el, clear } from "./ui.js";
 import { initAuth, isConfigured, onAuthChange, openSignIn, signOut } from "./auth.js";
 import { url } from "./router.js";
+import { revealAdminNav } from "./admin/nav.js";
 
 // Document-level listeners for the open menu, torn down on every re-render so
 // signed-in/out flips never leak handlers.
@@ -35,6 +36,7 @@ function render(slot, u) {
   }
   clear(slot);
   slot.appendChild(u ? accountMenu(u) : signInButton());
+  if (u) revealAdminNav(); // un-hide the "Admin console" menu item for admins
 }
 
 function signInButton() {
@@ -53,6 +55,12 @@ function accountMenu(u) {
       u.name ? el("b", { text: u.name }) : null,
       u.email ? el("span", { text: u.email }) : null,
     ]),
+    // Admins only — ships hidden, un-hidden by revealAdminNav() when /api/me
+    // reports admin/owner. The #/admin view is itself role-gated server-side.
+    el("button", {
+      class: "ac-auth-item ac-admin-only", type: "button", role: "menuitem", hidden: true,
+      onClick: () => { setOpen(false); location.hash = "#" + url.admin(); },
+    }, ["Admin console"]),
     el("button", {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
