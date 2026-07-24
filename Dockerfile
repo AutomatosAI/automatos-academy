@@ -10,11 +10,16 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --omit=dev --no-audit --no-fund
 
-# Copy the rest (public/ static SPA + content JSON, server.js).
+# Copy the rest (public/ static SPA + content JSON, server.js, migrations/).
 COPY . .
 
 # Railway sets PORT; default to 80 in case of bare container runs.
 ENV PORT=80
 EXPOSE 80
 
-CMD ["node", "server.js"]
+# Schema first, then the server (see docker-entrypoint.sh for why, and for the
+# tradeoff a failing migration now carries). node-pg-migrate is a PRODUCTION
+# dependency, so it survives the --omit=dev install above — moving it to
+# devDependencies would silently break every boot.
+RUN chmod +x ./docker-entrypoint.sh
+CMD ["./docker-entrypoint.sh"]
