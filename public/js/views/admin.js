@@ -5,7 +5,8 @@
 import { el, clear } from "../ui.js";
 import { section } from "./_chrome.js";
 import { adminApi, ROLES, isAdminRole } from "../admin/console.js";
-import { isConfigured, onAuthChange } from "../auth.js";
+import { contentTab } from "./admin-content.js";
+import { isConfigured, onAuthChange, user } from "../auth.js";
 
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(); } catch { return "—"; } };
 
@@ -39,7 +40,15 @@ export async function adminView() {
   await whenAuthReady();
   const me = await adminApi.me();
   if (me.status === 0) return wall("Admin", "Sign in to reach the admin console — then reload.");
-  if (!me.data || !isAdminRole(me.data.role)) return wall("Not authorized", "This area is for Academy admins only.");
+  if (!me.data || !isAdminRole(me.data.role)) {
+    const cid = (user() && user().id) || "unknown";
+    const role = (me.data && me.data.role) || "unknown";
+    return wall(
+      "Not authorized",
+      `This area is for Academy admins only. You're signed in as ${cid} — current role: ${role}. ` +
+      `To grant access, add that id to ACADEMY_ADMIN_CLERK_IDS on the server, then sign out and back in.`,
+    );
+  }
 
   const root = el("div", {});
   const tabs = ["Users", "Payments", "Content"];
@@ -50,7 +59,7 @@ export async function adminView() {
   const renderTab = async () => {
     clear(panel);
     panel.appendChild(el("p", { class: "muted", text: "Loading…" }));
-    const node = active === "Users" ? await usersTab() : active === "Payments" ? await paymentsTab() : contentTab();
+    const node = active === "Users" ? await usersTab() : active === "Payments" ? await paymentsTab() : await contentTab();
     clear(panel);
     panel.appendChild(node);
   };
@@ -171,11 +180,5 @@ async function paymentsTab() {
 }
 
 // ── Content ────────────────────────────────────────────────────────────
-function contentTab() {
-  return el("div", {}, [
-    el("h2", { class: "serif-i", style: { fontSize: "22px" }, text: "Content" }),
-    el("p", { class: "muted", style: { marginTop: "8px", maxWidth: "60ch" }, text: "Media (videos/audio) upload lives on each track's Video hub — open a track → Videos, and the Upload control appears on every slot for admins." }),
-    el("a", { class: "ac-btn", href: "#/", style: { marginTop: "12px" } }, ["Browse tracks →"]),
-    el("p", { class: "muted", style: { marginTop: "16px", fontSize: "13px" }, text: "In-app lesson/question editing (draft → approve → publish) lands with PRD-CONTENT-LIFECYCLE; today text content is authored in git + published via the content pipeline." }),
-  ]);
-}
+// The Content tab lives in ./admin-content.js (the drafts review surface for
+// the text write-back plane — PRD-CONTENT-LIFECYCLE); imported at the top.

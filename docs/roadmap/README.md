@@ -69,8 +69,31 @@ framework is [`../NOTEBOOKLM_PROMPTS.md`](../NOTEBOOKLM_PROMPTS.md).
 2. In NotebookLM, create a notebook and **add the sources** the file lists.
 3. **Video:** paste the *Video Overview* prompt → Customize → generate → tune to **~8 min**.
 4. **Audio:** paste the *Deep Dive* prompt (and *Brief* for exam tracks, *Debate* for security/governance).
-5. Download → host (self-host `.mp4`/`.mp3` or YouTube-unlisted) → register in the track's `videos[]`.
+5. Download → **map the file to its module slot** (see below) → host on the CDN → register in the track's `videos[]`.
 6. Tick the module off in the track's `README.md`.
+
+## Mapping a downloaded video → its module slot (read this before registering)
+
+NotebookLM names each download by its **video title** (`What_AI_Actually_Is.mp4`), but the registry
+tool matches files named by **slot id** (`v-m00-1.mp4`). So every download must be **renamed to its
+slot id** before it can be registered. The mapping rules:
+
+- **Where slot ids live:** each track's `videos[]` in `automatos-academy/public/content/<vendor>/<track>/track.json`
+  (+ its `domainFiles`). Every slot has an `id` and a `title` — match the download's title/topic to the slot title.
+- **Which slot a video is:** one ~7-min **Video Overview per module → that module's `…-1` slot**
+  (`v-m00-1`, `v-m0-1`, `v-00-1`, `v-d1-1` — the id scheme differs per track, so read the JSON). The
+  `…-2` slots are **Deep-Dive audio** (a separate artifact, usually not produced yet). `v-ov-1` / `v-ov-2`
+  are the course intro / exam-strategy videos.
+- **Ground truth for title↔module:** the `HANDOFF-notebooklm-<TRACK>-videos.md` files in the repo root —
+  each notebook was created as `TRACK · NN — Title`, so the handoff records resolve any ambiguous title.
+- **Register:** rename to `<slot-id>.mp4` → upload to the CDN at `academy/<vendor>/<track>/<slot-id>.mp4`
+  → `node scripts/register-videos.mjs --publish <dir> --vendor <v> --track <t> --base https://widgets.automatos.app`.
+  The tool **reports unmatched files + still-placeholder slots and never guesses**, so a wrong rename simply
+  won't match (nothing is faked).
+
+**The full worked crosswalk for every downloaded file** (all tracks, `title.mp4 → v-…-1.mp4`, with the
+duplicate/gap/A-B/legacy flags called out) lives in
+[`DUMPING AREA/ACADEMY/VIDEO-MAP.md`](../../../DUMPING%20AREA/ACADEMY/VIDEO-MAP.md) — start there.
 
 ## Media per module (always)
 
