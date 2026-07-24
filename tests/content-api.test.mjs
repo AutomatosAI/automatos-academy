@@ -149,12 +149,13 @@ ok(stats.body.learners === null && stats.body.activeThisWeek === null, "no DB po
 // ── podcasts (PRD-MT-10) ────────────────────────────────────────────────
 // Served verbatim from podcasts.json in exactly the app's manifest shape
 // (automatos-academy-app/src/podcast/schema.ts), so the app parses it adapter-
-// free. Two real episodes are seeded; new ones arrive via NotebookLM later.
+// free. Real episodes are seeded (count asserted against the file, not hard-
+// coded — new ones arrive via register-podcasts.mjs); shape verified verbatim.
 console.log("podcasts");
 const podManifest = readJson(join(CONTENT, "podcasts.json"));
 const pod = await get("/podcasts");
 ok(pod.status === 200 && typeof pod.body.version === "number" && Array.isArray(pod.body.episodes), "GET /podcasts → manifest shape { version, episodes }");
-ok(pod.body.episodes.length === 2, `GET /podcasts → 2 seeded episodes (got ${pod.body.episodes.length})`);
+ok(pod.body.episodes.length === podManifest.episodes.length && pod.body.episodes.length >= 2, `GET /podcasts → all ${podManifest.episodes.length} seeded episodes (got ${pod.body.episodes.length})`);
 ok(isDeepStrictEqual(pod.body, podManifest), "GET /podcasts ≡ podcasts.json (verbatim)");
 ok(pod.headers.get("x-content-version") === idx.contentVersion, "podcasts: X-Content-Version header present");
 ok((pod.headers.get("cache-control") || "").includes("max-age=300"), "podcasts: cache-control public max-age=300");
