@@ -30,6 +30,7 @@ const LINKS = [
   { href: "#/", nav: "catalog", label: "Tracks" },
   { href: "#/method", nav: "method", label: "The model" },
   { href: "#/tutor", nav: "tutor", label: "Tutor" },
+  { href: "#/admin", nav: "admin", label: "Admin", adminOnly: true }, // hidden until revealAdminNav()
 ];
 
 export function mountNav() {
@@ -60,7 +61,7 @@ export function mountNav() {
   // Links close the drawer on tap; same-page taps don't fire hashchange, so
   // the onClick matters even with the hashchange listener below.
   const drawer = el("nav", { id: "ac-nav-drawer", class: "ac-nav-drawer", "aria-label": "Primary", hidden: true }, [
-    ...LINKS.map((l) => el("a", { href: l.href, "data-nav": l.nav, onClick: () => setOpen(false) }, [l.label])),
+    ...LINKS.map((l) => el("a", { href: l.href, "data-nav": l.nav, ...(l.adminOnly ? { class: "ac-admin-only", hidden: true } : {}), onClick: () => setOpen(false) }, [l.label])),
     moodBtn,
   ]);
   bar.appendChild(drawer); // position:absolute — never becomes a topbar grid track

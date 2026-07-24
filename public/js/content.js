@@ -94,17 +94,26 @@ export const isPublishedVideo = (v) => v.status === "published" && !!v.url;
 // d1 and never match — their "Start here" is just the v-ov-* overviews.
 export const isStartHereDomain = (id) => /^m0+([-_]|$)/i.test(id || "");
 
+// A per-domain "deep dive" slot (v-*-2). These were authored speculatively and
+// are ~never produced (0/13 across ai-explained), so an UNPRODUCED one must not
+// show as an upload target — it just doubles the grid. (Overview slots like
+// v-ov-2 are track-level, not domain deep-dives, so they're excluded here.)
+export const isDeepDiveVideo = (v) => !!v.domainId && /-2$/.test(v.id || "");
+
 /**
  * Partition a track's videos into the two Video-hub bands. `startHere` = the
  * course-overview (track-level) slots + the module-00 videos; `byDomain` = the
- * rest. When includeUnproduced is false (visitors), placeholder slots are
- * dropped so the grid shows only real videos — no "Video coming" clutter.
- * Admins pass includeUnproduced:true so they can still see + upload into slots.
+ * rest. Filtering rules (one card per module, no clutter):
+ *   • a PUBLISHED video always shows;
+ *   • an UNPRODUCED deep-dive (v-*-2) is hidden from EVERYONE (incl. admins) —
+ *     uploading a module's video replaces its one placeholder, never adds a
+ *     lingering deep-dive card;
+ *   • an unproduced MAIN/overview slot shows only to admins (an upload target).
  */
 export function trackVideoSections(track, { includeUnproduced = false } = {}) {
   const overview = (track.videos || []).map((v) => ({ ...v, domainName: "Course overview" }));
   const all = allVideos(track);
-  const keep = includeUnproduced ? () => true : isPublishedVideo;
+  const keep = (v) => (isPublishedVideo(v) ? true : isDeepDiveVideo(v) ? false : includeUnproduced);
   const startHere = [...overview, ...all.filter((v) => isStartHereDomain(v.domainId))].filter(keep);
   const byDomain = all.filter((v) => !isStartHereDomain(v.domainId)).filter(keep);
   return { startHere, byDomain };
