@@ -14,7 +14,7 @@ _Last updated: 2026-07-24._
 | Architecture + PRD set | design/flow diagrams + the 5 PRDs | ✅ **shipped** | #59 |
 | [**PRD-ADMIN-CONSOLE**](./PRD-ADMIN-CONSOLE.md) | users · payments (Stripe) · progress · content | ✅ **BUILT** (S1–S6; **S5 text now live** via CONTENT-LIFECYCLE) | #60/#61 |
 | [PRD-MEDIA-DOMAIN-SLOTS](./PRD-MEDIA-DOMAIN-SLOTS.md) (Part 1b) | media plane + overlay for **domain** video/audio slots | ✅ **shipped** | #62 |
-| [**PRD-CONTENT-LIFECYCLE**](./PRD-CONTENT-LIFECYCLE.md) | text write-back + drafts review + serve overlay (academy); daily mission + cert-watch (cross-pod) | ✅ **academy BUILT** · platform half cross-pod | _open_ |
+| [**PRD-CONTENT-LIFECYCLE**](./PRD-CONTENT-LIFECYCLE.md) | text write-back + drafts review + serve overlay (academy); daily mission + cert-watch (cross-pod) | ✅ **academy BUILT** · platform half cross-pod | #65 |
 | [PRD-PLATFORM-ACTIVATION](./PRD-PLATFORM-ACTIVATION.md) | deploy Spine+Postgres+Clerk; flip content→DB | 🟡 owner env work | — |
 | [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3 (Kokoro→ElevenLabs); app consumer already merged | ⏳ needs engine pick + pod URL | — |
 | [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | ✅ tags fix shipped (automatos-ai #599); rest 📋 | #599 |
