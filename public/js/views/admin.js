@@ -5,8 +5,27 @@
 import { el, clear } from "../ui.js";
 import { section } from "./_chrome.js";
 import { adminApi, ROLES, isAdminRole } from "../admin/console.js";
+import { isConfigured, onAuthChange } from "../auth.js";
 
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(); } catch { return "—"; } };
+
+// Resolve once Clerk has loaded the session — so a signed-in owner opening
+// #/admin isn't shown the "sign in" wall just because the token wasn't ready on
+// the first paint (onAuthChange fires immediately if auth is already ready).
+function whenAuthReady() {
+  if (!isConfigured()) return Promise.resolve();
+  return new Promise((resolve) => {
+    let settled = false, off;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+      Promise.resolve().then(() => { if (off) off(); });
+    };
+    off = onAuthChange(done);
+    setTimeout(done, 3000); // fallback: never hang if Clerk fails to load
+  });
+}
 
 function wall(title, msg) {
   return el("div", {}, [section(
@@ -17,8 +36,9 @@ function wall(title, msg) {
 }
 
 export async function adminView() {
+  await whenAuthReady();
   const me = await adminApi.me();
-  if (me.status === 0) return wall("Admin", "Sign in to reach the admin console.");
+  if (me.status === 0) return wall("Admin", "Sign in to reach the admin console — then reload.");
   if (!me.data || !isAdminRole(me.data.role)) return wall("Not authorized", "This area is for Academy admins only.");
 
   const root = el("div", {});
