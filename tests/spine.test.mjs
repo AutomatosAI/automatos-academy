@@ -774,6 +774,37 @@ ok(resent.body.data.applied === 2, "the batch minus the quarantined event applie
 const afterQuarantine = await request("GET", "/api/me/state", { token: dev });
 ok(afterQuarantine.body.data.progress.filter((p) => [q(9), q(11)].includes(p.itemId)).length === 2 && !afterQuarantine.body.data.progress.some((p) => p.itemId === q(10)), "…and exactly the two good rows exist, the bad one never landed");
 
+// ── LA-2 REGRESSION: a derived rollup must never cost a learner an answer ──
+// The failure this guards: migrations reach production via content-publish,
+// which only fires on pushes touching public/content/**. A code-only merge
+// therefore deploys the rollup's table writes against a DB that has not seen
+// the migration — and while the rollup shared the progress transaction, a
+// missing table 500'd every POST /api/sync/progress. Renaming the table away
+// reproduces exactly that, with no other change.
+const rescueUser = "fixture:user_rescue";
+await pool.query("ALTER TABLE user_concept_state RENAME TO user_concept_state_absent");
+let survived;
+try {
+  survived = await request("POST", "/api/sync/progress", {
+    token: rescueUser,
+    body: { events: [progressEvent(q(4), T + 90_000)] },
+  });
+} finally {
+  // always put it back, even if the assertion path throws
+  await pool.query("ALTER TABLE user_concept_state_absent RENAME TO user_concept_state");
+}
+ok(survived.status === 200 && survived.body.data.applied === 1, `progress still applies with the concept table missing (${survived.status}, applied=${survived.body.data && survived.body.data.applied})`);
+ok((survived.body.data.mastery || []).length > 0, "…and mastery_map still rolls up — only the derived concept rows are skipped");
+ok((survived.body.data.conceptState || []).length === 0, "…with conceptState reported empty, not errored");
+const rescued = await request("GET", "/api/me/state", { token: rescueUser });
+ok(rescued.body.data.progress.length === 1, "the answer is durably stored — a rollup failure never loses it");
+// …and the very next sync heals: the table is back, the rows appear
+const healed = await request("POST", "/api/sync/progress", {
+  token: rescueUser,
+  body: { events: [progressEvent(q(5), T + 95_000)] },
+});
+ok((healed.body.data.conceptState || []).length > 0, "the next sync self-heals — concept rows appear once the table exists, no backfill needed");
+
 // ── teardown ──────────────────────────────────────────────────────────
 for (const s of servers) s.close();
 await pool.end();

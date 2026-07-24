@@ -13,7 +13,7 @@ import {
   validateMockEvent, validateScenarioEvent, collapseLatest,
 } from "./validate.js";
 import { rederiveRollups, scopeWeightResolver, masteryToWire } from "./rollups.js";
-import { rederiveConceptState, conceptWeightResolver, conceptStateToWire } from "./concepts.js";
+import { rederiveConceptStateSafely, conceptWeightResolver, conceptStateToWire } from "./concepts.js";
 
 // Cross-batch/cross-device conflict rule lives in the WHERE: the stored row
 // only yields to a strictly LATER device wall-clock answer (02 §5). A replay
@@ -103,8 +103,10 @@ export function createSyncRouter({ pool, index, limiter }) {
       const rolled = await rederiveRollups(client, index, userId, touched);
       // LA-2: the topic-level twin, same transaction, same authoritative rows.
       // Both derive from the merged state, so they can never disagree about
-      // what the learner actually did.
-      const conceptRows = await rederiveConceptState(client, index, userId, touched, nowMs);
+      // what the learner actually did — but they do NOT share a fate. The
+      // rollup runs in a SAVEPOINT: it is derived data, recomputable on the
+      // next sync, and must never cost a learner the answer it rode in with.
+      const conceptRows = await rederiveConceptStateSafely(client, index, userId, touched, nowMs);
       return { applied: appliedCount, mastery: rolled, concepts: conceptRows };
     });
 
