@@ -2,7 +2,7 @@
 // Video-hub layout (Part 1a): module-00 lifted into "Start here"; unproduced
 // slots hidden from visitors, shown to admins. Pure selectors from content.js.
 
-import { trackVideoSections, isStartHereDomain, isPublishedVideo } from "../public/js/content.js";
+import { trackVideoSections, isStartHereDomain, isPublishedVideo, isDeepDiveVideo } from "../public/js/content.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => (c ? (pass++, console.log("  ✓ " + m)) : (fail++, console.error("  ✗ " + m)));
@@ -35,11 +35,20 @@ console.log("trackVideoSections — visitor (hide unproduced, lift module-00)");
   ok(!v.byDomain.some((x) => x.id.endsWith("-2")), "no deep-dive placeholders leak into the visitor grid");
 }
 
-console.log("trackVideoSections — admin (see everything, to upload)");
+console.log("trackVideoSections — admin (upload targets, but NOT unproduced deep-dives)");
 {
   const a = trackVideoSections(skills, { includeUnproduced: true });
-  ok(a.startHere.some((x) => x.id === "v-ov-1") && a.startHere.some((x) => x.id === "v-m00-2"), "admin sees overview + module-00 deep-dive placeholders in Start here");
-  ok(a.byDomain.some((x) => x.id === "v-m01-2"), "admin sees by-domain placeholders (uploadable slots)");
+  ok(a.startHere.some((x) => x.id === "v-ov-1") && a.startHere.some((x) => x.id === "v-m00-1"), "admin sees the overview upload targets + the module-00 main in Start here");
+  ok(!a.startHere.some((x) => x.id === "v-m00-2") && !a.byDomain.some((x) => x.id.endsWith("-2")), "unproduced deep-dive (-2) slots are hidden even for admins — one card per module, no 'add more'");
+  ok(a.byDomain.length === 2 && a.byDomain.every((x) => x.id.endsWith("-1")), "admin's By-domain is the main slots only");
+}
+
+console.log("trackVideoSections — a PRODUCED deep-dive is real content, still shows");
+{
+  const withDD = { videos: [], domains: [{ id: "m01-agent", name: "M01", videos: [pub("v-m01-1"), pub("v-m01-2")] }] };
+  const r = trackVideoSections(withDD, { includeUnproduced: false });
+  ok(r.byDomain.some((x) => x.id === "v-m01-2"), "a published deep-dive shows (only UNPRODUCED ones are hidden)");
+  ok(isDeepDiveVideo({ id: "v-m01-2", domainId: "m01" }) && !isDeepDiveVideo({ id: "v-m01-1", domainId: "m01" }) && !isDeepDiveVideo({ id: "v-ov-2" }), "isDeepDiveVideo: a domain -2 only (not -1, not the track-level v-ov-2)");
 }
 
 console.log("trackVideoSections — exam track (no module-00)");

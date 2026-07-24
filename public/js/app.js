@@ -21,6 +21,8 @@ import { adminView } from "./views/admin.js";
 import { wireListView, wirePostView, mountWireNav } from "./views/wire.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
 import { mountAuthUI } from "./auth-ui.js";
+import { onAuthChange } from "./auth.js";
+import { revealAdminNav } from "./admin/nav.js";
 import { mountNav } from "./nav.js";
 import { initSync } from "./sync/syncer.js";
 import { track as tkEvent, mountCtaTracking } from "./analytics.js";
@@ -125,6 +127,8 @@ function syncTopnav(path) {
 start(handle);
 mountTutor();
 mountAuthUI();
+revealAdminNav(); // show the Admin nav link if signed in as admin/owner
+onAuthChange(() => revealAdminNav()); // …and after a sign-in without a reload
 mountNav(); // burger + drawer ≤900px; after theme() so its mood row syncs
 mountWireNav(); // after mountNav so the drawer exists; no-op on no-Wire deploys
 initSync(); // PRD-U2: no-op on unconfigured deploys; inert signed-out
