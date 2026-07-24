@@ -251,11 +251,16 @@ let spinePool = null;
 // needs the pool); the catalog reads it through this getter, which returns
 // null until the cache exists (so files/spine-less deploys are unchanged).
 let bindingsCache = null;
+// PRD-CONTENT-LIFECYCLE — approved-draft text overlay, set in the Spine block
+// below (needs the pool). Null until then, so files/spine-less deploys serve
+// the git/DB content untouched, exactly as before.
+let contentOverrides = null;
 app.use(
   "/api/catalog",
   createCatalogRouter(getContentIndex, {
     getPool: () => spinePool,
     getBindings: (v, t) => (bindingsCache ? bindingsCache.get(v, t) : null),
+    getOverride: (k, v, t, d) => (contentOverrides ? contentOverrides.get(k, v, t, d) : null),
   }),
 );
 console.log(`[catalog] serving contentVersion ${contentIndex.contentVersion} (${contentIndex.tracks.size} tracks, source=${CONTENT_SOURCE})`);
@@ -307,6 +312,16 @@ if (process.env.SPINE_ENABLED === "true") {
     onChange: () => bindingsCache.refresh(), // bind/unbind → overlay live at once
   });
   console.log(`[media] admin plane mounted (/api/admin/media) — configured=${media.configured} s3=${media.s3Ready}; bindings overlay on`);
+
+  // ── Content write-back plane (PRD-CONTENT-LIFECYCLE) — POST /api/admin/content
+  // (text drafts) + the drafts review API, same two-principal gate as media
+  // (machine X-Admin-Key / browser Clerk allowlist). Owns the approved-draft
+  // overrides cache the catalog router reads through getOverride above, so an
+  // approval serves live within one refresh (immediate via onChange).
+  const { mountContentAdmin } = await import("./server/content/index.js");
+  const content = mountContentAdmin(app, { pool: spine.pool, verifier: spine.verifier });
+  contentOverrides = content.overridesCache;
+  console.log(`[content] write-back plane mounted (/api/admin/content) — configured=${content.configured}; approved-draft overlay on (${content.overridesCache.size()} live)`);
 
   // ── Admin console (PRD-ADMIN-CONSOLE) — users · progress · payments. Shares
   // the Spine pool + auth + role gate. /api/admin/* is admin-role-gated;

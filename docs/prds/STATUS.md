@@ -4,7 +4,7 @@ The living board for the platform build (the unified content/data plane, admin c
 content lifecycle, voice). Updated as each PRD lands. See
 [`docs/architecture/PLATFORM-ARCHITECTURE.md`](../architecture/PLATFORM-ARCHITECTURE.md) for the design.
 
-_Last updated: 2026-07-23._
+_Last updated: 2026-07-24._
 
 ## Program PRDs
 
@@ -12,21 +12,20 @@ _Last updated: 2026-07-23._
 |---|---|---|---|
 | [Video-page fixes](./PRD-MEDIA-DOMAIN-SLOTS.md) (Part 1a) | module-00 → Start here; hide unproduced slots from visitors | ✅ **shipped** | #58 |
 | Architecture + PRD set | design/flow diagrams + the 5 PRDs | ✅ **shipped** | #59 |
-| [**PRD-ADMIN-CONSOLE**](./PRD-ADMIN-CONSOLE.md) | users · payments (Stripe) · progress · content | ✅ **BUILT** (S1–S4,S6; S5 text deferred) | #60 |
-| [PRD-MEDIA-DOMAIN-SLOTS](./PRD-MEDIA-DOMAIN-SLOTS.md) (Part 1b) | media plane + overlay for **domain** video/audio slots | 🔜 **next** | — |
+| [**PRD-ADMIN-CONSOLE**](./PRD-ADMIN-CONSOLE.md) | users · payments (Stripe) · progress · content | ✅ **BUILT** (S1–S6; **S5 text now live** via CONTENT-LIFECYCLE) | #60/#61 |
+| [PRD-MEDIA-DOMAIN-SLOTS](./PRD-MEDIA-DOMAIN-SLOTS.md) (Part 1b) | media plane + overlay for **domain** video/audio slots | ✅ **shipped** | #62 |
+| [**PRD-CONTENT-LIFECYCLE**](./PRD-CONTENT-LIFECYCLE.md) | text write-back + drafts review + serve overlay (academy); daily mission + cert-watch (cross-pod) | ✅ **academy BUILT** · platform half cross-pod | _open_ |
 | [PRD-PLATFORM-ACTIVATION](./PRD-PLATFORM-ACTIVATION.md) | deploy Spine+Postgres+Clerk; flip content→DB | 🟡 owner env work | — |
 | [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3 (Kokoro→ElevenLabs); app consumer already merged | ⏳ needs engine pick + pod URL | — |
-| [PRD-CONTENT-LIFECYCLE](./PRD-CONTENT-LIFECYCLE.md) | text write-back API + daily Automatos mission + cert-watch | 📋 design | — |
-| [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | 📋 design (platform repo) | — |
+| [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | ✅ tags fix shipped (automatos-ai #599); rest 📋 | #599 |
 
 Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decision · 📋 designed, not built.
 
 ## Recommended order
 
-1. **PRD-MEDIA-DOMAIN-SLOTS** (Part 1b) — makes the admin Upload button work on real lessons, not just overviews.
-2. **PRD-PLATFORM-ACTIVATION** (owner env) — lights up the Spine → the admin console + cross-device sync go live.
-3. **PRD-VOICE-PIPELINE** — biggest learner-quality jump; needs the engine pick.
-4. **PRD-CONTENT-LIFECYCLE** + **PRD-PLATFORM-DOCUMENTS-FIXES** — the daily generate/review/verify loop + the tutor-KG fixes.
+1. **PRD-PLATFORM-ACTIVATION** (owner env) — lights up the Spine → the admin console, media plane, **content write-back** + cross-device sync all go live at once.
+2. **PRD-VOICE-PIPELINE** — biggest learner-quality jump; needs the engine pick + pod URL.
+3. **CONTENT-LIFECYCLE platform half** (automatos-ai) — compose the daily generate→review→**`POST /api/admin/content`**→verify→KG-rebuild routine + cert-watch, now that the academy publish target exists.
 
 ## Owner switches (unlock the dormant plane)
 
@@ -42,4 +41,5 @@ Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decis
 AIGP + CH-500 (legacy-source call) · AIX m01 gap regen · the deep-dive `…-2` set across tracks.
 
 ## Recently shipped (this program)
-- **2026-07-23:** 66 videos live on the CDN (5 tracks uploaded + published); video-page fixes (#58); architecture + 5 PRDs (#59); **admin console S1–S6 (#60)**.
+- **2026-07-24:** **PRD-CONTENT-LIFECYCLE academy side** — text write-back `POST /api/admin/content` + drafts review API + serve-time content overlay + admin Content tab (drafts review); completes ADMIN-CONSOLE S5. Platform half (daily mission + cert-watch) flagged cross-pod.
+- **2026-07-23:** 66 videos live on the CDN (5 tracks uploaded + published); video-page fixes (#58); architecture + 5 PRDs (#59); **admin console S1–S6 (#60/#61)**; media domain slots (#62); admin nav + access diagnostic (#63/#64).

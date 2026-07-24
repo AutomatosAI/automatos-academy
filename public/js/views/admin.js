@@ -5,6 +5,7 @@
 import { el, clear } from "../ui.js";
 import { section } from "./_chrome.js";
 import { adminApi, ROLES, isAdminRole } from "../admin/console.js";
+import { contentTab } from "./admin-content.js";
 import { isConfigured, onAuthChange, user } from "../auth.js";
 
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(); } catch { return "—"; } };
@@ -58,7 +59,7 @@ export async function adminView() {
   const renderTab = async () => {
     clear(panel);
     panel.appendChild(el("p", { class: "muted", text: "Loading…" }));
-    const node = active === "Users" ? await usersTab() : active === "Payments" ? await paymentsTab() : contentTab();
+    const node = active === "Users" ? await usersTab() : active === "Payments" ? await paymentsTab() : await contentTab();
     clear(panel);
     panel.appendChild(node);
   };
@@ -179,11 +180,5 @@ async function paymentsTab() {
 }
 
 // ── Content ────────────────────────────────────────────────────────────
-function contentTab() {
-  return el("div", {}, [
-    el("h2", { class: "serif-i", style: { fontSize: "22px" }, text: "Content" }),
-    el("p", { class: "muted", style: { marginTop: "8px", maxWidth: "60ch" }, text: "Media (videos/audio) upload lives on each track's Video hub — open a track → Videos, and the Upload control appears on every slot for admins." }),
-    el("a", { class: "ac-btn", href: "#/", style: { marginTop: "12px" } }, ["Browse tracks →"]),
-    el("p", { class: "muted", style: { marginTop: "16px", fontSize: "13px" }, text: "In-app lesson/question editing (draft → approve → publish) lands with PRD-CONTENT-LIFECYCLE; today text content is authored in git + published via the content pipeline." }),
-  ]);
-}
+// The Content tab lives in ./admin-content.js (the drafts review surface for
+// the text write-back plane — PRD-CONTENT-LIFECYCLE); imported at the top.

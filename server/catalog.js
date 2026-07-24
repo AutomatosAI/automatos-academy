@@ -36,6 +36,7 @@ import { createHash } from "crypto";
 import { buildPodcastIndex } from "./podcasts.js";
 import { buildInventory } from "./media/inventory.js";
 import { overlayVideos } from "./media/overlay.js";
+import { applyContentOverride } from "./content/overlay.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -295,6 +296,11 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   // C3 PR2 — media bindings overlay accessor: (vendor, track) → {bySlot, version}
   // or null. Absent ⇒ no overlay (files/tests behave exactly as before).
   const getBindings = typeof opts.getBindings === "function" ? opts.getBindings : () => null;
+  // PRD-CONTENT-LIFECYCLE S4 — approved-draft text overlay accessor:
+  // (scopeKind, vendor, track, domain) → {canonical, sha256} or null. Absent ⇒
+  // no overlay (files/tests/spine-less deploys behave exactly as before). A
+  // whole-document swap served over the git/DB base, immutable + fail-soft.
+  const getOverride = typeof opts.getOverride === "function" ? opts.getOverride : () => null;
   // content stats keyed by index identity: files mode computes once per boot,
   // db mode once per index swap — never per request
   const contentStatsCache = new WeakMap();
@@ -352,7 +358,8 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   // over /:vendorId/:trackId.
   router.get("/paths", (req, res) => {
     const idx = getIdx();
-    send(res, req, idx, idx.paths.data, idx.paths.hash);
+    const o = applyContentOverride(idx.paths.data, idx.paths.hash, getOverride("paths", null, null, null));
+    send(res, req, idx, o.body, o.hash);
   });
   router.get("/paths/:pathId", (req, res) => {
     const idx = getIdx();
@@ -361,7 +368,8 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   });
   router.get("/levels", (req, res) => {
     const idx = getIdx();
-    send(res, req, idx, idx.levels.data, idx.levels.hash);
+    const o = applyContentOverride(idx.levels.data, idx.levels.hash, getOverride("levels", null, null, null));
+    send(res, req, idx, o.body, o.hash);
   });
 
   // C6 (PRD-WAVE-CONTENT-OPS) — flat inventory of everything that exists, for
@@ -401,19 +409,21 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
 
   router.get("/", (req, res) => {
     const idx = getIdx();
-    send(res, req, idx, idx.manifest.data, idx.manifest.hash);
+    const o = applyContentOverride(idx.manifest.data, idx.manifest.hash, getOverride("manifest", null, null, null));
+    send(res, req, idx, o.body, o.hash);
   });
 
   router.get("/:vendorId/:trackId", (req, res) => {
     const idx = getIdx();
     const t = idx.tracks.get(`${req.params.vendorId}/${req.params.trackId}`);
     if (!t) return notFound(res);
-    // C3 PR2 — overlay media bindings so a bound slot serves published; the
-    // binding version rides the ETag so an upload busts the cache within one
-    // refresh (immediate on bind via onChange).
+    // Content override first (an approved draft swaps the whole track doc),
+    // THEN media bindings on top — so a bound video url always wins over the
+    // draft's placeholder. Both fold into the ETag so either busts the cache.
+    const co = applyContentOverride(t.track.data, t.track.hash, getOverride("track", req.params.vendorId, req.params.trackId, null));
     const b = getBindings(req.params.vendorId, req.params.trackId);
-    const body = b ? overlayVideos(t.track.data, b.bySlot) : t.track.data;
-    const hash = b ? `${t.track.hash}-${b.version}` : t.track.hash;
+    const body = b ? overlayVideos(co.body, b.bySlot) : co.body;
+    const hash = b ? `${co.hash}-${b.version}` : co.hash;
     return send(res, req, idx, body, hash);
   });
 
@@ -422,12 +432,14 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     const t = idx.tracks.get(`${req.params.vendorId}/${req.params.trackId}`);
     const d = t && t.domains.get(req.params.domainId);
     if (!d) return notFound(res);
-    // PRD-MEDIA-DOMAIN-SLOTS — overlay bound DOMAIN videos so an uploaded lesson
-    // video serves published, ETag folded on the binding version like the track
-    // scope. Same per-track bySlot map (it holds every slot for the track).
+    // Content override first (an approved draft swaps the whole domain doc —
+    // the CONTENT-LIFECYCLE lesson/question path), THEN media bindings so an
+    // uploaded lesson video still serves published over the draft. Same
+    // per-track bySlot map (it holds every slot for the track).
+    const co = applyContentOverride(d.data, d.hash, getOverride("domain", req.params.vendorId, req.params.trackId, req.params.domainId));
     const b = getBindings(req.params.vendorId, req.params.trackId);
-    const body = b ? overlayVideos(d.data, b.bySlot) : d.data;
-    const hash = b ? `${d.hash}-${b.version}` : d.hash;
+    const body = b ? overlayVideos(co.body, b.bySlot) : co.body;
+    const hash = b ? `${co.hash}-${b.version}` : co.hash;
     return send(res, req, idx, body, hash);
   });
 
