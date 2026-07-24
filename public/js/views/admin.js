@@ -5,7 +5,7 @@
 import { el, clear } from "../ui.js";
 import { section } from "./_chrome.js";
 import { adminApi, ROLES, isAdminRole } from "../admin/console.js";
-import { isConfigured, onAuthChange } from "../auth.js";
+import { isConfigured, onAuthChange, user } from "../auth.js";
 
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(); } catch { return "—"; } };
 
@@ -39,7 +39,15 @@ export async function adminView() {
   await whenAuthReady();
   const me = await adminApi.me();
   if (me.status === 0) return wall("Admin", "Sign in to reach the admin console — then reload.");
-  if (!me.data || !isAdminRole(me.data.role)) return wall("Not authorized", "This area is for Academy admins only.");
+  if (!me.data || !isAdminRole(me.data.role)) {
+    const cid = (user() && user().id) || "unknown";
+    const role = (me.data && me.data.role) || "unknown";
+    return wall(
+      "Not authorized",
+      `This area is for Academy admins only. You're signed in as ${cid} — current role: ${role}. ` +
+      `To grant access, add that id to ACADEMY_ADMIN_CLERK_IDS on the server, then sign out and back in.`,
+    );
+  }
 
   const root = el("div", {});
   const tabs = ["Users", "Payments", "Content"];
