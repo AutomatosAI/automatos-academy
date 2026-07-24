@@ -39,6 +39,52 @@ export function domainStatsFromRows(domain, rows) {
 }
 
 /**
+ * The SAME math as domainStatsFromRows, generalised to an arbitrary member set
+ * — what a CONCEPT rollup needs (PRD-WAVE-LIVING-ACADEMY LA-2), because a
+ * concept can be a lesson (a handful of items) or a whole domain.
+ *
+ * Identical formulas, one difference of membership: a concept's question pool
+ * includes in-lesson knowledge checks, which `domainStatsFromRows` deliberately
+ * excludes from the blueprint-weighted mastery_map. Given a domain's exact
+ * member set this returns the same coverage/accuracy/knowledge/mastery numbers
+ * — pinned by an equivalence test rather than asserted in a comment.
+ *
+ * @param {{lessonIds: string[], questionIds: string[]}} members
+ * @param {Map<string,{seen:number,correct:number}>} rows — keyed by item_id
+ */
+export function conceptStatsFromRows(members, rows) {
+  const lessonIds = members.lessonIds || [];
+  const questionIds = members.questionIds || [];
+
+  const lessonsDone = lessonIds.filter((id) => {
+    const r = rows.get(id);
+    return !!(r && r.seen > 0);
+  }).length;
+  const coverage = lessonIds.length ? lessonsDone / lessonIds.length : 0;
+
+  let seen = 0, correct = 0, distinct = 0;
+  for (const id of questionIds) {
+    const r = rows.get(id);
+    if (r) { seen += r.seen; correct += r.correct; distinct++; }
+  }
+  const accuracy = seen ? correct / seen : 0;
+  const attemptsFactor = Math.min(1, distinct / Math.max(4, Math.ceil(questionIds.length * 0.6)));
+  const knowledge = accuracy * attemptsFactor;
+
+  return {
+    coverage, accuracy, distinct, knowledge,
+    mastery: 0.35 * coverage + 0.65 * knowledge,
+    poolSize: questionIds.length,
+    lessonsDone, lessonsTotal: lessonIds.length,
+    seen,
+    // Recorded misses across the concept's items — the honest "lapse" signal
+    // raw progress rows support (SM-2 lapse semantics would need per-answer
+    // history the Spine deliberately doesn't keep).
+    lapses: seen - correct,
+  };
+}
+
+/**
  * Blueprint-weighted roll-up — readiness.js `overall` reduced to its math:
  * Σ(weight × competence) / Σweight. Used for both the per-track headline and
  * the cross-track `path` scope (03 §2), and pinned by the 03 §5 worked

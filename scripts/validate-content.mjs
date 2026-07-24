@@ -5,6 +5,8 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { collectEpisodeErrors } from "../server/podcasts.js";
+import { validateCards } from "../server/cards/types.js";
+import { cardsFromDomain } from "../server/cards/map.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "content");
 const errors = [];
@@ -56,7 +58,8 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
   }
 
   const ids = new Set();
-  let weightSum = 0, domainCount = 0, weighted = 0;
+  const cardIds = new Set(); // LA-1 — card uids are unique per track
+  let weightSum = 0, domainCount = 0, weighted = 0, cardCount = 0;
   for (const df of t.domainFiles || []) {
     const dp = join(dir, df);
     if (!existsSync(dp)) { err(`${label}: missing domain file ${df}`); continue; }
@@ -82,8 +85,28 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
         if (!(st.choices || []).some((c) => c.verdict === "best")) err(`${s.id}/${st.id}: no 'best' choice`);
       }
     }
-    console.log(`  ✓ ${d.code || df} — ${(d.lessons || []).length} lessons, ${(d.questions || []).length} q, ${(d.scenarios || []).length} scn, weight ${d.weight}`);
+    // LA-1 — the whole domain must project cleanly into the typed feed
+    // (cardsFromDomain validates any authored cards[] on the way through).
+    // Cards are served by /api/catalog/cards, so a malformed card is a
+    // merge-time error here, never a serve-time surprise.
+    const projected = cardsFromDomain(d, { vendorId: vendor, trackId: track, domainId: d.id });
+    projected.errors.forEach(err);
+    for (const c of projected.cards) {
+      if (cardIds.has(c.uid)) err(`${df}: duplicate card uid ${c.uid}`); else cardIds.add(c.uid);
+    }
+    cardCount += projected.cards.length;
+    console.log(`  ✓ ${d.code || df} — ${(d.lessons || []).length} lessons, ${(d.questions || []).length} q, ${(d.scenarios || []).length} scn, ${projected.cards.length} cards, weight ${d.weight}`);
   }
+  // Track-scope cards (LA-11's changelog seam) — same contract, no derivation.
+  {
+    const r = validateCards(t.cards, { scope: { vendorId: vendor, trackId: track }, where: `${label}: track cards` });
+    r.errors.forEach(err);
+    for (const c of r.cards) {
+      if (cardIds.has(c.uid)) err(`${label}: duplicate card uid ${c.uid}`); else cardIds.add(c.uid);
+    }
+    cardCount += r.cards.length;
+  }
+  if (cardCount) console.log(`${label}: ${cardCount} feed cards`);
   // Exam tracks must sum to 1.000. A skills track may omit weights entirely;
   // if it declares any, they must still sum (half-weighted = authoring bug).
   if ((isExam || weighted > 0) && domainCount && Math.abs(weightSum - 1) > 0.005) err(`${label}: domain weights sum to ${weightSum.toFixed(3)}, expected 1.000`);
