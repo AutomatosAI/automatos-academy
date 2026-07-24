@@ -152,6 +152,56 @@ export async function rederiveConceptState(client, index, userId, touchedTrackKe
 }
 
 /**
+ * The rollup, wrapped so it can NEVER cost a learner their answer.
+ *
+ * `user_concept_state` is DERIVED — every row in it can be recomputed from the
+ * progress rows on the next sync. A learner's answer cannot. So the two must
+ * not share a fate: this runs inside a SAVEPOINT, and any failure rolls back
+ * only the rollup while the progress upsert it rode in with still commits.
+ *
+ * The failure that motivated this was real: `migrations/` reach production
+ * through the content-publish workflow, which only fires on pushes touching
+ * `public/content/**`. A code-only merge therefore deploys new table writes
+ * against a database that has not seen the migration yet — and because the
+ * rollup shared the progress transaction, a missing table took the whole
+ * `POST /api/sync/progress` down with it. That coupling was the bug; the
+ * missing migration was only what exposed it. With a SAVEPOINT the same
+ * situation degrades to "sync works, concept rows appear once the migration
+ * lands" — which is what a derived table should always have done.
+ *
+ * Returns [] on failure. Callers get an empty `conceptState`, never an error.
+ */
+export async function rederiveConceptStateSafely(client, index, userId, touchedTrackKeys, nowMs = Date.now(), logger = console) {
+  try {
+    await client.query("SAVEPOINT concept_rollup");
+  } catch (e) {
+    // No savepoint means no way to isolate a failure — skip the rollup
+    // entirely rather than risk the answer it would ride with.
+    (logger.warn || logger.log || (() => {}))(`[spine] concept rollup skipped (savepoint unavailable): ${e.message}`);
+    return [];
+  }
+  try {
+    const rows = await rederiveConceptState(client, index, userId, touchedTrackKeys, nowMs);
+    await client.query("RELEASE SAVEPOINT concept_rollup");
+    return rows;
+  } catch (e) {
+    (logger.warn || logger.log || (() => {}))(
+      `[spine] concept rollup failed, progress still committing: ${e.message}`,
+    );
+    // Postgres aborts the whole transaction on a statement error; rolling back
+    // to the savepoint is what makes the surrounding COMMIT possible again.
+    try {
+      await client.query("ROLLBACK TO SAVEPOINT concept_rollup");
+    } catch (rollbackError) {
+      // The connection itself is gone — nothing left to salvage, and
+      // swallowing this would let the caller COMMIT a dead transaction.
+      throw rollbackError;
+    }
+    return [];
+  }
+}
+
+/**
  * Half-life weight for a concept's decay. Domain concepts inherit their
  * domain's blueprint weight (heavier domain → slower decay, the same rule
  * mastery_map uses); finer and coarser concepts fall back to the neutral mid
