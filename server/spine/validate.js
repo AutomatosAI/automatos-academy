@@ -23,14 +23,33 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // app-side emitters (src/onboarding/analytics.ts, src/metrics/events.ts)
 // exactly — only what the app sends, no free-text fields. The follow-up
 // migration relaxes telemetry.event_type's CHECK to the same ten values.
+//
+// LA-3 (PRD-WAVE-LIVING-ACADEMY) adds `card_review`: the binary Got-it /
+// Missed-it grade, one per card served in the typed feed. It is the
+// OBSERVABILITY half of a graded card — the STATE half rides
+// /api/sync/progress as an ordinary SM-2 answer (`correct: grade === "got"`),
+// because a binary grade maps onto the existing engine unchanged. A SKIPPED
+// card sends only this event and no progress event: a skip is not an answer,
+// and must never move a learner's SM-2 state.
+//
+// Note what card_review deliberately does NOT carry: `conceptKeys[]`. The
+// server derives an item's concepts from the content index it already holds
+// (server/concepts/membership.js), so the client cannot mis-attribute mastery
+// and the PII-minimized flat-scalar payload rule stays intact. The optional
+// singular `conceptKey` exists only for a card that DECLARES a concept the
+// tree can't derive — the D-LA3 enrichment seam.
 const TELEMETRY_TYPES = [
   "answer", "card_outcome", "session", "scenario",
   "consent", "onboarding",
   "gate_transition", "weak_domain_closed", "session_open", "exam_outcome",
+  "card_review",
 ];
 const PAYLOAD_KEYS = {
   answer: ["itemId", "correct", "timeMs", "bucket", "surface"],
   card_outcome: ["itemId", "outcome", "timeMs", "surface"],
+  // cardId rides the payload AND top-level itemId (same shape as `answer`);
+  // cardType is what makes LA-6's "skip rate by card type" answerable.
+  card_review: ["cardId", "cardType", "grade", "msOnCard", "skipped", "surface", "conceptKey"],
   session: ["surface", "durationMs", "itemCount", "startedAt", "endedAt"],
   scenario: ["scenario_id", "step", "scorePct"],
   consent: ["copyVersion", "ackAt"],
@@ -43,6 +62,13 @@ const PAYLOAD_KEYS = {
 
 const isId = (v) => typeof v === "string" && v.length > 0 && v.length <= MAX_ID_LEN;
 const isInt = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
+
+/** Closed value sets a telemetry payload must respect. The generic validator
+ *  only guarantees "a scalar in the schema"; where a field IS an enum, an
+ *  out-of-set value is a client bug we should reject at the boundary rather
+ *  than store and have to clean out of the flywheel's aggregates later. */
+export const CARD_REVIEW_GRADES = ["got", "missed"];
+const PAYLOAD_ENUMS = { card_review: { grade: CARD_REVIEW_GRADES } };
 
 /** ISO string or epoch-ms (number, or digit string à la query params) → ms,
  *  or null when unparseable. */
@@ -93,11 +119,13 @@ export function validateTelemetryEvent(e) {
   const payload = e.payload === undefined ? {} : e.payload;
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return { error: "payload_not_object" };
   const allowed = PAYLOAD_KEYS[e.eventType];
+  const enums = PAYLOAD_ENUMS[e.eventType] || null;
   for (const [k, v] of Object.entries(payload)) {
     if (!allowed.includes(k)) return { error: `payload_key_not_in_schema:${k}` };
     const t = typeof v;
     if (t === "string") { if (v.length > MAX_PAYLOAD_STRING) return { error: `payload_string_too_long:${k}` }; }
     else if (t !== "number" && t !== "boolean") return { error: `payload_value_not_scalar:${k}` };
+    if (enums && enums[k] && !enums[k].includes(v)) return { error: `payload_value_not_allowed:${k}` };
   }
   return {
     value: {

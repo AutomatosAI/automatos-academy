@@ -17,6 +17,7 @@ import express from "express";
 import { ok, fail, wrap } from "./http.js";
 import { parseTimestamp } from "./validate.js";
 import { scopeWeightResolver, masteryToWire } from "./rollups.js";
+import { conceptWeightResolver, conceptStateToWire, conceptRowFromDb } from "./concepts.js";
 
 const iso = (v) => (v === null || v === undefined ? null : new Date(v).toISOString());
 
@@ -67,7 +68,7 @@ export const STREAK_SQL = `
 // then the users row itself — "all 7 tables" (US-025). The next authenticated
 // call re-mints a users row with a FRESH workspace_id, which is exactly the
 // "deleted user re-signs-up clean" semantic the PRD tests demand.
-export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots"];
+export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots", "user_concept_state"];
 
 // Exported so the admin console (PRD-ADMIN-CONSOLE S2) reuses the one canonical
 // wipe — an admin-scoped delete must match the self-service delete exactly.
@@ -95,6 +96,7 @@ export async function wipeUserRows(pool, userId) {
 export function createMeRouter({ pool, index, clerkUserDeleter }) {
   const router = express.Router();
   const scopeWeight = scopeWeightResolver(index);
+  const conceptWeight = conceptWeightResolver(index);
 
   // ── GET /api/me — light identity + role (the SPA reads role to decide
   //    whether to show #/admin; far cheaper than the full /state pull). ──
@@ -116,7 +118,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
     const cond = (col) => (since ? ` AND ${col} > $2` : "");
     const params = since ? [userId, since] : [userId];
 
-    const [progress, mastery, mocks, scenarios, streak] = await Promise.all([
+    const [progress, mastery, mocks, scenarios, streak, concepts] = await Promise.all([
       pool.query(`SELECT vendor_id, track_id, item_id, seen, correct, ease, "interval" AS interval, due_at, answered_at
                   FROM progress WHERE user_id = $1${cond("answered_at")}`, params),
       pool.query(`SELECT vendor_id, track_id, scope_type, scope_id, competence, decay_at, updated_at
@@ -126,6 +128,12 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       pool.query(`SELECT vendor_id, track_id, scenario_id, step, score_pct, updated_at
                   FROM scenario_progress WHERE user_id = $1${cond("updated_at")}`, params),
       pool.query(STREAK_SQL, [userId]), // always user-scoped, never since-filtered
+      // LA-2 — topic-level state, delta'd on the same `since` cursor as the
+      // rest. Aggregate-only stays the platform boundary: this is the CALLER's
+      // own rows, never anyone else's.
+      pool.query(`SELECT concept_key, vendor_id, track_id, level, mastery, coverage, accuracy,
+                         items_seen, items_total, due_count, next_due_at, lapses, last_seen_at, updated_at
+                  FROM user_concept_state WHERE user_id = $1${cond("updated_at")}`, params),
     ]);
 
     return ok(res, {
@@ -134,6 +142,9 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       masteryMap: mastery.rows.map((r) => masteryToWire(masteryRowFromDb(r), scopeWeight, nowMs)),
       mockAttempts: mocks.rows.map(mockToWire),
       scenarioProgress: scenarios.rows.map(scenarioToWire),
+      // LA-2 additive field — the app's MeStateSchema is .passthrough(), so
+      // pre-LA-2 builds ignore it cleanly (the same contract PRD-U2 relied on).
+      conceptState: concepts.rows.map((r) => conceptStateToWire(conceptRowFromDb(r), conceptWeight, nowMs)),
       // PRD-U2 additive envelope fields — absolute values on every pull.
       // The mobile client's MeStateSchema is .passthrough() (schemas.ts), so
       // pre-U2 apps ignore these cleanly.
@@ -203,7 +214,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
   router.get("/export", wrap(async (req, res) => {
     const userId = req.spineUser.id;
     const u = req.spineUser;
-    const [mastery, progress, cache, telemetry, mocks, scenarios, prefs, snapshots] = await Promise.all([
+    const [mastery, progress, cache, telemetry, mocks, scenarios, prefs, snapshots, concepts] = await Promise.all([
       pool.query("SELECT * FROM mastery_map WHERE user_id = $1", [userId]),
       pool.query('SELECT * FROM progress WHERE user_id = $1', [userId]),
       pool.query("SELECT * FROM content_cache WHERE user_id = $1", [userId]),
@@ -212,6 +223,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       pool.query("SELECT * FROM scenario_progress WHERE user_id = $1", [userId]),
       pool.query("SELECT * FROM user_prefs WHERE user_id = $1", [userId]),
       pool.query("SELECT * FROM mastery_snapshots WHERE user_id = $1", [userId]),
+      pool.query("SELECT * FROM user_concept_state WHERE user_id = $1", [userId]),
     ]);
     // Export is the raw truth: stored (undecayed) competence, full payloads.
     return ok(res, {
@@ -226,6 +238,9 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       // PRD-DIGEST S1 — the two new tables ride both export and delete.
       userPrefs: prefs.rows,
       masterySnapshots: snapshots.rows,
+      // LA-2 — derived, but it IS the learner's data: it rides export and
+      // delete like every other table (US-025's "all tables", now nine).
+      userConceptState: concepts.rows,
     });
   }));
 

@@ -37,6 +37,7 @@ import { buildPodcastIndex } from "./podcasts.js";
 import { buildInventory } from "./media/inventory.js";
 import { overlayVideos } from "./media/overlay.js";
 import { applyContentOverride } from "./content/overlay.js";
+import { collectCards, parseTypeFilter } from "./cards/index.js";
 
 const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 const shortHash = (s) => sha(s).slice(0, 12);
@@ -405,6 +406,41 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     const idx = getIdx();
     const ep = idx.podcasts.episodes.get(req.params.episodeId);
     return ep ? send(res, req, idx, ep, `${idx.podcasts.hash}-${req.params.episodeId}`) : notFound(res);
+  });
+
+  // Typed card feed (PRD-WAVE-LIVING-ACADEMY LA-1). A fixed segment registered
+  // ahead of /:vendorId/:trackId — same shape as /podcasts, and it keeps a
+  // track called "cards" from ever shadowing the endpoint. Cards are a VIEW
+  // over the same (overlaid) documents this router already serves, so an
+  // approved draft changes the feed with no republish and no card store.
+  //
+  //   GET /api/catalog/cards?vendor=&track=&domain=&locale=&type=quiz,flashcard
+  //
+  // Unfiltered it walks the whole catalog; that response is large but ETag'd
+  // and cached like the rest — clients narrow by track in practice. Narrowing
+  // by `domain` requires `vendor`+`track` (a domain id is only unique inside
+  // its track), and drops track-scope cards, which belong to no domain.
+  router.get("/cards", (req, res) => {
+    const idx = getIdx();
+    const vendor = typeof req.query.vendor === "string" ? req.query.vendor : null;
+    const track = typeof req.query.track === "string" ? req.query.track : null;
+    const domain = typeof req.query.domain === "string" ? req.query.domain : null;
+    if (domain && !(vendor && track)) {
+      return res.status(400).json({ error: "domain_needs_vendor_and_track" });
+    }
+    const result = collectCards(idx, {
+      vendorId: vendor, trackId: track, domainId: domain,
+      locale: req.query.locale,
+      types: parseTypeFilter(req.query.type),
+      getOverride, getBindings,
+    });
+    send(res, req, idx, {
+      version: 1,
+      locale: result.locale,
+      count: result.count,
+      invalidCards: result.invalidCards,
+      cards: result.cards,
+    }, `${result.hash}-cards`);
   });
 
   router.get("/", (req, res) => {

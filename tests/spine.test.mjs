@@ -7,6 +7,12 @@
 // they skip loudly so `npm test` stays green in the plain job.
 import { mkdtempSync, rmSync } from "fs";
 import { join, dirname } from "path";
+// LA-2 concept rollups — pure halves unit-tested here, wired halves below.
+import { buildMembership, membershipForTrack } from "../server/concepts/membership.js";
+import { conceptStatsFromRows } from "../server/engine/competence.js";
+import {
+  duePressure, conceptRowsForTrack, conceptWeightResolver, conceptStateToWire,
+} from "../server/spine/concepts.js";
 import { tmpdir } from "os";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
@@ -20,6 +26,7 @@ import {
   parseTimestamp, collapseLatest, validateBatch,
   validateProgressEvent, validateTelemetryEvent, validateMockEvent, validateScenarioEvent,
   MAX_BATCH as SERVER_MAX_BATCH, MAX_FUTURE_SKEW_MS as SERVER_MAX_SKEW,
+  CARD_REVIEW_GRADES,
 } from "../server/spine/validate.js";
 import { mountSpine } from "../server/spine/index.js";
 // The web sync client's pure helpers (PRD-U2 S1/S2) — plain ES modules with
@@ -214,6 +221,90 @@ ok(JSON.stringify(bf1) === JSON.stringify(bf2), "same manifest → byte-identica
 ok(bf1.progress[0].answeredAt === nowMs - 5000 && bf1.mocks[0].at === nowMs - 4000, "backfill keeps ORIGINAL timestamps — history ordering survives the merge");
 ok(!validateProgressEvent(bf1.progress[0], nowMs).error && !validateMockEvent(bf1.mocks[0], nowMs).error && !validateScenarioEvent(bf1.scenarios[0], nowMs).error, "every synthesized event clears the server validators");
 
+// ── LA-2: concept membership + rollup math (pure, no Postgres) ────────
+console.log("concept rollups (PRD-WAVE-LIVING-ACADEMY LA-2)");
+const laScratch = mkdtempSync(join(tmpdir(), "concepts-test-"));
+const laIndex = buildContentIndex(join(HERE, "..", "public", "content"), join(laScratch, "journal.json"));
+const laMembers = buildMembership(laIndex);
+const laCca = laIndex.tracks.get("anthropic/cca-f");
+const laD1 = [...laCca.domains.values()].find((d) => d.data.id === "d1-agentic-architectures").data;
+const laDomainKey = `anthropic/cca-f/${laD1.id}`;
+const laLessonKey = `${laDomainKey}/${laD1.lessons[0].id}`;
+
+ok(laMembers.has(laDomainKey) && laMembers.has(laLessonKey) && laMembers.has("anthropic/cca-f"), "membership covers track, domain and lesson concepts");
+ok(laMembers.get(laDomainKey).level === "domain" && laMembers.get(laLessonKey).level === "lesson", "each concept knows its level");
+ok(buildMembership(laIndex) === laMembers, "membership is cached by index identity (built once, not per request)");
+
+const laDomainMember = laMembers.get(laDomainKey);
+const laLessonMember = laMembers.get(laLessonKey);
+ok(laLessonMember.lessonIds.length === 1 && laLessonMember.lessonIds[0] === laD1.lessons[0].id, "a lesson concept holds exactly its own lesson");
+ok(laLessonMember.questionIds.length === (laD1.lessons[0].knowledgeCheck || []).length, "…plus its knowledge checks (real progress items)");
+ok(laDomainMember.lessonIds.length === laD1.lessons.length, "a domain concept holds every lesson beneath it");
+const laKcTotal = laD1.lessons.reduce((n, l) => n + (l.knowledgeCheck || []).length, 0);
+ok(laDomainMember.questionIds.length === laD1.questions.length + laKcTotal, "…and every question AND knowledge check (the card pool, not the blueprint pool)");
+ok(laLessonMember.questionIds.every((id) => laDomainMember.questionIds.includes(id)), "a concept contains its descendants, so one pass rolls up every level");
+ok(laMembers.get("anthropic/cca-f").questionIds.length >= laDomainMember.questionIds.length, "the track concept is the union of its domains");
+ok([...membershipForTrack(laIndex, "anthropic/cca-f").values()].every((m) => m.trackKey === "anthropic/cca-f"), "per-track membership is scoped");
+
+// the generalised math must AGREE with the pinned domain math on a domain's
+// blueprint member set — proven, not asserted in a comment
+const laRows = new Map(laD1.questions.slice(0, 6).map((qq, i) => [qq.id, { seen: 2, correct: i % 2 ? 2 : 1, dueAtMs: nowMs + DAY, answeredAtMs: nowMs - 1000 }]));
+laRows.set(laD1.lessons[0].id, { seen: 1, correct: 1, dueAtMs: null, answeredAtMs: nowMs - 500 });
+const laBlueprintMembers = { lessonIds: laD1.lessons.map((l) => l.id), questionIds: laD1.questions.map((qq) => qq.id) };
+ok(near(conceptStatsFromRows(laBlueprintMembers, laRows).mastery, domainStatsFromRows(laD1, laRows).mastery), "conceptStatsFromRows ≡ domainStatsFromRows on a domain's blueprint member set (one canonical math)");
+ok(conceptStatsFromRows(laBlueprintMembers, laRows).lapses === 3, "lapses count recorded misses (Σseen − Σcorrect)");
+ok(conceptStatsFromRows({ lessonIds: [], questionIds: [] }, laRows).mastery === 0, "an empty concept is 0, not NaN");
+
+const laPressure = duePressure([...laRows.keys()], laRows, nowMs);
+ok(laPressure.itemsSeen === 7 && laPressure.dueCount === 0, "nothing due yet");
+ok(laPressure.nextDueAtMs === nowMs + DAY, "next due is the earliest future due date");
+ok(laPressure.lastSeenAtMs === nowMs - 500, "last seen is the latest answer");
+const laOverdue = duePressure([...laRows.keys()], laRows, nowMs + 2 * DAY);
+ok(laOverdue.dueCount === 6 && laOverdue.nextDueAtMs === null, "a day later every scheduled item is due pressure");
+ok(duePressure(["never-answered"], laRows, nowMs).itemsSeen === 0, "untouched items contribute nothing");
+
+const laScoped = membershipForTrack(laIndex, "anthropic/cca-f");
+const laComputed = conceptRowsForTrack(laScoped, laRows, nowMs);
+ok(laComputed.length > 0 && laComputed.every((r) => r.trackId === "cca-f"), "rows are produced for the touched track");
+ok(laComputed.some((r) => r.conceptKey === laDomainKey) && laComputed.some((r) => r.conceptKey === laLessonKey), "both the domain and the lesson concept roll up from one answer set");
+ok(!laComputed.some((r) => r.conceptKey.startsWith("anthropic/cca-f/d2")), "a concept the learner never touched produces NO row (absent = zero)");
+ok(laComputed.every((r) => r.itemsSeen > 0 && r.itemsTotal >= r.itemsSeen), "itemsSeen/itemsTotal make mastery honest to read");
+ok(conceptRowsForTrack(laScoped, new Map(), nowMs).length === 0, "no progress → no rows at all");
+
+const laWeight = conceptWeightResolver(laIndex);
+ok(laWeight(laDomainKey) === laD1.weight, "a domain concept inherits its blueprint weight for decay");
+ok(laWeight("anthropic/cca-f") === 0.2 && laWeight(laLessonKey) === 0.2, "coarser and finer concepts take the neutral mid weight (the blueprint says nothing about them)");
+
+const laRow = laComputed.find((r) => r.conceptKey === laDomainKey);
+const laWire = conceptStateToWire({
+  ...laRow, nextDueAt: null, lastSeenAt: new Date(laRow.lastSeenAtMs),
+}, laWeight, nowMs);
+ok(laWire.masteryRaw === laRow.mastery && laWire.mastery <= laWire.masteryRaw, "wire carries raw + decayed mastery, same contract as mastery_map");
+const laStale = conceptStateToWire({ ...laRow, nextDueAt: null, lastSeenAt: new Date(laRow.lastSeenAtMs) }, laWeight, nowMs + 400 * DAY);
+ok(laStale.mastery < laWire.mastery, "a year later the same row reads lower — decay is applied on read, never stored");
+ok(conceptStateToWire({ ...laRow, nextDueAt: null, lastSeenAt: null }, laWeight, nowMs).mastery === laRow.mastery, "a row with no answer time decays not at all rather than to zero");
+rmSync(laScratch, { recursive: true, force: true });
+
+// ── LA-3: the binary card_review grade at the boundary ────────────────
+console.log("card_review grade event (LA-3)");
+const cr = (payload, over = {}) => ({
+  eventId: randomUUID(), eventType: "card_review",
+  vendorId: "anthropic", trackId: "cca-f", itemId: "q-d1-1", payload, ...over,
+});
+ok(!validateTelemetryEvent(cr({ cardId: "q-d1-1", cardType: "quiz", grade: "got", msOnCard: 3200, skipped: false, surface: "feed" })).error, "a well-formed card_review validates");
+ok(!validateTelemetryEvent(cr({ cardId: "fc-1", grade: "missed" })).error, "the minimal shape (card + grade) is enough");
+ok(validateTelemetryEvent(cr({ cardId: "q-d1-1", grade: "sort-of" })).error === "payload_value_not_allowed:grade", "grade is a closed set — got | missed, nothing else");
+ok(validateTelemetryEvent(cr({ cardId: "q-d1-1", grade: "got", conceptKeys: ["a/b/c"] })).error === "payload_key_not_in_schema:conceptKeys", "conceptKeys[] is NOT on the wire — the server derives concepts, so a client can't mis-attribute mastery");
+ok(!validateTelemetryEvent(cr({ cardId: "q-d1-1", grade: "got", conceptKey: "anthropic/cca-f/d1/l1" })).error, "…but a singular declared conceptKey is allowed (the D-LA3 enrichment seam)");
+ok(validateTelemetryEvent(cr({ cardId: "q-d1-1", grade: "got", bucket: "due" })).error === "payload_key_not_in_schema:bucket", "the flat allowlist still governs every other key");
+ok(JSON.stringify(CARD_REVIEW_GRADES) === JSON.stringify(["got", "missed"]), "binary grading is binary — one thumb, two outcomes");
+// The state half rides the existing SM-2 path unchanged: got → correct.
+const gotAsAnswer = validateProgressEvent({
+  eventId: randomUUID(), vendorId: "anthropic", trackId: "cca-f", itemId: "q-d1-1",
+  correct: true, answeredAt: nowMs, dueAt: nowMs + DAY, seen: 1, correct_count: 1, ease: 2.36, interval: 1,
+}, nowMs);
+ok(!gotAsAnswer.error && gotAsAnswer.value.correct === true, "a Got-it grade is an ordinary correct SM-2 answer — the engine is untouched");
+
 // ══════════════════════════════════════════════════════ integration ════
 if (!process.env.DATABASE_URL) {
   console.log("\nintegration: SKIPPED — DATABASE_URL not set (the CI spine job runs these against a service container)");
@@ -341,6 +432,39 @@ ok(!!stateD1 && near(stateD1.competenceRaw, expected, 1e-6), "state carries the 
 const item0 = state1.body.data.progress.find((p) => p.itemId === q(0));
 ok(item0 && item0.seen === 1 && item0.ease === 2.36 && item0.interval === 1, "SM-2 state round-trips field-for-field");
 
+// ── LA-2: concept rollups derived in the SAME transaction ─────────────
+const cDomainKey = `anthropic/cca-f/${d1.id}`;
+const cLessonKey = `${cDomainKey}/${lessonId}`;
+const ackConcepts = sync1.body.data.conceptState || [];
+ok(ackConcepts.length > 0, "the progress ack carries the re-derived concept rows (a client colours its feed without a second call)");
+const ackDomain = ackConcepts.find((c) => c.conceptKey === cDomainKey);
+ok(!!ackDomain && ackDomain.level === "domain", "the domain concept rolled up");
+ok(ackConcepts.some((c) => c.conceptKey === cLessonKey && c.level === "lesson"), "…and the lesson concept the answered lesson belongs to");
+ok(ackConcepts.some((c) => c.conceptKey === "anthropic/cca-f" && c.level === "track"), "…and the track concept above them");
+ok(ackDomain.itemsSeen === 3 && ackDomain.itemsTotal > 3, "itemsSeen counts what was touched, itemsTotal the whole pool");
+ok(ackDomain.vendorId === "anthropic" && ackDomain.trackId === "cca-f", "rows carry the split ids alongside the whole key");
+ok(!ackConcepts.some((c) => c.conceptKey.startsWith("anthropic/cca-f/d2")), "untouched concepts get no row (absent = zero, not 400 rows of nothing)");
+
+const stateConcepts = state1.body.data.conceptState || [];
+ok(stateConcepts.length === ackConcepts.length, "GET /api/me/state carries the same concept rows as the ack");
+const stateDomain = stateConcepts.find((c) => c.conceptKey === cDomainKey);
+ok(!!stateDomain && near(stateDomain.masteryRaw, ackDomain.masteryRaw, 1e-9), "…with the same server-derived mastery");
+ok(stateDomain.masteryRaw === stateDomain.mastery || stateDomain.mastery < stateDomain.masteryRaw, "mastery is raw in the DB, decayed on read");
+ok(typeof stateDomain.dueCount === "number" && "nextDueAt" in stateDomain && typeof stateDomain.lapses === "number", "due pressure + lapses ride the wire");
+
+// the key is the SHARED content id, not a per-user blob handle — the whole
+// point of PRD §2's "rows keyed to shared concept ids" decision
+const { rows: rawConcepts } = await pool.query(
+  "SELECT concept_key, level FROM user_concept_state WHERE concept_key = $1", [cDomainKey],
+);
+ok(rawConcepts.length >= 1 && rawConcepts[0].concept_key === cDomainKey, "the stored key is the shared concept id — queryable across learners, no blob to migrate");
+
+// a second answer re-derives rather than accumulating a second row
+const beforeCount = (await pool.query("SELECT count(*)::int AS n FROM user_concept_state WHERE user_id = (SELECT id FROM users WHERE clerk_user_id = 'user_alice')")).rows[0].n;
+await request("POST", "/api/sync/progress", { token: alice, body: { events: [progressEvent(q(0), T + 30_000, { seen: 2, correct_count: 2 })] } });
+const afterCount = (await pool.query("SELECT count(*)::int AS n FROM user_concept_state WHERE user_id = (SELECT id FROM users WHERE clerk_user_id = 'user_alice')")).rows[0].n;
+ok(afterCount === beforeCount, "re-answering upserts the concept row, never stacks a second one");
+
 // ── idempotent retry: the exact same batch replayed applies nothing ───
 const retry = await request("POST", "/api/sync/progress", { token: alice, body: { events: batch1 } });
 ok(retry.status === 200 && retry.body.data.applied === 0 && retry.body.data.discarded === 3, "replayed batch → 0 applied (idempotent)");
@@ -402,6 +526,30 @@ const { rows: frankTypeRows } = await pool.query(
 );
 ok(frankTypeRows.length === 6 && ["consent", "onboarding", "gate_transition", "weak_domain_closed", "session_open", "exam_outcome"].every((t) => frankTypeRows.some((r) => r.event_type === t)), "…and the relaxed CHECK constraint admitted every newer event_type");
 
+// ── LA-3: card_review crosses the boundary AND the CHECK ──────────────
+const gordon = "fixture:user_gordon";
+const reviewEvents = [
+  { eventId: randomUUID(), eventType: "card_review", vendorId: "anthropic", trackId: "cca-f", itemId: q(0),
+    payload: { cardId: q(0), cardType: "quiz", grade: "got", msOnCard: 4200, skipped: false, surface: "feed" } },
+  { eventId: randomUUID(), eventType: "card_review", vendorId: "anthropic", trackId: "cca-f", itemId: q(1),
+    payload: { cardId: q(1), cardType: "flashcard", grade: "missed", msOnCard: 9100, skipped: false, surface: "feed" } },
+  { eventId: randomUUID(), eventType: "card_review", vendorId: "anthropic", trackId: "cca-f", itemId: q(2),
+    payload: { cardId: q(2), cardType: "quiz", grade: "missed", msOnCard: 800, skipped: true, surface: "feed" } },
+];
+const reviewRes = await request("POST", "/api/sync/telemetry", { token: gordon, body: { events: reviewEvents } });
+ok(reviewRes.status === 200 && reviewRes.body.data.applied === 3, `card_review events stored end-to-end (${JSON.stringify(reviewRes.body && reviewRes.body.data)})`);
+const { rows: gordonRows } = await pool.query(
+  "SELECT payload FROM telemetry WHERE event_type = 'card_review' AND user_id = (SELECT id FROM users WHERE clerk_user_id = 'user_gordon')",
+);
+ok(gordonRows.length === 3, "…and the CHECK constraint admits card_review (the migration is the second, independent gate)");
+ok(gordonRows.some((r) => r.payload.cardType === "flashcard"), "cardType survives the round trip — LA-6's skip-rate-by-type is answerable");
+ok(gordonRows.some((r) => r.payload.skipped === true), "a skip is recorded as telemetry (and, by contract, sends no progress event)");
+const badGrade = await request("POST", "/api/sync/telemetry", {
+  token: gordon,
+  body: { events: [{ eventId: randomUUID(), eventType: "card_review", vendorId: "anthropic", trackId: "cca-f", payload: { cardId: q(0), grade: "sort-of" } }] },
+});
+ok(badGrade.status === 400 && /payload_value_not_allowed:grade/.test(badGrade.body.error || ""), `an out-of-set grade is refused at the boundary (${badGrade.body.error})`);
+
 // ── mocks: append-only attempts feeding the readiness gate ────────────
 const mockEv = { eventId: randomUUID(), vendorId: "anthropic", trackId: "cca-f", scaled: 812, passed: true, at: new Date(T).toISOString() };
 const mocks1 = await request("POST", "/api/sync/mocks", { token: alice, body: { events: [mockEv, { ...mockEv, eventId: randomUUID(), scaled: 640, passed: false, at: new Date(T - DAY).toISOString() }] } });
@@ -455,18 +603,22 @@ const r2 = await request("POST", "/api/sync/progress", { token: bob, body: tinyB
 const r3 = await request("POST", "/api/sync/progress", { token: bob, body: tinyBatch(), base: limited.base });
 ok(r1.status === 200 && r2.status === 200 && r3.status === 429 && r3.body.error === "rate_limited", "third call in the window → 429");
 
-// ── export: all 7 tables (GDPR access/portability) ────────────────────
+// ── export: every learner table (GDPR access/portability) ─────────────
 const exported = await request("GET", "/api/me/export", { token: alice });
 const ex = exported.body.data;
-ok(exported.status === 200 && ["user", "masteryMap", "progress", "contentCache", "telemetry", "mockAttempts", "scenarioProgress"].every((k) => k in ex), "export spans all 7 tables");
+ok(exported.status === 200 && ["user", "masteryMap", "progress", "contentCache", "telemetry", "mockAttempts", "scenarioProgress"].every((k) => k in ex), "export spans the original 7 tables");
 ok(ex.user.clerkUserId === "user_alice" && ex.progress.length > 0 && ex.telemetry.length === 2 && ex.mockAttempts.length === 2, "export carries the user's actual rows");
+// LA-2 — derived state is still the learner's data
+ok(Array.isArray(ex.userConceptState) && ex.userConceptState.length > 0, "export includes user_concept_state (derived, but still theirs)");
 
 // ── DELETE /api/me/data — wipe rows, keep the Clerk identity ──────────
 const wipe = await request("DELETE", "/api/me/data", { token: alice });
 ok(wipe.status === 200 && wipe.body.data.deleted.users === 1, "data deletion returns per-table counts");
 ok(wipe.body.data.deleted.progress > 0 && wipe.body.data.deleted.mastery_map > 0 && wipe.body.data.deleted.telemetry === 2, `…counting what was wiped (${JSON.stringify(wipe.body.data.deleted)})`);
+ok(wipe.body.data.deleted.user_concept_state > 0, "…including user_concept_state (LA-2 rides the one canonical wipe)");
 const afterWipe = await request("GET", "/api/me/state", { token: alice });
 ok(afterWipe.status === 200 && afterWipe.body.data.progress.length === 0 && afterWipe.body.data.masteryMap.length === 0, "deleted user re-signs-up clean (fresh empty state)");
+ok((afterWipe.body.data.conceptState || []).length === 0, "…and no concept state survives the wipe");
 const { rows: aliceAfter } = await pool.query("SELECT workspace_id FROM users WHERE clerk_user_id = 'user_alice'");
 ok(aliceAfter.length === 1 && aliceAfter[0].workspace_id !== aliceWorkspace, "re-signup minted a FRESH workspace (old rows unreachable)");
 const wipe2 = await request("DELETE", "/api/me/data", { token: alice });

@@ -1,6 +1,6 @@
 # PRD-WAVE-LIVING-ACADEMY — the feed that knows you, content that stays alive
 
-**Status:** DRAFT 2026-07-24 · phases P0–P4, stories LA-1..LA-14 · decision boxes D-LA1..D-LA8 (§9) await Gerard
+**Status:** 2026-07-24 · **P1 BUILT** (LA-1/LA-2/LA-3) · P2–P4 designed · D-LA1..D-LA6 decided, D-LA7/D-LA8 open (§9)
 **Owner:** Academy (Gerard approves all factory output in P3; autonomy is earned per §6)
 **Repos:** `automatos-academy` (contracts, factory seams, renderers' CI) + `automatos-academy-app` (card registry, feed, new card types) + `automatos-ai` (playbooks/missions — **flagged cross-pod, not built from this pod**)
 **Grounding:** repo state @ `db77445` (post-#66); the [Content & Data Plane flow map](https://claude.ai/code/artifact/b58e5d29-07e7-42ba-a16a-b49a93df343c) (verified 2026-07-24: SPINE lit, `content_drafts` live, 66 videos + GAIL podcast on CDN)
@@ -64,25 +64,25 @@ Slices are test-first; **CI is the only gate** (nothing runs on Gerard's machine
 
 ### P1 — Contracts (no new content, no new UI)
 
-**LA-1 · Card-type registry in the catalog contract** `[academy]`
+**LA-1 · Card-type registry in the catalog contract** `[academy]` — ✅ **BUILT**
 As the platform, I serve typed cards so any client can render a mixed feed.
-- [ ] Schema: `card{id, type, conceptKeys[], locale (default "en"), payload, media?{slotId}, source{lessonRef, chunkRef?}}`; types this wave: `quiz` `flashcard` `infographic` `minivideo` `explainback` `changelog`
-- [ ] Existing questions/knowledge-checks exposed as `quiz` cards via a pure mapping (no content duplication; validator extended)
-- [ ] Cards flow through the #65 overlay exactly like other course text (an approved draft can add/replace cards)
-- [ ] Contract documented in FRONTEND_BRIEF style; node tests cover mapping + validator; CI green
+- [x] Schema: `card{uid, id, type, scope{}, conceptKeys[], locale (default "en"), payload, media?{slotId}, source{lessonRef, chunkRef, refs[]}}`; all six types registered (`server/cards/types.js`)
+- [x] Existing questions/knowledge-checks exposed as `quiz` cards via a pure projection — 1 691 cards, zero content duplication (`server/cards/map.js`); validator extended
+- [x] Cards flow through the #65 overlay exactly like other course text; an approved draft adds/replaces cards, and an authored `cards[]` replaces a derived card in place
+- [x] `GET /api/catalog/cards` + [CARD-CONTRACT.md](./PRD-MOBILE-TUTOR/build/CARD-CONTRACT.md); 113 assertions in `tests/cards.test.mjs`
 
-**LA-2 · Concept keys + Spine rollups** `[academy]`
+**LA-2 · Concept keys + Spine rollups** `[academy]` — ✅ **BUILT**
 As the scheduler, I need topic-level state, not just item-level.
-- [ ] Concept key = `vendor/track/domain[/lessonRef]` (what corpus tags + `sourceRef` already give us — finer KG-extracted concepts are D-LA3, later)
-- [ ] Spine derives `user_concept_state` rollups (mastery, due pressure, lapse count) from existing sync events — **rows keyed to shared concept ids; explicitly not per-user graph blobs**
-- [ ] Exposed in `/api/me/state` (additive field); aggregate-only remains the platform boundary
-- [ ] Migration follows the repo ESM trap rule (`export async function up/down`); spine CI job green
+- [x] Concept key = `vendor/track/domain[/lessonRef]`, language-neutral (`server/concepts/keys.js`); membership derived from the served index (`server/concepts/membership.js`)
+- [x] Spine derives `user_concept_state` (mastery, coverage, accuracy, itemsSeen/Total, due pressure, next-due, lapses) in the SAME transaction as the progress upsert — **rows keyed to shared concept ids**, no per-user blobs
+- [x] Additive `conceptState[]` on `/api/me/state` AND on the progress ack; rides export + the one canonical wipe; aggregate-only stays the boundary
+- [x] Migration `1784830000000_user-concept-state.js` uses `export async function up/down`; the rollup math is proven ≡ the pinned domain math
 
-**LA-3 · Binary review grade event** `[app]` `[academy]`
+**LA-3 · Binary review grade event** `[app]` `[academy]` — ✅ **BUILT**
 As a learner, I grade cards with one thumb: Got it / Missed it.
-- [ ] `card_review` sync event (cardId, conceptKeys, grade: got|missed, msOnCard, skipped) posted via existing `/api/sync/*`
-- [ ] SM-2 engine consumes binary grades (map to its quality scale; engine untouched otherwise); unit tests on the mapping
-- [ ] Vitest green in CI
+- [x] `card_review` telemetry event (cardId, cardType, grade: got|missed, msOnCard, skipped, surface) via existing `/api/sync/telemetry`; `grade` enforced as a closed set at the boundary. **`conceptKeys[]` is NOT on the wire** — the server derives them (§9 build note 2)
+- [x] SM-2 consumes binary grades unchanged: got → `correct: true`. A SKIPPED card sends telemetry only and never moves SM-2 state
+- [x] `gradeToCorrect` mapping + `cardReview` outcome on the app's one write path; vitest green
 
 ### P2 — Feed v1 on CCA-F (user zero = Gerard)
 
@@ -192,16 +192,36 @@ The localization build is its own future wave (PRD-LOCALIZATION, unwritten). Wha
 
 ## 9. Decision boxes (Gerard)
 
-| # | Decision | Recommendation |
+**D-LA1..D-LA6 DECIDED 2026-07-24** — Gerard took the recommendations as they
+stood. D-LA7 and D-LA8 remain open; neither gates P1 or P2.
+
+| # | Decision | Outcome |
 |---|---|---|
-| D-LA1 | T1 graduation thresholds (§6) | ≤5% reject over 4 batches, zero wrong-fact |
-| D-LA2 | SM-2 → FSRS upgrade | **Keep SM-2 this wave** (built, tested); revisit only if pilot shows retention-scheduling pain |
-| D-LA3 | Concept granularity | Start `track/domain[/lesson]` from existing tags; KG-extracted fine concepts as a later enrichment playbook |
-| D-LA4 | Drip volume | 20–30 cards/week during P3 (sized to your review time, not factory capacity) |
-| D-LA5 | Explain-back affects readiness? | **Advisory-only** this wave; consider counting after grader precision is trusted |
-| D-LA6 | Changelog card transport | Ride PRD-WIRE's seam if Wire ships first; else a plain `changelog` card from the drafts queue |
-| D-LA7 | Mini-video tooling | Remotion (React-native fit; licence fine at current team size — flag if the team grows past 3) vs Motion Canvas (fully open) vs ffmpeg-composited slides (poor-man's, zero licence) |
-| D-LA8 | Monthly spend ceiling for factory + watchers + renderers | Set a number; the flywheel report includes actual spend against it |
+| D-LA1 | T1 graduation thresholds (§6) | ✅ **≤5% reject over 4 consecutive batches, zero `wrong-fact` rejects** |
+| D-LA2 | SM-2 → FSRS upgrade | ✅ **Keep SM-2** (built, tested, and binary grades map onto it unchanged — LA-3 proved it). Revisit only if the pilot shows retention-scheduling pain |
+| D-LA3 | Concept granularity | ✅ **`vendor/track/domain[/lesson]` from existing tags.** KG-extracted fine concepts become a FOURTH key segment via a later enrichment playbook, so nothing built on these keys has to move |
+| D-LA4 | Drip volume | ✅ **20–30 cards/week during P3**, sized to review time, not factory capacity |
+| D-LA5 | Explain-back affects readiness? | ✅ **Advisory-only** this wave; reconsider once grader precision is trusted |
+| D-LA6 | Changelog card transport | ✅ **Ride PRD-WIRE's seam if Wire ships first**; else a plain `changelog` card from the drafts queue |
+| D-LA7 | Mini-video tooling | ⏳ **OPEN** — Remotion (React-native fit; licence fine at current team size — flag if the team grows past 3) vs Motion Canvas (fully open) vs ffmpeg-composited slides (poor-man's, zero licence). Gates **LA-14 only** |
+| D-LA8 | Monthly spend ceiling for factory + watchers + renderers | ⏳ **OPEN** — set a number; the flywheel report includes actual spend against it. Gates **P3 factory start** |
+
+### Build notes that came out of P1 (things the PRD did not anticipate)
+
+1. **`uid` vs `id`.** Item ids are unique only *within* a track — 827 of the
+   catalog's 864 ids repeat across tracks (`q-m00-1` exists in several). Cards
+   therefore carry both: `id` (the item id, so a grade writes `progress` with
+   no translation) and `uid` = `vendorId/trackId/id` (the globally unique
+   handle everything else keys on). A whole-catalog pull deduped by `id` would
+   have silently discarded half the feed.
+2. **`card_review` does not carry `conceptKeys[]`.** The server already holds
+   the content index, so it derives an item's concepts itself — the client
+   cannot mis-attribute mastery, and the PII-minimized flat-scalar payload rule
+   stays intact. An optional singular `conceptKey` remains for a card that
+   declares a concept the tree can't derive (the D-LA3 seam).
+3. **`scope` is stamped by the server**, never read from a card body — a draft
+   cannot lie about which track it belongs to, because the document it arrived
+   in already answered that.
 
 ## 10. Open questions
 

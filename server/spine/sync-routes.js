@@ -13,6 +13,7 @@ import {
   validateMockEvent, validateScenarioEvent, collapseLatest,
 } from "./validate.js";
 import { rederiveRollups, scopeWeightResolver, masteryToWire } from "./rollups.js";
+import { rederiveConceptState, conceptWeightResolver, conceptStateToWire } from "./concepts.js";
 
 // Cross-batch/cross-device conflict rule lives in the WHERE: the stored row
 // only yields to a strictly LATER device wall-clock answer (02 §5). A replay
@@ -68,6 +69,7 @@ export function createSyncRouter({ pool, index, limiter }) {
   const router = express.Router();
   router.use(limiter);
   const scopeWeight = scopeWeightResolver(index);
+  const conceptWeight = conceptWeightResolver(index);
 
   // ── POST /api/sync/progress — SM-2 answer events ────────────────────
   router.post("/progress", wrap(async (req, res) => {
@@ -85,7 +87,7 @@ export function createSyncRouter({ pool, index, limiter }) {
     );
 
     const userId = req.spineUser.id;
-    const { applied, mastery } = await inTransaction(pool, async (client) => {
+    const { applied, mastery, concepts } = await inTransaction(pool, async (client) => {
       let appliedCount = 0;
       for (const v of winners) {
         const r = await client.query(PROGRESS_UPSERT_SQL, [
@@ -95,10 +97,15 @@ export function createSyncRouter({ pool, index, limiter }) {
         ]);
         appliedCount += r.rowCount;
       }
+      const touched = winners.map((v) => `${v.vendorId}/${v.trackId}`);
       // US-024: re-derive mastery_map from the merged item states — the
       // roll-up is computed once, server-side, from the winning rows.
-      const rolled = await rederiveRollups(client, index, userId, winners.map((v) => `${v.vendorId}/${v.trackId}`));
-      return { applied: appliedCount, mastery: rolled };
+      const rolled = await rederiveRollups(client, index, userId, touched);
+      // LA-2: the topic-level twin, same transaction, same authoritative rows.
+      // Both derive from the merged state, so they can never disagree about
+      // what the learner actually did.
+      const conceptRows = await rederiveConceptState(client, index, userId, touched, nowMs);
+      return { applied: appliedCount, mastery: rolled, concepts: conceptRows };
     });
 
     return ok(res, {
@@ -107,6 +114,14 @@ export function createSyncRouter({ pool, index, limiter }) {
       discarded: batch.values.length - applied,
       // 02 §5: "ack + updated mastery scope" — decay applied on read.
       mastery: mastery.map((row) => masteryToWire(row, scopeWeight, nowMs)),
+      // LA-2 additive: the touched concept rows ride the same ack, so a client
+      // can colour its feed immediately instead of waiting for the next pull.
+      // Pre-LA-2 clients ignore an unknown envelope field.
+      conceptState: concepts.map((row) => conceptStateToWire({
+        ...row,
+        nextDueAt: row.nextDueAtMs === null ? null : new Date(row.nextDueAtMs),
+        lastSeenAt: row.lastSeenAtMs === null ? null : new Date(row.lastSeenAtMs),
+      }, conceptWeight, nowMs)),
     });
   }));
 
