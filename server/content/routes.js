@@ -13,7 +13,7 @@
 // git stays the offline canonical; approved drafts are the live override.
 
 import express from "express";
-import { validateDraft } from "./validate.js";
+import { validateDraft, validateRejection } from "./validate.js";
 import { flagItems, flagEvidence, ITEM_FLAG_RULES } from "./item-stats.js";
 
 const INSERT_SQL = `
