@@ -14,6 +14,7 @@
 
 import express from "express";
 import { validateDraft } from "./validate.js";
+import { flagItems, flagEvidence, ITEM_FLAG_RULES } from "./item-stats.js";
 
 const INSERT_SQL = `
   INSERT INTO content_drafts
@@ -73,6 +74,81 @@ const REJECT_SQL = `
   WHERE id = $1 AND status IN ('pending', 'approved') RETURNING *;`;
 
 const STATUS_SQL = `SELECT status FROM content_drafts WHERE id = $1;`;
+
+// LA-12 — per-item quality aggregates over a window.
+//
+// `answer` events carry the SM-2 outcome; `card_review` events carry serve/skip
+// and time-on-card. They are counted separately and joined on the item, because
+// a card can be served and skipped without ever being answered — and the skip
+// rate is exactly that gap.
+//
+// Discrimination compares learners who have passed a mock against those who
+// have not. `mock_attempts` is the only honest source for that split; a learner
+// with no attempt is a NON-passer for this purpose, which is conservative (it
+// can only shrink an item's apparent discrimination, never inflate it).
+//
+// NOT computed here: which wrong option was chosen. The answer payload is a
+// closed flat-scalar set (itemId, correct, timeMs, bucket, surface) and does
+// not carry the chosen option, so `topWrongCount` is left null and the
+// `ambiguous` flag cannot fire. That is deliberate — see item-stats.js.
+const ITEM_STATS_SQL = `
+  WITH win AS (SELECT (now() - ($3 || ' days')::interval) AS since),
+  passers AS (
+    SELECT DISTINCT user_id FROM mock_attempts WHERE passed = true
+  ),
+  ans AS (
+    SELECT COALESCE(t.item_id, t.payload->>'itemId') AS item_id,
+           (t.payload->>'correct')::boolean            AS correct,
+           (p.user_id IS NOT NULL)                     AS is_passer
+    FROM telemetry t
+    CROSS JOIN win
+    LEFT JOIN passers p ON p.user_id = t.user_id
+    WHERE t.event_type = 'answer'
+      AND t.created_at >= win.since
+      AND ($1::text IS NULL OR t.vendor_id = $1)
+      AND ($2::text IS NULL OR t.track_id  = $2)
+      AND COALESCE(t.item_id, t.payload->>'itemId') IS NOT NULL
+  ),
+  rev AS (
+    SELECT COALESCE(t.item_id, t.payload->>'cardId') AS item_id,
+           COALESCE((t.payload->>'skipped')::boolean, false) AS skipped,
+           NULLIF(t.payload->>'msOnCard', '')::numeric       AS ms
+    FROM telemetry t
+    CROSS JOIN win
+    WHERE t.event_type = 'card_review'
+      AND t.created_at >= win.since
+      AND ($1::text IS NULL OR t.vendor_id = $1)
+      AND ($2::text IS NULL OR t.track_id  = $2)
+      AND COALESCE(t.item_id, t.payload->>'cardId') IS NOT NULL
+  ),
+  a AS (
+    SELECT item_id,
+           count(*)                                                       AS attempts,
+           count(*) FILTER (WHERE correct)                                AS correct,
+           count(*) FILTER (WHERE is_passer)                              AS passer_attempts,
+           count(*) FILTER (WHERE is_passer AND correct)                  AS passer_correct,
+           count(*) FILTER (WHERE NOT is_passer)                          AS non_passer_attempts,
+           count(*) FILTER (WHERE NOT is_passer AND correct)              AS non_passer_correct
+    FROM ans GROUP BY item_id
+  ),
+  r AS (
+    SELECT item_id,
+           count(*)                          AS served,
+           count(*) FILTER (WHERE skipped)   AS skipped,
+           percentile_cont(0.5) WITHIN GROUP (ORDER BY ms) AS median_ms
+    FROM rev GROUP BY item_id
+  )
+  SELECT COALESCE(a.item_id, r.item_id) AS item_id,
+         COALESCE(a.attempts, 0)            AS attempts,
+         COALESCE(a.correct, 0)             AS correct,
+         COALESCE(r.served, 0)              AS served,
+         COALESCE(r.skipped, 0)             AS skipped,
+         r.median_ms                        AS median_ms,
+         COALESCE(a.passer_attempts, 0)     AS passer_attempts,
+         COALESCE(a.passer_correct, 0)      AS passer_correct,
+         COALESCE(a.non_passer_attempts, 0) AS non_passer_attempts,
+         COALESCE(a.non_passer_correct, 0)  AS non_passer_correct
+  FROM a FULL OUTER JOIN r ON a.item_id = r.item_id;`;
 
 const actorOf = (req) => (typeof req.adminActor === "string" ? req.adminActor : "machine");
 
@@ -153,6 +229,47 @@ export function registerContentRoutes(app, { pool, requireAdmin, onChange = () =
       if (!rows.length) return res.status(409).json({ error: "not_pending" }); // lost a race
       notify(); // overlay serves the new content at once
       res.json({ ok: true, draft: shape(rows[0]) });
+    })().catch(next);
+  });
+
+  // ── LA-12: the flagged-item report ──
+  //
+  // Worth shipping before the revision playbook exists: the report alone says
+  // which items are failing learners, and it is the evidence a revision draft
+  // will carry (FR-7). Computed on demand over a window rather than
+  // materialised nightly — at pilot volume this is a millisecond query, and a
+  // nightly table over one learner's data would be a cache with nothing to
+  // serve. The trigger to materialise is measurable: when this stops being
+  // fast, not when it starts feeling big.
+  app.get("/api/admin/content/item-quality", requireAdmin, (req, res, next) => {
+    (async () => {
+      const vendorId = typeof req.query.vendorId === "string" && req.query.vendorId ? req.query.vendorId : null;
+      const trackId = typeof req.query.trackId === "string" && req.query.trackId ? req.query.trackId : null;
+      const days = Math.min(Math.max(parseInt(req.query.days, 10) || 90, 1), 365);
+      const { rows } = await pool.query(ITEM_STATS_SQL, [vendorId, trackId, String(days)]);
+      const flagged = flagItems(
+        rows.map((r) => ({
+          itemId: r.item_id,
+          attempts: r.attempts,
+          correct: r.correct,
+          served: r.served,
+          skipped: r.skipped,
+          medianMsOnCard: r.median_ms,
+          // Not on the wire — see ITEM_STATS_SQL. Left null so `ambiguous`
+          // cannot fire on an assumption.
+          topWrongCount: null,
+          passerAttempts: r.passer_attempts,
+          passerCorrect: r.passer_correct,
+          nonPasserAttempts: r.non_passer_attempts,
+          nonPasserCorrect: r.non_passer_correct,
+        })),
+      );
+      res.json({
+        days,
+        scanned: rows.length,
+        flagged: flagged.map((f) => ({ ...f, evidence: flagEvidence(f) })),
+        rules: ITEM_FLAG_RULES,
+      });
     })().catch(next);
   });
 
