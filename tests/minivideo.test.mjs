@@ -153,6 +153,22 @@ console.log("captions (written from the same plan the video is cut from)");
 
   const starts = cues.map((c) => c.split(" --> ")[0]);
   ok(starts.join() === [...starts].sort().join(), "cues are monotonic — they never run backwards");
+
+  // Slides overlap by one fade; cues must NOT. A cue that ran to its own
+  // slide's end would overlap its successor by 0.4s — two captions on screen
+  // through every transition, and a narration script that asks the voice to
+  // speak two lines at once.
+  const spans = cues.map((c) => c.split(" --> "));
+  const overlaps = spans.some((s, i) => i + 1 < spans.length && spans[i + 1][0] < s[1]);
+  ok(!overlaps, "no cue overlaps the next — the crossfade is in the picture, not in the words");
+
+  const plan2 = planOf();
+  const firstEnd = spans[0][1];
+  const secondStart = spans[1][0];
+  ok(firstEnd === secondStart,
+    "cues are contiguous: one ends exactly where the next begins, so nothing is unlabelled");
+  ok(plan2.slides[1].offsetFrames === Math.round(parseFloat(secondStart.split(":")[2]) * plan2.fps),
+    "and a cue's start is its slide's real offset, not a running sum that ignores the fade");
 }
 
 // ═══════════════════════════════════════════════════════════ query ══

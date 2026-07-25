@@ -64,12 +64,19 @@
     font-size: 34px; line-height: 1.3; font-weight: 600; color: var(--ink-muted);
     margin: 0 0 46px; letter-spacing: -0.3px;
   }
-  .point { display: flex; gap: 30px; align-items: flex-start; }
+  /* The size lives on .point, not on .body, so the dot's `em` resolves against
+     the SAME type the sentence is set in. With it on .body the dot inherited
+     the document's 16px, its offset computed to roughly zero, and it sat at
+     the top of the block instead of optically centred on the first line. */
+  .point {
+    display: flex; gap: 30px; align-items: flex-start;
+    font-size: 60px; line-height: 1.3;
+  }
   .point .dot {
     flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
     background: var(--brick); margin-top: calc((1.3em - 22px) / 2);
   }
-  .point .body { font-size: 60px; line-height: 1.3; font-weight: 600; letter-spacing: -0.8px; }
+  .point .body { font-size: inherit; font-weight: 600; letter-spacing: -0.8px; }
 
   .counter { font-family: var(--mono); font-size: 24px; color: var(--ink-muted); margin: 52px 0 0; }
 
@@ -127,11 +134,13 @@
     var len = title.length;
     h1.style.fontSize = len > 52 ? '78px' : len > 38 ? '92px' : '104px';
   } else if (role === 'end') {
+    // A bookend: the claim again, quieter, over the rule. The source is NOT
+    // repeated here — the footer carries it on every slide including this one,
+    // and printing it twice on the same frame reads as a mistake.
     var end = el('h1', null, title);
     end.style.fontSize = title.length > 52 ? '70px' : '84px';
     stage.appendChild(end);
     stage.appendChild(el('div', 'rule'));
-    if (text) stage.appendChild(el('div', 'end-source', text));
   } else {
     if (title) stage.appendChild(el('div', 'claim', title));
     var row = el('div', 'point');
@@ -152,14 +161,15 @@
       return last.getBoundingClientRect().bottom - stage.getBoundingClientRect().top;
     };
     for (var size = FLOOR + 2; size <= CEILING; size += 2) {
-      body.style.fontSize = size + 'px';
+      // Sized on .point so the bullet scales with the sentence — see the CSS.
+      row.style.fontSize = size + 'px';
       // Measure the content's real extent, never scrollHeight: scrollHeight is
       // clamped to at least clientHeight, so on a box larger than its content
       // it reports the box and the test is true before anything has grown.
       if (extent() > stage.clientHeight - BREATH) break;
       fitted = size;
     }
-    body.style.fontSize = fitted + 'px';
+    row.style.fontSize = fitted + 'px';
   }
 
   // Two rAFs = layout and paint have both happened. No timeout fallback: with

@@ -257,15 +257,24 @@ export function toVtt(plan) {
     return `${h}:${m}:${s}.${ms}`;
   };
   const lines = ["WEBVTT", ""];
-  for (const slide of plan.slides) {
-    // The end card is skipped: it carries the source label, which is chrome
-    // rather than something anyone says or needs read aloud. A caption track
-    // that announces "CCA-F · D1" is noise to a screen reader and a line the
-    // narrator would have to be told not to speak.
+  for (let i = 0; i < plan.slides.length; i++) {
+    const slide = plan.slides[i];
+    // The end card is skipped: it carries no sentence — the claim is a
+    // bookend and the source is chrome. A caption track that announces
+    // "CCA-F · D1" is noise to a screen reader and a line the narrator would
+    // have to be told not to speak.
     if (slide.role === "end") continue;
     const text = slide.role === "title" ? slide.title : slide.text;
     if (!text) continue;
-    lines.push(`${stamp(slide.offsetFrames)} --> ${stamp(slide.offsetFrames + slide.frames)}`);
+
+    // A cue ends where the NEXT slide begins, not where its own slide ends.
+    // Slides overlap by one fade — that overlap is the crossfade — so ending
+    // a cue at `offset + frames` would have every cue overlap its successor
+    // by 0.4s. Two captions render at once on every transition, and read as a
+    // narration script it asks the voice to speak two lines simultaneously.
+    const next = plan.slides[i + 1];
+    const end = next ? next.offsetFrames : slide.offsetFrames + slide.frames;
+    lines.push(`${stamp(slide.offsetFrames)} --> ${stamp(end)}`);
     lines.push(text, "");
   }
   return lines.join("\n");
