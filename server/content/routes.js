@@ -175,7 +175,10 @@ const ITEM_STATS_SQL = `
   -- across the distractors, while a broken one concentrates them on the single
   -- distractor that is competing with the key.
   --
-  -- Only WRONG answers count, and only those carrying `chosenOptionId` —
+  -- NB: no backticks anywhere in this string — it is a template literal, and
+  -- one closes it early (a SyntaxError at import, not at the query).
+  --
+  -- Only WRONG answers count, and only those carrying chosenOptionId —
   -- events from before the field shipped simply do not contribute, so the flag
   -- stays silent on an item until it has real evidence rather than firing on a
   -- thin early sample. Grouped by option ID, never by position: options are
