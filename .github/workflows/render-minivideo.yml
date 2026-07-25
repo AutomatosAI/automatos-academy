@@ -1,0 +1,151 @@
+# LA-14 · Lane 2 renderer #2 — verified payloads → vertical mini-videos.
+#
+# The twin of render-infographic.yml, deliberately: same default (render, don't
+# publish), same S3 path, same slug guard on the dispatch inputs. The default
+# run needs NO secrets and publishes nothing — it renders the videos and
+# uploads them as a workflow artifact, because the first question about a
+# renderer is "does it look right?" and answering it should not require
+# credentials, a bucket, or a deploy. Download it, WATCH the videos, then
+# decide whether to publish.
+#
+# Publishing (publish=true) reuses the existing media plane exactly:
+#   s3://$BUCKET/academy/<vendor>/<track>/mv-<domain>-<n>.mp4
+# `mv-*` was reserved by LA-9 and already resolves to the `video` family, so
+# this adds a renderer, not a plane.
+#
+# Secrets (publish only) — the same five as deploy-media.yml:
+#   AWS_SDK_DEPLOY_ACCESS_KEY_ID / _SECRET_ACCESS_KEY / _REGION / _BUCKET
+#   AWS_SDK_DEPLOY_DISTRIBUTION_ID
+
+name: Render mini-videos
+
+on:
+  # LA-9 shipped dispatch-only, and that cost a day: `workflow_dispatch`
+  # resolves from the DEFAULT branch, so its render could not be run — and its
+  # output could not be looked at — until the PR had already merged. Two real
+  # layout defects were sitting in it at that point. A renderer whose only
+  # proof is a picture has to produce that picture on the PR that changes it.
+  pull_request:
+    paths:
+      - "render/minivideo.html"
+      - "render/samples/**"
+      - "scripts/render-minivideo.mjs"
+      - "server/media/minivideo.js"
+      - ".github/workflows/render-minivideo.yml"
+  workflow_dispatch:
+    inputs:
+      payloads:
+        description: "Path to a payload .json or a directory of them"
+        type: string
+        default: render/samples
+      vendor:
+        description: "Vendor id (publish only) — the S3 key is academy/<vendor>/<track>/"
+        type: string
+        default: anthropic
+      track:
+        description: "Track id (publish only)"
+        type: string
+        default: cca-f
+      publish:
+        description: "Upload the rendered videos to S3 + invalidate CloudFront"
+        type: boolean
+        default: false
+
+concurrency:
+  group: render-minivideo
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # The payload contract AND the timeline are pure — no browser, no
+      # encoder. Run them first so a payload that cannot be filmed fails in
+      # seconds rather than after Chromium downloads.
+      - name: Validate the payload contract and the timeline
+        run: npm run test:minivideo
+
+      # ffmpeg is preinstalled on ubuntu runners; assert it rather than assume
+      # it, so a runner image change fails here with a readable reason instead
+      # of deep inside the render with an ENOENT.
+      - name: Check ffmpeg
+        run: ffmpeg -version | head -1
+
+      # puppeteer is NOT a dependency of this repo: it pulls Chromium, and
+      # every ordinary CI install would pay for it. Installed here only.
+      - name: Install puppeteer (render job only)
+        run: npm install --no-save puppeteer@23
+
+      - name: Render
+        env:
+          # `inputs` is empty on a pull_request event, so the samples are the
+          # default target — which is what makes the PR artifact automatic.
+          PAYLOADS: ${{ inputs.payloads || 'render/samples' }}
+        run: node scripts/render-minivideo.mjs "$PAYLOADS" --out dist/minivideos
+
+      # The point of the default run: something to WATCH, with no secrets.
+      # The .vtt files ride along — they are the caption track now and the
+      # narration script when PRD-VOICE-PIPELINE lands.
+      - name: Upload rendered mini-videos
+        uses: actions/upload-artifact@v4
+        with:
+          name: minivideos
+          path: |
+            dist/minivideos/*.mp4
+            dist/minivideos/*.vtt
+          if-no-files-found: error
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.publish == true }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SDK_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SDK_DEPLOY_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_SDK_DEPLOY_REGION }}
+
+      - name: Sync to S3
+        if: ${{ inputs.publish == true }}
+        env:
+          # env indirection only — no inline expansion in run: (injection
+          # hygiene, same posture as deploy-media.yml).
+          BUCKET: ${{ secrets.AWS_SDK_DEPLOY_BUCKET }}
+          VENDOR: ${{ inputs.vendor }}
+          TRACK: ${{ inputs.track }}
+        run: |
+          set -euo pipefail
+          # The key prefix is the containment boundary the media plane relies on
+          # (server/media/validate.js locks presigns to academy/<vendor>/<track>/).
+          # A dispatch input reaching it unchecked would let a slash walk out of
+          # that prefix, so it is validated as a slug the same way.
+          for v in "$VENDOR" "$TRACK"; do
+            if ! printf '%s' "$v" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+              echo "::error::'$v' is not a slug — refusing to build an S3 key from it."
+              exit 1
+            fi
+          done
+          aws s3 sync dist/minivideos/ "s3://$BUCKET/academy/$VENDOR/$TRACK/" \
+            --exclude "*" --include "*.mp4" \
+            --content-type "video/mp4" \
+            --cache-control "public, max-age=2592000"
+          aws s3 sync dist/minivideos/ "s3://$BUCKET/academy/$VENDOR/$TRACK/" \
+            --exclude "*" --include "*.vtt" \
+            --content-type "text/vtt" \
+            --cache-control "public, max-age=2592000"
+
+      - name: Invalidate CloudFront (/academy/*)
+        if: ${{ inputs.publish == true }}
+        env:
+          DISTRIBUTION_ID: ${{ secrets.AWS_SDK_DEPLOY_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/academy/*"
