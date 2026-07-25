@@ -1,0 +1,136 @@
+# LA-9 · Lane 2 renderer — verified payloads → portrait PNGs → (optionally) S3.
+#
+# The default run needs NO secrets and publishes nothing: it renders the
+# payloads and uploads the PNGs as a workflow artifact. That is deliberate —
+# the first question about a renderer is "does it look right?", and answering
+# it should not require credentials, a bucket, or a deploy. Download the
+# artifact, look at the cards, THEN decide whether to publish.
+#
+# Publishing (publish=true) reuses the existing media plane exactly:
+#   s3://$BUCKET/academy/<vendor>/<track>/ig-<domain>-<n>.png
+# and the same CloudFront invalidation deploy-media.yml uses. No new
+# publishing path, no new vocabulary — LA-9 adds a renderer, not a plane.
+#
+# Secrets (publish only) — the same five as deploy-media.yml:
+#   AWS_SDK_DEPLOY_ACCESS_KEY_ID / _SECRET_ACCESS_KEY / _REGION / _BUCKET
+#   AWS_SDK_DEPLOY_DISTRIBUTION_ID
+
+name: Render infographics
+
+on:
+  workflow_dispatch:
+    inputs:
+      payloads:
+        description: "Path to a payload .json or a directory of them"
+        type: string
+        default: render/samples
+      vendor:
+        description: "Vendor id (publish only) — the S3 key is academy/<vendor>/<track>/"
+        type: string
+        default: anthropic
+      track:
+        description: "Track id (publish only)"
+        type: string
+        default: cca-f
+      publish:
+        description: "Upload the rendered PNGs to S3 + invalidate CloudFront"
+        type: boolean
+        default: false
+
+concurrency:
+  group: render-infographic
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Payload validation is pure and needs no browser — run it first so a
+      # bad payload fails in seconds rather than after Chromium downloads.
+      - name: Validate the payload contract
+        run: npm run test:infographic
+
+      # puppeteer is NOT a dependency of this repo: it pulls Chromium, and
+      # every ordinary CI install would pay for it. Installed here only.
+      - name: Install puppeteer (render job only)
+        run: npm install --no-save puppeteer@23
+
+      - name: Render
+        env:
+          PAYLOADS: ${{ inputs.payloads }}
+        run: node scripts/render-infographic.mjs "$PAYLOADS" --out dist/infographics
+
+      # The point of the default run: something to LOOK at, with no secrets.
+      - name: Upload rendered cards
+        uses: actions/upload-artifact@v4
+        with:
+          name: infographics
+          path: dist/infographics/*.png
+          if-no-files-found: error
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.publish == true }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SDK_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SDK_DEPLOY_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_SDK_DEPLOY_REGION }}
+
+      - name: Sync to S3
+        if: ${{ inputs.publish == true }}
+        env:
+          # env indirection only — no inline expansion in run: (injection hygiene,
+          # same posture as deploy-media.yml).
+          BUCKET: ${{ secrets.AWS_SDK_DEPLOY_BUCKET }}
+          VENDOR: ${{ inputs.vendor }}
+          TRACK: ${{ inputs.track }}
+        run: |
+          set -euo pipefail
+          # The key prefix is the containment boundary the media plane relies on
+          # (server/media/validate.js locks presigns to academy/<vendor>/<track>/).
+          # A dispatch input reaching it unchecked would let a slash walk out of
+          # that prefix, so it is validated as a slug the same way.
+          for v in "$VENDOR" "$TRACK"; do
+            if ! printf '%s' "$v" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+              echo "::error::'$v' is not a slug — refusing to build an S3 key from it."
+              exit 1
+            fi
+          done
+          aws s3 sync dist/infographics/ "s3://$BUCKET/academy/$VENDOR/$TRACK/" \
+            --exclude "*" --include "*.png" \
+            --content-type "image/png" \
+            --cache-control "public, max-age=2592000"
+
+      - name: Invalidate CloudFront (/academy/*)
+        if: ${{ inputs.publish == true }}
+        env:
+          DISTRIBUTION_ID: ${{ secrets.AWS_SDK_DEPLOY_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/academy/*"
+
+      - name: Summary
+        env:
+          PUBLISHED: ${{ inputs.publish }}
+        run: |
+          {
+            echo "### Rendered infographics"
+            echo ""
+            ls dist/infographics | sed 's/^/- /'
+            echo ""
+            if [ "$PUBLISHED" = "true" ]; then
+              echo "Synced to s3://…/academy/ — bind each slot to serve it (deploy-media bind=true, or the admin Upload button)."
+            else
+              echo "Download the **infographics** artifact above to look at them. Nothing was published."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
