@@ -44,8 +44,26 @@ const TELEMETRY_TYPES = [
   "gate_transition", "weak_domain_closed", "session_open", "exam_outcome",
   "card_review",
 ];
+// LA-12 · `chosenOptionId` on `answer`, decided 2026-07-25. Without it the
+// `ambiguous` flag can never fire, and `ambiguous` is the one that catches a
+// BAD QUESTION — a distractor competing with the key — as opposed to a merely
+// hard or ignored one. Every other flag can be computed from counts already
+// on the wire; this one needs to know WHICH wrong answer won.
+//
+// It carries the option's **id**, never its text and never its position.
+//   - Not the text: that is the free-text hole US-023 exists to close.
+//   - Not the position: `options` is shuffled per serve (engine quiz shuffle,
+//     US-051), so index 2 is a different option for every learner. Counting a
+//     modal wrong INDEX would be counting the shuffle, and the flag would
+//     fire on noise. The id is content-derived and stable across shuffles.
+//
+// An option id is a content reference of exactly the same class as `itemId`,
+// which is already on the wire — so this widens the payload by a pointer into
+// the question, not by anything about the learner. The CONSTRAINED_IDS shape
+// below enforces that structurally: bounded, and no whitespace, so a sentence
+// cannot ride in this field even if a client tried.
 const PAYLOAD_KEYS = {
-  answer: ["itemId", "correct", "timeMs", "bucket", "surface"],
+  answer: ["itemId", "correct", "timeMs", "bucket", "surface", "chosenOptionId"],
   card_outcome: ["itemId", "outcome", "timeMs", "surface"],
   // cardId rides the payload AND top-level itemId (same shape as `answer`);
   // cardType is what makes LA-6's "skip rate by card type" answerable.
@@ -69,6 +87,16 @@ const isInt = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
  *  than store and have to clean out of the flywheel's aggregates later. */
 export const CARD_REVIEW_GRADES = ["got", "missed"];
 const PAYLOAD_ENUMS = { card_review: { grade: CARD_REVIEW_GRADES } };
+
+/** Payload fields that must look like an identifier rather than merely be a
+ *  short string. The generic rule allows any string up to MAX_PAYLOAD_STRING
+ *  (120), which is comfortably a sentence — fine for a `surface` or a
+ *  `bucket`, wrong for a field that points at content. No whitespace is the
+ *  load-bearing part: it is what stops free text riding in on a key that was
+ *  allowed for a different purpose. */
+const MAX_OPTION_ID_LEN = 40;
+const OPTION_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
+const CONSTRAINED_IDS = { answer: ["chosenOptionId"] };
 
 /** ISO string or epoch-ms (number, or digit string à la query params) → ms,
  *  or null when unparseable. */
@@ -120,12 +148,18 @@ export function validateTelemetryEvent(e) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return { error: "payload_not_object" };
   const allowed = PAYLOAD_KEYS[e.eventType];
   const enums = PAYLOAD_ENUMS[e.eventType] || null;
+  const idFields = CONSTRAINED_IDS[e.eventType] || null;
   for (const [k, v] of Object.entries(payload)) {
     if (!allowed.includes(k)) return { error: `payload_key_not_in_schema:${k}` };
     const t = typeof v;
     if (t === "string") { if (v.length > MAX_PAYLOAD_STRING) return { error: `payload_string_too_long:${k}` }; }
     else if (t !== "number" && t !== "boolean") return { error: `payload_value_not_scalar:${k}` };
     if (enums && enums[k] && !enums[k].includes(v)) return { error: `payload_value_not_allowed:${k}` };
+    if (idFields && idFields.includes(k)) {
+      if (t !== "string" || v.length > MAX_OPTION_ID_LEN || !OPTION_ID_RE.test(v)) {
+        return { error: `payload_value_not_an_id:${k}` };
+      }
+    }
   }
   return {
     value: {

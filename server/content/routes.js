@@ -118,10 +118,11 @@ const STATUS_SQL = `SELECT status FROM content_drafts WHERE id = $1;`;
 // with no attempt is a NON-passer for this purpose, which is conservative (it
 // can only shrink an item's apparent discrimination, never inflate it).
 //
-// NOT computed here: which wrong option was chosen. The answer payload is a
-// closed flat-scalar set (itemId, correct, timeMs, bucket, surface) and does
-// not carry the chosen option, so `topWrongCount` is left null and the
-// `ambiguous` flag cannot fire. That is deliberate — see item-stats.js.
+// The dominant wrong option IS computed here as of 2026-07-25: `answer` now
+// carries `chosenOptionId` (the option's id, not its position — options are
+// shuffled per serve), which is what finally lets `ambiguous` fire. Items
+// answered before the field shipped contribute nothing and stay null, which
+// `flagItem` reads as "unknown" rather than zero.
 const ITEM_STATS_SQL = `
   WITH win AS (SELECT (now() - ($3 || ' days')::interval) AS since),
   passers AS (
@@ -168,6 +169,34 @@ const ITEM_STATS_SQL = `
            count(*) FILTER (WHERE skipped)   AS skipped,
            percentile_cont(0.5) WITHIN GROUP (ORDER BY ms) AS median_ms
     FROM rev GROUP BY item_id
+  ),
+  -- LA-12 · the dominant wrong answer, which is what separates an AMBIGUOUS
+  -- item from a merely hard one: a hard question spreads its wrong answers
+  -- across the distractors, while a broken one concentrates them on the single
+  -- distractor that is competing with the key.
+  --
+  -- Only WRONG answers count, and only those carrying `chosenOptionId` —
+  -- events from before the field shipped simply do not contribute, so the flag
+  -- stays silent on an item until it has real evidence rather than firing on a
+  -- thin early sample. Grouped by option ID, never by position: options are
+  -- shuffled per serve, so counting positions would count the shuffle.
+  wrong AS (
+    SELECT COALESCE(t.item_id, t.payload->>'itemId') AS item_id,
+           t.payload->>'chosenOptionId'              AS option_id
+    FROM telemetry t
+    CROSS JOIN win
+    WHERE t.event_type = 'answer'
+      AND t.created_at >= win.since
+      AND ($1::text IS NULL OR t.vendor_id = $1)
+      AND ($2::text IS NULL OR t.track_id  = $2)
+      AND COALESCE(t.item_id, t.payload->>'itemId') IS NOT NULL
+      AND (t.payload->>'correct')::boolean IS FALSE
+      AND NULLIF(t.payload->>'chosenOptionId', '') IS NOT NULL
+  ),
+  tw AS (
+    SELECT item_id, max(n) AS top_wrong_count
+    FROM (SELECT item_id, option_id, count(*) AS n FROM wrong GROUP BY item_id, option_id) g
+    GROUP BY item_id
   )
   SELECT COALESCE(a.item_id, r.item_id) AS item_id,
          COALESCE(a.attempts, 0)            AS attempts,
@@ -175,11 +204,14 @@ const ITEM_STATS_SQL = `
          COALESCE(r.served, 0)              AS served,
          COALESCE(r.skipped, 0)             AS skipped,
          r.median_ms                        AS median_ms,
+         tw.top_wrong_count                 AS top_wrong_count,
          COALESCE(a.passer_attempts, 0)     AS passer_attempts,
          COALESCE(a.passer_correct, 0)      AS passer_correct,
          COALESCE(a.non_passer_attempts, 0) AS non_passer_attempts,
          COALESCE(a.non_passer_correct, 0)  AS non_passer_correct
-  FROM a FULL OUTER JOIN r ON a.item_id = r.item_id;`;
+  FROM a
+  FULL OUTER JOIN r  ON a.item_id = r.item_id
+  LEFT JOIN      tw ON tw.item_id = COALESCE(a.item_id, r.item_id);`;
 
 const actorOf = (req) => (typeof req.adminActor === "string" ? req.adminActor : "machine");
 
@@ -357,9 +389,12 @@ export function registerContentRoutes(app, { pool, requireAdmin, onChange = () =
           served: r.served,
           skipped: r.skipped,
           medianMsOnCard: r.median_ms,
-          // Not on the wire — see ITEM_STATS_SQL. Left null so `ambiguous`
-          // cannot fire on an assumption.
-          topWrongCount: null,
+          // Null until an item has wrong answers that carry `chosenOptionId`
+          // — `flagItem` treats null as "unknown", never as zero, so
+          // `ambiguous` stays silent rather than firing on an assumption.
+          topWrongCount: r.top_wrong_count === null || r.top_wrong_count === undefined
+            ? null
+            : Number(r.top_wrong_count),
           passerAttempts: r.passer_attempts,
           passerCorrect: r.passer_correct,
           nonPasserAttempts: r.non_passer_attempts,

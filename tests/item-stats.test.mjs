@@ -57,12 +57,13 @@ console.log("dead card (skip rate)");
 
 console.log("ambiguous — refuses to fire without the distractor data");
 {
-  // The PRD's rule is "≤30% correct AND a concentrated wrong answer". The
-  // answer telemetry payload is a closed flat-scalar set and does not carry
-  // the chosen option, so topWrongCount is null in production today. Merely
-  // hard is NOT a defect — an item can be hard because the material is hard —
-  // so with no concentration evidence the flag must stay silent rather than
-  // degrade into "low score = bad question".
+  // The PRD's rule is "≤30% correct AND a concentrated wrong answer". As of
+  // 2026-07-25 `answer` carries `chosenOptionId`, so topWrongCount is real —
+  // but it stays null for any item whose wrong answers predate the field, and
+  // null must keep meaning "unknown". Merely hard is NOT a defect — an item
+  // can be hard because the material is hard — so with no concentration
+  // evidence the flag stays silent rather than degrading into "low score =
+  // bad question".
   ok(!flagItem(S({ attempts: 100, correct: 20, topWrongCount: null })).flags.includes("ambiguous"),
     "20% correct with no distractor data → NOT flagged ambiguous");
   ok(flagItem(S({ attempts: 100, correct: 20, topWrongCount: 60 })).flags.includes("ambiguous"),

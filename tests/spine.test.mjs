@@ -142,6 +142,23 @@ ok(String(validateTelemetryEvent({ ...goodTelemetry, payload: { correct: { deep:
 ok(String(validateTelemetryEvent({ ...goodTelemetry, payload: { bucket: "x".repeat(200) } }).error).startsWith("payload_string_too_long"), "over-long payload strings rejected");
 ok(validateTelemetryEvent({ ...goodTelemetry, eventType: "pageview" }).error === "unknown_event_type", "event_type outside the enum rejected");
 
+// LA-12 · `chosenOptionId` — the field that lets `ambiguous` fire. It is a
+// pointer into the question (an option id, same class as itemId), never the
+// learner's words and never a position, since options shuffle per serve.
+const ans = (payload) => validateTelemetryEvent({ ...goodTelemetry, payload });
+ok(!ans({ correct: false, chosenOptionId: "b" }).error, "an option id rides the answer payload");
+ok(!ans({ correct: false, chosenOptionId: "opt-3" }).error, "hyphenated option ids accepted");
+ok(!ans({ correct: false, chosenOptionId: "q-d1-1.c" }).error, "dotted/qualified option ids accepted");
+ok(ans({ correct: false, chosenOptionId: "the one about retrieval filters" }).error === "payload_value_not_an_id:chosenOptionId",
+  "US-023 holds: whitespace is refused, so free text cannot ride in on this key");
+ok(ans({ correct: false, chosenOptionId: "x".repeat(41) }).error === "payload_value_not_an_id:chosenOptionId",
+  "an option id is bounded well below the 120-char payload string limit");
+ok(ans({ correct: false, chosenOptionId: 2 }).error === "payload_value_not_an_id:chosenOptionId",
+  "a POSITION is refused — options shuffle per serve, so an index counts the shuffle, not the distractor");
+ok(ans({ correct: false, chosenOptionId: "" }).error === "payload_value_not_an_id:chosenOptionId", "empty option id refused");
+ok(validateTelemetryEvent({ ...goodTelemetry, eventType: "card_review", payload: { cardId: "q-1", grade: "got", chosenOptionId: "b" } }).error === "payload_key_not_in_schema:chosenOptionId",
+  "the constraint is per-type: chosenOptionId belongs to `answer`, not to every event");
+
 // PILOT-METRICS §3 — the six types a live Spine used to 400 into client-side
 // quarantine (MT-04 consent/onboarding, MT-07 pilot metrics). Each payload
 // below is field-for-field what its app-side emitter sends
