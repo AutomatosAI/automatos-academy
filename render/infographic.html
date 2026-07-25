@@ -151,10 +151,21 @@
   // step and the densest card keeps a gap it can be read across.
   var FLOOR = 34, CEILING = 46;   // ceiling keeps the points under the 58px
   var BREATH = 28;                // headline floor — hierarchy is not optional
+  // Measure the content's real extent, NOT scrollHeight: scrollHeight is
+  // clamped to at least clientHeight, so for a list smaller than its box it
+  // reports the box and any `scrollHeight > clientHeight - BREATH` test is
+  // true before the loop has grown anything. That silently pins every card to
+  // the floor — the failure looks exactly like "nothing needed to grow".
+  function listHeight() {
+    var last = ul.lastElementChild;
+    if (!last) return 0;
+    return last.getBoundingClientRect().bottom - ul.getBoundingClientRect().top;
+  }
+
   var measured = FLOOR;
   for (var size = FLOOR + 2; size <= CEILING; size += 2) {
     ul.style.fontSize = size + 'px';
-    if (ul.scrollHeight > ul.clientHeight - BREATH) break;
+    if (listHeight() > ul.clientHeight - BREATH) break;
     measured = size;
   }
 
