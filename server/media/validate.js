@@ -4,14 +4,51 @@
 // academy/<vendor>/<track>/ so a leaked presign can never write elsewhere in
 // the bucket (least-privilege on the object key, not just the IAM policy).
 
-export const MEDIA_KINDS = ["video", "audio", "transcript"];
+export const MEDIA_KINDS = ["video", "audio", "transcript", "image"];
 
 /** per-kind content-type allowlist + a soft size ceiling (bytes) */
 export const MEDIA_RULES = {
   video: { types: ["video/mp4"], maxBytes: 500 * 1024 * 1024 },
   audio: { types: ["audio/mpeg", "audio/mp4", "audio/aac"], maxBytes: 60 * 1024 * 1024 },
   transcript: { types: ["application/json", "text/vtt"], maxBytes: 5 * 1024 * 1024 },
+  // LA-9 — rendered infographics. A portrait card PNG is ~200–600KB; 10MB is
+  // a runaway guard, not a target.
+  image: { types: ["image/png", "image/webp"], maxBytes: 10 * 1024 * 1024 },
 };
+
+/**
+ * LA-9 — the slot vocabulary, written down.
+ *
+ * Slot ids have always been free-form (`SLOT` below), which meant nothing
+ * stopped a PNG being bound to a video slot: the player would then render a
+ * <video> pointing at an image and a learner would get a dead card. The
+ * prefix now declares what a slot HOLDS, and binding checks the two agree.
+ *
+ *   v-*   video   the existing convention (v-d1-2.mp4) — unchanged
+ *   ig-*  image   infographic cards (ig-<domain>-<n>)
+ *   mv-*  video   mini-videos (LA-14) — reserved now so LA-14 adds no vocabulary
+ *   a-*   audio   narration/deep-dive audio
+ *   t-*   transcript
+ *
+ * A slot with no known prefix is still accepted (legacy ids predate this, and
+ * refusing them would strand live bindings) — it simply gets no extra check.
+ */
+export const SLOT_FAMILIES = {
+  "v-": "video",
+  "mv-": "video",
+  "ig-": "image",
+  "a-": "audio",
+  "t-": "transcript",
+};
+
+/** the kind a slot id declares, or null when it uses no known prefix */
+export function kindForSlot(slotId) {
+  const id = String(slotId || "");
+  // longest prefix first, so "mv-" is not read as an unknown "m" family
+  const prefixes = Object.keys(SLOT_FAMILIES).sort((a, b) => b.length - a.length);
+  for (const p of prefixes) if (id.startsWith(p)) return SLOT_FAMILIES[p];
+  return null;
+}
 
 const SLUG = /^[a-z0-9][a-z0-9-]*$/i;
 const SLOT = /^[a-z0-9][a-z0-9._-]*$/i;
@@ -43,6 +80,13 @@ export function validatePresign(body, { cdnBase }) {
   }
   if (!SLUG.test(vendor || "") || !SLUG.test(track || "") || !SLOT.test(slotId || "")) {
     return { ok: false, status: 400, error: "bad_slot_ref" };
+  }
+  // LA-9 — a slot that declares its family must be handed matching bytes. The
+  // failure this prevents is silent: an image bound to a v-* slot renders as a
+  // <video> with an unplayable source, i.e. a dead card, not an error.
+  const declared = kindForSlot(slotId);
+  if (declared && declared !== kind) {
+    return { ok: false, status: 400, error: "slot_kind_mismatch", expected: declared, got: kind };
   }
   const rule = MEDIA_RULES[kind];
   if (!contentType || !rule.types.includes(contentType)) {
