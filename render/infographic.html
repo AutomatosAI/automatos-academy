@@ -57,12 +57,24 @@
     /* Content-aware sizing happens in script below — this is the ceiling. */
   }
   .rule { height: 5px; width: 132px; background: var(--brick); margin: 40px 0 0; border-radius: 3px; }
-  ul { list-style: none; margin: 48px 0 0; padding: 0; flex: 1; }
+  /* `flex: 1` makes the list absorb the leftover space, but the items would
+     top-pack inside it and dump all of it between the last point and the
+     footer — a 2-point card then reads as a broken 5-point one. Centring the
+     block spends that space above and below instead, so the gaps BETWEEN
+     points stay constant at every count and the card looks composed rather
+     than unfinished. `safe` keeps a 5-point card that overruns top-aligned:
+     overflow must clip at the bottom, never eat the first point. */
+  ul {
+    list-style: none; margin: 48px 0 0; padding: 0; flex: 1;
+    display: flex; flex-direction: column; justify-content: safe center;
+  }
   li {
     display: flex; gap: 22px; align-items: flex-start;
     font-size: 34px; line-height: 1.38; font-weight: 500;
     padding: 0 0 30px;
   }
+  /* The trailing gap would pull the centred block optically high. */
+  li:last-child { padding-bottom: 0; }
   li .dot {
     flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
     background: var(--brick); margin-top: 15px;
