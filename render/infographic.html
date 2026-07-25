@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Academy — Infographic Render</title>
+<!--
+  LA-9 · Lane 2 renderer — a verified payload becomes a portrait card.
+
+  Ported from the automatos-social render harness (URL params in, exact-pixel
+  body, __renderReady handshake out) but deliberately NOT a copy of it:
+
+   - No React, no Babel. The social page ships a 3MB Babel build to transform
+     JSX in the browser at render time. A static card needs none of it, and
+     dropping it removes a whole transform from between the payload and the
+     pixels — which is the thing FR-5 asks us to keep deterministic.
+
+   - No webfonts. The social templates pull Inter + JetBrains Mono from Google
+     and tolerate a slow load behind an 8s ceiling, because a human looks at
+     every post. A CI job that diffs golden frames cannot tolerate "the font
+     arrived this time": the same payload would produce two different PNGs.
+     System stack only, so a pinned runner renders the same bytes every run.
+
+  The brand tokens are the social plane's, unchanged — this is the same
+  cream/orange editorial card, just built without the machinery.
+-->
+<style>
+  :root {
+    --paper: #f1e9dd;
+    --ink: #191919;
+    --ink-muted: #6b6256;
+    --brick: #FF6932;
+    --line: #d9cdb9;
+    --display: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  html, body { margin: 0; padding: 0; background: var(--paper); overflow: hidden; }
+  body {
+    width: 1080px; height: 1350px;
+    font-family: var(--display);
+    color: var(--ink);
+    display: flex; flex-direction: column;
+    padding: 88px 80px 72px;
+    box-sizing: border-box;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    align-self: flex-start;
+    background: var(--ink); color: #fff;
+    padding: 9px 18px; border-radius: 7px;
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    letter-spacing: 1.6px; text-transform: uppercase;
+  }
+  .eyebrow .mark { color: var(--brick); font-size: 12px; transform: translateY(-1px); }
+  h1 {
+    font-size: 78px; line-height: 1.06; font-weight: 800;
+    letter-spacing: -1.6px; margin: 44px 0 0;
+    /* Content-aware sizing happens in script below — this is the ceiling. */
+  }
+  .rule { height: 5px; width: 132px; background: var(--brick); margin: 40px 0 0; border-radius: 3px; }
+  ul { list-style: none; margin: 48px 0 0; padding: 0; flex: 1; }
+  li {
+    display: flex; gap: 22px; align-items: flex-start;
+    font-size: 34px; line-height: 1.38; font-weight: 500;
+    padding: 0 0 30px;
+  }
+  li .dot {
+    flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
+    background: var(--brick); margin-top: 15px;
+  }
+  footer {
+    border-top: 1px solid var(--line); padding-top: 24px;
+    font-family: var(--mono); font-size: 19px; color: var(--ink-muted);
+    display: flex; justify-content: space-between; gap: 24px;
+  }
+</style>
+</head>
+<body>
+  <div class="eyebrow" id="eyebrow" hidden><span class="mark">&#9650;</span><span id="eyebrow-text"></span></div>
+  <h1 id="title"></h1>
+  <div class="rule"></div>
+  <ul id="points"></ul>
+  <footer>
+    <span id="source"></span>
+    <span>automatos academy</span>
+  </footer>
+
+<script>
+(function () {
+  var p = new URLSearchParams(window.location.search);
+
+  var title = p.get('title') || '';
+  var eyebrow = p.get('eyebrow') || '';
+  var source = p.get('source') || '';
+  var points = [];
+  try { points = JSON.parse(p.get('points') || '[]'); } catch (e) { points = []; }
+  if (!Array.isArray(points)) points = [];
+
+  document.getElementById('title').textContent = title;
+  if (eyebrow) {
+    document.getElementById('eyebrow-text').textContent = eyebrow;
+    document.getElementById('eyebrow').hidden = false;
+  }
+  document.getElementById('source').textContent = source;
+
+  var ul = document.getElementById('points');
+  points.forEach(function (text) {
+    var li = document.createElement('li');
+    var dot = document.createElement('span');
+    dot.className = 'dot';
+    var span = document.createElement('span');
+    span.textContent = text;      // textContent, never innerHTML — the payload
+    li.appendChild(dot);           // is agent-written and must not carry markup
+    li.appendChild(span);
+    ul.appendChild(li);
+  });
+
+  // Content-aware headline sizing. server/media/infographic.js already refuses
+  // a title too long to fit, so this only handles the band between "short" and
+  // "at the limit" — it never rescues an over-long payload, because silently
+  // shrinking one is how a card ends up unreadable instead of rejected.
+  var h1 = document.getElementById('title');
+  var len = title.length;
+  h1.style.fontSize = len > 52 ? '58px' : len > 38 ? '68px' : '78px';
+
+  // Two rAFs = layout and paint have both happened. No timeout ceiling here
+  // (unlike the social harness): with no webfonts there is nothing to wait
+  // for, so a render that is not ready is a real fault and should hang the
+  // job rather than screenshot a half-drawn card.
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      window.__renderReady = true;
+      document.body.setAttribute('data-render-ready', 'true');
+    });
+  });
+})();
+</script>
+</body>
+</html>
