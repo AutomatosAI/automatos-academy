@@ -25,12 +25,36 @@ async function authed(path, { method = "GET", body } = {}) {
   return { status: res.status, ok: res.ok, ...(json || {}) };
 }
 
+// LA-8 §6 — the four verdicts, in the order a reviewer reaches for them.
+// `wrong-fact` is first because it is the one that matters: a single one
+// demotes its playbook×format to full manual review.
+export const REJECT_REASONS = [
+  { value: "wrong-fact", label: "Wrong fact" },
+  { value: "bad-pedagogy", label: "Bad pedagogy" },
+  { value: "style", label: "Style" },
+  { value: "duplicate", label: "Duplicate" },
+];
+
 export const contentApi = {
-  listDrafts: (status) =>
-    authed(`/api/admin/content/drafts${status ? `?status=${encodeURIComponent(status)}` : ""}`),
+  listDrafts: (status, batchId) => {
+    const q = new URLSearchParams();
+    if (status) q.set("status", status);
+    if (batchId) q.set("batchId", batchId);
+    const qs = q.toString();
+    return authed(`/api/admin/content/drafts${qs ? `?${qs}` : ""}`);
+  },
   getDraft: (id) => authed(`/api/admin/content/drafts/${encodeURIComponent(id)}`),
   approve: (id) => authed(`/api/admin/content/drafts/${encodeURIComponent(id)}/approve`, { method: "POST" }),
-  reject: (id) => authed(`/api/admin/content/drafts/${encodeURIComponent(id)}/reject`, { method: "POST" }),
+  // A pending draft's rejection MUST carry a reason (the ladder counts them);
+  // retiring a live override may pass none.
+  reject: (id, reason) =>
+    authed(`/api/admin/content/drafts/${encodeURIComponent(id)}/reject`, {
+      method: "POST",
+      body: reason ? { reason } : {},
+    }),
+  listBatches: () => authed("/api/admin/content/batches"),
+  approveBatch: (batchId) =>
+    authed(`/api/admin/content/batches/${encodeURIComponent(batchId)}/approve`, { method: "POST" }),
   writeBack: (body) => authed("/api/admin/content", { method: "POST", body }),
 };
 

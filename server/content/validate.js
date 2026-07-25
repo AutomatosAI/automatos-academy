@@ -14,6 +14,21 @@ const SINGLETON = new Set(["manifest", "paths", "levels", "podcasts"]); // carry
 // runaway/abusive body without ever clipping legitimate content.
 export const MAX_DRAFT_BYTES = 1_048_576;
 
+// LA-8 §6 — the four verdicts. Closed, because the ladder COUNTS them: T1
+// graduation needs "≤5% reject over 4 consecutive batches AND zero wrong-fact
+// rejects", and a free-text reason cannot be counted. `wrong-fact` is the one
+// that demotes a playbook×format to T0 on a single occurrence.
+export const REJECT_REASONS = new Set(["wrong-fact", "bad-pedagogy", "style", "duplicate"]);
+
+// A batch is the factory's weekly drop (20–30 cards, D-LA4). Opaque to us —
+// the playbook names it — but bounded so it stays an index key, not an essay.
+const MAX_BATCH_ID_LEN = 64;
+const BATCH_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
+
+// Playbook version, model, corpus snapshot date — small, flat, and stored as
+// given. Capped so a runaway agent cannot use it as a payload smuggling seam.
+const MAX_PROVENANCE_BYTES = 4096;
+
 const sha256 = (s) => crypto.createHash("sha256").update(s, "utf8").digest("hex");
 
 /** The file this draft would become — informational (the overlay matches by
@@ -89,12 +104,63 @@ export function validateDraft(body, { maxBytes = MAX_DRAFT_BYTES } = {}) {
   const source = body.source != null ? String(body.source).slice(0, 64) : "admin";
   const note = body.note != null ? String(body.note).slice(0, 2000) : null;
 
+  // LA-8 — batch + provenance. Both optional: a human write-back has neither,
+  // and inventing one would put a fake playbook in the ladder's evidence.
+  let batchId = null;
+  if (body.batchId != null) {
+    batchId = String(body.batchId);
+    if (batchId.length > MAX_BATCH_ID_LEN || !BATCH_ID_RE.test(batchId)) {
+      return { ok: false, error: "bad_batch_id", note: `≤${MAX_BATCH_ID_LEN} chars, [A-Za-z0-9._:-]` };
+    }
+  }
+
+  let provenance = null;
+  if (body.provenance != null) {
+    if (typeof body.provenance !== "object" || Array.isArray(body.provenance)) {
+      return { ok: false, error: "bad_provenance", note: "provenance is a flat object" };
+    }
+    let provText;
+    try { provText = JSON.stringify(body.provenance); } catch { return { ok: false, error: "bad_provenance" }; }
+    if (Buffer.byteLength(provText, "utf8") > MAX_PROVENANCE_BYTES) {
+      return { ok: false, error: "bad_provenance", note: `> ${MAX_PROVENANCE_BYTES} bytes` };
+    }
+    provenance = body.provenance;
+  }
+
   return {
     ok: true,
     draft: {
       scopeKind, vendorId, trackId, domainId,
       relPath: deriveRelPath({ scopeKind, vendorId, trackId, domainId }),
       canonical: text, payload, sha256: sha256(text), bytes, source, note,
+      batchId, provenance,
     },
   };
+}
+
+/**
+ * LA-8 — a rejection's verdict.
+ *
+ * Rejecting a PENDING draft is a review verdict, so the reason is REQUIRED:
+ * an uncounted rejection is a hole in the graduation evidence, and §6 is
+ * arithmetic over these. Rejecting an APPROVED draft is the other thing this
+ * route does — retiring a live override — which is an operational act, not a
+ * judgement of the content, so there the reason is optional.
+ *
+ * @returns { ok:true, reason:string|null } | { ok:false, error, note? }
+ */
+export function validateRejection(body, { status } = {}) {
+  const raw = body && body.reason != null ? String(body.reason) : "";
+  if (!raw) {
+    if (status === "approved") return { ok: true, reason: null };
+    return {
+      ok: false,
+      error: "reason_required",
+      note: `one of: ${[...REJECT_REASONS].join(", ")}`,
+    };
+  }
+  if (!REJECT_REASONS.has(raw)) {
+    return { ok: false, error: "bad_reason", note: `one of: ${[...REJECT_REASONS].join(", ")}` };
+  }
+  return { ok: true, reason: raw };
 }

@@ -5,7 +5,7 @@
 // by hand. Media (video/audio) upload stays on each track's Video hub.
 
 import { el, clear } from "../ui.js";
-import { contentApi, scopeLabel } from "../admin/content.js";
+import { contentApi, scopeLabel, REJECT_REASONS } from "../admin/content.js";
 
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(); } catch { return "—"; } };
 
@@ -13,11 +13,21 @@ export async function contentTab() {
   const wrap = el("div", {});
   const status = el("div", { class: "mono-label", style: { minHeight: "18px", marginTop: "6px" } });
   const setStatus = (t) => { status.textContent = t; };
+  const batches = el("div", { style: { marginTop: "16px" } });
   const queue = el("div", { style: { marginTop: "16px" } });
   const live = el("div", { style: { marginTop: "22px" } });
 
+  const loadBatches = async () => {
+    clear(batches);
+    const r = await contentApi.listBatches();
+    if (!r.ok || !Array.isArray(r.batches) || !r.batches.length) return; // no factory output yet
+    batches.appendChild(el("h3", { class: "mono-label", style: { color: "var(--muted)" }, text: `Factory batches — ${r.batches.length}` }));
+    for (const b of r.batches) batches.appendChild(batchCard(b, { onDone: load, setStatus }));
+  };
+
   const load = async () => {
     clear(queue); clear(live);
+    await loadBatches();
     queue.appendChild(el("p", { class: "muted", text: "Loading drafts…" }));
     const r = await contentApi.listDrafts();
     clear(queue);
@@ -42,6 +52,7 @@ export async function contentTab() {
   wrap.appendChild(el("p", { class: "muted", style: { marginTop: "8px", maxWidth: "64ch" }, text:
     "Automatos (and you) propose lesson/question/domain changes here as drafts; approving one serves it live over the published content with no redeploy. Media (videos/audio) upload lives on each track's Video hub." }));
   wrap.appendChild(status);
+  wrap.appendChild(batches);
   wrap.appendChild(queue);
   wrap.appendChild(live);
   wrap.appendChild(proposeForm(load, setStatus));
@@ -49,6 +60,43 @@ export async function contentTab() {
     "Git stays the offline canonical; approved drafts are the live override. A rejected proposal — or a retired live override — drops back to the published content at once." }));
   await load();
   return wrap;
+}
+
+/** LA-8 — one factory batch: what it cost to review, and what §6 reads.
+ *  The reject rate is over DECIDED cards and is shown as "—" (not 0%) while
+ *  nothing has been decided, because a clean sheet and an empty sheet are
+ *  different things and the ladder graduates playbooks on this number. */
+function batchCard(b, { onDone, setStatus }) {
+  const pct = b.rejectRate == null ? "—" : `${Math.round(b.rejectRate * 100)}%`;
+  const provenance = [b.playbook, b.format].filter(Boolean).join(" · ") || "unattributed";
+
+  const approveAll = el("button", {
+    type: "button",
+    class: "ac-btn",
+    disabled: b.pending === 0,
+    onClick: async () => {
+      setStatus(`Approving ${b.pending} in ${b.batchId}…`);
+      const r = await contentApi.approveBatch(b.batchId);
+      if (!r.ok) { setStatus(`Failed: ${r.error || r.status}`); return; }
+      setStatus(`Approved ${r.approved} ✓`); onDone();
+    },
+  }, [b.pending ? `Approve all pending (${b.pending})` : "Nothing pending"]);
+
+  return el("div", { style: { border: "1px solid var(--line)", borderRadius: "12px", padding: "12px 14px", marginTop: "10px" } }, [
+    el("div", { style: { display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", alignItems: "baseline" } }, [
+      el("span", { class: "mono", style: { fontSize: "14px" }, text: b.batchId }),
+      el("span", { class: "mono-label", style: { color: "var(--muted)" }, text: provenance }),
+    ]),
+    el("div", { class: "mono-label", style: { color: "var(--muted)", marginTop: "6px" }, text:
+      `${b.total} cards · ${b.pending} pending · ${b.approved} approved · ${b.rejected} rejected · reject rate ${pct}` }),
+    // §6: a single wrong-fact reject demotes this playbook×format to T0, so
+    // it is called out rather than buried in the rejected count.
+    b.wrongFact > 0
+      ? el("div", { class: "mono-label", style: { color: "var(--bad, #c33)", marginTop: "4px" }, text:
+          `${b.wrongFact} wrong-fact — this playbook is back to manual review` })
+      : null,
+    el("div", { style: { marginTop: "10px" } }, [approveAll]),
+  ]);
 }
 
 function draftCard(d, { pending, onDone, setStatus }) {
@@ -68,19 +116,30 @@ function draftCard(d, { pending, onDone, setStatus }) {
     }
   } }, ["View JSON"]);
 
-  const act = async (fn, label) => {
+  const act = async (call, label) => {
     setStatus(`${label}…`);
-    const r = await fn(d.id);
+    const r = await call();
     if (!r.ok) { setStatus(`Failed: ${r.error || r.status}`); return; }
     setStatus(`${label} ✓`); onDone();
   };
 
   const buttons = [];
   if (pending) {
-    buttons.push(el("button", { type: "button", class: "ac-btn", onClick: () => act(contentApi.approve, "Approved") }, ["Approve"]));
-    buttons.push(el("button", { type: "button", class: "ac-btn ghost", onClick: () => act(contentApi.reject, "Rejected") }, ["Reject"]));
+    buttons.push(el("button", { type: "button", class: "ac-btn", onClick: () => act(() => contentApi.approve(d.id), "Approved") }, ["Approve"]));
+    // LA-8 — the reason IS the reject button. A modal asking "why?" after the
+    // fact is the thing that makes a 25-card batch take an evening, and a
+    // reason typed as prose cannot be counted by §6.
+    for (const r of REJECT_REASONS) {
+      buttons.push(el("button", {
+        type: "button",
+        class: "ac-btn ghost",
+        title: `Reject — ${r.label}`,
+        style: r.value === "wrong-fact" ? { color: "var(--bad, #c33)" } : {},
+        onClick: () => act(() => contentApi.reject(d.id, r.value), `Rejected (${r.label})`),
+      }, [`✕ ${r.label}`]));
+    }
   } else {
-    buttons.push(el("button", { type: "button", class: "ac-btn ghost", style: { color: "var(--bad, #c33)" }, onClick: () => act(contentApi.reject, "Retired") }, ["Retire (revert to published)"]));
+    buttons.push(el("button", { type: "button", class: "ac-btn ghost", style: { color: "var(--bad, #c33)" }, onClick: () => act(() => contentApi.reject(d.id), "Retired") }, ["Retire (revert to published)"]));
   }
   buttons.push(view);
 
