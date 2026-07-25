@@ -49,7 +49,7 @@ export function discrimination({ passerCorrect, passerAttempts, nonPasserCorrect
 
 /**
  * @param stats {itemId, attempts, correct, skipped, served, medianMsOnCard,
- *               topWrongCount, passer*/nonPasser* counts}
+ *               topWrongCount, passer/nonPasser attempt + correct counts}
  * @returns { itemId, attempts, correctRate, skipRate, discrimination, flags[] }
  *          flags: 'too-easy' | 'ambiguous' | 'dead' | 'backwards'
  */
