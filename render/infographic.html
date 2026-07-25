@@ -145,11 +145,16 @@
   // refuses a payload that cannot fit at the floor, and that refusal is the
   // right outcome — shrinking below 34px to rescue an oversized payload is
   // how a card ends up technically rendered and practically unreadable.
+  // BREATH is why this is not simply a fit test. Growing until the list only
+  // just fits lands the final descender on the footer rule — technically
+  // inside the box, visually crowded against the attribution. Hold back a
+  // step and the densest card keeps a gap it can be read across.
   var FLOOR = 34, CEILING = 46;   // ceiling keeps the points under the 58px
-  var fitted = FLOOR;             // headline floor — hierarchy is not optional
+  var BREATH = 28;                // headline floor — hierarchy is not optional
+  var fitted = FLOOR;
   for (var size = FLOOR + 2; size <= CEILING; size += 2) {
     ul.style.fontSize = size + 'px';
-    if (ul.scrollHeight > ul.clientHeight) break;
+    if (ul.scrollHeight > ul.clientHeight - BREATH) break;
     fitted = size;
   }
   ul.style.fontSize = fitted + 'px';
