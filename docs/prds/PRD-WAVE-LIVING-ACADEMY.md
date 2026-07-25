@@ -1,6 +1,7 @@
 # PRD-WAVE-LIVING-ACADEMY — the feed that knows you, content that stays alive
 
-**Status:** 2026-07-24 · **P1 BUILT** (LA-1/LA-2/LA-3) · P2–P4 designed · D-LA1..D-LA6 decided, D-LA7/D-LA8 open (§9)
+**Status:** 2026-07-25 · **P1 BUILT** (LA-1/LA-2/LA-3) · **P2 BUILT** (LA-4, LA-5 — LA-6 pilot needs Gerard's device) · **P3 half** (LA-8, LA-9 built; LA-7 — the factory itself — blocked, §11) · **P4 started** (LA-12 built with two gaps) · **D-LA1..D-LA9 all decided** (§9)
+**Not built:** LA-6 (device), LA-7 (blocked), LA-10, LA-11, LA-13, LA-14. **Nothing in this wave is observable in production yet** — see §11.
 **Owner:** Academy (Gerard approves all factory output in P3; autonomy is earned per §6)
 **Repos:** `automatos-academy` (contracts, factory seams, renderers' CI) + `automatos-academy-app` (card registry, feed, new card types) + `automatos-ai` (playbooks/missions — **flagged cross-pod, not built from this pod**)
 **Grounding:** repo state @ `db77445` (post-#66); the [Content & Data Plane flow map](https://claude.ai/code/artifact/b58e5d29-07e7-42ba-a16a-b49a93df343c) (verified 2026-07-24: SPINE lit, `content_drafts` live, 66 videos + GAIL podcast on CDN)
@@ -86,12 +87,13 @@ As a learner, I grade cards with one thumb: Got it / Missed it.
 
 ### P2 — Feed v1 on CCA-F (user zero = Gerard)
 
-**LA-4 · Composer: extend the 4-bucket selector to mixed types** `[app]`
+**LA-4 · Composer: extend the 4-bucket selector to mixed types** `[app]` — ✅ **BUILT** (app #43)
 As a learner, my daily session has a rhythm, not a shuffle.
-- [ ] Session template: hook (infographic/changelog when available) → concept (video/flashcard) → check (2–3 quiz/flashcard) → apply (quiz) → recap; degrades gracefully when a slot has no cards (today: quiz + video only — that's fine, the rhythm fills as the factory drips)
-- [ ] Review-due cards (SM-2) take priority within the template; mastered concepts still resurface at long intervals (never fully retire — "not always bad to be reminded")
-- [ ] Unknown card types are skipped without error (forward compatibility — old app builds survive new content)
-- [ ] Selector stays on-device pure TS with tests; MT-12's Today surface consumes it unchanged
+- [x] Session template (`src/feed/template.ts`): hook → concept → check, with the **recap beat deliberately left to `loop.ts`**, which already inserts it — the template does not duplicate a beat that exists
+- [x] Degradation is slot-by-slot and silent: no hook available → the session opens on the concept, no error, no gap
+- [x] Review-due cards take priority *inside* the check beat (`roleOf` routes a `due` fact to check, everything else to hook)
+- [x] Unknown card types are skipped without error (forward compatibility — old app builds survive new content)
+- [x] Selector stays on-device pure TS with tests; MT-12's Today surface consumes it unchanged
 
 **LA-5 · Card components: flashcard flip + registry renderer** `[app]` — ✅ **BUILT** (app #42)
 - [x] Renderer registry (`src/feed/registry.tsx` + pure `registryCore.ts`) maps kind → renderer; `flashcard` (flip, binary grade) new, `quiz` rewired, `minivideo` via the existing CDN clip player, `changelog` as a text card. **Coverage is compile-enforced**, not tested-and-hoped
@@ -117,17 +119,24 @@ As the factory, I draft grounded flashcards; every card cites or dies.
 - [ ] Gerard reviews in the existing `#/admin` Content tab; **reject rate per batch is recorded** — this number drives §6
 - [ ] Cross-pod build flagged to the automatos-ai session; academy accepts the payloads with zero new endpoints
 
-**LA-8 · Batch review ergonomics** `[academy]`
+**LA-8 · Batch review ergonomics** `[academy]` — ✅ **BUILT** (#73)
 As the approver, I judge fifty cards in minutes, not an evening.
-- [ ] Admin Content tab: batch view (approve-all / reject-selected with a reason tag), card-level diff against cited chunk, keyboard flow
-- [ ] Reject reasons are structured (wrong-fact / bad-pedagogy / style / duplicate) — they become the factory's calibration signal and the graduation evidence
-- [ ] Node tests + deployed-site verification
+- [x] Batch view with approve-all, batch rollup counts, and provenance surfaced per batch (`migrations/…draft-batches-and-reject-reasons.js`, `server/content/routes.js`, `public/js/views/admin-content.js`)
+- [x] Reject reasons are a **closed set** (wrong-fact / bad-pedagogy / style / duplicate), required on a verdict — a free-text reason is refused, because a reason that cannot be counted cannot calibrate anything
+- [x] Reject rate computed over **DECIDED** cards, never the whole batch: one card in with that one rejected is 100%, not 4%, and §6 graduates playbooks on this number
+- [x] Approve-all replays same-scope drafts in write order, so the newest wins the scope exactly as approving them one at a time would
+- [x] Node tests green
+- [ ] **Card-level diff against the cited chunk — NOT built.** The approver sees the card, not the evidence it claims. This is the bullet that makes cite-or-die checkable by a human, and LA-7's whole quality argument leans on it
+- [ ] **Keyboard flow — NOT built.** Mouse-only review of a 25-card batch is the difference between the <10 min §8 target and an evening
+- [ ] Deployed-site verification blocked: `ACADEMY_ADMIN_CLERK_IDS` unset (§11)
 
-**LA-9 · Renderer #1: infographics via the social template system** `[academy CI]` `[Automatos-AI-Platform templates]`
-- [ ] Port/reuse the social HTML-template renderer (carousel/stats-grid templates, headless render — already brand-correct) as a CI job: verified JSON payload → portrait PNG → S3 via the `deploy-media` pattern
-- [ ] New `media_bindings` slot types: `ig-<domain>-<n>` (infographic), reserving `mv-*` (mini-video) and noting audio is voice-pipeline-owned; slot vocabulary documented next to the existing `v-*` convention
-- [ ] Payloads travel Lane 1 (drafts, approved) *before* rendering — verification happens before pixels exist
-- [ ] First 3 CCA-F infographic cards live in the pilot feed
+**LA-9 · Renderer #1: infographics via the social template system** `[academy CI]` `[Automatos-AI-Platform templates]` — ✅ **BUILT** (#74, hardened #76)
+- [x] Ported the social renderer's harness as a CI job: verified JSON payload → 1080×1350 portrait PNG → S3 via the `deploy-media` pattern. Default run needs **no secrets and publishes nothing** — it uploads the PNGs as an artifact, because the first question about a renderer is "does it look right?" and answering it should not require credentials
+- [x] `ig-<domain>-<n>` slots; `mv-*` reserved; audio stays voice-pipeline-owned
+- [x] Payloads travel Lane 1 before rendering — a card that cannot be drawn correctly is a rejected payload, never a clipped render
+- [x] **Eyeball gate passed (D-LA7), and it found two real defects** (#76): a dense card pushed the footer — the attribution — off the frame; and every sparse card wasted ~40% of itself, because the frame is sized for five points while the limits allow two. Both fixed. A `d3-1` fixture at the payload limits was added, since every existing sample was sparse and nothing in the repo could exercise the dense case
+- [x] **A set renders at one type size.** Each card measures the largest type it could hold; the renderer imposes the smallest across the batch. A card is one slide of a drip or one frame of an LA-14 video, and type that changes size between slides reads as a mistake, not as fit. **LA-14 inherits this contract**
+- [ ] First 3 CCA-F infographic cards live in the pilot feed — **not done**: needs an approved Lane-1 payload, which needs the approve queue, which needs §11
 
 ### P4 — Widen and earn autonomy
 
@@ -142,10 +151,14 @@ As the approver, I judge fifty cards in minutes, not an evening.
 - [ ] Cert-watch scheduled mission (the CONTENT-LIFECYCLE platform half): fetch-and-diff official blueprint pages weekly; LLM summarizes only on real change; files changelog entry + revision draft
 - [ ] `changelog` feed card ships the week's entry (via Wire's seam if Wire is live — D-LA6)
 
-**LA-12 · Quality flywheel v1** `[academy]` `[revision playbook cross-pod]`
-- [ ] Nightly per-item aggregates from sync events: attempts, correct %, skip rate, median msOnCard, naive discrimination (mock-passers vs not)
-- [ ] Threshold flags (≥98% correct = too easy; ≤30% + concentrated wrong answer = ambiguous; skip ≥ 40% = dead card) → revision playbook drafts a fix **with the stats attached as evidence** → drafts queue
-- [ ] Flagged-item report visible in admin (even before the playbook exists, the report alone has value)
+**LA-12 · Quality flywheel v1** `[academy]` `[revision playbook cross-pod]` — ✅ **BUILT** (#75), with two gaps stated below
+- [x] Per-item aggregates from sync events: attempts, correct %, skip rate, median msOnCard, naive discrimination (`server/content/item-stats.js`)
+- [x] Discrimination returns **null, not zero**, when either group is too small — zero is a real and damning value here (the item separates nobody), so returning it for "we don't know yet" would manufacture the worst finding out of missing data
+- [x] Flags with evidence attached: `too-easy` (≥98%), `dead` (skip ≥40%), `backwards` (passers do worse than non-passers), each gated behind `minAttempts: 20`
+- [ ] **`ambiguous` is built but can never fire.** It needs the dominant wrong answer, and `card_review` deliberately carries no `chosenOptionId` — so `topWrongCount` is hardcoded `null` (`routes.js:362`). The rule is written, tested, and dormant pending a wire-contract decision (§10). It is the flag that catches a *bad question*, as opposed to a hard or ignored one
+- [ ] **Aggregates are on-demand, not nightly.** Computed per request. Fine at this volume; the trigger to materialise is the query getting slow, which is measurable rather than a feeling
+- [ ] **No admin UI.** The report is an API route with evidence attached, not a surface. The PRD promised "visible in admin" and that is not what shipped
+- [ ] Revision playbook (cross-pod) not started
 
 **LA-13 · Topic voting (thin)** `[academy]`
 - [ ] "Suggest a topic / vote" on track + coming-soon surfaces, reusing the notify-me demand-capture muscle; counts visible to admin only (real-numbers honesty rule — no fake social proof)
@@ -197,7 +210,13 @@ The localization build is its own future wave (PRD-LOCALIZATION, unwritten). Wha
 ## 9. Decision boxes (Gerard)
 
 **D-LA1..D-LA6 DECIDED 2026-07-24** — Gerard took the recommendations as they
-stood. D-LA7 and D-LA8 remain open; neither gates P1 or P2.
+stood.
+
+**D-LA7, D-LA8, D-LA9 DECIDED 2026-07-25 on Gerard's behalf**, under his
+standing delegation ("I trust you to answer for me based on research"). Each
+carries its reasoning so it can be overturned on the reasoning rather than on
+authority. D-LA7 is now settled by evidence rather than research — the
+renderer was built, run, and looked at (#74/#76).
 
 | # | Decision | Outcome |
 |---|---|---|
@@ -207,8 +226,9 @@ stood. D-LA7 and D-LA8 remain open; neither gates P1 or P2.
 | D-LA4 | Drip volume | ✅ **20–30 cards/week during P3**, sized to review time, not factory capacity |
 | D-LA5 | Explain-back affects readiness? | ✅ **Advisory-only** this wave; reconsider once grader precision is trusted |
 | D-LA6 | Changelog card transport | ✅ **Ride PRD-WIRE's seam if Wire ships first**; else a plain `changelog` card from the drafts queue |
-| D-LA7 | Mini-video tooling | ⏳ **OPEN** — Remotion (React-native fit; licence fine at current team size — flag if the team grows past 3) vs Motion Canvas (fully open) vs ffmpeg-composited slides (poor-man's, zero licence). Gates **LA-14 only** |
-| D-LA8 | Monthly spend ceiling for factory + watchers + renderers | ⏳ **OPEN** — set a number; the flywheel report includes actual spend against it. Gates **P3 factory start** |
+| D-LA7 | Mini-video tooling | ✅ **ffmpeg-composited slides on the LA-9 renderer.** **Remotion is disqualified**, not merely flagged: it is free only to ≤3 people and combined headcount counts in collaborations — a licence tripwire under load-bearing infra is not worth the React ergonomics. **Motion Canvas is disqualified** on FR-5: it still expects a UI button press to render, and renderers must run in CI. The LA-9 harness already produces brand-correct portrait PNGs headlessly, and #76 proved it survives contact with real payloads at both extremes. Upgrade path if motion quality bites is **Revideo** (MIT, headless-native), never Remotion. **LA-14 inherits LA-9's set-fit contract** — one type size across a batch, which is exactly what a video needs so type does not jump between frames |
+| D-LA8 | Monthly spend ceiling for factory + watchers + renderers | ✅ **No currency figure — a ratio.** A fixed monthly number was rejected before and would either throttle a working factory or wave through a broken one. The tripwire is **cost per *approved* card**: batch 1 sets the baseline, the first four batches are metered, and the factory pauses on drift. Cost per *approved*, never per *generated* — measured per generated card, slop is cheap and a careful playbook looks expensive, which inverts the signal §6 graduates on |
+| D-LA9 | Which track the P3 factory drips into | ✅ **AIX (`automatos/ai-explained`) for the factory; CCA-F stays the LA-6 pilot track.** Gerard's lens is the new user who wants to learn AI, and AIX is the widest door. It is also the best-*grounded* target, which reverses the obvious worry: AIX carries **116 519 characters** of lesson prose against CCA-F's 41 007 (2.8×), and every question in all three tracks already has `sourceRefs`, so cite-or-die has more to bite on, not less. The "AIX needs a corpus sync first" concern was checked and is wrong. **Consequence not yet applied to this doc:** LA-7 and §8 still say CCA-F throughout |
 
 ### Build notes that came out of P1 (things the PRD did not anticipate)
 
@@ -227,9 +247,77 @@ stood. D-LA7 and D-LA8 remain open; neither gates P1 or P2.
    cannot lie about which track it belongs to, because the document it arrived
    in already answered that.
 
+### Build notes from P2/P3 (2026-07-25)
+
+4. **A clean merge is not a correct merge.** Merging `main` into the LA-12
+   branch auto-resolved two contested lines by taking one side wholesale and
+   raised no conflict. It dropped `validateRejection` from an import while the
+   call site and the export both remained — every reject-with-reason would
+   have 500'd in production — and it replaced `infographic.test.mjs` with
+   `item-stats.test.mjs` in the `npm test` line instead of joining them, which
+   would have silently removed LA-9's test from CI on main. `merge-base
+   --is-ancestor` said the branch was up to date and `merge-tree` reported no
+   conflict; both were true and neither helped. **When two branches touch one
+   line, read the merged line.** Caught by CI, on the way to being merged.
+5. **A fit test must measure the content, not the box.** `scrollHeight` is
+   clamped to at least `clientHeight`, so for a list smaller than its box it
+   reports the box. `scrollHeight > clientHeight` was therefore false until
+   content genuinely overflowed — accidentally correct — but subtracting a
+   breathing-room allowance made it true on the first iteration, pinning every
+   card to the type floor. **The failure is invisible in the output:** a card
+   held at the floor looks exactly like a card with no room to grow, so it
+   passed both a render and an eyeball.
+6. **A renderer should state its decision, not only draw it.** What caught
+   note 5 was the run log printing the chosen type size — a number to check
+   against, where there had previously been only a picture to look at. Any
+   renderer that picks something at runtime should say what it picked.
+
 ## 10. Open questions
 
-- Server-side session composer (push payload "your 7-min session is ready" needs the server to know the session): deferred — MT-12 owns nudges; revisit when notifications want card-level content.
-- Percentile/compare surfaces (PRD-COMMUNITY S2) consuming `user_concept_state`: natural later join, volume-gated there.
-- First localization target (pt-BR vs es) and whether AIX (widest audience, simplest prose) is the pilot localization track: belongs to PRD-LOCALIZATION.
-- NotebookLM per-language video regeneration quotas at 8 tracks × N languages: needs a pacing plan when localization starts.
+**Gerard's to answer — these change what gets built:**
+
+- **Does `card_review` gain `chosenOptionId`?** Without it LA-12's `ambiguous`
+  flag can never fire, and `ambiguous` is the one that catches a *bad
+  question* rather than a hard or ignored one. The payload is deliberately a
+  closed flat-scalar set (`itemId, correct, timeMs, bucket, surface`) for PII
+  reasons, and the option index is a genuine widening of it. Two repos change
+  if yes. **Recommendation: yes, as an option *index*, never the text** — an
+  index is not personal data and is all the rule needs.
+- **LA-8's two unbuilt bullets** — diff-against-cited-chunk and keyboard flow.
+  Both were scoped into LA-8 and neither shipped. The diff is the one that
+  makes cite-or-die checkable by a human instead of taken on trust, which is
+  the entire quality argument for letting LA-7 draft at volume.
+
+**Answerable by measurement, not opinion — deliberately left until they bite:**
+
+- Nightly materialisation of item-quality aggregates: on-demand today; the
+  trigger to change is the query getting slow.
+- Server-side session composer (a push payload "your 7-min session is ready"
+  needs the server to know the session): MT-12 owns nudges; revisit when
+  notifications want card-level content.
+
+**Owned by another PRD — recorded here so they are not re-litigated:**
+
+- Percentile/compare surfaces (PRD-COMMUNITY S2) consuming `user_concept_state`.
+- First localization target (pt-BR vs es), and whether AIX is the pilot
+  localization track (PRD-LOCALIZATION).
+- NotebookLM per-language video regeneration quotas at 8 tracks × N languages.
+
+## 11. What is actually blocking this wave
+
+Everything in P2/P3 that is built is built and green. **None of it is
+observable in production**, and the reasons are not code:
+
+1. **`ACADEMY_ADMIN_CLERK_IDS` is unset on Railway.** The approve queue is
+   the factory's human gate, so LA-8 and LA-12 ship invisible and P3 cannot
+   start no matter what is merged. This is the single highest-leverage item in
+   the wave and it is an env var.
+2. **LA-7 is blocked cross-pod.** `automatos-ai` #608 is unmerged, so main's
+   required `test` job is red and any PR opened there inherits a CI signal
+   that cannot be read. LA-7 is the factory — the entire point of P3.
+3. **LA-6 needs Gerard's device.** The pilot is the evidence gate for P3 per
+   §8, and nothing runs on his machine by standing rule, so it runs when he
+   runs it.
+
+The honest read: **the wave is engine-complete and production-invisible.** The
+next real progress is an env var and a merge, not a story.
