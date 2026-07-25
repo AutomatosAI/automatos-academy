@@ -1,0 +1,14 @@
+{
+  "domainId": "d3-agent-ops-claude-code",
+  "index": 1,
+  "eyebrow": "Agent ops & Claude Code",
+  "title": "Five habits that make an agent run reproducible under real load",
+  "points": [
+    "Pin the model id, because a floating alias silently changes the system under test",
+    "Record the whole tool surface — a tool added later quietly rewrites your history",
+    "Log the prompt that actually ran, never the template meant to have produced it",
+    "Capture exit state per step, because a swallowed failure reads exactly like success",
+    "Keep the seed and the retry count, or an ordinary flake looks like a real regression"
+  ],
+  "source": "CCA-F · D3"
+}
