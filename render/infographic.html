@@ -151,13 +151,30 @@
   // step and the densest card keeps a gap it can be read across.
   var FLOOR = 34, CEILING = 46;   // ceiling keeps the points under the 58px
   var BREATH = 28;                // headline floor — hierarchy is not optional
-  var fitted = FLOOR;
+  var measured = FLOOR;
   for (var size = FLOOR + 2; size <= CEILING; size += 2) {
     ul.style.fontSize = size + 'px';
     if (ul.scrollHeight > ul.clientHeight - BREATH) break;
-    fitted = size;
+    measured = size;
   }
-  ul.style.fontSize = fitted + 'px';
+
+  // A card is rarely seen alone: it is one slide of a drip, or one frame of a
+  // mini-video. If each card took the largest size it personally could, the
+  // type would change size between slides — which reads as a mistake, not as
+  // fit. So the measurement above is only this card's CEILING; the renderer
+  // measures the whole set and imposes the smallest via `pointSize`, and the
+  // set renders as one thing.
+  //
+  // Clamped by `measured` as well as by the band: an imposed size can only
+  // ever be smaller than what this card can hold, never a size that overflows
+  // it. A caller cannot force a card to clip.
+  var forced = parseInt(p.get('pointSize') || '', 10);
+  var applied = (forced >= FLOOR && forced <= CEILING) ? Math.min(forced, measured) : measured;
+  ul.style.fontSize = applied + 'px';
+
+  // Read by the renderer's measuring pass, before it decides the set's size.
+  window.__measuredPointSize = measured;
+  window.__pointSize = applied;
 
   // Two rAFs = layout and paint have both happened. No timeout ceiling here
   // (unlike the social harness): with no webfonts there is nothing to wait

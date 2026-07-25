@@ -98,13 +98,39 @@ async function main() {
   try {
     const page = await browser.newPage();
     await page.setViewport({ ...pageViewport(), deviceScaleFactor: 1 });
-    for (const { slotId, query } of prepared) {
-      const url = `${pathToFileURL(RENDER_PAGE).href}?${query}`;
+
+    const urlFor = (query, pointSize) =>
+      `${pathToFileURL(RENDER_PAGE).href}?${query}` +
+      (pointSize ? `&pointSize=${pointSize}` : "");
+
+    // The page sets `__renderReady` after two rAFs. No timeout fallback: a
+    // render that never signals is a real fault, and screenshotting a
+    // half-drawn card would publish it.
+    const load = async (url) => {
       await page.goto(url, { waitUntil: "load" });
-      // The page sets this after two rAFs. No timeout fallback: a render that
-      // never signals is a real fault, and screenshotting a half-drawn card
-      // would publish it.
       await page.waitForFunction("window.__renderReady === true");
+    };
+
+    // Pass 1 — measure, screenshot nothing. Each card reports the largest type
+    // it could personally hold; the set takes the smallest of those, so every
+    // card in the batch renders at one size. Cards are seen in sequence — as a
+    // drip, or as LA-14's frames — and type that changes size between slides
+    // reads as a mistake rather than as fit.
+    const measured = [];
+    for (const { slotId, query } of prepared) {
+      await load(urlFor(query));
+      measured.push({ slotId, size: await page.evaluate(() => window.__measuredPointSize) });
+    }
+    const setSize = Math.min(...measured.map((m) => m.size));
+    const governs = measured.filter((m) => m.size === setSize).map((m) => m.slotId);
+    console.log(
+      `  set type size: ${setSize}px — set by ${governs.join(", ")}` +
+        (measured.length > 1 ? ` (cards alone: ${measured.map((m) => m.size).join(", ")}px)` : "")
+    );
+
+    // Pass 2 — render the whole set at that one size.
+    for (const { slotId, query } of prepared) {
+      await load(urlFor(query, setSize));
       const file = path.join(out, `${slotId}.png`);
       await page.screenshot({ path: file, type: "png" });
       console.log(`  ✓ ${slotId} → ${file}`);
