@@ -6,7 +6,7 @@
 import { createServer } from "http";
 import express from "express";
 
-import { validateDraft, deriveRelPath, MAX_DRAFT_BYTES } from "../server/content/validate.js";
+import { validateDraft, validateRejection, deriveRelPath, MAX_DRAFT_BYTES } from "../server/content/validate.js";
 import { applyContentOverride } from "../server/content/overlay.js";
 import { createOverridesCache, scopeKey } from "../server/content/overrides-cache.js";
 import { registerContentRoutes } from "../server/content/routes.js";
@@ -86,11 +86,11 @@ function fakeStore() {
   const nn = (v) => (v == null ? null : v);
   const sameScope = (a, b) => a.scope_kind === b.scope_kind && nn(a.vendor_id) === nn(b.vendor_id) && nn(a.track_id) === nn(b.track_id) && nn(a.domain_id) === nn(b.domain_id);
   const byId = (id) => rows.find((r) => String(r.id) === String(id));
-  return {
+  const api = {
     rows,
     query: async (sql, args = []) => {
       if (/INSERT INTO content_drafts/i.test(sql)) {
-        const [scope_kind, vendor_id, track_id, domain_id, rel_path, canonical, , sha256, bytes, source, note, created_by] = args;
+        const [scope_kind, vendor_id, track_id, domain_id, rel_path, canonical, , sha256, bytes, source, note, created_by, batch_id, provenance] = args;
         const cand = { scope_kind, vendor_id, track_id, domain_id };
         if (rows.find((r) => r.status === "pending" && sameScope(r, cand) && r.sha256 === sha256)) return { rows: [] };
         let payload = {}; try { payload = JSON.parse(canonical); } catch { /* validated upstream */ }
@@ -99,6 +99,8 @@ function fakeStore() {
           rel_path, canonical, payload, sha256, bytes, status: "pending", source, note: nn(note),
           created_by: nn(created_by), created_at: new Date(1784760000000 + seq * 1000).toISOString(),
           reviewed_by: null, reviewed_at: null, title: payload && payload.name != null ? payload.name : null,
+          batch_id: nn(batch_id), reject_reason: null,
+          provenance: provenance == null ? null : JSON.parse(provenance),
         };
         rows.push(row);
         return { rows: [row] };
@@ -109,11 +111,41 @@ function fakeStore() {
         return { rows: r ? [r] : [] };
       }
       if (/payload->>'name'/i.test(sql)) {
-        const [status, limit] = args;
+        const [status, limit, batchId] = args;
         let out = rows.slice();
         if (status) out = out.filter((r) => r.status === status);
+        if (batchId) out = out.filter((r) => r.batch_id === batchId);
         out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
         return { rows: out.slice(0, limit) };
+      }
+      if (/GROUP BY batch_id/i.test(sql)) { // LA-8 batch rollup
+        const [limit] = args;
+        const byBatch = new Map();
+        for (const r of rows) {
+          if (r.batch_id == null) continue;
+          if (!byBatch.has(r.batch_id)) byBatch.set(r.batch_id, []);
+          byBatch.get(r.batch_id).push(r);
+        }
+        const out = [...byBatch.entries()].map(([batch_id, rs]) => ({
+          batch_id,
+          total: rs.length,
+          pending: rs.filter((r) => r.status === "pending").length,
+          approved: rs.filter((r) => r.status === "approved").length,
+          rejected: rs.filter((r) => r.status === "rejected").length,
+          wrong_fact: rs.filter((r) => r.reject_reason === "wrong-fact").length,
+          created_at: rs.map((r) => r.created_at).sort()[0],
+          playbook: rs.map((r) => (r.provenance && r.provenance.playbook) || null).filter(Boolean).sort()[0] || null,
+          format: rs.map((r) => (r.provenance && r.provenance.format) || null).filter(Boolean).sort()[0] || null,
+        }));
+        out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+        return { rows: out.slice(0, limit) };
+      }
+      if (/SELECT id FROM content_drafts/i.test(sql)) { // batch pending, oldest first
+        const [batchId] = args;
+        const out = rows
+          .filter((r) => r.batch_id === batchId && r.status === "pending")
+          .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.id - b.id));
+        return { rows: out.map((r) => ({ id: r.id })) };
       }
       if (/SELECT status FROM content_drafts/i.test(sql)) {
         const r = byId(args[0]);
@@ -132,15 +164,21 @@ function fakeStore() {
         return { rows: [tgt] };
       }
       if (/SET status = 'rejected'/i.test(sql)) { // reject / retire
-        const [id, actor] = args;
+        const [id, actor, reason] = args;
         const r = byId(id);
         if (!r || (r.status !== "pending" && r.status !== "approved")) return { rows: [] };
         r.status = "rejected"; r.reviewed_by = actor; r.reviewed_at = new Date().toISOString();
+        r.reject_reason = reason == null ? null : reason;
         return { rows: [r] };
       }
       return { rows: [] };
     },
   };
+  // LA-8's approve-all runs in a transaction. The fake client shares this
+  // store, so BEGIN/COMMIT/ROLLBACK fall through to the default no-op and the
+  // replay order is what the test is actually checking.
+  api.connect = async () => ({ query: api.query, release() {} });
+  return api;
 }
 
 async function serve(pool) {
@@ -234,6 +272,112 @@ console.log("routes: review (list, get, approve supersedes, reject/retire)");
   ok(r.status === 404, "approve unknown id → 404");
   r = await s.call("POST", "/api/admin/content/drafts/9999/reject");
   ok(r.status === 404, "reject unknown id → 404");
+
+  await s.close();
+}
+
+// ══════════════════════════════════════════ LA-8 — batches + reject reasons ══
+// The approval ladder (§6) is arithmetic over rejections: T1 needs "≤5% reject
+// over 4 consecutive batches AND zero wrong-fact rejects", and a single
+// wrong-fact demotes to T0. None of that can be computed unless a rejection
+// carries a countable reason and a draft knows which batch it came from.
+console.log("LA-8: reject reasons (closed set, required on a review verdict)");
+{
+  ok(validateRejection({}, { status: "pending" }).error === "reason_required",
+    "rejecting a PENDING draft without a reason → reason_required (no uncounted verdicts)");
+  ok(validateRejection({}, { status: "approved" }).ok === true &&
+     validateRejection({}, { status: "approved" }).reason === null,
+    "retiring an APPROVED override needs no reason (operational, not a verdict)");
+  ok(validateRejection({ reason: "because I say so" }, { status: "pending" }).error === "bad_reason",
+    "free-text reason → bad_reason (it could not be counted)");
+  ok(validateRejection({ reason: "wrong-fact" }, { status: "pending" }).reason === "wrong-fact",
+    "wrong-fact accepted — the one that demotes a playbook to T0");
+  for (const r of ["bad-pedagogy", "style", "duplicate"]) {
+    ok(validateRejection({ reason: r }, { status: "pending" }).ok, `${r} accepted`);
+  }
+}
+
+console.log("LA-8: batch id + provenance validation");
+{
+  const good = validateDraft({ ...DOMAIN("x"), batchId: "aix-flash-2026-07-25",
+    provenance: { playbook: "flashcard-drafter", playbookVersion: "1.2.0", model: "claude-sonnet-5", corpusSnapshot: "2026-07-20" } });
+  ok(good.ok && good.draft.batchId === "aix-flash-2026-07-25", "valid batchId kept");
+  ok(good.draft.provenance.playbook === "flashcard-drafter", "provenance kept whole");
+
+  ok(validateDraft({ ...DOMAIN("x"), batchId: "has spaces" }).error === "bad_batch_id", "batchId charset enforced");
+  ok(validateDraft({ ...DOMAIN("x"), batchId: "x".repeat(65) }).error === "bad_batch_id", "batchId length capped");
+  ok(validateDraft({ ...DOMAIN("x"), provenance: ["nope"] }).error === "bad_provenance", "array provenance rejected");
+  ok(validateDraft({ ...DOMAIN("x"), provenance: { blob: "y".repeat(5000) } }).error === "bad_provenance", "oversized provenance rejected");
+  ok(validateDraft(DOMAIN("x")).draft.batchId === null, "a human write-back carries no batch (not a fabricated one)");
+}
+
+console.log("LA-8: routes — reject reason, batch rollup, approve-all");
+{
+  const s = await serve(fakeStore());
+  const BATCH = "aix-flash-2026-07-25";
+  const card = (domainId, name, batchId = BATCH) => ({
+    scopeKind: "domain", vendorId: "automatos", trackId: "ai-explained", domainId,
+    canonical: JSON.stringify({ id: domainId, name, lessons: [] }),
+    source: "automatos", batchId,
+    provenance: { playbook: "flashcard-drafter", format: "flashcard", model: "claude-sonnet-5" },
+  });
+
+  const m0 = await (await s.call("POST", "/api/admin/content", card("m00-what-is-ai", "A"))).json();
+  const m1 = await (await s.call("POST", "/api/admin/content", card("m01-what-is-an-agent", "B"))).json();
+  const m2 = await (await s.call("POST", "/api/admin/content", card("m02-so-many-models", "C"))).json();
+
+  let r = await s.call("POST", `/api/admin/content/drafts/${m0.draft.id}/reject`);
+  ok(r.status === 400 && (await r.json()).error === "reason_required",
+    "rejecting a pending draft with no reason → 400 (the queue cannot lose evidence)");
+
+  r = await s.call("POST", `/api/admin/content/drafts/${m0.draft.id}/reject`, { reason: "wrong-fact" });
+  ok(r.status === 200 && (await r.json()).draft.rejectReason === "wrong-fact", "reason is stored on the draft");
+
+  // Rate is over DECIDED cards: 1 rejected of 1 decided = 100%, not 33% of the
+  // three-card batch. A half-reviewed batch must not flatter its own numbers.
+  let b = (await (await s.call("GET", "/api/admin/content/batches")).json()).batches[0];
+  ok(b.batchId === BATCH && b.total === 3 && b.pending === 2 && b.rejected === 1, "batch rollup counts by status");
+  ok(b.rejectRate === 1, "reject rate is over DECIDED cards, not the whole batch");
+  ok(b.wrongFact === 1, "wrong-fact broken out — §6 demotes on it alone");
+  ok(b.playbook === "flashcard-drafter" && b.format === "flashcard", "provenance surfaces on the batch");
+
+  r = await s.call("POST", `/api/admin/content/batches/${BATCH}/approve`);
+  const done = await r.json();
+  ok(r.status === 200 && done.approved === 2, "approve-all approves every PENDING draft, and only those");
+
+  b = (await (await s.call("GET", "/api/admin/content/batches")).json()).batches[0];
+  ok(b.pending === 0 && b.approved === 2 && b.rejected === 1, "batch settles: 2 approved, 1 rejected");
+  ok(Math.abs(b.rejectRate - 1 / 3) < 1e-9, "reject rate recomputes once everything is decided");
+
+  ok(done.drafts.every((d) => d.id !== m0.draft.id), "the rejected card is not resurrected by approve-all");
+  ok([m1.draft.id, m2.draft.id].every((id) => done.drafts.some((d) => d.id === id)), "both pending cards went live");
+
+  r = await s.call("POST", `/api/admin/content/batches/${BATCH}/approve`);
+  ok((await r.json()).approved === 0, "approve-all on a settled batch is a no-op, not an error");
+
+  await s.close();
+}
+
+console.log("LA-8: approve-all replays same-scope drafts in write order");
+{
+  // Two drafts for ONE scope in one batch. Approving them by hand oldest-first
+  // leaves the newest as the live override; approve-all must land identically,
+  // or the button and the manual flow disagree about what is serving.
+  const s = await serve(fakeStore());
+  const scope = (name) => ({ scopeKind: "domain", vendorId: "automatos", trackId: "ai-explained",
+    domainId: "m09-rag", canonical: JSON.stringify({ id: "m09-rag", name, lessons: [] }),
+    source: "automatos", batchId: "dup-scope" });
+
+  const first = await (await s.call("POST", "/api/admin/content", scope("older"))).json();
+  const second = await (await s.call("POST", "/api/admin/content", scope("newer"))).json();
+
+  const done = await (await s.call("POST", "/api/admin/content/batches/dup-scope/approve")).json();
+  ok(done.approved === 2, "both drafts were processed");
+
+  const approved = (await (await s.call("GET", "/api/admin/content/drafts?status=approved")).json()).drafts;
+  ok(approved.length === 1, "exactly one live override survives for the scope");
+  ok(approved[0].id === second.draft.id, "the NEWEST draft wins the scope, as it would one at a time");
+  ok(first.draft.id !== second.draft.id, "sanity: they were two distinct drafts");
 
   await s.close();
 }

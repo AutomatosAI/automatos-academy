@@ -13,12 +13,13 @@
 // git stays the offline canonical; approved drafts are the live override.
 
 import express from "express";
-import { validateDraft } from "./validate.js";
+import { validateDraft, validateRejection } from "./validate.js";
 
 const INSERT_SQL = `
   INSERT INTO content_drafts
-    (scope_kind, vendor_id, track_id, domain_id, rel_path, canonical, payload, sha256, bytes, source, note, created_by)
-  VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12)
+    (scope_kind, vendor_id, track_id, domain_id, rel_path, canonical, payload, sha256, bytes, source, note, created_by,
+     batch_id, provenance)
+  VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13, $14::jsonb)
   ON CONFLICT (scope_kind, vendor_id, track_id, domain_id, sha256) WHERE status = 'pending'
   DO NOTHING
   RETURNING *;`;
@@ -36,11 +37,40 @@ const SELECT_DUP_SQL = `
 const LIST_SQL = `
   SELECT id, scope_kind, vendor_id, track_id, domain_id, rel_path, sha256, bytes,
          status, source, note, created_by, created_at, reviewed_by, reviewed_at,
+         batch_id, reject_reason,
          payload->>'name' AS title
   FROM content_drafts
   WHERE ($1::text IS NULL OR status = $1)
+    AND ($3::text IS NULL OR batch_id = $3)
   ORDER BY created_at DESC
   LIMIT $2;`;
+
+// LA-8 / FR-7 — the batch rollup the review queue and the graduation evidence
+// both read. `wrongFact` is broken out because §6 demotes on it alone.
+const BATCHES_SQL = `
+  SELECT batch_id,
+         count(*)                                          AS total,
+         count(*) FILTER (WHERE status = 'pending')        AS pending,
+         count(*) FILTER (WHERE status = 'approved')       AS approved,
+         count(*) FILTER (WHERE status = 'rejected')       AS rejected,
+         count(*) FILTER (WHERE reject_reason = 'wrong-fact') AS wrong_fact,
+         min(created_at)                                   AS created_at,
+         min(provenance->>'playbook')                      AS playbook,
+         min(provenance->>'format')                        AS format
+  FROM content_drafts
+  WHERE batch_id IS NOT NULL
+  GROUP BY batch_id
+  ORDER BY min(created_at) DESC
+  LIMIT $1;`;
+
+// Pending drafts of one batch, OLDEST FIRST — approve-all replays them in
+// write order so that when two drafts in a batch target the same scope the
+// newest ends up as the live override, exactly as approving them by hand
+// one at a time would.
+const BATCH_PENDING_SQL = `
+  SELECT id FROM content_drafts
+  WHERE batch_id = $1 AND status = 'pending'
+  ORDER BY created_at ASC, id ASC;`;
 
 const GET_SQL = `SELECT * FROM content_drafts WHERE id = $1;`;
 
@@ -69,7 +99,8 @@ const APPROVE_SQL = `
 // drops it from the overlay so the git/DB base serves again. Only a terminal
 // (rejected/superseded) draft is a no-op.
 const REJECT_SQL = `
-  UPDATE content_drafts SET status = 'rejected', reviewed_by = $2, reviewed_at = now()
+  UPDATE content_drafts SET status = 'rejected', reviewed_by = $2, reviewed_at = now(),
+                            reject_reason = $3
   WHERE id = $1 AND status IN ('pending', 'approved') RETURNING *;`;
 
 const STATUS_SQL = `SELECT status FROM content_drafts WHERE id = $1;`;
@@ -96,9 +127,38 @@ function shape(row, { full = false } = {}) {
     createdAt: row.created_at,
     reviewedBy: row.reviewed_by,
     reviewedAt: row.reviewed_at,
+    batchId: row.batch_id ?? null,
+    rejectReason: row.reject_reason ?? null,
   };
-  if (full) out.canonical = row.canonical;
+  if (full) {
+    out.canonical = row.canonical;
+    out.provenance = row.provenance ?? null;
+  }
   return out;
+}
+
+/**
+ * Reject rate over DECIDED cards, never over the whole batch — a batch that
+ * is one card in with that one rejected is at 100%, not 4%. Null (not 0)
+ * while nothing has been decided: 0 would read as a clean sheet, and §6
+ * graduates playbooks on this number.
+ */
+function batchShape(row) {
+  const approved = Number(row.approved);
+  const rejected = Number(row.rejected);
+  const decided = approved + rejected;
+  return {
+    batchId: row.batch_id,
+    total: Number(row.total),
+    pending: Number(row.pending),
+    approved,
+    rejected,
+    wrongFact: Number(row.wrong_fact),
+    rejectRate: decided ? rejected / decided : null,
+    createdAt: row.created_at,
+    playbook: row.playbook ?? null,
+    format: row.format ?? null,
+  };
 }
 
 export function registerContentRoutes(app, { pool, requireAdmin, onChange = () => {} }) {
@@ -114,6 +174,7 @@ export function registerContentRoutes(app, { pool, requireAdmin, onChange = () =
       const params = [
         d.scopeKind, d.vendorId, d.trackId, d.domainId, d.relPath,
         d.canonical, d.canonical, d.sha256, d.bytes, d.source, d.note, actorOf(req),
+        d.batchId, d.provenance == null ? null : JSON.stringify(d.provenance),
       ];
       const ins = await pool.query(INSERT_SQL, params);
       if (ins.rows.length) return res.status(201).json({ ok: true, draft: shape(ins.rows[0]) });
@@ -127,9 +188,50 @@ export function registerContentRoutes(app, { pool, requireAdmin, onChange = () =
   app.get("/api/admin/content/drafts", requireAdmin, (req, res, next) => {
     (async () => {
       const status = typeof req.query.status === "string" && req.query.status ? req.query.status : null;
+      const batchId = typeof req.query.batchId === "string" && req.query.batchId ? req.query.batchId : null;
       const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 100, 1), 500);
-      const { rows } = await pool.query(LIST_SQL, [status, limit]);
+      const { rows } = await pool.query(LIST_SQL, [status, limit, batchId]);
       res.json({ drafts: rows.map((r) => shape(r)) });
+    })().catch(next);
+  });
+
+  // ── LA-8: the batch rollup — what the reviewer opens, and the evidence
+  //    §6 graduates a playbook×format on ──
+  app.get("/api/admin/content/batches", requireAdmin, (req, res, next) => {
+    (async () => {
+      const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+      const { rows } = await pool.query(BATCHES_SQL, [limit]);
+      res.json({ batches: rows.map(batchShape) });
+    })().catch(next);
+  });
+
+  // ── LA-8: approve every pending draft in a batch, atomically ──
+  //
+  // All-or-nothing: a partial approve-all would leave a batch half live with
+  // no record of where it stopped, and the reviewer pressed one button. The
+  // replay is oldest-first so same-scope drafts settle exactly as they would
+  // have one at a time (newest wins the override).
+  app.post("/api/admin/content/batches/:batchId/approve", requireAdmin, (req, res, next) => {
+    (async () => {
+      const batchId = String(req.params.batchId);
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const { rows: pending } = await client.query(BATCH_PENDING_SQL, [batchId]);
+        const approved = [];
+        for (const { id } of pending) {
+          const { rows } = await client.query(APPROVE_SQL, [id, actorOf(req)]);
+          if (rows.length) approved.push(shape(rows[0]));
+        }
+        await client.query("COMMIT");
+        if (approved.length) notify();
+        res.json({ ok: true, batchId, approved: approved.length, drafts: approved });
+      } catch (err) {
+        await client.query("ROLLBACK").catch(() => {});
+        throw err;
+      } finally {
+        client.release();
+      }
     })().catch(next);
   });
 
@@ -157,14 +259,20 @@ export function registerContentRoutes(app, { pool, requireAdmin, onChange = () =
   });
 
   // ── reject (pending proposal) / retire (a live approved override) ──
-  app.post("/api/admin/content/drafts/:id/reject", requireAdmin, (req, res, next) => {
+  //
+  // LA-8: rejecting a PENDING draft is a review verdict and carries a reason
+  // from the closed set — the ladder is arithmetic over those. Retiring an
+  // APPROVED override is operational, so there a reason is optional.
+  app.post("/api/admin/content/drafts/:id/reject", requireAdmin, json, (req, res, next) => {
     (async () => {
       const cur = await pool.query(STATUS_SQL, [req.params.id]);
       if (!cur.rows.length) return res.status(404).json({ error: "not_found" });
       if (cur.rows[0].status !== "pending" && cur.rows[0].status !== "approved") {
         return res.status(409).json({ error: "not_rejectable", status: cur.rows[0].status });
       }
-      const { rows } = await pool.query(REJECT_SQL, [req.params.id, actorOf(req)]);
+      const v = validateRejection(req.body || {}, { status: cur.rows[0].status });
+      if (!v.ok) return res.status(400).json({ error: v.error, ...(v.note ? { note: v.note } : {}) });
+      const { rows } = await pool.query(REJECT_SQL, [req.params.id, actorOf(req), v.reason]);
       if (!rows.length) return res.status(409).json({ error: "not_rejectable" }); // lost a race
       notify(); // a rejected/retired draft drops from the overlay at once
       res.json({ ok: true, draft: shape(rows[0]) });
