@@ -74,11 +74,22 @@ jobs:
       - name: Validate the payload contract and the timeline
         run: npm run test:minivideo
 
-      # ffmpeg is preinstalled on ubuntu runners; assert it rather than assume
-      # it, so a runner image change fails here with a readable reason instead
-      # of deep inside the render with an ENOENT.
-      - name: Check ffmpeg
-        run: ffmpeg -version | head -1
+      # ffmpeg is NOT on the runner image. It shipped with ubuntu-22.04 and
+      # ubuntu-24.04 dropped it, so "preinstalled" was an assumption and it was
+      # wrong — install it explicitly.
+      #
+      # `set -euo pipefail` is load-bearing on the last line. This step began
+      # life as a bare `ffmpeg -version | head -1` check, which printed
+      # "command not found" and then PASSED, because a pipeline exits with the
+      # status of its last command and `head` always succeeds. A verification
+      # step that cannot fail is worse than no verification step: it converts a
+      # missing dependency into a green tick.
+      - name: Install ffmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
 
       # puppeteer is NOT a dependency of this repo: it pulls Chromium, and
       # every ordinary CI install would pay for it. Installed here only.
