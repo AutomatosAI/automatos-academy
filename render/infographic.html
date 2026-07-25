@@ -57,27 +57,27 @@
     /* Content-aware sizing happens in script below — this is the ceiling. */
   }
   .rule { height: 5px; width: 132px; background: var(--brick); margin: 40px 0 0; border-radius: 3px; }
-  /* `flex: 1` makes the list absorb the leftover space, but the items would
-     top-pack inside it and dump all of it between the last point and the
-     footer — a 2-point card then reads as a broken 5-point one. Centring the
-     block spends that space above and below instead, so the gaps BETWEEN
-     points stay constant at every count and the card looks composed rather
-     than unfinished. `safe` keeps a 5-point card that overruns top-aligned:
-     overflow must clip at the bottom, never eat the first point. */
+  /* `min-height: 0` because a column flex item defaults to `min-height: auto`
+     and so refuses to shrink below its content — a dense five-point card
+     would push the footer off the bottom of the frame instead of clipping
+     inside the list. The footer carries the attribution; it does not get to
+     fall off. The 34px here is the FLOOR, not the size: the script below
+     grows the list to fill the space it owns. */
   ul {
-    list-style: none; margin: 48px 0 0; padding: 0; flex: 1;
-    display: flex; flex-direction: column; justify-content: safe center;
+    list-style: none; margin: 48px 0 0; padding: 0;
+    flex: 1; min-height: 0;
+    font-size: 34px;
   }
   li {
     display: flex; gap: 22px; align-items: flex-start;
-    font-size: 34px; line-height: 1.38; font-weight: 500;
-    padding: 0 0 30px;
+    font-size: inherit; line-height: 1.38; font-weight: 500;
+    padding: 0 0 0.88em;          /* gaps in em so the rhythm scales with the type */
   }
-  /* The trailing gap would pull the centred block optically high. */
   li:last-child { padding-bottom: 0; }
   li .dot {
     flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
-    background: var(--brick); margin-top: 15px;
+    background: var(--brick);
+    margin-top: calc((1.38em - 15px) / 2);   /* optically centred on line one, at any size */
   }
   footer {
     border-top: 1px solid var(--line); padding-top: 24px;
@@ -133,6 +133,26 @@
   var h1 = document.getElementById('title');
   var len = title.length;
   h1.style.fontSize = len > 52 ? '58px' : len > 38 ? '68px' : '78px';
+
+  // Content-aware point sizing. The headline above picks a size from the
+  // character count; the list cannot, because what fits depends on the
+  // headline that just consumed an unknown share of the card. So measure:
+  // grow the type until the list would overflow the box it owns, then step
+  // back. A two-point card ends up large and the card is full; a five-point
+  // card stays at the 34px floor and is unchanged.
+  //
+  // This is a GROW loop, never a shrink one. server/media/infographic.js
+  // refuses a payload that cannot fit at the floor, and that refusal is the
+  // right outcome — shrinking below 34px to rescue an oversized payload is
+  // how a card ends up technically rendered and practically unreadable.
+  var FLOOR = 34, CEILING = 46;   // ceiling keeps the points under the 58px
+  var fitted = FLOOR;             // headline floor — hierarchy is not optional
+  for (var size = FLOOR + 2; size <= CEILING; size += 2) {
+    ul.style.fontSize = size + 'px';
+    if (ul.scrollHeight > ul.clientHeight) break;
+    fitted = size;
+  }
+  ul.style.fontSize = fitted + 'px';
 
   // Two rAFs = layout and paint have both happened. No timeout ceiling here
   // (unlike the social harness): with no webfonts there is nothing to wait
