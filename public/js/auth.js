@@ -168,6 +168,29 @@ export function openSignIn() {
   if (ready && clerk) clerk.openSignIn();
 }
 
+/**
+ * Open Clerk's account modal — profile details, email addresses, password,
+ * connected accounts, active sessions, MFA.
+ *
+ * Deliberately Clerk's own UI rather than forms of ours. Every field in there
+ * is an identity operation with a verification flow behind it (a password
+ * change re-authenticates, an email change round-trips a code, removing the
+ * last connected account has to be refused), and hand-rolling those is how a
+ * profile page becomes a way to lock yourself out. It also means the moment a
+ * provider is enabled in the Clerk tenant it appears here with no code change.
+ *
+ * Note what this modal is NOT: the data rights. Export, erase-my-data and
+ * delete-account are the Spine's (`public/js/sync/account.js`, §4.4) and stay
+ * on the profile page, because they concern learner records this app owns —
+ * Clerk only knows the identity, not the progress. Two different things that
+ * would be confusing to merge.
+ *
+ * No-op until Clerk is ready, like every other export here.
+ */
+export function openUserProfile() {
+  if (ready && clerk) clerk.openUserProfile();
+}
+
 /** Sign out; listeners fire with null. Safe to call in any state. */
 export async function signOut() {
   if (!ready || !clerk) return;

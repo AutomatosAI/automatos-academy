@@ -10,7 +10,7 @@
 //                bottom of #/profile; the menu stays about learning.
 // All auth calls go through auth.js (the single Clerk seam).
 import { el, clear } from "./ui.js";
-import { initAuth, isConfigured, onAuthChange, openSignIn, signOut } from "./auth.js";
+import { initAuth, isConfigured, onAuthChange, openSignIn, openUserProfile, signOut } from "./auth.js";
 import { url } from "./router.js";
 import { revealAdminNav } from "./admin/nav.js";
 
@@ -65,6 +65,14 @@ function accountMenu(u) {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); location.hash = "#" + url.profile(); },
     }, ["My progress"]),
+    // Distinct from "My progress" on purpose: that page is the learning record,
+    // this is the identity behind it (name, email, password, connected
+    // accounts). They were one item called "profile", which is why there was
+    // nowhere to change a password.
+    el("button", {
+      class: "ac-auth-item", type: "button", role: "menuitem",
+      onClick: () => { setOpen(false); openUserProfile(); },
+    }, ["Manage account"]),
     el("button", {
       class: "ac-auth-item", type: "button", role: "menuitem",
       onClick: () => { setOpen(false); signOut(); },

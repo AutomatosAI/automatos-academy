@@ -30,7 +30,7 @@ import { loadCatalog, loadTrack } from "../content.js";
 import { Store } from "../store.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
-import { isConfigured, user, openSignIn } from "../auth.js";
+import { isConfigured, user, openSignIn, openUserProfile } from "../auth.js";
 import { shareAffordance } from "../share.js";
 import { streakMilestone } from "../engine/sharecard.js";
 import { syncStatus, syncNow } from "../sync/syncer.js";
@@ -78,6 +78,14 @@ function identityHead(status) {
         u.email,
         memberSince ? `member since ${memberSince.toLocaleDateString(undefined, { year: "numeric", month: "long" })}` : null,
       ].filter(Boolean).join(" · ") }),
+      // The page below is the learning record; the identity behind it lives in
+      // Clerk. This is the only route to a password change, a new email or a
+      // connected account, so it sits next to the name it edits rather than
+      // being reachable only from the header menu.
+      el("button", {
+        class: "ac-btn", type: "button", style: { marginTop: "14px" },
+        onClick: () => openUserProfile(),
+      }, ["Manage account"]),
     ]),
   ]);
 }
