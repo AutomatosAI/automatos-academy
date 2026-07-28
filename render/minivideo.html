@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Academy — Mini-video Slide Render</title>
+<!--
+  LA-14 · Lane 2 renderer #2 — a verified payload becomes one slide of a
+  vertical mini-video. The script screenshots this page once per slide and
+  ffmpeg crossfades the frames (D-LA7).
+
+  Same rules as the LA-9 infographic page, for the same reasons: no React, no
+  Babel, no webfonts. A CI job cannot tolerate "the font arrived this time" —
+  the same payload has to produce the same bytes on a pinned runner, which is
+  what FR-5 means by deterministic. Brand tokens below are the social plane's,
+  unchanged and identical to render/infographic.html: the two renderers film
+  the same payload, so they must not drift into two different looks.
+
+  What is deliberately NOT here: motion. Every slide is a still, and the only
+  movement in the finished video is the crossfade between them. A zoom or pan
+  on a text slide resamples the type on every frame and turns crisp letterfoms
+  into shimmer — the format is typography-led, so the typography wins. That is
+  the D-LA7 ceiling being accepted honestly rather than papered over; the
+  upgrade path if real motion is ever wanted is Revideo, never Remotion.
+-->
+<style>
+  :root {
+    --paper: #f1e9dd;
+    --ink: #191919;
+    --ink-muted: #6b6256;
+    --brick: #FF6932;
+    --line: #d9cdb9;
+    --display: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  html, body { margin: 0; padding: 0; background: var(--paper); overflow: hidden; }
+  body {
+    width: 1080px; height: 1920px;
+    font-family: var(--display);
+    color: var(--ink);
+    display: flex; flex-direction: column;
+    padding: 132px 96px 120px;
+    box-sizing: border-box;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    align-self: flex-start;
+    background: var(--ink); color: #fff;
+    padding: 12px 22px; border-radius: 8px;
+    font-family: var(--mono); font-size: 19px; font-weight: 600;
+    letter-spacing: 1.8px; text-transform: uppercase;
+  }
+  .eyebrow .mark { color: var(--brick); font-size: 15px; transform: translateY(-1px); }
+
+  /* The stage holds one thought, vertically centred. A phone screen is read
+     from the middle out, not from the top down like a card. */
+  .stage { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+
+  h1 { font-size: 104px; line-height: 1.04; font-weight: 800; letter-spacing: -2.2px; margin: 0; }
+  .rule { height: 7px; width: 168px; background: var(--brick); margin: 44px 0 0; border-radius: 4px; }
+
+  /* A point slide keeps the claim overhead as a quiet caption, so a viewer
+     arriving mid-video still knows what is being argued. */
+  .claim {
+    font-size: 34px; line-height: 1.3; font-weight: 600; color: var(--ink-muted);
+    margin: 0 0 46px; letter-spacing: -0.3px;
+  }
+  /* The size lives on .point, not on .body, so the dot's `em` resolves against
+     the SAME type the sentence is set in. With it on .body the dot inherited
+     the document's 16px, its offset computed to roughly zero, and it sat at
+     the top of the block instead of optically centred on the first line. */
+  .point {
+    display: flex; gap: 30px; align-items: flex-start;
+    font-size: 60px; line-height: 1.3;
+  }
+  .point .dot {
+    flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--brick); margin-top: calc((1.3em - 22px) / 2);
+  }
+  .point .body { font-size: inherit; font-weight: 600; letter-spacing: -0.8px; }
+
+  .counter { font-family: var(--mono); font-size: 24px; color: var(--ink-muted); margin: 52px 0 0; }
+
+  .end-source { font-family: var(--mono); font-size: 30px; color: var(--ink-muted); margin: 40px 0 0; }
+
+  footer {
+    border-top: 1px solid var(--line); padding-top: 30px;
+    font-family: var(--mono); font-size: 24px; color: var(--ink-muted);
+    display: flex; justify-content: space-between; gap: 28px;
+  }
+</style>
+</head>
+<body>
+  <div class="eyebrow" id="eyebrow" hidden><span class="mark">&#9650;</span><span id="eyebrow-text"></span></div>
+  <div class="stage" id="stage"></div>
+  <footer>
+    <span id="source"></span>
+    <span>automatos academy</span>
+  </footer>
+
+<script>
+(function () {
+  var p = new URLSearchParams(window.location.search);
+  var role = p.get('role') || 'point';
+  var title = p.get('title') || '';
+  var text = p.get('text') || '';
+  var eyebrow = p.get('eyebrow') || '';
+  var source = p.get('source') || '';
+  var index = parseInt(p.get('index') || '0', 10);
+  var count = parseInt(p.get('count') || '0', 10);
+
+  if (eyebrow) {
+    document.getElementById('eyebrow-text').textContent = eyebrow;
+    document.getElementById('eyebrow').hidden = false;
+  }
+  document.getElementById('source').textContent = source;
+
+  var stage = document.getElementById('stage');
+  var el = function (tag, cls, txt) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt !== undefined) n.textContent = txt;   // textContent, never innerHTML —
+    return n;                                      // the payload is agent-written
+  };
+
+  if (role === 'title') {
+    var h1 = el('h1', null, title);
+    stage.appendChild(h1);
+    stage.appendChild(el('div', 'rule'));
+    // Content-aware headline sizing, same principle as the infographic page:
+    // the server already refuses a title too long to fit, so this only spans
+    // the band between "short" and "at the limit" and never rescues an
+    // over-long payload — shrinking one silently is how a slide ends up
+    // unreadable instead of rejected.
+    var len = title.length;
+    h1.style.fontSize = len > 52 ? '78px' : len > 38 ? '92px' : '104px';
+  } else if (role === 'end') {
+    // A bookend: the claim again, quieter, over the rule. The source is NOT
+    // repeated here — the footer carries it on every slide including this one,
+    // and printing it twice on the same frame reads as a mistake.
+    var end = el('h1', null, title);
+    end.style.fontSize = title.length > 52 ? '70px' : '84px';
+    stage.appendChild(end);
+    stage.appendChild(el('div', 'rule'));
+  } else {
+    if (title) stage.appendChild(el('div', 'claim', title));
+    var row = el('div', 'point');
+    row.appendChild(el('span', 'dot'));
+    var body = el('span', 'body', text);
+    row.appendChild(body);
+    stage.appendChild(row);
+    if (count > 0) stage.appendChild(el('div', 'counter', index + ' / ' + count));
+
+    // The point is the whole slide, so it gets to be as large as it can be.
+    // Measured, not guessed: what fits depends on how many lines the claim
+    // above it took. Grow-only — the server refuses a point too long for the
+    // floor, and that refusal is the correct outcome.
+    var FLOOR = 44, CEILING = 76, BREATH = 40;
+    var fitted = FLOOR;
+    var extent = function () {
+      var last = stage.lastElementChild;
+      return last.getBoundingClientRect().bottom - stage.getBoundingClientRect().top;
+    };
+    for (var size = FLOOR + 2; size <= CEILING; size += 2) {
+      // Sized on .point so the bullet scales with the sentence — see the CSS.
+      row.style.fontSize = size + 'px';
+      // Measure the content's real extent, never scrollHeight: scrollHeight is
+      // clamped to at least clientHeight, so on a box larger than its content
+      // it reports the box and the test is true before anything has grown.
+      if (extent() > stage.clientHeight - BREATH) break;
+      fitted = size;
+    }
+    row.style.fontSize = fitted + 'px';
+  }
+
+  // Two rAFs = layout and paint have both happened. No timeout fallback: with
+  // no webfonts there is nothing to wait for, so a render that never signals
+  // is a real fault and should hang the job rather than film a half-drawn slide.
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      window.__renderReady = true;
+      document.body.setAttribute('data-render-ready', 'true');
+    });
+  });
+})();
+</script>
+</body>
+</html>
