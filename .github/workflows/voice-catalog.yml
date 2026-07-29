@@ -71,6 +71,8 @@ jobs:
           TRACKS: ${{ inputs.tracks }}
         run: |
           set -euo pipefail
+          mkdir -p dist   # tee opens its file BEFORE node runs; under pipefail a
+                          # missing dist/ makes tee's failure the step's exit code
           ARGS=""
           [ "$MODE" = "render" ] && ARGS="--render"
           [ -n "$TRACKS" ] && ARGS="$ARGS --tracks $TRACKS"
