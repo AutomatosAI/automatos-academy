@@ -1,6 +1,6 @@
 # PRD-VOICE — Voice & audio-first study: hands-free learning for commutes, gyms, and kitchens
 
-**Status:** proposed · **Owner:** Academy · **Last updated:** 2026-07-16
+**Status:** proposed · S1 shipped (app #40) · **D-V1 stage-(c) engine DECIDED 2026-07-29: Fish Audio (§8.1)** · **Owner:** Academy · **Last updated:** 2026-07-29
 **Repos:** `automatos-academy-app` (S1–S3, S5) · `automatos-academy` web SPA (S4) — no new services in v1
 **Builds on (shipped):** podcast player + offline downloads (MT-10 — `src/podcast/*`) · on-device tutor voice *input* (MT-09 F13 — `src/tutor/voice*`) · the single outcome write path (`src/sync/outcomes.ts`)
 **Referenced by (forthcoming):** PRD-TUTOR-LIVE S4 (tutor speaks its answers) · PRD-MT-12 (a Today plan can include an audio item)
@@ -215,3 +215,49 @@ replayable offline · service failure degrades silently to the device voice mid-
 for flagship-track lesson audio (quality where it's felt most, dynamic glue stays on-device) ·
 **adopt (b) behind the S5 flag** once its deployment is confirmed, replacing (a) for dynamic text.
 Each stage is a `TextSpeaker` swap (§4.1), not a rework — that is the point of the seam.
+
+## 8.1 D-V1 stage-(c) engine — DECIDED 2026-07-29 (Gerard): Fish Audio, Kokoro pod parked
+
+**Decision.** Pre-generated lesson audio (stage c) is produced by **Fish Audio `s2.1-pro`** via
+their pay-as-you-go API, not by self-hosting Kokoro. The `automatos-voice` Kokoro service (option
+b / §S5) is **parked**: its remaining value was zero-marginal-cost dynamic text, which stage (a)
+device TTS already covers, and its quality ceiling is the reason this decision exists. Stage (a)
+is unchanged — verdicts and glue stay on-device.
+
+**Evidence, measured 2026-07-29 (not estimated):**
+
+- **Corpus:** all 10 live tracks total **1,123,277 chars** of lesson prose + overviews
+  (read-aloud) and **2,449,237 chars** including quiz text — ≈ 19 h / 40 h of audio.
+- **Cost:** Fish PAYG is **$0.015 / 1k UTF-8 bytes** → the entire lesson corpus is **≈ $17
+  one-time**, everything ≈ $37. The webapp subscription (€399.50/yr Pro) is the wrong product for
+  a pipeline — studio seats and monthly credits we would never draw down. Regeneration after
+  edits is incremental by construction (content-addressed), and localization (§7-adjacent,
+  80+ languages) multiplies by N languages at the same trivial base.
+- **Quality:** Fish S2 Pro / S1 rank **#1 on TTS-Arena2** (ElevenLabs second; it edges only
+  Fish's older S1, on European languages). **Kokoro-82M ranks ~#32** (Elo 1056, 54.4% win rate) —
+  the honest answer to "is Kokoro as good": no. Kokoro stays the efficiency champion; at $17 for
+  the corpus, efficiency stopped being the constraint. Caveat recorded: the strongest blind-test
+  numbers are Fish's own blog; the arena leaderboard and independent roundups corroborate.
+- **Lock-in:** minimal by design — blobs are content-addressed and engine-namespaced
+  (`fish-s21p-<voice>-v1`), so switching engines later costs one more ~$37 regeneration, not a
+  migration.
+
+**Integration shape (the mass job, defined here, built after the ear-gate):** a publish-time CI
+job in this repo — same lane as the render workflows — runs the §4.2 speakable transform
+(**before** TTS, or the engine reads fenced code aloud), POSTs per-doc to Fish `/v1/tts`
+(`FISH_API_KEY` secret; JSON; `model` header), and lands MP3s on the existing media plane:
+`a-*` audio slots, CDN, per-doc content hash → unchanged docs are never re-billed. File-backed
+audio also buys the real lock-screen transport §4.5 wants, and the per-item download pattern
+(podcast → video, last night) extends identically to lesson audio.
+
+**Activation gates, in order — nothing mass-produces until all three pass:**
+1. **Ear-gate:** `Render voice samples` workflow (`scripts/render-voice-sample.mjs`) renders
+   three real lessons — code-heavy, longest-form, mid-length, distinct tracks — as an artifact.
+   Gerard **listens** before any bulk spend. The render-on-PR lesson applies to audio.
+2. **ToS check:** confirm commercial-use rights on PAYG output (expected standard; verify the line).
+3. **Free-tier probe:** `s2.1-pro-free` exists ("testing, prototyping, smaller businesses") —
+   verify its limits; do not build a dependency on it at these prices.
+
+**Superseded by this decision:** §S5's "ships only after the interface is confirmed live" no
+longer gates anything — S5 is parked, revisit only if dynamic spoken text at scale (tutor speaks
+long answers offline) ever outgrows stage (a).

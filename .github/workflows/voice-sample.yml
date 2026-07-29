@@ -1,0 +1,89 @@
+# PRD-VOICE §8.1 · the EAR-GATE — three real lessons through the speakable
+# transform + Fish Audio, uploaded as an artifact to LISTEN to before any bulk
+# spend. This is the render-on-PR lesson applied to audio: the proof a voice
+# decision needs is hearable, and it must be producible BEFORE merge.
+#
+# ACTIVATION: add the repo secret FISH_API_KEY (fish.audio → app → API keys).
+# Without it, a PR run reports itself blocked-but-green (the gate is a sample
+# job, not a verification step — red would block unrelated work); a manual
+# dispatch without the key FAILS, because dispatch states intent to render.
+#
+# Cost posture: the script prints chars + $ before spending and refuses > ~$1.20
+# without --force. The mass job (§8.1 "integration shape") is a separate lane.
+
+name: Render voice samples
+
+on:
+  pull_request:
+    paths:
+      - "server/audio/speakable.js"
+      - "scripts/render-voice-sample.mjs"
+      - ".github/workflows/voice-sample.yml"
+  workflow_dispatch:
+    inputs:
+      lessons:
+        description: "Explicit lessons (vendor/track/domain/lessonId, comma-separated) — empty = deterministic auto-pick"
+        type: string
+        default: ""
+      model:
+        description: "Fish model"
+        type: string
+        default: "s2.1-pro"
+      voice:
+        description: "Fish voice reference id (empty = engine default)"
+        type: string
+        default: ""
+
+concurrency:
+  group: voice-sample
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # The transform is pure — prove it before spending a cent on TTS.
+      - name: Speakable transform tests
+        run: node tests/speakable.test.mjs
+
+      - name: Render samples
+        env:
+          FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
+          FISH_MODEL: ${{ inputs.model || 's2.1-pro' }}
+          FISH_VOICE: ${{ inputs.voice || '' }}
+          LESSONS: ${{ inputs.lessons || '' }}
+          IS_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FISH_API_KEY:-}" ]; then
+            if [ "$IS_DISPATCH" = "true" ]; then
+              echo "::error::FISH_API_KEY secret is not set — dispatch states intent to render, so this is a failure. Add the secret to activate the ear-gate."
+              exit 1
+            fi
+            echo "::notice::EAR-GATE NOT ACTIVATED — FISH_API_KEY secret is not set. The transform tests above still gate this PR; add the secret and dispatch 'Render voice samples' to produce listenable output."
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "$LESSONS" ]; then
+            node scripts/render-voice-sample.mjs --lessons "$LESSONS" --out dist/voice-samples
+          else
+            node scripts/render-voice-sample.mjs --out dist/voice-samples
+          fi
+        id: render
+
+      - name: Upload samples (listen to these)
+        if: ${{ hashFiles('dist/voice-samples/*') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-samples
+          path: dist/voice-samples/
+          if-no-files-found: error
