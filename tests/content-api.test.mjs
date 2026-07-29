@@ -145,6 +145,9 @@ for (const vendor of manifest.vendors) {
 for (const k of Object.keys(expected)) ok(stats.body[k] === expected[k], `stats.${k} = ${expected[k]} (independent file count)`);
 ok(expected.liveTracks >= 10 && expected.questions > 1000, "stats describe the real catalog (≥10 live tracks, >1000 questions)");
 ok(stats.body.learners === null && stats.body.activeThisWeek === null, "no DB pool → learners + activeThisWeek are null");
+ok(typeof stats.body.podcasts === "number", "podcasts counted (hero growth stat)");
+ok(typeof stats.body.audioLessons === "number" && stats.body.audioLessons >= 0, "audioLessons present — 0 when no bindings, never absent");
+ok(typeof stats.body.audioMinutes === "number" && stats.body.audioMinutes >= 0, "audioMinutes present, floor-rounded");
 
 // ── podcasts (PRD-MT-10) ────────────────────────────────────────────────
 // Served verbatim from podcasts.json in exactly the app's manifest shape
