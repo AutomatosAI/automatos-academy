@@ -87,24 +87,36 @@ export function audioHash(spoken, settings = FISH_SETTINGS) {
   return h.digest("hex").slice(0, 12);
 }
 
-/** one Fish TTS call — errors verbatim, always */
-export async function ttsSegment(text, key, settings = FISH_SETTINGS) {
-  const res = await fetch("https://api.fish.audio/v1/tts", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", model: settings.model },
-    body: JSON.stringify({
-      text,
-      format: "mp3",
-      ...(settings.voice ? { reference_id: settings.voice } : {}),
-      ...(settings.speed && settings.speed !== 1 ? { prosody: { speed: settings.speed } } : {}),
-      ...(settings.temperature ? { temperature: settings.temperature } : {}),
-    }),
-  });
-  if (!res.ok) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** one Fish TTS call — retries throttles/hiccups, errors verbatim otherwise.
+ *  A catalogue run is thousands of calls: Fish's concurrency tier scales with
+ *  account spend and a fresh wallet sits in the lowest one, so 429s are an
+ *  OPERATING CONDITION here, not an error. Backoff honours Retry-After when
+ *  sent; genuine failures (401/402/4xx) still throw verbatim on attempt one. */
+export async function ttsSegment(text, key, settings = FISH_SETTINGS, attempts = 7) {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch("https://api.fish.audio/v1/tts", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", model: settings.model },
+      body: JSON.stringify({
+        text,
+        format: "mp3",
+        ...(settings.voice ? { reference_id: settings.voice } : {}),
+        ...(settings.speed && settings.speed !== 1 ? { prosody: { speed: settings.speed } } : {}),
+        ...(settings.temperature ? { temperature: settings.temperature } : {}),
+      }),
+    });
+    if (res.ok) return Buffer.from(await res.arrayBuffer());
     const body = await res.text().catch(() => "(unreadable)");
-    throw new Error(`Fish TTS ${res.status} ${res.statusText}\n${body.slice(0, 1200)}`);
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt >= attempts) {
+      throw new Error(`Fish TTS ${res.status} ${res.statusText}\n${body.slice(0, 1200)}`);
+    }
+    const retryAfter = Number(res.headers.get("retry-after") || 0) * 1000;
+    const backoff = Math.min(retryAfter || 1500 * 2 ** (attempt - 1), 30_000);
+    await sleep(backoff);
   }
-  return Buffer.from(await res.arrayBuffer());
 }
 
 /** per-segment buffers → one MP3 with real silence at the kind boundaries.
@@ -138,7 +150,7 @@ export async function stitchToFile(buffers, kinds, outFile) {
 /** render a whole lesson to a file: segments → TTS (small concurrent pool,
  *  ORDER PRESERVED) → stitch. The pool matters at catalogue scale: thousands
  *  of segment calls sequentially is hours; six in flight is minutes. */
-export async function renderLesson({ segments, kinds }, outFile, key, settings = FISH_SETTINGS, concurrency = 6) {
+export async function renderLesson({ segments, kinds }, outFile, key, settings = FISH_SETTINGS, concurrency = Number(process.env.FISH_CONCURRENCY || 2)) {
   const buffers = new Array(segments.length);
   let next = 0;
   async function worker() {
