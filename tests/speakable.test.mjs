@@ -13,6 +13,7 @@ import {
   narrateList,
   speakableLesson,
   speakableMarkdown,
+  speechifyCode,
   splitLongText,
 } from "../server/audio/speakable.js";
 
@@ -21,10 +22,31 @@ const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail+
 
 console.log("inline spans collapse to their words");
 {
-  ok(inlineText("use `sessions.create()` **once**") === "use sessions.create() once", "inline code + bold collapse");
+  ok(inlineText("use `sessions.create()` **once**") === "use sessions create once",
+    "inline code is SPEECH-NORMALISED (dots/parens → natural words), bold collapses");
   ok(inlineText("see [the docs](https://x.y) for more") === "see the docs for more", "links speak their text, never the URL");
   ok(inlineText("![diagram](img.png) then act") === "then act", "images say nothing");
   ok(inlineText("  spaced\t\tout  ") === "spaced out", "whitespace normalised");
+}
+
+console.log("speechifyCode — code a mouth can say (the robot-voice fix)");
+{
+  ok(speechifyCode("sessions.create()") === "sessions create", "call syntax → natural words");
+  ok(speechifyCode("maxTokens") === "max Tokens".replace(" T", " T") && speechifyCode("maxTokens").toLowerCase() === "max tokens", "camelCase splits");
+  ok(speechifyCode("snake_case_name") === "snake case name", "snake_case splits");
+  ok(speechifyCode("a/b#c>d") === "a b c d", "path punctuation → spaces");
+  ok(speechifyCode("MCP") === "MCP" && speechifyCode("RAG") === "RAG", "plain jargon terms untouched");
+}
+
+console.log("boldTag — engine-scoped emphasis, OFF by default (device TTS reads brackets)");
+{
+  ok(!inlineText("this is **vital** now").includes("["), "default: no tags anywhere");
+  ok(inlineText("this is **vital** now", { boldTag: "[emphasis]" }) === "this is [emphasis] vital now",
+    "Fish lane: short bold → [emphasis] words");
+  const long = inlineText("**a fully bolded sentence of many words here**", { boldTag: "[emphasis]" });
+  ok(!long.includes("[emphasis]"), "bold runs over 4 words stay plain — tagged sentences read as melodrama");
+  ok(speakableMarkdown("- **key** point\n- b\n", { boldTag: "[emphasis]" })[0].includes("[emphasis] key"),
+    "opts thread through lists");
 }
 
 console.log("fenced code — announced once, NEVER read (the load-bearing rule)");

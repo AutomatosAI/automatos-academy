@@ -112,6 +112,10 @@ async function main() {
   const model = process.env.FISH_MODEL || "s2.1-pro";
   const voice = process.env.FISH_VOICE || "";
   const speed = Number(process.env.FISH_SPEED || "1") || 1;
+  // Fish-lane markup: authors' **bold** becomes [emphasis] (s2.1 open-domain
+  // tags). Engine-scoped — the shared transform default stays plain, because
+  // device TTS would read the bracket aloud. FISH_EMPHASIS=0 switches it off.
+  const boldTag = process.env.FISH_EMPHASIS === "0" ? null : "[emphasis]";
   if (!key) {
     console.error("FISH_API_KEY is not set — the ear-gate needs a key. Add the repo secret (or export it locally) to activate.");
     process.exit(1);
@@ -130,7 +134,7 @@ async function main() {
     : autoPick(all);
 
   const jobs = wanted.map((l) => {
-    const spoken = speakableLesson(l.title, l.body).join("\n\n");
+    const spoken = speakableLesson(l.title, l.body, { boldTag }).join("\n\n");
     return { ...l, spoken, chars: spoken.length };
   });
 
