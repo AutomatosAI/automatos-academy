@@ -62,7 +62,10 @@ jobs:
       - name: Render samples
         env:
           FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
-          FISH_MODEL: ${{ inputs.model || 's2.1-pro' }}
+          # PR smoke runs ride the FREE tier (non-commercial is fine for CI
+          # samples; ToS-checked); PAID is a deliberate dispatch choice — the
+          # dispatch input's own default supplies s2.1-pro there.
+          FISH_MODEL: ${{ inputs.model || 's2.1-pro-free' }}
           FISH_VOICE: ${{ inputs.voice || '' }}
           FISH_SPEED: ${{ inputs.speed || '1' }}
           LESSONS: ${{ inputs.lessons || '' }}
