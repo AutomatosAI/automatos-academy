@@ -72,8 +72,8 @@ console.log("lists narrate First / Next / Finally");
 {
   const spoken = speakableMarkdown("- alpha\n- beta\n- gamma\n");
   ok(spoken.length === 3, "one segment per item");
-  ok(spoken[0] === `${SPOKEN.listFirst} alpha` && spoken[1] === `${SPOKEN.listNext} beta` && spoken[2] === `${SPOKEN.listFinally} gamma`, "leads match the app's register");
-  ok(speakableMarkdown("- only one\n")[0] === "only one", "a single item reads plainly, no lead");
+  ok(spoken[0] === `${SPOKEN.listFirst} alpha.` && spoken[1] === `${SPOKEN.listNext} beta.` && spoken[2] === `${SPOKEN.listFinally} gamma.`, "leads match the app's register — and every segment ends like a sentence (the breathing fix)");
+  ok(speakableMarkdown("- only one\n")[0] === "only one.", "a single item reads plainly, no lead — full stop appended");
   const numbered = speakableMarkdown("1. one\n2. two\n");
   ok(numbered[0].startsWith(SPOKEN.listFirst) && numbered[1].startsWith(SPOKEN.listFinally), "numbered lists narrate the same way");
 }

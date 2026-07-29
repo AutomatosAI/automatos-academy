@@ -167,7 +167,12 @@ export function speakableMarkdown(markdown, opts = {}) {
     paragraph.push(line.trim());
   }
   flushParagraph(); flushList();
-  return segments;
+  // Terminal punctuation on every segment: list items arrive as "First: alpha"
+  // with no full stop, and a TTS engine runs straight through the boundary —
+  // the "reading without taking a breath" verdict from the paid ear-gate. A
+  // segment is a spoken unit; it ends like one. Shared semantics: device TTS
+  // breathes at full stops too.
+  return segments.map((seg) => (/[.!?…:]$/.test(seg) ? seg : `${seg}.`));
 }
 
 /** whole-lesson convenience: title announced first, then the body */
