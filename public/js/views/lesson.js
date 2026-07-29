@@ -33,6 +33,19 @@ export function lessonView(ctx) {
   const prose = el("article", { class: "prose" }, [
     el("span", { class: "mono-label", text: `${d.name} · Lesson ${idx + 1} of ${lessons.length}` }),
     el("h1", { style: { fontSize: "clamp(30px,4.5vw,46px)", margin: "12px 0 0" }, text: lesson.title }),
+    // PRD-VOICE §8.1 — the bound narration (Laura). audioUrl arrives via the
+    // serve-time media overlay (a-<lessonId> slot); no binding → no player,
+    // and the reader looks exactly as it always did. Native <audio> on
+    // purpose: play/pause/seek/speed with zero JS in a no-build SPA.
+    lesson.audioUrl
+      ? el("audio", {
+          controls: true,
+          preload: "none",
+          src: lesson.audioUrl,
+          style: { width: "100%", maxWidth: "720px", display: "block", margin: "16px 0 0" },
+          "aria-label": `Listen to ${lesson.title}`,
+        })
+      : null,
     lesson.objective ? el("div", { class: "objective" }, [el("span", { class: "mono-label k", text: "Objective" }), el("p", { text: lesson.objective })]) : null,
     el("div", { html: md(lesson.body || "") }),
   ]);

@@ -78,6 +78,21 @@ jobs:
           [ -n "$TRACKS" ] && ARGS="$ARGS --tracks $TRACKS"
           node scripts/render-voice-catalog.mjs $ARGS --out dist/voice-catalog 2>&1 | tee dist/render-log.txt
 
+      # Binding is part of a render run when the admin key exists — otherwise
+      # the bindings.json artifact + scripts/bind-voice-catalog.mjs is the
+      # manual path. Loud either way; never silent.
+      - name: Bind catalogue into media_bindings
+        if: ${{ inputs.mode == 'render' }}
+        env:
+          ACADEMY_ADMIN_KEY: ${{ secrets.ACADEMY_ADMIN_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ACADEMY_ADMIN_KEY:-}" ]; then
+            echo "::notice::BIND SKIPPED — ACADEMY_ADMIN_KEY secret not set. Run scripts/bind-voice-catalog.mjs with the key to bind the artifact."
+            exit 0
+          fi
+          node scripts/bind-voice-catalog.mjs dist/voice-catalog/bindings.json --apply
+
       - name: Upload plan / bindings / log
         uses: actions/upload-artifact@v4
         with:

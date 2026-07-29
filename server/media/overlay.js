@@ -25,3 +25,30 @@ export function overlayVideos(data, bySlot) {
 
 // Back-compat alias — the track endpoint imported this name.
 export const overlayTrackVideos = overlayVideos;
+
+/**
+ * Lesson audio (PRD-VOICE §8.1) — a bound `a-<lessonId>` audio slot attaches
+ * `audioUrl` to the served lesson, on any node carrying `lessons[]` (domain
+ * files). Same contract as overlayVideos: pure, immutable, changed-flag — the
+ * cached content index is shared, so mutation would leak across requests.
+ * Consumers: the web lesson reader's Listen player, the app's file-backed
+ * TextSpeaker, and anything else reading the catalog (agents included).
+ */
+export function overlayLessonAudio(data, bySlot) {
+  if (!bySlot || !Array.isArray(data.lessons) || data.lessons.length === 0) {
+    return data;
+  }
+  let changed = false;
+  const lessons = data.lessons.map((l) => {
+    const b = bySlot.get(`a-${l.id}:audio`);
+    if (!b) return l;
+    changed = true;
+    return { ...l, audioUrl: b.url };
+  });
+  return changed ? { ...data, lessons } : data;
+}
+
+/** the one overlay the catalog applies: videos + lesson audio, composed */
+export function overlayMedia(data, bySlot) {
+  return overlayLessonAudio(overlayVideos(data, bySlot), bySlot);
+}
