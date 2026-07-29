@@ -1,0 +1,87 @@
+# PRD-VOICE §8.1 · THE MASS JOB — every lesson → Laura, through the exact lane
+# the ear-gate approved. DISPATCH-ONLY and dry-run by default: this workflow
+# spends real money on render mode, so running it is always a stated choice,
+# twice (dispatch + mode=render).
+#
+# Content-addressed: S3 keys carry audioHash(spoken+settings); existing keys
+# skip — re-running after edits bills only changed lessons. Changing the
+# voice/settings moves EVERY hash (deliberate: a new voice is new content).
+#
+# Secrets: FISH_API_KEY + the same AWS_SDK_DEPLOY_* five as deploy-media.
+# Binding into media_bindings stays a separate deliberate step (bindings.json
+# artifact carries everything needed).
+
+name: Render voice catalogue
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run (plan + cost, $0) or render (spend)"
+        type: choice
+        options: [dry-run, render]
+        default: dry-run
+      tracks:
+        description: "vendor/track filter, comma-separated — empty = ALL"
+        type: string
+        default: ""
+
+concurrency:
+  group: voice-catalog
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  catalogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Transform + lane tests gate the spend
+        run: |
+          set -euo pipefail
+          node tests/speakable.test.mjs
+          node tests/fishlane.test.mjs
+
+      - name: Install ffmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.mode == 'render' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SDK_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SDK_DEPLOY_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_SDK_DEPLOY_REGION }}
+
+      - name: Run the catalogue
+        env:
+          FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
+          AWS_SDK_DEPLOY_BUCKET: ${{ secrets.AWS_SDK_DEPLOY_BUCKET }}
+          MODE: ${{ inputs.mode }}
+          TRACKS: ${{ inputs.tracks }}
+        run: |
+          set -euo pipefail
+          ARGS=""
+          [ "$MODE" = "render" ] && ARGS="--render"
+          [ -n "$TRACKS" ] && ARGS="$ARGS --tracks $TRACKS"
+          node scripts/render-voice-catalog.mjs $ARGS --out dist/voice-catalog 2>&1 | tee dist/render-log.txt
+
+      - name: Upload plan / bindings / log
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-catalog
+          path: |
+            dist/voice-catalog/plan.json
+            dist/voice-catalog/bindings.json
+            dist/render-log.txt
+          if-no-files-found: error
