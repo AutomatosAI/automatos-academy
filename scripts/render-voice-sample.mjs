@@ -112,24 +112,36 @@ async function tts(text, { key, model, voice, speed, ...opts2 }) {
   return Buffer.from(await res.arrayBuffer());
 }
 
-/** silence AFTER a segment, by what the segment was — narration rhythm */
-function gapMsAfter(seg) {
-  if (seg.startsWith(SPOKEN.sectionPrefix)) return 650;          // heading lands
-  if (seg === SPOKEN.codeSample) return 500;                     // aside breath
-  if (/^(First|Next|Finally):/.test(seg)) return 300;            // list beat
-  return 420;                                                    // paragraph/sentence
+/** classify a RAW transform segment (before fish decoration strips cues) */
+function kindOf(seg) {
+  if (seg.startsWith(SPOKEN.sectionPrefix)) return "heading";
+  if (seg === SPOKEN.codeSample) return "code";
+  if (/^(First|Next|Finally):/.test(seg)) return "list";
+  return "plain";
+}
+
+/** silence between segment i and i+1, by KINDS — narration rhythm. A human
+ *  pauses longest BEFORE a new section (the breath that replaces saying the
+ *  word "Section"), lands a heading briefly, keeps list beats tight. */
+function gapMs(prevKind, nextKind) {
+  if (nextKind === "heading") return 750;      // the section-break breath
+  if (prevKind === "heading") return 500;      // heading lands
+  if (prevKind === "code") return 500;         // aside breath
+  if (prevKind === "list" && nextKind === "list") return 300;
+  return 420;                                  // sentence rhythm
 }
 
 /** per-segment MP3s → one file with real silence between (ffmpeg concat).
  *  Fish returns constant-format mp3 (128k/44.1k mono), so silences are
  *  generated once per gap length in the SAME format and -c copy concat is
  *  gapless-exact and deterministic. */
-async function stitchSegments(buffers, segments, outFile) {
+async function stitchSegments(buffers, kinds, outFile) {
   const tmp = await mkdir(path.join(os.tmpdir(), `fish-stitch-${process.pid}`), { recursive: true }).then(
     () => path.join(os.tmpdir(), `fish-stitch-${process.pid}`),
   );
   const silence = {};
-  for (const ms of new Set(segments.slice(0, -1).map(gapMsAfter))) {
+  const gaps = kinds.slice(0, -1).map((k, i) => gapMs(k, kinds[i + 1]));
+  for (const ms of new Set(gaps)) {
     const f = path.join(tmp, `sil-${ms}.mp3`);
     await run("ffmpeg", ["-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
       "-t", (ms / 1000).toFixed(3), "-c:a", "libmp3lame", "-b:a", "128k", f]);
@@ -140,7 +152,7 @@ async function stitchSegments(buffers, segments, outFile) {
     const f = path.join(tmp, `seg-${String(i).padStart(3, "0")}.mp3`);
     await writeFile(f, buffers[i]);
     list.push(`file '${f}'`);
-    if (i < buffers.length - 1) list.push(`file '${silence[gapMsAfter(segments[i])]}'`);
+    if (i < buffers.length - 1) list.push(`file '${silence[gaps[i]]}'`);
   }
   const listFile = path.join(tmp, "concat.txt");
   await writeFile(listFile, list.join("\n"), "utf8");
@@ -187,17 +199,24 @@ async function main() {
   // code-sample aside. Two tags at structural moments read as a human;
   // tags everywhere read as melodrama. FISH_TONE=0 disables.
   const tone = process.env.FISH_TONE !== "0";
-  const decorate = (segments) =>
-    !tone ? segments : segments.map((seg, i) => {
-      if (i === 1 && !seg.startsWith("[")) return `[warm] ${seg}`;
-      if (seg === SPOKEN.codeSample) return `[casual] ${seg}`;
-      return seg;
-    });
+  const decorate = (seg, i, kind) => {
+    // Headings drop the "Section:" announcement in THIS lane: the 750ms
+    // pre-heading silence is the cue a human gives, and hearing the literal
+    // word read aloud was the ear-gate's complaint. Device TTS keeps the
+    // announcement — it has no stitched pauses to speak with.
+    let out = kind === "heading" ? seg.slice(SPOKEN.sectionPrefix.length).trim() : seg;
+    if (!tone) return out;
+    if (i === 1 && !out.startsWith("[")) out = `[warm] ${out}`;
+    if (kind === "code") out = `[casual] ${out}`;
+    return out;
+  };
 
   const jobs = wanted.map((l) => {
-    const segments = decorate(speakableLesson(l.title, l.body, { boldTag }));
+    const raw = speakableLesson(l.title, l.body, { boldTag });
+    const kinds = raw.map(kindOf);
+    const segments = raw.map((seg, i) => decorate(seg, i, kinds[i]));
     const spoken = segments.join("\n\n");
-    return { ...l, segments, spoken, chars: spoken.length };
+    return { ...l, segments, kinds, spoken, chars: spoken.length };
   });
 
   const total = jobs.reduce((n, j) => n + j.chars, 0);
@@ -226,7 +245,7 @@ async function main() {
         buffers.push(await tts(seg, { key, model, voice, speed, temperature }));
         if ((si + 1) % 10 === 0) process.stdout.write(` ${si + 1}/${segs.length}`);
       }
-      await stitchSegments(buffers, segs, path.join(out, `${slug}.mp3`));
+      await stitchSegments(buffers, j.kinds, path.join(out, `${slug}.mp3`));
       const size = (await readFile(path.join(out, `${slug}.mp3`))).length;
       console.log(` ${segs.length} segments, stitched, ${(size / 1024).toFixed(0)} KiB`);
     } else {
