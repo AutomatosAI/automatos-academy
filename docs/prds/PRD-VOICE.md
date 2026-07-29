@@ -250,13 +250,38 @@ job in this repo — same lane as the render workflows — runs the §4.2 speaka
 audio also buys the real lock-screen transport §4.5 wants, and the per-item download pattern
 (podcast → video, last night) extends identically to lesson audio.
 
-**Activation gates, in order — nothing mass-produces until all three pass:**
-1. **Ear-gate:** `Render voice samples` workflow (`scripts/render-voice-sample.mjs`) renders
-   three real lessons — code-heavy, longest-form, mid-length, distinct tracks — as an artifact.
-   Gerard **listens** before any bulk spend. The render-on-PR lesson applies to audio.
-2. **ToS check:** confirm commercial-use rights on PAYG output (expected standard; verify the line).
-3. **Free-tier probe:** `s2.1-pro-free` exists ("testing, prototyping, smaller businesses") —
-   verify its limits; do not build a dependency on it at these prices.
+**Activation gates — ALL THREE PASSED 2026-07-29:**
+1. **Ear-gate: PASSED, five listening rounds deep.** The verdicts drove the lane's design and
+   each is now encoded in `server/audio/fishLane.js` + pinned by `tests/fishlane.test.mjs`:
+   "reading without taking a breath" → **stitched per-segment synthesis with real silence** at
+   kind boundaries (750ms before a heading, 500ms after, 420ms sentences, 300ms list beats) +
+   terminal punctuation on every segment (shared semantics — device TTS breathes too);
+   "she says Section" → the announcement is **stripped in this lane, the pause IS the cue**
+   (device TTS keeps it — it has no silence to speak with); "no emotion" → sparse open-domain
+   tags (`[warm]` opening, `[casual]` code aside, `[emphasis]` from authors' bolds — tags are
+   inline text, there is no auto-tag API; LLM tone passes would break FR-5 and belong at
+   content time if ever). **Voice locked: Laura** (`e3cd384158934cc9a01029cd7d278634`,
+   conversational·educational — "the best tech speaker, assertive and easy to listen to"),
+   natural pace, default temperature. Namespace **`fish-s21p-laura-v1`**.
+2. **ToS: verified.** Outputs owned by us; **free tier is non-commercial → ear-gate only, all
+   PUBLISHED audio renders on paid `s2.1-pro`**; stock voices only (no cloning — §3 stands).
+3. **Free tier probed:** it serves the same model at $0 against a separate 8k-credit platform
+   allowance — fine for CI smoke and auditions, structurally irrelevant for a 1M-char corpus.
+   **Two-wallet trap recorded:** API credit (fish.audio/app/developers) is independent of
+   platform credits; the paid model 402s until the API wallet specifically is funded.
+
+**The mass job is BUILT** (`scripts/render-voice-catalog.mjs` + `voice-catalog.yml`,
+dispatch-only, dry-run default, $25 hard cap): 227 lessons, 1,051,001 spoken chars,
+**≈ $15.77** for the full catalogue. Content-addressed — S3 keys carry
+`audioHash(spoken+settings)`, so edits re-bill only changed lessons and a settings change
+regenerates everything by design. Output: MP3s on the media plane under
+`academy/<vendor>/<track>/audio/` + a `bindings.json` artifact (slot `a-<lessonId>` → CDN url).
+
+**What generating does NOT yet do:** nothing plays these files. Binding `bindings.json` into
+`media_bindings` is a deliberate separate step, and the playback surfaces — the web lesson
+read-aloud upgrading from Web Speech to the CDN file, the app's `TextSpeaker` gaining the
+file-backed implementation (S5's shape, pointed at the CDN instead of a Kokoro pod) — are the
+next stories. Files first, then mouths.
 
 **Superseded by this decision:** §S5's "ships only after the interface is confirmed live" no
 longer gates anything — S5 is parked, revisit only if dynamic spoken text at scale (tutor speaks
