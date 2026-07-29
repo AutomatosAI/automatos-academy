@@ -182,8 +182,20 @@ async function main() {
       })
     : autoPick(all);
 
+  // Sparse tone decoration (fish lane only — device TTS would read the
+  // brackets): a [warm] on the lesson's opening line and [casual] on the
+  // code-sample aside. Two tags at structural moments read as a human;
+  // tags everywhere read as melodrama. FISH_TONE=0 disables.
+  const tone = process.env.FISH_TONE !== "0";
+  const decorate = (segments) =>
+    !tone ? segments : segments.map((seg, i) => {
+      if (i === 1 && !seg.startsWith("[")) return `[warm] ${seg}`;
+      if (seg === SPOKEN.codeSample) return `[casual] ${seg}`;
+      return seg;
+    });
+
   const jobs = wanted.map((l) => {
-    const segments = speakableLesson(l.title, l.body, { boldTag });
+    const segments = decorate(speakableLesson(l.title, l.body, { boldTag }));
     const spoken = segments.join("\n\n");
     return { ...l, segments, spoken, chars: spoken.length };
   });
