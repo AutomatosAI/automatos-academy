@@ -21,7 +21,12 @@
 import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { speakableLesson } from "../server/audio/speakable.js";
+import { SPOKEN, speakableLesson } from "../server/audio/speakable.js";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import os from "node:os";
+
+const run = promisify(execFile);
 
 const CONTENT_ROOT = "public/content";
 const SPEND_CAP_CHARS = 80_000; // ~$1.20 — an ear-gate, not a bulk job
@@ -80,7 +85,7 @@ function autoPick(lessons) {
   return picks.filter(Boolean);
 }
 
-async function tts(text, { key, model, voice }) {
+async function tts(text, { key, model, voice, speed, ...opts2 }) {
   const res = await fetch(FISH_URL, {
     method: "POST",
     headers: {
@@ -88,7 +93,16 @@ async function tts(text, { key, model, voice }) {
       "Content-Type": "application/json",
       model,
     },
-    body: JSON.stringify({ text, format: "mp3", ...(voice ? { reference_id: voice } : {}) }),
+    body: JSON.stringify({
+      text,
+      format: "mp3",
+      ...(voice ? { reference_id: voice } : {}),
+      // prosody.speed — the ear-gate's pacing dial (TTSRequest.ProsodyControl).
+      // 1.0 = the voice's natural pace; Gerard's first-listen verdict on the
+      // default voice was "really slow", so this is a first-class knob.
+      ...(speed && speed !== 1 ? { prosody: { speed } } : {}),
+      ...(opts2.temperature ? { temperature: opts2.temperature } : {}),
+    }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "(unreadable)");
@@ -98,11 +112,71 @@ async function tts(text, { key, model, voice }) {
   return Buffer.from(await res.arrayBuffer());
 }
 
+/** classify a RAW transform segment (before fish decoration strips cues) */
+function kindOf(seg) {
+  if (seg.startsWith(SPOKEN.sectionPrefix)) return "heading";
+  if (seg === SPOKEN.codeSample) return "code";
+  if (/^(First|Next|Finally):/.test(seg)) return "list";
+  return "plain";
+}
+
+/** silence between segment i and i+1, by KINDS — narration rhythm. A human
+ *  pauses longest BEFORE a new section (the breath that replaces saying the
+ *  word "Section"), lands a heading briefly, keeps list beats tight. */
+function gapMs(prevKind, nextKind) {
+  if (nextKind === "heading") return 750;      // the section-break breath
+  if (prevKind === "heading") return 500;      // heading lands
+  if (prevKind === "code") return 500;         // aside breath
+  if (prevKind === "list" && nextKind === "list") return 300;
+  return 420;                                  // sentence rhythm
+}
+
+/** per-segment MP3s → one file with real silence between (ffmpeg concat).
+ *  Fish returns constant-format mp3 (128k/44.1k mono), so silences are
+ *  generated once per gap length in the SAME format and -c copy concat is
+ *  gapless-exact and deterministic. */
+async function stitchSegments(buffers, kinds, outFile) {
+  const tmp = await mkdir(path.join(os.tmpdir(), `fish-stitch-${process.pid}`), { recursive: true }).then(
+    () => path.join(os.tmpdir(), `fish-stitch-${process.pid}`),
+  );
+  const silence = {};
+  const gaps = kinds.slice(0, -1).map((k, i) => gapMs(k, kinds[i + 1]));
+  for (const ms of new Set(gaps)) {
+    const f = path.join(tmp, `sil-${ms}.mp3`);
+    await run("ffmpeg", ["-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
+      "-t", (ms / 1000).toFixed(3), "-c:a", "libmp3lame", "-b:a", "128k", f]);
+    silence[ms] = f;
+  }
+  const list = [];
+  for (let i = 0; i < buffers.length; i++) {
+    const f = path.join(tmp, `seg-${String(i).padStart(3, "0")}.mp3`);
+    await writeFile(f, buffers[i]);
+    list.push(`file '${f}'`);
+    if (i < buffers.length - 1) list.push(`file '${silence[gaps[i]]}'`);
+  }
+  const listFile = path.join(tmp, "concat.txt");
+  await writeFile(listFile, list.join("\n"), "utf8");
+  await run("ffmpeg", ["-y", "-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", outFile],
+    { maxBuffer: 64 * 1024 * 1024 });
+}
+
 async function main() {
   const { out, lessons: explicit, force } = parseArgs(process.argv);
   const key = process.env.FISH_API_KEY;
   const model = process.env.FISH_MODEL || "s2.1-pro";
   const voice = process.env.FISH_VOICE || "";
+  const speed = Number(process.env.FISH_SPEED || "1") || 1;
+  // Fish-lane markup: authors' **bold** becomes [emphasis] (s2.1 open-domain
+  // tags). Engine-scoped — the shared transform default stays plain, because
+  // device TTS would read the bracket aloud. FISH_EMPHASIS=0 switches it off.
+  const boldTag = process.env.FISH_EMPHASIS === "0" ? null : "[emphasis]";
+  // STITCH mode (default ON): one TTS call per spoken segment, joined with
+  // real silence at structure boundaries. One giant request gave the paid
+  // ear-gate its "reading without taking a breath" verdict — the model was
+  // never offered a boundary. Silence is manufactured, so breathing is
+  // guaranteed, deterministic, and engine-independent. FISH_STITCH=0 reverts.
+  const stitch = process.env.FISH_STITCH !== "0";
+  const temperature = process.env.FISH_TEMP ? Number(process.env.FISH_TEMP) : null;
   if (!key) {
     console.error("FISH_API_KEY is not set — the ear-gate needs a key. Add the repo secret (or export it locally) to activate.");
     process.exit(1);
@@ -120,14 +194,34 @@ async function main() {
       })
     : autoPick(all);
 
+  // Sparse tone decoration (fish lane only — device TTS would read the
+  // brackets): a [warm] on the lesson's opening line and [casual] on the
+  // code-sample aside. Two tags at structural moments read as a human;
+  // tags everywhere read as melodrama. FISH_TONE=0 disables.
+  const tone = process.env.FISH_TONE !== "0";
+  const decorate = (seg, i, kind) => {
+    // Headings drop the "Section:" announcement in THIS lane: the 750ms
+    // pre-heading silence is the cue a human gives, and hearing the literal
+    // word read aloud was the ear-gate's complaint. Device TTS keeps the
+    // announcement — it has no stitched pauses to speak with.
+    let out = kind === "heading" ? seg.slice(SPOKEN.sectionPrefix.length).trim() : seg;
+    if (!tone) return out;
+    if (i === 1 && !out.startsWith("[")) out = `[warm] ${out}`;
+    if (kind === "code") out = `[casual] ${out}`;
+    return out;
+  };
+
   const jobs = wanted.map((l) => {
-    const spoken = speakableLesson(l.title, l.body).join("\n\n");
-    return { ...l, spoken, chars: spoken.length };
+    const raw = speakableLesson(l.title, l.body, { boldTag });
+    const kinds = raw.map(kindOf);
+    const segments = raw.map((seg, i) => decorate(seg, i, kinds[i]));
+    const spoken = segments.join("\n\n");
+    return { ...l, segments, kinds, spoken, chars: spoken.length };
   });
 
   const total = jobs.reduce((n, j) => n + j.chars, 0);
   const usd = (total / 1000) * 0.015;
-  console.log(`ear-gate: ${jobs.length} lesson(s), ${total.toLocaleString()} spoken chars ≈ $${usd.toFixed(2)} (${model}${voice ? `, voice ${voice}` : ""})`);
+  console.log(`ear-gate: ${jobs.length} lesson(s), ${total.toLocaleString()} spoken chars ≈ $${usd.toFixed(2)} (${model}${voice ? `, voice ${voice}` : ""}${speed !== 1 ? `, speed ${speed}` : ""})`);
   for (const j of jobs) console.log(`  · ${j.vendor}/${j.track}/${j.domain}/${j.id} — ${j.chars.toLocaleString()} chars, ${fenceCount(j.body)} code fence(s)`);
   if (total > SPEND_CAP_CHARS && !force) {
     console.error(`\nRefusing: ${total.toLocaleString()} chars exceeds the ear-gate cap (${SPEND_CAP_CHARS.toLocaleString()}). This script samples; the mass job is a separate, deliberate lane. --force overrides.`);
@@ -144,9 +238,21 @@ async function main() {
     const slug = `${j.vendor}--${j.track}--${j.domain}--${j.id}`.replace(/[^a-zA-Z0-9._-]/g, "_");
     await writeFile(path.join(out, `${slug}.spoken.txt`), j.spoken, "utf8");
     process.stdout.write(`  → ${slug}.mp3 …`);
-    const audio = await tts(j.spoken, { key, model, voice });
-    await writeFile(path.join(out, `${slug}.mp3`), audio);
-    console.log(` ${(audio.length / 1024).toFixed(0)} KiB`);
+    if (stitch) {
+      const segs = j.segments;
+      const buffers = [];
+      for (const [si, seg] of segs.entries()) {
+        buffers.push(await tts(seg, { key, model, voice, speed, temperature }));
+        if ((si + 1) % 10 === 0) process.stdout.write(` ${si + 1}/${segs.length}`);
+      }
+      await stitchSegments(buffers, j.kinds, path.join(out, `${slug}.mp3`));
+      const size = (await readFile(path.join(out, `${slug}.mp3`))).length;
+      console.log(` ${segs.length} segments, stitched, ${(size / 1024).toFixed(0)} KiB`);
+    } else {
+      const audio = await tts(j.spoken, { key, model, voice, speed, temperature });
+      await writeFile(path.join(out, `${slug}.mp3`), audio);
+      console.log(` ${(audio.length / 1024).toFixed(0)} KiB`);
+    }
     manifest.push(`| ${j.vendor}/${j.track}/${j.domain}/${j.id} | ${j.chars.toLocaleString()} | $${((j.chars / 1000) * 0.015).toFixed(3)} |`);
   }
   manifest.push("", "Listen for: code fences ANNOUNCED not read · list rhythm (First/Next/Finally) · jargon (MCP, RAG, SM-2) · long-form fatigue.", "");

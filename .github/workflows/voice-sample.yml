@@ -33,6 +33,10 @@ on:
         description: "Fish voice reference id (empty = engine default)"
         type: string
         default: ""
+      speed:
+        description: "prosody.speed (1 = the voice's natural pace)"
+        type: string
+        default: "1"
 
 concurrency:
   group: voice-sample
@@ -55,11 +59,25 @@ jobs:
       - name: Speakable transform tests
         run: node tests/speakable.test.mjs
 
+      # Stitched mode concatenates per-segment MP3s with real silence — that
+      # needs ffmpeg, and ubuntu-24.04 runners DON'T ship it (the LA-14
+      # lesson, now bitten twice). set -euo pipefail so a failed install
+      # cannot pass as a green check.
+      - name: Install ffmpeg
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
+
       - name: Render samples
         env:
           FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
-          FISH_MODEL: ${{ inputs.model || 's2.1-pro' }}
+          # PR smoke runs ride the FREE tier (non-commercial is fine for CI
+          # samples; ToS-checked); PAID is a deliberate dispatch choice — the
+          # dispatch input's own default supplies s2.1-pro there.
+          FISH_MODEL: ${{ inputs.model || 's2.1-pro-free' }}
           FISH_VOICE: ${{ inputs.voice || '' }}
+          FISH_SPEED: ${{ inputs.speed || '1' }}
           LESSONS: ${{ inputs.lessons || '' }}
           IS_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
         run: |

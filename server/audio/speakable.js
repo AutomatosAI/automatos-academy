@@ -25,15 +25,48 @@ export const SPOKEN = {
   codeSample: "Code sample — it's on screen when you want it.",
 };
 
-/** inline markdown → plain speakable text (spans collapse to their words) */
-export function inlineText(s) {
+/**
+ * Inline code → something a mouth can say. `sessions.create()` spoken
+ * literally is "sessions dot create open paren" — the robot voice everyone
+ * hates. Deterministic normalisation instead: dots/underscores/slashes become
+ * spaces, camelCase splits, call/bracket noise drops. `sessions.create()` →
+ * "sessions create"; `maxTokens` → "max tokens"; plain terms (`MCP`, `RAG`)
+ * pass through untouched. Shared semantics — device TTS robot-reads the same
+ * spans, so this is for every engine, not a Fish decoration.
+ */
+export function speechifyCode(code) {
+  return String(code ?? "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")            // camelCase → camel Case
+    .replace(/[._/\\:#>-]+/g, " ")                     // path/call punctuation → space
+    .replace(/[(){}[\]<>;,`'"|=+*!?$%^&~@]+/g, " ")    // symbol noise → space
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * inline markdown → speakable text.
+ *
+ * opts.boldTag — ENGINE-SCOPED, default null: when set (the Fish lane passes
+ * "[emphasis]"), short bold runs become `[emphasis] <words>` — the author's
+ * bold already marks what deserves stress, so it is a free, deterministic tag
+ * source. Only runs of ≤ 4 words are tagged (a whole bolded sentence tagged
+ * reads as melodrama); longer runs stay plain. NEVER the default: the app's
+ * device TTS would read the bracket literally.
+ */
+export function inlineText(s, opts = {}) {
+  const boldTag = opts.boldTag ?? null;
+  const bold = (words) => {
+    const text = String(words).trim();
+    if (!boldTag) return text;
+    return text.split(/\s+/).length <= 4 ? `${boldTag} ${text}` : text;
+  };
   return String(s ?? "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")          // images: nothing to say
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")       // links → their text
-    .replace(/`([^`]*)`/g, "$1")                   // inline code → its text
-    .replace(/\*\*([^*]+)\*\*/g, "$1")             // bold
-    .replace(/\*([^*]+)\*/g, "$1")                 // emphasis
-    .replace(/__([^_]+)__/g, "$1")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")              // images: nothing to say
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")           // links → their text
+    .replace(/`([^`]*)`/g, (_, code) => ` ${speechifyCode(code)} `) // code → speech
+    .replace(/\*\*([^*]+)\*\*/g, (_, w) => bold(w))    // bold → words (or tagged)
+    .replace(/\*([^*]+)\*/g, "$1")                     // emphasis
+    .replace(/__([^_]+)__/g, (_, w) => bold(w))
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -67,8 +100,8 @@ export function splitLongText(text) {
 
 /** narrate list items — one spoken segment per item; a single item reads
  *  plainly; empties drop out (app parity) */
-export function narrateList(items) {
-  const spoken = items.map((i) => inlineText(i)).filter((i) => i.length > 0);
+export function narrateList(items, opts = {}) {
+  const spoken = items.map((i) => inlineText(i, opts)).filter((i) => i.length > 0);
   if (spoken.length <= 1) return spoken;
   return spoken.map((text, i) => {
     const lead = i === 0 ? SPOKEN.listFirst
@@ -87,7 +120,7 @@ export function narrateList(items) {
  * failure. Fenced code is the one construct that must NEVER degrade that
  * way, so fences are handled first and absolutely.
  */
-export function speakableMarkdown(markdown) {
+export function speakableMarkdown(markdown, opts = {}) {
   const segments = [];
   const lines = String(markdown ?? "").split("\n");
   let inFence = false;
@@ -96,13 +129,13 @@ export function speakableMarkdown(markdown) {
 
   const flushParagraph = () => {
     if (!paragraph.length) return;
-    const text = inlineText(paragraph.join(" "));
+    const text = inlineText(paragraph.join(" "), opts);
     if (text) segments.push(...splitLongText(text));
     paragraph = [];
   };
   const flushList = () => {
     if (!list.length) return;
-    segments.push(...narrateList(list));
+    segments.push(...narrateList(list, opts));
     list = [];
   };
 
@@ -119,7 +152,7 @@ export function speakableMarkdown(markdown) {
     const heading = line.match(/^\s*#{1,6}\s+(.*)$/);
     if (heading) {
       flushParagraph(); flushList();
-      const text = inlineText(heading[1]);
+      const text = inlineText(heading[1], opts);
       if (text) segments.push(`${SPOKEN.sectionPrefix} ${text}.`);
       continue;
     }
@@ -134,11 +167,16 @@ export function speakableMarkdown(markdown) {
     paragraph.push(line.trim());
   }
   flushParagraph(); flushList();
-  return segments;
+  // Terminal punctuation on every segment: list items arrive as "First: alpha"
+  // with no full stop, and a TTS engine runs straight through the boundary —
+  // the "reading without taking a breath" verdict from the paid ear-gate. A
+  // segment is a spoken unit; it ends like one. Shared semantics: device TTS
+  // breathes at full stops too.
+  return segments.map((seg) => (/[.!?…:]$/.test(seg) ? seg : `${seg}.`));
 }
 
 /** whole-lesson convenience: title announced first, then the body */
-export function speakableLesson(title, markdown) {
+export function speakableLesson(title, markdown, opts = {}) {
   const head = inlineText(title);
-  return [...(head ? [`${head}.`] : []), ...speakableMarkdown(markdown)];
+  return [...(head ? [`${head}.`] : []), ...speakableMarkdown(markdown, opts)];
 }
