@@ -33,6 +33,10 @@ on:
         description: "Fish voice reference id (empty = engine default)"
         type: string
         default: ""
+      speed:
+        description: "prosody.speed (1 = the voice's natural pace)"
+        type: string
+        default: "1"
 
 concurrency:
   group: voice-sample
@@ -60,6 +64,7 @@ jobs:
           FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
           FISH_MODEL: ${{ inputs.model || 's2.1-pro' }}
           FISH_VOICE: ${{ inputs.voice || '' }}
+          FISH_SPEED: ${{ inputs.speed || '1' }}
           LESSONS: ${{ inputs.lessons || '' }}
           IS_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
         run: |

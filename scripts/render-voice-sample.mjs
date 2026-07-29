@@ -80,7 +80,7 @@ function autoPick(lessons) {
   return picks.filter(Boolean);
 }
 
-async function tts(text, { key, model, voice }) {
+async function tts(text, { key, model, voice, speed }) {
   const res = await fetch(FISH_URL, {
     method: "POST",
     headers: {
@@ -88,7 +88,15 @@ async function tts(text, { key, model, voice }) {
       "Content-Type": "application/json",
       model,
     },
-    body: JSON.stringify({ text, format: "mp3", ...(voice ? { reference_id: voice } : {}) }),
+    body: JSON.stringify({
+      text,
+      format: "mp3",
+      ...(voice ? { reference_id: voice } : {}),
+      // prosody.speed — the ear-gate's pacing dial (TTSRequest.ProsodyControl).
+      // 1.0 = the voice's natural pace; Gerard's first-listen verdict on the
+      // default voice was "really slow", so this is a first-class knob.
+      ...(speed && speed !== 1 ? { prosody: { speed } } : {}),
+    }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "(unreadable)");
@@ -103,6 +111,7 @@ async function main() {
   const key = process.env.FISH_API_KEY;
   const model = process.env.FISH_MODEL || "s2.1-pro";
   const voice = process.env.FISH_VOICE || "";
+  const speed = Number(process.env.FISH_SPEED || "1") || 1;
   if (!key) {
     console.error("FISH_API_KEY is not set — the ear-gate needs a key. Add the repo secret (or export it locally) to activate.");
     process.exit(1);
@@ -127,7 +136,7 @@ async function main() {
 
   const total = jobs.reduce((n, j) => n + j.chars, 0);
   const usd = (total / 1000) * 0.015;
-  console.log(`ear-gate: ${jobs.length} lesson(s), ${total.toLocaleString()} spoken chars ≈ $${usd.toFixed(2)} (${model}${voice ? `, voice ${voice}` : ""})`);
+  console.log(`ear-gate: ${jobs.length} lesson(s), ${total.toLocaleString()} spoken chars ≈ $${usd.toFixed(2)} (${model}${voice ? `, voice ${voice}` : ""}${speed !== 1 ? `, speed ${speed}` : ""})`);
   for (const j of jobs) console.log(`  · ${j.vendor}/${j.track}/${j.domain}/${j.id} — ${j.chars.toLocaleString()} chars, ${fenceCount(j.body)} code fence(s)`);
   if (total > SPEND_CAP_CHARS && !force) {
     console.error(`\nRefusing: ${total.toLocaleString()} chars exceeds the ear-gate cap (${SPEND_CAP_CHARS.toLocaleString()}). This script samples; the mass job is a separate, deliberate lane. --force overrides.`);
@@ -144,7 +153,7 @@ async function main() {
     const slug = `${j.vendor}--${j.track}--${j.domain}--${j.id}`.replace(/[^a-zA-Z0-9._-]/g, "_");
     await writeFile(path.join(out, `${slug}.spoken.txt`), j.spoken, "utf8");
     process.stdout.write(`  → ${slug}.mp3 …`);
-    const audio = await tts(j.spoken, { key, model, voice });
+    const audio = await tts(j.spoken, { key, model, voice, speed });
     await writeFile(path.join(out, `${slug}.mp3`), audio);
     console.log(` ${(audio.length / 1024).toFixed(0)} KiB`);
     manifest.push(`| ${j.vendor}/${j.track}/${j.domain}/${j.id} | ${j.chars.toLocaleString()} | $${((j.chars / 1000) * 0.015).toFixed(3)} |`);
