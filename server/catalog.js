@@ -35,7 +35,7 @@ import { join, dirname } from "path";
 import { createHash } from "crypto";
 import { buildPodcastIndex } from "./podcasts.js";
 import { buildInventory } from "./media/inventory.js";
-import { overlayVideos } from "./media/overlay.js";
+import { overlayVideos, overlayMedia } from "./media/overlay.js";
 import { applyContentOverride } from "./content/overlay.js";
 import { collectCards, parseTypeFilter } from "./cards/index.js";
 
@@ -458,7 +458,7 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     // draft's placeholder. Both fold into the ETag so either busts the cache.
     const co = applyContentOverride(t.track.data, t.track.hash, getOverride("track", req.params.vendorId, req.params.trackId, null));
     const b = getBindings(req.params.vendorId, req.params.trackId);
-    const body = b ? overlayVideos(co.body, b.bySlot) : co.body;
+    const body = b ? overlayMedia(co.body, b.bySlot) : co.body;
     const hash = b ? `${co.hash}-${b.version}` : co.hash;
     return send(res, req, idx, body, hash);
   });
@@ -474,7 +474,7 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     // per-track bySlot map (it holds every slot for the track).
     const co = applyContentOverride(d.data, d.hash, getOverride("domain", req.params.vendorId, req.params.trackId, req.params.domainId));
     const b = getBindings(req.params.vendorId, req.params.trackId);
-    const body = b ? overlayVideos(co.body, b.bySlot) : co.body;
+    const body = b ? overlayMedia(co.body, b.bySlot) : co.body;
     const hash = b ? `${co.hash}-${b.version}` : co.hash;
     return send(res, req, idx, body, hash);
   });

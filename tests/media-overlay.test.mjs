@@ -7,7 +7,7 @@
 import { createServer } from "http";
 import express from "express";
 
-import { overlayTrackVideos } from "../server/media/overlay.js";
+import { overlayLessonAudio, overlayMedia, overlayTrackVideos } from "../server/media/overlay.js";
 import { createBindingsCache } from "../server/media/bindings-cache.js";
 import { createCatalogRouter } from "../server/catalog.js";
 
@@ -18,6 +18,30 @@ const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail+
 const CDN = "https://widgets.automatos.app";
 
 // ═══════════════════════════════════════════════════ overlay (pure) ══
+console.log("overlayLessonAudio (PRD-VOICE — a-<lessonId> attaches audioUrl)");
+{
+  const domain = Object.freeze({
+    id: "d1",
+    lessons: Object.freeze([
+      Object.freeze({ id: "l1-tiers", title: "Tiers", body: "…" }),
+      Object.freeze({ id: "l2-loops", title: "Loops", body: "…" }),
+    ]),
+  });
+  const slots = new Map([["a-l1-tiers:audio", { url: "https://widgets.automatos.app/academy/a/t/audio/l1-tiers.ffee.mp3" }]]);
+  const out = overlayLessonAudio(domain, slots);
+  ok(out !== domain, "returns a NEW object when a lesson binds");
+  ok(out.lessons[0].audioUrl === "https://widgets.automatos.app/academy/a/t/audio/l1-tiers.ffee.mp3", "bound lesson gains audioUrl");
+  ok(!("audioUrl" in out.lessons[1]), "unbound lesson untouched");
+  ok(!("audioUrl" in domain.lessons[0]), "source object never mutated (frozen input survived)");
+  ok(overlayLessonAudio(domain, new Map()) === domain, "no bindings → same reference, zero allocation");
+  const noLessons = { id: "track", videos: [] };
+  ok(overlayLessonAudio(noLessons, slots) === noLessons, "nodes without lessons pass through by reference");
+
+  const both = overlayMedia({ id: "d1", lessons: domain.lessons, videos: [{ id: "v-d1-1", status: "planned" }] },
+    new Map([...slots, ["v-d1-1:video", { url: "https://cdn/x.mp4" }]]));
+  ok(both.lessons[0].audioUrl && both.videos[0].url === "https://cdn/x.mp4", "overlayMedia composes audio + video in one pass");
+}
+
 console.log("overlayTrackVideos");
 const track = {
   name: "CCA-F",
