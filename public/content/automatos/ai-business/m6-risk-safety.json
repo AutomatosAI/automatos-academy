@@ -567,7 +567,7 @@
     {
       "id": "r-gb-roles",
       "title": "Automatos docs — Roles & permissions",
-      "url": "automatos-gitbook/team/roles.md",
+      "url": "https://docs.automatos.app/user-guides/team/roles",
       "kind": "official-doc",
       "annotation": "The least-privilege backbone for this module's platform checks: three roles (Admin / Member / Viewer) with a full permission matrix. Only Admins connect tools, manage the team, and reach Settings, credentials, and audit logs; Members create agents, upload docs, and run playbooks; Viewers are read-only. Use it to align workspace roles to your policy — grant each person the narrowest role that fits.",
       "domainIds": [
@@ -577,7 +577,7 @@
     {
       "id": "r-gb-team",
       "title": "Automatos docs — Team Management & workspace isolation",
-      "url": "automatos-gitbook/team/README.md",
+      "url": "https://docs.automatos.app/user-guides/team",
       "kind": "official-doc",
       "annotation": "Where the role review happens (Team Management is admin-only) and the isolation fact behind data safety: each workspace is fully isolated — agents, documents, tools, and settings are workspace-scoped and one workspace's agents cannot reach another's data. Grounds the 'roles match reality' step of the lab.",
       "domainIds": [
@@ -587,7 +587,7 @@
     {
       "id": "r-gb-assigning",
       "title": "Automatos docs — Assigning tools to agents (permission scope)",
-      "url": "automatos-gitbook/tools/assigning.md",
+      "url": "https://docs.automatos.app/user-guides/tools/assigning",
       "kind": "official-doc",
       "annotation": "The scope guardrail in concrete form: tools are assigned per agent with a permission level — Read only (fetch, don't change), Full access (read and write), or Custom (only the specific actions you pick). The sanctioned safe default the module leans on: 'Start with read-only for new agents. Expand permissions once you've verified the agent behaves correctly.'",
       "domainIds": [
@@ -597,7 +597,7 @@
     {
       "id": "r-gb-coordination",
       "title": "Automatos docs — Agent coordination & delegation",
-      "url": "automatos-gitbook/agents/coordination.md",
+      "url": "https://docs.automatos.app/user-guides/agents/coordination",
       "kind": "official-doc",
       "annotation": "The second place approval lives (and part of the manipulation defense): delegation rules — Auto-delegate, Approval required, or Disabled — govern whether one agent can hand work to another automatically or must wait for your confirmation. Backs 'anything that acts runs behind an approval gate.'",
       "domainIds": [
@@ -607,7 +607,7 @@
     {
       "id": "r-gb-security",
       "title": "Automatos docs — Tool connection security",
-      "url": "automatos-gitbook/tools/security.md",
+      "url": "https://docs.automatos.app/user-guides/tools/security",
       "kind": "official-doc",
       "annotation": "The connection-safety facts that back the data-rules and manipulation sections: tool credentials are encrypted at rest, never exposed in logs or agent responses, rotatable without downtime, and workspace-scoped; every tool call is logged (agent, action, timestamp, status) with sensitive input redacted. Evidence that acting-AI leaves a record.",
       "domainIds": [
@@ -617,7 +617,7 @@
     {
       "id": "r-gb-credentials",
       "title": "Automatos docs — API keys & credentials",
-      "url": "automatos-gitbook/settings/credentials.md",
+      "url": "https://docs.automatos.app/user-guides/settings/credentials",
       "kind": "official-doc",
       "annotation": "Grounds the 'approved tools / keys are handled properly' idea: credentials are encrypted at rest, masked after saving (never shown in full), workspace-scoped, and every access is logged. Admin-only. Useful when your policy names the approved tools and you want to confirm their keys are stored safely, not pasted around.",
       "domainIds": [
@@ -627,7 +627,7 @@
     {
       "id": "r-gb-audit-logs",
       "title": "Automatos docs — Audit Logs",
-      "url": "automatos-gitbook/settings/audit-logs.md",
+      "url": "https://docs.automatos.app/user-guides/settings/audit-logs",
       "kind": "official-doc",
       "annotation": "The immutable-record fact behind the visibility guardrail and the 'money is never done unseen' policy line: a complete, timestamped log of user actions, agent operations, tool calls, credential changes, and security events — retained for the workspace's lifetime, cannot be deleted, exportable as CSV for compliance. Admin-only to view.",
       "domainIds": [

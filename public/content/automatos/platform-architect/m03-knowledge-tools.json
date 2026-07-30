@@ -980,7 +980,7 @@
     {
       "id": "r-knowledge-readme",
       "title": "Automatos AI — Knowledge Bases (platform docs)",
-      "url": "automatos-gitbook/knowledge/README.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge",
       "kind": "first-party-doc",
       "annotation": "The hub page for everything an agent can read: the Documents / Database / Templates / CodeGraph tabs and the stats bar (Total Documents, Processed, Storage, Vector Chunks). Read it first to see how the four knowledge surfaces sit together, then drill into each. It's the map for the whole first three lessons.",
       "domainIds": [
@@ -990,7 +990,7 @@
     {
       "id": "r-documents",
       "title": "Automatos AI — Documents & RAG (platform docs)",
-      "url": "automatos-gitbook/knowledge/documents.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/documents",
       "kind": "first-party-doc",
       "annotation": "The core of Lesson 1: the parse→chunk→embed→index pipeline, supported file types, the Processing and Search sub-tabs, and the four RAG dials (Top K, similarity threshold, reranking, context window). The load-bearing sentence for practitioners is that Search shows exactly what agents see during chat — that's what makes it your retrieval debugger. Default embedding is qwen3-embedding-8b (2048-dim), configurable in Settings.",
       "domainIds": [
@@ -1000,7 +1000,7 @@
     {
       "id": "r-cloud-sync",
       "title": "Automatos AI — Cloud Sync (platform docs)",
-      "url": "automatos-gitbook/knowledge/cloud-sync.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/cloud-sync",
       "kind": "first-party-doc",
       "annotation": "How to keep a knowledge base in step with external storage. Currency caveat to hold: Dropbox and S3 (custom buckets) are Available today; Google Drive and OneDrive are marked 'Coming soon' — teach only the live ones. Synced files run the same ingestion pipeline as manual uploads, and incremental syncs process only new or changed files.",
       "domainIds": [
@@ -1010,7 +1010,7 @@
     {
       "id": "r-knowledge-graph",
       "title": "Automatos AI — Knowledge Graph (platform docs)",
-      "url": "automatos-gitbook/knowledge/knowledge-graph.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/knowledge-graph",
       "kind": "first-party-doc",
       "annotation": "Lesson 2's first half: auto-extracted entities and relationships, graph-enhanced RAG (vector hits + graph traversal combined on one search), find-paths, and the governance point that entity visibility respects team access control. Read it to understand when relationship/multi-hop questions need the graph rather than a single vector hit — the graph builds itself as you upload.",
       "domainIds": [
@@ -1020,7 +1020,7 @@
     {
       "id": "r-codegraph",
       "title": "Automatos AI — CodeGraph (platform docs)",
-      "url": "automatos-gitbook/knowledge/codegraph.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/codegraph",
       "kind": "first-party-doc",
       "annotation": "Lesson 2's second half: indexing a repo as a graph of symbols (classes, functions) and relationships (calls, imports, inheritance), so 'where is X defined?' and 'what calls Y?' become graph lookups. Key practitioner facts: connect at CodeGraph → + Add Repository, and it re-indexes automatically on new commits to a connected GitHub repo (integration active). This is why a symbol graph beats uploading raw source files.",
       "domainIds": [
@@ -1030,7 +1030,7 @@
     {
       "id": "r-database-nl2sql",
       "title": "Automatos AI — Database & NL2SQL (platform docs)",
-      "url": "automatos-gitbook/knowledge/database.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/database",
       "kind": "first-party-doc",
       "annotation": "All of Lesson 3: SQL Explorer, Semantic Layer (business-term-to-column mappings), Query Templates (20+ per DB type), Training with Golden SQL benchmarking and accuracy trends, Schema Browser, and Audit History. Two postures to carry: queries are read-only by default (writes need explicit Settings permission), and every query is audited — that audit trail is how you make an NL2SQL agent trustworthy in production.",
       "domainIds": [
@@ -1040,7 +1040,7 @@
     {
       "id": "r-connecting-apps",
       "title": "Automatos AI — Tools & Integrations: connecting apps (platform docs)",
-      "url": "automatos-gitbook/tools/connecting-apps.md",
+      "url": "https://docs.automatos.app/user-guides/tools/connecting-apps",
       "kind": "first-party-doc",
       "annotation": "Lesson 4, move 1: connecting a Composio app (1,000+ integrations) at the workspace via OAuth (tokens self-refresh) or API key (stored in Settings → Credentials), plus the app categories and disconnecting. Pairs with the Tools hub (tools/README.md), which frames the connect → assign → tool-router-calls-it model and the Composio backing. Connecting is workspace-level and done once per app.",
       "domainIds": [
@@ -1050,7 +1050,7 @@
     {
       "id": "r-assigning-tools",
       "title": "Automatos AI — Assigning tools, scopes & tool security (platform docs)",
-      "url": "automatos-gitbook/tools/assigning.md",
+      "url": "https://docs.automatos.app/user-guides/tools/assigning",
       "kind": "first-party-doc",
       "annotation": "The heart of Lesson 4's judgment, covering both tools/assigning.md and tools/security.md. Assignment: only assigned agents can use a tool; the three permission scopes (Full / Read only / Custom); the explicit guidance to start read-only and widen only after verifying behaviour; and tool validation (active connection, scope, rate limits) with failures surfacing in the Activity Feed. Security: the credential model — encrypted at rest, never exposed in logs or agent responses, rotatable without downtime, workspace-scoped — connection health (healthy / warning / expired) and the per-call audit log in Settings → Audit Logs. Practitioner rules: re-authenticate an 'expired' connection immediately, and never put a secret anywhere but the connection dialog / Settings → Credentials.",
       "domainIds": [

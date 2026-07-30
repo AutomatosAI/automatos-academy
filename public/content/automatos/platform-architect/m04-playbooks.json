@@ -1119,7 +1119,7 @@
     {
       "id": "r-gb-playbooks",
       "title": "Automatos AI — Playbooks (platform docs)",
-      "url": "automatos-gitbook/agents/playbooks.md",
+      "url": "https://docs.automatos.app/user-guides/agents/playbooks",
       "kind": "first-party-doc",
       "annotation": "The core source for this module: what a playbook is (steps, inputs, flow control, optional schedule), the +Create Playbook flow, the canonical nightly-code-review example (Scout → Code Reviewer → Sentinel → Scribe → Comms), the three run modes (Manual / Scheduled / From Chat), the scratchpad/workflow-pipeline that passes data between steps, webhook triggers (Jira/GitHub/Slack — the platform registers the URL for you), and Save-as-Routine. Read this first; the whole module hangs off it.",
       "domainIds": [
@@ -1129,7 +1129,7 @@
     {
       "id": "r-gb-coordination",
       "title": "Automatos AI — Coordination & delegation rules (platform docs)",
-      "url": "automatos-gitbook/agents/coordination.md",
+      "url": "https://docs.automatos.app/user-guides/agents/coordination",
       "kind": "first-party-doc",
       "annotation": "How agents work together inside a playbook: team assignments, the three delegation rules (Auto-delegate / Approval required / Disabled), the worked Code-Reviewer-delegates-to-Sentinel example, and how context passes between agents via the workflow pipeline and scratchpad. The source for the least-privilege 'which delegation rule?' judgment — coordination settings matter most exactly when a playbook chains multiple agents.",
       "domainIds": [
@@ -1139,7 +1139,7 @@
     {
       "id": "r-gb-tools",
       "title": "Automatos AI — Tools & Integrations (platform docs)",
-      "url": "automatos-gitbook/tools/README.md",
+      "url": "https://docs.automatos.app/user-guides/tools",
       "kind": "first-party-doc",
       "annotation": "Where webhook triggers and cron scheduling are documented alongside the tool connections they ride on: Composio powers 1,000+ integrations; triggers are configured per-playbook (Jira/GitHub/Slack); real cron patterns (0 9 * * 1-5 weekdays 9am, 0 */6 * * * every 6 hours, 0 22 * * 0 Sundays 10pm). Note that a trigger needs its app connected first — no GitHub connection, no GitHub event to fire on.",
       "domainIds": [
@@ -1149,7 +1149,7 @@
     {
       "id": "r-gb-analytics-workflows",
       "title": "Automatos AI — Workflow Analytics (platform docs)",
-      "url": "automatos-gitbook/analytics/workflows.md",
+      "url": "https://docs.automatos.app/user-guides/analytics/workflows",
       "kind": "first-party-doc",
       "annotation": "The health-and-trends surface for playbook runs: total runs, completion rate, average duration, failure rate; a table of recent runs with status, step progress (e.g. 4/5) and triggering method; and step-level drill-down (per-step timing, which agent handled it, token usage, error details). The key practitioner instinct lives here: a consistently-failing step usually means a tool-connection issue or an agent needing a better prompt — pair it with Activity → Feed for the per-run error detail.",
       "domainIds": [
@@ -1159,7 +1159,7 @@
     {
       "id": "r-gb-marketplace-playbooks",
       "title": "Automatos AI — Marketplace Playbooks (platform docs)",
-      "url": "automatos-gitbook/marketplace/playbooks.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace/playbooks",
       "kind": "first-party-doc",
       "annotation": "Installing pre-built playbooks: preview steps → Install → it's copied into your workspace library (appears under Agents → Playbooks) → configure and Run. Two facts that trip people up: playbooks reference agent ROLES (mapped to your agents on install; map manually if a role has no match), and installed playbooks are INDEPENDENT COPIES that don't auto-update when the marketplace version changes. Note: the gitbook documents browse/install today; a contributor economy/monetization is not part of the live docs — treat any 'earn from playbooks' framing as not-yet.",
       "domainIds": [
@@ -1169,7 +1169,7 @@
     {
       "id": "r-gb-missions",
       "title": "Automatos AI — Missions (platform docs)",
-      "url": "automatos-gitbook/activity/missions.md",
+      "url": "https://docs.automatos.app/user-guides/activity/missions",
       "kind": "first-party-doc",
       "annotation": "The other side of the central judgment call: a Mission is an autonomous objective an agent PLANS (you approve the plan), then executes — open-ended and one-off, with a lifecycle (Plan Pending → Active → Paused → Completed) and cost-by-task monitoring. Crucially, the source for the Save-as-Routine bridge: a completed mission's task pattern can be extracted into a repeatable playbook. Note on budgets: missions offer cost-by-task plus pause / resume-with-increased-budget and cost alerts — not a pre-set hard spend ceiling.",
       "domainIds": [
@@ -1179,7 +1179,7 @@
     {
       "id": "r-gb-activity",
       "title": "Automatos AI — Activity command centre (platform docs)",
-      "url": "automatos-gitbook/activity/README.md",
+      "url": "https://docs.automatos.app/user-guides/activity",
       "kind": "first-party-doc",
       "annotation": "Where running work surfaces, the two monitoring tabs this module uses: Dashboard (schedule of upcoming automated runs + Active Now live status + status cards) and Feed (the chronological, step-by-step execution log — every action, tool call, and agent response). Use the Dashboard for 'what's running/coming up' and the Feed for 'what exactly happened in this run'.",
       "domainIds": [
@@ -1189,7 +1189,7 @@
     {
       "id": "r-forge-skill",
       "title": "Automatos Skills — FORGE, the playbook-builder agent (automatos-skills/team/forge/SKILL.md)",
-      "url": "automatos-skills/team/forge/SKILL.md",
+      "url": "https://github.com/AutomatosAI/automatos-skills/blob/main/team/forge/SKILL.md",
       "kind": "first-party-doc",
       "annotation": "The signature 'describe it and it builds it' agent: FORGE converts a natural-language description into a playbook — discovers your agents/tools, designs steps (one step, one job; descriptive output keys, never step1_output), assigns verified-fit agents, wires the trigger (manual/cron/event), and does a test run before declaring done. Also the clearest statement of the per-step error-handling choices (stop / skip / retry) and the 'Playbook, never recipe' vocabulary rule. This is a skills-repo source (grounds the WHY/how of building well); the gitbook remains the proof of what's live in the UI.",
       "domainIds": [

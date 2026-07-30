@@ -1029,7 +1029,7 @@
     {
       "id": "r-gitbook-memory",
       "title": "Automatos AI — Memory tab (platform docs)",
-      "url": "automatos-gitbook/activity/memory.md",
+      "url": "https://docs.automatos.app/user-guides/activity/memory",
       "kind": "first-party-doc",
       "annotation": "The primary source for this entire module and the only proof of what's live. Read it literally: how agent memory works (automatic capture of facts/decisions/preferences/task-results/shared-knowledge, persisting across conversations), browsing entries (source, timestamp, relevance = how often recalled), searching by vector similarity, and the three management actions — Pin (protect from pruning), Edit (correct in place), Delete (PERMANENT). Also the documented two-tier model (short-term/long-term), the per-agent-plus-workspace-shared scope rule, automatic consolidation, and augmentation via the memory API. Everything in the hands-on labs traces to this page.",
       "domainIds": [
@@ -1039,7 +1039,7 @@
     {
       "id": "r-gitbook-settings-general",
       "title": "Automatos AI — General Settings (platform docs)",
-      "url": "automatos-gitbook/settings/general.md",
+      "url": "https://docs.automatos.app/user-guides/settings/general",
       "kind": "first-party-doc",
       "annotation": "Where the memory kill-switch lives: the Agent memory feature flag under Features enables/disables persistent memory at the workspace level, and Cost alerts notifies on budget thresholds. Read the Features and Feature-flags sections so you know memory is a governed capability an admin can turn off — the first thing to check if the Memory tab looks inactive. (Roles and who may toggle flags are covered in Module 09.)",
       "domainIds": [
@@ -1049,7 +1049,7 @@
     {
       "id": "r-gitbook-apiref-memory",
       "title": "Automatos AI — API reference: Memory endpoints (platform docs)",
-      "url": "automatos-gitbook/api-reference.md",
+      "url": "https://docs.automatos.app/reference/api-reference",
       "kind": "first-party-doc",
       "annotation": "The REST surface behind the tab: store, retrieve (by query), augment (add external knowledge), consolidate (trigger), and stats. You don't need these for the hands-on labs — the Memory tab covers everyday use — but they're the proof that memory is a first-class, programmable system, and the 'augment' endpoint is what makes deliberate injection possible. Skim the Memory section; it's a small endpoint table.",
       "domainIds": [
@@ -1059,7 +1059,7 @@
     {
       "id": "r-design-five-layer",
       "title": "Automatos AI — Five-Layer Memory Architecture (design doc — architecture direction)",
-      "url": "automatos-ai/docs/memory-system/five-layer-memory-architecture.md",
+      "url": "https://github.com/AutomatosAI/automatos-ai/blob/main/docs/memory-system/five-layer-memory-architecture.md",
       "kind": "first-party-doc",
       "annotation": "ARCHITECTURE DIRECTION, not a shipped UI — teach it labelled as such. The engineering picture behind the two documented tiers: L0 focus (context window) → L1 working memory (session state) → L2 short-term (Postgres, Ebbinghaus decay) → L3 long-term (fact-extracted, persistent) → L4 organisational knowledge (RAG/NL2SQL, tool-gated, NOT pre-loaded). Read it to understand WHY memory behaves as it does and to speak about the direction accurately; never present the five layers as buttons a user picks — the product exposes two tiers.",
       "domainIds": [
@@ -1069,7 +1069,7 @@
     {
       "id": "r-design-memory-lifecycle",
       "title": "Automatos AI — Memory Lifecycle & Consolidation (design doc — architecture direction)",
-      "url": "automatos-ai/docs/memory-system/memory-lifecycle-consolidation.md",
+      "url": "https://github.com/AutomatosAI/automatos-ai/blob/main/docs/memory-system/memory-lifecycle-consolidation.md",
       "kind": "first-party-doc",
       "annotation": "ARCHITECTURE DIRECTION — the flow behind the user-facing word 'consolidation': session state consolidates L1→L2 at session end, low-value items decay out (Ebbinghaus), and high-value/frequently-accessed items are promoted L2→L3 as durable facts. Read it to see that the tidy Memory tab is the surface of a capture → consolidate → promote → forget lifecycle. Label as direction; the user manages none of these jobs directly.",
       "domainIds": [
@@ -1079,7 +1079,7 @@
     {
       "id": "r-design-field-memory",
       "title": "Automatos AI — PRD-166 Field Memory Core (design doc — architecture direction)",
-      "url": "automatos-ai/docs/PRDS/PRD-166-FIELD-MEMORY-CORE.md",
+      "url": "https://github.com/AutomatosAI/automatos-ai/blob/main/docs/PRDS/PRD-166-FIELD-MEMORY-CORE.md",
       "kind": "first-party-doc",
       "annotation": "ARCHITECTURE DIRECTION and explicitly NOT a live tab — where long-horizon memory is headed. Field memory is workspace-persistent memory that compounds across missions: episode payloads carry provenance (mission/task/agent/timestamps), patterns are scored honestly by similarity × stability × recency with token-budgeted (truncation-flagged) queries, and a compaction pass prunes low-stability patterns to stay bounded. Teach the trajectory and the honest-scoring instinct; always say 'design direction', never 'a tab you'll open'.",
       "domainIds": [
@@ -1089,7 +1089,7 @@
     {
       "id": "r-apa-survey",
       "title": "APA source survey — the binding grounding map (2026-07-02)",
-      "url": "automatos-academy/docs/research/apa-source-survey-2026-07-02.md",
+      "url": "https://github.com/AutomatosAI/automatos-academy/blob/main/docs/research/apa-source-survey-2026-07-02.md",
       "kind": "reference",
       "annotation": "The author's grounding contract for the whole APA track, and the reason this module is careful about labels. Key rows for memory: the gitbook is the ONLY proof of live; user docs = two tiers + scope + consolidation + pin/edit/delete, while five-layer L0–L4 and field memory (PRD-166) are design vocabulary to be labelled as architecture direction. Also the vocabulary map (playbook not recipe; roles are Admin/Member/Viewer) that keeps the track consistent. Read it to see why 'live' and 'direction' are kept strictly apart here.",
       "domainIds": [

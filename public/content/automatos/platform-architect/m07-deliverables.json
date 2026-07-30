@@ -916,7 +916,7 @@
     {
       "id": "r-gb-templates",
       "title": "Automatos AI — Templates (platform docs)",
-      "url": "automatos-gitbook/knowledge/templates.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/templates",
       "kind": "first-party-doc",
       "annotation": "The core source for this module: what a template is (structure, sections, formatting for a type of document), the four example templates (Daily Standup, Security Audit, Code Review, Research Summary), how templates are automatically available to agents and requested from chat ('...using the Security Audit template'), and the five-part create flow (+ New Template → name/description → markdown structure → {{placeholder}} variables → Save). Currency note: this documents MARKDOWN templates with placeholder variables — that's the live baseline; richer branded/block templates are verify-in-product.",
       "domainIds": [
@@ -926,7 +926,7 @@
     {
       "id": "r-gb-reports",
       "title": "Automatos AI — Reports (platform docs)",
-      "url": "automatos-gitbook/activity/reports.md",
+      "url": "https://docs.automatos.app/user-guides/activity/reports",
       "kind": "first-party-doc",
       "annotation": "Where deliverables surface and get reviewed: report cards (agent, title, timestamp, status unread/reviewed/graded, preview), the slide-over viewer (full markdown render + referenced files/artifacts + linked agent/task), 1–5 star grading that feeds Analytics → Agents, typical report contents (Summary / Findings / Actions taken / Recommendations / Linked artifacts), filters, and persistent storage at /reports/{agent}/{date}_{slug}.md plus the database. The source for the whole find-read-grade loop.",
       "domainIds": [
@@ -936,7 +936,7 @@
     {
       "id": "r-gb-documents",
       "title": "Automatos AI — Documents & supported file types (platform docs)",
-      "url": "automatos-gitbook/knowledge/documents.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/documents",
       "kind": "first-party-doc",
       "annotation": "Read this specifically for the supported file-types table (.md/.txt/.csv/.json, .docx/.xlsx/.pptx, .pdf with OCR, code, .html). The critical practitioner point: that list is what you can UPLOAD into a knowledge base, NOT what generate_document is documented to emit — don't read '.docx supported' as 'agents generate DOCX'. Markdown is the documented generation baseline.",
       "domainIds": [
@@ -946,7 +946,7 @@
     {
       "id": "r-gb-analytics-agents",
       "title": "Automatos AI — Agent Analytics (platform docs)",
-      "url": "automatos-gitbook/analytics/agents.md",
+      "url": "https://docs.automatos.app/user-guides/analytics/agents",
       "kind": "first-party-doc",
       "annotation": "Where the report grades land: the 1–5 star ratings you give in Reports feed agent quality tracking here (and in Agent Details → Reports), building a picture of which agents produce reliable deliverables over time. This is the destination end of the feedback loop that makes grading worth doing — grade honestly and this analytic becomes real signal.",
       "domainIds": [
@@ -956,7 +956,7 @@
     {
       "id": "r-generate-document-tool",
       "title": "Automatos AI — the generate_document deliverable tool (orchestrator/consumers/chatbot/service.py)",
-      "url": "automatos-ai/orchestrator/consumers/chatbot/service.py",
+      "url": "https://github.com/AutomatosAI/automatos-ai/blob/main/orchestrator/consumers/chatbot/service.py",
       "kind": "first-party-doc",
       "annotation": "The real platform tool agents call to produce a deliverable. In the chatbot service it's registered as a genuine multi-step tool alongside composio_execute and the workspace file tools — grounding for 'template = the shape, generate_document = produces the file.' This is a code source (proves the tool exists and how it's wired); the gitbook remains the proof of what the UI surfaces. Treat the tool as live; treat the RICHNESS of what it emits (branded PDF/DOCX vs markdown) as verify-in-product.",
       "domainIds": [
@@ -966,7 +966,7 @@
     {
       "id": "r-prd63-docgen",
       "title": "Automatos AI — Document Generation module (PRD-63, architecture direction)",
-      "url": "automatos-ai/docs/PRDS/63-DOCUMENT-GENERATION-MODULE.md",
+      "url": "https://github.com/AutomatosAI/automatos-ai/blob/main/docs/PRDS/63-DOCUMENT-GENERATION-MODULE.md",
       "kind": "first-party-doc",
       "annotation": "The WHY behind deliverables: deliverables are the 'last mile' that turns AI analysis into documents a business actually sends, and the design intent is templated output extending to PDF/DOCX/XLSX. Read this as ARCHITECTURE DIRECTION, not a shipped-UI feature — it explains why generation matters and where it's heading, while the user docs' live baseline remains markdown templates and markdown reports. Use it to understand the direction; verify any branded-format claim in the product before demoing.",
       "domainIds": [
@@ -976,7 +976,7 @@
     {
       "id": "r-gb-missions",
       "title": "Automatos AI — Missions (platform docs)",
-      "url": "automatos-gitbook/activity/missions.md",
+      "url": "https://docs.automatos.app/user-guides/activity/missions",
       "kind": "first-party-doc",
       "annotation": "Context for how a deliverable is the end of a bigger piece of work: a mission (an autonomous objective an agent plans and you approve) can conclude by generating a templated deliverable — the report that lands in Reports is often what a mission or a scheduled playbook hands back. Useful for connecting this module to earlier ones; the deliverable is the output, not the orchestration.",
       "domainIds": [

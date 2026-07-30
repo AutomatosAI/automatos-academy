@@ -930,7 +930,7 @@
     {
       "id": "r-gb-channels",
       "title": "Automatos AI — Channels (platform docs)",
-      "url": "automatos-gitbook/tools/channels.md",
+      "url": "https://docs.automatos.app/user-guides/tools/channels",
       "kind": "first-party-doc",
       "annotation": "The core source for this module's channel half: the nine documented channels and their connection methods (Telegram bot token, Slack OAuth, WhatsApp webhook, Discord bot, Teams Azure AD registration, Google Chat service account, iMessage local adapter, Matrix homeserver, Signal CLI), the Tools & Integrations setup flow, the 'Live' status on the Activity Dashboard, automatic per-platform formatting (Slack blocks, Telegram markdown), and the three monitoring surfaces (Dashboard 'Channels Live' card, Feed, Analytics → Tools) plus credential rotation in Settings → Credentials. Note the hard edge: disconnecting a channel immediately stops all message flow.",
       "domainIds": [
@@ -940,7 +940,7 @@
     {
       "id": "r-gb-routing",
       "title": "Automatos AI — Routing & Auto Mode, incl. Channel routing (platform docs)",
-      "url": "automatos-gitbook/chat/routing.md",
+      "url": "https://docs.automatos.app/user-guides/chat/routing",
       "kind": "first-party-doc",
       "annotation": "Why every surface behaves the same: the Universal Router's five tiers (Tier 0 user-override → 1 cache → 2 rules → 2.5 semantic → 3 LLM) and, in the 'Channel routing' section, the key fact that messages from all external channels go through the SAME multi-tier routing as the chat page. This is the source for the module's 'same brain, many front doors' thesis — consistency is a property of the shared Router, not per-channel configuration.",
       "domainIds": [
@@ -950,7 +950,7 @@
     {
       "id": "r-gb-api-widgets",
       "title": "Automatos AI — API Reference, Widgets (Embedded SDK) group (platform docs)",
-      "url": "automatos-gitbook/api-reference.md",
+      "url": "https://docs.automatos.app/reference/api-reference",
       "kind": "first-party-doc",
       "annotation": "The gitbook's only widget coverage: the Widgets (Embedded SDK) endpoint group — POST /api/widgets/chat (SSE streaming), plus widget document and memory endpoints — alongside the platform's REST conventions (Clerk bearer + X-Workspace-ID auth, SSE responses, Vercel-AI-SDK-compatible streaming). Confirms the chat surface the widget streams over; the SDK repo's EMBEDDING.md is the canonical end-to-end how-to.",
       "domainIds": [
@@ -960,7 +960,7 @@
     {
       "id": "r-gb-analytics-tools",
       "title": "Automatos AI — Activity command centre (platform docs)",
-      "url": "automatos-gitbook/activity/README.md",
+      "url": "https://docs.automatos.app/user-guides/activity",
       "kind": "first-party-doc",
       "annotation": "Where channel activity surfaces for monitoring: the Activity Dashboard (the 'Channels Live' card showing active channels, plus schedule and live status) and the Activity Feed (the chronological log where you watch external-channel messages flow through the Router). Use the Dashboard for 'is it connected and running', the Feed for 'did this specific message travel through the shared Router'; channel usage statistics over time live under Analytics → Tools.",
       "domainIds": [
@@ -970,7 +970,7 @@
     {
       "id": "r-widget-embedding",
       "title": "Automatos Widget SDK — Embedding guide (automatos-widget-sdk/docs/EMBEDDING.md)",
-      "url": "automatos-widget-sdk/docs/EMBEDDING.md",
+      "url": "https://github.com/AutomatosAI/automatos-widget-sdk/blob/main/docs/EMBEDDING.md",
       "kind": "first-party-doc",
       "annotation": "The canonical how-to for the module's headline: turn any site into an AI-driven site with one script tag from widgets.automatos.app/v0 plus an init() call using an origin-allow-listed public key (ak_pub_*). Covers getting a public key (dashboard or API, bare-host allowed_domains incl. dev hosts and *.myshopify.com wildcards), the static-HTML / Next.js / Vite embeds, the auth contract (public key → short-lived JWT → SSE chat; every request origin-checked; instant revocation), and proactive engagement (opt-in per workspace; triggers time_on_page / scroll_depth / exit_intent / idle; config fetched on init so behaviour flips live with no republish). This is a widget-SDK-repo source — the how-to that grounds embedding; the gitbook's api-reference remains the proof of what the platform exposes.",
       "domainIds": [
@@ -980,7 +980,7 @@
     {
       "id": "r-widget-readme",
       "title": "Automatos Widget SDK — README (automatos-widget-sdk/README.md)",
-      "url": "automatos-widget-sdk/README.md",
+      "url": "https://github.com/AutomatosAI/automatos-widget-sdk/blob/main/README.md",
       "kind": "first-party-doc",
       "annotation": "The SDK at a glance: the Shadow-DOM-isolated, zero-runtime-dependency, ~8KB chat widget; the two embed paths (a CDN script tag with AutomatosWidget.init(), or the React package @automatos/widget-sdk exposing an <AutomatosChat> component and a useAutomatosChat hook); the package breakdown (@automatos/core auth+SSE ~3.6KB, chat-widget ~8KB, loader IIFE, React wrapper); and CSS-variable theming that pierces the Shadow DOM. Note a versioning nuance: this README shows an sdk.automatos.app/v1 example URL, while the canonical EMBEDDING.md and live CDN use widgets.automatos.app/v0 — prefer the EMBEDDING.md/v0 form.",
       "domainIds": [
@@ -990,7 +990,7 @@
     {
       "id": "r-shopify-architecture",
       "title": "Automatos ↔ Shopify — Architecture & Flows (automatos-shopify/docs/ARCHITECTURE.md)",
-      "url": "automatos-shopify/docs/ARCHITECTURE.md",
+      "url": "https://github.com/AutomatosAI/automatos-shopify/blob/main/docs/ARCHITECTURE.md",
       "kind": "first-party-doc",
       "annotation": "The flagship worked instance of the widget pattern: Flow W (storefront widget conversation — CDN load → public-key session → short-lived JWT → SSE, agent runs read-only scoped tools, Shopify data flows indirectly via the orchestrator and Composio; the widget never holds a Shopify token) and Flow E (embedded admin via App Bridge — a higher session-token tier that permits write-scope operations). The trust-boundary table makes the security model explicit: the public ak_pub_* key is the ONLY credential that ever appears client-side. Same orchestrator runtime and workspace on both sides; the flows differ only in auth tier.",
       "domainIds": [
@@ -1000,7 +1000,7 @@
     {
       "id": "r-shopify-widget-agents",
       "title": "Automatos ↔ Shopify — Widget Agent Templates (automatos-shopify/docs/SHOPIFY/SHOPIFY-WIDGET-AGENTS.md)",
-      "url": "automatos-shopify/docs/SHOPIFY/SHOPIFY-WIDGET-AGENTS.md",
+      "url": "https://github.com/AutomatosAI/automatos-shopify/blob/main/docs/SHOPIFY/SHOPIFY-WIDGET-AGENTS.md",
       "kind": "first-party-doc",
       "annotation": "The scoped children of the parent Operations Manager (shopify-ops): storefront-facing via the widget — Support Agent (chat FAB, read-only order lookup), Product Expert (PDP, scoped to the viewed product), Merchandiser (conversational shopper) — and admin-facing via App Bridge — Business Analyst (daily brief) and Inventory Watchdog. Key point: these are configured instances of one Operations Manager with a narrower persona and constrained tools, not separate agent types — one shared brain, all children reporting to the parent. Read alongside STATUS for what is live versus in-development.",
       "domainIds": [
@@ -1010,7 +1010,7 @@
     {
       "id": "r-shopify-status",
       "title": "Automatos ↔ Shopify — Status (automatos-shopify/docs/STATUS.md)",
-      "url": "automatos-shopify/docs/STATUS.md",
+      "url": "https://github.com/AutomatosAI/automatos-shopify/blob/main/docs/STATUS.md",
       "kind": "first-party-doc",
       "annotation": "The currency anchor for the Shopify section — read it so you teach reality, not the roadmap. Live today: partner app deployed, /api/shopify/* namespace, widget CDN at widgets.automatos.app/v0, storefront widget chat on a production store with proactive engagement. In-development: unified install flow (PRD-004) that auto-registers the Composio connection on App Store install (still a manual step), the widget auth-tier model (design locked), and the public App Store listing. The author caveat to teach verbatim: architecture supports both storefront and admin agents from a single workspace; currently only the storefront Support Agent is confirmed live on production stores; admin agents and multi-widget seeding are in-development pending PRD-004.",
       "domainIds": [
@@ -1020,7 +1020,7 @@
     {
       "id": "r-academy-tutor",
       "title": "Automatos Academy — Tutor agent setup (docs/ACADEMY_TUTOR_PROMPT.md)",
-      "url": "automatos-academy/docs/ACADEMY_TUTOR_PROMPT.md",
+      "url": "https://github.com/AutomatosAI/automatos-academy/blob/main/docs/ACADEMY_TUTOR_PROMPT.md",
       "kind": "first-party-doc",
       "annotation": "The module's live proof point, documented: the Academy tutor is a SEPARATE agent living in the Academy workspace (not the main site bot), grounded in its own knowledge base with retrieval on, embedded on the widget contract with an ak_pub_* public key whose allowed_domains are locked to academy.automatos.app (plus the Railway URL and localhost:4321 for dev). This is exactly the 'any site becomes AI-driven' pattern running in production — the tutor in the corner of this Academy is the widget SDK you're learning to embed.",
       "domainIds": [
@@ -1030,7 +1030,7 @@
     {
       "id": "r-ide-auto",
       "title": "Automatos IDE — the editor surface (automatos-ide/AUTO.md)",
-      "url": "automatos-ide/AUTO.md",
+      "url": "https://github.com/AutomatosAI/automatos-ide/blob/main/AUTO.md",
       "kind": "first-party-doc",
       "annotation": "The fourth documented surface, named in a line: automatos-ide is a VS Code extension that brings the workspace into the editor — chat with the orchestrator (Auto), and the agents are all views over the workspace, so a developer reaches the same brain without leaving their code. Grounds the module's one-line IDE mention; treat the extension's internal git-native mechanics as architecture detail, not a UI feature list for learners.",
       "domainIds": [
