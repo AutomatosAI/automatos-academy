@@ -944,7 +944,7 @@
     {
       "id": "r-gb-chat-readme",
       "title": "Automatos AI — Chat (platform docs)",
-      "url": "automatos-gitbook/chat/README.md",
+      "url": "https://docs.automatos.app/user-guides/chat",
       "kind": "first-party-doc",
       "annotation": "The canonical description of the front door: the three areas (history, message thread, input bar), how the Universal Router picks an agent, SSE streaming, file attachments up to 20 MB, the ~60,000-token per-conversation context budget with auto-summarisation, and switching agents mid-thread. Read this first — everything else in the module hangs off it. Note the context budget is per-conversation and separate from long-term memory (module 06).",
       "domainIds": [
@@ -954,7 +954,7 @@
     {
       "id": "r-gb-chat-routing",
       "title": "Automatos AI — Routing & Auto Mode (platform docs)",
-      "url": "automatos-gitbook/chat/routing.md",
+      "url": "https://docs.automatos.app/user-guides/chat/routing",
       "kind": "first-party-doc",
       "annotation": "The single most important page for this module: the five routing tiers by their exact names (Tier 0 user override, Tier 1 cache, Tier 2 rules, Tier 2.5 semantic, Tier 3 LLM), the fact that they're ordered by cost and latency, how decisions are logged and corrections feed future routing, and the note that new agents take a few interactions to warm up. Treat the tier order and the 'avoid Tier 3' insight as load-bearing.",
       "domainIds": [
@@ -964,7 +964,7 @@
     {
       "id": "r-gb-chat-quick-actions",
       "title": "Automatos AI — Quick Actions (platform docs)",
-      "url": "automatos-gitbook/chat/quick-actions.md",
+      "url": "https://docs.automatos.app/user-guides/chat/quick-actions",
       "kind": "first-party-doc",
       "annotation": "The shortcut buttons under the input bar — Code, Create an Agent, Knowledge Base, Playbooks, Edit Tools — and the key nuance that a quick action sets context for your next message; you still type the request normally. Useful for orienting a new builder around what's one click away from Chat.",
       "domainIds": [
@@ -974,7 +974,7 @@
     {
       "id": "r-gb-chat-history",
       "title": "Automatos AI — Chat History (platform docs)",
-      "url": "automatos-gitbook/chat/history.md",
+      "url": "https://docs.automatos.app/user-guides/chat/history",
       "kind": "first-party-doc",
       "annotation": "How past conversations are stored (auto-titled, workspace-scoped, independent context per chat) and — importantly for this module — the feedback and correction loop: upvote/downvote and routing corrections feed the Universal Router so it improves over time. The proof that routing learns from you.",
       "domainIds": [
@@ -984,7 +984,7 @@
     {
       "id": "r-gb-chat-voice",
       "title": "Automatos AI — Voice Chat (platform docs)",
-      "url": "automatos-gitbook/chat/voice.md",
+      "url": "https://docs.automatos.app/user-guides/chat/voice",
       "kind": "first-party-doc",
       "annotation": "Voice chat is documented live: microphone to speak, speech-to-text in, text-to-speech out, and voice profiles (including custom cloned voices) under Settings → Voice Profiles. Read it for the 'when to use voice vs text' judgment — voice suits quick questions and status checks, text suits long code review.",
       "domainIds": [
@@ -994,7 +994,7 @@
     {
       "id": "r-gb-agents-readme",
       "title": "Automatos AI — Agents (Agent Management) (platform docs)",
-      "url": "automatos-gitbook/agents/README.md",
+      "url": "https://docs.automatos.app/user-guides/agents",
       "kind": "first-party-doc",
       "annotation": "The Agent Management page: the four tabs (Roster, Configuration, Coordination, Playbooks), the stats bar, the 10 starter agents in a new workspace, and the quick-start create summary. Use it to place the agent as one unit of work among playbooks (module 04) and to see where fleet-wide settings live.",
       "domainIds": [
@@ -1004,7 +1004,7 @@
     {
       "id": "r-gb-agents-creating",
       "title": "Automatos AI — Creating an Agent (platform docs)",
-      "url": "automatos-gitbook/agents/creating.md",
+      "url": "https://docs.automatos.app/user-guides/agents/creating",
       "kind": "first-party-doc",
       "annotation": "The six-step create flow (starting point, basic info, model, persona, tools/skills, create), the explicit note that the Description is what the router matches on, the testing loop (chat test → capability test scoring quality/tool-usage/persona/error-handling → review routing), the 5-10 interaction warm-up, and the five prompt-engineering disciplines. The practical spine of Lesson 2 and the first lab.",
       "domainIds": [
@@ -1014,7 +1014,7 @@
     {
       "id": "r-gb-agents-configuration",
       "title": "Automatos AI — Configuration (global agent settings) (platform docs)",
-      "url": "automatos-gitbook/agents/configuration.md",
+      "url": "https://docs.automatos.app/user-guides/agents/configuration",
       "kind": "first-party-doc",
       "annotation": "Where fleet-wide defaults and safety live: default model settings (a cost lever), system-prompt defaults including safety guidelines/guardrails, and the orchestrator soul (global tone and safety boundaries). The load-bearing mechanic is that agent-specific prompts are appended after the global defaults and win on conflict — so global guidelines set a floor, not an absolute override. Deeper governance (approvals, RBAC, budgets) is module 09.",
       "domainIds": [
@@ -1024,7 +1024,7 @@
     {
       "id": "r-gb-agents-details",
       "title": "Automatos AI — Agent Details & Roster (platform docs)",
-      "url": "automatos-gitbook/agents/details.md",
+      "url": "https://docs.automatos.app/user-guides/agents/details",
       "kind": "first-party-doc",
       "annotation": "The per-agent slide-over (Overview, Performance, Workload, Plugins, Reports) where you edit an agent, read its performance and token/cost metrics, manage its tools, and run the capability test — plus roster actions (Edit, Duplicate, Delete; deletes are permanent). Pair with agents/roster.md for card fields and filtering. This is where you refine an agent after the create dialog.",
       "domainIds": [
@@ -1034,7 +1034,7 @@
     {
       "id": "r-gb-tools-security",
       "title": "Automatos AI — Tools: security & least privilege (platform docs)",
-      "url": "automatos-gitbook/tools/security.md",
+      "url": "https://docs.automatos.app/user-guides/tools/security",
       "kind": "first-party-doc",
       "annotation": "Grounds the least-privilege habit from Lesson 2: scope an agent's tools to the job rather than assigning everything 'just in case,' because over-scoping widens the blast radius of a mistake. Read alongside tools/assigning.md when you start attaching real integrations (covered in depth in module 03).",
       "domainIds": [
@@ -1044,7 +1044,7 @@
     {
       "id": "r-ai-docs-universal-router",
       "title": "Automatos platform — Universal Router (architecture direction)",
-      "url": "automatos-ai/docs/universal-router",
+      "url": "https://github.com/AutomatosAI/automatos-ai/tree/main/docs/universal-router",
       "kind": "reference",
       "annotation": "The WHY behind the tiers — the design rationale for a cost-and-latency-ordered routing ladder and how the platform learns from routing history. Architecture direction, not a UI guide: read it to understand why the router is built this way, but treat only the gitbook as proof of what's live in the product today.",
       "domainIds": [

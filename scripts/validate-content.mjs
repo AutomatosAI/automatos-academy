@@ -27,6 +27,44 @@ function findTracks(dir) {
   return out;
 }
 
+/**
+ * Every `url` a learner can click must be REACHABLE from a browser.
+ *
+ * The bug this exists to stop (2026-07-30): source links were authored as
+ * repo-relative paths — `automatos-gitbook/about.md`, `automatos-ai/README.md`
+ * — which are fine in an editor and meaningless in a browser. The SPA renders
+ * them straight into `<a href>`, the browser resolves them against the site
+ * root, the server 404s, and the SPA fallback quietly serves the HOME PAGE.
+ * 211 dead "sources" across 39 files, every one looking like a working link.
+ *
+ * Allowed: an absolute http(s) URL, or a root-relative path (leading "/")
+ * that EXISTS under public/ — checked on disk here, so a link to a deleted
+ * PDF fails the merge rather than 404ing for a learner. Empty string / null
+ * are legal: unproduced video slots carry `url: ""` and the UI filters them
+ * on `status`, never on the URL.
+ */
+function validateUrl(value, where) {
+  if (value === undefined || value === null || value === "") return;
+  if (typeof value !== "string") return err(`${where}: url must be a string`);
+  if (/^https?:\/\//i.test(value)) return;
+  if (value.startsWith("/")) {
+    const onDisk = join(dirname(ROOT), value.replace(/^\//, "").replace(/[?#].*$/, ""));
+    if (!existsSync(onDisk)) err(`${where}: root-relative url "${value}" has no file at public${value}`);
+    return;
+  }
+  err(`${where}: url "${value}" is not reachable from a browser — repo paths render as dead links that silently land on the home page. Use the published URL (docs.automatos.app/… or github.com/AutomatosAI/…).`);
+}
+
+/** walk any content object and validate every `url` it carries, at any depth */
+function validateUrlsDeep(node, where) {
+  if (Array.isArray(node)) return node.forEach((n, i) => validateUrlsDeep(n, `${where}[${i}]`));
+  if (!node || typeof node !== "object") return;
+  for (const [k, v] of Object.entries(node)) {
+    if (k === "url") validateUrl(v, `${where}${node.id ? `/${node.id}` : ""}`);
+    else validateUrlsDeep(v, where);
+  }
+}
+
 function validateQuestion(q, where, ids) {
   if (!q.id) return err(`${where}: question missing id`);
   if (ids.has(q.id)) err(`${where}: duplicate question id ${q.id}`); else ids.add(q.id);
@@ -43,6 +81,7 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
   const label = `${vendor}/${track}`;
   let t;
   try { t = read(join(dir, "track.json")); } catch (e) { err(`${label}: track.json invalid — ${e.message}`); continue; }
+  validateUrlsDeep(t, `${label}/track.json`);
   // Two shapes: exam tracks (weighted blueprint, mock, A+ gate) and skills
   // tracks (no exam{} — APA/ABF/AI-Security shape; weights optional).
   const isExam = !!(t.exam && t.exam.questionCount);
@@ -65,6 +104,7 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
     if (!existsSync(dp)) { err(`${label}: missing domain file ${df}`); continue; }
     let d;
     try { d = read(dp); } catch (e) { err(`${label}/${df}: invalid JSON — ${e.message}`); continue; }
+    validateUrlsDeep(d, `${label}/${df}`);
     domainCount++;
     weightSum += d.weight || 0;
     if (typeof d.weight === "number") weighted++;

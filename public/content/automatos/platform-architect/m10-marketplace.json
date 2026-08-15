@@ -1032,7 +1032,7 @@
     {
       "id": "r-gb-marketplace-readme",
       "title": "Automatos AI — Marketplace overview (platform docs)",
-      "url": "automatos-gitbook/marketplace/README.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace",
       "kind": "first-party-doc",
       "annotation": "The spine of this module: the five tabs (Applications / Agents / Playbooks / LLMs / Capabilities), including the Applications tab's app cards (name, category, tool count = actions, trigger count = event triggers, Added/Available status, Composio-powered); the stats bar (Total Items, Categories, Featured, and Total Installs = YOUR installs); search across all tabs; and the publishing flow (Submit to Marketplace → description/category/tags → submit for review; available to all users, your workspace name as publisher, installs workspace-scoped). Read the publishing section literally — it documents no reviewer/SLA and zero monetization; the contributor economy is 'coming', not a current earnings feature. Pairs with the APA track brief (PRD-S1): completion of the capstone = 'Automatos-ready', a shareable proof of skill on a FREE academy with no exam and no paid tier.",
       "domainIds": [
@@ -1042,7 +1042,7 @@
     {
       "id": "r-gb-marketplace-agents",
       "title": "Automatos AI — Marketplace Agents (platform docs)",
-      "url": "automatos-gitbook/marketplace/agents.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace/agents",
       "kind": "first-party-doc",
       "annotation": "Installing a pre-built agent: what you receive (tuned system prompt, model recommendation, pre-assigned git-based skills, tool suggestions), that it lands on your Agent Roster, and the key fact for the whole module — installed agents are editable COPIES you can modify freely without affecting the marketplace listing or other users. The same 'install = independent copy' rule applies to marketplace PLAYBOOKS: they're copied into your workspace library (under Agents → Playbooks), reference agent ROLES mapped to your agents on install, and do NOT auto-update when the marketplace version changes. Also the per-agent 'Publish to Marketplace' path (description + category → submit for review). No monetization anywhere in this page.",
       "domainIds": [
@@ -1052,7 +1052,7 @@
     {
       "id": "r-gb-marketplace-capabilities",
       "title": "Automatos AI — Marketplace Capabilities: Plugins & Skills (platform docs)",
-      "url": "automatos-gitbook/marketplace/capabilities.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace/capabilities",
       "kind": "first-party-doc",
       "annotation": "The source for the distinction a practitioner must keep straight: a Plugin is a bundled package (skills + commands + agent configs + prompt templates); a Skill is a single git-based module defined by one SKILL.md (instructions, prompts, tool definitions). Both install into your workspace inventory, then must be ASSIGNED to an agent (Agent Details → Plugins) to change behaviour. Installed vs available states. Ties directly to module 02's skill library (the automatos-skills repo) and the signature agents.",
       "domainIds": [
@@ -1062,7 +1062,7 @@
     {
       "id": "r-gb-marketplace-llms",
       "title": "Automatos AI — Marketplace LLMs (platform docs)",
-      "url": "automatos-gitbook/marketplace/llms.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace/llms",
       "kind": "first-party-doc",
       "annotation": "The browse-and-COMPARE tab (not an install surface): model cards across providers (OpenRouter 100+, OpenAI, Anthropic, DeepSeek, Google) showing pricing per million tokens, context window, capabilities (vision/function-calling/JSON), and speed. The model is assigned to an agent in the agent editor, not 'installed' here. This is where the number-one cost lever gets informed — compare cheaper models on a routine, high-volume agent, then assign in the editor; the page itself points you to Analytics → LLM & Costs (module 09) to track ACTUAL spend, and reminds you list pricing differs from real cost by usage volume. Note the live budget model: cost alerts + mission pause/resume-with-increased-budget, NOT a pre-set hard spend ceiling.",
       "domainIds": [
@@ -1072,7 +1072,7 @@
     {
       "id": "r-gb-api-widgets",
       "title": "Automatos AI — API Reference: Widgets (Embedded SDK) (platform docs)",
-      "url": "automatos-gitbook/api-reference.md",
+      "url": "https://docs.automatos.app/reference/api-reference",
       "kind": "first-party-doc",
       "annotation": "The gitbook's live proof of the embeddable widget for capstone Option A: the Widgets endpoint group (POST /api/widgets/chat SSE streaming, /api/widgets/documents, /api/widget-memory) backing a workspace agent. Confirms the widget chat surface is a shipped, documented capability — the storefront assistant is built on real, live rails, not roadmap.",
       "domainIds": [
@@ -1082,7 +1082,7 @@
     {
       "id": "r-widget-embedding",
       "title": "Automatos Widget SDK — EMBEDDING.md (automatos-widget-sdk/docs/EMBEDDING.md)",
-      "url": "automatos-widget-sdk/docs/EMBEDDING.md",
+      "url": "https://github.com/AutomatosAI/automatos-widget-sdk/blob/main/docs/EMBEDDING.md",
       "kind": "first-party-doc",
       "annotation": "The canonical how-to for capstone Option A: embed a chat widget on any page with one script tag (widgets.automatos.app/v0/widget.global.js) + one AutomatosWidget.init({ apiKey, widget:'chat', ... }) call, authenticated by an origin-locked public key (ak_pub_*, bare-host allow-list, shown once). Works on static HTML, React/Next/Vite, Shopify, WordPress, Webflow. Two live proof points to build on the same rails as: the automatos.app landing site and the academy's own tutor. This is a widget-SDK-repo source (the how); the gitbook api-reference is the proof it's live.",
       "domainIds": [
@@ -1092,7 +1092,7 @@
     {
       "id": "r-gb-knowledge-documents",
       "title": "Automatos AI — Knowledge: Documents (platform docs)",
-      "url": "automatos-gitbook/knowledge/documents.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/documents",
       "kind": "first-party-doc",
       "annotation": "For grounding the capstone agent: direct document upload (drag/drop or Upload) → the always-live ingestion pipeline (parse → chunk → embed → index) → the Search tab to confirm retrieval is exactly what agents see. Supported types (.md/.txt/.csv/.json/.docx/.xlsx/.pptx/.pdf-with-OCR/code/.html). Use direct upload for the capstone — it's the reliably-live path and needs no cloud-sync connector. Currency caveat: of the cloud-sync connectors, Dropbox and S3 are LIVE while Google Drive and OneDrive are 'coming soon', so don't build the capstone around Drive/OneDrive sync — upload directly instead.",
       "domainIds": [
@@ -1102,7 +1102,7 @@
     {
       "id": "r-gb-knowledge-templates",
       "title": "Automatos AI — Knowledge: Templates (platform docs)",
-      "url": "automatos-gitbook/knowledge/templates.md",
+      "url": "https://docs.automatos.app/user-guides/knowledge/templates",
       "kind": "first-party-doc",
       "annotation": "For capstone Option B's deliverable: templates are markdown document structures with {{placeholder}} variables the agent fills at generation time (Daily Standup, Security Audit, Code Review, Research Summary). The agent's filled output is saved as a markdown REPORT (reports live at /reports/{agent}/…) — this markdown baseline is the LIVE, dependable path. Branded PDF/DOCX generation, block templates, and a brand kit are the roadmap edge to verify in-product, not assume.",
       "domainIds": [

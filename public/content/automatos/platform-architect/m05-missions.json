@@ -1093,7 +1093,7 @@
     {
       "id": "r-gitbook-missions",
       "title": "Automatos AI — Missions (platform docs)",
-      "url": "automatos-gitbook/activity/missions.md",
+      "url": "https://docs.automatos.app/user-guides/activity/missions",
       "kind": "first-party-doc",
       "annotation": "The primary source for this entire module. Read the how-missions-work five-beat loop, the writing-good-objectives examples (the 'audit all API endpoints…' vs 'check the API security' pair), the full lifecycle table (Plan Pending → Active → Paused → Completed → Cancelled → Archived), the five monitoring surfaces, budget management, and Save as Routine. Currency note: budget control is cost-by-task visibility plus Pause and Resume-with-increased-budget — there is NO pre-set spend ceiling; don't teach one.",
       "domainIds": [
@@ -1103,7 +1103,7 @@
     {
       "id": "r-gitbook-playbooks",
       "title": "Automatos AI — Playbooks (platform docs)",
-      "url": "automatos-gitbook/agents/playbooks.md",
+      "url": "https://docs.automatos.app/user-guides/agents/playbooks",
       "kind": "first-party-doc",
       "annotation": "The other half of the mission-vs-playbook judgment. A playbook is a workflow whose steps YOU author and assign to agents — the nightly-code-review example is the canonical known-steps case, and playbooks are what carry cron schedules and webhook triggers. Read the 'Saving missions as playbooks' section: it's the same Save as Routine door seen from the playbook side. Use 'playbook' throughout — never 'recipe'.",
       "domainIds": [
@@ -1113,7 +1113,7 @@
     {
       "id": "r-gitbook-coordination",
       "title": "Automatos AI — Coordination (platform docs)",
-      "url": "automatos-gitbook/agents/coordination.md",
+      "url": "https://docs.automatos.app/user-guides/agents/coordination",
       "kind": "first-party-doc",
       "annotation": "Background for the 'agent involvement' surface: when a mission spans several agents, this page explains how they hand off work, share context through the workflow pipeline and scratchpad, and delegate. Note the delegation rules (Auto-delegate / Approval required / Disabled) — 'Approval required' is the coordination-level cousin of the mission plan-approval gate. Deepened further in module 04.",
       "domainIds": [
@@ -1123,7 +1123,7 @@
     {
       "id": "r-gitbook-dashboard",
       "title": "Automatos AI — Activity Dashboard (platform docs)",
-      "url": "automatos-gitbook/activity/dashboard.md",
+      "url": "https://docs.automatos.app/user-guides/activity/dashboard",
       "kind": "first-party-doc",
       "annotation": "The Command Centre view where active missions appear alongside other workspace activity. Useful for picturing where a running mission lives: the 'Active Now' section shows in-progress tasks with progress bars and step counts, and the dashboard updates live via SSE. Read it to place missions in the wider Activity page rather than as an isolated screen.",
       "domainIds": [
@@ -1133,7 +1133,7 @@
     {
       "id": "r-gitbook-settings-general",
       "title": "Automatos AI — General Settings (platform docs)",
-      "url": "automatos-gitbook/settings/general.md",
+      "url": "https://docs.automatos.app/user-guides/settings/general",
       "kind": "first-party-doc",
       "annotation": "Grounds two mission controls that live at the workspace level, not on the mission itself. 'Mission mode' (Feature flags) enables autonomous multi-step mission execution — the coarsest guardrail. 'Cost alerts' (Features) notifies on budget thresholds — a notification, NOT a brake that stops a mission. Who can toggle these (Admin) is covered in module 09.",
       "domainIds": [
@@ -1143,7 +1143,7 @@
     {
       "id": "r-gitbook-apiref",
       "title": "Automatos AI — API Reference: Missions endpoint group (platform docs)",
-      "url": "automatos-gitbook/api-reference.md",
+      "url": "https://docs.automatos.app/reference/api-reference",
       "kind": "first-party-doc",
       "annotation": "The Missions endpoint group is the lifecycle expressed as an API: create, approve, reject, pause, resume (with optional budget increase), cancel, events (paginated timeline), costs (task cost breakdown), archived (with search), save-as-routine, and stats. Read it to see the same controls you click in the UI available programmatically over the REST API (Clerk bearer + X-Workspace-ID). Confirms resume carries the optional budget increase — not a ceiling.",
       "domainIds": [
@@ -1153,7 +1153,7 @@
     {
       "id": "r-gitbook-activity-readme",
       "title": "Automatos AI — Activity command centre (platform docs)",
-      "url": "automatos-gitbook/activity/README.md",
+      "url": "https://docs.automatos.app/user-guides/activity",
       "kind": "first-party-doc",
       "annotation": "Orientation for where the Missions tab sits in the Command Centre (tabs: Dashboard / Feed / Reports / Memory / Missions). Skim it to navigate confidently to Activity → Missions for the lab, and to see that mission monitoring is one facet of a wider real-time activity surface.",
       "domainIds": [
@@ -1163,7 +1163,7 @@
     {
       "id": "r-design-missions-coordination",
       "title": "Automatos platform — missions & multi-agent coordination (architecture direction)",
-      "url": "automatos-ai/docs (missions-multi-agent-coordination)",
+      "url": "https://github.com/AutomatosAI/automatos-ai/tree/main/docs",
       "kind": "reference",
       "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind autonomous multi-step missions and how planning/coordination is intended to work under the hood. Treat anything here that isn't in the gitbook as design intent, not a shipped UI capability; the gitbook remains the only proof of what you can do today.",
       "domainIds": [

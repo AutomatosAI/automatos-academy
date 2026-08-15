@@ -230,6 +230,7 @@ export function computeContentStats(idx) {
     }
   }
   let liveTracks = 0, lessons = 0, learningMinutes = 0, questions = 0, scenarios = 0, labs = 0, videos = 0;
+  const podcasts = (idx.podcasts?.data?.episodes || []).length;
   for (const [key, { domains }] of idx.tracks) {
     if (!live.has(key)) continue;
     liveTracks += 1;
@@ -248,7 +249,7 @@ export function computeContentStats(idx) {
       videos += (d.videos || []).filter((v) => typeof v.url === "string" && v.url.trim() !== "").length;
     }
   }
-  return { liveTracks, lessons, learningMinutes, questions, scenarios, labs, videos };
+  return { liveTracks, lessons, learningMinutes, questions, scenarios, labs, videos, podcasts };
 }
 
 // Learner numbers for GET /stats — only on deploys where the Spine's pg pool
@@ -349,10 +350,30 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
       contentStatsCache.set(idx, content);
     }
     const learners = await learnerStats(); // never throws — nulls on any failure
+    // Audio narration stats come from media_bindings (PRD-VOICE §8.1), not the
+    // content tree — computed fresh because bindings refresh on their own
+    // 30s cadence, outside the idx-keyed cache. Minutes assume the pipeline's
+    // constant 128kbps (16,000 bytes/s) and round DOWN — never promise more
+    // listening than we shipped.
+    let audioLessons = 0, audioBytes = 0;
+    if (typeof getBindings === "function") {
+      for (const key of idx.tracks.keys()) {
+        const [v, t] = key.split("/");
+        const b = getBindings(v, t);
+        if (!b || !b.bySlot) continue;
+        for (const [slotKey, bind] of b.bySlot) {
+          if (slotKey.startsWith("a-") && slotKey.endsWith(":audio")) {
+            audioLessons += 1;
+            audioBytes += Number(bind.size || 0);
+          }
+        }
+      }
+    }
+    const audioMinutes = Math.floor(audioBytes / (16000 * 60));
     res.set("X-Content-Version", idx.contentVersion);
     res.set("Cache-Control", "public, max-age=300");
     res.set("Access-Control-Allow-Origin", "*");
-    res.json({ ...content, ...learners });
+    res.json({ ...content, audioLessons, audioMinutes, ...learners });
   });
 
   // Fixed segments before parameterised routes — /paths and /levels must win

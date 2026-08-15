@@ -1149,7 +1149,7 @@
     {
       "id": "r-gitbook-llm-costs",
       "title": "Automatos AI — Analytics: LLM & Costs (platform docs)",
-      "url": "automatos-gitbook/analytics/llm-costs.md",
+      "url": "https://docs.automatos.app/user-guides/analytics/llm-costs",
       "kind": "first-party-doc",
       "annotation": "The primary source for lesson 1 and the cost half of the module. Read the four cost cards (Total Cost, Total Tokens, Cost Per Request, Top Spender), the Cost by Model Over Time chart, the By Model / By Agent / By Time breakdowns, Cost Projections (monthly estimate, trend, anomaly alerts), and the four cost-optimisation tips — the first of which, 'use cheaper models for simple tasks', is the number-one cost lever. Key fact: every LLM call is tracked with model + agent, which is what lets you trace a cost back to a specific conversation, playbook, or mission. Currency note: costs are estimates from per-token pricing, and projections are estimates that can change — there is no 'budget remaining' figure because there is no pre-set spend ceiling.",
       "domainIds": [
@@ -1159,7 +1159,7 @@
     {
       "id": "r-gitbook-analytics-readme",
       "title": "Automatos AI — Analytics overview (platform docs)",
-      "url": "automatos-gitbook/analytics/README.md",
+      "url": "https://docs.automatos.app/user-guides/analytics",
       "kind": "first-party-doc",
       "annotation": "Orientation for where the LLM & Costs tab sits among the seven Analytics tabs (Overview, Agents, Workflows, Documents, LLM & Costs, Tools & Integrations). Read it for the time-range selector (My Workspace scope; 24 Hours / 7 Days / 30 Days; Refresh) that governs every cost view, and for the enhanced real-time metrics (cost-per-execution from actual usage, predictive capacity alerts, bottleneck detection). Skim it to navigate confidently to the cost tab for the lab.",
       "domainIds": [
@@ -1169,7 +1169,7 @@
     {
       "id": "r-gitbook-analytics-agents",
       "title": "Automatos AI — Analytics: Agents tab (platform docs)",
-      "url": "automatos-gitbook/analytics/agents.md",
+      "url": "https://docs.automatos.app/user-guides/analytics/agents",
       "kind": "first-party-doc",
       "annotation": "The per-agent view that expands the Top Spender card into a full ranking. Read the agent comparison table (Tasks, Success Rate, Avg Time, Tokens, Cost) and the drill-down (time-series performance, task-type breakdown, error log, model usage history). Use it alongside the By Agent cost breakdown to answer 'which agents are expensive, and is any getting worse?' — the input to a blueprint (cheaper-model) fix.",
       "domainIds": [
@@ -1179,7 +1179,7 @@
     {
       "id": "r-gitbook-settings-general",
       "title": "Automatos AI — Settings: General (platform docs)",
-      "url": "automatos-gitbook/settings/general.md",
+      "url": "https://docs.automatos.app/user-guides/settings/general",
       "kind": "first-party-doc",
       "annotation": "Grounds the workspace-level budget lever and the defaults. Read the Defaults (Default Model, Max Tokens, Temperature) and the Features flags — including Cost alerts ('notify on budget thresholds'), which is a NOTIFICATION, not a brake that stops spend. Also where BYOK preferences and Mission mode live. Currency note: Cost alerts is the only workspace budget control and it does not enforce a ceiling; teach it as 'tells you to look', never 'stops the workspace at $X'. Access is Admin-only.",
       "domainIds": [
@@ -1189,7 +1189,7 @@
     {
       "id": "r-gitbook-missions",
       "title": "Automatos AI — Missions (platform docs)",
-      "url": "automatos-gitbook/activity/missions.md",
+      "url": "https://docs.automatos.app/user-guides/activity/missions",
       "kind": "first-party-doc",
       "annotation": "The source for the per-mission budget lever and the plan-approval gate the scenario leans on. Read the Budget management section: view the cost breakdown by task, Pause 'if costs are exceeding expectations', and Resume with increased budget 'if a mission needs more resources than originally estimated'. The cost-by-task view is the finest grain of cost attribution — per-objective, per-task spend. Currency note (repeat because it's the module's core trap): budget control here is visibility plus a human decision, NOT a pre-set ceiling. Deepened in module 05.",
       "domainIds": [
@@ -1199,7 +1199,7 @@
     {
       "id": "r-gitbook-roles",
       "title": "Automatos AI — Team: Roles & Permissions (platform docs)",
-      "url": "automatos-gitbook/team/roles.md",
+      "url": "https://docs.automatos.app/user-guides/team/roles",
       "kind": "first-party-doc",
       "annotation": "The primary source for lesson 3's RBAC. Read the full permission matrix (Admin / Member / Viewer across chat, view, create/edit agents, upload docs, run playbooks, install marketplace items, connect tools, manage team, Settings, admin analytics, credentials, audit logs), the 'at least one Admin' rule, and the specialised Context Engineering permission (edit global system prompts, orchestrator soul, coordination rules). The governance insight: the Admin line falls exactly around the reach-outside-the-workspace and control-the-controls actions. Roles are Admin/Member/Viewer — never 'owner' or 'super_admin'.",
       "domainIds": [
@@ -1209,7 +1209,7 @@
     {
       "id": "r-gitbook-team-readme",
       "title": "Automatos AI — Team Management & workspace isolation (platform docs)",
-      "url": "automatos-gitbook/team/README.md",
+      "url": "https://docs.automatos.app/user-guides/team",
       "kind": "first-party-doc",
       "annotation": "Grounds workspace isolation as the tenancy boundary and the Team Management surface for the lab. Read the isolation statements literally: agents, documents, tools, and settings are workspace-scoped; members only see their own workspace; agents from one workspace cannot access another's data; credentials are workspace-scoped; cross-workspace access is not supported — which 'ensures data privacy between teams even on the same Automatos instance'. Also covers the member list columns, quick actions (Invite / Change Role / Remove), and that authentication is via Clerk (email/password, social, MFA). See team/inviting.md for the invite flow.",
       "domainIds": [
@@ -1219,7 +1219,7 @@
     {
       "id": "r-gitbook-credentials",
       "title": "Automatos AI — Settings: API Keys & Credentials (platform docs)",
-      "url": "automatos-gitbook/settings/credentials.md",
+      "url": "https://docs.automatos.app/user-guides/settings/credentials",
       "kind": "first-party-doc",
       "annotation": "The source for lesson 4's credential security and rotation. Read the credential types (OpenRouter, OpenAI, Anthropic, Composio, Clerk, AWS, Custom), the security properties (encrypted at rest; masked / never shown in full after saving; all access logged; workspace-scoped), and the no-downtime rotation procedure (create new key → Edit → paste → Save → Test). Critical warning to teach: deleting a credential immediately breaks every agent and tool that depends on it, so rotation is edit-then-test, never delete-then-add; use View usage to see dependents first. Admin-only.",
       "domainIds": [
@@ -1229,7 +1229,7 @@
     {
       "id": "r-gitbook-audit-logs",
       "title": "Automatos AI — Settings: Audit Logs (platform docs)",
-      "url": "automatos-gitbook/settings/audit-logs.md",
+      "url": "https://docs.automatos.app/user-guides/settings/audit-logs",
       "kind": "first-party-doc",
       "annotation": "The source for the immutable audit trail. Read what gets logged (user actions, agent operations, tool calls, credential changes, team changes, document operations, security events), the entry format (timestamp, actor — user OR agent, action, target, details, status), the filters (date range, actor, category, status, search), and the CSV export. Defining property to teach: audit logs are retained for the workspace's lifetime and CANNOT be deleted — that immutability is what makes them trustworthy for compliance. Admin-only.",
       "domainIds": [
@@ -1239,7 +1239,7 @@
     {
       "id": "r-gitbook-settings-models",
       "title": "Automatos AI — Settings: Models (platform docs)",
-      "url": "automatos-gitbook/settings/models.md",
+      "url": "https://docs.automatos.app/user-guides/settings/models",
       "kind": "first-party-doc",
       "annotation": "Grounds BYOK, the default model, and the fallback chain for lesson 4. Read the provider configuration (OpenRouter primary with 100+ models; OpenAI; Anthropic; DeepSeek), the default-model behaviour (used when an agent doesn't specify one, and for system tasks like routing), and the fallback chain (Primary → Fallback 1 → Fallback 2; OpenRouter gives built-in fallback). Note the embedding default (qwen3-embedding-8b, 2048 dims) and the warning that changing it requires re-processing all documents. Currency note: OpenRouter is the documented primary; the cheaper-model routing decision is expressed through per-agent model choice and this default.",
       "domainIds": [
@@ -1249,7 +1249,7 @@
     {
       "id": "r-gitbook-agents-creating",
       "title": "Automatos AI — Agents: Creating an Agent (platform docs)",
-      "url": "automatos-gitbook/agents/creating.md",
+      "url": "https://docs.automatos.app/user-guides/agents/creating",
       "kind": "first-party-doc",
       "annotation": "The source for the agent's configuration — our teaching term 'blueprint'. Read the creation steps that set what an agent does and costs: provider and model (OpenRouter/OpenAI/Anthropic/DeepSeek + specific model ID), temperature, max tokens, persona and system prompt, and assigned tools/skills. This is where least-privilege tool scoping and the right-sized model are decided per agent. Teaching-term note: the docs call this the agent's 'configuration'; APA uses 'blueprint' as a labelled metaphor for the same thing — say 'configuration' once, then use 'blueprint' as the concept.",
       "domainIds": [
@@ -1259,7 +1259,7 @@
     {
       "id": "r-design-auth-multitenancy",
       "title": "Automatos platform — authentication & multi-tenancy (architecture direction)",
-      "url": "automatos-ai/docs (authentication-multi-tenancy)",
+      "url": "https://github.com/AutomatosAI/automatos-ai/tree/main/docs",
       "kind": "reference",
       "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind workspace isolation and how tenancy/identity are intended to work under the hood. Treat anything here that isn't in the gitbook (team/README.md and team/roles.md are the live proof) as design intent, not shipped UI. Useful for understanding the reasoning behind 'cross-workspace access is not supported' as a hard boundary, but cite the gitbook for anything you claim is available today.",
       "domainIds": [
@@ -1269,7 +1269,7 @@
     {
       "id": "r-design-analytics-monitoring",
       "title": "Automatos platform — analytics & monitoring (architecture direction)",
-      "url": "automatos-ai/docs (analytics-monitoring)",
+      "url": "https://github.com/AutomatosAI/automatos-ai/tree/main/docs",
       "kind": "reference",
       "annotation": "Architecture direction, NOT a live-feature reference — read it for the WHY behind cost tracking and observability: why every LLM call is metered by model and agent, and how the platform reasons about cost attribution and optimisation. The gitbook analytics/ pages remain the only proof of what the tabs actually show today; treat design-doc capabilities beyond the gitbook as intent, not a shipped feature you can teach as live.",
       "domainIds": [

@@ -207,10 +207,22 @@ function glassLearners(pos, stats) {
 function heroStats(pos, stats) {
   const lessons = stats && posNum(stats.lessons);
   const tracks = stats && posNum(stats.liveTracks);
-  const hours = stats && posNum(Math.floor((posNum(stats.learningMinutes) || 0) / 60));
-  const spec = lessons && tracks && hours
-    ? { big: { count: String(lessons) }, cap: "Guided lessons",
-        mini: [[{ count: String(tracks) }, "expert tracks"], [{ count: String(hours), suffix: "h" }, "guided learning"]] }
+  // The growth numbers (2026-07-29): every stat below is COMPUTED by
+  // /api/catalog/stats from the live catalog + media bindings, so new
+  // courses, videos, podcasts and narrations move the hero with no edit
+  // here. audioLessons landed the day all 227 lessons got a voice.
+  const videos = stats && posNum(stats.videos);
+  const podcasts = stats && posNum(stats.podcasts);
+  const audioH = stats && posNum(Math.floor((posNum(stats.audioMinutes) || 0) / 60));
+  const narrated = stats && posNum(stats.audioLessons) === lessons; // every lesson voiced
+  const spec = lessons && tracks
+    ? { big: { count: String(lessons) }, cap: narrated ? "Guided lessons · every one narrated" : "Guided lessons",
+        mini: [
+          [{ count: String(tracks) }, "courses"],
+          ...(videos ? [[{ count: String(videos) }, "video explainers"]] : []),
+          ...(audioH ? [[{ count: String(audioH), suffix: "h" }, "audio · learn on the go"]] : []),
+          ...(podcasts ? [[{ count: String(podcasts) }, "podcasts"]] : []),
+        ] }
     : { big: { count: "345" }, cap: "Sessions tracked",
         mini: [[{ count: "24", suffix: "K" }, "data points"], [{ count: "1.33", dec: "2" }, "avg score"]] };
   return el("div", { class: "ac-hero__stats anim-float2", style: pos }, [

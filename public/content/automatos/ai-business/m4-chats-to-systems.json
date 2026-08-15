@@ -529,7 +529,7 @@
     {
       "id": "r-gb-playbooks",
       "title": "Automatos docs — Playbooks (Agents → Playbooks)",
-      "url": "automatos-gitbook/agents/playbooks.md",
+      "url": "https://docs.automatos.app/user-guides/agents/playbooks",
       "kind": "first-party-doc",
       "annotation": "The platform's own definition of a playbook: a multi-step workflow you define once and run on demand, on a schedule (cron), or from chat. Read this for the trigger/steps/schedule structure, the worked 'nightly code review' example, how each step's output feeds the next, and how a completed mission can be saved as a reusable playbook ('Save as Routine').",
       "domainIds": [
@@ -539,7 +539,7 @@
     {
       "id": "r-gb-agents",
       "title": "Automatos docs — Agents (Agent Management)",
-      "url": "automatos-gitbook/agents/README.md",
+      "url": "https://docs.automatos.app/user-guides/agents",
       "kind": "first-party-doc",
       "annotation": "What an agent is in the platform's words: a specialised AI worker with its own model, persona, tools, and skills — a worker, not a chatbot. Read this for the four things you give an agent (role/description, knowledge, tools, boundaries) and why a clear description matters (the router uses it). Grounds the 'agent = described team member' framing and the playbook-versus-agent choice.",
       "domainIds": [
@@ -549,7 +549,7 @@
     {
       "id": "r-gb-creating",
       "title": "Automatos docs — Creating an Agent",
-      "url": "automatos-gitbook/agents/creating.md",
+      "url": "https://docs.automatos.app/user-guides/agents/creating",
       "kind": "first-party-doc",
       "annotation": "The step-by-step of standing up an agent: name and description, model, persona, and — the parts this module leans on — assigning tools and setting boundaries in the system prompt ('be specific about the role', 'set boundaries: what the agent should NOT do'). Useful when a task graduates from a playbook to an agent.",
       "domainIds": [
@@ -559,7 +559,7 @@
     {
       "id": "r-gb-tools",
       "title": "Automatos docs — Tools & Integrations",
-      "url": "automatos-gitbook/tools/README.md",
+      "url": "https://docs.automatos.app/user-guides/tools",
       "kind": "first-party-doc",
       "annotation": "How agents reach external apps: connect an app, assign it to agents, and the tool router calls it when relevant. Read this for the connect→assign→use flow, the cron-scheduling section (how recurring playbook triggers are written), and the note that event/webhook triggers are configured per playbook. Grounds the 'trigger' and 'tools an agent is allowed to use' parts of the module.",
       "domainIds": [
@@ -569,7 +569,7 @@
     {
       "id": "r-gb-assigning",
       "title": "Automatos docs — Assigning Tools to Agents",
-      "url": "automatos-gitbook/tools/assigning.md",
+      "url": "https://docs.automatos.app/user-guides/tools/assigning",
       "kind": "first-party-doc",
       "annotation": "The key containment rule for this module: an agent can use only the tools you assign to it, and each assignment has a permission scope — Full access, Read only, or Custom (specific actions). The docs advise starting read-only for new agents. This is what keeps an agent inside its lane.",
       "domainIds": [
@@ -579,7 +579,7 @@
     {
       "id": "r-gb-coordination",
       "title": "Automatos docs — Coordination (how agents work together)",
-      "url": "automatos-gitbook/agents/coordination.md",
+      "url": "https://docs.automatos.app/user-guides/agents/coordination",
       "kind": "first-party-doc",
       "annotation": "How multi-step, multi-agent work shares context: each step sees the previous step's output through the workflow pipeline. Also documents delegation rules (Auto-delegate / Approval required / Disabled) — the 'approval required' setting is the platform-level echo of this module's 'a human still approves' posture, explored properly in the next module.",
       "domainIds": [
@@ -589,7 +589,7 @@
     {
       "id": "r-gb-dashboard",
       "title": "Automatos docs — Activity Dashboard",
-      "url": "automatos-gitbook/activity/dashboard.md",
+      "url": "https://docs.automatos.app/user-guides/activity/dashboard",
       "kind": "first-party-doc",
       "annotation": "Where you watch a scheduled playbook (a 'routine') actually run: a weekly calendar marks days with scheduled routines, 'Active Now' shows tasks in progress with a step count, and the view updates in real time. This is the surface the hands-on step uses to confirm the playbook ran and its output landed.",
       "domainIds": [
@@ -599,7 +599,7 @@
     {
       "id": "r-gb-marketplace-playbooks",
       "title": "Automatos docs — Marketplace Playbooks",
-      "url": "automatos-gitbook/marketplace/playbooks.md",
+      "url": "https://docs.automatos.app/user-guides/marketplace/playbooks",
       "kind": "first-party-doc",
       "annotation": "If you would rather start from a ready-made recipe than a blank one: the community marketplace has pre-built playbooks you can install (they reference agent roles and get mapped to your own agents). Installed playbooks are independent copies scoped to your workspace — a useful shortcut, though most operator tasks are quick to build from scratch. (Community-shared and free; there is no paid or creator-earns marketplace.)",
       "domainIds": [
