@@ -48,7 +48,25 @@ export function overlayLessonAudio(data, bySlot) {
   return changed ? { ...data, lessons } : data;
 }
 
-/** the one overlay the catalog applies: videos + lesson audio, composed */
+/**
+ * Domain-intro audio (PRD-VOICE §8.1) — a bound `a-<domainId>-intro` slot
+ * attaches `introAudioUrl` to the domain scope itself: the narrated overview
+ * and objectives, the part a learner hears BEFORE committing to a domain.
+ *
+ * Keyed off the node's own `id` rather than a lessons[] entry, so it applies
+ * only where that id is the domain's — the track scope carries no `lessons[]`
+ * and never matches an intro slot. Same contract as its siblings: pure,
+ * immutable, changed-flag.
+ */
+export function overlayIntroAudio(data, bySlot) {
+  if (!bySlot || !data?.id || !Array.isArray(data.lessons)) {
+    return data;
+  }
+  const b = bySlot.get(`a-${data.id}-intro:audio`);
+  return b ? { ...data, introAudioUrl: b.url } : data;
+}
+
+/** the one overlay the catalog applies: videos + lesson audio + intro audio */
 export function overlayMedia(data, bySlot) {
-  return overlayLessonAudio(overlayVideos(data, bySlot), bySlot);
+  return overlayIntroAudio(overlayLessonAudio(overlayVideos(data, bySlot), bySlot), bySlot);
 }
