@@ -298,6 +298,10 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
   // C3 PR2 — media bindings overlay accessor: (vendor, track) → {bySlot, version}
   // or null. Absent ⇒ no overlay (files/tests behave exactly as before).
   const getBindings = typeof opts.getBindings === "function" ? opts.getBindings : () => null;
+  // "none" when no bindings cache is wired (tests, files-mode) — a stable
+  // value, never null, so a client can compare it without special-casing
+  const getMediaVersion =
+    typeof opts.getMediaVersion === "function" ? opts.getMediaVersion : () => "none";
   // PRD-CONTENT-LIFECYCLE S4 — approved-draft text overlay accessor:
   // (scopeKind, vendor, track, domain) → {canonical, sha256} or null. Absent ⇒
   // no overlay (files/tests/spine-less deploys behave exactly as before). A
@@ -324,7 +328,19 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
     const idx = getIdx();
     res.set("Access-Control-Allow-Origin", "*");
     res.set("Cache-Control", "no-store");
-    res.json({ contentVersion: idx.contentVersion, generatedAt: idx.generatedAt });
+    // mediaVersion is SEPARATE from contentVersion on purpose. contentVersion
+    // is a rollup over published content files and carries publish/rollback
+    // semantics; binding media is a serve-time overlay that must not move it.
+    // But a client polling contentVersion alone never learns that new audio or
+    // video exists — it short-circuits before issuing the conditional request
+    // that would see the busted ETag, so bound media stays invisible to every
+    // installed client until its cache is cleared by hand. Publishing both
+    // lets a client refresh on either without entangling the two models.
+    res.json({
+      contentVersion: idx.contentVersion,
+      mediaVersion: getMediaVersion(),
+      generatedAt: idx.generatedAt,
+    });
   });
 
   router.get("/changes", (req, res) => {

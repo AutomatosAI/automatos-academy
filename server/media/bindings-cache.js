@@ -11,8 +11,12 @@ const ALL_SQL = `
   FROM media_bindings
   ORDER BY vendor_id, track_id, slot_id, kind;`;
 
+/** no bindings at all — a real, stable value, never null (clients compare it) */
+const EMPTY_MEDIA_VERSION = "none";
+
 export function createBindingsCache({ pool, intervalMs = 30000, logger = console } = {}) {
   let byTrack = new Map();
+  let mediaVersion = EMPTY_MEDIA_VERSION;
   let timer = null;
 
   async function loadOnce() {
@@ -32,11 +36,19 @@ export function createBindingsCache({ pool, intervalMs = 30000, logger = console
       });
       entry._parts.push(`${r.slot_id}:${r.kind}=${r.url}`);
     }
-    for (const entry of next.values()) {
+    const rollup = [];
+    for (const [key, entry] of [...next.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
       entry.version = crypto.createHash("sha1").update(entry._parts.join("|")).digest("hex").slice(0, 12);
       delete entry._parts;
+      rollup.push(`${key}=${entry.version}`);
     }
     byTrack = next;
+    // One hash over every track's binding version, sorted so it is stable
+    // across row order. This is what /version publishes as mediaVersion: it
+    // moves whenever ANY binding is added, changed or removed, and only then.
+    mediaVersion = rollup.length
+      ? crypto.createHash("sha1").update(rollup.join("|")).digest("hex").slice(0, 12)
+      : EMPTY_MEDIA_VERSION;
   }
 
   async function refresh() {
@@ -50,6 +62,18 @@ export function createBindingsCache({ pool, intervalMs = 30000, logger = console
   return {
     /** the track's { bySlot: Map, version } or null */
     get: (vendor, track) => byTrack.get(`${vendor}/${track}`) || null,
+    /**
+     * One version over ALL bindings, for /version.
+     *
+     * Why it exists: binding media is a serve-time overlay, so it deliberately
+     * does NOT move contentVersion (which is a rollup over published content
+     * files and carries publish/rollback semantics). But a client that gates
+     * its refresh on contentVersion alone therefore never notices new audio or
+     * video — it never even issues the conditional request that would see the
+     * busted ETag. Publishing this separately lets a client refresh on either
+     * signal without entangling bindings with the publish model.
+     */
+    mediaVersion: () => mediaVersion,
     refresh,
     start() {
       void refresh(); // best-effort initial load; empty until it lands

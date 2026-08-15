@@ -97,6 +97,27 @@ function fakePool(rowsOrThrow) {
   ok(typeof e.version === "string" && e.version.length === 12, "each track carries a 12-char bindings version");
   ok(cache.get("nope", "x") === null, "unknown track → null");
 }
+console.log("mediaVersion (the global rollup /version publishes)");
+{
+  const one = createBindingsCache({ pool: fakePool([{ vendor_id: "a", track_id: "t", slot_id: "s", kind: "video", url: "u1", content_type: null, size_bytes: null }]) });
+  await one._loadOnce();
+  const same = createBindingsCache({ pool: fakePool([{ vendor_id: "a", track_id: "t", slot_id: "s", kind: "video", url: "u1", content_type: null, size_bytes: null }]) });
+  await same._loadOnce();
+  const changed = createBindingsCache({ pool: fakePool([{ vendor_id: "a", track_id: "t", slot_id: "s", kind: "video", url: "u2", content_type: null, size_bytes: null }]) });
+  await changed._loadOnce();
+  const added = createBindingsCache({ pool: fakePool([
+    { vendor_id: "a", track_id: "t", slot_id: "s", kind: "video", url: "u1", content_type: null, size_bytes: null },
+    { vendor_id: "b", track_id: "t2", slot_id: "s2", kind: "audio", url: "u9", content_type: null, size_bytes: null },
+  ]) });
+  await added._loadOnce();
+  const empty = createBindingsCache({ pool: fakePool([]) });
+  await empty._loadOnce();
+  ok(one.mediaVersion() === same.mediaVersion(), "identical bindings → identical mediaVersion (stable, no false refreshes)");
+  ok(one.mediaVersion() !== changed.mediaVersion(), "a CHANGED url moves mediaVersion (the audio/video-went-live signal)");
+  ok(one.mediaVersion() !== added.mediaVersion(), "an ADDED binding on another track moves it too");
+  ok(empty.mediaVersion() === "none", "no bindings → the stable 'none', never null");
+}
+
 {
   // version changes when the url changes (ETag correctness)
   const v1 = createBindingsCache({ pool: fakePool([{ vendor_id: "a", track_id: "t", slot_id: "s", kind: "video", url: "u1", content_type: null, size_bytes: null }]) });
