@@ -115,6 +115,19 @@ export function domainView(ctx) {
     el("h1", { style: { fontSize: "clamp(30px,4.5vw,48px)", marginTop: "10px" }, text: d.name }),
     d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, text: d.overview }) : null,
     (d.objectives || []).length ? el("ul", { class: "prose", style: { marginTop: "18px", maxWidth: "70ch" } }, d.objectives.map((o) => el("li", { text: o }))) : null,
+    // PRD-VOICE §8.1 — the narrated intro: this overview and these objectives
+    // in Laura's voice, so a learner can hear what a domain covers before
+    // committing to it. Bound via the a-<domainId>-intro slot; no binding →
+    // no player, and the page looks exactly as it always did.
+    d.introAudioUrl
+      ? el("audio", {
+          controls: true,
+          preload: "none",
+          src: d.introAudioUrl,
+          style: { width: "100%", maxWidth: "720px", display: "block", marginTop: "18px" },
+          "aria-label": `Listen to the introduction to ${d.name}`,
+        })
+      : null,
   );
 
   return el("div", {}, [trackHeader(track, "overview"), head, section(...blocks)]);

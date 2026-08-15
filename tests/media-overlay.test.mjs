@@ -7,7 +7,7 @@
 import { createServer } from "http";
 import express from "express";
 
-import { overlayLessonAudio, overlayMedia, overlayTrackVideos } from "../server/media/overlay.js";
+import { overlayIntroAudio, overlayLessonAudio, overlayMedia, overlayTrackVideos } from "../server/media/overlay.js";
 import { createBindingsCache } from "../server/media/bindings-cache.js";
 import { createCatalogRouter } from "../server/catalog.js";
 
@@ -40,6 +40,23 @@ console.log("overlayLessonAudio (PRD-VOICE — a-<lessonId> attaches audioUrl)")
   const both = overlayMedia({ id: "d1", lessons: domain.lessons, videos: [{ id: "v-d1-1", status: "planned" }] },
     new Map([...slots, ["v-d1-1:video", { url: "https://cdn/x.mp4" }]]));
   ok(both.lessons[0].audioUrl && both.videos[0].url === "https://cdn/x.mp4", "overlayMedia composes audio + video in one pass");
+}
+
+console.log("overlayIntroAudio (PRD-VOICE — a-<domainId>-intro attaches introAudioUrl)");
+{
+  const url = `${CDN}/academy/a/t/audio/d1-intro.91c8.mp3`;
+  const domain = Object.freeze({ id: "d1", overview: "…", lessons: Object.freeze([Object.freeze({ id: "l1" })]) });
+  const slots = new Map([[`a-d1-intro:audio`, { url }]]);
+  const out = overlayIntroAudio(domain, slots);
+  ok(out !== domain, "returns a NEW object when the intro binds");
+  ok(out.introAudioUrl === url, "domain gains introAudioUrl");
+  ok(!("introAudioUrl" in domain), "source object never mutated (frozen input survived)");
+  ok(overlayIntroAudio(domain, new Map()) === domain, "no bindings → same reference, zero allocation");
+  // the track scope carries an id too — it must never pick up a domain's intro
+  const trackScope = { id: "d1", videos: [] };
+  ok(overlayIntroAudio(trackScope, slots) === trackScope, "a node without lessons[] never takes intro audio");
+  const composed = overlayMedia(domain, slots);
+  ok(composed.introAudioUrl === url, "overlayMedia applies intro audio alongside lesson audio + video");
 }
 
 console.log("overlayTrackVideos");

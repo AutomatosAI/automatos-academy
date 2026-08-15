@@ -22,6 +22,7 @@ import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { FISH_SETTINGS, buildSpoken, audioHash, renderLesson } from "../server/audio/fishLane.js";
 
@@ -30,6 +31,8 @@ const CONTENT_ROOT = "public/content";
 const CDN_BASE = "https://widgets.automatos.app";
 const PRICE_PER_1K = 0.015;
 const HARD_CAP_USD = 25;
+/** spoken heading before a domain's objectives — plain English, not "Objectives" */
+const INTRO_OBJECTIVES_HEADING = "What you'll be able to do";
 
 function parseArgs(argv) {
   const a = argv.slice(2);
@@ -42,7 +45,38 @@ function parseArgs(argv) {
   };
 }
 
-async function walkLessons(filterTracks) {
+/**
+ * The spoken form of a domain's INTRO — its overview prose and objectives.
+ *
+ * Authored as markdown so it flows through the one shared transform the
+ * lessons use (heading → pause, list → "First:/Next:/Finally:"), rather than
+ * growing a second set of speech rules that could drift from it.
+ *
+ * Why this exists: the intro is the only part of a cheat sheet that a learner
+ * hears BEFORE committing to it — "what is this domain, and what will I be
+ * able to do." The app used to read it with the device voice; when device TTS
+ * was removed from lesson reading, that left the intro spoken by nothing.
+ */
+export function introBody(doc) {
+  const overview = typeof doc?.overview === "string" ? doc.overview.trim() : "";
+  const objectives = (doc?.objectives ?? []).filter((o) => typeof o === "string" && o.trim());
+  if (!overview && !objectives.length) return "";
+  const parts = [];
+  if (overview) parts.push(overview);
+  if (objectives.length) {
+    parts.push(`## ${INTRO_OBJECTIVES_HEADING}`);
+    parts.push(objectives.map((o) => `- ${o.trim()}`).join("\n"));
+  }
+  return parts.join("\n\n");
+}
+
+/**
+ * Every unit of narratable content, in the order a learner meets it: each
+ * domain's intro, then its lessons. `kind` decides only the slot and file
+ * name — both kinds share one transform, one voice and one hash rule, so a
+ * settings change re-renders them together or not at all.
+ */
+async function walkUnits(filterTracks) {
   const out = [];
   for (const vendor of await readdir(CONTENT_ROOT)) {
     const vDir = path.join(CONTENT_ROOT, vendor);
@@ -54,10 +88,19 @@ async function walkLessons(filterTracks) {
       for (const f of files) {
         let doc; try { doc = JSON.parse(await readFile(path.join(tDir, f), "utf8")); } catch { continue; }
         const domain = doc?.id ?? f.replace(/\.json$/, "");
+        const intro = introBody(doc);
+        if (intro.trim()) {
+          out.push({
+            vendor, track, domain, kind: "intro",
+            id: `${domain}-intro`,
+            title: doc?.name ?? domain,
+            body: intro,
+          });
+        }
         for (const lesson of doc?.lessons ?? []) {
           const body = typeof lesson?.body === "string" ? lesson.body : "";
           if (!body.trim()) continue;
-          out.push({ vendor, track, domain, id: lesson.id ?? "?", title: lesson.title ?? lesson.id ?? "?", body });
+          out.push({ vendor, track, domain, kind: "lesson", id: lesson.id ?? "?", title: lesson.title ?? lesson.id ?? "?", body });
         }
       }
     }
@@ -76,11 +119,11 @@ async function main() {
   const bucket = process.env.AWS_SDK_DEPLOY_BUCKET;
   const S = FISH_SETTINGS;
 
-  const lessons = await walkLessons(tracks);
-  if (!lessons.length) { console.error("no lessons matched"); process.exit(1); }
+  const units = await walkUnits(tracks);
+  if (!units.length) { console.error("no content matched"); process.exit(1); }
 
-  // Plan every lesson first: spoken form, hash, key. Pure — no network.
-  const plan = lessons.map((l) => {
+  // Plan every unit first: spoken form, hash, key. Pure — no network.
+  const plan = units.map((l) => {
     const built = buildSpoken(l.title, l.body, S);
     const hash = audioHash(built.spoken, S);
     const s3key = `academy/${l.vendor}/${l.track}/audio/${l.id}.${hash}.mp3`;
@@ -88,18 +131,20 @@ async function main() {
   });
   const totalChars = plan.reduce((n, p) => n + p.chars, 0);
   const estUsd = (totalChars / 1000) * PRICE_PER_1K;
+  const nIntro = plan.filter((p) => p.kind === "intro").length;
+  const nLesson = plan.length - nIntro;
 
-  console.log(`voice-catalog · ${S.SETTINGS_VERSION} · ${plan.length} lessons · ${totalChars.toLocaleString()} spoken chars ≈ $${estUsd.toFixed(2)} ceiling (skips are free)`);
+  console.log(`voice-catalog · ${S.SETTINGS_VERSION} · ${nLesson} lessons + ${nIntro} domain intros · ${totalChars.toLocaleString()} spoken chars ≈ $${estUsd.toFixed(2)} ceiling (skips are free)`);
   const byTrack = {};
   for (const p of plan) byTrack[`${p.vendor}/${p.track}`] = (byTrack[`${p.vendor}/${p.track}`] ?? 0) + 1;
-  for (const [t, n] of Object.entries(byTrack)) console.log(`  · ${t}: ${n} lessons`);
+  for (const [t, n] of Object.entries(byTrack)) console.log(`  · ${t}: ${n} units`);
 
   if (!render) {
     console.log("\nDRY RUN (default) — nothing rendered, nothing spent. Re-run with --render.");
     await mkdir(out, { recursive: true });
     await writeFile(path.join(out, "plan.json"),
-      JSON.stringify(plan.map(({ vendor, track, domain, id, chars, hash, s3key, slotId }) =>
-        ({ vendor, track, domain, id, chars, hash, s3key, slotId })), null, 2));
+      JSON.stringify(plan.map(({ vendor, track, domain, kind, id, chars, hash, s3key, slotId }) =>
+        ({ vendor, track, domain, kind, id, chars, hash, s3key, slotId })), null, 2));
     console.log(`plan → ${out}/plan.json`);
     return;
   }
@@ -138,4 +183,9 @@ async function main() {
   console.log(`bindings → ${out}/bindings.json — bind into media_bindings as the separate, deliberate next step.`);
 }
 
-main().catch((err) => { console.error(err.message ?? err); process.exit(1); });
+// Run ONLY as a program. The module also exports introBody for tests, and an
+// import must never kick off a job that can spend money — the same reason the
+// render itself is opt-in behind --render.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => { console.error(err.message ?? err); process.exit(1); });
+}
