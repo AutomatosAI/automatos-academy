@@ -260,6 +260,7 @@ app.use(
   createCatalogRouter(getContentIndex, {
     getPool: () => spinePool,
     getBindings: (v, t) => (bindingsCache ? bindingsCache.get(v, t) : null),
+    getMediaVersion: () => (bindingsCache ? bindingsCache.mediaVersion() : "none"),
     getOverride: (k, v, t, d) => (contentOverrides ? contentOverrides.get(k, v, t, d) : null),
   }),
 );
