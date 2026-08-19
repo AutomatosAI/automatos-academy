@@ -27,3 +27,20 @@ data/
 public/content/**/*.mp4
 public/content/**/*.mp3
 public/content/**/*.m4a
+
+# Staging area for the CDN upload lane. deploy-media.yml reads it from a
+# THROWAWAY branch via --ref; it must never merge to main. #93 did exactly
+# that and put 345 MiB of audio into the tree, duplicating bytes that already
+# live on the CDN.
+#
+# Ignored on purpose, so committing it takes a deliberate act:
+#   git checkout -b chore/stage-<thing>
+#   git add -f media-staging/<vendor>/...      <- -f is required, and is the point
+#   git push -u origin chore/stage-<thing>
+#   gh workflow run deploy-media.yml --ref chore/stage-<thing> ...
+#   git push origin --delete chore/stage-<thing>
+#
+# Audio over 100 MiB cannot use this lane at all - GitHub rejects it at the
+# pre-receive hook. Re-encode to mono first (the NotebookLM files are mono
+# duplicated into stereo, so it costs nothing) or push straight to the bucket.
+media-staging/
