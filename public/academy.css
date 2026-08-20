@@ -667,11 +667,16 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .55s ease; pointer-events: none; }
 .ac-hero__slide.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
 
+/* bottom-band watermark — hugs the hero's bottom edge and bleeds slightly
+   below it (the hero clips), so the letterforms fill the base of the page
+   instead of rising into the CTA row. Centred and sized to span the width
+   whole — no more clipped Y off the right edge. */
 .ac-hero__watermark {
-  position: absolute; left: -2%; bottom: 4%; width: 130%; z-index: 1;
-  font-family: var(--display); font-weight: 800; font-size: clamp(110px, 20vw, 300px);
-  line-height: 0.8; letter-spacing: -0.05em; color: rgba(255,255,255,0.22);
-  transform: scaleX(1.12); transform-origin: left; white-space: nowrap; pointer-events: none; user-select: none;
+  position: absolute; left: 50%; bottom: 0; z-index: 1;
+  font-family: var(--display); font-weight: 800; font-size: clamp(100px, min(19vw, 34vh), 290px);
+  line-height: 0.75; letter-spacing: -0.045em; color: rgba(255,255,255,0.22);
+  transform: translateX(-50%) translateY(24%); transform-origin: 50% 100%;
+  white-space: nowrap; pointer-events: none; user-select: none;
 }
 /* the hero brain — a still <img> or the animated brain <video> (extracted from
    the .fig). object-fit cover + a radial mask fade the video's rectangular edges
@@ -751,13 +756,25 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__avatars img:last-child { margin-right: 0; }
 
 /* hero stat widgets (mock 1a) */
-.ac-hero__stats { position: absolute; z-index: 5; width: 234px; padding: 20px; border-radius: var(--radius-lg); background: rgba(39,60,89,0.20); border: 1px solid rgba(255,255,255,0.24); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; }
+.ac-hero__stats { position: absolute; z-index: 5; width: 252px; padding: 20px; border-radius: var(--radius-lg); background: rgba(39,60,89,0.20); border: 1px solid rgba(255,255,255,0.24); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; }
 .ac-hero__stats .big { font-family: var(--display); font-weight: 700; font-size: 34px; color: #fff; }
 .ac-hero__stats .cap { font-size: 13px; color: rgba(255,255,255,0.75); }
-.ac-hero__stats .mini { display: flex; gap: 10px; margin-top: 18px; }
-.ac-hero__stats .mini > div { flex: 1; background: rgba(255,255,255,0.13); border-radius: var(--radius); padding: 12px; text-align: left; }
-.ac-hero__stats .mini b { display: block; font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; margin-top: 26px; }
+/* mini tiles — a 2-col grid, not a flex row: the tile count is data-driven
+   (/api/catalog/stats grew a 4th tile the day podcasts crossed zero) and a
+   one-row flex overflowed the card and ran off the viewport. The grid wraps
+   any count; an odd last tile spans the full width so no cell gapes. */
+.ac-hero__stats .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.ac-hero__stats .mini > div { min-width: 0; background: rgba(255,255,255,0.13); border-radius: var(--radius); padding: 11px; text-align: left; }
+.ac-hero__stats .mini > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.ac-hero__stats .mini b { display: block; font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; margin-top: 10px; }
 .ac-hero__stats .mini span { font-size: 12px; color: rgba(255,255,255,0.7); }
+/* narrow desktop (mobile layout takes over below 900px): the 2x2 card is
+   taller than the old one-row card, so lift it clear of the corner mark —
+   !important because the JS positions widgets with inline styles (same
+   mechanism the mobile block already uses for the play button) */
+@media (min-width: 901px) and (max-width: 1440px) {
+  .ac-hero__stats { top: 26% !important; }
+}
 /* personal readiness card — the stats shell laid out around the conic ring
    (ui.js ring(); its centre disc stays var(--bg), the house donut look) */
 .ac-hero__stats.is-ready { width: auto; display: flex; align-items: center; gap: 14px; text-align: left; padding: 16px 20px; }
@@ -832,7 +849,10 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .ac-glass { top: auto !important; left: auto !important; right: 5% !important; bottom: 34% !important; padding: 9px 13px !important; }
   .ac-hero__stats { top: auto !important; right: auto !important; left: 4% !important; bottom: 12% !important; width: 166px !important; padding: 13px !important; }
   .ac-hero__stats .big { font-size: 27px; }
-  .ac-hero__stats .mini b { margin-top: 16px; }
+  /* phones get the headline stat only — four mini tiles never fit a 166px
+     card (pre-grid they overflowed the viewport; as a grid they stack into
+     a tower over the CTAs). The tiles are desktop detail. */
+  .ac-hero__stats .mini { display: none; }
   .ac-hero__insights { top: auto !important; left: auto !important; right: 4% !important; bottom: 12% !important; width: 162px !important; padding: 13px !important; }
 }
 
