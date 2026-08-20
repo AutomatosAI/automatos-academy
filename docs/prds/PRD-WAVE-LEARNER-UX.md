@@ -111,6 +111,48 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 - [ ] T-1 day (exam date known): the plan flips to final-review mode — weakest domains, no new content, and a written send-off
 - [ ] Day after: one check-in — "How did it go?" Pass → congratulations + next-track suggestion + (only then) a review/testimonial ask. Not passed → re-plan without shame, retake pacing
 
+## Thread D · the tutor becomes a member benefit
+
+The tutor is the product's most expensive surface and its least controlled: the web
+client POSTs **directly to the platform's widget endpoint** (`tutor.js:177` →
+`{apiBase}/api/widgets/chat`, public key, SSE) — no auth, no metering, no ceiling on
+what a free anonymous visitor can spend. Gating it is cost control AND the strongest
+sign-in reason the product has (stronger than LX-12's backup nudge — this one gives
+something, not just protects something).
+
+### LX-15 · Sign-in gate + server-enforced quota `[server] [web] [app]`
+**As the operator of a free app, I can bound what tutor chat costs; as a learner, I know exactly what I get.**
+
+The academy server gains an authenticated proxy — `POST /api/tutor/chat` (Clerk-verified)
+→ forwards to the platform widget endpoint → streams back. Both clients switch to it.
+Enforcement lives server-side; client gating is UX, never the control.
+
+- [ ] Signed-out request → 401 with a friendly body; signed-in over quota → 429 with reset time
+- [ ] Quota per D-LX5 (recommend 10 questions/day), counted per user message, streamed reply counts once
+- [ ] `tutor_usage` (user, day, count) upsert — resets by day boundary, no cron needed
+- [ ] The public widget key moves server-side with the proxy (no longer shipped to every browser)
+- [ ] Per-user and per-IP rate limits on the proxy independent of quota (abuse ≠ usage)
+- [ ] App `tutor.tsx` switches to the proxy with the signed-in session; signed-out app users see the same gate
+- [ ] The entitlement check is one function (`tutorAllowance(user)`) — the future paid-unlimited tier changes its return value, nothing else
+
+### LX-16 · Quota that never surprises `[web] [app]`
+**As a learner, I can see my allowance before I hit it, and hitting it feels like a boundary, not a wall.**
+
+- [ ] Tutor surface shows the meter while composing ("7 of 10 questions left today") — visible before the first send, not after the last
+- [ ] Signed-out: the tutor page stays visible (chips, examples — it is the ad); the composer is replaced by a sign-in card that names the deal: "Sign in free — 10 tutor questions a day"
+- [ ] At zero: written in the house voice — when it resets, plus what's free right now (reviews, lessons, videos) with links; never a dead end
+- [ ] Profile shows today's usage and the reset time; the app mirrors it
+- [ ] Verify in browser (dev-browser): signed-out gate, meter states, zero state, both themes
+
+### LX-17 · The feed the crawlers read `[server] [web]`
+The Wire already ships the pattern site-wide SEO needs — `/wire/rss.xml`, `/wire/sitemap.xml`,
+per-slug SEO shells (`server/wire/index.js:42-47`). Nothing else on the site is indexable.
+
+- [ ] Site-wide `/sitemap.xml`: every live track's share page (LX-4), the Wire sitemap referenced, home + method
+- [ ] `<link rel="alternate" type="application/rss+xml">` in the page head — the existing Wire RSS becomes discoverable by readers and crawlers instead of being a secret URL
+- [ ] `robots.txt` states the map; the Wire teaser on home links the feed visibly ("Follow the Wire — RSS")
+- [ ] Wire posts carry per-post OG (reuse LX-4's plumbing) so shared posts unfurl
+
 ## 4. Non-goals
 
 - No third-party analytics SDKs; first-party only
@@ -118,7 +160,9 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 - No server-side resume positions (local only) and no watch-time surveillance beyond the completion event
 - No un-completing on rewatch, ever
 - No gamification beyond the existing streak + LX-11 mercy
-- No paywall/entitlement changes anywhere in this wave
+- No billing in this wave: the paid-unlimited tutor tier is designed for (one entitlement function) but not built — no Stripe, no plans UI
+- No tutor model/prompt changes — this wave meters access, it does not touch answer quality
+- No other paywall/entitlement changes anywhere
 
 ## 5. Decision boxes (Gerard)
 
@@ -128,6 +172,9 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 | D-LX2 | Completion visibility signed-out | **Show locally signed-out, sync on sign-in** (platform's local-first pattern; nothing lost arriving anonymous). Alternative per the original ask: render ✓ only when signed in — cleaner profile story, but punishes the anonymous first-timer the wave is for |
 | D-LX3 | Streak-mercy mechanic | **Repair-by-doing** (finish anything today → yesterday restored, 1×/week) over freeze tokens — no inventory to explain, keeps the habit honest |
 | D-LX4 | History-API URLs now or later | Ship titles/OG now (LX-4); route migration as its own follow-up PR — it touches every internal link |
+| D-LX5 | Tutor quota size + period | **10 questions/day, resets at midnight UTC, shown in the learner's local time.** Daily beats weekly: predictable cost ceiling, and a daily allowance is a return-visit reason. Weekly invites binge-and-vanish |
+| D-LX6 | Signed-out tutor page | **Page visible, composer gated** with the deal named ("Sign in free — 10 questions a day"). The page is the ad; hard-hiding it kills the conversion it exists to drive. Alternative (fully hidden) only if abuse appears |
+| D-LX7 | Where quota is enforced | **Academy-side authenticated proxy** (`/api/tutor/chat`). Alternative — platform-side per-widget-key metering — spans repos and can't see Academy identity; the proxy also stops shipping the widget key to every browser |
 
 ## 6. Sequencing
 
@@ -135,7 +182,9 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 2. **LX-4 + LX-5** together (share pages and events share plumbing)
 3. **LX-7 + LX-8 + LX-10** (the polish-and-guide pass) · **LX-9** in the app alongside
 4. **LX-12 → LX-13** (nudge, then the growth loop; LX-13 reuses LX-4's OG work)
-5. **LX-11 → LX-14** (mechanics last — they're policy, small code)
+5. **LX-15 → LX-16** (the cost hole closes early — proxy first, then the meter UX; LX-15 can land right after LX-1's server work while the same files are open)
+6. **LX-17** rides LX-4's share-page PR (same sitemap plumbing)
+7. **LX-11 → LX-14** (mechanics last — they're policy, small code)
 
 ## 7. Success metrics
 
@@ -144,10 +193,14 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 - Return: D7 return rate of first-timers, before vs after LX-8/10
 - Conversion: sign-in rate within 3 sessions of the LX-12 nudge (vs silent baseline)
 - Reach: track-page impressions from search + share-link unfurls (LX-4/13) — any nonzero is new
+- Cost: tutor spend per user per day is bounded by construction (quota × per-question cost); total tutor spend becomes forecastable
+- Tutor conversion: sign-ins attributed to the tutor gate (the LX-5 `signed_in` event gains a `from` field) — expected to beat every other prompt
 - Voice: zero internal vocabulary tokens (DIFF-n, raw API strings, raw markdown) on learner surfaces — checkable by the LX-6 guard
 
 ## 8. Open questions
 
 - Narration "listened" per lesson: does it also count toward lesson completion, or stay a separate ✓? (Lean separate — reading and listening are both real completions of different things.)
 - Do overview videos (v-ov-*) count in track media totals, or only teaching media? (Lean: count everything listed on the page; the totals must match what the eye sees.)
+- "New feed" interpretation check: this PRD reads it as the Wire made publicly discoverable (LX-17) — RSS advertised, site-wide sitemap, posts unfurling. If a *new* feed surface was meant (e.g. a learner activity feed), that is a different story — confirm before LX-17 builds
+- Does the tutor quota also meter the in-lesson "ask about this" entry points (question.js), or only the tutor page? (Lean: one allowance for all tutor entry points — one number a learner can hold in their head.)
 - LX-5 storage: new table vs the Spine's existing event stream — whichever the Spine's owner prefers; the PRD only requires the six events be queryable.
