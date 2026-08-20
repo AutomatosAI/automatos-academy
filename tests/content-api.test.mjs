@@ -128,6 +128,9 @@ for (const vendor of manifest.vendors) {
     const trackPath = join(CONTENT, vendor.id, t.trackId, "track.json");
     if (!existsSync(trackPath)) continue; // live-but-contentless would be skipped by the index too
     expected.liveTracks++;
+    // track-level videos (course-overview cards) count alongside domain ones;
+    // with no bindings getter mounted here, /stats counts baked urls only
+    expected.videos += (readJson(trackPath).videos || []).filter((v) => typeof v.url === "string" && v.url.trim() !== "").length;
     for (const df of readJson(trackPath).domainFiles || []) {
       const d = readJson(join(CONTENT, vendor.id, t.trackId, df));
       for (const l of d.lessons || []) {

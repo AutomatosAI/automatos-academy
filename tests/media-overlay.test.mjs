@@ -146,6 +146,8 @@ console.log("catalog router serves the overlay + a binding-busted ETag");
 const idx = {
   contentVersion: "v1",
   generatedAt: "t",
+  // manifest carries the live set — computeContentStats (GET /stats) reads it
+  manifest: { data: { vendors: [{ id: "anthropic", tracks: [{ trackId: "cca-f", status: "live" }] }] } },
   tracks: new Map([["anthropic/cca-f", {
     track: { data: JSON.parse(JSON.stringify(track)), hash: "htrack" },
     domains: new Map([["d1", { data: { name: "D1", videos: [{ id: "v-dm-1", status: "placeholder", url: "" }] }, hash: "hd1" }]]),
@@ -195,6 +197,33 @@ async function serveWith(getBindings) {
   body = await r.json();
   ok(body.videos[0].status === "published" && body.videos[0].url.endsWith("v-dm-1-x.mp4"), "domain endpoint: a bound domain video serves published");
   ok(r.headers.get("etag") !== etagNoBind, "domain endpoint ETag busts on the binding version");
+  await bound.close();
+}
+
+// GET /stats counts bound videos — the hero's numbers must agree with what
+// the track and domain routes actually serve, not with the content files
+// alone. Fixture truth: track.json bakes ONE url (v-ov-1) and leaves v-d1-1
+// unlit; domain d1 leaves v-dm-1 unlit.
+console.log("stats unions bound videos with baked ones");
+{
+  const plain = await serveWith(() => null);
+  let r = await plain.get("/api/catalog/stats");
+  let body = await r.json();
+  ok(r.status === 200 && body.videos === 1, `no bindings → baked count only (videos=${body.videos})`);
+  ok(!("unboundVideoSlots" in body), "working state never leaks into the payload");
+  await plain.close();
+
+  const statsBySlot = new Map([
+    ["v-d1-1:video", { url: `${CDN}/academy/anthropic/cca-f/v-d1-1-a.mp4` }],
+    ["v-dm-1:video", { url: `${CDN}/academy/anthropic/cca-f/v-dm-1-x.mp4` }],
+    ["v-ov-1:video", { url: `${CDN}/academy/anthropic/cca-f/v-ov-1-b.mp4` }], // re-points a BAKED slot — must not double-count
+    ["a-l1:audio", { url: `${CDN}/academy/a.mp3`, size: 960000 }],
+  ]);
+  const bound = await serveWith((v, t) => (v === "anthropic" && t === "cca-f" ? { bySlot: statsBySlot, version: "statver12345" } : null));
+  r = await bound.get("/api/catalog/stats");
+  body = await r.json();
+  ok(body.videos === 3, `bound slots join the count, re-bound baked slots don't double (videos=${body.videos})`);
+  ok(body.audioLessons === 1 && body.audioMinutes === 1, "audio stats ride the same bindings pass");
   await bound.close();
 }
 
