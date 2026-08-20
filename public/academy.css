@@ -667,15 +667,16 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .55s ease; pointer-events: none; }
 .ac-hero__slide.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-/* bottom-band watermark — hugs the hero's bottom edge and bleeds slightly
-   below it (the hero clips), so the letterforms fill the base of the page
-   instead of rising into the CTA row. Centred and sized to span the width
-   whole — no more clipped Y off the right edge. */
+/* bottom-band watermark — the whole word rests just above the hero's bottom
+   edge, fully visible: no below-the-fold bleed (it read as cropped letters)
+   and sized so the Y never clips the right edge (ACADEMY runs ~5.5em wide
+   in Funnel Display 800, so 16vw ≈ 88vw of word). vh term keeps squat
+   windows from riding it up into the CTA column. */
 .ac-hero__watermark {
-  position: absolute; left: 50%; bottom: 0; z-index: 1;
-  font-family: var(--display); font-weight: 800; font-size: clamp(100px, min(19vw, 34vh), 290px);
-  line-height: 0.75; letter-spacing: -0.045em; color: rgba(255,255,255,0.22);
-  transform: translateX(-50%) translateY(24%); transform-origin: 50% 100%;
+  position: absolute; left: 50%; bottom: 2%; z-index: 1;
+  font-family: var(--display); font-weight: 800; font-size: clamp(80px, min(16vw, 26vh), 240px);
+  line-height: 0.78; letter-spacing: -0.045em; color: rgba(255,255,255,0.22);
+  transform: translateX(-50%);
   white-space: nowrap; pointer-events: none; user-select: none;
 }
 /* the hero brain — a still <img> or the animated brain <video> (extracted from
