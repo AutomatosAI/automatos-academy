@@ -667,17 +667,18 @@ a.verify-chip:hover { background: var(--accent-soft); }
 .ac-hero__slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .55s ease; pointer-events: none; }
 .ac-hero__slide.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-/* bottom-band watermark — big, whole, and FLUSH: every letterform fully
-   visible (no below-the-fold bleed — it read as cropped) with the baseline
-   sitting on the hero's bottom edge (the small translateY swallows the
-   font's internal baseline-to-box gap, not glyph pixels). ACADEMY runs
-   ~4.75em in Funnel Display 800, so 18.5vw ≈ 88vw of word with clear
-   margins; the vh term keeps squat windows from riding it up into the CTAs. */
+/* bottom-band watermark — big, whole, and flush. NO vertical offset: at
+   line-height 0.76 Funnel Display's ink ends 3px above the box bottom
+   (measured by pixel-scan, not estimated — an 8% translateY here cut 20px
+   off every letterform on retina). bottom: 0 alone puts the glyph bottoms
+   ~1px off the hero's edge: sitting on the line, nothing amputated.
+   ACADEMY runs ~4.75em wide, so 18.5vw ≈ 88vw of word with clear margins;
+   the vh term keeps squat windows from riding it up into the CTAs. */
 .ac-hero__watermark {
   position: absolute; left: 50%; bottom: 0; z-index: 1;
   font-family: var(--display); font-weight: 800; font-size: clamp(96px, min(18.5vw, 30vh), 285px);
   line-height: 0.76; letter-spacing: -0.045em; color: rgba(255,255,255,0.22);
-  transform: translateX(-50%) translateY(8%); transform-origin: 50% 100%;
+  transform: translateX(-50%);
   white-space: nowrap; pointer-events: none; user-select: none;
 }
 /* the hero brain — a still <img> or the animated brain <video> (extracted from
