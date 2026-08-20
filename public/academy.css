@@ -659,7 +659,14 @@ a.verify-chip:hover { background: var(--accent-soft); }
    ========================================================================== */
 .ac-hero {
   position: relative; width: 100%; overflow: hidden;
-  height: clamp(600px, 84vh, 840px);
+  /* the first screen, whole: viewport minus the 58px in-flow topbar (the
+     height .subnav's sticky top already hardcodes). The old 840px cap left
+     a dead band under the hero on every display taller than ~900px - the
+     next section's blank top filled the rest of the fold. No max: taller
+     screen, taller hero; everything inside is %-positioned and scales. */
+  height: calc(100vh - 58px);
+  height: calc(100svh - 58px);
+  min-height: 600px;
   background: var(--gradient-mist);
 }
 /* two full-bleed slides (image + video) cross-fade; the pager + corner are
