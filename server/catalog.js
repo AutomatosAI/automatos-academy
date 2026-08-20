@@ -231,9 +231,28 @@ export function computeContentStats(idx) {
   }
   let liveTracks = 0, lessons = 0, learningMinutes = 0, questions = 0, scenarios = 0, labs = 0, videos = 0;
   const podcasts = (idx.podcasts?.data?.episodes || []).length;
-  for (const [key, { domains }] of idx.tracks) {
+  // Video slots whose url is NOT baked into the content tree, per track key.
+  // Bound videos (media_bindings) publish at serve time via overlayVideos, so
+  // the content files alone under-count what a learner can actually play —
+  // the /stats route unions these slots with the live bindings, the same
+  // truth the track and domain routes serve. (Counting files only, and only
+  // domain files, had the hero at 59 videos while the pages served 96.)
+  const unboundVideoSlots = new Map();
+  const countVideos = (key, list) => {
+    for (const v of list || []) {
+      // baked = a learner can press play with no binding involved
+      if (typeof v.url === "string" && v.url.trim() !== "") videos += 1;
+      else if (v.id) {
+        let slots = unboundVideoSlots.get(key);
+        if (!slots) unboundVideoSlots.set(key, (slots = []));
+        slots.push(v.id);
+      }
+    }
+  };
+  for (const [key, { track, domains }] of idx.tracks) {
     if (!live.has(key)) continue;
     liveTracks += 1;
+    countVideos(key, track.data.videos); // track-level: the course-overview cards
     for (const { data: d } of domains.values()) {
       for (const l of d.lessons || []) {
         lessons += 1;
@@ -245,11 +264,10 @@ export function computeContentStats(idx) {
       questions += (d.questions || []).length;
       scenarios += (d.scenarios || []).length;
       labs += (d.labs || []).length;
-      // only videos a learner can actually press play on
-      videos += (d.videos || []).filter((v) => typeof v.url === "string" && v.url.trim() !== "").length;
+      countVideos(key, d.videos);
     }
   }
-  return { liveTracks, lessons, learningMinutes, questions, scenarios, labs, videos, podcasts };
+  return { liveTracks, lessons, learningMinutes, questions, scenarios, labs, videos, podcasts, unboundVideoSlots };
 }
 
 // Learner numbers for GET /stats — only on deploys where the Spine's pg pool
@@ -366,12 +384,12 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
       contentStatsCache.set(idx, content);
     }
     const learners = await learnerStats(); // never throws — nulls on any failure
-    // Audio narration stats come from media_bindings (PRD-VOICE §8.1), not the
-    // content tree — computed fresh because bindings refresh on their own
-    // 30s cadence, outside the idx-keyed cache. Minutes assume the pipeline's
-    // constant 128kbps (16,000 bytes/s) and round DOWN — never promise more
-    // listening than we shipped.
-    let audioLessons = 0, audioBytes = 0;
+    // Audio narration AND bound-video counts come from media_bindings
+    // (PRD-VOICE §8.1 / C3), not the content tree — computed fresh because
+    // bindings refresh on their own 30s cadence, outside the idx-keyed cache.
+    // Minutes assume the pipeline's constant 128kbps (16,000 bytes/s) and
+    // round DOWN — never promise more listening than we shipped.
+    let audioLessons = 0, audioBytes = 0, boundVideos = 0;
     if (typeof getBindings === "function") {
       for (const key of idx.tracks.keys()) {
         const [v, t] = key.split("/");
@@ -383,13 +401,20 @@ export function createCatalogRouter(idxOrGetter, opts = {}) {
             audioBytes += Number(bind.size || 0);
           }
         }
+        // videos: only slots the content tree left unlit, so a binding that
+        // merely re-points an already-baked url is never double-counted
+        for (const slot of content.unboundVideoSlots.get(key) || []) {
+          if (b.bySlot.has(`${slot}:video`)) boundVideos += 1;
+        }
       }
     }
     const audioMinutes = Math.floor(audioBytes / (16000 * 60));
     res.set("X-Content-Version", idx.contentVersion);
     res.set("Cache-Control", "public, max-age=300");
     res.set("Access-Control-Allow-Origin", "*");
-    res.json({ ...content, audioLessons, audioMinutes, ...learners });
+    // unboundVideoSlots is working state (and a Map — not JSON), not payload
+    const { unboundVideoSlots, ...publicStats } = content;
+    res.json({ ...publicStats, videos: content.videos + boundVideos, audioLessons, audioMinutes, ...learners });
   });
 
   // Fixed segments before parameterised routes — /paths and /levels must win
