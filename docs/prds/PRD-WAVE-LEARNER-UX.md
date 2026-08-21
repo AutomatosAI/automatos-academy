@@ -56,10 +56,12 @@ The web store and app engine gain one event shape: `{ kind: video|podcast|narrat
 ## Thread B · the review's ranked fixes
 
 ### LX-4 · Every page becomes its own page `[web]`
+Per D-LX4: the full job lands in this wave — titles, OG, and real URLs together.
 - [ ] `document.title` per route (track pages: "GH-500 — GitHub Advanced Security · Automatos Academy")
 - [ ] Per-track share pages with real OG tags, server-emitted from the catalog (name, blurb, stats, brain art)
+- [ ] History-API routing: `/t/github/gh-500` is a real, rankable URL; every `#/...` link redirects to its clean twin so nothing bookmarked ever breaks
+- [ ] Server serves the SPA shell on all route paths (deep-load works); LX-17's sitemap lists the clean URLs
 - [ ] Unknown-track error page speaks the written-404 voice, not `404 /api/catalog/...`
-- [ ] (Stretch, own PR) History-API URLs so `/t/github/gh-500` is rankable; hash URLs 301-equivalent redirect
 
 ### LX-5 · First-party funnel events `[web] [server]`
 Six events, one table, no third-party: `arrived`, `pathfinder_answered(door)`, `track_viewed`, `lesson_opened`, `first_question_answered`, `signed_in` — plus LX-1's media events. Anonymous id = the existing local-store id; joins to user on sign-in.
@@ -101,7 +103,8 @@ The next-step selector (`next-step.js`, PRD-WEB-LOOP §4.4) already answers this
 - [ ] Copy is honest about it ("streak repaired — 12 days") — real numbers, mercy visible, never silent
 
 ### LX-12 · The backup nudge `[web] [app]`
-- [ ] On first domain completed signed-out: one card — "Everything you've done lives only on this device. Sign in and it's safe everywhere." Once, dismissible, at a moment of pride not a popup on arrival
+- [ ] On first domain completed signed-out: one card — "Everything you've done lives only on this browser. Clear it, lose the phone, or stay away long enough and it's gone. Sign in free and it's safe everywhere." Once, dismissible, at a moment of pride not a popup on arrival
+- [ ] (Per D-LX2) The copy is honest about the real risks — device loss, cleared data, Safari's eviction of long-idle storage — without fear-mongering the daily case, which is safe
 
 ### LX-13 · The certificate becomes shareable `[web] [server]`
 - [ ] `/cert/:payload` page gets per-cert OG tags (badge name, track, A+ standard note) so a LinkedIn paste unfurls properly
@@ -164,22 +167,22 @@ per-slug SEO shells (`server/wire/index.js:42-47`). Nothing else on the site is 
 - No tutor model/prompt changes — this wave meters access, it does not touch answer quality
 - No other paywall/entitlement changes anywhere
 
-## 5. Decision boxes (Gerard)
+## 5. Decision boxes — RESOLVED 2026-08-21 (Gerard)
 
-| # | Decision | Recommendation |
+| # | Decision | Resolution |
 |---|---|---|
-| D-LX1 | What auto-marks media complete | `ended` OR ≥90% position. Podcasts (60min): same rule — 90% of an episode is a real listen. Alternative: per-chapter, deferred until chapters exist |
-| D-LX2 | Completion visibility signed-out | **Show locally signed-out, sync on sign-in** (platform's local-first pattern; nothing lost arriving anonymous). Alternative per the original ask: render ✓ only when signed in — cleaner profile story, but punishes the anonymous first-timer the wave is for |
-| D-LX3 | Streak-mercy mechanic | **Repair-by-doing** (finish anything today → yesterday restored, 1×/week) over freeze tokens — no inventory to explain, keeps the habit honest |
-| D-LX4 | History-API URLs now or later | Ship titles/OG now (LX-4); route migration as its own follow-up PR — it touches every internal link |
-| D-LX5 | Tutor quota size + period | **10 questions/day, resets at midnight UTC, shown in the learner's local time.** Daily beats weekly: predictable cost ceiling, and a daily allowance is a return-visit reason. Weekly invites binge-and-vanish |
-| D-LX6 | Signed-out tutor page | **Page visible, composer gated** with the deal named ("Sign in free — 10 questions a day"). The page is the ad; hard-hiding it kills the conversion it exists to drive. Alternative (fully hidden) only if abuse appears |
-| D-LX7 | Where quota is enforced | **Academy-side authenticated proxy** (`/api/tutor/chat`). Alternative — platform-side per-widget-key metering — spans repos and can't see Academy identity; the proxy also stops shipping the widget key to every browser |
+| D-LX1 | What auto-marks media complete | ✅ **`ended` OR ≥90% position**, podcasts included |
+| D-LX2 | Completion visibility signed-out | ✅ **Local-first as recommended.** Persistence clarified for the record: leave-and-return on the same browser keeps everything (persistent storage, same as signed-out lesson progress today). Real loss risks: cleared browser data, incognito, another device — and Safari may evict after ~7 days away. That risk is LX-12's job; its nudge copy names it |
+| D-LX3 | Streak-mercy mechanic | ✅ **Repair-by-doing** (finish anything today → yesterday restored, 1×/week) |
+| D-LX4 | History-API URLs now or later | ✅ **All now** — real URLs land in this wave inside LX-4, with hash-URL redirects for every existing link |
+| D-LX5 | Tutor quota size + period | ✅ **10/day**, resets midnight UTC, shown local |
+| D-LX6 | Signed-out tutor page | ✅ **Always visible, composer gated.** Confirmed: the page renders for everyone (chips, examples, pitch); only the composer swaps — sign-in card signed-out, reset-time zero-state at quota |
+| D-LX7 | Where quota is enforced | ✅ **Academy proxy — settled by the architecture itself.** Gerard's grounding fact: the Academy is ONE Automatos workspace; the platform sees one widget key and cannot tell learners apart, so platform-side per-user metering is impossible, not just worse. The proxy requires zero Automatos changes — the platform keeps seeing exactly today's traffic shape; identity and counting happen academy-side (Clerk) before forwarding |
 
 ## 6. Sequencing
 
 1. **LX-6** (half-day, trust on a deciding page) → **LX-1 → LX-2 → LX-3** (the reported bug; server first, clients ride the seam)
-2. **LX-4 + LX-5** together (share pages and events share plumbing)
+2. **LX-4 + LX-5** together (share pages and events share plumbing). LX-4 now carries the URL migration (D-LX4: all now) — budget it as the wave's largest single story and land redirects in the same PR as the router change, never split
 3. **LX-7 + LX-8 + LX-10** (the polish-and-guide pass) · **LX-9** in the app alongside
 4. **LX-12 → LX-13** (nudge, then the growth loop; LX-13 reuses LX-4's OG work)
 5. **LX-15 → LX-16** (the cost hole closes early — proxy first, then the meter UX; LX-15 can land right after LX-1's server work while the same files are open)
