@@ -108,7 +108,7 @@ function shellHtml(t, track) {
 // (D-W5: review mode claims the human review that is actually happening).
 function wireIndexHtml() {
   const pageUrl = `${BASE}/wire/`;
-  const label = transparencyLabel(process.env.WIRE_PUBLISH_POLICY === "auto" ? "auto" : "review");
+  const label = transparencyLabel(process.env.ACADEMY_WIRE_REVIEWED);
   const title = "The Wire — agent-written, source-verified AI news · Automatos Academy";
   const desc = "Daily briefings researched and written by Automatos agents — model news, trends, new courses and question refreshes. Every claim linked to its source, every correction in the open.";
   return `<!doctype html>

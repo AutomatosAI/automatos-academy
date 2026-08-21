@@ -15,7 +15,7 @@
 // deploys (DEPLOY.md Option A) keep working untouched.
 import { el, clear } from "../ui.js";
 import { url , setTitle } from "../router.js";
-import { md } from "../markdown.js";
+import { sanitizeHtml } from "../sanitize-html.js";
 import { track as tk } from "../analytics.js";
 
 // Fallback only for older caches — the live label rides every API response.
@@ -277,7 +277,7 @@ export async function wirePostView(ctx) {
       el("span", { class: "mono-label", text: bylineText }),
       label(data.transparency || LABEL_FALLBACK),
     ]),
-    el("div", { class: "prose wire-body", html: md(p.bodyMd) }),
+    el("div", { class: "prose wire-body", html: sanitizeHtml(p.body_html) }),
     sourcesBox,
     corrections,
     el("p", { style: { marginTop: "26px" } }, [el("a", { class: "ac-btn", href: url.wire() }, ["← All Wire posts"])]),

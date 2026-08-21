@@ -1,10 +1,10 @@
-// The Wire's feed (PRD-WIRE §4.6, D-W4 decided: RSS now). Served from the DB
-// per request at the PRD's real path /wire/rss.xml — Atom 1.0 underneath,
+// The Wire's feed (PRD-WIRE §4.6, D-W4 decided: RSS now). Served per request
+// from the Automatos blog API at the PRD's real path /wire/rss.xml — Atom 1.0 underneath,
 // because the PRD requires a per-entry <updated> that reflects corrections,
 // which RSS 2.0 has no element for. RSS is both distribution AND honesty:
-// every entry carries its source links (the feed carries the verification,
-// not just the claims), and anyone can audit the Wire's history from a feed
-// reader.
+// every entry carries its source links when the post has any. (Posts
+// authored on the platform carry no structured sources — blog_posts has no
+// column for them — so those entries omit the block rather than fake it.)
 //
 // buildFeedXml is pure (posts in, XML out) so tests cover escaping and shape
 // without a server; the handler owns the query + headers.
@@ -15,13 +15,6 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
 
 const iso = (v) => new Date(v).toISOString();
 
-// Latest 50 published, newest first — the same visibility rule as the list
-// API, so unpublish vanishes a post from the feed on the next request.
-export const RSS_SQL = `
-  SELECT slug, type, tags, title, summary, sources, corrections, byline, published_at, updated_at
-  FROM wire_posts WHERE status = 'published'
-  ORDER BY published_at DESC LIMIT 50
-`;
 
 /** Per-entry HTML body: summary, the sources block, corrections when present
  *  — all escaped, then XML-escaped once more as <content type="html"> text. */
@@ -33,13 +26,13 @@ function entryHtml(post) {
     `<li>${esc(String(c.at).slice(0, 10))}: ${esc(c.note)}</li>`,
   ).join("");
   return `<p>${esc(post.summary)}</p>` +
-    `<p>Sources:</p><ul>${sources}</ul>` +
+    (sources ? `<p>Sources:</p><ul>${sources}</ul>` : "") +
     (corrections ? `<p>Corrections:</p><ul>${corrections}</ul>` : "");
 }
 
 /**
  * @param {{posts: Array, baseUrl: string, label: string}} opts — posts are
- *        wire_posts rows (snake_case timestamps); label is the transparency
+ *        mapped posts (see wire-api.js); label is the transparency
  *        label (D-W5), carried as the feed subtitle.
  */
 export function buildFeedXml({ posts, baseUrl, label }) {
@@ -73,12 +66,13 @@ ${entries}
 `;
 }
 
-/** GET /wire/rss.xml — per-request from the DB (posts published after boot
- *  must appear; unpublished must vanish). Errors 500 as JSON, never a stack. */
-export function createRssHandler({ pool, label }) {
+/** GET /wire/rss.xml — fetched per request from the Automatos blog API (a
+ *  post published after boot must appear; an unpublished one must vanish, and
+ *  the platform owns both states). Errors 500 as JSON, never a stack. */
+export function createRssHandler({ client, label }) {
   return async function rssHandler(req, res) {
     try {
-      const { rows } = await pool.query(RSS_SQL);
+      const { posts: rows } = await client.listPosts({ perPage: 50 });
       const baseUrl = `${req.protocol}://${req.get("host")}`;
       res.set("Content-Type", "application/atom+xml; charset=utf-8");
       res.set("Cache-Control", "public, max-age=60");

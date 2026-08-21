@@ -100,15 +100,20 @@ if (CONTENT_SOURCE === "db") {
   );
 }
 
+// The Academy's Automatos workspace. Not a secret — it names whose posts and
+// whose agent to show, exactly as the landing site ships its workspace id in
+// client JS. Railway's ACADEMY_WORKSPACE_ID overrides it.
+const DEFAULT_WORKSPACE_ID = "894519f4-9fc3-40eb-bb9f-081e5b113a58";
+
 // SEO landing shells + sitemap render FROM THE INDEX (PRD-U3 S4 — the index
 // exists first; shells never re-read disk). Failure is non-fatal — the SPA
 // serves fine without shells. Wire-enabled deploys additionally get the
-// static /wire/ index shell + the robots.txt line pointing at the DB-served
+// static /wire/ index shell + the robots.txt line pointing at
 // /wire/sitemap.xml (PRD-WIRE S3 — post shells themselves are per-request,
 // mounted with the Wire below).
 try {
   const { generateShells } = await import("./scripts/generate-shells.mjs");
-  generateShells(getContentIndex(), { wire: !!process.env.WIRE_INGEST_KEY });
+  generateShells(getContentIndex(), { wire: !!(process.env.ACADEMY_WORKSPACE_ID || DEFAULT_WORKSPACE_ID) });
 } catch (e) { console.warn("[shells] generation skipped:", e.message); }
 
 // ── Hydrate the tutor's chat config from env at startup ───────────────
@@ -354,28 +359,28 @@ if (process.env.SPINE_ENABLED === "true") {
   console.log(`[admin] console mounted (/api/admin/users, /api/billing) — billing configured=${admin.billing.configured}`);
 }
 
-// ── The Wire — agent-verified news: ingest + reads + RSS (PRD-WIRE) ────
-// Default OFF, same posture as the Spine: without WIRE_INGEST_KEY nothing
-// mounts — /api/wire/* answers through the 501 fallback below (the SPA
-// feature-detects and hides the nav entry), and /wire/rss.xml answers an
-// honest 503 not_configured (the /api/notify pattern) so a feed reader gets
-// a machine-readable error, never an HTML 404. Key without a database is a
-// misconfigured deploy → loud boot failure. Mounted after the Spine so a
-// full deploy shares the Spine's pg pool (one DATABASE_URL, one pool —
-// the same sharing /api/catalog/stats rides); wire-only deploys build their
-// own pool inside mountWire.
-if (process.env.WIRE_INGEST_KEY) {
-  if (!process.env.DATABASE_URL) {
-    console.error("[wire] WIRE_INGEST_KEY is set but DATABASE_URL is missing — refusing to boot.");
-    process.exit(1);
-  }
+// ── The Wire — Academy news, managed on the Automatos platform ─────────
+// Read-only here: agents author and publish into the Academy workspace with
+// platform_publish_blog_post, and this server proxies + renders. No table, no
+// ingest key, no database — the workspace id is a public identifier (it says
+// whose posts to show), so it defaults in the same way the tutor's public key
+// does and Railway env overrides it.
+//
+// The Wire mounts whenever a workspace is configured. An empty workspace is
+// not an error: the list answers [], the SPA's feature-detect keeps the nav
+// entry and the home teaser hidden, and /wire/rss.xml serves a valid empty
+// feed instead of the 503 the page head was previously advertising.
+const wireWorkspace = process.env.ACADEMY_WORKSPACE_ID || DEFAULT_WORKSPACE_ID;
+if (wireWorkspace) {
   const { mountWire } = await import("./server/wire/index.js");
   const wire = mountWire(app, {
-    pool: spinePool, // null on spine-less deploys → mountWire creates its own
-    ingestKey: process.env.WIRE_INGEST_KEY,
-    publishPolicy: process.env.WIRE_PUBLISH_POLICY, // unset → "review" (D-W1)
+    workspaceId: wireWorkspace,
+    apiBase: process.env.ACADEMY_API_BASE || "https://api.automatos.app",
+    // only true when drafts are genuinely reviewed before publishing — the
+    // label refuses to claim review that isn't happening (label.js)
+    humanReviewed: process.env.ACADEMY_WIRE_REVIEWED,
   });
-  console.log(`[wire] news API mounted (/api/wire, /wire/rss.xml, /wire/:slug shells) — publish policy: ${wire.publishPolicy}`);
+  console.log(`[wire] news mounted read-only from Automatos workspace ${wire.workspaceId} (/api/wire, /wire/rss.xml, /wire/:slug shells)`);
 } else {
   app.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
   app.get("/wire/sitemap.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
