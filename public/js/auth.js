@@ -165,7 +165,12 @@ export function onAuthChange(cb) {
 
 /** Open Clerk's sign-in modal (no navigation). No-op until Clerk is ready. */
 export function openSignIn() {
-  if (ready && clerk) clerk.openSignIn();
+  if (ready && clerk) { clerk.openSignIn(); return; }
+  // Clerk is still loading. Dropping the click here is indistinguishable
+  // from a broken button, so hold the intent and open the moment auth
+  // answers — unless it answers with a session, in which case the person is
+  // already signed in and a sign-in modal would be nonsense.
+  const off = onAuthChange((u) => { off(); if (!u && clerk) clerk.openSignIn(); });
 }
 
 /**
