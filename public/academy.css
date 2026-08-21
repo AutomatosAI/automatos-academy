@@ -1214,11 +1214,19 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .media-count-done { color: var(--accent); }
 
 /* ── LX-16: tutor allowance meter + signed-out gate ───────────────────── */
-.tut-meter { margin-top: 6px; font-size: 12px; color: var(--muted); }
-.tut-gate { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: var(--radius-lg); background: var(--glass); border: 1px solid var(--glass-border); }
-.tut-gate-lead { font-weight: 650; font-size: 15px; }
-.tut-gate-sub { font-size: 13px; color: var(--muted); }
-.tut-gate .ac-btn { align-self: flex-start; }
+/* Both of these sit in the composer's slot at the foot of the panel, so they
+   take the composer's geometry — the same 14px gutter as .tut-chips and
+   .tut-inputrow, and the same hairline that separates the composer from the
+   message list. The gate is the composer changing shape, not a card dropped
+   on top of it: no background, no border box, no second radius. The meter is
+   a sibling of .tut-inputrow rather than a child, so it carries its own
+   gutter or it sits flush against the panel edge. */
+.tut-meter { padding: 2px 14px 10px; font-size: 12px; color: var(--muted); }
+.tut-gate { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
+.tut-gate p { margin: 0; }  /* the flex gap owns the rhythm — default p margins double it */
+.tut-gate-lead { font-weight: 650; font-size: 14.5px; line-height: 1.35; }
+.tut-gate-sub { font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.tut-gate .ac-btn { align-self: flex-start; margin-top: 4px; }
 
 /* ── LX-7: reach + legibility sweep ───────────────────────────────────── */
 /* keyboard users skip the nav — visible only on focus */
