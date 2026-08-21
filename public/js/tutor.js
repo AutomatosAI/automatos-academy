@@ -16,10 +16,41 @@
 import { el, clear } from "./ui.js";
 import { loadCatalog } from "./content.js";
 import { attachContext, consentCard, consentStrip, onContextChange, refreshOffer } from "./tutor-context.js";
+import { user, getToken, onAuthChange, isConfigured } from "./auth.js";
 
 const cfg = () => window.ACADEMY_CHAT || {};
 const apiBase = () => (cfg().apiBase || "https://api.automatos.app").replace(/\/$/, "");
-const enabled = () => !!cfg().publicKey;
+const enabled = () => !!cfg().proxy || !!cfg().publicKey;
+
+// ── LX-16: the allowance meter — visible BEFORE the first send, never a
+// surprise wall. quotaState hydrates from GET /api/tutor/allowance once per
+// page and updates from every reply's X-Tutor-Remaining header.
+const quotaState = { limit: null, remaining: null, loaded: false };
+const meterEls = new Set();
+function meterText() {
+  if (!cfg().proxy || quotaState.remaining === null) return "";
+  if (quotaState.remaining <= 0) return "0 questions left today — resets at midnight UTC";
+  return `${quotaState.remaining} of ${quotaState.limit} questions left today`;
+}
+function refreshMeters() {
+  for (const elm of meterEls) {
+    if (!document.contains(elm)) { meterEls.delete(elm); continue; }
+    elm.textContent = meterText();
+    elm.style.display = meterText() ? "" : "none";
+  }
+}
+async function loadAllowance() {
+  if (!cfg().proxy || quotaState.loaded || !user()) return;
+  try {
+    const token = await getToken();
+    if (!token) return;
+    const r = await fetch("/api/tutor/allowance", { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) return;
+    const a = await r.json();
+    quotaState.limit = a.limit; quotaState.remaining = a.remaining; quotaState.loaded = true;
+    refreshMeters();
+  } catch (_) { /* the meter is a nicety — sends still answer honestly */ }
+}
 const mood = () => (document.documentElement.getAttribute("data-mood") === "night" ? "night" : "mist");
 
 // ── study-action chips: derived from the current route's track ───────────
@@ -174,13 +205,34 @@ async function streamChat(text, { onChunk, onDone, onError, onAccepted }) {
   const c = cfg();
   let res;
   try {
-    res = await fetch(`${apiBase()}/api/widgets/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${c.publicKey}` },
-      body: JSON.stringify({ message: text, conversation_id: session.conversationId || undefined, agent_id: c.agentId || undefined }),
-    });
+    if (c.proxy) {
+      // LX-15 (D-LX7): the metered door. Identity lives here (Clerk), the
+      // widget key lives server-side — the platform still sees one workspace.
+      const token = await getToken();
+      if (!token) { onError({ kind: "auth", status: 401 }); return; }
+      res = await fetch("/api/tutor/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ message: text, conversation_id: session.conversationId || undefined }),
+      });
+    } else {
+      res = await fetch(`${apiBase()}/api/widgets/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${c.publicKey}` },
+        body: JSON.stringify({ message: text, conversation_id: session.conversationId || undefined, agent_id: c.agentId || undefined }),
+      });
+    }
   } catch (e) { onError({ kind: navigator.onLine === false ? "offline" : "unreachable" }); return; }
+  if (res.status === 429) {
+    let body = null; try { body = await res.json(); } catch (_) {}
+    quotaState.remaining = 0;
+    refreshMeters();
+    onError({ kind: "quota", limit: body && body.limit, resetsAt: body && body.resetsAt });
+    return;
+  }
   if (!res.ok || !res.body) { onError(res.status === 401 || res.status === 403 ? { kind: "auth", status: res.status } : { kind: "http", status: res.status }); return; }
+  const rem = res.headers.get("X-Tutor-Remaining");
+  if (rem !== null) { quotaState.remaining = parseInt(rem, 10); quotaState.limit = parseInt(res.headers.get("X-Tutor-Limit"), 10) || quotaState.limit; refreshMeters(); }
   if (onAccepted) onAccepted(); // the platform took the request — any learner_context has landed
   const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
   try {
@@ -214,6 +266,7 @@ function failureCopy(f) {
   if (f.kind === "auth") return "The tutor's link to the Academy workspace isn't accepting its key right now — a configuration problem on our side, not your account. Please try again later.";
   if (f.kind === "http") return `The tutor hit an error on our side (HTTP ${f.status}). A retry usually clears it.`;
   if (f.kind === "agent") return "The tutor reported a problem" + (f.message ? `: ${f.message}` : ".");
+  if (f.kind === "quota") return `That's your ${f.limit || 10} tutor questions for today — the allowance resets ${f.resetsAt ? "at " + new Date(f.resetsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "tomorrow"}. Reviews, lessons and videos stay open all day.`;
   return "The answer was cut off — the connection to the tutor dropped mid-stream.";
 }
 
@@ -332,13 +385,30 @@ function stream(text, listEl) {
 }
 
 function inputRow(listEl, big) {
+  // LX-16 (D-LX6): the page stays visible to everyone — only the composer
+  // changes shape. Signed out on a proxy deploy, the deal is named plainly.
+  if (cfg().proxy && isConfigured() && !user()) {
+    const card = el("div", { class: "tut-gate" }, [
+      el("p", { class: "tut-gate-lead", text: "Sign in free — 10 tutor questions a day." }),
+      el("p", { class: "tut-gate-sub", text: "The tutor is grounded in every Academy track. Your allowance lives on your profile." }),
+      el("a", { class: "ac-btn", href: "/profile", text: "Sign in" }),
+    ]);
+    const rerenderOnAuth = onAuthChange(() => { /* app re-renders surfaces on auth change */ });
+    void rerenderOnAuth;
+    return card;
+  }
   const ta = el("textarea", { class: "tut-input", rows: big ? "2" : "1", placeholder: enabled() ? "Ask the tutor…" : "Tutor connecting soon…", "aria-label": "Message the tutor" });
   if (!enabled()) ta.disabled = true;
   const fire = () => { send(ta.value, listEl); ta.value = ""; ta.style.height = "auto"; };
   ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); fire(); } });
   ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, big ? 160 : 96) + "px"; });
   const btn = el("button", { class: "tut-send", type: "button", "aria-label": "Send", onclick: fire, html: "&#8593;" });
-  return el("div", { class: "tut-inputrow" }, [ta, btn]);
+  const meter = el("div", { class: "tut-meter", "aria-live": "polite" });
+  meterEls.add(meter);
+  meter.textContent = meterText();
+  if (!meterText()) meter.style.display = "none";
+  loadAllowance();
+  return el("div", {}, [el("div", { class: "tut-inputrow" }, [ta, btn]), meter]);
 }
 
 function chips(listEl) {
