@@ -1,5 +1,16 @@
 # PRD-WIRE — The Wire: agent-written daily news, verified at the door
 
+> **Superseded in part (2026-08-21).** The Wire's *storage and ingest* architecture described
+> below — the `wire_posts` table, `POST /api/wire/posts` behind `X-Wire-Key`, the validator, the
+> `WIRE_PUBLISH_POLICY` switch — was replaced by the Automatos platform's blog capability. Agents
+> now publish into the Academy workspace and this repo only reads. The reader-facing goals, the
+> SEO surfaces and the transparency principle are unchanged and still govern.
+>
+> Two commitments could not survive the move: enforced per-claim `sources[]` and the corrections
+> log, because `blog_posts` has no column for either. The transparency label was rewritten so it
+> stops claiming them. Current contract: **`docs/WIRE-PUBLISHING.md`**.
+
+
 **Status:** DRAFT · blocked on D-W1..D-W6 (register in §8) · **Owner:** Academy · **Last updated:** 2026-07-16
 **Repo:** `automatos-academy` (all five slices). The daily authoring mission itself is built in the
 platform repo against the §4.4 interface contract — S4 delivers the contract, not the mission.

@@ -1,9 +1,13 @@
 // Per-request SEO surfaces (PRD-WIRE §4.6, S3): the real-path post shell at
-// /wire/:slug/ and the wire sitemap at /wire/sitemap.xml, both served FROM
-// THE DB on every request — the /cert/:payload precedent in server.js. The
+// /wire/:slug/ and the wire sitemap at /wire/sitemap.xml, both fetched from
+// the Automatos blog API on every request — the /cert/:payload precedent in server.js. The
 // boot-time generate-shells.mjs cannot see posts published after boot (or
 // unsee posts killed after boot), so the runtime owns these two paths; the
 // generator emits only the static /wire/ index shell.
+//
+// Bodies arrive as rendered HTML from the platform and are filtered through
+// sanitize-html.js before they reach the page (markdown.js escaped raw HTML
+// by design, which would have printed tags at the reader).
 //
 // The shell is the no-JS truth of a post: og/article tags, NewsArticle or
 // BlogPosting JSON-LD with `citation` built from sources[] (the verification
@@ -20,8 +24,7 @@
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
-import { md } from "../../public/js/markdown.js";
-import { FACTUAL_TYPES } from "./validate.js";
+import { sanitizeHtml } from "../../public/js/sanitize-html.js";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -40,27 +43,21 @@ const TYPE_LABELS = {
   "question-refresh": "Question refresh", "changelog": "Changelog",
 };
 
-// Same visibility rule as every public surface: published only, so an
-// unpublished post 404s its shell on the next request (US-W3).
-export const SHELL_SQL = `
-  SELECT slug, type, tags, title, summary, body_md, sources, byline, corrections, published_at, updated_at
-  FROM wire_posts WHERE slug = $1 AND status = 'published'
-`;
 
-export const SITEMAP_SQL = `
-  SELECT slug, updated_at FROM wire_posts
-  WHERE status = 'published' ORDER BY published_at DESC
-`;
-
-/** JSON-LD for one post. Factual types are NewsArticle (which carries the
- *  `correction` property — corrections in the open, even to machines);
- *  first-party types are BlogPosting. `citation` is the §4.3 sources[]. */
+/** JSON-LD for one post.
+ *
+ *  Everything is a BlogPosting now. The old split sent "factual" types out as
+ *  NewsArticle specifically to carry schema.org's `correction` property — a
+ *  claim that only meant something while this repo owned a corrections log.
+ *  Platform posts have neither a corrections history nor a structured source
+ *  list, so `citation` and `correction` are emitted only if a post actually
+ *  carries them (nothing does today) rather than declaring a rigour the
+ *  pipeline no longer enforces. */
 function jsonLd(post, pageUrl, baseUrl) {
-  const factual = FACTUAL_TYPES.includes(post.type);
   const agents = (post.byline && post.byline.agents) || [];
   const ld = {
     "@context": "https://schema.org",
-    "@type": factual ? "NewsArticle" : "BlogPosting",
+    "@type": "BlogPosting",
     headline: post.title,
     description: post.summary,
     datePublished: iso(post.published_at),
@@ -70,9 +67,11 @@ function jsonLd(post, pageUrl, baseUrl) {
     isAccessibleForFree: true,
     mainEntityOfPage: pageUrl,
     url: pageUrl,
-    citation: (post.sources || []).map((s) => ({ "@type": "WebPage", url: s.url, name: s.title })),
   };
-  if (factual && (post.corrections || []).length) {
+  if ((post.sources || []).length) {
+    ld.citation = post.sources.map((s) => ({ "@type": "WebPage", url: s.url, name: s.title }));
+  }
+  if ((post.corrections || []).length) {
     ld.correction = post.corrections.map((c) => `${String(c.at).slice(0, 10)}: ${c.note}`);
   }
   // `<` escaped inside string values so untrusted text can never terminate
@@ -126,7 +125,7 @@ ${tagsMeta}
   <p class="lede muted" style="max-width:66ch;margin-top:14px">${esc(post.summary)}</p>
   <p class="mono-label" style="margin-top:18px">By ${esc(agents)} · ${esc(fmtDay(post.published_at))}${corrected}</p>
   <p class="wire-label">${esc(label)}</p>
-  <div class="prose wire-body" style="margin-top:22px">${md(post.body_md)}</div>
+  <div class="prose wire-body" style="margin-top:22px">${sanitizeHtml(post.body_html)}</div>
   <div class="callout wire-sources" style="margin-top:30px"><div class="ct">Sources — what each one supports</div>
     <ul>
       ${sourcesHtml}
@@ -156,18 +155,18 @@ const DEFAULT_INDEX = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..
 /** GET /wire/:slug — 200 shell for a published post; 404 + the SPA shell for
  *  anything else (the /cert/:payload posture: crawlers see the status, a
  *  human clicking a dead link still lands in the app). */
-export function createShellHandler({ pool, label, indexHtml = DEFAULT_INDEX }) {
+export function createShellHandler({ client, label, indexHtml = DEFAULT_INDEX }) {
   return async function wireShellHandler(req, res) {
     try {
-      const { rows } = await pool.query(SHELL_SQL, [req.params.slug]);
-      if (rows.length === 0) {
+      const post = await client.getPost(req.params.slug);
+      if (!post) {
         res.status(404);
         if (existsSync(indexHtml)) return res.sendFile(indexHtml);
         return res.json({ error: "not_found" });
       }
       const baseUrl = `${req.protocol}://${req.get("host")}`;
       res.set("Cache-Control", "public, max-age=60");
-      res.send(buildPostShellHtml({ post: rows[0], baseUrl, label }));
+      res.send(buildPostShellHtml({ post, baseUrl, label }));
     } catch (e) {
       console.error("[wire] shell failed:", e);
       res.status(500).json({ error: "internal_error" });
@@ -177,10 +176,10 @@ export function createShellHandler({ pool, label, indexHtml = DEFAULT_INDEX }) {
 
 /** GET /wire/sitemap.xml — per request, so publishes appear and unpublishes
  *  vanish without a redeploy. robots.txt points here (generate-shells.mjs). */
-export function createSitemapHandler({ pool }) {
+export function createSitemapHandler({ client }) {
   return async function wireSitemapHandler(req, res) {
     try {
-      const { rows } = await pool.query(SITEMAP_SQL);
+      const { posts: rows } = await client.listPosts({ perPage: 50 });
       const baseUrl = `${req.protocol}://${req.get("host")}`;
       res.set("Content-Type", "application/xml; charset=utf-8");
       res.set("Cache-Control", "public, max-age=60");
