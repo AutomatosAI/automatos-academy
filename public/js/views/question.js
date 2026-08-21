@@ -6,7 +6,7 @@ import { el } from "../ui.js";
 import { md } from "../markdown.js";
 import { isCorrect, isMulti } from "../engine/quiz.js";
 import { askTutor } from "../tutor.js";
-import { track } from "../analytics.js";
+import { track , trackOnce } from "../analytics.js";
 
 const KEYS = "ABCDEFGH";
 const strip = (s) => md(s || "").replace(/^<p>|<\/p>\s*$/g, "");
@@ -40,6 +40,9 @@ function tutorWhyMessage(q, chosenIds) {
     "Explain why the correct answer is right — and, if I picked wrong, why my choice is a tempting distractor.",
   ].join("\n");
 }
+
+// LX-5 — activation: the first question this browser ever answers, once.
+function markFirstAnswer() { trackOnce("first_question_answered", "first_question_answered"); }
 
 export function questionCard(q, opts = {}) {
   const { reveal = true, onAnswer, selected = [], showExplain = false } = opts;
@@ -91,7 +94,7 @@ export function questionCard(q, opts = {}) {
     else chosen = new Set([b._opt.id]);
     syncSel();
     if (!reveal) { if (onAnswer) onAnswer([...chosen]); return; }      // exam: store only
-    if (!multi) { const ok = lockAndExplain(); if (onAnswer) onAnswer([...chosen], ok); } // single: reveal now
+    if (!multi) { const ok = lockAndExplain(); if (onAnswer) onAnswer([...chosen], ok); markFirstAnswer(); } // single: reveal now
   }));
 
   const submitBtn = (multi && reveal)
@@ -102,6 +105,7 @@ export function questionCard(q, opts = {}) {
     const ok = lockAndExplain();
     submitBtn.remove();
     if (onAnswer) onAnswer([...chosen], ok);
+    markFirstAnswer();
   });
 
   const card = el("div", { class: "q-card" }, [
