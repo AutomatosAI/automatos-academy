@@ -413,19 +413,27 @@ function inputRow(listEl, big) {
   return el("div", {}, [el("div", { class: "tut-inputrow" }, [ta, btn]), meter]);
 }
 
-function chips(listEl) {
+// `limit` caps how many starters the surface shows. The floating panel is
+// 620px tall and the five full-sentence chips (LX-7 made them sentence case
+// at a readable size) ate 292px of it — enough to clip the welcome copy and
+// leave a conversation window barely three messages deep. The panel shows
+// three; the full study page, which has the room, shows them all.
+/** starters the compact panel shows; the study page shows every one */
+const PANEL_CHIP_LIMIT = 3;
+
+function chips(listEl, limit) {
   const box = el("div", { class: "tut-chips" });
-  fillChips(box, listEl);
+  fillChips(box, listEl, limit);
   return box;
 }
 
 // (Re)compute the chips for the current route. Neutral prompts paint first
 // (sync), then swap to track-specific ones when the catalog lookup lands —
 // so the panel never waits on a fetch and a failed lookup costs nothing.
-function fillChips(box, listEl) {
+function fillChips(box, listEl, limit) {
   const paint = (prompts) => {
     clear(box);
-    for (const p of prompts) box.appendChild(el("button", { class: "tut-chip", type: "button", onclick: () => send(p, listEl) }, [p]));
+    for (const p of (limit ? prompts.slice(0, limit) : prompts)) box.appendChild(el("button", { class: "tut-chip", type: "button", onclick: () => send(p, listEl) }, [p]));
   };
   paint(promptsForTrack(null));
   currentTrack().then((t) => { if (t) paint(promptsForTrack(t)); }).catch(() => {});
@@ -471,7 +479,7 @@ export function mountTutor() {
   window.__academyTutor = true;
 
   const list = el("div", { class: "tut-list" });
-  const chipBox = chips(list);
+  const chipBox = chips(list, PANEL_CHIP_LIMIT);
   const panel = el("div", { class: "tut-panel", "data-open": "false", role: "dialog", "aria-label": "Academy tutor" }, [
     el("div", { class: "tut-head" }, [
       el("span", { class: "tut-title", text: "Tutor" }),
@@ -490,7 +498,7 @@ export function mountTutor() {
   const setOpen = (open) => {
     panel.setAttribute("data-open", open ? "true" : "false");
     fab.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) { refreshOffer(); renderList(list); fillChips(chipBox, list); const ta = panel.querySelector(".tut-input"); if (ta && !ta.disabled) setTimeout(() => ta.focus(), 60); }
+    if (open) { refreshOffer(); renderList(list); fillChips(chipBox, list, PANEL_CHIP_LIMIT); const ta = panel.querySelector(".tut-input"); if (ta && !ta.disabled) setTimeout(() => ta.focus(), 60); }
   };
   fab.addEventListener("click", () => setOpen(panel.getAttribute("data-open") !== "true"));
   document.body.appendChild(panel);
