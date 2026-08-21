@@ -50,6 +50,9 @@ export const STREAK_SQL = `
     SELECT (answered_at AT TIME ZONE 'UTC')::date AS day FROM progress WHERE user_id = $1
     UNION
     SELECT (created_at AT TIME ZONE 'UTC')::date AS day FROM telemetry WHERE user_id = $1
+    UNION
+    -- LX-11: a granted repair makes the missed day count (D-LX3)
+    SELECT day FROM streak_repairs WHERE user_id = $1
   ),
   runs AS (
     SELECT day, day - (ROW_NUMBER() OVER (ORDER BY day))::int AS grp FROM days
@@ -61,14 +64,16 @@ export const STREAK_SQL = `
     COALESCE((SELECT max(len) FROM lens), 0)::int AS best,
     COALESCE((SELECT len FROM lens
               WHERE last_day >= (now() AT TIME ZONE 'UTC')::date - 1
-              ORDER BY last_day DESC LIMIT 1), 0)::int AS current
+              ORDER BY last_day DESC LIMIT 1), 0)::int AS current,
+    (SELECT max(day) FROM streak_repairs
+      WHERE user_id = $1 AND day >= (now() AT TIME ZONE 'UTC')::date - 7) AS repaired_day
 `;
 
 // Deletion order: children first so the response can report per-table counts,
 // then the users row itself — "all 7 tables" (US-025). The next authenticated
 // call re-mints a users row with a FRESH workspace_id, which is exactly the
 // "deleted user re-signs-up clean" semantic the PRD tests demand.
-export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots", "user_concept_state"];
+export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots", "user_concept_state", "streak_repairs"];
 
 // Exported so the admin console (PRD-ADMIN-CONSOLE S2) reuses the one canonical
 // wipe — an admin-scoped delete must match the self-service delete exactly.
@@ -148,7 +153,12 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       // PRD-U2 additive envelope fields — absolute values on every pull.
       // The mobile client's MeStateSchema is .passthrough() (schemas.ts), so
       // pre-U2 apps ignore these cleanly.
-      streak: { current: streak.rows[0].current, best: streak.rows[0].best },
+      streak: {
+        current: streak.rows[0].current, best: streak.rows[0].best,
+        // LX-11: the client shows "streak repaired" only when mercy actually
+        // fired recently — a date or null, never invented
+        repairedDay: streak.rows[0].repaired_day ? streak.rows[0].repaired_day.toISOString().slice(0, 10) : null,
+      },
       user: { createdAt: iso(req.spineUser.created_at), plan: req.spineUser.plan, role: req.spineUser.role },
     });
   }));

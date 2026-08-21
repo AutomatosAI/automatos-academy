@@ -1,7 +1,7 @@
 // Readiness dashboard — the A+ verdict, per-domain mastery, review queue,
 // exam history, and the honest "what's missing to qualify". Skills tracks
 // (no exam) get the progress/completion variant instead — same route.
-import { el, seal, ring } from "../ui.js";
+import { el, seal, ring, clear } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
 import { url } from "../router.js";
 import { verdict, domainStats } from "../engine/readiness.js";
@@ -111,9 +111,57 @@ function progressView(ctx) {
     ]);
   });
 
+  // ── LX-14: the two days the product must own ──────────────────────────
+  // Eve (daysLeft ≤ 1): a send-off, weakest domains, nothing new.
+  // Day after (exam-past, no recorded outcome): one check-in — pass turns
+  // into congratulations + what's next; not-yet re-plans without shame.
+  const OUTCOME_KEY = `automatos-academy:v1:exam-outcome:${v}/${t}`;
+  const outcome = (() => { try { return localStorage.getItem(OUTCOME_KEY); } catch (_) { return null; } })();
+  let examMoment = null;
+  if (pv && pv.verdict === "eve") {
+    examMoment = el("div", { class: "panel exam-eve" }, [
+      el("p", { class: "mono-label", text: "Exam eve" }),
+      el("h3", { text: "You've done the work. Tonight is not for new material." }),
+      el("p", { class: "muted", text: "Run your weakest domains once, skim your misses, then stop. Rest is preparation too — walking in fresh beats walking in crammed." }),
+      el("div", { class: "row", style: { gap: "10px", marginTop: "6px", flexWrap: "wrap" } }, [
+        el("a", { class: "ac-btn ac-btn-solid", href: "#" + weakHref, text: r.weakest ? `Drill ${r.weakest.name}` : "Run a final mock" }),
+        el("a", { class: "ac-btn", href: "#" + url.track(v, t), text: "Back to the course" }),
+      ]),
+    ]);
+  } else if (pv && pv.verdict === "exam-past" && !outcome) {
+    const passBtn = el("button", { class: "ac-btn ac-btn-solid", type: "button", text: "I passed" });
+    const notBtn = el("button", { class: "ac-btn", type: "button", text: "Not this time" });
+    examMoment = el("div", { class: "panel exam-checkin" }, [
+      el("p", { class: "mono-label", text: "Your exam date has passed" }),
+      el("h3", { text: "How did it go?" }),
+      el("div", { class: "row", style: { gap: "10px", marginTop: "6px" } }, [passBtn, notBtn]),
+    ]);
+    const record = (val) => { try { localStorage.setItem(OUTCOME_KEY, val); } catch (_) {} };
+    passBtn.addEventListener("click", () => {
+      record("passed");
+      clear(examMoment);
+      examMoment.append(
+        el("h3", { text: "Congratulations — that's the whole point of this place." }),
+        el("p", { class: "muted", text: "Claim your completion certificate below, and when you're ready, pick the next track." }),
+        el("div", { class: "row", style: { gap: "10px", marginTop: "6px", flexWrap: "wrap" } }, [
+          el("a", { class: "ac-btn ac-btn-solid", href: "/", text: "Choose your next track" }),
+        ]),
+      );
+    });
+    notBtn.addEventListener("click", () => {
+      record("not-yet");
+      clear(examMoment);
+      examMoment.append(
+        el("h3", { text: "Not this time — that's data, not a verdict." }),
+        el("p", { class: "muted", text: "Most people pass on a retake. Set the new date below and the plan re-paces itself around what the first attempt taught you." }),
+      );
+    });
+  }
+
   return el("div", {}, [
     trackHeader(track, "readiness"),
     section(
+      examMoment,
       el("div", { class: "ready-hero" }, [
         ring(pct),
         el("div", { class: "verdict" }, [
@@ -185,9 +233,57 @@ export function readinessView(ctx) {
           : `${pv.daysLeft} day${pv.daysLeft === 1 ? "" : "s"} left · ${pinp.dueNow} due + ${pinp.unseenInScope} unseen · ~${rate}/day at your recent rate (${pinp.activeDays} active of the last ${PACE_WINDOW_DAYS} days)` })
     : null;
 
+  // ── LX-14: the two days the product must own ──────────────────────────
+  // Eve (daysLeft ≤ 1): a send-off, weakest domains, nothing new.
+  // Day after (exam-past, no recorded outcome): one check-in — pass turns
+  // into congratulations + what's next; not-yet re-plans without shame.
+  const OUTCOME_KEY = `automatos-academy:v1:exam-outcome:${v}/${t}`;
+  const outcome = (() => { try { return localStorage.getItem(OUTCOME_KEY); } catch (_) { return null; } })();
+  let examMoment = null;
+  if (pv && pv.verdict === "eve") {
+    examMoment = el("div", { class: "panel exam-eve" }, [
+      el("p", { class: "mono-label", text: "Exam eve" }),
+      el("h3", { text: "You've done the work. Tonight is not for new material." }),
+      el("p", { class: "muted", text: "Run your weakest domains once, skim your misses, then stop. Rest is preparation too — walking in fresh beats walking in crammed." }),
+      el("div", { class: "row", style: { gap: "10px", marginTop: "6px", flexWrap: "wrap" } }, [
+        el("a", { class: "ac-btn ac-btn-solid", href: "#" + weakHref, text: r.weakest ? `Drill ${r.weakest.name}` : "Run a final mock" }),
+        el("a", { class: "ac-btn", href: "#" + url.track(v, t), text: "Back to the course" }),
+      ]),
+    ]);
+  } else if (pv && pv.verdict === "exam-past" && !outcome) {
+    const passBtn = el("button", { class: "ac-btn ac-btn-solid", type: "button", text: "I passed" });
+    const notBtn = el("button", { class: "ac-btn", type: "button", text: "Not this time" });
+    examMoment = el("div", { class: "panel exam-checkin" }, [
+      el("p", { class: "mono-label", text: "Your exam date has passed" }),
+      el("h3", { text: "How did it go?" }),
+      el("div", { class: "row", style: { gap: "10px", marginTop: "6px" } }, [passBtn, notBtn]),
+    ]);
+    const record = (val) => { try { localStorage.setItem(OUTCOME_KEY, val); } catch (_) {} };
+    passBtn.addEventListener("click", () => {
+      record("passed");
+      clear(examMoment);
+      examMoment.append(
+        el("h3", { text: "Congratulations — that's the whole point of this place." }),
+        el("p", { class: "muted", text: "Claim your completion certificate below, and when you're ready, pick the next track." }),
+        el("div", { class: "row", style: { gap: "10px", marginTop: "6px", flexWrap: "wrap" } }, [
+          el("a", { class: "ac-btn ac-btn-solid", href: "/", text: "Choose your next track" }),
+        ]),
+      );
+    });
+    notBtn.addEventListener("click", () => {
+      record("not-yet");
+      clear(examMoment);
+      examMoment.append(
+        el("h3", { text: "Not this time — that's data, not a verdict." }),
+        el("p", { class: "muted", text: "Most people pass on a retake. Set the new date below and the plan re-paces itself around what the first attempt taught you." }),
+      );
+    });
+  }
+
   return el("div", {}, [
     trackHeader(track, "readiness"),
     section(
+      examMoment,
       el("div", { class: "ready-hero" }, [
         seal(r.grade, r.qualified ? "Qualified" : "Readiness", "lg"),
         el("div", { class: "verdict" }, [

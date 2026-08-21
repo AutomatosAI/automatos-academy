@@ -144,8 +144,12 @@ function heroStats(entries, status) {
 
   const lessons = el("b", {}, [countTo(t.lessonsDone), el("span", { class: "of", text: ` / ${t.lessonsTotal}` })]);
   const streakVal = streak ? el("b", {}, [countTo(streak.current)]) : el("b", { text: "—" });
+  // LX-11 — when mercy fired for yesterday, say so: visible, honest, capped
+  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   const streakCap = streak
-    ? `best ${streak.best} · counted in UTC, across your devices`
+    ? (streak.repairedDay === yesterday
+        ? `streak repaired — one missed day covered (1×/week) · best ${streak.best}`
+        : `best ${streak.best} · counted in UTC, across your devices · one missed day a week repairs itself when you come back and finish something`)
     : (signedIn() ? "appears after your first sync" : "sign in to keep a streak across devices");
 
   // PRD-COMMUNITY S1: from the first milestone (7 days) the streak becomes

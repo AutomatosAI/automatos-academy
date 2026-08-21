@@ -65,6 +65,37 @@ async function inTransaction(pool, fn) {
   }
 }
 
+/**
+ * LX-11 (D-LX3) — repair-by-doing. Called after a progress batch applies
+ * (today just became active). Grants at most one bridged day per trailing
+ * 7 days, only when EXACTLY yesterday is missing and the day before was
+ * active — a single INSERT..SELECT whose WHERE encodes the whole policy,
+ * so two racing syncs cannot double-grant (PK) and a long gap never
+ * qualifies. Failure is swallowed: mercy must never cost an answer.
+ */
+export async function maybeRepairStreak(client, userId) {
+  try {
+    await client.query(
+      `WITH days AS (
+         SELECT (answered_at AT TIME ZONE 'UTC')::date AS day FROM progress WHERE user_id = $1
+         UNION
+         SELECT (created_at AT TIME ZONE 'UTC')::date AS day FROM telemetry WHERE user_id = $1
+         UNION
+         SELECT day FROM streak_repairs WHERE user_id = $1
+       )
+       INSERT INTO streak_repairs (user_id, day)
+       SELECT $1, (now() AT TIME ZONE 'UTC')::date - 1
+       WHERE EXISTS (SELECT 1 FROM days WHERE day = (now() AT TIME ZONE 'UTC')::date)
+         AND NOT EXISTS (SELECT 1 FROM days WHERE day = (now() AT TIME ZONE 'UTC')::date - 1)
+         AND EXISTS (SELECT 1 FROM days WHERE day = (now() AT TIME ZONE 'UTC')::date - 2)
+         AND NOT EXISTS (SELECT 1 FROM streak_repairs
+                          WHERE user_id = $1 AND created_at > now() - interval '7 days')
+       ON CONFLICT DO NOTHING`,
+      [userId],
+    );
+  } catch (_) { /* mercy is best-effort */ }
+}
+
 export function createSyncRouter({ pool, index, limiter }) {
   const router = express.Router();
   router.use(limiter);
@@ -107,6 +138,7 @@ export function createSyncRouter({ pool, index, limiter }) {
       // rollup runs in a SAVEPOINT: it is derived data, recomputable on the
       // next sync, and must never cost a learner the answer it rode in with.
       const conceptRows = await rederiveConceptStateSafely(client, index, userId, touched, nowMs);
+      await maybeRepairStreak(client, userId); // LX-11 — today just became active
       return { applied: appliedCount, mastery: rolled, concepts: conceptRows };
     });
 

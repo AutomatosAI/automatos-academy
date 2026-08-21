@@ -116,6 +116,12 @@ export function pace(examDateMs, dueNow, unseenInScope, observedPerDay, now) {
   if (daysLeft <= 0) {
     return { verdict: "exam-past", daysLeft, requiredPerDay: null, inputs };
   }
+  // LX-14 — the most emotional 48 hours get their own verdict: no new
+  // content, no pace maths, final review only. (The mobile twin
+  // src/…/pace needs the same branch — flagged in the app wave.)
+  if (daysLeft <= 1) {
+    return { verdict: "eve", daysLeft, requiredPerDay: null, inputs };
+  }
   const studyDays = Math.max(1, daysLeft - MOCK_RESERVE_DAYS);
   const requiredPerDay = Math.ceil((dueNow + unseenInScope) / studyDays);
   const verdict =
@@ -145,5 +151,6 @@ export function paceLineCopy(verdict, dueTotal, requiredPerDay, dateLabel) {
   else if (verdict === "close") v = `close — ${requiredPerDay}/day keeps you on pace`;
   else if (verdict === "behind") v = `behind — ${requiredPerDay}/day gets there`;
   else if (verdict === "exam-past") v = "exam date passed — set a new one";
+  else if (verdict === "eve") v = `exam ${dateLabel ? "on " + dateLabel : "tomorrow"} — final review only, nothing new`;
   return { count, verdict: v };
 }
