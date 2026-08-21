@@ -124,7 +124,7 @@ export async function pathFinderView() {
       voice.sub ? el("p", { class: "muted", style: { maxWidth: "56ch", marginTop: "12px" }, text: voice.sub }) : null,
       el("div", { class: "res-list", style: { marginTop: "26px" } }, recs.map((t, i) => {
         const live = t.status === "live";
-        return el(live ? "a" : "div", { class: "res-row", href: live ? "#" + url.track(t.vendorId, t.trackId) : null }, [
+        return el(live ? "a" : "div", { class: "res-row", href: live ? "#" + url.track(t.vendorId, t.trackId) : null, onClick: live ? () => { try { sessionStorage.setItem("automatos-academy:v1:from-pathfinder", "1"); } catch (_) {} } : null }, [
           el("span", { class: "kind", text: i === 0 ? "Start" : "Then" }),
           el("div", {}, [
             el("div", { class: "serif", style: { fontSize: "19px" }, text: t.name }),

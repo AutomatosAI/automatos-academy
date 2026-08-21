@@ -18,7 +18,7 @@ export function libraryView(ctx) {
   const official = res.filter((r) => r.official);
   const rest = res.filter((r) => !r.official);
   return el("div", {}, [trackHeader(track, "library"), section(
-    el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Source library" }),
+    el("h2", { style: { fontFamily: "var(--display)", fontSize: "clamp(28px,4vw,44px)" }, text: "Source library" }),
     el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Read the thing the exam is actually testing. Primary sources first, each annotated with what to extract — not a wall of links." }),
     official.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "32px 0 14px" }, text: "Official & primary" }) : null,
     official.length ? resList(official) : null,
@@ -140,7 +140,7 @@ export function videosView(ctx) {
   const nothing = !startHere.length && !byDomain.length;
   const grid = (list) => el("div", { class: "vid-grid", style: { marginTop: "20px" } }, list.map((v) => videoCard(v, adminCtx)));
   return el("div", {}, [trackHeader(track, "videos"), section(
-    el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Video hub" }),
+    el("h2", { style: { fontFamily: "var(--display)", fontSize: "clamp(28px,4vw,44px)" }, text: "Video hub" }),
     el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Short, focused overviews — produced with NotebookLM, hosted on Automatos. Watch the course primers first, then the per-domain deep dives." }),
     startHere.length ? el("h2", { class: "serif-i", style: { fontSize: "24px", margin: "34px 0 6px" }, text: "Start here" }) : null,
     startHere.length ? grid(startHere) : null,

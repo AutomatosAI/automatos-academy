@@ -32,7 +32,7 @@ export function lessonView(ctx) {
 
   const prose = el("article", { class: "prose" }, [
     el("span", { class: "mono-label", text: `${d.name} · Lesson ${idx + 1} of ${lessons.length}` }),
-    el("h1", { style: { fontSize: "clamp(30px,4.5vw,46px)", margin: "12px 0 0" }, text: lesson.title }),
+    el("h2", { style: { fontFamily: "var(--display)", fontSize: "clamp(30px,4.5vw,46px)", margin: "12px 0 0" }, text: lesson.title }),
     // PRD-VOICE §8.1 — the bound narration (Laura). audioUrl arrives via the
     // serve-time media overlay (a-<lessonId> slot); no binding → no player,
     // and the reader looks exactly as it always did. Native <audio> on
@@ -68,13 +68,15 @@ export function lessonView(ctx) {
   // closing line. The §4.2 earned-value ask composes in on Mark complete —
   // right after value was created, never before.
   const endHost = el("div", {});
-  const renderEnd = (withAsk) => {
+  const renderEnd = (withAsk, domainJustFinished) => {
     clear(endHost);
     const cands = nextStep({ track, store, domainId: d.id });
     const due = cands.find((c) => c.kind === "due");
     if (due || !next) endHost.appendChild(endNote(cands));
     if (withAsk) {
-      const ask = accountAsk("lesson");
+      const ask = domainJustFinished
+        ? accountAsk("milestone", { copy: "That's a whole domain done. Everything you've finished lives only on this browser — clear it, lose the device, or stay away long enough and it's gone. Sign in free and it's safe everywhere." })
+        : accountAsk("lesson");
       if (ask) endHost.appendChild(ask);
     }
   };
@@ -82,10 +84,14 @@ export function lessonView(ctx) {
   const doneBtn = el("button", { class: "ac-btn" + (store.lessonDone(lesson.id) ? " ac-btn-solid" : ""), type: "button" },
     [store.lessonDone(lesson.id) ? "✓ Completed" : "Mark complete"]);
   doneBtn.addEventListener("click", () => {
+    const domainWasDone = (d.lessons || []).every((l) => store.lessonDone(l.id));
     store.markLesson(lesson.id);
     doneBtn.classList.add("ac-btn-solid");
     doneBtn.textContent = "✓ Completed";
-    renderEnd(true);
+    // LX-12 — the backup nudge lands at a moment of pride: the completion
+    // that finishes a whole domain, once, honestly worded (see account-ask.js)
+    const domainNowDone = (d.lessons || []).every((l) => store.lessonDone(l.id));
+    renderEnd(true, !domainWasDone && domainNowDone);
   });
 
   prose.appendChild(el("div", { class: "lesson-nav" }, [

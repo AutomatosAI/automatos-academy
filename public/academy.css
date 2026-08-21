@@ -1189,3 +1189,28 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .share-check input { accent-color: var(--accent); }
 .share-name { margin-top: 10px; }
 .share-pop .cap { font-size: 12px; line-height: 1.45; color: var(--muted); max-width: 52ch; }
+
+/* ── LX-7: reach + legibility sweep ───────────────────────────────────── */
+/* keyboard users skip the nav — visible only on focus */
+.skip-link {
+  position: absolute; left: -9999px; top: 12px; z-index: 200;
+  padding: 10px 16px; border-radius: var(--radius-pill);
+  background: var(--fg); color: var(--bg); font: 600 13px/1 var(--sans);
+}
+.skip-link:focus { left: 12px; }
+
+/* tutor chips: sentence case at a readable size, 44px hit areas */
+.tut-chip { text-transform: none; letter-spacing: 0.01em; font-size: 12.5px; padding: 12px 14px; }
+
+/* phone widths: micro-text floors at 12px, recurring targets reach 44px */
+@media (max-width: 900px) {
+  .mono-label { font-size: 12px; }
+  .subnav a { padding: 15px 16px; }
+  .ac-footer-col a { padding: 6px 0; }
+  .media-mark-btn { padding: 10px 4px; }
+}
+
+/* ── LX-8: first-run orientation card ─────────────────────────────────── */
+.orient-card { margin-bottom: 22px; display: flex; flex-direction: column; gap: 10px; }
+.orient-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; font-size: 14.5px; }
+.orient-card .ac-btn { align-self: flex-start; }
