@@ -11,7 +11,7 @@
     "validate": "node scripts/validate-content.mjs",
     "migrate": "node-pg-migrate -m migrations up",
     "publish-content": "node scripts/publish-content.mjs",
-    "test": "node tests/engine.test.mjs && node tests/md-inline.test.mjs && node tests/tutor-context.test.mjs && node tests/share.test.mjs && node tests/web-loop.test.mjs && node tests/cards.test.mjs && node tests/content-api.test.mjs && node tests/content-db.test.mjs && node tests/spine.test.mjs && node tests/digest.test.mjs && node tests/admin-roles.test.mjs && node tests/admin.test.mjs && node tests/media.test.mjs && node tests/media-overlay.test.mjs && node tests/bulk-bind.test.mjs && node tests/sync-corpus.test.mjs && node tests/stage-media.test.mjs && node tests/videos-layout.test.mjs && node tests/content-writeback.test.mjs && node tests/register-podcasts.test.mjs && node tests/speakable.test.mjs && node tests/fishlane.test.mjs && node tests/infographic.test.mjs && node tests/minivideo.test.mjs && node tests/item-stats.test.mjs && node scripts/token-parity.mjs",
+    "test": "node scripts/check-js-refs.mjs && node tests/engine.test.mjs && node tests/md-inline.test.mjs && node tests/tutor-context.test.mjs && node tests/share.test.mjs && node tests/web-loop.test.mjs && node tests/cards.test.mjs && node tests/content-api.test.mjs && node tests/content-db.test.mjs && node tests/spine.test.mjs && node tests/digest.test.mjs && node tests/admin-roles.test.mjs && node tests/admin.test.mjs && node tests/media.test.mjs && node tests/media-overlay.test.mjs && node tests/bulk-bind.test.mjs && node tests/sync-corpus.test.mjs && node tests/stage-media.test.mjs && node tests/videos-layout.test.mjs && node tests/content-writeback.test.mjs && node tests/register-podcasts.test.mjs && node tests/speakable.test.mjs && node tests/fishlane.test.mjs && node tests/infographic.test.mjs && node tests/minivideo.test.mjs && node tests/item-stats.test.mjs && node scripts/token-parity.mjs",
     "tokens": "node scripts/token-parity.mjs",
     "test:engine": "node tests/engine.test.mjs",
     "test:tutor-context": "node tests/tutor-context.test.mjs",
@@ -37,7 +37,8 @@
     "test:fishlane": "node tests/fishlane.test.mjs",
     "test:item-quality-db": "node tests/item-quality-db.test.mjs",
     "render-infographic": "node scripts/render-infographic.mjs",
-    "render-minivideo": "node scripts/render-minivideo.mjs"
+    "render-minivideo": "node scripts/render-minivideo.mjs",
+    "test:js-refs": "node scripts/check-js-refs.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.658.0",

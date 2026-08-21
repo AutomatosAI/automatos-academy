@@ -7,6 +7,7 @@ import { domainById } from "../content.js";
 import { domainStats } from "../engine/readiness.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { trackOnce } from "../analytics.js";
+import { mdInline } from "../markdown.js";
 import { nextStep } from "./next-step.js";
 
 export function trackHome(ctx) {
@@ -71,8 +72,8 @@ export function trackHome(ctx) {
 
   const actions = el("div", { class: "row", style: { gap: "12px", marginBottom: "30px" } }, [
     el("a", { class: "ac-btn ac-btn-solid", href: "#" + primaryHref }, [primaryLabel, el("span", { class: "arr", text: "→" })]),
-    skills ? null : el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Take a mock exam"]),
-    el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
+    skills ? null : el("a", { class: "ac-btn", href: url.exam(v, t) }, ["Take a mock exam"]),
+    el("a", { class: "ac-btn", href: url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
   ]);
 
   const map = el("div", { class: "domain-list" }, track.domains.map((d) => {
