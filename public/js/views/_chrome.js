@@ -1,7 +1,7 @@
 // Shared track chrome: the header (crumbs, title, exam spec) + the sticky
 // sub-nav used across every track-scoped view.
 import { el } from "../ui.js";
-import { url } from "../router.js";
+import { url , setTitle } from "../router.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { mdInline } from "../markdown.js";
 
@@ -32,7 +32,10 @@ function verificationChip(ver) {
   ]);
 }
 
+const TAB_TITLES = { overview: null, library: "Source library", videos: "Videos", scenarios: "Scenarios", exam: "Mock exam", readiness: "Readiness" };
 export function trackHeader(track, active) {
+  // LX-4 — every track surface names itself in the tab/history/share sheet
+  setTitle(TAB_TITLES[active] ? `${TAB_TITLES[active]} — ${track.name}` : track.name);
   const v = track.vendorId, t = track.trackId;
   const skills = isSkillsTrack(track);
   const tabs = [
@@ -52,7 +55,7 @@ export function trackHeader(track, active) {
     el("div", { class: "track-head" }, [
       el("div", { class: "wrap" }, [
         el("div", { class: "crumbs" }, [
-          el("a", { class: "mono-label", href: "#" + url.catalog(), text: track.vendorName || track.vendorId }),
+          el("a", { class: "mono-label", href: url.catalog(), text: track.vendorName || track.vendorId }),
           el("span", { class: "mono-label", text: "›" }),
           el("span", { class: "mono-label", text: track.code || track.trackId }),
         ]),

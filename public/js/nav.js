@@ -26,11 +26,11 @@ let dispose = null;
 // Ordered to mirror .ac-topnav exactly — same links, same data-nav keys, so
 // app.js's syncTopnav() highlights the current page in both places.
 const LINKS = [
-  { href: "#/start", nav: "start", label: "Start here" },
-  { href: "#/", nav: "catalog", label: "Tracks" },
-  { href: "#/method", nav: "method", label: "The model" },
-  { href: "#/tutor", nav: "tutor", label: "Tutor" },
-  { href: "#/admin", nav: "admin", label: "Admin", adminOnly: true }, // hidden until revealAdminNav()
+  { href: "/start", nav: "start", label: "Start here" },
+  { href: "/", nav: "catalog", label: "Tracks" },
+  { href: "/method", nav: "method", label: "The model" },
+  { href: "/tutor", nav: "tutor", label: "Tutor" },
+  { href: "/admin", nav: "admin", label: "Admin", adminOnly: true }, // hidden until revealAdminNav()
 ];
 
 export function mountNav() {
@@ -86,12 +86,14 @@ export function mountNav() {
   document.addEventListener("click", onDocClick);
   document.addEventListener("keydown", onDocKey);
   window.addEventListener("hashchange", onHash);
+  window.addEventListener("popstate", onHash); // history-mode navigation closes it too
   if (mq && mq.addEventListener) mq.addEventListener("change", onMq);
 
   dispose = () => {
     document.removeEventListener("click", onDocClick);
     document.removeEventListener("keydown", onDocKey);
     window.removeEventListener("hashchange", onHash);
+    window.removeEventListener("popstate", onHash);
     if (mq && mq.removeEventListener) mq.removeEventListener("change", onMq);
     if (pill) pill.removeEventListener("click", syncMood);
     drawer.remove();

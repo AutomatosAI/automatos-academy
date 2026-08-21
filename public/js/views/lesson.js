@@ -2,7 +2,7 @@
 // check, mark-complete, prev/next.
 import { el, clear } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
-import { url } from "../router.js";
+import { url , setTitle } from "../router.js";
 import { domainById, lessonById } from "../content.js";
 import { md, toc } from "../markdown.js";
 import { questionCard } from "./question.js";
@@ -14,6 +14,7 @@ export function lessonView(ctx) {
   const { track, store, params } = ctx;
   const d = domainById(track, params.domain);
   const lesson = d && lessonById(track, params.domain, params.lesson);
+  if (lesson) setTitle(`${lesson.title} — ${track.name}`);
   const v = track.vendorId, t = track.trackId;
   if (!lesson) return el("div", {}, [trackHeader(track, "overview"), section(el("p", { text: "Lesson not found." }))]);
 
@@ -101,11 +102,11 @@ export function lessonView(ctx) {
   });
 
   prose.appendChild(el("div", { class: "lesson-nav" }, [
-    prev ? el("a", { class: "ac-btn", href: "#" + url.lesson(v, t, d.id, prev.id) }, ["← Previous"])
-         : el("a", { class: "ac-btn", href: "#" + url.domain(v, t, d.id) }, ["← Domain"]),
+    prev ? el("a", { class: "ac-btn", href: url.lesson(v, t, d.id, prev.id) }, ["← Previous"])
+         : el("a", { class: "ac-btn", href: url.domain(v, t, d.id) }, ["← Domain"]),
     doneBtn,
-    next ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.lesson(v, t, d.id, next.id) }, ["Next →"])
-         : el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.quiz(v, t, d.id) }, ["Quiz this domain →"]),
+    next ? el("a", { class: "ac-btn ac-btn-solid", href: url.lesson(v, t, d.id, next.id) }, ["Next →"])
+         : el("a", { class: "ac-btn ac-btn-solid", href: url.quiz(v, t, d.id) }, ["Quiz this domain →"]),
   ]));
   prose.appendChild(endHost);
   if (!next) renderEnd(false); // last-lesson render gets the line up front

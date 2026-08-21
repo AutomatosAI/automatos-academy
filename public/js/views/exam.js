@@ -35,7 +35,7 @@ export function examView(ctx) {
       el("span", { class: "mono-label", text: "Skills track" }),
       el("h1", { style: { fontSize: "clamp(30px,5vw,52px)", marginTop: "8px" }, text: "No exam here — on purpose." }),
       el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "This track has no external exam, so there's no mock and no gate. Progress is the work itself: finish every module and ship the capstone." }),
-      el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t), style: { marginTop: "22px" } }, ["My progress →"]),
+      el("a", { class: "ac-btn ac-btn-solid", href: url.readiness(v, t), style: { marginTop: "22px" } }, ["My progress →"]),
     )]);
   }
   const spec = track.exam || {};
@@ -54,7 +54,7 @@ export function examView(ctx) {
         `${spec.questionCount} questions · ${spec.durationMinutes} minutes · ${spec.passingScore}/${spec.scoreScale} to pass. ${spec.scenariosPresented} of ${spec.scenarioPool} scenarios are drawn at random — exactly like the real exam. The clock runs the moment you begin; unanswered counts as wrong.` }),
       el("div", { class: "row", style: { marginTop: "26px" } }, [
         el("button", { class: "ac-btn ac-btn-solid", type: "button", onClick: begin }, ["Begin exam ", el("span", { class: "arr", text: "→" })]),
-        el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, ["My readiness"]),
+        el("a", { class: "ac-btn", href: url.readiness(v, t) }, ["My readiness"]),
       ]),
       examHistory(store),
     ));
@@ -162,13 +162,13 @@ export function examView(ctx) {
     }
     const nextRow = res.passed
       ? [
-          el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t) }, ["Readiness & claim →"]),
+          el("a", { class: "ac-btn ac-btn-solid", href: url.readiness(v, t) }, ["Readiness & claim →"]),
           el("button", { class: "ac-btn", type: "button", onClick: begin }, ["New exam"]),
         ]
       : [
-          weakest ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.quiz(v, t, weakest.id) }, [`Drill ${weakest.name} →`]) : null,
+          weakest ? el("a", { class: "ac-btn ac-btn-solid", href: url.quiz(v, t, weakest.id) }, [`Drill ${weakest.name} →`]) : null,
           el("button", { class: "ac-btn" + (weakest ? "" : " ac-btn-solid"), type: "button", onClick: begin }, ["New exam"]),
-          el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, ["Readiness →"]),
+          el("a", { class: "ac-btn", href: url.readiness(v, t) }, ["Readiness →"]),
         ];
     const ask = accountAsk("mock"); // §4.2 — right after value was created
     root.appendChild(section(

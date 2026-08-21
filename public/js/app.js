@@ -48,7 +48,7 @@ const shell = (kicker, title, msg) => el("div", { class: "section" }, [el("div",
   el("span", { class: "mono-label", text: kicker }),
   el("h1", { class: "serif-i", style: { fontSize: "40px", marginTop: "10px" }, text: title }),
   msg ? el("p", { class: "muted", style: { marginTop: "8px" }, text: msg }) : null,
-  el("a", { class: "ac-btn", href: "#" + url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
+  el("a", { class: "ac-btn", href: url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
 ])]);
 
 // ── routes ───────────────────────────────────────────────────────────
