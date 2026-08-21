@@ -110,7 +110,9 @@ export function questionCard(q, opts = {}) {
 
   const card = el("div", { class: "q-card" }, [
     el("div", { class: "q-meta" }, [
-      el("span", { class: "chip diff", text: "Diff " + (q.difficulty || 1) }),
+      // LX-7 — plain words, not authoring-side codes ("DIFF 3" meant nothing
+      // to a learner). 1–2 easier · 3 core · 4–5 hard.
+      el("span", { class: "chip diff", text: (q.difficulty || 1) <= 2 ? "Easier" : (q.difficulty || 1) === 3 ? "Core" : "Hard" }),
       multi ? el("span", { class: "chip", text: "Select all that apply" }) : null,
     ]),
     el("div", { class: "q-stem", html: strip(q.stem) }),
