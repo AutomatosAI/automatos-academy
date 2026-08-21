@@ -486,9 +486,43 @@ app.use(express.static(PUBLIC, {
 
 // ── SPA fallback ───────────────────────────────────────────────────────
 // Any GET that isn't a real asset (no file extension) renders the shell so
-// hash-routed deep links and refreshes resolve.
-app.get(/^\/(?!api\/)(?!.*\.[a-zA-Z0-9]+$).*/, (_req, res) => {
+// clean-path deep links and refreshes resolve (LX-4: the SPA routes on real
+// URLs now; legacy #/… links are normalised client-side).
+//
+// /t/:vendor/:track… paths get their track's own <title> + og tags injected
+// into the shell, so a shared link unfurls as THAT course. Canonical points
+// at the static SEO shell (/tracks/<id>/, PRD-GROWTH §2.1) — search keeps one
+// indexable door per track, shares get honest previews, no duplicate-content
+// split. String surgery on known head tags; anything unmatched serves as-is.
+const TRACK_PATH_RX = /^\/t\/([^/]+)\/([^/]+)(\/|$)/;
+function injectTrackMeta(html, vendorId, trackId, base) {
+  try {
+    const manifest = getContentIndex().manifest.data;
+    const vend = (manifest.vendors || []).find((v) => v.id === vendorId);
+    const tr = vend && (vend.tracks || []).find((t) => t.trackId === trackId);
+    if (!tr) return html;
+    const escAttr = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const title = `${tr.name} · Automatos Academy`;
+    const desc = tr.summary || `${tr.name} — free, honest preparation on Automatos Academy.`;
+    return html
+      .replace(/<title>[^<]*<\/title>/, `<title>${escAttr(title)}</title>`)
+      .replace(/(<meta name="description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
+      .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escAttr(title)}$2`)
+      .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
+      .replace("</head>", `<meta property="og:url" content="${escAttr(`${base}/t/${vendorId}/${trackId}`)}" />\n<link rel="canonical" href="${escAttr(`${base}/tracks/${trackId}/`)}" />\n</head>`);
+  } catch (_) { return html; }
+}
+app.get(/^\/(?!api\/)(?!.*\.[a-zA-Z0-9]+$).*/, (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  const m = req.path.match(TRACK_PATH_RX);
+  if (m) {
+    try {
+      const shell = readFileSync(resolve(PUBLIC, "index.html"), "utf8");
+      const base = `${req.protocol}://${req.get("host")}`;
+      res.type("html");
+      return res.send(injectTrackMeta(shell, decodeURIComponent(m[1]), decodeURIComponent(m[2]), base));
+    } catch (_) { /* fall through to the plain shell */ }
+  }
   res.sendFile(resolve(PUBLIC, "index.html"));
 });
 

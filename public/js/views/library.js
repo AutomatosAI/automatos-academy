@@ -11,6 +11,7 @@ import { trackHeader, section } from "./_chrome.js";
 import { resList } from "./parts.js";
 import { allResources, invalidateTrack, trackVideoSections } from "../content.js";
 import { isAdminSync, ensureAdmin, uploadVideo } from "../admin/media.js";
+import { rerender as routerRerender } from "../router.js";
 
 export function libraryView(ctx) {
   const { track } = ctx;
@@ -104,15 +105,28 @@ function uploadControl(vd, adminCtx, refs) {
   return wrap;
 }
 
-function videoCard(vd, adminCtx) {
+function videoCard(vd, adminCtx, store) {
   const published = vd.status === "published" && vd.url;
   const frame = videoFrame(vd);
   const capComing = !published ? el("div", { class: "mono-label", style: { marginTop: "8px", color: "var(--muted)" }, text: "Video coming" }) : null;
-  const card = el("div", { class: "vid-card" }, [
+  // LX-2 — the ✓ language: auto-complete wiring on the real <video>, and the
+  // manual toggle for everyone (YouTube embeds can only be marked manually —
+  // the iframe exposes no ended/timeupdate without the YT API).
+  let mark = null;
+  if (published && store && vd.id) {
+    mark = markToggle(store, "video", vd.id);
+    const v = frame.querySelector("video");
+    if (v) {
+      wireMediaEl(v, store, "video", vd.id);
+      v.addEventListener("lx-media-complete", () => mark.refresh && mark.refresh());
+    }
+  }
+  const card = el("div", { class: "vid-card" + (published && store && store.mediaDone(vd.id) ? " is-watched" : "") }, [
     frame,
     el("div", { class: "cap" }, [
       el("span", { class: "mono-label", text: vd.domainName || "" }),
       el("div", { class: "serif", style: { fontSize: "18px", marginTop: "6px" }, text: vd.title }),
+      mark,
       capComing,
     ]),
   ]);
@@ -126,19 +140,19 @@ function videoCard(vd, adminCtx) {
 }
 
 export function videosView(ctx) {
-  const { track } = ctx;
+  const { track, store } = ctx;
   const adminCtx = { vendor: track.vendorId, track: track.trackId };
   // Probe admin once. If it flips us to admin AFTER this first render, re-render
   // so the Upload affordances appear — idempotent, because the second pass sees
   // isAdminSync()===true and skips the probe (no loop).
   if (!isAdminSync()) {
-    ensureAdmin().then(({ admin }) => { if (admin) window.dispatchEvent(new HashChangeEvent("hashchange")); });
+    ensureAdmin().then(({ admin }) => { if (admin) routerRerender(); });
   }
   // Visitors see only produced videos (module-00 lifted into "Start here", no
   // placeholder clutter); admins see every slot so they can upload into them.
   const { startHere, byDomain } = trackVideoSections(track, { includeUnproduced: isAdminSync() });
   const nothing = !startHere.length && !byDomain.length;
-  const grid = (list) => el("div", { class: "vid-grid", style: { marginTop: "20px" } }, list.map((v) => videoCard(v, adminCtx)));
+  const grid = (list) => el("div", { class: "vid-grid", style: { marginTop: "20px" } }, list.map((v) => videoCard(v, adminCtx, store)));
   return el("div", {}, [trackHeader(track, "videos"), section(
     el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Video hub" }),
     el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Short, focused overviews — produced with NotebookLM, hosted on Automatos. Watch the course primers first, then the per-domain deep dives." }),

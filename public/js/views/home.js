@@ -1,12 +1,13 @@
 // Platform home (track catalog, two doors) + the "learning model" explainer.
 import { el, ring } from "../ui.js";
 import { loadCatalog } from "../content.js";
-import { url } from "../router.js";
+import { url , setTitle } from "../router.js";
 import { track as tk } from "../analytics.js";
 import { continueData, heroReadiness, heroPace } from "./continue.js";
 import { wireTeaserData, wireTeaser } from "./wire.js";
 import { paceLine } from "./pace-line.js";
 import { loadLane, laneSort } from "../lane.js";
+import { mdInline } from "../markdown.js";
 
 // ── real hero numbers (GET /api/catalog/stats) ─────────────────────────
 // One fetch per session (module-level cached promise; the route is
@@ -67,7 +68,7 @@ function notifyForm(t) {
 function trackCard(t) {
   const live = t.status === "live";
   const attrs = { class: "track-card" + (live ? "" : " is-soon") };
-  if (live) attrs.href = "#" + url.track(t.vendorId, t.trackId);
+  if (live) attrs.href = url.track(t.vendorId, t.trackId);
   return el(live ? "a" : "div", attrs, [
     el("div", { class: "vendor" }, [
       el("span", { class: "mono-label", text: t.vendorName }),
@@ -78,7 +79,7 @@ function trackCard(t) {
     ]),
     el("h3", { text: t.name }),
     t.code ? el("span", { class: "mono-label", text: t.code }) : null,
-    el("p", { class: "meta", text: t.summary || "" }),
+    el("p", { class: "meta", html: mdInline(t.summary || "") }),
     el("div", { class: "foot" }, [
       el("span", { class: "stat", text: live ? `${t.domains} domains${t.exam ? " · " + t.exam.questionCount + "Q exam" : ""}` : "In development" }),
       live ? el("span", { class: "arr serif-i", text: "→" }) : null,
@@ -100,7 +101,7 @@ function onRamp(tracks) {
     el("span", { class: "mono-label", style: { marginLeft: "auto", color: live ? "var(--accent)" : "var(--muted)" }, text: live ? "Start free →" : "Coming soon — notify me below" }),
   ];
   const attrs = { class: "onramp" + (live ? "" : " is-soon"), style: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px", border: "1px solid var(--rule)", borderLeft: "3px solid var(--accent)", padding: "12px 16px", marginTop: "26px" } };
-  if (live) { attrs.href = "#" + url.track(t.vendorId, t.trackId); return el("a", attrs, inner); }
+  if (live) { attrs.href = url.track(t.vendorId, t.trackId); return el("a", attrs, inner); }
   return el("div", attrs, inner);
 }
 
@@ -134,7 +135,7 @@ function doors(tracks, laneRec, resumeVoice) {
     // the voice only speaks on the door that actually leads to rec[0] —
     // never on a stand-in track it doesn't name
     const voiced = resumeVoice && rec0 && lane === doorLane && live && t.trackId === rec0.trackId;
-    return el(live ? "a" : "div", { class: "door" + (live ? "" : " is-soon"), href: live ? "#" + url.track(t.vendorId, t.trackId) : null }, [
+    return el(live ? "a" : "div", { class: "door" + (live ? "" : " is-soon"), href: live ? url.track(t.vendorId, t.trackId) : null }, [
       el("span", { class: "mono-label", text: kicker }),
       el("h3", { class: "serif-i", text: title }),
       el("p", { class: "muted", text: body }),
@@ -360,7 +361,7 @@ function mountHeroCarousel(hero, slides, pager) {
 }
 
 function periwinkleHero(flagship, stats, personal) {
-  const startHref = flagship ? "#" + url.track(flagship.vendorId, flagship.trackId) : "#/start";
+  const startHref = flagship ? url.track(flagship.vendorId, flagship.trackId) : "#/start";
 
   // CTA block — the returning learner's primary action is CONTINUING, in the
   // same orb pill; "Start Learning" steps down to the ghost slot beside it.
@@ -470,9 +471,9 @@ export async function catalog() {
       ". Demanding preparation for people who intend to be in the top percentile, because A+ is the only grade that qualifies.",
     ]),
     el("div", { class: "cta-row" }, [
-      flagship ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.track(flagship.vendorId, flagship.trackId) }, ["Start the flagship track ", el("span", { class: "arr", text: "→" })]) : null,
-      el("a", { class: "ac-btn", href: "#/start" }, ["Which track is mine?"]),
-      el("a", { class: "ac-btn", href: "#" + url.method() }, ["See the model"]),
+      flagship ? el("a", { class: "ac-btn ac-btn-solid", href: url.track(flagship.vendorId, flagship.trackId) }, ["Start the flagship track ", el("span", { class: "arr", text: "→" })]) : null,
+      el("a", { class: "ac-btn", href: "/start" }, ["Which track is mine?"]),
+      el("a", { class: "ac-btn", href: url.method() }, ["See the model"]),
     ]),
     onRamp(tracks),
     // the lane door leads; the resume voice only speaks while there is no
@@ -496,6 +497,7 @@ export async function catalog() {
 }
 
 export async function method() {
+  setTitle("The model");
   const blocks = [
     ["The model", "Automatos teaches one way, everywhere.", "Every track runs the same loop — Learn, Build, Decide, Prove, Ready. It's a deliberately demanding pedagogy: read the primary source, build the thing, defend the architecture, sit the full exam under time, and face an honest verdict. The loop is the product; the subject is interchangeable."],
     ["The standard", "A+ — or not yet.", "Most prep flatters you with a green checkmark for clicking through slides. We don't. Your readiness is a letter grade computed from proven mastery and a real, full-length mock passed with margin. A+ is the only grade that means qualified. Everything below it tells you exactly what's missing and where."],

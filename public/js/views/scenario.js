@@ -22,7 +22,7 @@ export function scenariosIndex(ctx) {
     el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: "Scenario drills" }),
     el("p", { class: "lede muted", style: { maxWidth: "64ch", marginTop: "14px" }, text: "Real-world architecture briefs. The exam draws four at random — make the calls and get graded on your reasoning, not just the letter." }),
     list.length
-      ? el("div", { style: { marginTop: "26px" } }, [linkList(list.map((s) => ({ label: s.title, href: "#" + url.scenario(v, t, s.id), kind: (s.domainName || "Run").split(" ")[0], note: s.tagline })))])
+      ? el("div", { style: { marginTop: "26px" } }, [linkList(list.map((s) => ({ label: s.title, href: url.scenario(v, t, s.id), kind: (s.domainName || "Run").split(" ")[0], note: s.tagline })))])
       : el("p", { class: "muted", style: { marginTop: "20px" }, text: "Scenarios coming soon." }),
   )]);
 }
@@ -103,10 +103,10 @@ export function scenarioRun(ctx) {
         const nextScn = allScenarios(track).find((x) => x.id !== scn.id && !store.scenarioScore(x.id));
         return [
           nextScn
-            ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.scenario(v, t, nextScn.id) }, [`Next scenario: ${nextScn.title} →`])
-            : el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t) }, ["Readiness →"]),
+            ? el("a", { class: "ac-btn ac-btn-solid", href: url.scenario(v, t, nextScn.id) }, [`Next scenario: ${nextScn.title} →`])
+            : el("a", { class: "ac-btn ac-btn-solid", href: url.readiness(v, t) }, ["Readiness →"]),
           el("button", { class: "ac-btn", type: "button", onClick: () => { state = Scn.start(scn); renderStep(); } }, ["Re-run scenario"]),
-          el("a", { class: "ac-btn", href: "#" + url.scenarios(v, t) }, ["All scenarios"]),
+          el("a", { class: "ac-btn", href: url.scenarios(v, t) }, ["All scenarios"]),
         ];
       })()),
       doneLine(),
