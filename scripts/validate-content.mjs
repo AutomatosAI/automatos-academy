@@ -77,11 +77,37 @@ function validateQuestion(q, where, ids) {
   if (new Set(q.options.map((o) => o.id)).size !== q.options.length) err(`${q.id}: duplicate option ids`);
 }
 
+/**
+ * PRD-WAVE-LEARNER-UX LX-6 — markdown belongs only where markdown renders.
+ *
+ * The bug this stops (2026-08-21): GH-500's D1 overview shipped `*place*` and
+ * `**GitHub Secret Protection**` as literal asterisks — authored as markdown,
+ * rendered by a plain-text node. Overviews and summaries now render through
+ * mdInline(), so they MAY carry inline markdown; short display fields (titles,
+ * names, labels) never render markdown anywhere, so tokens there are always a
+ * mistake about to ship.
+ */
+const MD_TOKEN = /(\*\*[^*]+\*\*|(^|[^*\w])\*[^*\s][^*]*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/;
+function checkPlainField(value, where) {
+  if (typeof value === "string" && MD_TOKEN.test(value)) {
+    err(`${where}: markdown token in a plain-text field — this renders as literal asterisks/backticks: ${JSON.stringify(value.slice(0, 80))}`);
+  }
+}
+function checkPlainFieldsDeep(node, where) {
+  if (Array.isArray(node)) { node.forEach((v, i) => checkPlainFieldsDeep(v, `${where}[${i}]`)); return; }
+  if (!node || typeof node !== "object") return;
+  for (const [k, v] of Object.entries(node)) {
+    if (typeof v === "string" && /^(title|name|label|code|cap|caption)$/.test(k)) checkPlainField(v, `${where}.${k}`);
+    else if (typeof v === "object" && v) checkPlainFieldsDeep(v, `${where}.${k}`);
+  }
+}
+
 for (const { vendor, track, dir } of findTracks(ROOT)) {
   const label = `${vendor}/${track}`;
   let t;
   try { t = read(join(dir, "track.json")); } catch (e) { err(`${label}: track.json invalid — ${e.message}`); continue; }
   validateUrlsDeep(t, `${label}/track.json`);
+  checkPlainFieldsDeep(t, `${label}/track.json`);
   // Two shapes: exam tracks (weighted blueprint, mock, A+ gate) and skills
   // tracks (no exam{} — APA/ABF/AI-Security shape; weights optional).
   const isExam = !!(t.exam && t.exam.questionCount);
@@ -105,6 +131,7 @@ for (const { vendor, track, dir } of findTracks(ROOT)) {
     let d;
     try { d = read(dp); } catch (e) { err(`${label}/${df}: invalid JSON — ${e.message}`); continue; }
     validateUrlsDeep(d, `${label}/${df}`);
+    checkPlainFieldsDeep(d, `${label}/${df}`);
     domainCount++;
     weightSum += d.weight || 0;
     if (typeof d.weight === "number") weighted++;

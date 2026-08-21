@@ -7,6 +7,7 @@ import { domainById } from "../content.js";
 import { domainStats } from "../engine/readiness.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { trackOnce } from "../analytics.js";
+import { mdInline } from "../markdown.js";
 
 export function trackHome(ctx) {
   const { track, store } = ctx;
@@ -113,7 +114,7 @@ export function domainView(ctx) {
       d.weight ? el("span", { class: "mono-label", text: Math.round(d.weight * 100) + "% of exam" }) : null,
     ]),
     el("h1", { style: { fontSize: "clamp(30px,4.5vw,48px)", marginTop: "10px" }, text: d.name }),
-    d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, text: d.overview }) : null,
+    d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, html: mdInline(d.overview) }) : null,
     (d.objectives || []).length ? el("ul", { class: "prose", style: { marginTop: "18px", maxWidth: "70ch" } }, d.objectives.map((o) => el("li", { text: o }))) : null,
     // PRD-VOICE §8.1 — the narrated intro: this overview and these objectives
     // in Laura's voice, so a learner can hear what a domain covers before

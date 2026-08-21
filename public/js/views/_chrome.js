@@ -3,6 +3,7 @@
 import { el } from "../ui.js";
 import { url } from "../router.js";
 import { isSkillsTrack } from "../engine/certificate.js";
+import { mdInline } from "../markdown.js";
 
 function examSpec(spec) {
   if (!spec || !spec.questionCount) return null;
@@ -56,7 +57,7 @@ export function trackHeader(track, active) {
           el("span", { class: "mono-label", text: track.code || track.trackId }),
         ]),
         el("h1", { text: track.name }),
-        track.summary ? el("p", { class: "lede muted", style: { maxWidth: "66ch", marginTop: "16px" }, text: track.summary }) : null,
+        track.summary ? el("p", { class: "lede muted", style: { maxWidth: "66ch", marginTop: "16px" }, html: mdInline(track.summary) }) : null,
         examSpec(track.exam),
         verificationChip(track.verification),
       ]),
