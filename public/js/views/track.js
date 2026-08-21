@@ -45,6 +45,14 @@ export function trackHome(ctx) {
         el("div", { class: "row", style: { gap: "16px", marginTop: "8px" } }, [
           el("span", { class: "mono-label", text: `${st.lessonsDone}/${st.lessonsTotal} lessons` }),
           el("span", { class: "mono-label", text: `${st.poolSize} questions` }),
+          // LX-2 — media joins the count only when the domain actually has
+          // playable video (placeholder slots never inflate the denominator)
+          (() => {
+            const vids = (d.videos || []).filter((vd) => vd.status === "published" && vd.url && vd.id);
+            if (!vids.length) return null;
+            const done = store.mediaDoneCount(vids.map((vd) => vd.id));
+            return el("span", { class: "mono-label" + (done === vids.length ? " media-count-done" : ""), text: `${done}/${vids.length} videos` });
+          })(),
         ]),
       ]),
       skills || !d.weight ? null : el("div", { class: "weight" }, [
