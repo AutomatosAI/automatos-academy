@@ -112,7 +112,7 @@ function build(cat) {
     signedIn: !!u,
     first: u && u.name ? u.name.trim().split(/\s+/)[0] : "",
     streak: streakDays(),
-    latest: { name: latest.name, href: "#" + url.track(latest.vendorId, latest.trackId) },
+    latest: { name: latest.name, href: url.track(latest.vendorId, latest.trackId) },
     reviews: dueTotal > 0
       ? {
           count: dueTotal,
@@ -121,7 +121,7 @@ function build(cat) {
             : url.track(mostDue.vendorId, mostDue.trackId)),
         }
       : null,
-    mock: mockTrack ? { href: "#" + url.exam(mockTrack.vendorId, mockTrack.trackId) } : null,
+    mock: mockTrack ? { href: url.exam(mockTrack.vendorId, mockTrack.trackId) } : null,
     top: byAnswered[0], // most-advanced started track (readiness widget)
   };
 }
@@ -156,7 +156,7 @@ export async function heroPace(cont) {
       return {
         verdict: "no-date",
         dueTotal,
-        setHref: top.hasExam ? "#" + url.readiness(top.vendorId, top.trackId) : null,
+        setHref: top.hasExam ? url.readiness(top.vendorId, top.trackId) : null,
       };
     }
     const track = await loadTrack(top.vendorId, top.trackId);
@@ -168,7 +168,7 @@ export async function heroPace(cont) {
       dueTotal,
       requiredPerDay: p.requiredPerDay,
       dateLabel: examDateLabel(iso),
-      setHref: "#" + url.readiness(top.vendorId, top.trackId),
+      setHref: url.readiness(top.vendorId, top.trackId),
     };
   } catch (e) {
     console.warn("[continue] pace line skipped:", (e && e.message) || e);

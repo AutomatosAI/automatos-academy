@@ -1,5 +1,9 @@
-// Minimal hash router. Patterns use /:name segments. Robust for a no-build
-// static SPA: deep links and refreshes always work (no server route needed).
+// History-API router (PRD-WAVE-LEARNER-UX LX-4, D-LX4: all now). Clean paths
+// — /t/github/gh-500 — are real, rankable URLs; the server's SPA fallback
+// already serves the shell on any non-asset path, so deep loads worked before
+// this file did. Every pre-wave "#/…" link 301-equivalents client-side: on
+// boot (and on any later hashchange) a "#/…" hash is replaceState'd to its
+// clean twin, so nothing bookmarked ever breaks.
 
 const routes = [];
 
@@ -11,29 +15,75 @@ export function route(pattern, view) {
   routes.push({ rx, keys, view });
 }
 
+/** "#/t/x/y" (legacy) → "/t/x/y"; no legacy hash → null */
+function legacyHashPath() {
+  const h = location.hash || "";
+  return h.startsWith("#/") ? h.slice(1).split("?")[0] : null;
+}
+
 export function parse() {
-  let h = location.hash.replace(/^#/, "") || "/";
-  if (!h.startsWith("/")) h = "/" + h;
-  h = h.split("?")[0];
+  // legacy hash wins if present (then gets cleaned by start()'s redirect)
+  let p = legacyHashPath() || location.pathname || "/";
+  if (!p.startsWith("/")) p = "/" + p;
+  p = p.split("?")[0];
   for (const { rx, keys, view } of routes) {
-    const m = h.match(rx);
+    const m = p.match(rx);
     if (m) {
       const params = {};
       keys.forEach((k, i) => { params[k] = decodeURIComponent(m[i + 1]); });
-      return { view, params, path: h };
+      return { view, params, path: p };
     }
   }
   return null;
 }
 
+let notify = null;
+const dispatch = () => { if (notify) notify(parse()); };
+
+/** re-render the current route in place (the old HashChangeEvent trick) */
+export function rerender() { dispatch(); }
+
 export function navigate(to) {
-  if (location.hash === "#" + to) { window.dispatchEvent(new HashChangeEvent("hashchange")); }
-  else location.hash = to;
+  if (location.pathname === to) { dispatch(); return; }
+  history.pushState({}, "", to);
+  dispatch();
+}
+
+// ── document title (LX-4) ──────────────────────────────────────────────
+// The router resets to the site default on every change; data-carrying views
+// call setTitle() once their content is loaded.
+const DEFAULT_TITLE = "Automatos Academy — Learn AI architecture. Prove it.";
+export function setTitle(t) {
+  document.title = t ? `${t} · Automatos Academy` : DEFAULT_TITLE;
+}
+
+function cleanLegacyHash() {
+  const p = legacyHashPath();
+  if (p !== null) history.replaceState({}, "", p + location.search);
 }
 
 export function start(onChange) {
-  window.addEventListener("hashchange", () => onChange(parse()));
-  onChange(parse());
+  notify = (r) => { setTitle(null); onChange(r); };
+  cleanLegacyHash();
+  window.addEventListener("popstate", dispatch);
+  // legacy in-page "#/…" links (or old bookmarks applied while loaded):
+  // normalise instead of letting the hash sit in the address bar
+  window.addEventListener("hashchange", () => { cleanLegacyHash(); dispatch(); });
+  // same-origin clean-path links route client-side — no full reload
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+    const href = a.getAttribute("href") || "";
+    if (href.startsWith("#/")) { e.preventDefault(); navigate(href.slice(1)); return; }
+    if (!href.startsWith("/") || href.startsWith("//")) return;
+    // real files and non-SPA server routes pass through untouched
+    if (/^\/(api\/|wire\/rss|wire\/sitemap|sitemap\.xml|robots\.txt|s\/|cert\/.+\/card\.png)/.test(href)) return;
+    if (/\.[a-zA-Z0-9]+$/.test(href)) return;
+    e.preventDefault();
+    navigate(href);
+  });
+  dispatch();
 }
 
 // route-builder helpers (keep URL construction in one place)

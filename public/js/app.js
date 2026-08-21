@@ -25,7 +25,7 @@ import { onAuthChange } from "./auth.js";
 import { revealAdminNav } from "./admin/nav.js";
 import { mountNav } from "./nav.js";
 import { initSync } from "./sync/syncer.js";
-import { track as tkEvent, mountCtaTracking } from "./analytics.js";
+import { track as tkEvent, trackOnce, mountCtaTracking } from "./analytics.js";
 
 const appEl = document.getElementById("app");
 const progressEl = document.getElementById("ac-progress");
@@ -48,7 +48,7 @@ const shell = (kicker, title, msg) => el("div", { class: "section" }, [el("div",
   el("span", { class: "mono-label", text: kicker }),
   el("h1", { class: "serif-i", style: { fontSize: "40px", marginTop: "10px" }, text: title }),
   msg ? el("p", { class: "muted", style: { marginTop: "8px" }, text: msg }) : null,
-  el("a", { class: "ac-btn", href: "#" + url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
+  el("a", { class: "ac-btn", href: url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
 ])]);
 
 // ── routes ───────────────────────────────────────────────────────────
@@ -127,6 +127,11 @@ function syncTopnav(path) {
 start(handle);
 mountTutor();
 mountAuthUI();
+// LX-5 — the funnel's last step, once per browser (identity-free: the event
+// records THAT a sign-in happened here, never who)
+import("./auth.js").then(({ onAuthChange, user }) => {
+  onAuthChange(() => { if (user()) trackOnce("signed_in", "signed_in"); });
+}).catch(() => {});
 revealAdminNav(); // show the Admin nav link if signed in as admin/owner
 onAuthChange(() => revealAdminNav()); // …and after a sign-in without a reload
 mountNav(); // burger + drawer ≤900px; after theme() so its mood row syncs

@@ -68,14 +68,14 @@ export function nextStep(ctx) {
       for (const d of scope) {
         const l = (d.lessons || []).find((x) => !store.lessonDone(x.id));
         if (l) {
-          out.push({ kind: "lesson", title: l.title, href: "#" + url.lesson(v, t, d.id, l.id), domainId: d.id });
+          out.push({ kind: "lesson", title: l.title, href: url.lesson(v, t, d.id, l.id), domainId: d.id });
           break;
         }
       }
       // 3 · weakest-domain drill — exam tracks only, readiness' own framing
       if (!isSkillsTrack(track)) {
         const w = verdict(track, store).weakest;
-        if (w) out.push({ kind: "drill", name: w.name, href: "#" + url.quiz(v, t, w.id) });
+        if (w) out.push({ kind: "drill", name: w.name, href: url.quiz(v, t, w.id) });
       }
     }
   } catch (_) { /* a next step must never break a finish panel */ }
