@@ -171,6 +171,22 @@ function hydrateAuthConfig() {
 hydrateAuthConfig();
 
 const app = express();
+// Railway terminates TLS at its edge and forwards over http, so without this
+// Express answers req.protocol === "http" and req.ip === the edge's address.
+// Both were wrong in ways that mattered:
+//
+//   - canonical and og:url on every track shell claimed http:// while the
+//     boot-generated sitemap.xml claimed https://. A canonical that disagrees
+//     with the sitemap about protocol is an indexing fault, not cosmetic.
+//   - the Wire's Atom <id>/self link — a feed's own identity — was http://.
+//   - Stripe return URLs fell back to an http base when ACADEMY_BASE_URL was unset.
+//   - every IP rate limiter (the funnel receiver, the Spine's unauthenticated
+//     bucket) keyed on the edge address, so one shared bucket throttled all
+//     visitors together instead of limiting anyone individually.
+//
+// One hop, not `true`: Railway is the only proxy in front of this app, and
+// trusting exactly one stops a spoofed X-Forwarded-For from prepending hops.
+app.set("trust proxy", 1);
 app.use(compression());
 // 1mb body cap: sync batches (PRD-MT-02, up to 500 events) outgrow the 100kb
 // express default; every consumer of req.body validates its input regardless.
