@@ -17,7 +17,7 @@ export const MAX_BATCH = 500;
 export const MAX_FUTURE_SKEW_MS = 48 * 3_600_000;
 
 /** flush order mirrors the mobile write path: progress first (drives mastery) */
-export const KIND_ORDER = ["progress", "telemetry", "mock", "scenario"];
+export const KIND_ORDER = ["progress", "media", "telemetry", "mock", "scenario"];
 
 /** uuid v4 for idempotency keys. crypto.randomUUID where the runtime provides
  *  it (every browser this SPA targets, node ≥ 20); Math.random fallback —
@@ -114,4 +114,21 @@ export function buildTelemetryEvent({ eventType, vendorId, trackId, itemId, payl
       ...(payload !== undefined ? { payload } : {}),
     },
   };
+}
+
+/**
+ * LX-1 media completion → POST /api/sync/media. Mirrors the server's
+ * validateMediaEvent bounds so a well-behaved write path never queues an
+ * event the server would 400.
+ */
+export const MEDIA_KINDS = ["video", "podcast", "narration"];
+export function buildMediaEvent({ vendorId, trackId, kind, mediaId, completed, how, at, eventId, nowMs }) {
+  const now = isMs(nowMs) ? nowMs : Date.now();
+  if (!isId(vendorId) || !isId(trackId) || !isId(mediaId)) return { error: "bad_content_ref" };
+  if (!MEDIA_KINDS.includes(kind)) return { error: "kind_unknown" };
+  if (typeof completed !== "boolean") return { error: "completed_not_boolean" };
+  if (how !== "auto" && how !== "manual") return { error: "how_unknown" };
+  const ts = isMs(at) ? at : now;
+  if (ts > now + MAX_FUTURE_SKEW_MS) return { error: "at_too_far_future" };
+  return { event: { eventId: eventId || generateEventId(), vendorId, trackId, kind, mediaId, completed, how, at: ts } };
 }

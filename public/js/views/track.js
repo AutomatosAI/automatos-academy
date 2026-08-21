@@ -7,6 +7,7 @@ import { domainById } from "../content.js";
 import { domainStats } from "../engine/readiness.js";
 import { isSkillsTrack } from "../engine/certificate.js";
 import { trackOnce } from "../analytics.js";
+import { mdInline } from "../markdown.js";
 
 export function trackHome(ctx) {
   const { track, store } = ctx;
@@ -26,14 +27,14 @@ export function trackHome(ctx) {
 
   const actions = el("div", { class: "row", style: { gap: "12px", marginBottom: "30px" } }, [
     el("a", { class: "ac-btn ac-btn-solid", href: "#" + startHref }, [resume ? "Resume " : "Start learning ", el("span", { class: "arr", text: "→" })]),
-    skills ? null : el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Take a mock exam"]),
-    el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
+    skills ? null : el("a", { class: "ac-btn", href: url.exam(v, t) }, ["Take a mock exam"]),
+    el("a", { class: "ac-btn", href: url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
   ]);
 
   const map = el("div", { class: "domain-list" }, track.domains.map((d) => {
     const st = domainStats(d, store);
     // Skills tracks have no scored bank — the ring is lesson coverage there.
-    return el("a", { class: "domain-row", href: "#" + url.domain(v, t, d.id) }, [
+    return el("a", { class: "domain-row", href: url.domain(v, t, d.id) }, [
       ring((skills ? st.coverage : st.mastery) * 100),
       el("div", { class: "body" }, [
         el("div", { class: "row", style: { gap: "10px" } }, [
@@ -44,6 +45,14 @@ export function trackHome(ctx) {
         el("div", { class: "row", style: { gap: "16px", marginTop: "8px" } }, [
           el("span", { class: "mono-label", text: `${st.lessonsDone}/${st.lessonsTotal} lessons` }),
           el("span", { class: "mono-label", text: `${st.poolSize} questions` }),
+          // LX-2 — media joins the count only when the domain actually has
+          // playable video (placeholder slots never inflate the denominator)
+          (() => {
+            const vids = (d.videos || []).filter((vd) => vd.status === "published" && vd.url && vd.id);
+            if (!vids.length) return null;
+            const done = store.mediaDoneCount(vids.map((vd) => vd.id));
+            return el("span", { class: "mono-label" + (done === vids.length ? " media-count-done" : ""), text: `${done}/${vids.length} videos` });
+          })(),
         ]),
       ]),
       skills || !d.weight ? null : el("div", { class: "weight" }, [
@@ -72,7 +81,7 @@ export function domainView(ctx) {
   const lessons = d.lessons || [];
   const lessonList = el("div", { class: "res-list" }, lessons.map((l, i) => {
     const done = store.lessonDone(l.id);
-    return el("a", { class: "res-row", href: "#" + url.lesson(v, t, d.id, l.id) }, [
+    return el("a", { class: "res-row", href: url.lesson(v, t, d.id, l.id) }, [
       el("span", { class: "kind", text: done ? "✓ done" : String(i + 1).padStart(2, "0") }),
       el("div", {}, [
         el("div", { class: "serif", style: { fontSize: "19px" }, text: l.title }),
@@ -85,13 +94,13 @@ export function domainView(ctx) {
   const blocks = [
     el("div", { class: "row", style: { justifyContent: "space-between", alignItems: "baseline" } }, [
       el("h2", { class: "serif-i", style: { fontSize: "28px" }, text: "Lessons" }),
-      (d.questions || []).length ? el("a", { class: "ac-btn", href: "#" + url.quiz(v, t, d.id) }, ["Quiz this domain"]) : null,
+      (d.questions || []).length ? el("a", { class: "ac-btn", href: url.quiz(v, t, d.id) }, ["Quiz this domain"]) : null,
     ]),
     lessonList,
   ];
   if ((d.scenarios || []).length) {
     blocks.push(subhead("Scenario drills"));
-    blocks.push(linkList(d.scenarios.map((s) => ({ label: s.title, href: "#" + url.scenario(v, t, s.id), kind: "Run", note: s.tagline }))));
+    blocks.push(linkList(d.scenarios.map((s) => ({ label: s.title, href: url.scenario(v, t, s.id), kind: "Run", note: s.tagline }))));
   }
   if ((d.labs || []).length) {
     blocks.push(subhead("Hands-on labs"));
@@ -113,7 +122,7 @@ export function domainView(ctx) {
       d.weight ? el("span", { class: "mono-label", text: Math.round(d.weight * 100) + "% of exam" }) : null,
     ]),
     el("h1", { style: { fontSize: "clamp(30px,4.5vw,48px)", marginTop: "10px" }, text: d.name }),
-    d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, text: d.overview }) : null,
+    d.overview ? el("p", { class: "lede muted", style: { maxWidth: "70ch", marginTop: "14px" }, html: mdInline(d.overview) }) : null,
     (d.objectives || []).length ? el("ul", { class: "prose", style: { marginTop: "18px", maxWidth: "70ch" } }, d.objectives.map((o) => el("li", { text: o }))) : null,
     // PRD-VOICE §8.1 — the narrated intro: this overview and these objectives
     // in Laura's voice, so a learner can hear what a domain covers before
