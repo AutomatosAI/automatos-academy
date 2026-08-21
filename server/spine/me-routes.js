@@ -123,7 +123,7 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
     const cond = (col) => (since ? ` AND ${col} > $2` : "");
     const params = since ? [userId, since] : [userId];
 
-    const [progress, mastery, mocks, scenarios, streak, concepts] = await Promise.all([
+    const [progress, mastery, mocks, scenarios, streak, concepts, media] = await Promise.all([
       pool.query(`SELECT vendor_id, track_id, item_id, seen, correct, ease, "interval" AS interval, due_at, answered_at
                   FROM progress WHERE user_id = $1${cond("answered_at")}`, params),
       pool.query(`SELECT vendor_id, track_id, scope_type, scope_id, competence, decay_at, updated_at
@@ -139,6 +139,9 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       pool.query(`SELECT concept_key, vendor_id, track_id, level, mastery, coverage, accuracy,
                          items_seen, items_total, due_count, next_due_at, lapses, last_seen_at, updated_at
                   FROM user_concept_state WHERE user_id = $1${cond("updated_at")}`, params),
+      // LX-1 — media completion deltas; completed=false rows ride too (un-marks)
+      pool.query(`SELECT vendor_id, track_id, kind, media_id, completed_at, how, updated_at
+                  FROM media_completions WHERE user_id = $1${cond("updated_at")}`, params),
     ]);
 
     return ok(res, {
@@ -150,6 +153,13 @@ export function createMeRouter({ pool, index, clerkUserDeleter }) {
       // LA-2 additive field — the app's MeStateSchema is .passthrough(), so
       // pre-LA-2 builds ignore it cleanly (the same contract PRD-U2 relied on).
       conceptState: concepts.rows.map((r) => conceptStateToWire(conceptRowFromDb(r), conceptWeight, nowMs)),
+      // LX-1 additive envelope field — clients before this wave ignore it
+      // (.passthrough() schemas, the PRD-U2 contract).
+      media: media.rows.map((r) => ({
+        vendorId: r.vendor_id, trackId: r.track_id, kind: r.kind, mediaId: r.media_id,
+        completed: r.completed_at !== null, how: r.how,
+        at: (r.completed_at || r.updated_at).getTime(),
+      })),
       // PRD-U2 additive envelope fields — absolute values on every pull.
       // The mobile client's MeStateSchema is .passthrough() (schemas.ts), so
       // pre-U2 apps ignore these cleanly.

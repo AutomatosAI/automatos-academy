@@ -70,12 +70,13 @@ function bucketByTrack(state) {
   const bucket = (vendorId, trackId) => {
     const key = `${vendorId}/${trackId}`;
     let b = buckets.get(key);
-    if (!b) { b = { vendorId, trackId, progress: [], mocks: [], scenarios: [] }; buckets.set(key, b); }
+    if (!b) { b = { vendorId, trackId, progress: [], mocks: [], scenarios: [], media: [] }; buckets.set(key, b); }
     return b;
   };
   for (const row of state.progress || []) bucket(row.vendorId, row.trackId).progress.push(row);
   for (const row of state.mockAttempts || []) bucket(row.vendorId, row.trackId).mocks.push(row);
   for (const row of state.scenarioProgress || []) bucket(row.vendorId, row.trackId).scenarios.push(row);
+  for (const row of state.media || []) bucket(row.vendorId, row.trackId).media.push(row);
   return buckets;
 }
 
@@ -125,6 +126,7 @@ export async function reconcileOnce(sinceCursor) {
     mocksApplied: 0,
     scenariosApplied: 0,
     masteryApplied: 0,
+    mediaApplied: 0,
   };
 
   for (const b of bucketByTrack(state).values()) {
@@ -145,6 +147,21 @@ export async function reconcileOnce(sinceCursor) {
       for (const row of b.scenarios) scenarios[row.scenarioId] = { score: row.scorePct, at: ms(row.updatedAt) || 0 };
       s = { ...s, scenarios };
       result.scenariosApplied += b.scenarios.length;
+    }
+    if (b.media.length) {
+      // LX-1 — last-write-wins by event time, matching the server's collapse
+      // rule. An un-mark (completed:false) with a newer `at` beats a local
+      // done; a stale server row never clobbers a fresher local mark (it is
+      // still in the queue and will win server-side on the next flush).
+      const media = { ...(s.media || {}) };
+      let applied = 0;
+      for (const row of b.media) {
+        const local = media[row.mediaId];
+        if (local && (local.at || 0) >= (row.at || 0)) continue;
+        media[row.mediaId] = { done: !!row.completed, how: row.how || "auto", at: row.at || 0, kind: row.kind };
+        applied++;
+      }
+      if (applied) { s = { ...s, media }; result.mediaApplied += applied; }
     }
     saveRawState(b.vendorId, b.trackId, s);
   }

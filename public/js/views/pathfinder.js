@@ -5,7 +5,7 @@
 // before we help them. Rule-based on manifest data; no engine coupling: it
 // only reads the catalog and emits links.
 import { el, clear } from "../ui.js";
-import { url } from "../router.js";
+import { url , setTitle } from "../router.js";
 import { loadCatalog } from "../content.js";
 import { track as tk } from "../analytics.js";
 import { saveLane } from "../lane.js";
@@ -69,6 +69,7 @@ const TONE = {
 };
 
 export async function pathFinderView() {
+  setTitle("Start here");
   const cat = await loadCatalog();
   const tracks = cat.vendors.flatMap((v) => v.tracks.map((t) => ({ ...t, vendorId: v.id, vendorName: v.name })));
   const byId = Object.fromEntries(tracks.map((t) => [t.trackId, t]));
@@ -97,7 +98,7 @@ export async function pathFinderView() {
       )),
       el("p", { class: "muted", style: { marginTop: "22px", fontSize: "13.5px" } }, [
         "No wrong answers — or ",
-        el("a", { href: "#" + url.catalog(), style: { textDecoration: "underline" }, text: "browse every track" }),
+        el("a", { href: url.catalog(), style: { textDecoration: "underline" }, text: "browse every track" }),
         " and wander.",
       ]),
     ])]);
@@ -124,7 +125,7 @@ export async function pathFinderView() {
       voice.sub ? el("p", { class: "muted", style: { maxWidth: "56ch", marginTop: "12px" }, text: voice.sub }) : null,
       el("div", { class: "res-list", style: { marginTop: "26px" } }, recs.map((t, i) => {
         const live = t.status === "live";
-        return el(live ? "a" : "div", { class: "res-row", href: live ? "#" + url.track(t.vendorId, t.trackId) : null }, [
+        return el(live ? "a" : "div", { class: "res-row", href: live ? "#" + url.track(t.vendorId, t.trackId) : null, onClick: live ? () => { try { sessionStorage.setItem("automatos-academy:v1:from-pathfinder", "1"); } catch (_) {} } : null }, [
           el("span", { class: "kind", text: i === 0 ? "Start" : "Then" }),
           el("div", {}, [
             el("div", { class: "serif", style: { fontSize: "19px" }, text: t.name }),
@@ -135,7 +136,7 @@ export async function pathFinderView() {
       })),
       el("div", { class: "row", style: { gap: "10px", marginTop: "26px" } }, [
         el("button", { class: "ac-btn", type: "button", onClick: () => { nodeId = "xp"; stepN = 1; for (const k in answers) delete answers[k]; render(); } }, ["Start over"]),
-        el("a", { class: "ac-btn", href: "#" + url.catalog() }, ["See every track"]),
+        el("a", { class: "ac-btn", href: url.catalog() }, ["See every track"]),
       ]),
     ])]));
   }

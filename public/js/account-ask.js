@@ -50,7 +50,7 @@ export function askAllowed(ledger, now) {
  * lastShownAt is written before the panel returns, so no second surface can
  * double-ask inside the window — a learner never sees two asks in a week.
  */
-export function accountAsk(surface) {
+export function accountAsk(surface, opts = {}) {
   try {
     if (!isConfigured() || user()) return null;
     const now = Date.now();
@@ -62,7 +62,12 @@ export function accountAsk(surface) {
     const go = el("button", { class: "ac-btn ac-btn-solid", type: "button" }, ["Create free account"]);
     const later = el("button", { class: "ac-btn", type: "button" }, ["Not now"]);
     const panel = el("div", { class: "panel ask-line", role: "status" }, [
-      el("p", { class: "ask-copy", text: "Nice work — an account saves this progress across devices." }),
+      // LX-12 (D-LX2 resolved): the milestone variant is HONEST about where
+      // the risk actually lives — device loss, cleared data, long-idle
+      // eviction — without fear-mongering the daily case, which is safe.
+      // Every cap above still applies: same ledger, same cooldown, same
+      // two-dismissals-then-quiet.
+      el("p", { class: "ask-copy", text: opts.copy || "Nice work — an account saves this progress across devices." }),
       el("div", { class: "row", style: { gap: "10px", flexWrap: "wrap" } }, [go, later]),
     ]);
     go.addEventListener("click", () => {

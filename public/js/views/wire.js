@@ -14,7 +14,7 @@
 // but empty shows the honest "warming up" state instead. Static no-DB
 // deploys (DEPLOY.md Option A) keep working untouched.
 import { el, clear } from "../ui.js";
-import { url } from "../router.js";
+import { url , setTitle } from "../router.js";
 import { md } from "../markdown.js";
 import { track as tk } from "../analytics.js";
 
@@ -82,9 +82,9 @@ export function wireTeaser(posts) {
     el("div", { class: "wrap" }, [
       el("div", { class: "wire-teaser-head" }, [
         el("span", { class: "mono-label", text: "From the Wire — agent-verified daily briefings" }),
-        el("a", { class: "mono-label", href: "#" + url.wire(), text: "All posts →" }),
+        el("a", { class: "mono-label", href: url.wire(), text: "All posts →" }),
       ]),
-      el("div", { class: "wire-teaser-row" }, posts.map((p) => el("a", { class: "wire-item", href: "#" + url.wirePost(p.slug) }, [
+      el("div", { class: "wire-teaser-row" }, posts.map((p) => el("a", { class: "wire-item", href: url.wirePost(p.slug) }, [
         el("span", { class: "mono-label", text: `${shortDate(p.publishedAt)} · ${TYPE_LABELS[p.type] || p.type}` }),
         el("h3", { text: p.title }),
       ]))),
@@ -98,7 +98,7 @@ export function wireTeaser(posts) {
 export function mountWireNav() {
   detectWire().then((on) => {
     if (!on || document.querySelector('[data-nav="wire"]')) return;
-    const mk = () => el("a", { href: "#" + url.wire(), "data-nav": "wire" }, ["The Wire"]);
+    const mk = () => el("a", { href: url.wire(), "data-nav": "wire" }, ["The Wire"]);
     const topnav = document.querySelector(".ac-topnav");
     if (topnav) topnav.appendChild(mk());
     const drawer = document.getElementById("ac-nav-drawer");
@@ -109,7 +109,7 @@ export function mountWireNav() {
       drawer.insertBefore(link, mood || null);
     }
     const learnCol = document.querySelector('.ac-footer-col[aria-label="Learn"]');
-    if (learnCol) learnCol.appendChild(el("a", { href: "#" + url.wire() }, ["The Wire"]));
+    if (learnCol) learnCol.appendChild(el("a", { href: url.wire() }, ["The Wire"]));
   });
 }
 
@@ -126,7 +126,7 @@ const wireShell = (...kids) => el("div", { class: "section" }, [el("div", { clas
 const emptyState = (title, body) => el("div", { class: "wire-empty" }, [
   el("h2", { class: "serif-i", style: { fontSize: "24px" }, text: title }),
   el("p", { class: "muted", style: { marginTop: "8px", maxWidth: "56ch" }, text: body }),
-  el("a", { class: "ac-btn", href: "#" + url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
+  el("a", { class: "ac-btn", href: url.catalog(), style: { marginTop: "18px" } }, ["← Back to the Academy"]),
 ]);
 
 const offState = () => emptyState(
@@ -143,6 +143,7 @@ const typeChip = (type) => el("span", { class: "chip wire-type", text: TYPE_LABE
 
 // ── #/wire — the list, grouped by date, filterable by type + tag ───────
 export async function wireListView() {
+  setTitle("The Wire");
   const r = await fetchList();
   if (!r.ok) {
     return wireShell(r.mounted
@@ -174,7 +175,7 @@ export async function wireListView() {
     for (const p of posts) {
       const d = dayName(p.publishedAt);
       if (d !== day) { day = d; listEl.appendChild(el("h2", { class: "mono-label wire-day", text: d })); }
-      listEl.appendChild(el("a", { class: "wire-item", href: "#" + url.wirePost(p.slug) }, [
+      listEl.appendChild(el("a", { class: "wire-item", href: url.wirePost(p.slug) }, [
         el("div", { class: "wire-item-head" }, [
           typeChip(p.type),
           ...(p.tags || []).map((t) => el("span", { class: "mono-label wire-tag", text: t })),
@@ -227,11 +228,12 @@ export async function wirePostView(ctx) {
   catch (_) { return wireShell(offState()); }
   if (r.status === 404) {
     return wireShell(emptyState("That post isn't on the Wire.", "It may have been unpublished, or the link is stale."),
-      el("p", { style: { marginTop: "10px" } }, [el("a", { class: "ac-btn", href: "#" + url.wire() }, ["← All Wire posts"])]));
+      el("p", { style: { marginTop: "10px" } }, [el("a", { class: "ac-btn", href: url.wire() }, ["← All Wire posts"])]));
   }
   if (!r.ok) return wireShell(offState());
   const data = await r.json();
   const p = data.post;
+  if (p && p.title) setTitle(p.title);
   tk("wire_post_view", { slug: p.slug, type: p.type });
 
   const sourcesBox = el("div", { class: "callout wire-sources" }, [
@@ -265,7 +267,7 @@ export async function wirePostView(ctx) {
     (lastCorrection ? ` · corrected ${String(lastCorrection.at).slice(0, 10)}` : "");
   return wireShell(
     el("div", { class: "crumbs" }, [
-      el("a", { class: "mono-label", href: "#" + url.wire(), text: "The Wire" }),
+      el("a", { class: "mono-label", href: url.wire(), text: "The Wire" }),
       el("span", { class: "mono-label", text: "›" }),
       el("span", { class: "mono-label", text: TYPE_LABELS[p.type] || p.type }),
     ]),
@@ -278,6 +280,6 @@ export async function wirePostView(ctx) {
     el("div", { class: "prose wire-body", html: md(p.bodyMd) }),
     sourcesBox,
     corrections,
-    el("p", { style: { marginTop: "26px" } }, [el("a", { class: "ac-btn", href: "#" + url.wire() }, ["← All Wire posts"])]),
+    el("p", { style: { marginTop: "26px" } }, [el("a", { class: "ac-btn", href: url.wire() }, ["← All Wire posts"])]),
   );
 }

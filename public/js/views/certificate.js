@@ -3,7 +3,7 @@
 // v1 is honest social proof: the payload checksum deters casual URL edits,
 // nothing more — copy never says "verified".
 import { el } from "../ui.js";
-import { url } from "../router.js";
+import { url , navigate } from "../router.js";
 import { loadCatalog, loadTrack } from "../content.js";
 import { encodeCert, decodeCert, badgeCopy, linkedInAddUrl, isSkillsTrack } from "../engine/certificate.js";
 import { user as authUser } from "../auth.js";
@@ -88,7 +88,7 @@ export function claimPanel(trackData, comp) {
     // Progressive enhancement: try to server-sign, else navigate unsigned.
     go.disabled = true;
     const sig = await signBadge(payload);
-    location.hash = certHash(sig ? `${payload}${SIG_SEP}${sig}` : payload);
+    navigate(certHash(sig ? `${payload}${SIG_SEP}${sig}` : payload));
   });
 
   return el("div", { class: "panel claim-box", style: { marginTop: "26px" } }, [
@@ -113,7 +113,7 @@ export async function certificateView({ params }) {
       el("span", { class: "mono-label", text: "Certificate" }),
       el("h1", { class: "serif-i", style: { fontSize: "40px", marginTop: "10px" }, text: "That link doesn't check out." }),
       el("p", { class: "muted", text: "The certificate payload is malformed or was edited. Ask the holder to re-share it." }),
-      el("a", { class: "ac-btn", href: "#" + url.catalog(), style: { marginTop: "18px" } }, ["← To the Academy"]),
+      el("a", { class: "ac-btn", href: url.catalog(), style: { marginTop: "18px" } }, ["← To the Academy"]),
     ])]);
   }
 
@@ -180,7 +180,7 @@ export async function certificateView({ params }) {
         // (el() skips the null this returns elsewhere; Copy link covers it).
         nativeShareButton({ title: certName, url: absoluteCertUrl(params.payload) }),
         el("button", { class: "ac-btn", type: "button", onClick: () => window.print() }, ["Save as PDF"]),
-        el("a", { class: "ac-btn", href: "#" + url.track(cert.vendorId, cert.trackId) }, ["Start this track →"]),
+        el("a", { class: "ac-btn", href: url.track(cert.vendorId, cert.trackId) }, ["Start this track →"]),
       ]),
       el("p", { class: "muted no-print", style: { marginTop: "18px", fontSize: "12.5px", maxWidth: "70ch" }, text:
         "Automatos Academy is independent, free training. Completion badges certify Academy work — never an external credential, which only its certification body can issue. Not affiliated with or endorsed by any certification body." }),

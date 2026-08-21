@@ -39,8 +39,8 @@ export function quizView(ctx) {
         due ? el("a", { class: "ac-btn ac-btn-solid", href: due.href }, [`Clear ${due.count} more due →`])
             : lesson ? el("a", { class: "ac-btn ac-btn-solid", href: lesson.href }, [`Next lesson: ${lesson.title} →`]) : null,
         el("button", { class: "ac-btn", type: "button", onClick: run }, ["Re-quiz"]),
-        el("a", { class: "ac-btn", href: "#" + url.domain(v, t, d.id) }, ["Back to domain"]),
-        !due && !lesson ? el("a", { class: "ac-btn ac-btn-solid", href: "#" + url.readiness(v, t) }, ["Readiness →"]) : null,
+        el("a", { class: "ac-btn", href: url.domain(v, t, d.id) }, ["Back to domain"]),
+        !due && !lesson ? el("a", { class: "ac-btn ac-btn-solid", href: url.readiness(v, t) }, ["Readiness →"]) : null,
       ];
       finishBox.appendChild(el("div", { class: "panel", style: { marginTop: "8px" } }, [
         el("h3", { text: `Quiz complete — ${correct}/${qs.length} (${pct}%)` }),

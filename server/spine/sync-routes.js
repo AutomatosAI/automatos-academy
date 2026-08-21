@@ -10,7 +10,7 @@ import express from "express";
 import { ok, fail, wrap } from "./http.js";
 import {
   validateBatch, validateProgressEvent, validateTelemetryEvent,
-  validateMockEvent, validateScenarioEvent, collapseLatest,
+  validateMockEvent, validateScenarioEvent, validateMediaEvent, collapseLatest,
 } from "./validate.js";
 import { rederiveRollups, scopeWeightResolver, masteryToWire } from "./rollups.js";
 import { rederiveConceptStateSafely, conceptWeightResolver, conceptStateToWire } from "./concepts.js";
@@ -157,6 +157,38 @@ export function createSyncRouter({ pool, index, limiter }) {
         lastSeenAt: row.lastSeenAtMs === null ? null : new Date(row.lastSeenAtMs),
       }, conceptWeight, nowMs)),
     });
+  }));
+
+  // ── POST /api/sync/media — LX-1 media completion (video/podcast/narration) ──
+  // Same batch discipline as /progress: validate, collapse to one row per
+  // media slot (latest `at` wins — an un-mark after a mark applies in order),
+  // then upsert. completed=false keeps its row with completed_at NULL so the
+  // un-mark reaches other devices as a /state delta.
+  router.post("/media", wrap(async (req, res) => {
+    const nowMs = Date.now();
+    const batch = validateBatch((req.body || {}).events, validateMediaEvent, nowMs);
+    if (batch.error) return fail(res, 400, batchError(batch));
+
+    const { winners } = collapseLatest(
+      batch.values,
+      (v) => `${v.vendorId}/${v.trackId}/${v.mediaId}`,
+      (v) => v.at,
+    );
+
+    const userId = req.spineUser.id;
+    let applied = 0;
+    for (const v of winners) {
+      const r = await pool.query(
+        `INSERT INTO media_completions (user_id, vendor_id, track_id, kind, media_id, completed_at, how, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, now())
+         ON CONFLICT (user_id, vendor_id, track_id, media_id)
+         DO UPDATE SET kind = EXCLUDED.kind, completed_at = EXCLUDED.completed_at,
+                       how = EXCLUDED.how, updated_at = now()`,
+        [userId, v.vendorId, v.trackId, v.kind, v.mediaId, v.completed ? new Date(v.at) : null, v.how],
+      );
+      applied += r.rowCount;
+    }
+    return ok(res, { received: batch.values.length, applied, discarded: batch.values.length - applied });
   }));
 
   // ── POST /api/sync/telemetry — append-only, PII-minimized ───────────

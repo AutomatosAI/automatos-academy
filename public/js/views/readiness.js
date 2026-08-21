@@ -3,7 +3,7 @@
 // (no exam) get the progress/completion variant instead — same route.
 import { el, seal, ring, clear } from "../ui.js";
 import { trackHeader, section } from "./_chrome.js";
-import { url } from "../router.js";
+import { url , navigate } from "../router.js";
 import { verdict, domainStats } from "../engine/readiness.js";
 import { isSkillsTrack, completion } from "../engine/certificate.js";
 import { claimPanel } from "./certificate.js";
@@ -24,7 +24,7 @@ const gradeVar = (g) => `var(--grade-${g === "A+" ? "aplus" : g === "A" ? "a" : 
 // and a two-click reset. Backup carries EVERY track, not just this one.
 function dataControls(store, backTo) {
   const msg = el("span", { class: "mono-label", style: { alignSelf: "center" } });
-  const reload = () => { location.hash = backTo; window.dispatchEvent(new HashChangeEvent("hashchange")); };
+  const reload = () => { navigate(backTo); };
 
   const reset = el("button", { class: "ac-btn", type: "button", style: { borderColor: "var(--bad)", color: "var(--bad)" } }, ["Reset my progress"]);
   let armed = false;
@@ -70,7 +70,7 @@ function dataControls(store, backTo) {
 // verdict can be audited.
 function examDateRow(v, t, backTo) {
   const cur = getExamDate(v, t);
-  const reload = () => { location.hash = backTo; window.dispatchEvent(new HashChangeEvent("hashchange")); };
+  const reload = () => { navigate(backTo); };
   const input = el("input", { class: "exam-date-input", type: "date", value: cur || "", "aria-label": "Exam date for this track" });
   input.addEventListener("change", () => {
     if (input.value) { setExamDate(v, t, input.value); tk("exam_date_set", { track: t, action: "set" }); }
@@ -184,7 +184,7 @@ function progressView(ctx) {
       el("h3", { class: "serif-i", style: { fontSize: "24px", margin: "40px 0 14px" }, text: "Progress by module group" }),
       el("div", { class: "mastery" }, rows),
       el("div", { class: "row", style: { marginTop: "48px", flexWrap: "wrap", gap: "16px", justifyContent: "space-between" } }, [
-        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: "#" + url.track(v, t), text: "← Back to curriculum" }),
+        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: url.track(v, t), text: "← Back to curriculum" }),
         dataControls(store, url.readiness(v, t)),
       ]),
     ),
@@ -295,7 +295,7 @@ export function readinessView(ctx) {
           paceWhy,
           el("div", { class: "row", style: { marginTop: "18px" } }, [
             el("a", { class: "ac-btn ac-btn-solid", href: "#" + weakHref }, [r.weakest ? `Drill ${r.weakest.name} →` : "Take a mock →"]),
-            el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Mock exam"]),
+            el("a", { class: "ac-btn", href: url.exam(v, t) }, ["Mock exam"]),
           ]),
         ]),
       ]),
@@ -327,7 +327,7 @@ export function readinessView(ctx) {
       el("div", { class: "mastery" }, rows),
 
       el("div", { class: "row", style: { marginTop: "48px", flexWrap: "wrap", gap: "16px", justifyContent: "space-between" } }, [
-        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: "#" + url.track(v, t), text: "← Back to curriculum" }),
+        el("a", { class: "mono-label", style: { alignSelf: "center" }, href: url.track(v, t), text: "← Back to curriculum" }),
         dataControls(store, url.readiness(v, t)),
       ]),
     ),
