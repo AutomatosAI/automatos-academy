@@ -117,7 +117,8 @@ function ensureWatch() {
 // two-line hash parse mirrors tutor.js routeTrackRef — cheaper than an
 // import cycle between tutor.js and this module
 function routeTrackRef() {
-  const m = (location.hash || "").match(/^#\/t\/([^/]+)\/([^/]+)/);
+  const routePath = location.pathname.startsWith("/t/") ? location.pathname : (location.hash || "").replace(/^#/, "");
+  const m = routePath.match(/^\/t\/([^/]+)\/([^/]+)/);
   return m ? { vendorId: decodeURIComponent(m[1]), trackId: decodeURIComponent(m[2]) } : null;
 }
 

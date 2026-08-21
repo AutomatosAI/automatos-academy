@@ -32,7 +32,7 @@ function wall(title, msg) {
   return el("div", {}, [section(
     el("h1", { style: { fontSize: "clamp(28px,4vw,44px)" }, text: title }),
     el("p", { class: "lede muted", style: { marginTop: "14px" }, text: msg }),
-    el("a", { class: "ac-btn", href: "#/", style: { marginTop: "18px" } }, ["← Back to the Academy"]),
+    el("a", { class: "ac-btn", href: "/", style: { marginTop: "18px" } }, ["← Back to the Academy"]),
   )]);
 }
 

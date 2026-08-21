@@ -25,7 +25,7 @@
 // never a wall (PRD-U2 goal 2). Cold start (no progress anywhere) gets an
 // invitation in the hero's own voice, not a wall of zeros.
 import { el, ring, seal } from "../ui.js";
-import { url } from "../router.js";
+import { url , rerender as routerRerender, navigate , setTitle } from "../router.js";
 import { loadCatalog, loadTrack } from "../content.js";
 import { Store } from "../store.js";
 import { verdict, domainStats } from "../engine/readiness.js";
@@ -41,7 +41,7 @@ import { getExamDate, examDateLabel } from "../exam-date.js";
 
 const signedIn = () => isConfigured() && !!user();
 const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-const rerender = () => window.dispatchEvent(new HashChangeEvent("hashchange"));
+const rerender = () => routerRerender();
 
 const hasData = (s) =>
   Object.keys(s.q || {}).length > 0 || (s.exams || []).length > 0 ||
@@ -237,7 +237,7 @@ function credentialLine(track, comp) {
   if (!comp.complete) return null;
   return el("p", { class: "profile-cred" }, [
     el("span", { class: "mono-label", text: "Badge earned — " }),
-    el("a", { href: "#" + url.readiness(track.vendorId, track.trackId), text: "claim your certificate →" }),
+    el("a", { href: url.readiness(track.vendorId, track.trackId), text: "claim your certificate →" }),
   ]);
 }
 
@@ -282,11 +282,11 @@ function trackPanel(track, store) {
       readinessRing,
       el("div", { class: "profile-track-title" }, [
         el("span", { class: "mono-label", text: `${track.vendorName || track.vendorId} · ${track.code || track.trackId}` }),
-        el("h3", {}, [el("a", { href: "#" + url.track(track.vendorId, track.trackId), text: track.name })]),
+        el("h3", {}, [el("a", { href: url.track(track.vendorId, track.trackId), text: track.name })]),
         el("p", { class: "muted", style: { fontSize: "13px" }, text: headline }),
         examIso ? el("p", { class: "muted", style: { fontSize: "12.5px", marginTop: "2px" } }, [
           `Exam date: ${examDateLabel(examIso, { long: true })} · `,
-          el("a", { href: "#" + url.readiness(track.vendorId, track.trackId), text: "change on readiness" }),
+          el("a", { href: url.readiness(track.vendorId, track.trackId), text: "change on readiness" }),
         ]) : null,
       ]),
       gradeSeal,
@@ -350,8 +350,8 @@ function emptyState() {
       ? el("p", { class: "muted", style: { fontSize: "13px" }, text: "Studied on another device? Its progress appears here after that device syncs." })
       : null,
     el("div", { class: "row", style: { gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" } }, [
-      el("a", { class: "ac-btn ac-btn-solid", href: "#/start" }, ["Find your track →"]),
-      el("a", { class: "ac-btn", href: "#" + url.catalog() }, ["Browse all tracks"]),
+      el("a", { class: "ac-btn ac-btn-solid", href: "/start" }, ["Find your track →"]),
+      el("a", { class: "ac-btn", href: url.catalog() }, ["Browse all tracks"]),
     ]),
   ]);
 }
@@ -437,7 +437,7 @@ function dataSection(status) {
     confirmLabel: "Delete my account",
     onConfirm: async () => {
       const r = await deleteMyAccount();
-      if (r.ok) setTimeout(() => { location.hash = "#" + url.catalog(); }, 1400);
+      if (r.ok) setTimeout(() => { navigate(url.catalog()); }, 1400);
       if (r.ok && !r.clerkDeleted) return { ok: true, message: "Your data is deleted and you're signed out. Removing the sign-in identity itself hit an error — it will be retried; your data is already gone." };
       return { ...r, message: "Account deleted. Thanks for studying with us." };
     },
@@ -488,6 +488,7 @@ function dataSection(status) {
 
 // ── the view ─────────────────────────────────────────────────────────────
 export async function profileView() {
+  setTitle("My progress");
   const status = syncStatus();
   let entries = null; // null = catalog unreachable, [] = genuinely no history
   try { entries = await gatherStarted(); } catch (_) {}

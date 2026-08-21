@@ -16,6 +16,7 @@
 import { el, clear } from "./ui.js";
 import { loadCatalog } from "./content.js";
 import { attachContext, consentCard, consentStrip, onContextChange, refreshOffer } from "./tutor-context.js";
+import { navigate , setTitle } from "./router.js";
 
 const cfg = () => window.ACADEMY_CHAT || {};
 const apiBase = () => (cfg().apiBase || "https://api.automatos.app").replace(/\/$/, "");
@@ -35,7 +36,8 @@ const NEUTRAL_PROMPTS = [
 ];
 
 function routeTrackRef() {
-  const m = (location.hash || "").match(/^#\/t\/([^/]+)\/([^/]+)/);
+  const routePath = location.pathname.startsWith("/t/") ? location.pathname : (location.hash || "").replace(/^#/, "");
+  const m = routePath.match(/^\/t\/([^/]+)\/([^/]+)/);
   return m ? { vendorId: decodeURIComponent(m[1]), trackId: decodeURIComponent(m[2]) } : null;
 }
 
@@ -361,6 +363,7 @@ function fillChips(box, listEl) {
 
 // ── full study page (#/tutor) ────────────────────────────────────────────
 export function tutorPageView() {
+  setTitle("Tutor");
   const list = el("div", { class: "tut-list tut-list-page" });
   const page = el("div", {}, [
     el("section", { class: "section" }, [el("div", { class: "wrap tut-page" }, [
@@ -404,7 +407,7 @@ export function mountTutor() {
       el("span", { class: "tut-title", text: "Tutor" }),
       el("span", { class: "mono-label tut-dogfood", text: "an Automatos agent, live" }),
       el("div", { class: "tut-head-actions" }, [
-        el("button", { class: "tut-icon", type: "button", title: "Open full study mode", "aria-label": "Expand to full study page", html: "&#10530;", onclick: () => { setOpen(false); location.hash = "#/tutor"; } }),
+        el("button", { class: "tut-icon", type: "button", title: "Open full study mode", "aria-label": "Expand to full study page", html: "&#10530;", onclick: () => { setOpen(false); navigate("/tutor"); } }),
         el("button", { class: "tut-icon", type: "button", title: "Close", "aria-label": "Close tutor", html: "&times;", onclick: () => setOpen(false) }),
       ]),
     ]),

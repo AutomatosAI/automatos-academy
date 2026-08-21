@@ -11,6 +11,7 @@ import { trackHeader, section } from "./_chrome.js";
 import { resList } from "./parts.js";
 import { allResources, invalidateTrack, trackVideoSections } from "../content.js";
 import { isAdminSync, ensureAdmin, uploadVideo } from "../admin/media.js";
+import { rerender as routerRerender } from "../router.js";
 
 export function libraryView(ctx) {
   const { track } = ctx;
@@ -132,7 +133,7 @@ export function videosView(ctx) {
   // so the Upload affordances appear — idempotent, because the second pass sees
   // isAdminSync()===true and skips the probe (no loop).
   if (!isAdminSync()) {
-    ensureAdmin().then(({ admin }) => { if (admin) window.dispatchEvent(new HashChangeEvent("hashchange")); });
+    ensureAdmin().then(({ admin }) => { if (admin) routerRerender(); });
   }
   // Visitors see only produced videos (module-00 lifted into "Start here", no
   // placeholder clutter); admins see every slot so they can upload into them.

@@ -26,14 +26,14 @@ export function trackHome(ctx) {
 
   const actions = el("div", { class: "row", style: { gap: "12px", marginBottom: "30px" } }, [
     el("a", { class: "ac-btn ac-btn-solid", href: "#" + startHref }, [resume ? "Resume " : "Start learning ", el("span", { class: "arr", text: "→" })]),
-    skills ? null : el("a", { class: "ac-btn", href: "#" + url.exam(v, t) }, ["Take a mock exam"]),
-    el("a", { class: "ac-btn", href: "#" + url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
+    skills ? null : el("a", { class: "ac-btn", href: url.exam(v, t) }, ["Take a mock exam"]),
+    el("a", { class: "ac-btn", href: url.readiness(v, t) }, [skills ? "My progress" : "My readiness"]),
   ]);
 
   const map = el("div", { class: "domain-list" }, track.domains.map((d) => {
     const st = domainStats(d, store);
     // Skills tracks have no scored bank — the ring is lesson coverage there.
-    return el("a", { class: "domain-row", href: "#" + url.domain(v, t, d.id) }, [
+    return el("a", { class: "domain-row", href: url.domain(v, t, d.id) }, [
       ring((skills ? st.coverage : st.mastery) * 100),
       el("div", { class: "body" }, [
         el("div", { class: "row", style: { gap: "10px" } }, [
@@ -72,7 +72,7 @@ export function domainView(ctx) {
   const lessons = d.lessons || [];
   const lessonList = el("div", { class: "res-list" }, lessons.map((l, i) => {
     const done = store.lessonDone(l.id);
-    return el("a", { class: "res-row", href: "#" + url.lesson(v, t, d.id, l.id) }, [
+    return el("a", { class: "res-row", href: url.lesson(v, t, d.id, l.id) }, [
       el("span", { class: "kind", text: done ? "✓ done" : String(i + 1).padStart(2, "0") }),
       el("div", {}, [
         el("div", { class: "serif", style: { fontSize: "19px" }, text: l.title }),
@@ -85,13 +85,13 @@ export function domainView(ctx) {
   const blocks = [
     el("div", { class: "row", style: { justifyContent: "space-between", alignItems: "baseline" } }, [
       el("h2", { class: "serif-i", style: { fontSize: "28px" }, text: "Lessons" }),
-      (d.questions || []).length ? el("a", { class: "ac-btn", href: "#" + url.quiz(v, t, d.id) }, ["Quiz this domain"]) : null,
+      (d.questions || []).length ? el("a", { class: "ac-btn", href: url.quiz(v, t, d.id) }, ["Quiz this domain"]) : null,
     ]),
     lessonList,
   ];
   if ((d.scenarios || []).length) {
     blocks.push(subhead("Scenario drills"));
-    blocks.push(linkList(d.scenarios.map((s) => ({ label: s.title, href: "#" + url.scenario(v, t, s.id), kind: "Run", note: s.tagline }))));
+    blocks.push(linkList(d.scenarios.map((s) => ({ label: s.title, href: url.scenario(v, t, s.id), kind: "Run", note: s.tagline }))));
   }
   if ((d.labs || []).length) {
     blocks.push(subhead("Hands-on labs"));

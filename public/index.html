@@ -23,6 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Funnel+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/academy.css" />
+  <link rel="alternate" type="application/rss+xml" title="Automatos Academy — The Wire" href="/wire/rss.xml" />
   <script src="/js/anim.js" defer></script>
 
   <!-- Anti-FOUC: apply the stored Automatos mood before first paint.
@@ -46,16 +47,16 @@
   <div id="ac-progress" aria-hidden="true"></div>
 
   <header class="ac-topbar">
-    <a class="ac-brand" href="#/" aria-label="Automatos Academy — home">
+    <a class="ac-brand" href="/" aria-label="Automatos Academy — home">
       <span class="ac-brand-mark" aria-hidden="true"></span>
       <span class="ac-brand-word">Automatos <em>Academy</em></span>
     </a>
     <nav class="ac-topnav" aria-label="Primary">
-      <a href="#/start" data-nav="start">Start here</a>
-      <a href="#/" data-nav="catalog">Tracks</a>
-      <a href="#/method" data-nav="method">The model</a>
-      <a href="#/tutor" data-nav="tutor">Tutor</a>
-      <a href="#/admin" data-nav="admin" class="ac-admin-only" hidden>Admin</a>
+      <a href="/start" data-nav="start">Start here</a>
+      <a href="/" data-nav="catalog">Tracks</a>
+      <a href="/method" data-nav="method">The model</a>
+      <a href="/tutor" data-nav="tutor">Tutor</a>
+      <a href="/admin" data-nav="admin" class="ac-admin-only" hidden>Admin</a>
       <!-- automatos.app ↗ moved to the footer's Automatos column -->
     </nav>
     <button id="ac-mood" class="ac-mood" type="button" aria-label="Toggle light / dark">
@@ -87,7 +88,7 @@
   <footer class="ac-footer">
     <div class="ac-footer-grid">
       <div class="ac-footer-brand">
-        <a class="ac-brand" href="#/" aria-label="Automatos Academy — home">
+        <a class="ac-brand" href="/" aria-label="Automatos Academy — home">
           <span class="ac-brand-mark" aria-hidden="true"></span>
           <span class="ac-brand-word">Automatos <em>Academy</em></span>
         </a>
@@ -96,15 +97,15 @@
       </div>
       <nav class="ac-footer-col" aria-label="Learn">
         <span class="mono-label">Learn</span>
-        <a href="#/start">Start here</a>
-        <a href="#/">Tracks</a>
-        <a href="#/method">The model</a>
-        <a href="#/tutor">Tutor</a>
+        <a href="/start">Start here</a>
+        <a href="/">Tracks</a>
+        <a href="/method">The model</a>
+        <a href="/tutor">Tutor</a>
       </nav>
       <nav class="ac-footer-col" aria-label="Account">
         <span class="mono-label">Account</span>
-        <a href="#/profile">My progress</a>
-        <a href="#/profile">Sign in</a>
+        <a href="/profile">My progress</a>
+        <a href="/profile">Sign in</a>
       </nav>
       <nav class="ac-footer-col" aria-label="Automatos">
         <span class="mono-label">Automatos</span>

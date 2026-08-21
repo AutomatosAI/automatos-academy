@@ -26,7 +26,7 @@ export function track(event, props = {}) {
   const body = JSON.stringify({
     event,
     props,
-    path: location.hash.replace(/^#/, "") || "/",
+    path: (location.hash.startsWith("#/") ? location.hash.slice(1) : location.pathname) || "/",
     ref: document.referrer || undefined,
     at: Date.now(),
   });
@@ -53,7 +53,7 @@ export function mountCtaTracking() {
     const a = e.target && e.target.closest && e.target.closest("a[href]");
     if (!a) return;
     if (/(^|\.)automatos\.app/.test((a.hostname || ""))) {
-      track("cta_automatos_click", { href: a.href, from: location.hash || "#/" });
+      track("cta_automatos_click", { href: a.href, from: location.pathname + (location.hash || "") });
     }
   }, { capture: true });
 }
