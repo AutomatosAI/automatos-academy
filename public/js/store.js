@@ -22,7 +22,7 @@ const DAY = 86400000;
 
 const keyFor = (vendorId, trackId) => `automatos-academy:${VERSION}:${vendorId}/${trackId}`;
 
-const EMPTY = () => ({ lessons: {}, q: {}, exams: [], scenarios: {} });
+const EMPTY = () => ({ lessons: {}, q: {}, exams: [], scenarios: {}, media: {} });
 
 // ── sync seam (PRD-U2) ─────────────────────────────────────────────────
 let syncEmitter = null;
@@ -75,6 +75,23 @@ export class Store {
   _save() {
     try { localStorage.setItem(this.key, JSON.stringify(this.s)); } catch (_) {}
   }
+
+  // ── media completion (PRD-WAVE-LEARNER-UX LX-1) ──────────────────────
+  // One map per track: mediaId → { done, how, at, kind }. Auto marks come
+  // from the player (D-LX1: ended OR ≥90%); manual marks are the learner's
+  // override, both directions. A re-play never clears `done` — only an
+  // explicit markMedia(kind, id, false, "manual") does. Old persisted states
+  // predate `media`, hence the (this.s.media || {}) guards.
+  markMedia(kind, id, done = true, how = "manual") {
+    const at = now();
+    this.s = { ...this.s, media: { ...(this.s.media || {}), [id]: { done, how, at, kind } } };
+    this._save();
+    emit({ type: "media", vendorId: this.vendorId, trackId: this.trackId, kind, mediaId: id, completed: done, how, at });
+  }
+  /** the player's path: completes once, never un-completes, never re-fires */
+  mediaAuto(kind, id) { if (!this.mediaDone(id)) this.markMedia(kind, id, true, "auto"); }
+  mediaDone(id) { const m = (this.s.media || {})[id]; return !!(m && m.done); }
+  mediaDoneCount(ids) { return ids.filter((i) => this.mediaDone(i)).length; }
 
   // ── lessons ──────────────────────────────────────────────────────────
   markLesson(id) {

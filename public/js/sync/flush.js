@@ -20,6 +20,7 @@ import { KIND_ORDER, MAX_BATCH } from "./events.js";
 
 const ENDPOINT = {
   progress: "/api/sync/progress",
+  media: "/api/sync/media",
   telemetry: "/api/sync/telemetry",
   mock: "/api/sync/mocks",
   scenario: "/api/sync/scenarios",

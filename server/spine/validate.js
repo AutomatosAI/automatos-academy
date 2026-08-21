@@ -195,6 +195,25 @@ export function validateScenarioEvent(e, nowMs) {
 }
 
 /**
+ * LX-1 — media completion event. `completed: false` is a first-class value
+ * (an explicit un-mark syncs as a delta); `how` records auto (D-LX1's
+ * ended-or-90%) vs manual.
+ */
+export const MEDIA_KINDS = ["video", "podcast", "narration"];
+export function validateMediaEvent(e, nowMs) {
+  if (!e || typeof e !== "object" || Array.isArray(e)) return { error: "not_an_object" };
+  if (!UUID_RE.test(e.eventId || "")) return { error: "eventId_not_uuid" };
+  if (!isId(e.vendorId) || !isId(e.trackId) || !isId(e.mediaId)) return { error: "bad_content_ref" };
+  if (!MEDIA_KINDS.includes(e.kind)) return { error: "kind_unknown" };
+  if (typeof e.completed !== "boolean") return { error: "completed_not_boolean" };
+  if (e.how !== "auto" && e.how !== "manual") return { error: "how_unknown" };
+  const at = parseTimestamp(e.at);
+  if (at === null) return { error: "at_unparseable" };
+  if (at > nowMs + MAX_FUTURE_SKEW_MS) return { error: "at_too_far_future" };
+  return { value: { eventId: e.eventId.toLowerCase(), vendorId: e.vendorId, trackId: e.trackId, kind: e.kind, mediaId: e.mediaId, completed: e.completed, how: e.how, at } };
+}
+
+/**
  * Validate a whole batch with one of the validators above. Returns
  * { error, index } on the first bad event, else { values }.
  */
