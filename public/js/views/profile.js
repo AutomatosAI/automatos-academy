@@ -98,8 +98,18 @@ const ATTEMPT_SECONDS = 45; // honest flat cost per recorded answer (see header)
 
 function heroTotals(entries) {
   let minutes = 0, lessonsDone = 0, lessonsTotal = 0, qDistinct = 0, qAttempts = 0;
+  let mediaDone = 0, mediaTotal = 0;
+  const countMedia = (store, list) => {
+    for (const vd of list || []) {
+      if (!(vd.status === "published" && vd.url && vd.id)) continue; // placeholders never count
+      mediaTotal++;
+      if (store.mediaDone(vd.id)) mediaDone++;
+    }
+  };
   for (const { track, store } of entries) {
+    countMedia(store, track.videos); // course-overview cards
     for (const d of track.domains) {
+      countMedia(store, d.videos);
       for (const l of d.lessons || []) {
         lessonsTotal++;
         if (store.lessonDone(l.id)) { lessonsDone++; minutes += l.estMinutes || 0; }
@@ -110,7 +120,7 @@ function heroTotals(entries) {
     minutes += (store.s.exams || []).length * ((track.exam && track.exam.durationMinutes) || 0);
   }
   minutes += (qAttempts * ATTEMPT_SECONDS) / 60;
-  return { minutes: Math.round(minutes), lessonsDone, lessonsTotal, qDistinct, qAttempts };
+  return { minutes: Math.round(minutes), lessonsDone, lessonsTotal, qDistinct, qAttempts, mediaDone, mediaTotal };
 }
 
 // anim.js tweens [data-count] the first time it scrolls into view (and just
@@ -160,10 +170,19 @@ function heroStats(entries, status) {
     }));
   }
 
+  const media = t.mediaTotal
+    ? statTile(
+        el("b", {}, [countTo(t.mediaDone), el("span", { class: "of", text: ` / ${t.mediaTotal}` })]),
+        "Videos watched",
+        "real bindings only — placeholders never count",
+      )
+    : null;
+
   return el("div", { class: "profile-stats" }, [
     statTile(timeValue(t.minutes), "Time invested", "estimated from lessons, reviews and mock exams"),
     statTile(lessons, "Lessons completed", `across ${n} started track${n === 1 ? "" : "s"}`),
     statTile(el("b", {}, [countTo(t.qDistinct)]), "Questions answered", `${t.qAttempts.toLocaleString()} attempt${t.qAttempts === 1 ? "" : "s"} in total`),
+    media,
     streakTile,
   ]);
 }

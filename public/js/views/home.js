@@ -7,6 +7,7 @@ import { continueData, heroReadiness, heroPace } from "./continue.js";
 import { wireTeaserData, wireTeaser } from "./wire.js";
 import { paceLine } from "./pace-line.js";
 import { loadLane, laneSort } from "../lane.js";
+import { mdInline } from "../markdown.js";
 
 // ── real hero numbers (GET /api/catalog/stats) ─────────────────────────
 // One fetch per session (module-level cached promise; the route is
@@ -78,7 +79,7 @@ function trackCard(t) {
     ]),
     el("h3", { text: t.name }),
     t.code ? el("span", { class: "mono-label", text: t.code }) : null,
-    el("p", { class: "meta", text: t.summary || "" }),
+    el("p", { class: "meta", html: mdInline(t.summary || "") }),
     el("div", { class: "foot" }, [
       el("span", { class: "stat", text: live ? `${t.domains} domains${t.exam ? " · " + t.exam.questionCount + "Q exam" : ""}` : "In development" }),
       live ? el("span", { class: "arr serif-i", text: "→" }) : null,

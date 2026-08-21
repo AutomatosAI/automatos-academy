@@ -28,6 +28,14 @@ function link(text, url) {
   return `<a href="${attrEsc(url)}"${external ? ' target="_blank" rel="noopener"' : ""}>${text}</a>`;
 }
 
+// Exported for single-paragraph fields (track summaries, domain overviews)
+// that are authored in markdown but render outside md()'s block pipeline.
+// Same hardened path: escape first, then format — never raw HTML.
+export function mdInline(s) {
+  if (!s) return "";
+  return inline(s);
+}
+
 function inline(s) {
   return esc(s)
     .replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`)

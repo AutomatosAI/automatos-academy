@@ -8,6 +8,7 @@ import { md, toc } from "../markdown.js";
 import { questionCard } from "./question.js";
 import { nextStep, endNote } from "./next-step.js";
 import { accountAsk } from "../account-ask.js";
+import { wireMediaEl, markToggle } from "../media-progress.js";
 
 export function lessonView(ctx) {
   const { track, store, params } = ctx;
@@ -39,13 +40,24 @@ export function lessonView(ctx) {
     // and the reader looks exactly as it always did. Native <audio> on
     // purpose: play/pause/seek/speed with zero JS in a no-build SPA.
     lesson.audioUrl
-      ? el("audio", {
-          controls: true,
-          preload: "none",
-          src: lesson.audioUrl,
-          style: { width: "100%", maxWidth: "720px", display: "block", margin: "16px 0 0" },
-          "aria-label": `Listen to ${lesson.title}`,
-        })
+      ? (() => {
+          // LX-1/2 — the narration is media too: ≥90% or ended marks it
+          // listened (id mirrors the binding slot: a-<lessonId>), with the
+          // manual toggle beside the player. Reading and listening are
+          // separate completions — this never touches markLesson().
+          const audio = el("audio", {
+            controls: true,
+            preload: "none",
+            src: lesson.audioUrl,
+            style: { width: "100%", maxWidth: "720px", display: "block", margin: "16px 0 0" },
+            "aria-label": `Listen to ${lesson.title}`,
+          });
+          const mediaId = `a-${lesson.id}`;
+          wireMediaEl(audio, store, "narration", mediaId);
+          const mark = markToggle(store, "narration", mediaId, { doneLabel: "Listened", markLabel: "Mark listened", unmarkLabel: "Mark unlistened" });
+          audio.addEventListener("lx-media-complete", () => mark.refresh && mark.refresh());
+          return el("div", {}, [audio, el("div", { style: { marginTop: "6px" } }, [mark])]);
+        })()
       : null,
     lesson.objective ? el("div", { class: "objective" }, [el("span", { class: "mono-label k", text: "Objective" }), el("p", { text: lesson.objective })]) : null,
     el("div", { html: md(lesson.body || "") }),

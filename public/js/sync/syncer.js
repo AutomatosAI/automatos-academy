@@ -16,7 +16,7 @@
 // — no queue writes, no network, no storage keys. Byte-identical to pre-U2.
 
 import { isConfigured, onAuthChange, user } from "../auth.js";
-import { buildMockEvent, buildProgressEvent, buildScenarioEvent } from "./events.js";
+import { buildMediaEvent, buildMockEvent, buildProgressEvent, buildScenarioEvent } from "./events.js";
 import { flushOnce } from "./flush.js";
 import { loadMeta, saveMeta } from "./meta.js";
 import { append, stats } from "./queue.js";
@@ -122,6 +122,8 @@ function onStoreWrite(w) {
     built = buildMockEvent({ vendorId: w.vendorId, trackId: w.trackId, scaled: w.scaled, passed: w.passed, at: w.at });
   } else if (w.type === "scenario") {
     built = buildScenarioEvent({ vendorId: w.vendorId, trackId: w.trackId, scenarioId: w.scenarioId, step: w.step, scorePct: w.scorePct, at: w.at });
+  } else if (w.type === "media") {
+    built = buildMediaEvent({ vendorId: w.vendorId, trackId: w.trackId, kind: w.kind, mediaId: w.mediaId, completed: w.completed, how: w.how, at: w.at });
   }
   if (!built) return;
   if (built.error) { console.warn("[sync] write not queueable:", built.error); return; }
