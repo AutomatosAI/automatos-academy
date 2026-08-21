@@ -123,9 +123,15 @@ function hydrateChatConfig() {
   // key is origin-allow-listed server-side, so it is safe to ship in client JS
   // (it only works from the Academy's own allowed_domains). Railway env vars
   // override these if set.
+  // LX-15: Spine deploys route tutor chat through the authenticated proxy —
+  // the browser gets proxy:true and NO widget key (the key stays server-side
+  // in server/tutor.js). Static deploys keep the legacy direct mode so the
+  // tutor works exactly as before this wave.
+  const proxyMode = process.env.SPINE_ENABLED === "true";
   const out = readFileSync(tpl, "utf8")
-    .replace(/\$\{ACADEMY_CHAT_PUBLIC_KEY\}/g, process.env.ACADEMY_CHAT_PUBLIC_KEY || "ak_pub_267f4a7135d136ac8cfce0c193f3b52715d72346b3e0f5df8af55eec7508b9a3")
-    .replace(/\$\{ACADEMY_CHAT_AGENT_ID\}/g, process.env.ACADEMY_CHAT_AGENT_ID || "bdfe4212-bd85-4875-8b9a-27c16c1b938c")
+    .replace(/\$\{ACADEMY_CHAT_PROXY\}/g, proxyMode ? "true" : "false")
+    .replace(/\$\{ACADEMY_CHAT_PUBLIC_KEY\}/g, proxyMode ? "" : (process.env.ACADEMY_CHAT_PUBLIC_KEY || "ak_pub_267f4a7135d136ac8cfce0c193f3b52715d72346b3e0f5df8af55eec7508b9a3"))
+    .replace(/\$\{ACADEMY_CHAT_AGENT_ID\}/g, proxyMode ? "" : (process.env.ACADEMY_CHAT_AGENT_ID || "bdfe4212-bd85-4875-8b9a-27c16c1b938c"))
     .replace(/\$\{ACADEMY_ANALYTICS_ENDPOINT\}/g, process.env.ACADEMY_ANALYTICS_ENDPOINT || "");
   writeFileSync(resolve(PUBLIC, "chat-config.js"), out, "utf8");
 }
@@ -327,11 +333,12 @@ if (process.env.SPINE_ENABLED === "true") {
   // ── Admin console (PRD-ADMIN-CONSOLE) — users · progress · payments. Shares
   // the Spine pool + auth + role gate. /api/admin/* is admin-role-gated;
   // /api/billing is learner-authed (checkout/portal) or Stripe-signed (webhook).
-  // ── Funnel events (PRD-WAVE-LEARNER-UX LX-5) — the first-party endpoint
-  // the analytics beacon waited a year for. Identity-free by design.
-  const { mountFunnelEvents } = await import("./server/events.js");
-  mountFunnelEvents(app, { pool: spine.pool, auth: spine.auth, requireRole: spine.requireRole });
-  console.log("[events] funnel receiver mounted (/api/events, /api/admin/funnel)");
+  // ── Tutor proxy (PRD-WAVE-LEARNER-UX LX-15, D-LX7) — the metered door.
+  // The platform sees one workspace and cannot tell learners apart; identity
+  // and the daily quota live here. Proxy deploys stop shipping the widget key.
+  const { mountTutorProxy } = await import("./server/tutor.js");
+  const tutor = mountTutorProxy(app, { pool: spine.pool, auth: spine.auth });
+  console.log(`[tutor] proxy mounted (/api/tutor/chat, /api/tutor/allowance) — limit ${tutor.limit}/day`);
 
   const { mountAdminConsole } = await import("./server/admin/index.js");
   const admin = mountAdminConsole(app, {
