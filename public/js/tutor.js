@@ -16,7 +16,7 @@
 import { el, clear } from "./ui.js";
 import { loadCatalog } from "./content.js";
 import { attachContext, consentCard, consentStrip, onContextChange, refreshOffer } from "./tutor-context.js";
-import { user, getToken, onAuthChange, isConfigured } from "./auth.js";
+import { user, getToken, onAuthChange, isConfigured, openSignIn } from "./auth.js";
 import { navigate, setTitle } from "./router.js";
 
 const cfg = () => window.ACADEMY_CHAT || {};
@@ -386,6 +386,32 @@ function stream(text, listEl) {
   });
 }
 
+/**
+ * The composer's slot, wired to auth.
+ *
+ * inputRow() chooses between the signed-out gate and the real composer by
+ * reading user() — but Clerk resolves *after* first paint, and neither the
+ * docked panel (mounted once at boot) nor the study page is rebuilt by the
+ * router when auth settles. A signed-in learner therefore got the gate and
+ * it never went away. The slot repaints on every auth transition, so the
+ * composer appears the moment Clerk answers and again on sign-in/sign-out
+ * without a reload.
+ */
+function inputSlot(listEl, big) {
+  const slot = el("div", { class: "tut-slot" });
+  const paint = () => { clear(slot); slot.appendChild(inputRow(listEl, big)); };
+  paint();
+  let everMounted = false;
+  const off = onAuthChange(() => {
+    if (document.contains(slot)) { everMounted = true; paint(); return; }
+    // the study page unmounts on navigation — drop the listener with it.
+    // (before the first mount there is nothing to repaint: paint() already
+    // ran synchronously with the current state.)
+    if (everMounted) off();
+  });
+  return slot;
+}
+
 function inputRow(listEl, big) {
   // LX-16 (D-LX6): the page stays visible to everyone — only the composer
   // changes shape. Signed out on a proxy deploy, the deal is named plainly.
@@ -393,10 +419,8 @@ function inputRow(listEl, big) {
     const card = el("div", { class: "tut-gate" }, [
       el("p", { class: "tut-gate-lead", text: "Sign in free — 10 tutor questions a day." }),
       el("p", { class: "tut-gate-sub", text: "The tutor is grounded in every Academy track. Your allowance lives on your profile." }),
-      el("a", { class: "ac-btn", href: "/profile", text: "Sign in" }),
+      el("button", { class: "ac-btn", type: "button", onClick: () => openSignIn() }, ["Sign in"]),
     ]);
-    const rerenderOnAuth = onAuthChange(() => { /* app re-renders surfaces on auth change */ });
-    void rerenderOnAuth;
     return card;
   }
   const ta = el("textarea", { class: "tut-input", rows: big ? "2" : "1", placeholder: enabled() ? "Ask the tutor…" : "Tutor connecting soon…", "aria-label": "Message the tutor" });
@@ -461,7 +485,7 @@ export function tutorPageView() {
           el("span", { class: "mono-label", text: "Try" }),
           chips(list),
         ]),
-        el("div", { class: "tut-page-main" }, [list, inputRow(list, true)]),
+        el("div", { class: "tut-page-main" }, [list, inputSlot(list, true)]),
       ]),
     ])]),
   ]);
@@ -492,7 +516,7 @@ export function mountTutor() {
     consentStrip(), // S3 — "let the tutor see my progress"; hidden until offered
     list,
     chipBox,
-    inputRow(list, false),
+    inputSlot(list, false),
   ]);
   const fab = el("button", { class: "tut-fab", type: "button", "aria-label": "Open the Academy tutor", html: "&#9632;" });
   const setOpen = (open) => {
