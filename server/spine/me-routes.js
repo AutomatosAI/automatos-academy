@@ -73,7 +73,7 @@ export const STREAK_SQL = `
 // then the users row itself — "all 7 tables" (US-025). The next authenticated
 // call re-mints a users row with a FRESH workspace_id, which is exactly the
 // "deleted user re-signs-up clean" semantic the PRD tests demand.
-export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots", "user_concept_state", "streak_repairs"];
+export const CHILD_TABLES = ["mastery_map", "progress", "content_cache", "telemetry", "mock_attempts", "scenario_progress", "user_prefs", "mastery_snapshots", "user_concept_state", "streak_repairs", "media_completions"];
 
 // Exported so the admin console (PRD-ADMIN-CONSOLE S2) reuses the one canonical
 // wipe — an admin-scoped delete must match the self-service delete exactly.

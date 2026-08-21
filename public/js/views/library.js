@@ -12,6 +12,7 @@ import { resList } from "./parts.js";
 import { allResources, invalidateTrack, trackVideoSections } from "../content.js";
 import { isAdminSync, ensureAdmin, uploadVideo } from "../admin/media.js";
 import { rerender as routerRerender } from "../router.js";
+import { wireMediaEl, markToggle } from "../media-progress.js";
 
 export function libraryView(ctx) {
   const { track } = ctx;

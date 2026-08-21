@@ -1193,3 +1193,54 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 /* ── LX-14: exam eve + day-after check-in ─────────────────────────────── */
 .exam-eve, .exam-checkin { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
 .exam-eve h3, .exam-checkin h3 { font-family: var(--display); font-size: 20px; }
+
+/* ── LX-2: the one ✓ language for media (PRD-WAVE-LEARNER-UX) ─────────── */
+.media-done-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--fg); font: 600 12px/1.2 var(--sans); letter-spacing: 0.01em;
+}
+.media-mark { display: inline-flex; align-items: center; gap: 10px; margin-top: 8px; }
+.media-mark-btn {
+  background: none; border: 0; padding: 6px 2px; cursor: pointer;
+  color: var(--muted); font: 500 12.5px/1.2 var(--sans);
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.media-mark-btn:hover { color: var(--fg); }
+.media-mark-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+/* a watched card steps back without hiding — rewatch stays one tap away */
+.vid-card.is-watched .frame { opacity: 0.82; }
+.media-count-done { color: var(--accent); }
+
+/* ── LX-16: tutor allowance meter + signed-out gate ───────────────────── */
+.tut-meter { margin-top: 6px; font-size: 12px; color: var(--muted); }
+.tut-gate { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: var(--radius-lg); background: var(--glass); border: 1px solid var(--glass-border); }
+.tut-gate-lead { font-weight: 650; font-size: 15px; }
+.tut-gate-sub { font-size: 13px; color: var(--muted); }
+.tut-gate .ac-btn { align-self: flex-start; }
+
+/* ── LX-7: reach + legibility sweep ───────────────────────────────────── */
+/* keyboard users skip the nav — visible only on focus */
+.skip-link {
+  position: absolute; left: -9999px; top: 12px; z-index: 200;
+  padding: 10px 16px; border-radius: var(--radius-pill);
+  background: var(--fg); color: var(--bg); font: 600 13px/1 var(--sans);
+}
+.skip-link:focus { left: 12px; }
+
+/* tutor chips: sentence case at a readable size, 44px hit areas */
+.tut-chip { text-transform: none; letter-spacing: 0.01em; font-size: 12.5px; padding: 12px 14px; }
+
+/* phone widths: micro-text floors at 12px, recurring targets reach 44px */
+@media (max-width: 900px) {
+  .mono-label { font-size: 12px; }
+  .subnav a { padding: 15px 16px; }
+  .ac-footer-col a { padding: 6px 0; }
+  .media-mark-btn { padding: 10px 4px; }
+}
+
+/* ── LX-8: first-run orientation card ─────────────────────────────────── */
+.orient-card { margin-bottom: 22px; display: flex; flex-direction: column; gap: 10px; }
+.orient-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; font-size: 14.5px; }
+.orient-card .ac-btn { align-self: flex-start; }

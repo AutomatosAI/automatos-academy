@@ -17,6 +17,7 @@ import { el, clear } from "./ui.js";
 import { loadCatalog } from "./content.js";
 import { attachContext, consentCard, consentStrip, onContextChange, refreshOffer } from "./tutor-context.js";
 import { user, getToken, onAuthChange, isConfigured } from "./auth.js";
+import { navigate, setTitle } from "./router.js";
 
 const cfg = () => window.ACADEMY_CHAT || {};
 const apiBase = () => (cfg().apiBase || "https://api.automatos.app").replace(/\/$/, "");

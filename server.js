@@ -340,6 +340,12 @@ if (process.env.SPINE_ENABLED === "true") {
   const tutor = mountTutorProxy(app, { pool: spine.pool, auth: spine.auth });
   console.log(`[tutor] proxy mounted (/api/tutor/chat, /api/tutor/allowance) — limit ${tutor.limit}/day`);
 
+  // ── Funnel events (PRD-WAVE-LEARNER-UX LX-5) — the first-party endpoint
+  // the analytics beacon waited a year for. Identity-free by design.
+  const { mountFunnelEvents } = await import("./server/events.js");
+  mountFunnelEvents(app, { pool: spine.pool, auth: spine.auth, requireRole: spine.requireRole });
+  console.log("[events] funnel receiver mounted (/api/events, /api/admin/funnel)");
+
   const { mountAdminConsole } = await import("./server/admin/index.js");
   const admin = mountAdminConsole(app, {
     pool: spine.pool, index: contentIndex,

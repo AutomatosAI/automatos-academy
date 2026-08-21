@@ -9,6 +9,7 @@ import { questionCard } from "./question.js";
 import { nextStep, endNote } from "./next-step.js";
 import { accountAsk } from "../account-ask.js";
 import { track as tkEvent } from "../analytics.js";
+import { wireMediaEl, markToggle } from "../media-progress.js";
 
 export function lessonView(ctx) {
   const { track, store, params } = ctx;
