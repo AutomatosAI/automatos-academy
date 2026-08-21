@@ -8,7 +8,7 @@ import { md, toc } from "../markdown.js";
 import { questionCard } from "./question.js";
 import { nextStep, endNote } from "./next-step.js";
 import { accountAsk } from "../account-ask.js";
-import { wireMediaEl, markToggle } from "../media-progress.js";
+import { track as tkEvent } from "../analytics.js";
 
 export function lessonView(ctx) {
   const { track, store, params } = ctx;
@@ -16,6 +16,8 @@ export function lessonView(ctx) {
   const lesson = d && lessonById(track, params.domain, params.lesson);
   if (lesson) setTitle(`${lesson.title} — ${track.name}`);
   const v = track.vendorId, t = track.trackId;
+  // LX-5 — the funnel's missing step between track_start and answering
+  if (lesson) tkEvent("lesson_opened", { track: `${v}/${t}`, lesson: lesson.id });
   if (!lesson) return el("div", {}, [trackHeader(track, "overview"), section(el("p", { text: "Lesson not found." }))]);
 
   const lessons = d.lessons || [];

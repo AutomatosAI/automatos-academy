@@ -16,7 +16,14 @@
 // account_ask_shown · account_ask_clicked · account_ask_dismissed (props:
 // surface — PRD-WEB-LOOP §4.2)
 
-const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim();
+// LX-5: same-origin first-party default — the configured endpoint still
+// wins (an external choice overrides), but unset no longer means "no-op":
+// /api/events answers on Spine deploys and is a harmless 404/501 elsewhere.
+const endpoint = () => ((window.ACADEMY_CHAT || {}).analyticsEndpoint || "").trim() || "/api/events";
+
+// per-pageload session id — within-visit drop-off, never a person across
+// visits (the identity-free stance in this file's header is unchanged)
+const SESSION = Math.random().toString(36).slice(2, 12);
 
 const ONCE_KEY = "automatos-academy:v1:events-once";
 
@@ -27,6 +34,7 @@ export function track(event, props = {}) {
     event,
     props,
     path: (location.hash.startsWith("#/") ? location.hash.slice(1) : location.pathname) || "/",
+    session: SESSION,
     ref: document.referrer || undefined,
     at: Date.now(),
   });
