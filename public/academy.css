@@ -163,12 +163,15 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
   border-bottom: 1px solid var(--glass-border);
 }
 .ac-brand { display: inline-flex; align-items: center; gap: 11px; }
+/* The Automatos mark (DesignKit asset). It replaces the drawn circle so the
+   Academy carries the parent brand rather than a generic dot — automatos.app
+   pairs the same boat glyph with its wordmark. The orange is the only place
+   the Automatos brand colour lands in an otherwise periwinkle/navy palette,
+   which is the point: it should read as "Automatos" before it reads as a
+   decoration. Portrait glyph, so height drives the box and width follows. */
 .ac-brand-mark {
-  width: 24px; height: 24px; border: 1.5px solid var(--accent); border-radius: 50%;
-  position: relative; flex: none;
-}
-.ac-brand-mark::after {
-  content: ""; position: absolute; inset: 5px; background: var(--accent); border-radius: 50%;
+  width: 22px; height: 26px; flex: none;
+  background: url("/automatos-mark.png") center/contain no-repeat;
 }
 .ac-brand-word { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; line-height: 1; }
 .ac-brand-word em { font-style: normal; font-weight: 500; color: var(--muted); }
