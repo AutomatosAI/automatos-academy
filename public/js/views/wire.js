@@ -19,7 +19,10 @@ import { sanitizeHtml } from "../sanitize-html.js";
 import { track as tk } from "../analytics.js";
 
 // Fallback only for older caches — the live label rides every API response.
-const LABEL_FALLBACK = "Researched and written by Automatos agents · every claim linked to its source";
+// Mirrors server/wire/label.js. It must not promise per-claim sourcing:
+// platform posts carry no structured citations, so the claim would be false
+// on exactly the surface a reader is most likely to trust.
+const LABEL_FALLBACK = "Researched and written by Automatos agents";
 
 const TYPE_LABELS = {
   "model-news": "Model news",
@@ -85,7 +88,7 @@ export function wireTeaser(posts) {
         el("a", { class: "mono-label", href: url.wire(), text: "All posts →" }),
       ]),
       el("div", { class: "wire-teaser-row" }, posts.map((p) => el("a", { class: "wire-item", href: url.wirePost(p.slug) }, [
-        el("span", { class: "mono-label", text: `${shortDate(p.publishedAt)} · ${TYPE_LABELS[p.type] || p.type}` }),
+        el("span", { class: "mono-label", text: `${shortDate(p.published_at)} · ${TYPE_LABELS[p.type] || p.type}` }),
         el("h3", { text: p.title }),
       ]))),
     ]),
@@ -173,13 +176,13 @@ export async function wireListView() {
     }
     let day = "";
     for (const p of posts) {
-      const d = dayName(p.publishedAt);
+      const d = dayName(p.published_at);
       if (d !== day) { day = d; listEl.appendChild(el("h2", { class: "mono-label wire-day", text: d })); }
       listEl.appendChild(el("a", { class: "wire-item", href: url.wirePost(p.slug) }, [
         el("div", { class: "wire-item-head" }, [
           typeChip(p.type),
           ...(p.tags || []).map((t) => el("span", { class: "mono-label wire-tag", text: t })),
-          p.correctionsCount ? el("span", { class: "mono-label wire-corrected", text: "corrected" }) : null,
+          (p.corrections || []).length ? el("span", { class: "mono-label wire-corrected", text: "corrected" }) : null,
         ]),
         el("h3", { text: p.title }),
         el("p", { class: "muted", text: p.summary }),
@@ -263,7 +266,7 @@ export async function wirePostView(ctx) {
   // not just in the box below — the reader never has to scroll to learn the
   // post has moved since publish.
   const lastCorrection = (p.corrections || []).length ? p.corrections[p.corrections.length - 1] : null;
-  const bylineText = `By ${byline} · ${dayName(p.publishedAt)}` +
+  const bylineText = `By ${byline} · ${dayName(p.published_at)}` +
     (lastCorrection ? ` · corrected ${String(lastCorrection.at).slice(0, 10)}` : "");
   return wireShell(
     el("div", { class: "crumbs" }, [
@@ -274,7 +277,15 @@ export async function wirePostView(ctx) {
     el("h1", { style: { fontSize: "clamp(30px,4.4vw,50px)", marginTop: "14px" }, text: p.title }),
     el("p", { class: "lede muted", style: { maxWidth: "66ch", marginTop: "14px" }, text: p.summary }),
     el("div", { class: "wire-byline" }, [
-      el("span", { class: "mono-label", text: bylineText }),
+      el("span", { class: "mono-label" }, [
+        bylineText + " · ",
+        // The byline names a real agent (author_name on the platform post),
+        // so saying what it is costs the reader nothing and is the honest
+        // answer to "who wrote this". mountCtaTracking picks the link up as
+        // cta_automatos_click automatically — any automatos.app href does.
+        el("a", { class: "wire-agent-link", href: "https://automatos.app", target: "_blank",
+                  rel: "noopener", text: "an Automatos agent \u2197" }),
+      ]),
       label(data.transparency || LABEL_FALLBACK),
     ]),
     el("div", { class: "prose wire-body", html: sanitizeHtml(p.body_html) }),

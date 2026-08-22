@@ -1216,6 +1216,19 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .vid-card.is-watched .frame { opacity: 0.82; }
 .media-count-done { color: var(--accent); }
 
+/* The quota wall's second line. Muted and small: the wall's own copy leads,
+   this explains what the learner was using. Never styled as a button — a CTA
+   here would read as upsell at the exact moment goodwill matters most. */
+.tut-status-note { margin: 6px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.tut-status-note a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+  white-space: nowrap; }  /* the ↗ must never orphan onto its own line */
+
+/* The Wire byline's attribution link. Deliberately the same weight as the
+   rest of the byline — it answers "who wrote this", it is not a promotion,
+   and it should read as a credit line rather than an ad. */
+.wire-agent-link { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.wire-agent-link:hover { color: var(--accent); }
+
 /* ── LX-16: tutor allowance meter + signed-out gate ───────────────────── */
 /* Both of these sit in the composer's slot at the foot of the panel, so they
    take the composer's geometry — the same 14px gutter as .tut-chips and
