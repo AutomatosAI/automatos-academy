@@ -17,6 +17,7 @@ import express from "express";
 import compression from "compression";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { wireIndexMeta } from "./scripts/generate-shells.mjs";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { decodeCert, linkedInAddUrl } from "./public/js/engine/certificate.js";
 import { decodeShare } from "./public/js/engine/sharecard.js";
@@ -541,6 +542,23 @@ function injectTrackMeta(html, vendorId, trackId, base) {
 }
 app.get(/^\/(?!api\/)(?!.*\.[a-zA-Z0-9]+$).*/, (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  // /wire is the SPA's feed route. It used to be shadowed by a generated
+  // public/wire/index.html that express.static answered first, so visitors got
+  // a static door page and had to click through to the actual feed. The file
+  // is gone; the crawlable <head> it carried is injected here instead.
+  if (req.path === "/wire" || req.path === "/wire/") {
+    try {
+      const shell = readFileSync(resolve(PUBLIC, "index.html"), "utf8");
+      const { title, desc, pageUrl } = wireIndexMeta();
+      res.type("html");
+      return res.send(shell
+        .replace(/(<title>)[^<]*(<\/title>)/, `$1${escAttr(title)}$2`)
+        .replace(/(<meta name="description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
+        .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escAttr(title)}$2`)
+        .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
+        .replace("</head>", `<link rel="canonical" href="${escAttr(pageUrl)}" />\n</head>`));
+    } catch (_) { /* fall through to the plain shell */ }
+  }
   const m = req.path.match(TRACK_PATH_RX);
   if (m) {
     try {

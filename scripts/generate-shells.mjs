@@ -9,18 +9,17 @@
 // the index first and calls generateShells(idx); standalone `npm run shells`
 // builds a file index below and emits the same bytes.
 //
-// PRD-WIRE S3: wire-enabled deploys (opts.wire, from WIRE_INGEST_KEY) also
-// get the STATIC parts of the Wire's SEO surface — the /wire/ index shell and
-// a robots.txt Sitemap line pointing at the DB-served /wire/sitemap.xml. Post
-// shells are deliberately NOT generated here: this runs at boot and cannot
-// see posts published (or killed) afterwards — they render per request from
-// the DB (server/wire/shell.js). Wire off → the index shell is removed, so a
-// dev tree flipping env never serves a stale door to a dead surface.
+// PRD-WIRE S3: wire-enabled deploys (opts.wire) get the one STATIC part of
+// the Wire's SEO surface — a robots.txt Sitemap line pointing at
+// /wire/sitemap.xml. Nothing is written under public/wire/: an index.html
+// there would be served by express.static and shadow the SPA's /wire route.
+// Post shells are deliberately not generated here either — this runs at boot
+// and cannot see posts published (or unpublished) afterwards, so they render
+// per request from the platform (server/wire/shell.js).
 import { writeFileSync, mkdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { buildContentIndex } from "../server/catalog.js";
-import { transparencyLabel } from "../server/wire/label.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const BASE = (process.env.ACADEMY_BASE_URL || "https://academy.automatos.app").replace(/\/$/, "");
@@ -102,37 +101,27 @@ function shellHtml(t, track) {
 </main></body></html>`;
 }
 
-// The Wire's static index shell (PRD-WIRE S3) — the crawlable front door at
-// /wire/; individual posts live at /wire/<slug>/ (per-request, DB-served).
-// The transparency label is computed from the same env the runtime reads
-// (D-W5: review mode claims the human review that is actually happening).
-function wireIndexHtml() {
-  const pageUrl = `${BASE}/wire/`;
-  const label = transparencyLabel(process.env.ACADEMY_WIRE_REVIEWED);
-  const title = "The Wire — agent-written, source-verified AI news · Automatos Academy";
-  const desc = "Daily briefings researched and written by Automatos agents — model news, trends, new courses and question refreshes. Every claim linked to its source, every correction in the open.";
-  return `<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
-<link rel="canonical" href="${esc(pageUrl)}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Automatos Academy">
-<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${esc(pageUrl)}"><meta property="og:image" content="${BASE}/og-academy.png?v=2">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="alternate" type="application/atom+xml" title="The Wire — Automatos Academy" href="/wire/rss.xml">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
-</head><body data-mood="mist" style="display:block">
-<main style="max-width:820px;margin:0 auto;padding:64px 22px">
-  <p class="mono-label">Automatos Academy</p>
-  <h1 class="serif-i" style="font-size:clamp(34px,6vw,54px);margin:10px 0 0">The Wire</h1>
-  <p style="margin-top:16px;font-size:18px;max-width:66ch">${esc(desc)}</p>
-  <p class="wire-label">${esc(label)}</p>
-  <p style="margin:26px 0"><a class="ac-btn ac-btn-solid" href="/#/wire">Open the Wire →</a>
-  <a class="ac-btn" href="/wire/rss.xml">Subscribe — RSS</a></p>
-  <p style="margin-top:34px"><a href="/">← Automatos Academy</a></p>
-</main></body></html>`;
+// The Wire's index metadata. /wire is the SPA's own route; individual posts
+// live at /wire/<slug>/ (per-request, rendered from the platform).
+// The transparency label and this copy are held to the same rule as label.js:
+// they may not claim what the pipeline does not do. The old strings promised
+// "source-verified" news where "every claim linked to its source, every
+// correction in the open" — true of the ingest API that enforced sources[],
+// false of platform-authored posts. Removed rather than left flattering.
+//
+// A full page at
+// public/wire/index.html used to be written here, but express.static resolves
+// that file for GET /wire and so shadowed the SPA's own /wire route: visitors
+// landed on a static door page and had to click "Open the Wire" to reach the
+// actual feed, and a refresh put them back on the door. server.js injects
+// this meta into the SPA shell for /wire instead — the same treatment track
+// pages already get — so /wire is the feed, first hit and every hit.
+export function wireIndexMeta() {
+  return {
+    title: "The Wire — agent-written AI news · Automatos Academy",
+    desc: "Briefings researched and written by Automatos agents — model news, trends, new courses and question refreshes.",
+    pageUrl: `${BASE}/wire/`,
+  };
 }
 
 /**
@@ -176,13 +165,11 @@ export function generateShells(idx, opts = {}) {
   // Wire statics (PRD-WIRE S3): the index shell + the second Sitemap line —
   // /wire/sitemap.xml is DB-served, so its urls are always current.
   const wireOn = !!opts.wire;
-  if (wireOn) {
-    mkdirSync(join(PUBLIC, "wire"), { recursive: true });
-    writeFileSync(join(PUBLIC, "wire", "index.html"), wireIndexHtml(), "utf8");
-    console.log("[shells] /wire/ index shell ✓");
-  } else {
-    rmSync(join(PUBLIC, "wire"), { recursive: true, force: true });
-  }
+  // No file is written under public/wire/ — see wireIndexMeta above. Any
+  // index.html here would be served by express.static and shadow the SPA's
+  // /wire route. The directory is cleared either way so an old deploy's door
+  // page cannot survive an upgrade and keep shadowing it.
+  rmSync(join(PUBLIC, "wire"), { recursive: true, force: true });
   writeFileSync(join(PUBLIC, "robots.txt"),
     `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n` +
     (wireOn ? `Sitemap: ${BASE}/wire/sitemap.xml\n` : ""), "utf8");
@@ -191,5 +178,5 @@ export function generateShells(idx, opts = {}) {
 
 // ── standalone: npm run shells — build a file index, emit the same bytes ─
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  generateShells(buildContentIndex(join(PUBLIC, "content")), { wire: !!process.env.WIRE_INGEST_KEY });
+  generateShells(buildContentIndex(join(PUBLIC, "content")), { wire: !!process.env.ACADEMY_WORKSPACE_ID });
 }

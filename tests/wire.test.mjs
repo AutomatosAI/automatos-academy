@@ -28,7 +28,7 @@ import { buildPostShellHtml, buildWireSitemapXml } from "../server/wire/shell.js
 import { mountWire, createWireClient } from "../server/wire/index.js";
 import { mapPost, listPosts, getPost } from "../public/js/wire-api.js";
 import { sanitizeHtml, htmlToText } from "../public/js/sanitize-html.js";
-import { generateShells } from "../scripts/generate-shells.mjs";
+import { generateShells, wireIndexMeta } from "../scripts/generate-shells.mjs";
 import { buildContentIndex } from "../server/catalog.js";
 
 let failures = 0;
@@ -251,23 +251,26 @@ section("mounted routes");
   ok(mountThrew, "mounting without a workspace fails loudly at boot");
 }
 
-// ── Static wire shell + robots line ──────────────────────────────────────
+// ── Shell generation + the /wire shadowing rule ──────────────────────────
 section("generate-shells wire statics");
 {
   const PUB = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
   const idx = buildContentIndex(join(PUB, "content"));
 
   generateShells(idx, { wire: true });
-  ok(existsSync(join(PUB, "wire", "index.html")), "wire on → /wire/ index shell emitted");
-  const html = readFileSync(join(PUB, "wire", "index.html"), "utf8");
-  ok(html.includes('rel="canonical"') && html.includes("/wire/rss.xml"), "index shell carries canonical + the feed");
-  ok(!/reviewed by a human/.test(html), "index shell does NOT claim human review by default");
-  ok(/Automatos agents/.test(html), "…but does name the agents as authors");
-  ok(/Sitemap: .*\/wire\/sitemap\.xml/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "robots.txt points at the wire sitemap");
+  ok(!existsSync(join(PUB, "wire", "index.html")),
+     "NOTHING is written to public/wire/index.html — express.static would answer it for GET /wire and shadow the SPA route");
+  ok(/Sitemap: .*\/wire\/sitemap\.xml/.test(readFileSync(join(PUB, "robots.txt"), "utf8")),
+     "robots.txt points at the wire sitemap");
+
+  const meta = wireIndexMeta();
+  ok(typeof meta.title === "string" && /The Wire/.test(meta.title), "wire meta carries a title for the SPA shell");
+  ok(!/source-verified/.test(meta.title), "title drops the 'source-verified' claim the platform cannot back");
+  ok(!/linked to its source|correction in the open/.test(meta.desc), "description drops the sourcing and corrections promises");
+  ok(/\/wire\/$/.test(meta.pageUrl), "canonical points at the trailing-slash real path");
 
   generateShells(idx, { wire: false });
-  ok(!existsSync(join(PUB, "wire", "index.html")), "wire off → the stale index shell is removed");
-  ok(!/wire\/sitemap/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "…and robots.txt drops the wire line");
+  ok(!/wire\/sitemap/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "wire off → robots.txt drops the wire line");
 
   generateShells(idx, { wire: true }); // leave the tree as a wire-enabled deploy finds it
 }
