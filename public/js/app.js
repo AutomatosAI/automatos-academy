@@ -17,6 +17,7 @@ import { libraryView, videosView } from "./views/library.js";
 import { certificateView } from "./views/certificate.js";
 import { pathFinderView } from "./views/pathfinder.js";
 import { profileView } from "./views/profile.js";
+import { podcastsView } from "./views/podcasts.js";
 import { adminView } from "./views/admin.js";
 import { wireListView, wirePostView, mountWireNav } from "./views/wire.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
@@ -65,6 +66,7 @@ route("/t/:vendor/:track/quiz/:domain", quizView);
 route("/t/:vendor/:track/exam", examView);
 route("/t/:vendor/:track/readiness", readinessView);
 route("/tutor", tutorPageView);
+route("/podcasts", podcastsView);
 route("/start", pathFinderView);
 route("/cert/:payload", certificateView);
 route("/profile", profileView);
@@ -104,7 +106,7 @@ function syncTopnav(path) {
   // whichever is visible at this width.
   document.querySelectorAll(".ac-topnav a[data-nav], .ac-nav-drawer a[data-nav]").forEach((a) => {
     const k = a.getAttribute("data-nav");
-    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "start" && path === "/start") || (k === "wire" && (path === "/wire" || path.startsWith("/wire/")));
+    const on = (k === "catalog" && path === "/") || (k === "method" && path === "/method") || (k === "tutor" && path === "/tutor") || (k === "podcasts" && path === "/podcasts") || (k === "start" && path === "/start") || (k === "wire" && (path === "/wire" || path.startsWith("/wire/")));
     if (on) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });

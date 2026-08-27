@@ -1216,6 +1216,31 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
 .vid-card.is-watched .frame { opacity: 0.82; }
 .media-count-done { color: var(--accent); }
 
+/* ── Podcast library ──────────────────────────────────────────────────────
+   Cards, not a table: each episode carries a real player, so the row has to
+   breathe. A listened card steps back rather than hiding — relistening stays
+   one tap away, the same rule the video hub follows. */
+.pod-group { font-size: 24px; margin: 40px 0 4px; }
+.pod-group:first-child { margin-top: 26px; }
+.pod-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.pod-card {
+  border: 1px solid var(--glass-border); background: var(--glass);
+  border-radius: var(--radius-lg); padding: 18px 18px 16px;
+  display: flex; flex-direction: column;
+}
+.pod-card[data-done="true"] { opacity: 0.86; }
+.pod-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.pod-title { font-family: var(--display); font-weight: 650; font-size: 17px; line-height: 1.3; margin: 0; }
+.pod-meta { margin-top: 6px; color: var(--muted); }
+.pod-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.pod-track-link { color: var(--muted); }
+.pod-track-link:hover { color: var(--fg); }
+.pod-grounding { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+@media (max-width: 640px) {
+  .pod-grid { grid-template-columns: 1fr; }
+  .pod-track-link { padding: 10px 0; }   /* 44px reach, per LX-7 */
+}
+
 /* The quota wall's second line. Muted and small: the wall's own copy leads,
    this explains what the learner was using. Never styled as a button — a CTA
    here would read as upsell at the exact moment goodwill matters most. */

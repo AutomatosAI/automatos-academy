@@ -24,6 +24,15 @@ export async function loadCatalog() {
   return m;
 }
 
+/** The podcast manifest (PRD-MT-10). Same endpoint the mobile app consumes,
+ *  so both surfaces read one published list and cannot drift. */
+export async function loadPodcasts() {
+  if (cache.has("podcasts")) return cache.get("podcasts");
+  const m = await getJSON("/api/catalog/podcasts");
+  cache.set("podcasts", m);
+  return m;
+}
+
 // Drop a cached track so the next loadTrack refetches from the catalog — used
 // after an admin media bind so the overlay-aware content is re-read on the next
 // visit to the track (the card also swaps optimistically in place right away).

@@ -28,6 +28,7 @@ let dispose = null;
 const LINKS = [
   { href: "/start", nav: "start", label: "Start here" },
   { href: "/", nav: "catalog", label: "Tracks" },
+  { href: "/podcasts", nav: "podcasts", label: "Podcasts" },
   { href: "/method", nav: "method", label: "The model" },
   { href: "/tutor", nav: "tutor", label: "Tutor" },
   { href: "/admin", nav: "admin", label: "Admin", adminOnly: true }, // hidden until revealAdminNav()
