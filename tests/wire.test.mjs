@@ -28,7 +28,7 @@ import { buildPostShellHtml, buildWireSitemapXml } from "../server/wire/shell.js
 import { mountWire, createWireClient } from "../server/wire/index.js";
 import { mapPost, listPosts, getPost } from "../public/js/wire-api.js";
 import { sanitizeHtml, htmlToText } from "../public/js/sanitize-html.js";
-import { generateShells, wireIndexMeta } from "../scripts/generate-shells.mjs";
+import { generateShells, wireIndexMeta, injectWireMeta } from "../scripts/generate-shells.mjs";
 import { buildContentIndex } from "../server/catalog.js";
 
 let failures = 0;
@@ -273,6 +273,27 @@ section("generate-shells wire statics");
   ok(!/wire\/sitemap/.test(readFileSync(join(PUB, "robots.txt"), "utf8")), "wire off → robots.txt drops the wire line");
 
   generateShells(idx, { wire: true }); // leave the tree as a wire-enabled deploy finds it
+}
+
+// ── /wire's injected head ────────────────────────────────────────────────
+// This shipped broken: the injection referenced an escAttr declared inside
+// another function, threw ReferenceError on every request, and was swallowed
+// by its own catch — so /wire served the generic shell for days with no log
+// line and green CI. The assertions below are against the real output.
+section("/wire head injection");
+{
+  const PUB = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+  const shell = readFileSync(join(PUB, "index.html"), "utf8");
+  const out = injectWireMeta(shell);
+  const meta = wireIndexMeta();
+
+  ok(out.includes(`<title>${meta.title}</title>`), "the shell's <title> becomes the Wire's");
+  ok(out !== shell, "output actually differs from the shell it was given");
+  ok(!/Learn AI architecture/.test(out.slice(0, out.indexOf("</head>"))), "the generic Academy title is gone from the head");
+  ok(out.includes(`<link rel="canonical" href="${meta.pageUrl}" />`), "canonical points at /wire/");
+  ok(out.includes(`<meta property="og:title" content="${meta.title}"`), "og:title carries the Wire title");
+  ok(out.includes(`<meta name="description" content="${meta.desc}"`), "description is the Wire's");
+  ok(injectWireMeta('<head><title>x</title></head>').includes(meta.title), "works on a minimal document too");
 }
 
 console.log(failures ? `\n${failures} failure(s)` : "\nwire: all assertions passed");
