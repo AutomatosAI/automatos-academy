@@ -116,6 +116,27 @@ function shellHtml(t, track) {
 // actual feed, and a refresh put them back on the door. server.js injects
 // this meta into the SPA shell for /wire instead — the same treatment track
 // pages already get — so /wire is the feed, first hit and every hit.
+/**
+ * Inject the Wire index's crawlable <head> into the SPA shell.
+ *
+ * Pure — html in, html out, no request object — so a test asserts the real
+ * output instead of trusting that a route wired it up. It lives here rather
+ * than in server.js for exactly that reason: importing server.js boots the
+ * server, so anything defined there is untestable by construction, which is
+ * how the previous version shipped a ReferenceError that served the plain
+ * shell for days without a log line.
+ */
+export function injectWireMeta(html) {
+  const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const { title, desc, pageUrl } = wireIndexMeta();
+  return String(html)
+    .replace(/(<title>)[^<]*(<\/title>)/, `$1${esc(title)}$2`)
+    .replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
+    .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(title)}$2`)
+    .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
+    .replace("</head>", `<link rel="canonical" href="${esc(pageUrl)}" />\n</head>`);
+}
+
 export function wireIndexMeta() {
   return {
     title: "The Wire — agent-written AI news · Automatos Academy",

@@ -262,6 +262,16 @@ async function streamChat(text, { onChunk, onDone, onError, onAccepted }) {
 
 // Truthful copy per failure kind. Only "offline" ever mentions the learner's
 // connection — everything else owns the fault ("on our side, not yours").
+// What answered the learner's questions all day. Named at the wall because
+// that is where the question "what is this thing?" actually occurs — and
+// because a person who ran out is interested, not annoyed by being told.
+// mountCtaTracking instruments the click as cta_automatos_click for free.
+const QUOTA_NOTE = {
+  text: "This tutor is an Automatos agent, grounded in the Academy's own material.",
+  href: "https://automatos.app",
+  linkText: "Build one on your own docs \u2197",
+};
+
 function failureCopy(f) {
   if (f.kind === "offline") return "You're offline — the tutor needs an internet connection. Reconnect, then retry.";
   if (f.kind === "unreachable") return "The Academy tutor can't be reached right now — this is on our side, not yours.";
@@ -295,6 +305,17 @@ function statusRow(msg, listEl) {
   const row = el("div", { class: "tut-status", role: "status" }, [
     el("span", { class: "tut-status-text", text: msg.text }),
   ]);
+  // An optional second line. Only the quota wall uses it: someone who has just
+  // spent the day's allowance is the one person in the product who has proved
+  // they want more of this agent, so that is the honest moment to say what the
+  // agent actually is. It is a sentence, not a banner — the wall's own copy
+  // still leads, and nothing here competes with the Retry affordance.
+  if (msg.note) {
+    row.appendChild(el("p", { class: "tut-status-note" }, [
+      msg.note.text + " ",
+      el("a", { href: msg.note.href, target: "_blank", rel: "noopener", text: msg.note.linkText }),
+    ]));
+  }
   if (msg.action) {
     row.appendChild(el("button", {
       class: "tut-retry", type: "button", text: msg.action.label,
@@ -378,7 +399,12 @@ function stream(text, listEl) {
         } else {
           session.messages.pop(); // drop the empty typing bubble — no fake reply
           const retry = { label: "Retry", run: (le) => stream(text, le) };
-          session.messages.push({ role: "status", text: failureCopy(f), action: f.kind === "auth" ? null : retry });
+          session.messages.push({
+            role: "status",
+            text: failureCopy(f),
+            note: f.kind === "quota" ? QUOTA_NOTE : null,
+            action: f.kind === "auth" || f.kind === "quota" ? null : retry,
+          });
         }
         repaint();
       },

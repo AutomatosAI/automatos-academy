@@ -17,7 +17,7 @@ import express from "express";
 import compression from "compression";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { wireIndexMeta } from "./scripts/generate-shells.mjs";
+import { injectWireMeta } from "./scripts/generate-shells.mjs";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { decodeCert, linkedInAddUrl } from "./public/js/engine/certificate.js";
 import { decodeShare } from "./public/js/engine/sharecard.js";
@@ -523,13 +523,19 @@ app.use(express.static(PUBLIC, {
 // indexable door per track, shares get honest previews, no duplicate-content
 // split. String surgery on known head tags; anything unmatched serves as-is.
 const TRACK_PATH_RX = /^\/t\/([^/]+)\/([^/]+)(\/|$)/;
+// Module scope on purpose. This used to be declared inside injectTrackMeta,
+// which made the /wire injection below a ReferenceError the moment it ran —
+// swallowed by that branch's own catch, so /wire quietly served the plain
+// shell and nothing was ever logged. Track pages worked because escAttr was
+// in their scope. One definition, both callers.
+const escAttr = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 function injectTrackMeta(html, vendorId, trackId, base) {
   try {
     const manifest = getContentIndex().manifest.data;
     const vend = (manifest.vendors || []).find((v) => v.id === vendorId);
     const tr = vend && (vend.tracks || []).find((t) => t.trackId === trackId);
     if (!tr) return html;
-    const escAttr = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const title = `${tr.name} · Automatos Academy`;
     const desc = tr.summary || `${tr.name} — free, honest preparation on Automatos Academy.`;
     return html
@@ -549,15 +555,13 @@ app.get(/^\/(?!api\/)(?!.*\.[a-zA-Z0-9]+$).*/, (req, res) => {
   if (req.path === "/wire" || req.path === "/wire/") {
     try {
       const shell = readFileSync(resolve(PUBLIC, "index.html"), "utf8");
-      const { title, desc, pageUrl } = wireIndexMeta();
       res.type("html");
-      return res.send(shell
-        .replace(/(<title>)[^<]*(<\/title>)/, `$1${escAttr(title)}$2`)
-        .replace(/(<meta name="description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
-        .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escAttr(title)}$2`)
-        .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`)
-        .replace("</head>", `<link rel="canonical" href="${escAttr(pageUrl)}" />\n</head>`));
-    } catch (_) { /* fall through to the plain shell */ }
+      return res.send(injectWireMeta(shell));
+    } catch (e) {
+      // Loud, not silent. The previous version swallowed a ReferenceError
+      // here and served the plain shell for days without one log line.
+      console.warn("[wire] index meta injection failed:", e.message);
+    }
   }
   const m = req.path.match(TRACK_PATH_RX);
   if (m) {
