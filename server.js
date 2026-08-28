@@ -101,11 +101,6 @@ if (CONTENT_SOURCE === "db") {
   );
 }
 
-// The Academy's Automatos workspace. Not a secret — it names whose posts and
-// whose agent to show, exactly as the landing site ships its workspace id in
-// client JS. Railway's ACADEMY_WORKSPACE_ID overrides it.
-const DEFAULT_WORKSPACE_ID = "894519f4-9fc3-40eb-bb9f-081e5b113a58";
-
 // SEO landing shells + sitemap render FROM THE INDEX (PRD-U3 S4 — the index
 // exists first; shells never re-read disk). Failure is non-fatal — the SPA
 // serves fine without shells. Wire-enabled deploys additionally get the
@@ -114,7 +109,7 @@ const DEFAULT_WORKSPACE_ID = "894519f4-9fc3-40eb-bb9f-081e5b113a58";
 // mounted with the Wire below).
 try {
   const { generateShells } = await import("./scripts/generate-shells.mjs");
-  generateShells(getContentIndex(), { wire: !!(process.env.ACADEMY_WORKSPACE_ID || DEFAULT_WORKSPACE_ID) });
+  generateShells(getContentIndex(), { wire: !!process.env.ACADEMY_WORKSPACE_ID });
 } catch (e) { console.warn("[shells] generation skipped:", e.message); }
 
 // ── Hydrate the tutor's chat config from env at startup ───────────────
@@ -387,7 +382,17 @@ if (process.env.SPINE_ENABLED === "true") {
 // not an error: the list answers [], the SPA's feature-detect keeps the nav
 // entry and the home teaser hidden, and /wire/rss.xml serves a valid empty
 // feed instead of the 503 the page head was previously advertising.
-const wireWorkspace = process.env.ACADEMY_WORKSPACE_ID || DEFAULT_WORKSPACE_ID;
+// Configuration, not a constant. The workspace id used to be hardcoded here
+// with the env var as an override, which meant the Academy was not actually
+// consuming the platform the way a customer does — it was a sibling app with
+// a sibling's shortcut. Both are ours, which is exactly why it mattered: if
+// the Academy cannot be stood up from configuration alone, neither can anyone
+// else's site, and we would not find that out from our own product.
+//
+// Unset → the Wire does not mount, and /wire/rss.xml + /wire/sitemap.xml
+// answer the honest 503 not_configured below. Same default-off posture as
+// SPINE_ENABLED and DIGEST_ENABLED.
+const wireWorkspace = process.env.ACADEMY_WORKSPACE_ID;
 if (wireWorkspace) {
   const { mountWire } = await import("./server/wire/index.js");
   const wire = mountWire(app, {
@@ -399,6 +404,7 @@ if (wireWorkspace) {
   });
   console.log(`[wire] news mounted read-only from Automatos workspace ${wire.workspaceId} (/api/wire, /wire/rss.xml, /wire/:slug shells)`);
 } else {
+  console.log("[wire] ACADEMY_WORKSPACE_ID is not set — the Wire is off (nav entry hidden, feed answers 503 not_configured).");
   app.get("/wire/rss.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
   app.get("/wire/sitemap.xml", (_req, res) => res.status(503).json({ error: "not_configured" }));
 }
