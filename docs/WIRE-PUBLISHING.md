@@ -110,11 +110,42 @@ sanitiser can't reach the crawler shell).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ACADEMY_WORKSPACE_ID` | the id above | whose posts to show. Not a secret — it names a workspace, exactly as the landing site ships its own in client JS |
+| `ACADEMY_WORKSPACE_ID` | **none — required** | whose posts to show. Unset ⇒ the Wire does not mount |
 | `ACADEMY_API_BASE` | `https://api.automatos.app` | platform origin |
 | `ACADEMY_WIRE_REVIEWED` | unset | see the label section — set only when review is real |
 
-No database, no key. The Wire mounts whenever a workspace is configured.
+The Academy's workspace is `894519f4-9fc3-40eb-bb9f-081e5b113a58`. It is
+**configuration, not a constant.** It was briefly hardcoded with the env var as
+an override, which meant the Academy was not consuming the platform the way a
+customer does — it was a sibling app taking a sibling's shortcut. Both are
+ours, which is precisely why it mattered: if this site cannot be stood up from
+configuration alone, neither can a customer's, and we would never learn that
+from our own product.
+
+No database, no key. Unset ⇒ the Wire is off, the nav entry stays hidden and
+`/wire/rss.xml` answers `503 not_configured` — the same default-off posture as
+`SPINE_ENABLED` and `DIGEST_ENABLED`.
+
+### Why there is no API key here (and why that is a gap)
+
+The chat widget authenticates with an `ak_pub_*` key. That key is not just a
+credential: `sdk_api_keys` carries `workspace_id`, `allowed_domains` and
+`key_type`, so the platform derives the workspace from the key and enforces an
+origin lock on top. One value, copied once, and the widget is bound to the
+right workspace and the right site.
+
+The blog read endpoints take a raw `workspace_id` query param instead — no
+auth, no origin check. Functionally fine for published content, but it is a
+second, different onboarding story for the same product: chat asks for a key
+you can copy from the dashboard, the Wire asks for a workspace UUID that is
+not surfaced as a customer-facing credential at all. Nothing revocable, no
+origin control, no per-site attribution.
+
+The coherent fix belongs on the platform, not here: let the blog widget
+endpoints accept `ak_pub_*` and resolve the workspace from it exactly as chat
+does. Then a site embeds **one** key and every widget works. Tracked as a
+platform ask — this repo will adopt it the day it exists, and this file is
+where the change lands.
 
 ## An empty workspace is not an error
 
