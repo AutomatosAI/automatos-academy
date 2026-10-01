@@ -163,7 +163,8 @@ export function generateShells(idx, opts = {}) {
 
   // /podcasts is a real page with ten episodes on it — indexable, and the
   // kind of content page that earns traffic without an ad.
-  const urls = [`${BASE}/`, `${BASE}/podcasts`];
+  // /privacy and /support are the store-listing URLs — public, stable pages.
+  const urls = [`${BASE}/`, `${BASE}/podcasts`, `${BASE}/privacy`, `${BASE}/support`];
   for (const t of live) {
     const entry = idx.tracks.get(`${t.vendorId}/${t.trackId}`);
     if (!entry) { console.warn(`[shells] ${t.trackId}: not in the content index — skipped`); continue; }

@@ -18,6 +18,7 @@ import { certificateView } from "./views/certificate.js";
 import { pathFinderView } from "./views/pathfinder.js";
 import { profileView } from "./views/profile.js";
 import { podcastsView } from "./views/podcasts.js";
+import { privacyView, supportView } from "./views/legal.js";
 import { adminView } from "./views/admin.js";
 import { wireListView, wirePostView, mountWireNav } from "./views/wire.js";
 import { tutorPageView, mountTutor } from "./tutor.js";
@@ -70,6 +71,8 @@ route("/podcasts", podcastsView);
 route("/start", pathFinderView);
 route("/cert/:payload", certificateView);
 route("/profile", profileView);
+route("/privacy", privacyView);
+route("/support", supportView);
 route("/admin", adminView); // PRD-ADMIN-CONSOLE — gated in-view on role from /api/me
 // Wire routes register unconditionally — deep links on no-Wire deploys get
 // the friendly "isn't switched on" state (PRD-WIRE §4.5); the nav entry is
