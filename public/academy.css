@@ -569,6 +569,11 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-footer-col a:hover { color: var(--fg); }
 .ac-footer-col .ac-ext { color: var(--accent); font-weight: 600; }
 .ac-footer-note { font: 400 12.5px/1.5 var(--sans); color: var(--muted); }
+/* "Powered by Automatos AI": the family mark on every Automatos product footer. */
+.ac-powered { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; font: 500 12px/1 var(--mono); color: var(--muted); transition: color .15s, border-color .15s; }
+.ac-powered strong { font-weight: 600; color: var(--fg); }
+.ac-powered:hover { color: var(--fg); border-color: var(--fg-2); }
+.ac-powered .ac-brand-mark { width: 14px; height: 14px; }
 .ac-footer-legal { border-top: 1px dashed var(--rule); }
 .ac-footer-row { max-width: var(--maxw); margin: 0 auto; padding: 18px clamp(16px,4vw,40px) 24px; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
 @media (max-width: 720px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
