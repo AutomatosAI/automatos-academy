@@ -16,7 +16,7 @@ _Last updated: 2026-07-24._
 | [PRD-MEDIA-DOMAIN-SLOTS](./PRD-MEDIA-DOMAIN-SLOTS.md) (Part 1b) | media plane + overlay for **domain** video/audio slots | ✅ **shipped** | #62 |
 | [**PRD-CONTENT-LIFECYCLE**](./PRD-CONTENT-LIFECYCLE.md) | text write-back + drafts review + serve overlay (academy); daily mission + cert-watch (cross-pod) | ✅ **academy BUILT** · platform half cross-pod | #65 |
 | [PRD-PLATFORM-ACTIVATION](./PRD-PLATFORM-ACTIVATION.md) | deploy Spine+Postgres+Clerk; flip content→DB | 🟡 owner env work | — |
-| [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3 (Kokoro→ElevenLabs); app consumer already merged | ⏳ needs engine pick + pod URL | — |
+| [PRD-VOICE-PIPELINE](./PRD-VOICE-PIPELINE.md) | JSON→MP3; app consumer already merged | ✅ **shipped on Fish** (Laura, `server/audio/fishLane.js`, content-addressed catalogue job) · mini-videos narrated through the same lane | #83–#88 |
 | [PRD-PLATFORM-DOCUMENTS-FIXES](./PRD-PLATFORM-DOCUMENTS-FIXES.md) | automatos-ai / D-CO6: 🔴 tags-drop, by-hash, scoped keys, KG rebuild | ✅ tags fix shipped (automatos-ai #599); rest 📋 | #599 |
 | [**PRD-WAVE-LIVING-ACADEMY**](./PRD-WAVE-LIVING-ACADEMY.md) | card registry + concept rollups · CCA-F pilot feed · content factory w/ approval ladder · explain-back · freshness surface · quality flywheel · i18n contracts | ✅ **P1 BUILT** (LA-1/2/3) + **LA-5 renderers** · LA-4/LA-6 next · D-LA1..6 decided, D-LA7/8 open | #69/#70/#71 · app #41/#42 |
 
@@ -25,7 +25,7 @@ Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decis
 ## Recommended order
 
 1. **PRD-PLATFORM-ACTIVATION** (owner env) — lights up the Spine → the admin console, media plane, **content write-back** + cross-device sync all go live at once.
-2. **PRD-VOICE-PIPELINE** — biggest learner-quality jump; needs the engine pick + pod URL.
+2. ~~**PRD-VOICE-PIPELINE**~~ — shipped on Fish (#83–#88); the engine pick was Fish, not Kokoro.
 3. **CONTENT-LIFECYCLE platform half** (automatos-ai) — compose the daily generate→review→**`POST /api/admin/content`**→verify→KG-rebuild routine + cert-watch, now that the academy publish target exists.
 
 ## Owner switches (unlock the dormant plane)

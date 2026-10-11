@@ -50,6 +50,21 @@ export const MINIVIDEO_TIMING = {
   maxTotalSeconds: 40,
 };
 
+/**
+ * Where a narrated line sits inside its slide. The voice never starts under a
+ * crossfade — the viewer is still watching the previous slide leave — and
+ * never runs into the next one: each line finishes, breathes, and only then
+ * does the picture move on.
+ */
+export const MINIVIDEO_NARRATION = {
+  /** the title card has no fade in; this is just enough to not open on a word */
+  firstStartSeconds: 0.3,
+  /** after a slide's fade-in has finished, before its line begins */
+  settleSeconds: 0.15,
+  /** silence after a line, before the next slide starts fading in */
+  tailSeconds: 0.3,
+};
+
 const clean = (v) => String(v == null ? "" : v).replace(/\s+/g, " ").trim();
 const words = (s) => (s ? s.split(" ").filter(Boolean).length : 0);
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
@@ -57,6 +72,8 @@ const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 /** Whole frames, so a timeline is exactly representable in the encoder. */
 const toFrames = (seconds, fps) => Math.max(1, Math.round(seconds * fps));
 const toSeconds = (frames, fps) => frames / fps;
+/** A voice clip is rounded UP: rounding it down would cut its last syllable. */
+const toFramesCeil = (seconds, fps) => Math.max(1, Math.ceil(seconds * fps));
 
 /**
  * The slot a mini-video binds to: `mv-<domainId>-<n>`, 1-based.
@@ -157,20 +174,45 @@ export function toSlides(params) {
  * or `pointMax` without re-checking the runtime and this is what catches it,
  * instead of a 46-second video nobody finishes. The test exercises it with a
  * tightened timing rather than a payload, because there is no legal payload
- * that reaches it.
+ * that reaches it SILENT. Narrated, there can be: the voice floors below are
+ * measured clip lengths, so the densest legal payload read at a slow pace can
+ * land past the band — and is refused here like anything else.
  *
  * Crossfades overlap, so the finished runtime is the sum of the slides minus
  * one fade per join.
+ *
+ * Narrated (`voiceSeconds`, one entry per slide, null where nothing is said):
+ * a slide's voice is a FLOOR on its length — settle, speak, breathe, and only
+ * then start the next fade. The floor beats the read-time ceiling, because a
+ * slide cut under its own voice would talk over the next one; the runtime
+ * band still refuses a narration too long for the format, by the same rule as
+ * above. The real clip lengths come in from the renderer (they are only known
+ * once the voice exists), so this stays pure and a narrated plan is as
+ * testable as a silent one.
  */
-export function planTimeline(slides, timing = MINIVIDEO_TIMING) {
+export function planTimeline(slides, timing = MINIVIDEO_TIMING, voiceSeconds = null, narration = MINIVIDEO_NARRATION) {
   const T = timing;
   const fadeFrames = toFrames(T.fadeSeconds, T.fps);
   const minFrames = toFrames(T.minSlideSeconds, T.fps);
   const maxFrames = toFrames(T.maxSlideSeconds, T.fps);
 
-  const natural = slides.map((s) => {
+  const voice = readVoice(slides, voiceSeconds);
+  if (!voice.ok) return voice;
+
+  // Where each line starts inside its slide: the title card has no fade in;
+  // every other slide waits for its fade to finish.
+  const voiceStart = slides.map((_, i) =>
+    i === 0 ? toFrames(narration.firstStartSeconds, T.fps) : fadeFrames + toFrames(narration.settleSeconds, T.fps));
+  const voiceFrames = voice.seconds.map((s) => (s == null ? null : toFramesCeil(s, T.fps)));
+
+  const natural = slides.map((s, i) => {
     const readSeconds = words(s.text || s.title) / T.wordsPerMinute * 60;
-    return clamp(toFrames(T.leadSeconds + readSeconds, T.fps), minFrames, maxFrames);
+    const read = clamp(toFrames(T.leadSeconds + readSeconds, T.fps), minFrames, maxFrames);
+    if (voiceFrames[i] == null) return read;
+    // The next slide's fade begins `fadeFrames` before this one ends, so the
+    // line and its breath have to be over by then.
+    const outro = i + 1 < slides.length ? fadeFrames : 0;
+    return Math.max(read, voiceStart[i] + voiceFrames[i] + toFrames(narration.tailSeconds, T.fps) + outro);
   });
 
   // Overlapped runtime: every join eats one fade.
@@ -192,7 +234,8 @@ export function planTimeline(slides, timing = MINIVIDEO_TIMING) {
   if (runtime(frames) < minTotal) {
     // Stretch proportionally toward each slide's own ceiling.
     const deficit = minTotal - runtime(frames);
-    const headroom = frames.map((f) => maxFrames - f);
+    // A voiced slide can already sit above the read-time ceiling: no headroom.
+    const headroom = frames.map((f) => Math.max(0, maxFrames - f));
     const totalHeadroom = headroom.reduce((a, b) => a + b, 0);
     if (totalHeadroom > 0) {
       const share = Math.min(1, deficit / totalHeadroom);
@@ -207,7 +250,11 @@ export function planTimeline(slides, timing = MINIVIDEO_TIMING) {
   const cuts = [];
   let offset = 0;
   for (let i = 0; i < frames.length; i++) {
-    cuts.push({ ...slides[i], index: i, frames: frames[i], seconds: toSeconds(frames[i], T.fps), offsetFrames: offset });
+    const cut = { ...slides[i], index: i, frames: frames[i], seconds: toSeconds(frames[i], T.fps), offsetFrames: offset };
+    // Absolute frames, on the same timeline as the picture — the mixer places
+    // each clip here directly rather than re-deriving it.
+    if (voiceFrames[i] != null) cut.voice = { offsetFrames: offset + voiceStart[i], frames: voiceFrames[i] };
+    cuts.push(cut);
     // The next slide starts one fade BEFORE this one ends — that overlap is
     // the crossfade, and it is why offsets are not a running sum of lengths.
     offset += frames[i] - fadeFrames;
@@ -222,6 +269,34 @@ export function planTimeline(slides, timing = MINIVIDEO_TIMING) {
     totalFrames: runtime(frames),
     totalSeconds: toSeconds(runtime(frames), T.fps),
   };
+}
+
+/** voiceSeconds → { ok, seconds[] } aligned with the slides, or a refusal. */
+function readVoice(slides, voiceSeconds) {
+  if (voiceSeconds == null) return { ok: true, seconds: slides.map(() => null) };
+  if (!Array.isArray(voiceSeconds) || voiceSeconds.length !== slides.length) {
+    return { ok: false, error: "bad_voice", note: "one entry per slide (null where nothing is said)" };
+  }
+  const bad = voiceSeconds.findIndex((s) => s != null && !(Number.isFinite(s) && s > 0));
+  if (bad >= 0) return { ok: false, error: "bad_voice", note: `slide ${bad}: ${voiceSeconds[bad]}` };
+  return { ok: true, seconds: voiceSeconds.map((s) => (s == null ? null : s)) };
+}
+
+/**
+ * The words a slide says — its caption, and its narration line. One function
+ * for both, so the script the voice reads and the captions on screen can
+ * never disagree. The end card says nothing: the claim is a bookend and the
+ * source is chrome.
+ */
+export function slideLine(slide) {
+  if (slide.role === "end") return null;
+  const text = slide.role === "title" ? slide.title : slide.text;
+  return text || null;
+}
+
+/** Slides → the narration script: one line per slide, null where silent. */
+export function narrationLines(slides) {
+  return slides.map(slideLine);
 }
 
 /** render params + one slide → the renderer's URL query. Key order is fixed so
@@ -242,10 +317,10 @@ export function toRenderQuery(params, slide) {
  * The timeline as WebVTT.
  *
  * Written now, while the timings are exact, rather than derived later from the
- * finished file. Two things need it: accessibility (a silent video still has
- * to be readable by someone who cannot see it), and PRD-VOICE-PIPELINE, which
- * will narrate these payloads — when it does, these cues are the script and
- * its timings, not something to re-derive from audio.
+ * finished file. Two things need it: accessibility (a video watched muted
+ * still has to be readable), and the narration — the renderer's `--narrate`
+ * speaks exactly these lines (slideLine), inside these cues, from the same
+ * plan, so the words on screen and the words in the ear cannot drift apart.
  */
 export function toVtt(plan) {
   const stamp = (frames) => {
@@ -259,12 +334,10 @@ export function toVtt(plan) {
   const lines = ["WEBVTT", ""];
   for (let i = 0; i < plan.slides.length; i++) {
     const slide = plan.slides[i];
-    // The end card is skipped: it carries no sentence — the claim is a
-    // bookend and the source is chrome. A caption track that announces
-    // "CCA-F · D1" is noise to a screen reader and a line the narrator would
-    // have to be told not to speak.
-    if (slide.role === "end") continue;
-    const text = slide.role === "title" ? slide.title : slide.text;
+    // The end card is skipped (slideLine): it carries no sentence. A caption
+    // track that announces "CCA-F · D1" is noise to a screen reader and a line
+    // the narrator would have to be told not to speak.
+    const text = slideLine(slide);
     if (!text) continue;
 
     // A cue ends where the NEXT slide begins, not where its own slide ends.
