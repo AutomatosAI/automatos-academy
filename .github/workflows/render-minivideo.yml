@@ -2,11 +2,11 @@
 #
 # The twin of render-infographic.yml, deliberately: same default (render, don't
 # publish), same S3 path, same slug guard on the dispatch inputs. The default
-# run needs NO secrets and publishes nothing — it renders the videos and
+# run publishes nothing and needs no AWS secrets — it renders the videos and
 # uploads them as a workflow artifact, because the first question about a
-# renderer is "does it look right?" and answering it should not require
-# credentials, a bucket, or a deploy. Download it, WATCH the videos, then
-# decide whether to publish.
+# renderer is "does it look right?" and answering it should not require a
+# bucket or a deploy. (The voice key is optional: without it the videos render
+# silent.) Download it, WATCH the videos, then decide whether to publish.
 #
 # Publishing (publish=true) reuses the existing media plane exactly:
 #   s3://$BUCKET/academy/<vendor>/<track>/mv-<domain>-<n>.mp4
@@ -16,6 +16,12 @@
 # Secrets (publish only) — the same five as deploy-media.yml:
 #   AWS_SDK_DEPLOY_ACCESS_KEY_ID / _SECRET_ACCESS_KEY / _REGION / _BUCKET
 #   AWS_SDK_DEPLOY_DISTRIBUTION_ID
+#
+# Narration — FISH_API_KEY (the voice catalogue's key). Narrated by default:
+# the PR artifact has to be HEARD as well as watched. Without the key (a fork
+# PR) the render falls back to silent, loudly. The clips are content-addressed
+# and cached across runs, so a re-run bills only lines that changed — four
+# samples are ~15 short lines, a few cents when nothing is cached.
 
 name: Render mini-videos
 
@@ -31,6 +37,8 @@ on:
       - "render/samples/**"
       - "scripts/render-minivideo.mjs"
       - "server/media/minivideo.js"
+      - "server/audio/fishLane.js"
+      - "server/audio/speakable.js"
       - ".github/workflows/render-minivideo.yml"
   workflow_dispatch:
     inputs:
@@ -46,6 +54,10 @@ on:
         description: "Track id (publish only)"
         type: string
         default: cca-f
+      narrate:
+        description: "Speak each caption in the lessons' voice (needs FISH_API_KEY)"
+        type: boolean
+        default: true
       publish:
         description: "Upload the rendered videos to S3 + invalidate CloudFront"
         type: boolean
@@ -96,16 +108,40 @@ jobs:
       - name: Install puppeteer (render job only)
         run: npm install --no-save puppeteer@23
 
+      # Clip files are named by audioHash(spoken text + voice settings), so an
+      # older cache can only ever contribute clips that are still exactly right
+      # — a changed line hashes to a new name and is synthesised fresh.
+      - name: Restore narration clips
+        if: ${{ github.event_name == 'pull_request' || inputs.narrate == true }}
+        uses: actions/cache@v4
+        with:
+          path: dist/voice-cache
+          key: minivideo-voice-${{ hashFiles('render/samples/**', 'server/audio/fishLane.js', 'server/audio/speakable.js') }}
+          restore-keys: minivideo-voice-
+
       - name: Render
         env:
           # `inputs` is empty on a pull_request event, so the samples are the
           # default target — which is what makes the PR artifact automatic.
           PAYLOADS: ${{ inputs.payloads || 'render/samples' }}
-        run: node scripts/render-minivideo.mjs "$PAYLOADS" --out dist/minivideos
+          # pull_request: inputs.narrate is empty → narrate. Dispatch: the box.
+          NARRATE: ${{ github.event_name == 'pull_request' || inputs.narrate == true }}
+          FISH_API_KEY: ${{ secrets.FISH_API_KEY }}
+        run: |
+          set -euo pipefail
+          ARGS=(--out dist/minivideos --voice-cache dist/voice-cache)
+          if [ "$NARRATE" = "true" ]; then
+            if [ -n "${FISH_API_KEY:-}" ]; then
+              ARGS+=(--narrate)
+            else
+              echo "::warning::FISH_API_KEY not available (fork PR?) — rendering SILENT mini-videos."
+            fi
+          fi
+          node scripts/render-minivideo.mjs "$PAYLOADS" "${ARGS[@]}"
 
-      # The point of the default run: something to WATCH, with no secrets.
-      # The .vtt files ride along — they are the caption track now and the
-      # narration script when PRD-VOICE-PIPELINE lands.
+      # The point of the default run: something to WATCH (and hear). The .vtt
+      # files ride along — the caption track, and the exact script the
+      # narration spoke.
       - name: Upload rendered mini-videos
         uses: actions/upload-artifact@v4
         with:

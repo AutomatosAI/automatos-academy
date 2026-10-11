@@ -111,7 +111,7 @@ have **no** media write path, by design."*
 | explainback | 1 | **agent** — prompt + rubric | LA-10 |
 | changelog | 1 | **agent** | LA-11 |
 | infographic | 2 | agent drafts payload → **CI renders PNG** | LA-9 |
-| minivideo | 2 | agent drafts payload → **CI renders MP4** | LA-14 |
+| minivideo | 2 | agent drafts payload → **CI renders MP4**, narrated in the lessons' voice (`--narrate`) | LA-14 |
 
 Infographic and minivideo take the **same payload** — `{domainId, index, title, points[],
 eyebrow?, source?}` — "the factory drafts one verified payload and both renderers film it."
