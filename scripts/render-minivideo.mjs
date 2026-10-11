@@ -161,11 +161,17 @@ async function narrate(entry, { key, voiceCache, spend }) {
       // Written aside and timed BEFORE it takes its hash name: the cache is
       // trusted on name alone, so a clip that cannot be read must never get one.
       const part = `${file}.part`;
-      await writeFile(part, await ttsSegment(spoken, key, FISH_SETTINGS));
-      spend.billed++;
-      spend.chars += spoken.length;
-      voiceSeconds.push(await clipSeconds(part));
-      await rename(part, file);
+      try {
+        await writeFile(part, await ttsSegment(spoken, key, FISH_SETTINGS));
+        spend.billed++;
+        spend.chars += spoken.length;
+        voiceSeconds.push(await clipSeconds(part));
+        await rename(part, file);
+      } catch (err) {
+        // Reported per payload like any other refusal, Fish's error verbatim.
+        await rm(part, { force: true });
+        return { file: entry.file, error: `narration failed: ${err.message}` };
+      }
     }
     clips.push(file);
   }
