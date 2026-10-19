@@ -127,7 +127,7 @@ If this policy changes, we update it here and change the date below. If the chan
 `;
 
 export const SUPPORT_MD = `
-Need help with Automatos AI Academy, on the website or in the app? Email **${SUPPORT_EMAIL}**. We read every message.
+Need help with Automatos AI Academy, on the website or in the app? Email **${SUPPORT_EMAIL}**. We read every message. We reply within two working days.
 
 ## Common questions
 
