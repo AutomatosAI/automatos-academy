@@ -30,8 +30,9 @@ Cover ONLY, in order:
 4. Monitoring an active Mission: the task list with per-task status, the event timeline, the cost
    breakdown by task, which agents worked on what, and checkpoints (saved state snapshots). Click a
    task to see its detailed execution log (tool calls, LLM interactions, intermediate results).
-5. Budget + reuse: Missions consume tokens; view cost-by-task, pause if costs run high, resume with
-   increased budget. A completed Mission can be Saved as Routine → becomes a reusable Playbook.
+5. Budget + reuse: Missions consume tokens. Before approving you can give a Mission a budget; when its
+   spend reaches it, the Mission pauses for your decision (it never cancels or refunds). View
+   cost-by-task, pause if costs run high, resume with increased budget. A completed Mission can be Saved as Routine → becomes a reusable Playbook.
 
 ~8 minutes: open with "give it a goal, not a script," create one objective on screen, show the plan-
 approval gate, then the monitoring + budget controls. Stay strictly in the sources; do not invent
