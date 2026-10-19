@@ -4,8 +4,9 @@
 // coherent switch — and the static #ac-burger button in index.html opens a
 // glass drawer under the topbar: the same primary links on 48px tap rows and
 // an Appearance (mood) row. The external automatos.app link lives in the
-// footer's Automatos column now (both surfaces, every width) — not here, so
-// the drawer mirrors the slimmed topnav exactly. The in-bar mood pill hides
+// footer (the Powered by pill and the Automatos AI family row), on both
+// surfaces at every width, not here, so the drawer mirrors the slimmed topnav
+// exactly. The in-bar mood pill hides
 // ≤560px where it crowds the brand; the drawer row exists at every drawer
 // width so there is always exactly one obvious mood control on phones.
 // The signed-in avatar / Sign-in pill deliberately STAYS in the bar — small,

@@ -45,7 +45,7 @@ export function shellHtml(t, track) {
     "@type": "Course",
     name: track.name,
     description: desc,
-    provider: academyOrganization(BASE),
+    provider: academyOrganization(),
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", courseWorkload: "PT20H" },

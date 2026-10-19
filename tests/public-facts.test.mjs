@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 import { BRAND_FOOTER_HTML, FAMILY_LABEL, FAMILY_SITES, FAMILY_ROW_HTML, FAMILY_ROW_INLINE_HTML } from "../server/brand-footer.js";
-import { AUTOMATOS_ORG_ID, AUTOMATOS_ORGANIZATION, siteJsonLd } from "../server/structured-data.js";
+import { ACADEMY_ORG_ID, AUTOMATOS_ORG_ID, AUTOMATOS_ORGANIZATION, siteJsonLd } from "../server/structured-data.js";
 import { shellHtml } from "../scripts/generate-shells.mjs";
 import { buildPostShellHtml } from "../server/wire/shell.js";
 
@@ -128,6 +128,7 @@ function checkGraph(ld, where) {
   ok(!ld.parseError && ld["@context"] === "https://schema.org" && orgs.length === 1 && isDeepStrictEqual(orgs[0], plain(org)), `${where}: JSON-LD parses and defines the shared Organization once`);
   const academy = nodesNamed(ld, "Automatos Academy");
   ok(academy.length > 0 && academy.every((n) => n["@type"] === "EducationalOrganization" && isDeepStrictEqual(n.parentOrganization, { "@id": AUTOMATOS_ORG_ID })), `${where}: Automatos Academy is an EducationalOrganization whose parentOrganization is the shared @id`);
+  ok(academy.length > 0 && academy.every((n) => n["@id"] === "https://academy.automatos.app/#academy" && n.url === "https://academy.automatos.app"), `${where}: the Academy node's @id and url are pinned to https://academy.automatos.app, whatever host served the page`);
   ok(nodesNamed(ld, "Automatos AI").length === 1, `${where}: no second Automatos AI Organization`);
   return graph;
 }
@@ -144,11 +145,15 @@ ok(trackShell.includes(FAMILY_ROW_HTML), "track shell carries the family row");
 
 const wireShell = buildPostShellHtml({
   post: { slug: "facts", title: "Facts", summary: "S", type: "trend", byline: { agents: ["QUILL"] }, published_at: "2026-10-19T00:00:00Z", updated_at: "2026-10-19T00:00:00Z", sources: [], corrections: [], tags: [], body_html: "<p>b</p>" },
-  baseUrl: "https://academy.automatos.app", label: "L",
+  // A Railway host, as a request reaching the service directly would carry:
+  // the page URLs follow it, the Academy's identity must not.
+  baseUrl: "http://automatos-academy-production.up.railway.app", label: "L",
 });
 const wireLd = ldBlocks(wireShell);
 const posting = wireLd.length ? checkGraph(wireLd[0], "Wire post shell").find((n) => n["@type"] === "BlogPosting") : null;
 ok(!!posting && posting.publisher.name === "Automatos Academy", "Wire post shell: the BlogPosting is published by Automatos Academy");
+ok(!!posting && posting.publisher["@id"] === ACADEMY_ORG_ID && ACADEMY_ORG_ID === "https://academy.automatos.app/#academy"
+  && posting.url === "http://automatos-academy-production.up.railway.app/wire/facts/", "Wire post shell: the publisher keeps the Academy @id on another host; only the page URL follows the request");
 ok(wireShell.includes(FAMILY_ROW_HTML), "Wire post shell carries the family row");
 
 console.log(`\npublic-facts: ${pass} passed, ${fail} failed`);

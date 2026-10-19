@@ -14,7 +14,9 @@
 // is the mark automatos.app serves (and its own Organization node uses); the
 // sameAs profiles are the X, Instagram, LinkedIn and GitHub links on the
 // automatos.app footer (GitHub as the org profile, github.com/AutomatosAI).
-// Each returned 200 on 19 Oct 2026.
+// X and GitHub returned 200 on 19 Oct 2026; LinkedIn returns 999 to bots and
+// 200 to a browser; Instagram answers 200 for any handle, so it rests on the
+// automatos.app footer link.
 export const AUTOMATOS_ORG_ID = "https://automatos.app/#organization";
 
 export const AUTOMATOS_ORGANIZATION = Object.freeze({
@@ -32,14 +34,19 @@ export const AUTOMATOS_ORGANIZATION = Object.freeze({
 });
 
 export const ACADEMY_URL = "https://academy.automatos.app";
+export const ACADEMY_ORG_ID = `${ACADEMY_URL}/#academy`;
 
-/** The Academy as an EducationalOrganization under Automatos AI. */
-export function academyOrganization(base = ACADEMY_URL) {
+/** The Academy as an EducationalOrganization under Automatos AI.
+ *  Its identity is pinned to the public host: the track shells build from
+ *  ACADEMY_BASE_URL and the Wire post shells from the request host, so a
+ *  staging base, a *.up.railway.app host or plain http would otherwise give
+ *  the same entity a second @id. */
+export function academyOrganization() {
   return {
     "@type": "EducationalOrganization",
-    "@id": `${base}/#academy`,
+    "@id": ACADEMY_ORG_ID,
     name: "Automatos Academy",
-    url: base,
+    url: ACADEMY_URL,
     parentOrganization: { "@id": AUTOMATOS_ORG_ID },
   };
 }
@@ -54,6 +61,6 @@ export function pageJsonLd(...nodes) {
 }
 
 /** The site-wide graph the SPA shell carries in its <head>. */
-export function siteJsonLd(base = ACADEMY_URL) {
-  return pageJsonLd(academyOrganization(base));
+export function siteJsonLd() {
+  return pageJsonLd(academyOrganization());
 }

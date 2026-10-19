@@ -55,7 +55,7 @@ const TYPE_LABELS = {
  *  list, so `citation` and `correction` are emitted only if a post actually
  *  carries them (nothing does today) rather than declaring a rigour the
  *  pipeline no longer enforces. */
-function jsonLd(post, pageUrl, baseUrl) {
+function jsonLd(post, pageUrl) {
   const agents = (post.byline && post.byline.agents) || [];
   const ld = {
     "@type": "BlogPosting",
@@ -66,7 +66,7 @@ function jsonLd(post, pageUrl, baseUrl) {
     author: { "@type": "Organization", name: agents.join(", ") || "Automatos agents" },
     // The Academy (an EducationalOrganization under the shared Automatos AI
     // Organization, server/structured-data.js) publishes the Wire.
-    publisher: academyOrganization(baseUrl),
+    publisher: academyOrganization(),
     isAccessibleForFree: true,
     mainEntityOfPage: pageUrl,
     url: pageUrl,
@@ -120,7 +120,7 @@ ${tagsMeta}
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/atom+xml" title="The Wire — Automatos Academy" href="/wire/rss.xml">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
-<script type="application/ld+json">${jsonLd(post, pageUrl, baseUrl)}</script>
+<script type="application/ld+json">${jsonLd(post, pageUrl)}</script>
 </head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <p class="mono-label">The Wire · ${esc(TYPE_LABELS[post.type] || post.type)} · Automatos Academy</p>
