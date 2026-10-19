@@ -25,11 +25,10 @@ Cover ONLY, in order:
    website widget, or the Automatos chat page all go through the same multi-tier routing (cache →
    rules → semantic → LLM), so agents respond with the same tools, knowledge, and capabilities, and
    the reply goes back out the originating channel. Internally everything is a uniform RequestEnvelope.
-2. Channels (tools/channels.md): the supported list and connection method — Telegram (bot token,
-   easiest), Slack (OAuth app), WhatsApp (webhook), Discord (bot token), Microsoft Teams (app
-   registration), Google Chat (service account), iMessage (local adapter), Matrix, Signal. Setup =
-   Tools & Integrations → find the platform → authenticate → save; it then shows "Live" on the
-   Activity Dashboard. Channel-specific formatting (Slack blocks, Telegram markdown) is automatic.
+2. Channels (tools/channels.md): the four chat channels and their connection methods — Telegram
+   (bot token, easiest), Slack (OAuth app), WhatsApp (webhook), Discord (bot token) — plus a generic
+   webhook. Setup = Tools & Integrations → find the platform → authenticate → save; it then shows
+   "Live" on the Activity Dashboard. Channel-specific formatting (Slack blocks, Telegram markdown) is automatic.
 3. Monitoring channels: Activity → Dashboard "Channels Live" card, Activity → Feed for messages
    flowing in, Analytics → Tools for usage. Credentials live in Settings → Credentials (view status,
    rotate, test).
