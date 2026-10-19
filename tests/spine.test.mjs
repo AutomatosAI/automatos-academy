@@ -792,10 +792,11 @@ const afterQuarantine = await request("GET", "/api/me/state", { token: dev });
 ok(afterQuarantine.body.data.progress.filter((p) => [q(9), q(11)].includes(p.itemId)).length === 2 && !afterQuarantine.body.data.progress.some((p) => p.itemId === q(10)), "…and exactly the two good rows exist, the bad one never landed");
 
 // ── LA-2 REGRESSION: a derived rollup must never cost a learner an answer ──
-// The failure this guards: migrations reach production via content-publish,
-// which only fires on pushes touching public/content/**. A code-only merge
-// therefore deploys the rollup's table writes against a DB that has not seen
-// the migration — and while the rollup shared the progress transaction, a
+// The failure this guards: migrations used to reach production only via
+// content-publish, which fired solely on pushes touching public/content/**
+// (they run on boot since 2026-07-24). A code-only merge therefore deployed
+// the rollup's table writes against a DB that had not seen the migration —
+// and while the rollup shared the progress transaction, a
 // missing table 500'd every POST /api/sync/progress. Renaming the table away
 // reproduces exactly that, with no other change.
 const rescueUser = "fixture:user_rescue";

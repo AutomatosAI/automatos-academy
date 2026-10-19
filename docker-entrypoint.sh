@@ -1,8 +1,10 @@
 #!/bin/sh
-# Pre-deploy migrations, then the server (Gerard's call, 2026-07-24).
+# Boot sequence: migrations, then the course content publish, then the server.
 #
-# WHY THIS EXISTS — the 2026-07-24 incident: `migrations/` only reached
-# production through content-publish.yml, which fires solely on pushes
+# ── 1. Migrations (Gerard's call, 2026-07-24) ────────────────────────────
+#
+# WHY THIS EXISTS — the 2026-07-24 incident: `migrations/` used to reach
+# production only through content-publish.yml, which fired solely on pushes
 # touching public/content/**. A code-only merge (PR #69) therefore deployed
 # new table writes against a database that had never seen the migration, and
 # POST /api/sync/progress broke. Every future migration had the same gap.
@@ -22,6 +24,32 @@
 #   2. node-pg-migrate takes a session advisory lock, so concurrent replica
 #      boots serialise instead of racing. Applied migrations are tracked in
 #      `pgmigrations`, so a re-run is a no-op.
+#
+# ── 2. Course content publish (2026-10-19) ───────────────────────────────
+#
+# WHY THIS EXISTS — with CONTENT_SOURCE=db the server serves course content
+# from Postgres, and content-publish.yml (GitHub Actions) used to be the only
+# writer. Production Postgres is reachable only on Railway's private network,
+# and the public URL that job used pointed at a different database, so it
+# failed on every content merge (last success: 19 Aug 2026) and new content
+# never went live. The publish now runs here, inside Railway, on the same
+# DATABASE_URL the server uses — so every deploy publishes the content tree it
+# ships with.
+#
+# `npm run publish-content` validates first (the same gate as
+# `npm run validate`), writes the whole version in one transaction, and is
+# idempotent per content version: an unchanged tree is a no-op, and a
+# concurrent replica that loses the insert race logs and exits 0.
+#
+# THE TRADEOFF IS THE OPPOSITE OF MIGRATIONS: a publish that fails does NOT
+# block the boot. The server keeps serving the last published version (and
+# polls for a new one every 60 s), which is a safe state; refusing to boot
+# would take the site down over a content problem. If no version has EVER been
+# published, the server itself refuses to boot (server/catalog-db.js), so a
+# failed first publish still fails loudly.
+#
+# Runs only when DATABASE_URL is set AND CONTENT_SOURCE=db. Files-mode deploys
+# serve public/content straight from disk and have nothing to publish.
 
 set -e
 
@@ -38,6 +66,23 @@ else
     exit 1
   fi
   echo "[entrypoint] migrations up to date"
+
+  if [ "$CONTENT_SOURCE" = "db" ]; then
+    echo "[entrypoint] publishing course content (CONTENT_SOURCE=db)…"
+    if npm run publish-content; then
+      echo "[entrypoint] course content published (or already current)"
+    else
+      echo "[entrypoint] ==================================================================="
+      echo "[entrypoint] CONTENT PUBLISH FAILED — serving the last published version."
+      echo "[entrypoint] The server IS starting. New course content from this deploy is"
+      echo "[entrypoint] NOT live. Read the publish output above, fix the content, and"
+      echo "[entrypoint] redeploy (or run the manual lane once fixed):"
+      echo "[entrypoint]   railway ssh --service automatos-academy -- \"npm run publish-content\""
+      echo "[entrypoint] ==================================================================="
+    fi
+  else
+    echo "[entrypoint] CONTENT_SOURCE is not db — skipping content publish (files mode serves public/content from disk)"
+  fi
 fi
 
 # exec so the server is PID 1 and receives SIGTERM directly — Railway's

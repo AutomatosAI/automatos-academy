@@ -79,6 +79,12 @@ content_versions (
 Trigger (D-U6): CI job on merge to `main` (needs `DATABASE_URL` secret) + manual dispatch. Local
 runs are possible but never required.
 
+> **Superseded 2026-10-19:** production Postgres is reachable only on Railway's private network,
+> so the CI job could not publish. `docker-entrypoint.sh` now runs `npm run publish-content` on
+> every deploy (`CONTENT_SOURCE=db`), after migrations; a failed publish logs a banner and the
+> server keeps serving the last published version. CI runs only `--dry-run`. Manual lane:
+> `railway ssh --service automatos-academy -- "npm run publish-content"`.
+
 ### 4.3 Serving
 
 - `buildContentIndex` gains a twin loader: `CONTENT_SOURCE=db` loads the current version's rows

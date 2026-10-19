@@ -219,7 +219,7 @@ What already exists and needs nothing (checked, 2026-08-28):
   presign/bind — one env var to set, zero code.
 - **Every render lane is already `workflow_dispatch`-able**: `deploy-media`,
   `render-infographic`, `render-minivideo`, `voice-catalog`, `voice-sample`,
-  `content-publish`, `sync-tutor-corpus`. Machine-triggerable rendering exists; what is
+  `content-publish` (validate + dry run only since 2026-10-19), `sync-tutor-corpus`. Machine-triggerable rendering exists; what is
   missing is only the *path* by which an agent fires a dispatch (R4).
 - Batch approval is transactional (BEGIN … COMMIT, all-or-nothing) — the right bones for
   new-course batches. What it lacks is validation (R1/R2).

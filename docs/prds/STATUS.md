@@ -36,7 +36,7 @@ Legend: ✅ built · 🔜 next up · 🟡 owner action · ⏳ blocked on a decis
 | `SPINE_ENABLED=true` + prod Clerk (`CLERK_SECRET_KEY`, `ACADEMY_AUTHORIZED_PARTIES`) | cross-device progress sync · media admin plane · **the admin console** |
 | `ACADEMY_ADMIN_CLERK_IDS=<your clerk id>` | bootstraps you as the first **owner** |
 | `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` + `STRIPE_DEFAULT_PRICE_ID` | academy billing (checkout/portal/webhook → `users.plan`) |
-| `CONTENT_SOURCE=db` (after the 7-day dual-run) | content ships without a redeploy |
+| `CONTENT_SOURCE=db` — **on in production** (2026-10-19: content publishes on every deploy, from `docker-entrypoint.sh`) | DB-served content; a manual publish or rollback goes live within 60 s, no redeploy |
 
 ## Content still owed (NotebookLM)
 AIGP + CH-500 (legacy-source call) · AIX m01 gap regen · the deep-dive `…-2` set across tracks.

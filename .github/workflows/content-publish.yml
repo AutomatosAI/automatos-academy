@@ -1,22 +1,40 @@
-# Content publish (PRD-U3, D-U6) — ingest main's validated content tree into
-# the live Postgres so the running server picks it up on its next 60 s poll
-# (D-U7), no redeploy.
+# Content validate (PRD-U3) — the gate in front of the boot-time publish.
 #
-# Triggers: every push to main that touches public/content/** (the dual-run
-# publisher, D-U9), plus manual workflow_dispatch as the override lane.
+# This workflow NO LONGER PUBLISHES. Since 2026-10-19 the course content is
+# published into Postgres by docker-entrypoint.sh on every Railway deploy
+# (CONTENT_SOURCE=db), on the service's private DATABASE_URL. Production
+# Postgres is not reachable from GitHub Actions: the old publish job here
+# failed on every content merge after 19 Aug 2026.
 #
-# Until the DATABASE_URL secret is provisioned (Gerard, Railway dashboard —
-# the same database the academy service + Spine use), the job skips with a
-# notice instead of failing: dual-run starts the moment the secret exists,
-# with zero further changes here.
+# What it does now: run exactly what the boot-time publish runs, minus the
+# database write, so a content PR that would fail the publish fails here
+# first:
+#   1. `npm run validate` — the content gate;
+#   2. `npm run publish-content -- --dry-run` — the same validate + index
+#      build + version roll-up the deploy runs, with no DATABASE_URL.
+# Dependencies install the way the Dockerfile installs them (--omit=dev), so
+# a publish path that needs a dev-only package goes red here too.
 #
-# `npm run migrate` runs first and is idempotent (node-pg-migrate tracks
-# applied migrations) — it only matters the very first time, when the content
-# tables may not exist yet because no service deploy (D-U3 pre-deploy
-# migrate) has happened since PRD-U3 merged.
-name: content-publish
+# Manual publish lane (production, inside Railway):
+#   railway ssh --service automatos-academy -- "npm run publish-content"
+#
+# No secrets, no database: this job must never be given DATABASE_URL again.
+name: content-validate
 
 on:
+  pull_request:
+    paths:
+      - "public/content/**"
+      - "scripts/publish-content.mjs"
+      - "scripts/validate-content.mjs"
+      - "server/catalog.js"
+      - "server/podcasts.js"
+      - "server/content/**"
+      - "docker-entrypoint.sh"
+      - "Dockerfile"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/content-publish.yml"
   push:
     branches: [main]
     paths:
@@ -24,38 +42,22 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: content-publish
-  cancel-in-progress: false
+  group: content-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  publish:
+  validate:
+    name: validate content (publish dry run)
     runs-on: ubuntu-latest
-    env:
-      # either name works — DATABASE_PUBLIC_URL is the precise one (CI must use
-      # Railway's public proxied URL; .railway.internal is unreachable from CI)
-      DATABASE_URL: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL || secrets.DATABASE_PUBLIC_URL }}
     steps:
-      - name: Gate on the DATABASE_URL secret
-        id: gate
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::DATABASE_URL secret not configured — content publish skipped. Set it (Railway Postgres) to start the D-U9 dual-run."
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          fi
       - uses: actions/checkout@v4
-        if: steps.gate.outputs.configured == 'true'
       - uses: actions/setup-node@v4
-        if: steps.gate.outputs.configured == 'true'
         with:
           node-version: 20
           cache: npm
-      - run: npm install
-        if: steps.gate.outputs.configured == 'true'
+      - run: npm install --omit=dev --no-audit --no-fund
       - run: npm run validate
-        if: steps.gate.outputs.configured == 'true'
-      - run: npm run migrate
-        if: steps.gate.outputs.configured == 'true'
-      - run: npm run publish-content
-        if: steps.gate.outputs.configured == 'true'
+      - run: npm run publish-content -- --dry-run

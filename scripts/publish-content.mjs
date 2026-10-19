@@ -10,30 +10,42 @@
 // no window where the version exists but the pointer flip can be lost.
 //
 // Idempotent: if contentVersion already exists in content_versions, log and
-// exit 0 WITHOUT touching the pointer — so re-running CI never overrides a
+// exit 0 WITHOUT touching the pointer — so a redeploy never overrides a
 // deliberate rollback (rollback = pointing content_current at an old version;
 // the tree that produced the bad version still hashes to it and stays
-// skipped).
+// skipped). Concurrent publishers of the same tree (two replicas booting at
+// once) race on the content_versions primary key: the loser's transaction
+// rolls back whole and it logs and exits 0, exactly like the skip above.
 //
 // Usage:
 //   DATABASE_URL=postgres://… npm run publish-content
 //   npm run publish-content -- --dry-run   (validate + print version/counts;
 //                                           no DATABASE_URL needed)
 //
-// Trigger (D-U6): .github/workflows/content-publish.yml on merge to main
-// touching public/content/**, plus manual workflow_dispatch. Local runs are
-// possible but never required.
+// Trigger (2026-10-19): docker-entrypoint.sh runs it on every boot of a
+// CONTENT_SOURCE=db deploy, after migrations, inside Railway — production
+// Postgres is only reachable on Railway's private network. Manual lane:
+//   railway ssh --service automatos-academy -- "npm run publish-content"
+// .github/workflows/content-publish.yml runs only the --dry-run, as a gate.
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { buildContentIndex } from "../server/catalog.js";
 
 const CONTENT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "content");
 
+// Postgres unique_violation on the version journal's primary key: another
+// publisher committed this exact contentVersion between our idempotency check
+// and our insert. Any other unique violation (e.g. a duplicate scope inside
+// one tree) is a real defect and still throws.
+const UNIQUE_VIOLATION = "23505";
+const VERSION_PK = "content_versions_pkey";
+const isLostPublishRace = (e) => e?.code === UNIQUE_VIOLATION && e?.constraint === VERSION_PK;
+
 /**
  * Publish CONTENT_DIR's tree. Returns { contentVersion, published, counts };
  * `published` is false for dry runs and idempotent skips. Exported so the CI
  * equivalence test (tests/content-db.test.mjs) publishes through the same
- * code path as the workflow — no spawn, no duplicate SQL.
+ * code path as the boot-time publish — no spawn, no duplicate SQL.
  */
 export async function publishContent({ databaseUrl, dryRun = false, log = console.log } = {}) {
   // 1. Hard validation gate — the same judge as `npm run validate`. The
@@ -95,6 +107,10 @@ export async function publishContent({ databaseUrl, dryRun = false, log = consol
     return { contentVersion: idx.contentVersion, published: true, counts };
   } catch (e) {
     await client.query("ROLLBACK").catch(() => {});
+    if (isLostPublishRace(e)) {
+      log(`[publish] ${idx.contentVersion} was published by a concurrent run (another replica booting?) — nothing to do`);
+      return { contentVersion: idx.contentVersion, published: false, counts };
+    }
     throw e;
   } finally {
     await client.end();

@@ -4,7 +4,7 @@
 // plane. Same zero-framework style as the other suites.
 //
 // The CLI's behaviour is proven separately (byte-identical output on the real
-// tree, gated by content-publish.yml). These tests prove the library catches
+// tree, gated by ci.yml and content-publish.yml). These tests prove the library catches
 // each defect class the factory gate exists to stop, against minimal fixture
 // trees — so US-002 can assert "approving this draft 422s" against the same
 // fixtures.

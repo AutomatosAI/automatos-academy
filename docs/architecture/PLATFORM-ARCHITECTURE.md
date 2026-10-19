@@ -59,7 +59,7 @@ flowchart TB
 | Concern | Store | Access API | Status |
 |---|---|---|---|
 | Curriculum (canonical) | git `public/content/**` | Content API (files mode) | ✅ **live** |
-| Curriculum (mirror) | Postgres `content_documents/versions/current` | Content API (db mode) | 🟡 built, **dormant** (`CONTENT_SOURCE=files`, no `DATABASE_URL`) |
+| Curriculum (mirror) | Postgres `content_documents/versions/current` | Content API (db mode) | ✅ **live** (2026-10-19: production serves `CONTENT_SOURCE=db`; published on every deploy by `docker-entrypoint.sh`) |
 | Videos | Widget CDN `widgets.automatos.app/academy/` | JSON urls + media overlay | ✅ **66 live** (via git-JSON publish) |
 | Podcast audio | **git `.m4a`** (academy origin) | Content API `/podcasts` | ✅ live, but a **fork** (gitignore only blocks `.mp4/.mp3`) |
 | TTS / read-aloud audio | (planned) CDN `academy/audio/<voiceKey>/<sha>.mp3` | media overlay `kind:audio` | ⛔ **generation unbuilt** |
@@ -124,7 +124,7 @@ flowchart LR
     subgraph IN["INGRESS"]
         i1["admin Upload (Clerk)"]
         i2["bulk-bind / deploy-media (X-Admin-Key)"]
-        i3["git → publish-content → DB (CI)"]
+        i3["git → publish-content → DB (on deploy)"]
         i4["Automatos mission → /api/admin/content (NEW)"]
         i5["web/mobile → /api/sync (Clerk)"]
     end

@@ -159,11 +159,12 @@ export async function rederiveConceptState(client, index, userId, touchedTrackKe
  * not share a fate: this runs inside a SAVEPOINT, and any failure rolls back
  * only the rollup while the progress upsert it rode in with still commits.
  *
- * The failure that motivated this was real: `migrations/` reach production
- * through the content-publish workflow, which only fires on pushes touching
- * `public/content/**`. A code-only merge therefore deploys new table writes
- * against a database that has not seen the migration yet — and because the
- * rollup shared the progress transaction, a missing table took the whole
+ * The failure that motivated this was real: `migrations/` used to reach
+ * production only through the content-publish workflow, which fired solely on
+ * pushes touching `public/content/**` (migrations run on boot since
+ * 2026-07-24 — docker-entrypoint.sh). A code-only merge therefore deployed
+ * new table writes against a database that had not seen the migration yet —
+ * and because the rollup shared the progress transaction, a missing table took the whole
  * `POST /api/sync/progress` down with it. That coupling was the bug; the
  * missing migration was only what exposed it. With a SAVEPOINT the same
  * situation degrades to "sync works, concept rows appear once the migration
