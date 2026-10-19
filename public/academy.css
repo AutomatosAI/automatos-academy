@@ -551,10 +551,13 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .chip.diff::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
 /* ── footer ─────────────────────────────────────────────────────────────
-   Brand column + three link columns (Learn / Account / Automatos) over a
-   dashed legal strip. Static HTML in index.html — no JS, tokens only, and
-   the automatos.app ↗ link lives HERE now (out of the topnav); analytics'
-   delegated hostname listener keeps counting it as cta_automatos_click.
+   Brand column + four link columns (Learn / Account / Next step / Legal)
+   over a dashed legal strip that ends with the Automatos AI family row
+   (.ac-family); automatos.app is linked from the Powered by pill and the
+   family row. Static HTML in index.html — no JS, tokens only. Analytics
+   counts only the Next step link (data-cta) as cta_automatos_click;
+   family-row clicks are footer_family_click; the Powered by pill and the
+   Legal links are not counted (js/analytics.js ctaEvent).
    No mood toggle down here — the topbar pill / drawer row stay the only two. */
 .ac-footer { border-top: 1px solid var(--glass-border); margin-top: 40px; background: color-mix(in srgb, var(--bg-2) 38%, transparent); }
 .ac-footer-grid {
@@ -576,7 +579,31 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-powered .ac-brand-mark { width: 14px; height: 14px; }
 .ac-footer-legal { border-top: 1px dashed var(--rule); }
 .ac-footer-row { max-width: var(--maxw); margin: 0 auto; padding: 18px clamp(16px,4vw,40px) 24px; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
-@media (max-width: 720px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
+/* The Automatos AI family row (19 Oct 2026): the last line of every footer,
+   in the SPA (index.html) and on the standalone pages (BRAND_FOOTER_HTML in
+   server/brand-footer.js). Label and links in --fg, not --muted/--fg-2
+   (those fall under 4.5:1 on the Mist footer at this size); links are
+   underlined so they read as links without relying on colour. This site is
+   plain text marked aria-current="page". Wraps on phones. */
+.ac-family { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-top: 14px; }
+.ac-family-label { font: 500 var(--t-meta)/1.4 var(--label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg); }
+.ac-family-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.ac-family-links a, .ac-family-links [aria-current="page"] { font: 500 13px/1.4 var(--sans); color: var(--fg); }
+.ac-family-links a { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; transition: text-decoration-color .15s; }
+.ac-family-links a:hover { text-decoration-color: currentColor; }
+.ac-family-links [aria-current="page"] { font-weight: 700; }
+.ac-footer-legal .ac-family { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px,4vw,40px) 24px; }
+/* Below 1080px five tracks squeeze each link column (~87px at 721px), so the
+   brand block takes its own row. 1001–1080px: the four link columns share
+   the next row (~212px each at 1001px). 561–1000px: two link columns per row
+   (Learn | Account, then Next step | Legal; ~320px each at 721px, against
+   ~148px with four), so the long Next step link wraps to about three lines.
+   560px and below: one column. The brand spans the full row throughout. */
+@media (max-width: 1080px) {
+  .ac-footer-grid { grid-template-columns: repeat(4, 1fr); }
+  .ac-footer-brand { grid-column: 1 / -1; }
+}
+@media (max-width: 1000px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .ac-footer-grid { grid-template-columns: 1fr; gap: 24px; } }
 
 /* ── misc ───────────────────────────────────────────────────────────── */
@@ -1291,6 +1318,7 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .mono-label { font-size: 12px; }
   .subnav a { padding: 15px 16px; }
   .ac-footer-col a { padding: 6px 0; }
+  .ac-family-links a, .ac-family-links [aria-current="page"] { display: inline-block; padding: 6px 0; }
   .media-mark-btn { padding: 10px 4px; }
 }
 

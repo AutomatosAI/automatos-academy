@@ -5,7 +5,9 @@
 //
 // Events (keep this the single vocabulary): page_view · track_start ·
 // module_complete · mock_start · mock_score · readiness_a_plus · badge_claim
-// · badge_view · cta_automatos_click · notify_me · tutor_message (props:
+// · badge_view · cta_automatos_click · footer_family_click (props: href,
+// from — a click in the footer's Automatos AI family row) · notify_me ·
+// tutor_message (props:
 // ctx? — "sent"|"held"|"off" context presence, only present when the
 // progress-context feature is offered; PRD-TUTOR-LIVE D-T4) ·
 // tutor_error (props: kind, status? — counts only, never message text;
@@ -54,14 +56,37 @@ export function trackOnce(key, event, props = {}) {
   track(event, props);
 }
 
-// Delegated listener: any link out to the Automatos platform is the loop's
-// conversion click ("Apply it in Automatos" boxes, header link, tutor label).
+// Which event a click on a link sends, or null. Only links out to another
+// automatos.app host count: the Academy's own links are navigation, and in
+// production their hostname (academy.automatos.app) matches automatos.app
+// too, so the page's own host and the Academy host never count.
+// The footer counts only what it marks: a link with data-cta (the Next step
+// link into Studio) is the loop's conversion, the family row is
+// footer_family_click, and every other footer link (the Powered by pill, the
+// Legal column's Terms, Cookies and EU AI Act) sends nothing. Outside the
+// footer every such link is an explicit call to action: the lessons' "Apply
+// it in Automatos" and "Do it now" links, the tutor's and the home page's
+// Studio waitlist links, the Wire's agent link.
+export const AUTOMATOS_HOST = /(^|\.)automatos\.app$/;
+export const ACADEMY_HOST = "academy.automatos.app";
+export const FOOTER = ".ac-footer";
+export const FAMILY_ROW = ".ac-family";
+export const FOOTER_CTA = "[data-cta]";
+
+export function ctaEvent(a, pageHost) {
+  const host = a.hostname || "";
+  if (!AUTOMATOS_HOST.test(host) || host === pageHost || host === ACADEMY_HOST) return null;
+  if (!a.closest(FOOTER)) return "cta_automatos_click";
+  if (a.closest(FAMILY_ROW)) return "footer_family_click";
+  return a.matches(FOOTER_CTA) ? "cta_automatos_click" : null;
+}
+
+// Delegated listener for every link on the page; ctaEvent decides.
 export function mountCtaTracking() {
   document.addEventListener("click", (e) => {
     const a = e.target && e.target.closest && e.target.closest("a[href]");
     if (!a) return;
-    if (/(^|\.)automatos\.app/.test((a.hostname || ""))) {
-      track("cta_automatos_click", { href: a.href, from: location.pathname + (location.hash || "") });
-    }
+    const event = ctaEvent(a, location.hostname);
+    if (event) track(event, { href: a.href, from: location.pathname + (location.hash || "") });
   }, { capture: true });
 }
