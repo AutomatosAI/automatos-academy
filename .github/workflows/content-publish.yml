@@ -60,7 +60,10 @@ jobs:
     name: validate content (publish dry run)
     runs-on: ubuntu-latest
     steps:
+      # No token left in .git/config while npm install runs dependency scripts.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
