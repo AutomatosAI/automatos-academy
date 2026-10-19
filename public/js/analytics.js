@@ -5,7 +5,9 @@
 //
 // Events (keep this the single vocabulary): page_view · track_start ·
 // module_complete · mock_start · mock_score · readiness_a_plus · badge_claim
-// · badge_view · cta_automatos_click · notify_me · tutor_message (props:
+// · badge_view · cta_automatos_click · footer_family_click (props: href,
+// from — a click in the footer's Automatos AI family row) · notify_me ·
+// tutor_message (props:
 // ctx? — "sent"|"held"|"off" context presence, only present when the
 // progress-context feature is offered; PRD-TUTOR-LIVE D-T4) ·
 // tutor_error (props: kind, status? — counts only, never message text;
@@ -54,14 +56,26 @@ export function trackOnce(key, event, props = {}) {
   track(event, props);
 }
 
-// Delegated listener: any link out to the Automatos platform is the loop's
-// conversion click ("Apply it in Automatos" boxes, header link, tutor label).
+// Footer links that go to an automatos.app host but are not the loop's
+// conversion: the family row (counted on its own) and the Legal column
+// (Terms, Cookies, EU AI Act on automatos.app; not counted).
+const FAMILY_ROW = ".ac-family";
+const NOT_A_CTA = ".ac-footer-col[aria-label='Legal']";
+
+// Delegated listener: any other link out to the Automatos platform is the
+// loop's conversion click ("Apply it in Automatos" boxes, header link, tutor
+// label, the footer's Powered by pill and Next step link).
 export function mountCtaTracking() {
   document.addEventListener("click", (e) => {
     const a = e.target && e.target.closest && e.target.closest("a[href]");
     if (!a) return;
-    if (/(^|\.)automatos\.app/.test((a.hostname || ""))) {
-      track("cta_automatos_click", { href: a.href, from: location.pathname + (location.hash || "") });
+    if (!/(^|\.)automatos\.app/.test((a.hostname || ""))) return;
+    const from = location.pathname + (location.hash || "");
+    if (a.closest(NOT_A_CTA)) return;
+    if (a.closest(FAMILY_ROW)) {
+      track("footer_family_click", { href: a.href, from });
+      return;
     }
+    track("cta_automatos_click", { href: a.href, from });
   }, { capture: true });
 }

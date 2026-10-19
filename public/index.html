@@ -17,6 +17,39 @@
   <meta property="og:image:alt" content="Automatos Academy — Train your AI mind" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="/og-academy.png?v=2" />
+  <!-- Structured data: the one Automatos AI Organization the four family sites
+       share by @id, and the Academy as an EducationalOrganization under it.
+       Same graph as siteJsonLd() in server/structured-data.js;
+       tests/public-facts.test.mjs pins the two together. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://automatos.app/#organization",
+        "name": "Automatos AI",
+        "url": "https://automatos.app",
+        "logo": "https://automatos.app/images/automatos-mark-black.png",
+        "sameAs": [
+          "https://x.com/automatosai",
+          "https://www.instagram.com/automatosai",
+          "https://www.linkedin.com/company/automatos-ai",
+          "https://github.com/AutomatosAI"
+        ]
+      },
+      {
+        "@type": "EducationalOrganization",
+        "@id": "https://academy.automatos.app/#academy",
+        "name": "Automatos Academy",
+        "url": "https://academy.automatos.app",
+        "parentOrganization": {
+          "@id": "https://automatos.app/#organization"
+        }
+      }
+    ]
+  }
+  </script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,7 +92,7 @@
       <a href="/method" data-nav="method">The model</a>
       <a href="/tutor" data-nav="tutor">Tutor</a>
       <a href="/admin" data-nav="admin" class="ac-admin-only" hidden>Admin</a>
-      <!-- automatos.app ↗ moved to the footer's Automatos column -->
+      <!-- automatos.app ↗ moved to the footer's family row -->
     </nav>
     <button id="ac-mood" class="ac-mood" type="button" aria-label="Toggle light / dark">
       <span class="ac-mood-dot" aria-hidden="true"></span>
@@ -81,8 +114,9 @@
     </div>
   </main>
 
-  <!-- Footer — brand + three link columns over the legal strip. Static links
-       only (#/profile handles signed-out itself); the mood toggle is NOT
+  <!-- Footer — brand + four link columns (Learn / Account / Next step / Legal)
+       over the legal strip, ending with the Automatos AI family row. Static
+       links only (#/profile handles signed-out itself); the mood toggle is NOT
        duplicated here — the topbar pill / drawer Appearance row own it.
        Note: the SEO track shells (scripts/generate-shells.mjs) are standalone
        minimal pages with their own inline disclaimer plus the shared brand
@@ -116,12 +150,14 @@
         <a href="/support">Help &amp; support</a>
         <a href="/privacy">Privacy policy</a>
       </nav>
-      <!-- Family footer rule (6 Oct 2026): each site sells its own product; the
-           family and cross-marketing live on automatos.app. Academy keeps one
-           bridge, because a learner's natural next step is putting it to work.
-           The bridge points at the Studio site in the public facts wording of
-           19 Oct 2026 (hosted beta, waitlist), and the legal links (facts 8b:
-           Terms, Cookies, EU AI Act on automatos.app) sit in their own column. -->
+      <!-- Next step: the one call to action into Studio, because a learner's
+           natural next step is putting it to work. It points at the Studio
+           waitlist in the public facts wording of 19 Oct 2026 (hosted beta,
+           waitlist); the four family sites are listed once, in the family row
+           at the bottom, so Studio is linked twice in this footer (this CTA
+           and the row) until Gerard decides whether the column stays. The
+           legal links (facts 8b: Terms, Cookies, EU AI Act on automatos.app)
+           sit in their own column. -->
       <nav class="ac-footer-col" aria-label="Next step">
         <span class="mono-label">Next step</span>
         <a href="https://studio.automatos.app/#waitlist" target="_blank" rel="noopener" class="ac-ext">Put it to work in Automatos Studio · Hosted beta opens November 2026 · Join the waitlist ↗</a>
@@ -139,6 +175,20 @@
         <span class="mono-label">Independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.</span>
         <span class="mono-label" style="text-transform:none;letter-spacing:0">© 2026 Automatos AI</span>
       </div>
+      <!-- The Automatos AI family row (Gerard, 19 Oct 2026): the last line of
+           the footer on every family site. This site is shown, not linked
+           (aria-current="page"). Same markup as FAMILY_ROW_HTML in
+           server/brand-footer.js, which the standalone pages render;
+           tests/public-facts.test.mjs pins the two together. -->
+      <nav class="ac-family" aria-labelledby="ac-family-label">
+        <span class="ac-family-label" id="ac-family-label">The Automatos AI family</span>
+        <ul class="ac-family-links">
+          <li><a href="https://automatos.app">Automatos AI</a></li>
+          <li><a href="https://studio.automatos.app">Automatos Studio</a></li>
+          <li><span aria-current="page">Automatos Academy</span></li>
+          <li><a href="https://markets.automatos.app">Automatos Markets</a></li>
+        </ul>
+      </nav>
     </div>
   </footer>
 

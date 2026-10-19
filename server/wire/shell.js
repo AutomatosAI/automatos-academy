@@ -26,6 +26,7 @@ import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 import { sanitizeHtml } from "../../public/js/sanitize-html.js";
 import { BRAND_FOOTER_HTML } from "../brand-footer.js";
+import { academyOrganization, pageJsonLd } from "../structured-data.js";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -54,17 +55,18 @@ const TYPE_LABELS = {
  *  list, so `citation` and `correction` are emitted only if a post actually
  *  carries them (nothing does today) rather than declaring a rigour the
  *  pipeline no longer enforces. */
-function jsonLd(post, pageUrl, baseUrl) {
+function jsonLd(post, pageUrl) {
   const agents = (post.byline && post.byline.agents) || [];
   const ld = {
-    "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.summary,
     datePublished: iso(post.published_at),
     dateModified: iso(post.updated_at),
     author: { "@type": "Organization", name: agents.join(", ") || "Automatos agents" },
-    publisher: { "@type": "Organization", name: "Automatos Academy", url: baseUrl },
+    // The Academy (an EducationalOrganization under the shared Automatos AI
+    // Organization, server/structured-data.js) publishes the Wire.
+    publisher: academyOrganization(),
     isAccessibleForFree: true,
     mainEntityOfPage: pageUrl,
     url: pageUrl,
@@ -77,7 +79,7 @@ function jsonLd(post, pageUrl, baseUrl) {
   }
   // `<` escaped inside string values so untrusted text can never terminate
   // the <script> element (JSON.stringify leaves "</script>" intact).
-  return JSON.stringify(ld).replace(/</g, "\\u003c");
+  return JSON.stringify(pageJsonLd(ld)).replace(/</g, "\\u003c");
 }
 
 /**
@@ -118,7 +120,7 @@ ${tagsMeta}
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/atom+xml" title="The Wire — Automatos Academy" href="/wire/rss.xml">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
-<script type="application/ld+json">${jsonLd(post, pageUrl, baseUrl)}</script>
+<script type="application/ld+json">${jsonLd(post, pageUrl)}</script>
 </head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <p class="mono-label">The Wire · ${esc(TYPE_LABELS[post.type] || post.type)} · Automatos Academy</p>
