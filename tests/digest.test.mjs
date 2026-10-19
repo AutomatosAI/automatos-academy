@@ -19,7 +19,7 @@ import { weekDeltas, daysToExam, composeDigest } from "../server/digest/compose.
 import { createMailer } from "../server/digest/mailer.js";
 import { runDigest, buildMeta } from "../server/digest/send.js";
 import { registerDigestRoutes } from "../server/digest/routes.js";
-import { FAMILY_ROW_INLINE_HTML } from "../server/brand-footer.js";
+import { FAMILY_ROW_INLINE_HTML, LEGAL_ROW_INLINE_HTML } from "../server/brand-footer.js";
 import { mountSpine } from "../server/spine/index.js";
 import { buildContentIndex } from "../server/catalog.js";
 
@@ -254,6 +254,7 @@ const un1 = await request("GET", unsubPath);
 ok(un1.status === 200 && /unsubscribed/i.test(un1.body.raw), "GET unsubscribe: 200, plain confirmation, no sign-in");
 ok(un1.body.raw.includes("Powered by") && un1.body.raw.includes("© 2026 Automatos AI"), "unsubscribe page carries the Powered by line and the copyright");
 ok(un1.body.raw.includes(FAMILY_ROW_INLINE_HTML) && un1.body.raw.includes('aria-current="page"'), "unsubscribe page carries the Automatos AI family row");
+ok(un1.body.raw.includes(LEGAL_ROW_INLINE_HTML) && un1.body.raw.indexOf(LEGAL_ROW_INLINE_HTML) < un1.body.raw.indexOf(FAMILY_ROW_INLINE_HTML), "unsubscribe page carries the legal links (Privacy, Terms, Cookies, EU AI Act) above the family row");
 const prefAfter = (await pool.query("SELECT digest_enabled FROM user_prefs WHERE user_id = $1", [doraId])).rows[0];
 ok(prefAfter.digest_enabled === false, "…and the toggle is actually off");
 const unBad = await request("POST", "/digest/unsubscribe?u=" + doraId + "&t=00000000-0000-4000-8000-000000000000");

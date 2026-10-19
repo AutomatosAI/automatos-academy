@@ -5,7 +5,7 @@
 // the pages are reachable (routes registered, footer links, sitemap).
 import { readFileSync } from "node:fs";
 import { md } from "../public/js/markdown.js";
-import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL, POLICY_UPDATED } from "../public/js/legal-copy.js";
+import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL, POLICY_UPDATED, CONTACT_URL } from "../public/js/legal-copy.js";
 import { generateShells } from "../scripts/generate-shells.mjs";
 import { BRAND_FOOTER_HTML } from "../server/brand-footer.js";
 
@@ -18,6 +18,14 @@ const support = md(SUPPORT_MD);
 ok(privacy.length > 2000 && support.length > 500, "both pages render to non-trivial HTML");
 ok(!privacy.includes("${") && !support.includes("${"), "no unresolved template placeholders");
 ok(privacy.includes(SUPPORT_EMAIL) && support.includes(SUPPORT_EMAIL), "contact email on both pages");
+// Public facts sheet 8b: the one contact route is the company contact form.
+// The role address stays as the second option (a data-rights contact).
+const contactLink = `<a href="${CONTACT_URL}" target="_blank" rel="noopener">`;
+ok(CONTACT_URL === "https://automatos.app/contact" && privacy.includes(contactLink) && support.includes(contactLink), "both pages link the contact form at https://automatos.app/contact");
+ok(/through the contact form at <a [^>]+>automatos\.app\/contact<\/a> or by emailing/.test(privacy), "data-rights requests: the contact form, or the email address");
+const views = readFileSync(new URL("../public/js/views/legal.js", import.meta.url), "utf8");
+ok((views.match(/contactButton\(\)/g) || []).length === 2, "/privacy and /support both lead with the contact form button");
+ok(/"Contact form",\s*el\("span", \{ "aria-hidden": "true", text: " ↗" \}\)/.test(views) && !views.includes("Contact form ↗"), 'the contact button\'s new-tab ↗ is aria-hidden, so the button is named "Contact form"');
 ok(privacy.includes(POLICY_UPDATED), "policy states its last-updated date");
 ok(support.includes("We reply within two working days.") && privacy.includes("We reply within two working days."), "reply-time line is the facts-sheet wording on both pages");
 
@@ -43,7 +51,7 @@ ok(footer.includes('href="/privacy"') && footer.includes('href="/support"'), "fo
 // Terms and Cookies at automatos.app (the Academy has no pages of its own).
 ok(footer.includes('class="ac-powered"') && footer.includes("Powered by <strong>Automatos AI</strong>"), "footer carries the Powered by pill");
 ok(footer.includes("© 2026 Automatos AI") && !/Ltd|Lda|Labs/.test(footer), "footer uses the one copyright form");
-ok(/<a href="https:\/\/automatos\.app\/eu-ai-act"[^>]*>EU AI Act ↗<\/a>/.test(footer) && !/EU AI Act posture/i.test(footer), 'footer labels the EU AI Act link "EU AI Act"');
+ok(/<a href="https:\/\/automatos\.app\/eu-ai-act"[^>]*>EU AI Act<span aria-hidden="true"> ↗<\/span><\/a>/.test(footer) && !/EU AI Act posture/i.test(footer), 'footer labels the EU AI Act link "EU AI Act" (the new-tab ↗ is aria-hidden)');
 ok(footer.includes('href="https://automatos.app/terms"') && footer.includes('href="https://automatos.app/cookies"'), "footer links Terms and Cookies on automatos.app");
 ok(!footer.includes("Built on Automatos agents"), "footer drops the old 'Built on Automatos agents' line (the pill replaces it)");
 ok(!/Automatos AI Academy/.test(PRIVACY_MD + SUPPORT_MD) && PRIVACY_MD.includes("**Automatos Academy**"), 'legal copy names the product "Automatos Academy"');

@@ -593,6 +593,12 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-family-links a:hover { text-decoration-color: currentColor; }
 .ac-family-links [aria-current="page"] { font-weight: 700; }
 .ac-footer-legal .ac-family { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px,4vw,40px) 24px; }
+/* The legal links on the standalone pages (LEGAL_ROW_HTML in
+   server/brand-footer.js, above the family row): Privacy, Terms, Cookies and
+   EU AI Act, styled like the family links (--fg, underlined, 13px). */
+.ac-legal-links { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.ac-legal-links a { font: 500 13px/1.4 var(--sans); color: var(--fg); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; transition: text-decoration-color .15s; }
+.ac-legal-links a:hover { text-decoration-color: currentColor; }
 /* Below 1080px five tracks squeeze each link column (~87px at 721px), so the
    brand block takes its own row. 1001–1080px: the four link columns share
    the next row (~212px each at 1001px). 561–1000px: two link columns per row

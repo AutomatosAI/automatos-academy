@@ -72,10 +72,15 @@ export const ACADEMY_HOST = "academy.automatos.app";
 export const FOOTER = ".ac-footer";
 export const FAMILY_ROW = ".ac-family";
 export const FOOTER_CTA = "[data-cta]";
+// The company contact form (linked from /support and /privacy) is a help
+// route, not the loop's conversion: a click on it sends nothing.
+export const CONTACT_FORM_HOST = "automatos.app";
+export const CONTACT_FORM_PATH = "/contact";
 
 export function ctaEvent(a, pageHost) {
   const host = a.hostname || "";
   if (!AUTOMATOS_HOST.test(host) || host === pageHost || host === ACADEMY_HOST) return null;
+  if (host === CONTACT_FORM_HOST && (a.pathname || "").replace(/\/+$/, "") === CONTACT_FORM_PATH) return null;
   if (!a.closest(FOOTER)) return "cta_automatos_click";
   if (a.closest(FAMILY_ROW)) return "footer_family_click";
   return a.matches(FOOTER_CTA) ? "cta_automatos_click" : null;

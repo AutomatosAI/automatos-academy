@@ -7,11 +7,11 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
-import { BRAND_FOOTER_HTML, FAMILY_LABEL, FAMILY_SITES, FAMILY_ROW_HTML, FAMILY_ROW_INLINE_HTML } from "../server/brand-footer.js";
+import { BRAND_FOOTER_HTML, FAMILY_LABEL, FAMILY_SITES, FAMILY_ROW_HTML, FAMILY_ROW_INLINE_HTML, LEGAL_LINKS, LEGAL_ROW_HTML, LEGAL_ROW_INLINE_HTML, legalLinkHtml } from "../server/brand-footer.js";
 import { ACADEMY_ORG_ID, AUTOMATOS_ORG_ID, AUTOMATOS_ORGANIZATION, siteJsonLd } from "../server/structured-data.js";
 import { shellHtml } from "../scripts/generate-shells.mjs";
 import { buildPostShellHtml } from "../server/wire/shell.js";
-import { ctaEvent, FOOTER, FAMILY_ROW, FOOTER_CTA } from "../public/js/analytics.js";
+import { ctaEvent, FOOTER, FAMILY_ROW, FOOTER_CTA, CONTACT_FORM_HOST, CONTACT_FORM_PATH } from "../public/js/analytics.js";
 
 let pass = 0, fail = 0;
 const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail++, console.error("  ✗ " + msg)));
@@ -46,6 +46,8 @@ const RETIRED = [
   [/verify-in-product|roadmap edge/, "branded documents and templates ship: generate_document renders PDF, DOCX and XLSX from the Brand Kit (facts 8b)"],
   [/\/Users\//, "no local machine paths in served content (track verification.sourceOfTruth)"],
   [/Activity → (?:Dashboard|Feed|Reports|Memory|Missions)|Agents → Playbooks|Analytics → Workflows/, "retired UI paths: the Command Centre's Calendar and Activity tab, Knowledge Base → Memory, Agent Details → Reports, Assignments → Playbooks/Missions, Analytics → Missions"],
+  [/(?:leaves|leaving) the building (?:gets your sign-off|without your)|nothing leaves the building|nothing (?:executes|runs) until you|nothing runs unseen|runs? unapproved anyway|never starts unapproved|only run after you approve|before anything runs|nothing is sent, posted or paid|a board that asks before it acts|everything waits for (?:your )?approval/i,
+    "no absolute approval claims: a mission plan waits for approval by default, but the workspace approval policy (dollar ceiling, full autonomy, countdown) and a chat request can start one unapproved (section 8b)"],
 ];
 for (const [rx, rule] of RETIRED) {
   const hits = corpus.filter(({ text }) => rx.test(text)).map(({ p }) => p);
@@ -73,6 +75,13 @@ ok(m08.includes("12 Shopify agent templates") && m08.includes("Shopify Managemen
 ok(m08.includes("Settings → Channels"), "m08 connects and watches channels in Settings → Channels");
 const m09 = read("public/content/automatos/platform-architect/m09-governance-ops.json");
 ok(m09.includes("Command Centre → Governance → Policy") && /ships off/.test(m09), "m09 teaches the workspace spend ceiling and that enforcement ships off");
+// The mission plan gate is the default, not a guarantee (automatos-ai
+// core/services/approval_policy.py: always_ask is the default; auto_below_budget,
+// full_auto and the auto-proceed countdown start plans unapproved).
+const m05 = read("public/content/automatos/platform-architect/m05-missions.json");
+const m5 = read("public/content/automatos/ai-business/m5-delegation-guardrails.json");
+ok([m05, m5].every((t) => t.includes("mission approval policy") && t.includes("auto-approve plans under a dollar ceiling") && t.includes("countdown") && t.includes("a mission started from chat can be told to skip the wait")),
+  "m05 and AI Business m5 teach the plan gate as the default the workspace approval policy can change");
 
 // The Automatos AI family row (Gerard, 19 Oct 2026; reverses the 6 Oct "no
 // family column on product sites" rule): the last line of every footer, the
@@ -105,6 +114,28 @@ ok((footer.match(/class="ac-family"/g) || []).length === 1 && (footer.match(/hre
 // family listing creeps in.
 const studioOutsideRow = footer.replace(spaRow, "").match(/href="https:\/\/studio\.automatos\.app[^"]*"/g) || [];
 ok(studioOutsideRow.every((h) => h === 'href="https://studio.automatos.app/#waitlist"') && studioOutsideRow.length <= 1, "outside the family row, Studio is linked only by the Next step waitlist CTA");
+
+// The legal links (facts 8b): Terms, Privacy, Cookies and EU AI Act on every
+// page. The Academy keeps its own Privacy (/privacy); the rest are
+// automatos.app's. The SPA footer's Legal column and the standalone pages'
+// legal row are the same links, labels, markup and order.
+const spaLegal = (footer.match(/<nav class="ac-footer-col" aria-label="Legal">[\s\S]*?<\/nav>/) || [""])[0];
+const linkEntries = (html) => [...html.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)</g)].map((m) => [m[2], m[1]]);
+ok(isDeepStrictEqual(LEGAL_LINKS.map(({ label, href }) => [label, href]), [
+  ["Privacy", "/privacy"],
+  ["Terms", "https://automatos.app/terms"],
+  ["Cookies", "https://automatos.app/cookies"],
+  ["EU AI Act", "https://automatos.app/eu-ai-act"],
+]), "legal links: Privacy on the Academy; Terms, Cookies and EU AI Act on automatos.app; labelled Privacy, Terms, Cookies, EU AI Act");
+ok(spaLegal !== "" && isDeepStrictEqual(linkEntries(spaLegal), linkEntries(LEGAL_ROW_HTML)) && LEGAL_LINKS.every((l) => spaLegal.includes(legalLinkHtml(l))),
+  "the SPA footer's Legal column has the same links, labels, markup and order as the standalone pages' legal row");
+ok((footer.match(/href="\/privacy"/g) || []).length === 1, "the SPA footer links Privacy once, in the Legal column");
+ok(BRAND_FOOTER_HTML.includes(LEGAL_ROW_HTML) && BRAND_FOOTER_HTML.indexOf(LEGAL_ROW_HTML) < BRAND_FOOTER_HTML.indexOf(FAMILY_ROW_HTML),
+  "standalone pages (BRAND_FOOTER_HTML) carry the legal row above the family row");
+ok(/\.ac-legal-links \{[^}]*list-style: none/.test(read("public/academy.css")), "academy.css styles the standalone legal row");
+ok(isDeepStrictEqual(linkEntries(LEGAL_ROW_INLINE_HTML), linkEntries(LEGAL_ROW_HTML)) && LEGAL_ROW_INLINE_HTML.includes('aria-label="Legal"')
+  && (LEGAL_ROW_INLINE_HTML.match(/<span aria-hidden="true"> ↗<\/span>/g) || []).length === 3 && !/class=/.test(LEGAL_ROW_INLINE_HTML),
+  "the inline legal row (unsubscribe page, no academy.css) has the same links, labels and order, inline-styled");
 
 // The footer grid has one track per child (brand + link columns), at every
 // width: removing or adding a column must change the CSS with it, or the grid
@@ -144,6 +175,8 @@ for (const [what, a, want, pageHost = PAGE_HOST] of [
   ["a navigation link on a staging host under automatos.app (same host)", fakeEl([], fakeEl([".ac-topnav"]), "academy-staging.automatos.app"), null, "academy-staging.automatos.app"],
   ["an absolute academy.automatos.app link on a Railway host", fakeEl([], null, "academy.automatos.app"), null, "automatos-academy-production.up.railway.app"],
   ["a link to another site", fakeEl([], null, "example.com"), null],
+  ["the contact form link in the /support copy", Object.assign(fakeEl([], fakeEl([".prose"]), CONTACT_FORM_HOST), { pathname: CONTACT_FORM_PATH }), null],
+  ["the contact form link with a trailing slash", Object.assign(fakeEl([], fakeEl([".prose"]), CONTACT_FORM_HOST), { pathname: `${CONTACT_FORM_PATH}/` }), null],
   ["a look-alike host", fakeEl([], null, "automatos.app.example.com"), null],
 ]) {
   const got = ctaEvent(a, pageHost);
@@ -204,6 +237,7 @@ const trackLd = ldBlocks(trackShell);
 const course = trackLd.length ? checkGraph(trackLd[0], "track shell").find((n) => n["@type"] === "Course") : null;
 ok(!!course && course.provider.name === "Automatos Academy" && course.isAccessibleForFree === true, "track shell: the Course is provided by Automatos Academy, free");
 ok(trackShell.includes(FAMILY_ROW_HTML), "track shell carries the family row");
+ok(trackShell.includes(LEGAL_ROW_HTML), "track shell carries the legal links (Privacy, Terms, Cookies, EU AI Act)");
 const hostileShell = shellHtml({ trackId: "facts", vendorId: "automatos", vendorName: "Automatos" }, { name: "Bad </script><script>alert(1)</script>", summary: "A track.", domainFiles: [] });
 const hostileLd = ldBlocks(hostileShell);
 ok(hostileLd.length === 1 && !hostileLd[0].parseError && (hostileLd[0]["@graph"] || []).some((n) => n.name === "Bad </script><script>alert(1)</script>"), "track shell: a '</script>' in a track name stays inside the JSON-LD string (escaped as \\u003c)");
@@ -220,6 +254,7 @@ ok(!!posting && posting.publisher.name === "Automatos Academy", "Wire post shell
 ok(!!posting && posting.publisher["@id"] === ACADEMY_ORG_ID && ACADEMY_ORG_ID === "https://academy.automatos.app/#academy"
   && posting.url === "http://automatos-academy-production.up.railway.app/wire/facts/", "Wire post shell: the publisher keeps the Academy @id on another host; only the page URL follows the request");
 ok(wireShell.includes(FAMILY_ROW_HTML), "Wire post shell carries the family row");
+ok(wireShell.includes(LEGAL_ROW_HTML), "Wire post shell carries the legal links");
 
 console.log(`\npublic-facts: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
