@@ -51,7 +51,7 @@ reasoning); when CodeGraph earns its keep (large codebases, "what calls this?");
 teachable system — Semantic Layer mappings, Training examples, Golden SQL benchmarking, the read-only
 default and the query audit trail. Then tools: OAuth vs API-key connection, assigning per agent,
 permission scopes (full/read-only/custom), and tool validation (active connection, scope, rate
-limits) with failures showing in the Activity Feed. Ground strictly in the knowledge/* and tools/*
+limits) with failures showing in the chat's activity trail and on the Command Centre's Activity tab. Ground strictly in the knowledge/* and tools/*
 sources.
 ```
 

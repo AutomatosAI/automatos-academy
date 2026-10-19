@@ -63,7 +63,7 @@ a practical autonomy rule for a new user. Ground strictly in activity/missions.m
 
 ## 🛠 Try it now (on Automatos)
 Run your first autonomous Mission:
-1. **Activity → Missions → + New Mission.** Write a specific objective with a success criterion, e.g.
+1. **Assignments → Missions → New Mission.** Write a specific objective with a success criterion, e.g.
    *"Review the three documents I uploaded, list every open question they leave unanswered, and write
    a one-page summary report."* (Attach files if useful.)
 2. Wait for the **Plan Pending** state → read the proposed task list → **Approve** (or Reject and
