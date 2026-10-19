@@ -15,6 +15,7 @@ const page = (title, body) => `<!doctype html>
 <div style="max-width:460px;margin:0 auto;background:#fff;border-radius:14px;padding:32px;">
 <h1 style="margin:0 0 12px;font-size:20px;">${title}</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:#40506e;">${body}</p>
+<p style="margin:16px 0 0;font-size:12px;color:#5d6b85;">Powered by <a href="https://automatos.app" style="color:#5d6b85;">Automatos AI</a> · © 2026 Automatos AI</p>
 </div></body>`;
 
 function safeEqual(a, b) {

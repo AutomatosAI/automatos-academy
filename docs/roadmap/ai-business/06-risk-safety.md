@@ -55,7 +55,7 @@ owned, lived, boring — and pointing anyone whose job this becomes at the full 
 (AIGP). Ground strictly in the sources.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Draft your one-page AI policy — with the AI's help, grounded in your business. In Automatos, ask
 your grounded assistant (Module 03) to interview you through the six sections (approved tools,
 data rules, human-check list, manipulation awareness, disclosure line, review rhythm) and produce

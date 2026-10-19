@@ -20,6 +20,7 @@ import { writeFileSync, mkdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { buildContentIndex } from "../server/catalog.js";
+import { BRAND_FOOTER_HTML } from "../server/brand-footer.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const BASE = (process.env.ACADEMY_BASE_URL || "https://academy.automatos.app").replace(/\/$/, "");
@@ -98,6 +99,7 @@ function shellHtml(t, track) {
   ${faq.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join("\n  ")}
   <p style="margin-top:34px"><a href="/">← All tracks</a></p>
   <p class="mono-label" style="margin-top:26px;max-width:70ch">${esc(DISCLAIMER)}</p>
+  ${BRAND_FOOTER_HTML}
 </main></body></html>`;
 }
 

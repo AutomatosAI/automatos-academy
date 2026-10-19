@@ -1,9 +1,9 @@
 # Automatos Platform (APA) — Free platform training
 
-**Learn to actually *use* Automatos, end to end — on the free platform.** APA is a self-learning,
+**Learn to actually *use* Automatos, end to end.** APA is a self-learning,
 awareness track: no proctored exam, no A+ gate, no paid tier to convert to. Progress = modules
 completed + the capstone build. Every module teaches one capability from the real product and ends
-with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-APA.md](../../prds/PRD-S1-APA.md).
+with a **🛠 Try it now** task you do on Automatos. Blueprint: [PRD-S1-APA.md](../../prds/PRD-S1-APA.md).
 
 > **No exam. Learn by doing.** APA is the deepest expression of the academy-wide *"apply it in
 > Automatos"* thread — every other track teaches an external skill then shows Automatos doing it; APA
@@ -16,7 +16,7 @@ with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-
 |---|---|---|---|
 | 00 | What is Automatos? — concepts, vocabulary & the Command Centre tour | `README`, `about`, `activity` | [`00-overview.md`](./00-overview.md) |
 | 01 | Chat, your first agent & the Universal Router | `chat`, `agents` | [`01-chat-first-agent.md`](./01-chat-first-agent.md) |
-| 02 | Skills — the 128-skill library, the 9 signature agents, authoring a `SKILL.md` | `marketplace/capabilities`, `agents` | [`02-skills.md`](./02-skills.md) |
+| 02 | Skills — the 140-skill library, the 9 signature agents, authoring a `SKILL.md` | `marketplace/capabilities`, `agents` | [`02-skills.md`](./02-skills.md) |
 | 03 | Knowledge & tools — RAG, Knowledge Graph, CodeGraph, NL2SQL, connect Composio tools | `knowledge/*`, `tools/*` | [`03-knowledge-tools.md`](./03-knowledge-tools.md) |
 | 04 | Playbooks & workflows — build, schedule, trigger | `agents/playbooks`, `tools` | [`04-recipes-playbooks.md`](./04-recipes-playbooks.md) |
 | 05 | Missions — goal → plan → approve → run | `activity/missions` | [`05-missions.md`](./05-missions.md) |
@@ -33,7 +33,7 @@ with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-
 - **Completion = "Automatos-ready":** you can build and run real work on Automatos. The badge is a
   shareable proof of skill, not a conversion metric — it's a free academy.
 - **Hands-on by design.** Every module replaces the usual "apply it in Automatos" box with a concrete
-  **🛠 Try it now** step you do on the live free platform. The capstone is your first real build.
+  **🛠 Try it now** step you do on Automatos. The capstone is your first real build.
 
 ## The workflow — do this per module
 
@@ -42,7 +42,7 @@ with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-
    `automatos-gitbook` docs for that module + the named repo — nothing extra).
 3. **Video:** paste the *Video* prompt → Customize → generate → tune to **~8 min**.
 4. **Audio:** paste the *Deep Dive* prompt (learn) and, on judgment modules, the *Debate* prompt.
-5. **Do it:** complete the **🛠 Try it now** task on the free platform — that's the real learning.
+5. **Do it:** complete the **🛠 Try it now** task on Automatos — that's the real learning.
 6. Download the media → host (self-host `.mp4`/`.mp3` or YouTube-unlisted) → register in the track's
    `videos[]`. Tick the module off below.
 
@@ -67,7 +67,7 @@ with a **🛠 Try it now** task you do on the free platform. Blueprint: [PRD-S1-
 - [ ] **09 · Governance & ops** — load `team`+`analytics` → Video + Deep Dive + Debate → 🛠 set a budget, invite a Viewer, read the cost tab
 - [ ] **10 · Marketplace** — load `marketplace/*` → Video + Deep Dive → 🛠 install a marketplace agent (note: contributor economy is roadmap/beta)
 - [ ] Every video registered in the track `videos[]` with a `sourceNotebook` for re-generation
-- [ ] Capstone: ship one real thing on the free platform (an agent + a playbook or mission that
+- [ ] Capstone: ship one real thing on Automatos (an agent + a playbook or mission that
       produces a deliverable) — that's "Automatos-ready"
 
 ---

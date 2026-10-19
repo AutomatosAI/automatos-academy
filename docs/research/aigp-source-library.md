@@ -1,5 +1,7 @@
 # IAPP AI Governance Professional (AIGP) — research & source library
 
+> **Dates superseded 19 Oct 2026:** Article 50 transparency has applied since 2 Aug 2026; generative systems already on the market before then have until 2 Dec 2026 for the Article 50(2) marking duty. Annex III high-risk applies 2 Dec 2027 and Annex I high-risk 2 Aug 2028 (Regulation (EU) 2026/1744). The "in flux" and "re-verify before asserting dates" notes below are kept as dated history.
+
 **For:** [PRD-S3-AIGP.md](../prds/PRD-S3-AIGP.md) · **Last updated:** 2026-07-02
 **Method:** [KNOWLEDGE_INGEST.md](../KNOWLEDGE_INGEST.md) (official primary sources only) · **Guardrail:**
 the IAPP BoK PDF is copyright — **linked, never rehosted**; no third-party braindumps / real exam items

@@ -64,7 +64,7 @@ templated deliverable. Ground strictly in knowledge/templates.md, activity/repor
 supported file types in knowledge/documents.md.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Produce your first branded deliverable:
 1. **Knowledge Bases → Templates → + New Template.** Name it *"Weekly Review,"* write a markdown
    structure (Summary / Findings / Actions), and add placeholders like `{{agent_name}}` and

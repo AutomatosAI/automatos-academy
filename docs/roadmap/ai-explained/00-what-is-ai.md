@@ -47,8 +47,8 @@ check it, never blame it, manage it. Ground strictly in the sources; invent no n
 ```
 
 ## 🤝 The Automatos peek
-Everything in this course is something you can try for free in Automatos — you just talk to it in
-plain language, the same way you'd brief that new hire. Later modules show where the knobs, the
+Everything in this course is something you can try in Automatos (free in the open-source local
+edition today; hosted Studio beta opens November 2026) — you just talk to it in plain language, the same way you'd brief that new hire. Later modules show where the knobs, the
 memory and the tools live; for now, know that the "well-read new hire" you just met is exactly what
 you'll be working with.
 

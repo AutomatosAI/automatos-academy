@@ -46,7 +46,7 @@ checking, never blamed — managed. Ground strictly in the sources; do not inven
 or vendor claims.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Have your first *grounded* conversation. Open Automatos chat and ask something generic about your
 industry — notice the answer is competent but generic. Now paste in one real thing (your menu, your
 price list, a recent customer email) and ask again. That difference — generic vs grounded — is the

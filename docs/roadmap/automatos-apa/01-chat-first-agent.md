@@ -63,7 +63,7 @@ interaction cache warm-up, persona/temperature fit, and maintenance cost. Land o
 thumb for a beginner. Ground strictly in the provided sources; no invented benchmarks.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Create your first working agent and prove it routes:
 1. **Agents → + Create Agent → From Template → Code Reviewer.**
 2. Give it a **specific description**: *"Reviews GitHub pull requests and code for bugs, security

@@ -60,7 +60,7 @@ keep the leash short (irreversible actions, external side effects, unclear succe
 a practical autonomy rule for a new user. Ground strictly in activity/missions.md.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Run your first autonomous Mission:
 1. **Activity → Missions → + New Mission.** Write a specific objective with a success criterion, e.g.
    *"Review the three documents I uploaded, list every open question they leave unanswered, and write

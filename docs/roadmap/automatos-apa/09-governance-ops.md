@@ -66,7 +66,7 @@ sits for irreversible or external-side-effect actions. Land on a starter governa
 can adopt. Ground strictly in the provided sources.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Put guardrails on your workspace:
 1. **Settings → General → Features → enable Cost alerts** and set a budget threshold.
 2. **Analytics → LLM & Costs.** Read the four cost cards and the Cost by Model Over Time chart; find

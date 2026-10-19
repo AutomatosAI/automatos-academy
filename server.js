@@ -25,6 +25,7 @@ import { buildContentIndex, createCatalogRouter } from "./server/catalog.js";
 import { createSigner } from "./server/signing.js";
 import { initCardRenderer, cardsAvailable } from "./server/share-cards.js";
 import { mountShareRoutes } from "./server/share-routes.js";
+import { BRAND_FOOTER_HTML } from "./server/brand-footer.js";
 import { createShareAttestor } from "./server/share-attest.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -497,6 +498,7 @@ app.get("/cert/:payload", (req, res) => {
   <p style="margin-top:22px"><a class="ac-btn ac-btn-solid" href="${esc(li)}">Add to LinkedIn profile ↗</a>
   <a class="ac-btn" href="/#/t/${esc(cert.vendorId)}/${esc(cert.trackId)}">Start this track →</a></p>
   <p class="mono-label" style="margin-top:18px;max-width:70ch">Automatos Academy is independent, free training. Completion badges certify Academy work — never an external credential, which only its certification body can issue.</p>
+  ${BRAND_FOOTER_HTML}
 </main></body></html>`);
 });
 

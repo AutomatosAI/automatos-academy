@@ -43,8 +43,8 @@ from here is just building on words they now own. Ground strictly in the sources
 ```
 
 ## 🤝 The Automatos peek
-Every idea in this course is something you can now go and *see* for free in Automatos — talk to an
-agent, upload a document and watch it answer with citations, connect a tool. You arrived not knowing
+Every idea in this course is something you can now go and *see* in Automatos (free in the open-source
+local edition today; hosted Studio beta opens November 2026) — talk to an agent, upload a document and watch it answer with citations, connect a tool. You arrived not knowing
 the words; you're leaving able to use the thing. Whichever door you pick, you'll recognise what
 you're looking at.
 
