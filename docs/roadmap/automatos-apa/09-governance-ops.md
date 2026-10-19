@@ -21,9 +21,12 @@ Cover ONLY, in order:
    model, agent, and estimated cost. Show the cost cards (Total Cost, Total Tokens, Cost Per Request,
    Top Spender), Cost by Model Over Time, and breakdowns By Model / By Agent / By Time, plus Cost
    Projections (monthly estimate, trend, anomaly alerts).
-2. Budgets: two levers. Workspace-wide Cost alerts (Settings → General → Features: notify on budget
-   thresholds), and per-Mission budget control (Activity → Missions: cost breakdown by task, pause a
-   Mission if costs run high, resume with increased budget). Frame budgets as "policy, not vibes."
+2. Budgets: the levers. Workspace-wide Cost alerts (Settings → General → Features: notify on budget
+   thresholds); a Mission budget set at approval, which pauses the Mission when its spend reaches it
+   (it never cancels or refunds); per-Mission steering (Assignments → Missions: cost breakdown by task,
+   pause a Mission if costs run high, resume with increased budget); and a workspace spend ceiling in
+   Command Centre → Governance → Policy that the policy plane enforces only once it is switched on (it
+   ships off). Frame budgets as "policy, not vibes."
 3. The agent's config as its operating "blueprint" (our teaching term — the user docs just call it
    the agent's configuration; say that once): each agent's model/provider, temperature, max tokens,
    persona, tools and skills (set at creation) bounds what it does and what it costs. Cheaper models
@@ -46,8 +49,9 @@ sources; do not invent roles, permissions, or budget controls.
 ```
 Two hosts, practical, teaching an admin to operate a workspace responsibly. Go deep on: reading the
 LLM & Costs tab (cards, cost-by-model/agent/time, projections, anomaly alerts) and tracing a cost
-back to a conversation/Playbook/Mission; the two budget levers (workspace Cost alerts in Settings,
-per-Mission cost-by-task + pause + resume-with-increased-budget); the cost-optimisation tips (cheaper
+back to a conversation/Playbook/Mission; the budget levers (workspace Cost alerts in Settings, a
+Mission budget that pauses the Mission, per-Mission cost-by-task + pause + resume-with-increased-budget,
+and the workspace spend ceiling that only bites when policy enforcement is on); the cost-optimisation tips (cheaper
 models for simple tasks, watch Top Spender, check token efficiency); the RBAC matrix (Admin vs Member
 vs Viewer) and what each can and can't do, plus the Context Engineering role; and workspace isolation
 as the tenancy boundary. Tie "blueprint" to agent creation — model/persona/tools as the per-agent

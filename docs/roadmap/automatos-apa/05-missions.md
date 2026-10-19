@@ -30,8 +30,9 @@ Cover ONLY, in order:
 4. Monitoring an active Mission: the task list with per-task status, the event timeline, the cost
    breakdown by task, which agents worked on what, and checkpoints (saved state snapshots). Click a
    task to see its detailed execution log (tool calls, LLM interactions, intermediate results).
-5. Budget + reuse: Missions consume tokens; view cost-by-task, pause if costs run high, resume with
-   increased budget. A completed Mission can be Saved as Routine → becomes a reusable Playbook.
+5. Budget + reuse: Missions consume tokens. Before approving you can give a Mission a budget; when its
+   spend reaches it, the Mission pauses for your decision (it never cancels or refunds). View
+   cost-by-task, pause if costs run high, resume with increased budget. A completed Mission can be Saved as Routine → becomes a reusable Playbook.
 
 ~8 minutes: open with "give it a goal, not a script," create one objective on screen, show the plan-
 approval gate, then the monitoring + budget controls. Stay strictly in the sources; do not invent
@@ -62,7 +63,7 @@ a practical autonomy rule for a new user. Ground strictly in activity/missions.m
 
 ## 🛠 Try it now (on Automatos)
 Run your first autonomous Mission:
-1. **Activity → Missions → + New Mission.** Write a specific objective with a success criterion, e.g.
+1. **Assignments → Missions → New Mission.** Write a specific objective with a success criterion, e.g.
    *"Review the three documents I uploaded, list every open question they leave unanswered, and write
    a one-page summary report."* (Attach files if useful.)
 2. Wait for the **Plan Pending** state → read the proposed task list → **Approve** (or Reject and

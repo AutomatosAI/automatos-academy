@@ -454,7 +454,7 @@
         },
         {
           "id": "b",
-          "text": "Set a hard dollar spend cap that blocks any run over the limit before it starts",
+          "text": "Set a dollar spend cap on AI usage and rely on it to stop any payment an agent makes",
           "correct": false
         },
         {
@@ -468,7 +468,7 @@
           "correct": false
         }
       ],
-      "explanation": "The real, documented backing is three things working together: **tool scope** (start agents **Read-only**, or **Custom** for specific actions), the **mission plan-approval gate** (you Approve/Reject before anything runs), and an **immutable audit trail** (logs are retained and can't be deleted, exportable as CSV). Note the honest limit: the platform's budget controls are cost *alerts* plus pause/resume, **not** a hard pre-set dollar cap that blocks a run — so that option overstates what exists. Turning off logging destroys the very record you want, and Full-access-to-everything is the opposite of least-privilege.",
+      "explanation": "The real, documented backing is three things working together: **tool scope** (start agents **Read-only**, or **Custom** for specific actions), the **mission plan-approval gate** (you Approve/Reject before anything runs), and an **immutable audit trail** (logs are retained and can't be deleted, exportable as CSV). Note why the budget option misses: a spend cap limits what the AI itself costs, not what an agent does with your money, and a mission budget pauses work rather than blocking a payment — so it doesn't back a 'no money-out by AI alone' policy. Turning off logging destroys the very record you want, and Full-access-to-everything is the opposite of least-privilege.",
       "sourceRefs": [
         "r-gb-assigning",
         "r-gb-audit-logs",

@@ -1,17 +1,17 @@
 # Automatos · Module 10 — Marketplace & the contributor economy
 
-**Type:** Free training (no exam)  ·  **Goal:** discover and install community extensions — apps,
-agents, playbooks, LLMs, capabilities — and understand where the contributor economy is headed.
+**Type:** Free training (no exam)  ·  **Goal:** discover and install community extensions — packages,
+apps, agents, playbooks, LLMs, capabilities — and understand where the contributor economy is headed.
 
 > **Status note:** installing and publishing to the Community Marketplace is live. The broader
 > **contributor economy** (creator payouts / revenue-share / a paid marketplace) is **roadmap/beta —
 > framed here as "coming."** Nothing in this module implies a paid tier of the academy; APA is free.
 
 ## 📥 Sources to load into NotebookLM
-- `automatos-gitbook/marketplace/README.md` — the five tabs (Applications / Agents / Playbooks / LLMs / Capabilities), stats, search, and publishing
+- `automatos-gitbook/marketplace/README.md` — the tabs (Applications / Agents / Playbooks / LLMs / Capabilities), stats, search, and publishing. The product now leads with a sixth tab, **Packages** (3 today: Socials, Shopify Management, Shopify Development); teach the six
 - `automatos-gitbook/marketplace/agents.md` — installing a pre-built agent (prompt + model + skills)
 - `automatos-gitbook/marketplace/capabilities.md` — Plugins vs Skills, installing and assigning
-- Repo for grounding: `automatos-skills` — the 140 skills that back the Capabilities tab and the 9 signature agents
+- Repo for grounding: `automatos-skills` — the open library of 140 skills behind the Capabilities tab (hosted Studio lists 400+ skills and 70+ plugins) and the signature agents
 
 ## 🎬 Video (~8 min) — NotebookLM → Video → Customize
 ```
@@ -21,15 +21,15 @@ install it, publish yours" walkthrough. Do NOT imply any paid academy tier.
 
 Cover ONLY, in order:
 1. What the Marketplace is: the place to discover, browse, and install extensions for your workspace —
-   Applications (external app integrations), Agents (pre-built configs), Playbooks (ready-made
+   Packages (starter teams: agents with their skills, Playbooks and apps to connect), Applications (external app integrations), Agents (pre-built configs), Playbooks (ready-made
    workflows), LLMs (models to compare/configure), and Capabilities (Plugins and Skills). Show the
    stats bar (Total Items, Categories, Featured, Total Installs) and search across tabs.
 2. Installing an agent (marketplace/agents.md): pick a card → Install → it lands on your Agent Roster
    as a COPY (tuned system prompt, recommended model, pre-assigned skills, suggested tools) you can
    freely modify without affecting the listing.
 3. Installing capabilities (marketplace/capabilities.md): Plugins are bundles (skills + commands +
-   agent configs + prompt templates); Skills are individual git-based modules (a SKILL.md). Install →
-   assign to agents. Tie back to Module 02's 140-skill library and the signature agents.
+   agent configs + prompt templates) you Enable for the workspace; Skills are individual git-based
+   modules (a SKILL.md) you Install. Then assign either to agents (Configure → Capabilities). Tie back to Module 02's 140-skill library and the signature agents.
 4. Publishing to the community: from an agent, Playbook, or plugin → Submit/Publish to Marketplace →
    add description, category, tags → submit for review. Published items are available to all Automatos
    users with your workspace name as publisher; installs are scoped per workspace and don't affect
@@ -45,8 +45,8 @@ strictly in the sources; do not invent current monetisation features.
 
 ## 🎧 Deep Dive (learn) — NotebookLM → Audio → Customize
 ```
-Two hosts, practical, teaching a user to get leverage from the Marketplace. Go deep on: the five tabs
-and what each installs; installing a marketplace agent as an editable copy; the Plugins-vs-Skills
+Two hosts, practical, teaching a user to get leverage from the Marketplace. Go deep on: the six tabs
+(Packages first) and what each installs; installing a marketplace agent as an editable copy; the Plugins-vs-Skills
 distinction and how installed capabilities get assigned to agents; and the publishing flow (submit
 with description/category/tags for review, workspace-scoped installs, your name as publisher). Then
 frame the contributor economy honestly as roadmap/beta — a "coming" evolution of community sharing

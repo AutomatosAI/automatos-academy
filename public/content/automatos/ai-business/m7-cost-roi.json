@@ -274,14 +274,14 @@
         },
         {
           "id": "c",
-          "text": "Activity → Feed"
+          "text": "Command Centre → Activity"
         },
         {
           "id": "d",
           "text": "Marketplace → LLMs"
         }
       ],
-      "explanation": "Analytics → LLM & Costs is the cost tab — total cost, cost per request, cost by agent/model, Top Spender, and projections. Settings → Credentials is where you store your provider key, not where you read spend. Activity → Feed is the live log of what agents did. Marketplace → LLMs shows list pricing to help you compare models before choosing — it's not your actual bill.",
+      "explanation": "Analytics → LLM & Costs is the cost tab — total cost, cost per request, cost by agent/model, Top Spender, and projections. Settings → Credentials is where you store your provider key, not where you read spend. The Command Centre's Activity tab is the stream of what agents ran. Marketplace → LLMs shows list pricing to help you compare models before choosing — it's not your actual bill.",
       "sourceRefs": [
         "r-gb-llm-costs",
         "r-gb-marketplace-llms"
@@ -404,7 +404,7 @@
           "text": "As a bill you must pay to Automatos directly for the projection"
         }
       ],
-      "explanation": "The docs are explicit: projections are estimates from recent usage and change as usage changes — good for a heads-up, not a promise. It is not a spend cap; the platform surfaces cost alerts on thresholds and lets you pause a mission and resume it with a higher budget, but it doesn't hard-stop a run at a projected number. It's not a locked-in exact charge. And it isn't a bill payable to Automatos — with bring-your-own-key, usage lands on your own provider account.",
+      "explanation": "The docs are explicit: projections are estimates from recent usage and change as usage changes — good for a heads-up, not a promise. It is not a spend cap (b): a projection never stops anything. The limits that exist are separate — a mission's own budget pauses that mission when it's reached, and cost alerts notify you at a threshold. It's not a locked-in exact charge. And it isn't a bill payable to Automatos — with bring-your-own-key, usage lands on your own provider account.",
       "sourceRefs": [
         "r-gb-llm-costs",
         "r-gb-settings-general",
@@ -615,7 +615,7 @@
       "title": "Automatos docs — General settings & feature flags",
       "url": "https://docs.automatos.app/user-guides/settings/general",
       "kind": "official-doc",
-      "annotation": "Home of the Default Model setting and the Cost alerts feature flag ('notify on budget thresholds'). Grounds the lab's optional cost-alert step and the honest caveat that alerts are reactive nudges — there is no hard spend cap that blocks a run.",
+      "annotation": "Home of the Default Model setting and the Cost alerts feature flag ('notify on budget thresholds'). Grounds the lab's optional cost-alert step and the honest caveat that alerts are reactive nudges — they notify, they don't stop anything.",
       "domainIds": [
         "m7-cost-roi"
       ]
@@ -625,7 +625,7 @@
       "title": "Automatos docs — Missions (cost breakdown & budget)",
       "url": "https://docs.automatos.app/user-guides/activity/missions",
       "kind": "official-doc",
-      "annotation": "For automations run as missions: the per-task cost breakdown, and budget management (view cost breakdown by task, pause if costs exceed expectations, resume with increased budget). The honest picture of what 'budget' means on the platform — reactive pause/resume and alerts, not a pre-set spend ceiling.",
+      "annotation": "For automations run as missions: the per-task cost breakdown, and budget management (view cost breakdown by task, pause if costs exceed expectations, resume with increased budget). Note what 'budget' means for a mission: when its spend reaches the budget you set, it pauses for your decision; it doesn't cancel.",
       "domainIds": [
         "m7-cost-roi"
       ]
