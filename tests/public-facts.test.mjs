@@ -34,6 +34,8 @@ const RETIRED = [
   [/\bin flux\b/, "EU AI Act dates are set by Regulation (EU) 2026/1744 (section 8)"],
   [/Built on Automatos agents/, "outlets carry the Powered by pill only (section 2)"],
   [/pre-set spend ceiling|there is no hard spend cap/, "missions have a budget that pauses them; the workspace ceiling exists but ships off"],
+  [/Channels Live/, "a connected channel shows on its card in Settings → Channels; the Command Centre has no 'Channels Live' card (facts 8b: no unrunning features as running)"],
+  [/confirmed live on production|live production store today|Live today: partner app/, "the Shopify app is next, not in the App Store; the 12 Shopify agent templates ship (section 6)"],
 ];
 for (const [rx, rule] of RETIRED) {
   const hits = corpus.filter(({ text }) => rx.test(text)).map(({ p }) => p);
@@ -51,6 +53,9 @@ ok(/70\+ plugins/.test(m10) && /400\+ skills/.test(m10), "m10 gives the hosted p
 const m02 = read("public/content/automatos/platform-architect/m02-skills.json");
 ok(m02.includes("140 skills") && m02.includes("18 top-level"), "m02 cites the open library as 140 skills in 18 top-level folders");
 ok(!/Agent Details → Plugins/.test(m02), "m02 assigns skills in the Configure panel, not the retired Agent Details → Plugins path");
+const m08 = read("public/content/automatos/platform-architect/m08-channels-surfaces.json");
+ok(m08.includes("12 Shopify agent templates") && m08.includes("Shopify Management") && /Shopify app[^.]*next/.test(m08), "m08 teaches the 12 Shopify agent templates as shipped and the Shopify app as next");
+ok(m08.includes("Settings → Channels"), "m08 connects and watches channels in Settings → Channels");
 const m09 = read("public/content/automatos/platform-architect/m09-governance-ops.json");
 ok(m09.includes("Command Centre → Governance → Policy") && /ships off/.test(m09), "m09 teaches the workspace spend ceiling and that enforcement ships off");
 
