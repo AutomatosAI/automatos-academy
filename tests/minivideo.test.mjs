@@ -19,6 +19,8 @@ import {
   toSlides,
   planTimeline,
   toVtt,
+  narrationLines,
+  MINIVIDEO_NARRATION,
 } from "../server/media/minivideo.js";
 import { kindForSlot } from "../server/media/validate.js";
 
@@ -169,6 +171,72 @@ console.log("captions (written from the same plan the video is cut from)");
     "cues are contiguous: one ends exactly where the next begins, so nothing is unlabelled");
   ok(plan2.slides[1].offsetFrames === Math.round(parseFloat(secondStart.split(":")[2]) * plan2.fps),
     "and a cue's start is its slide's real offset, not a running sum that ignores the fade");
+}
+
+// ═══════════════════════════════════════════════════════ narration ══
+console.log("narration (the captions, spoken — on the same timeline)");
+{
+  const slides = toSlides(toRenderParams(P()).params);
+  const lines = narrationLines(slides);
+  ok(lines.length === slides.length, "one script entry per slide, so it indexes like the plan");
+  ok(lines[0] === P().title && lines[1] === P().points[0], "the title card speaks the claim, a point slide its point");
+  ok(lines[lines.length - 1] === null, "the end card is silent — nobody wants 'CCA-F · D1' read aloud");
+
+  // The single-source invariant: what the voice reads is what the captions show.
+  const vttText = toVtt(planOf()).split("\n").filter((l) => l && !l.includes("-->") && l !== "WEBVTT");
+  ok(JSON.stringify(vttText) === JSON.stringify(lines.filter(Boolean)),
+    "the narration script IS the caption track, line for line");
+
+  const silent = planTimeline(slides);
+  ok(silent.slides.every((s) => !s.voice), "a plan with no voice carries no voice cues (the silent video is unchanged)");
+
+  // Clips just under what the silent plan already allows: nothing should move.
+  const short = lines.map((l) => (l ? 0.5 : null));
+  const quiet = planTimeline(slides, MINIVIDEO_TIMING, short);
+  ok(quiet.ok && quiet.slides.every((s, i) => s.frames === silent.slides[i].frames),
+    "short lines fit the read-time slides as they are — narration only ever lengthens a slide");
+
+  const voice = lines.map((l) => (l ? 4.2 : null));
+  const plan = planTimeline(slides, MINIVIDEO_TIMING, voice);
+  ok(plan.ok, "a narrated payload plans");
+  const N = MINIVIDEO_NARRATION;
+  const voiced = plan.slides.filter((s) => s.voice);
+  ok(voiced.length === lines.filter(Boolean).length, "every spoken line has a place on the timeline, the end card none");
+  ok(voiced.every((s) => Number.isInteger(s.voice.offsetFrames) && Number.isInteger(s.voice.frames)),
+    "voice offsets and lengths are whole frames, like the picture's");
+  ok(voiced.every((s) => s.voice.frames >= Math.ceil(4.2 * plan.fps)),
+    "a clip's length is rounded UP — rounding down would clip its last syllable");
+  ok(plan.slides[0].voice.offsetFrames === Math.round(N.firstStartSeconds * plan.fps),
+    "the title's line starts just after zero — there is no fade to wait for");
+  ok(voiced.slice(1).every((s) => s.voice.offsetFrames >= s.offsetFrames + plan.fadeFrames),
+    "every other line waits for its slide's fade-in to finish — no voice under a crossfade");
+
+  // The property that matters most: no line runs into the next slide's fade.
+  const clear = plan.slides.every((s, i) => {
+    const next = plan.slides[i + 1];
+    if (!s.voice || !next) return true;
+    return s.voice.offsetFrames + s.voice.frames + Math.round(N.tailSeconds * plan.fps) <= next.offsetFrames;
+  });
+  ok(clear, "each line, plus its breath, ends before the next slide starts fading in");
+
+  // Cues and voice share one plan: each line starts inside its own cue.
+  const cues = toVtt(plan).split("\n").filter((l) => l.includes("-->"));
+  ok(cues.length === voiced.length, "one caption cue per spoken line");
+
+  // A voice longer than the read-time ceiling wins over the ceiling...
+  const slow = lines.map((l) => (l ? MINIVIDEO_TIMING.maxSlideSeconds + 0.5 : null));
+  const slowPlan = planTimeline(slides, { ...MINIVIDEO_TIMING, maxTotalSeconds: 60 }, slow);
+  ok(slowPlan.ok && slowPlan.slides.filter((s) => s.voice).every((s) => s.seconds > MINIVIDEO_TIMING.maxSlideSeconds),
+    "a slide is never cut under its own voice — the voice floor beats the read-time ceiling");
+  // ...and the runtime band still refuses it, never trims it. (Nine seconds a
+  // line: title + three points then run past 40s; 7.5s a line still fits.)
+  const tooSlow = planTimeline(slides, MINIVIDEO_TIMING, lines.map((l) => (l ? 9 : null)));
+  ok(!tooSlow.ok && tooSlow.error === "too_long_for_format",
+    "a narration too long for the format is REFUSED, by the same rule as a silent one");
+
+  ok(planTimeline(slides, MINIVIDEO_TIMING, [1, 2]).error === "bad_voice", "a voice list that does not index the slides is refused");
+  ok(planTimeline(slides, MINIVIDEO_TIMING, lines.map((l) => (l ? NaN : null))).error === "bad_voice",
+    "a clip with no measurable length is refused, not planned as zero");
 }
 
 // ═══════════════════════════════════════════════════════════ query ══

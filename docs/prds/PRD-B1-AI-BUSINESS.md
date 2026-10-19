@@ -11,8 +11,8 @@ core marketing problem — *"people don't understand Automatos AI, or AI in gene
 can run their business with it"* — describes an **operator**: a business owner, founder, team
 lead, or non-technical professional. They will never sit CCA-F. They are, however, exactly who
 Automatos is for. ABF is the academy's front door for them: plain-language, jargon-free,
-outcome-first AI education that ends — every module — with the learner *doing the thing* on the
-free Automatos platform.
+outcome-first AI education that ends — every module — with the learner *doing the thing* on
+Automatos (the free, open-source local edition today; hosted Studio beta opens November 2026).
 
 This is the track that makes the "teach what AI can do → offer the tool" thesis literal. It is
 also the general-AI-literacy layer (goal: "understand AI in general") that the cert tracks assume
@@ -65,7 +65,7 @@ agent?"), 07 ("build the habit vs buy the outcome — where's the ROI, honestly?
 Lesson depth *shallower* than cert tracks by design: 2–3 short lessons per module, one worked
 real-business example each (a café, an agency, an e-commerce shop, a consultancy — recurring cast
 so the course feels like advising real firms), optional knowledge check, and a mandatory
-**🛠 Do it now** step on the free platform. Signature artifacts the learner accumulates:
+**🛠 Do it now** step on Automatos. Signature artifacts the learner accumulates:
 
 1. **The AI opportunity map** (m1) — their own functions × repetitive-knowledge-work audit.
 2. **A prompt/delegation library** (m2) — five reusable briefs for their actual tasks.
@@ -128,7 +128,7 @@ never the copy.
 
 `npm run validate` green (unique IDs, answerable knowledge checks) · renders on all surfaces
 (minus exam/readiness, omitted by design) · every module has a working **🛠 Do it now** step
-achievable on the free platform · the capstone produces the §4 artifacts · tone rule holds (no
+achievable on Automatos · the capstone produces the §4 artifacts · tone rule holds (no
 unexplained acronym anywhere in the track — spot-check) · Gen-AI-Leader bridge links resolve ·
 manifest entry under the `automatos` vendor (`trackId: ai-business`, code **ABF**,
 `status: coming-soon` until authored).

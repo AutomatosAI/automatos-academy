@@ -251,6 +251,7 @@ ok(sentMails.length === 1, "…and the mailbox agrees");
 const unsubPath = sentMails[0].unsubUrl.replace("https://academy.example", "");
 const un1 = await request("GET", unsubPath);
 ok(un1.status === 200 && /unsubscribed/i.test(un1.body.raw), "GET unsubscribe: 200, plain confirmation, no sign-in");
+ok(un1.body.raw.includes("Powered by") && un1.body.raw.includes("© 2026 Automatos AI"), "unsubscribe page carries the Powered by line and the copyright");
 const prefAfter = (await pool.query("SELECT digest_enabled FROM user_prefs WHERE user_id = $1", [doraId])).rows[0];
 ok(prefAfter.digest_enabled === false, "…and the toggle is actually off");
 const unBad = await request("POST", "/digest/unsubscribe?u=" + doraId + "&t=00000000-0000-4000-8000-000000000000");

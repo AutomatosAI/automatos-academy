@@ -65,7 +65,7 @@ automatically — and never present an architecture-doc layer as a UI feature. G
 activity/memory.md, the five-layer doc, and PRD-166.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Explore and shape what your agents remember:
 1. **Activity → Memory.** Browse the entries and note the **source agent**, **timestamp**, and
    **relevance** on each.

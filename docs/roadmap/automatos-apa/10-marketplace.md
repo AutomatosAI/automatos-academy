@@ -11,7 +11,7 @@ agents, playbooks, LLMs, capabilities — and understand where the contributor e
 - `automatos-gitbook/marketplace/README.md` — the five tabs (Applications / Agents / Playbooks / LLMs / Capabilities), stats, search, and publishing
 - `automatos-gitbook/marketplace/agents.md` — installing a pre-built agent (prompt + model + skills)
 - `automatos-gitbook/marketplace/capabilities.md` — Plugins vs Skills, installing and assigning
-- Repo for grounding: `automatos-skills` — the 128 skills that back the Capabilities tab and the 9 signature agents
+- Repo for grounding: `automatos-skills` — the 140 skills that back the Capabilities tab and the 9 signature agents
 
 ## 🎬 Video (~8 min) — NotebookLM → Video → Customize
 ```
@@ -29,7 +29,7 @@ Cover ONLY, in order:
    freely modify without affecting the listing.
 3. Installing capabilities (marketplace/capabilities.md): Plugins are bundles (skills + commands +
    agent configs + prompt templates); Skills are individual git-based modules (a SKILL.md). Install →
-   assign to agents. Tie back to Module 02's 128-skill library and the signature agents.
+   assign to agents. Tie back to Module 02's 140-skill library and the signature agents.
 4. Publishing to the community: from an agent, Playbook, or plugin → Submit/Publish to Marketplace →
    add description, category, tags → submit for review. Published items are available to all Automatos
    users with your workspace name as publisher; installs are scoped per workspace and don't affect
@@ -52,11 +52,11 @@ with description/category/tags for review, workspace-scoped installs, your name 
 frame the contributor economy honestly as roadmap/beta — a "coming" evolution of community sharing
 into a fuller creator ecosystem — without overstating current monetisation, and without any mention
 of a paid academy (APA is free). Connect to Module 02: the Capabilities tab is backed by the same
-128-skill library and the signature agents. Ground strictly in the marketplace/* docs and the
+140-skill library and the signature agents. Ground strictly in the marketplace/* docs and the
 automatos-skills repo.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Reuse and contribute:
 1. **Marketplace → Agents.** Browse, open a card, and **Install** a pre-built agent that fits a job
    you have. Confirm it appears on your **Agent Roster** as an editable copy.

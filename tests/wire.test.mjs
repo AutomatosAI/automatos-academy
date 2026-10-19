@@ -152,6 +152,7 @@ section("feed + shell builders");
   ok(shell.includes('<link rel="canonical" href="https://academy.automatos.app/wire/a-post/">'), "canonical is the trailing-slash real path");
   ok(shell.includes("<h2>Body</h2>"), "body HTML reaches the crawler shell");
   ok(!shell.includes("&lt;h2&gt;"), "body is NOT double-escaped into visible tags (the markdown-path bug)");
+  ok(shell.includes('class="ac-powered"') && shell.includes("© 2026 Automatos AI"), "wire shell carries the brand footer");
 
   const evil = buildPostShellHtml({ post: mapPost(apiPost({ content: '<p>ok</p><script>alert(1)</script>' })), baseUrl: "https://a.test", label: "L" });
   ok(!/<script>alert/.test(evil), "the shell sanitises too — server-side rendering is not a sanitiser bypass");

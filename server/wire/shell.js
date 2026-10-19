@@ -25,6 +25,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 import { sanitizeHtml } from "../../public/js/sanitize-html.js";
+import { BRAND_FOOTER_HTML } from "../brand-footer.js";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -134,6 +135,7 @@ ${tagsMeta}
   <p style="margin-top:26px"><a class="ac-btn ac-btn-solid" href="${esc(appUrl)}">Open on the Wire →</a>
   <a class="ac-btn" href="/#/wire">All Wire posts</a></p>
   <p class="mono-label" style="margin-top:18px"><a href="/wire/rss.xml">Subscribe — RSS</a></p>
+  ${BRAND_FOOTER_HTML}
 </main></body></html>`;
 }
 

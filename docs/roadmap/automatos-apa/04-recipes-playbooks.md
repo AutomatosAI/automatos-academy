@@ -63,7 +63,7 @@ reuse (Playbook) vs flexibility and planning (Mission) vs speed and simplicity (
 user can apply. Ground strictly in agents/playbooks.md and activity/missions.md.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Build and run a real 3-step Playbook:
 1. **Agents → Playbooks → + Create Playbook.** Name it *"Daily Repo Digest."*
 2. Add three steps: **Step 1 (Scout)** — pull the latest commits from your connected GitHub repo;

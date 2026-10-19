@@ -61,7 +61,7 @@ item shows. Land honestly: agree on measuring weekly tasks and killing losers qu
 on how much weight the unmeasurable deserves. Ground in the sources; no invented statistics.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Open the cost tab and put real numbers on your Module 04 automation: what it cost this month, what
 it costs per run, and the minutes it frees each week (net of your review time — be honest). Fill
 the one-page ROI sheet: cost / hours freed / verdict (scale, keep, kill). If it clears, pick the

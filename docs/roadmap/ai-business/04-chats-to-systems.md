@@ -43,7 +43,7 @@ the artifact: one real weekly task running as a scheduled playbook, human-approv
 strictly in the sources.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Automate the task you circled in Module 01. Take its Module 02 brief and build it as an Automatos
 playbook: set the trigger (start with a weekly schedule), the steps, and where the output lands.
 Run it manually once, fix what's off, then let the schedule take it. Keep approval on the output —

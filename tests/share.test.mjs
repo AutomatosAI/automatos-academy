@@ -115,6 +115,7 @@ ok(page.includes('og:image" content="https://a.example/s/x/card.png"'), "og:imag
 ok(page.includes("Start this track →") && page.includes(SHARE_FOOTER), "landing CTA + independence footer on the page");
 ok(!/verified/i.test(page), 'share page never says "verified"');
 ok(page.includes("Signed by the Academy"), "attested page shows the signed chip");
+ok(page.includes('class="ac-powered"') && page.includes("© 2026 Automatos AI"), "share page carries the Powered by pill and the copyright");
 const streakPage = sharePageHtml({ share: { kind: "streak", n: 30, date: today, name: "" }, meta: { trackName: "", code: "", summary: "", isExam: false }, pageUrl: "u", imageUrl: "i", signed: false });
 ok(streakPage.includes("Find your track →") && !streakPage.includes("Signed by the Academy"), "streak page: CTA present, no chip unsigned");
 ok(shareCopy({ kind: "readiness", n: 68, date: today }, meta).sub.includes("not a pass prediction"), "readiness page copy disclaims prediction");

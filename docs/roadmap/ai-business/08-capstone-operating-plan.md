@@ -45,7 +45,7 @@ naming what "AI-operational" means: not expertise — a running system, a writte
 habit, and the judgment to know what stays human. Ground strictly in the sources.
 ```
 
-## 🛠 Do it now (on the free platform) — the capstone checklist
+## 🛠 Do it now (on Automatos) — the capstone checklist
 Ship it, end to end:
 1. **Running:** your Module 04 automation has run ≥3 times on schedule, with Module 05's budget
    cap and approval line set, and this month's cost visible on the cost tab.

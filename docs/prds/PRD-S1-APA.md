@@ -28,7 +28,8 @@ APA uses the **skills-track shape** (like [S4](./PRD-S4-CROSS-VENDOR.md)), not t
 - `blueprintNote`: "Free first-party platform-training track — capability curriculum derived from the
   `automatos-*` repos; no proctored exam."
 
-**Hands-on by design:** every module ends in a *do-it-in-Automatos* step on the free platform, and the
+**Hands-on by design:** every module ends in a *do-it-in-Automatos* step (the free, open-source local edition today;
+hosted Studio beta opens November 2026), and the
 capstone is the learner's first real build. The goal is a capable, confident user who becomes an
 advocate — skill and awareness, not a sales funnel.
 

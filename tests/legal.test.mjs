@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { md } from "../public/js/markdown.js";
 import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL, POLICY_UPDATED } from "../public/js/legal-copy.js";
 import { generateShells } from "../scripts/generate-shells.mjs";
+import { BRAND_FOOTER_HTML } from "../server/brand-footer.js";
 
 let pass = 0, fail = 0;
 const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail++, console.error("  ✗ " + msg)));
@@ -18,6 +19,7 @@ ok(privacy.length > 2000 && support.length > 500, "both pages render to non-triv
 ok(!privacy.includes("${") && !support.includes("${"), "no unresolved template placeholders");
 ok(privacy.includes(SUPPORT_EMAIL) && support.includes(SUPPORT_EMAIL), "contact email on both pages");
 ok(privacy.includes(POLICY_UPDATED), "policy states its last-updated date");
+ok(support.includes("We reply within two working days.") && privacy.includes("We reply within two working days."), "reply-time line is the facts-sheet wording on both pages");
 
 // the disclosures App Review / App Privacy ask for, by heading
 for (const id of ["what-we-collect", "who-helps-us-run-it", "how-long-we-keep-it", "your-choices-and-rights", "children"]) {
@@ -41,6 +43,11 @@ ok(footer.includes('href="/privacy"') && footer.includes('href="/support"'), "fo
 generateShells({ manifest: { data: { vendors: [] } }, tracks: new Map() }, {});
 const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
 ok(sitemap.includes("/privacy</loc>") && sitemap.includes("/support</loc>"), "sitemap lists /privacy and /support");
+
+// the one copyright form every standalone page carries (track shells, /cert,
+// share and Wire pages all render BRAND_FOOTER_HTML)
+ok(BRAND_FOOTER_HTML.includes('class="ac-powered"') && BRAND_FOOTER_HTML.includes("Powered by"), "brand footer carries the Powered by pill");
+ok(BRAND_FOOTER_HTML.includes("© 2026 Automatos AI") && !/Ltd|Lda|Labs/.test(BRAND_FOOTER_HTML), "brand footer uses the one copyright form");
 
 console.log(`\nlegal: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

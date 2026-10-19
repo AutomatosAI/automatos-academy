@@ -267,9 +267,9 @@ async function streamChat(text, { onChunk, onDone, onError, onAccepted }) {
 // because a person who ran out is interested, not annoyed by being told.
 // mountCtaTracking instruments the click as cta_automatos_click for free.
 const QUOTA_NOTE = {
-  text: "This tutor is an Automatos agent, grounded in the Academy's own material.",
-  href: "https://automatos.app",
-  linkText: "Build one on your own docs \u2197",
+  text: "This AI tutor is an Automatos agent, grounded in the Academy's own material.",
+  href: "https://studio.automatos.app/#waitlist",
+  linkText: "Build one on your own docs in Automatos Studio \u00b7 Hosted beta opens November 2026 \u00b7 Join the waitlist \u2197",
 };
 
 function failureCopy(f) {
@@ -338,8 +338,8 @@ function renderList(listEl) {
   if (card) listEl.appendChild(card);
   if (!session.messages.length) {
     listEl.appendChild(el("div", { class: "tut-empty" }, [
-      el("p", { class: "tut-empty-title", text: "Your Academy tutor." }),
-      el("p", { class: "muted", style: { marginTop: "6px", fontSize: "13.5px" }, text: enabled() ? "Ask about any Academy track — I can explain, quiz you, grade your reasoning, and draw the flows." : "The tutor comes online once the Academy workspace is connected." }),
+      el("p", { class: "tut-empty-title", text: "Your Academy AI tutor." }),
+      el("p", { class: "muted", style: { marginTop: "6px", fontSize: "13.5px" }, text: enabled() ? "I'm an AI tutor, an Automatos agent. Ask about any Academy track — I can explain, quiz you, grade your reasoning, and draw the flows." : "The tutor comes online once the Academy workspace is connected." }),
     ]));
     return null;
   }
@@ -496,13 +496,13 @@ export function tutorPageView() {
   const page = el("div", {}, [
     el("section", { class: "section" }, [el("div", { class: "wrap tut-page" }, [
       el("div", { class: "tut-page-head" }, [
-        el("span", { class: "mono-label", text: "Academy tutor · powered by Automatos" }),
+        el("span", { class: "mono-label", text: "Academy AI tutor · powered by Automatos AI" }),
         el("h1", { class: "serif", style: { fontSize: "clamp(28px,4vw,44px)", marginTop: "8px" }, text: "Study with the tutor" }),
         el("p", { class: "lede muted", style: { maxWidth: "60ch", marginTop: "10px" }, text: "Grounded in every live Academy track — the lessons, the official docs, and each track's exam blueprint where it has one. Ask it to explain, quiz you, grade your reasoning, or draw a flow." }),
         el("p", { class: "mono-label", style: { marginTop: "12px" } }, [
-          "Dogfood, live: this tutor is an ",
-          el("a", { href: "https://automatos.app", target: "_blank", rel: "noopener", style: { color: "var(--accent)" }, text: "Automatos" }),
-          " workspace agent — the same thing you can build there in an afternoon.",
+          "Dogfood, live: this AI tutor is an Automatos workspace agent — the kind you'll be able to build in Automatos Studio. ",
+          el("a", { href: "https://studio.automatos.app/#waitlist", target: "_blank", rel: "noopener", style: { color: "var(--accent)" }, text: "Hosted beta opens November 2026 · Join the waitlist" }),
+          ".",
         ]),
       ]),
       el("div", { class: "tut-page-grid" }, [
@@ -530,10 +530,10 @@ export function mountTutor() {
 
   const list = el("div", { class: "tut-list" });
   const chipBox = chips(list, PANEL_CHIP_LIMIT);
-  const panel = el("div", { class: "tut-panel", "data-open": "false", role: "dialog", "aria-label": "Academy tutor" }, [
+  const panel = el("div", { class: "tut-panel", "data-open": "false", role: "dialog", "aria-label": "Academy AI tutor" }, [
     el("div", { class: "tut-head" }, [
-      el("span", { class: "tut-title", text: "Tutor" }),
-      el("span", { class: "mono-label tut-dogfood", text: "an Automatos agent, live" }),
+      el("span", { class: "tut-title", text: "AI tutor" }),
+      el("span", { class: "mono-label tut-dogfood", text: "an Automatos AI agent, live" }),
       el("div", { class: "tut-head-actions" }, [
         el("button", { class: "tut-icon", type: "button", title: "Open full study mode", "aria-label": "Expand to full study page", html: "&#10530;", onclick: () => { setOpen(false); navigate("/tutor"); } }),
         el("button", { class: "tut-icon", type: "button", title: "Close", "aria-label": "Close tutor", html: "&times;", onclick: () => setOpen(false) }),
@@ -544,7 +544,7 @@ export function mountTutor() {
     chipBox,
     inputSlot(list, false),
   ]);
-  const fab = el("button", { class: "tut-fab", type: "button", "aria-label": "Open the Academy tutor", html: "&#9632;" });
+  const fab = el("button", { class: "tut-fab", type: "button", "aria-label": "Open the Academy AI tutor", html: "&#9632;" });
   const setOpen = (open) => {
     panel.setAttribute("data-open", open ? "true" : "false");
     fab.setAttribute("aria-expanded", open ? "true" : "false");

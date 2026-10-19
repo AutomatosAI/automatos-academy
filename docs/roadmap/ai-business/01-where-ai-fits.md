@@ -56,7 +56,7 @@ system version. Land honestly: both agree on starting small THIS week; they disa
 compounds. Ground in the sources; no invented statistics.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Build your opportunity map — with the AI's help. In Automatos chat, describe your business in five
 sentences, then ask it to interview you function-by-function (customers, service, operations,
 numbers) and produce a table of repetitive-knowledge-work candidates scored by frequency, pain, and
