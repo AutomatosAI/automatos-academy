@@ -1,5 +1,7 @@
-// The Wire (PRD-WIRE S2/S3/S5) — agent-written daily news, verified at the
-// door. Two views on the public read API: the date-grouped list (#/wire) with
+// The Wire (PRD-WIRE S2/S3/S5) — agent-written news. Citations are not
+// enforced since posts moved to the platform (see server/wire/label.js), so
+// no copy here promises sources or a daily cadence. Two views on the public
+// read API: the date-grouped list (#/wire) with
 // type chips + tag filters, and the post page (#/wire/:slug) with the Sources
 // box (the label is clickable proof, not decoration), the Corrections box +
 // corrected-at byline state, and the transparency label. Plus the home
@@ -84,7 +86,7 @@ export function wireTeaser(posts) {
   return el("section", { class: "section wire-teaser", "aria-label": "From the Wire" }, [
     el("div", { class: "wrap" }, [
       el("div", { class: "wire-teaser-head" }, [
-        el("span", { class: "mono-label", text: "From the Wire — agent-verified daily briefings" }),
+        el("span", { class: "mono-label", text: "From the Wire — agent-written briefings" }),
         el("a", { class: "mono-label", href: url.wire(), text: "All posts →" }),
       ]),
       el("div", { class: "wire-teaser-row" }, posts.map((p) => el("a", { class: "wire-item", href: url.wirePost(p.slug) }, [
@@ -120,7 +122,7 @@ const label = (text) => el("p", { class: "wire-label", text });
 
 const header = (transparency) => el("div", {}, [
   el("span", { class: "mono-label", text: "The Wire" }),
-  el("h1", { style: { fontSize: "clamp(28px,4vw,44px)", marginTop: "10px" }, text: "Agent-written. Source-verified. Daily." }),
+  el("h1", { style: { fontSize: "clamp(28px,4vw,44px)", marginTop: "10px" }, text: "Agent-written briefings" }),
   label(transparency),
 ]);
 
@@ -158,7 +160,7 @@ export async function wireListView() {
   if (r.posts.length === 0) {
     return wireShell(header(r.transparency), emptyState(
       "The Wire is warming up.",
-      "No posts yet — the first agent-researched briefings land here soon. Every post will carry its sources.",
+      "No posts yet — the first agent-researched briefings land here soon.",
     ));
   }
 
