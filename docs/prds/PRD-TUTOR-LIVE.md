@@ -23,6 +23,15 @@ in `views/question.js` → exported `askTutor()`). It streams from the Automatos
 Config is hydrated at boot (`public/chat-config.js` from `ACADEMY_CHAT_PUBLIC_KEY` /
 `ACADEMY_CHAT_AGENT_ID` — **both set in prod**).
 
+> **Update 2026-10-19 — proxy deploys.** Since LX-15 (PRD-WAVE-LEARNER-UX), Spine deploys route
+> chat through `POST /api/tutor/chat` (`server/tutor.js`), which calls the widget endpoint
+> server-side. The platform denies an `ak_pub_` key with no `Origin`/`Referer`
+> (automatos-ai `orchestrator/api/widgets/auth.py`, P2-13) and Node's fetch sends none, so every
+> proxied question failed as `502 upstream_error`. The proxy now sends `Origin` + `Referer` =
+> `ACADEMY_CHAT_ORIGIN` (default `https://academy.automatos.app`); that host must be in the key's
+> `allowed_domains`. Server-side calls send no preflight, so S0 below concerns only the legacy
+> direct (browser) mode.
+
 **Why it's broken (diagnosed 2026-07-16):** the platform API fails the CORS preflight. A direct POST
 with an academy `Origin` returns 200 and a streaming agent reply — the agent is alive. But
 `OPTIONS /api/widgets/chat` with `Origin` + `Access-Control-Request-*` headers returns **403 with zero

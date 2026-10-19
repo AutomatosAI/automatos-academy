@@ -356,7 +356,7 @@ if (process.env.SPINE_ENABLED === "true") {
   // and the daily quota live here. Proxy deploys stop shipping the widget key.
   const { mountTutorProxy } = await import("./server/tutor.js");
   const tutor = mountTutorProxy(app, { pool: spine.pool, auth: spine.auth });
-  console.log(`[tutor] proxy mounted (/api/tutor/chat, /api/tutor/allowance) — limit ${tutor.limit}/day`);
+  console.log(`[tutor] proxy mounted (/api/tutor/chat, /api/tutor/allowance) — limit ${tutor.limit}/day, upstream Origin ${tutor.origin}`);
 
   // ── Funnel events (PRD-WAVE-LEARNER-UX LX-5) — the first-party endpoint
   // the analytics beacon waited a year for. Identity-free by design.

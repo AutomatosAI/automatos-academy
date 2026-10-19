@@ -8,8 +8,12 @@ import { mountTutorProxy, tutorConfig } from "../server/tutor.js";
 let pass = 0, fail = 0;
 const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail++, console.error("  ✗ " + msg)));
 
-// upstream stub: SSE for good requests, 500 when the message says so
+// upstream stub: SSE for good requests, 500 when the message says so; keeps
+// the headers it saw so the test can prove Origin/Referer reach the wire
+// (the widget API denies a public key without them, and Node's fetch adds none)
+const seen = [];
 const upstream = createServer((req, res) => {
+  seen.push({ origin: req.headers.origin, referer: req.headers.referer });
   let body = "";
   req.on("data", (c) => (body += c));
   req.on("end", () => {
@@ -60,6 +64,8 @@ ok(tutorConfig({ TUTOR_DAILY_LIMIT: "25" }).limit === 25, "env override works");
 let r = await chat("hello");
 ok(r.status === 200 && r.headers.get("x-tutor-remaining") === "2", "first question streams, remaining=2");
 ok((await r.text()).includes("hi"), "SSE body passes through");
+ok(seen[0] && seen[0].origin === "https://academy.automatos.app", "upstream request carries Origin: https://academy.automatos.app on the wire");
+ok(seen[0] && seen[0].referer === "https://academy.automatos.app/", "upstream request carries the matching Referer");
 
 await chat("two"); await chat("three");
 r = await chat("four");

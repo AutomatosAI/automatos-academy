@@ -17,6 +17,13 @@
 //
 //   POST /api/tutor/chat       — auth; 429 {error:"quota"} past the limit
 //   GET  /api/tutor/allowance  — auth; { limit, used, remaining, resetsAt }
+//
+// The upstream call names the Academy's origin. The widget API denies an
+// ak_pub_ key that arrives with no Origin/Referer (automatos-ai
+// orchestrator/api/widgets/auth.py, P2-13 "fail closed"), then matches the
+// origin's host against the key's allowed_domains. A browser adds Origin by
+// itself; Node's fetch never does, so without it every proxied question came
+// back 403 → 502 upstream_error. ACADEMY_CHAT_ORIGIN overrides the default.
 
 import { Readable } from "stream";
 
@@ -24,6 +31,7 @@ const DEFAULT_LIMIT = 10;
 const DEFAULT_KEY = "ak_pub_267f4a7135d136ac8cfce0c193f3b52715d72346b3e0f5df8af55eec7508b9a3";
 const DEFAULT_AGENT = "bdfe4212-bd85-4875-8b9a-27c16c1b938c";
 const DEFAULT_API = "https://api.automatos.app";
+export const DEFAULT_ORIGIN = "https://academy.automatos.app";
 
 const utcDay = (d = new Date()) => d.toISOString().slice(0, 10);
 const nextUtcMidnight = () => {
@@ -31,12 +39,26 @@ const nextUtcMidnight = () => {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1)).toISOString();
 };
 
+// Reduce ACADEMY_CHAT_ORIGIN to a bare scheme://host[:port] origin. A value
+// that is not an absolute http(s) URL is a misconfiguration: say so in the
+// boot log and keep the tutor on the Academy's own origin rather than send a
+// header the platform would refuse.
+function chatOrigin(raw) {
+  if (!raw) return DEFAULT_ORIGIN;
+  let url;
+  try { url = new URL(raw); } catch (_) { url = null; }
+  if (url && (url.protocol === "https:" || url.protocol === "http:")) return url.origin;
+  console.warn(`[tutor] ACADEMY_CHAT_ORIGIN=${JSON.stringify(raw)} is not an absolute http(s) URL — using ${DEFAULT_ORIGIN}`);
+  return DEFAULT_ORIGIN;
+}
+
 export function tutorConfig(env = process.env) {
   return {
     limit: Math.max(1, parseInt(env.TUTOR_DAILY_LIMIT, 10) || DEFAULT_LIMIT),
     key: env.ACADEMY_CHAT_PUBLIC_KEY || DEFAULT_KEY,
     agentId: env.ACADEMY_CHAT_AGENT_ID || DEFAULT_AGENT,
     apiBase: (env.ACADEMY_CHAT_API_BASE || DEFAULT_API).replace(/\/$/, ""),
+    origin: chatOrigin(env.ACADEMY_CHAT_ORIGIN),
   };
 }
 
@@ -81,7 +103,12 @@ export function mountTutorProxy(app, { pool, auth, env = process.env, fetchImpl 
     try {
       upstream = await fetchImpl(`${cfg.apiBase}/api/widgets/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.key}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cfg.key}`,
+          Origin: cfg.origin,
+          Referer: `${cfg.origin}/`,
+        },
         body: JSON.stringify({
           message,
           conversation_id: (req.body || {}).conversation_id || undefined,
@@ -105,5 +132,5 @@ export function mountTutorProxy(app, { pool, auth, env = process.env, fetchImpl 
     Readable.fromWeb(upstream.body).pipe(res);
   });
 
-  return { limit: cfg.limit };
+  return { limit: cfg.limit, origin: cfg.origin };
 }
