@@ -11,6 +11,7 @@ import { BRAND_FOOTER_HTML, FAMILY_LABEL, FAMILY_SITES, FAMILY_ROW_HTML, FAMILY_
 import { ACADEMY_ORG_ID, AUTOMATOS_ORG_ID, AUTOMATOS_ORGANIZATION, siteJsonLd } from "../server/structured-data.js";
 import { shellHtml } from "../scripts/generate-shells.mjs";
 import { buildPostShellHtml } from "../server/wire/shell.js";
+import { ctaEvent, FOOTER, FAMILY_ROW, FOOTER_CTA } from "../public/js/analytics.js";
 
 let pass = 0, fail = 0;
 const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail++, console.error("  ✗ " + msg)));
@@ -98,9 +99,10 @@ ok(!/nofollow|target=|rel=/.test(FAMILY_ROW_HTML + FAMILY_ROW_INLINE_HTML), "fam
 ok(spaRow !== "" && squash(spaRow) === FAMILY_ROW_HTML, "the SPA footer's family row is the same markup as FAMILY_ROW_HTML");
 ok(footer.lastIndexOf("© 2026 Automatos AI") < footer.indexOf('class="ac-family"') && squash(footer).endsWith("</ul></nav></div>"), "the family row is the last line of the SPA footer");
 ok((footer.match(/class="ac-family"/g) || []).length === 1 && (footer.match(/href="https:\/\/markets\.automatos\.app"/g) || []).length === 1, "one family row in the SPA footer; Markets linked once");
-// Studio is also linked from the Next step column, the Academy's one CTA into
-// Studio (pending Gerard's call on keeping it). Outside the row, a Studio link
-// may only be that waitlist CTA, so no second family listing creeps in.
+// Studio is also linked from the Next step column: the Academy's funnel into
+// Studio, its one call to action, kept on purpose and not a family column.
+// Outside the row, a Studio link may only be that waitlist CTA, so no second
+// family listing creeps in.
 const studioOutsideRow = footer.replace(spaRow, "").match(/href="https:\/\/studio\.automatos\.app[^"]*"/g) || [];
 ok(studioOutsideRow.every((h) => h === 'href="https://studio.automatos.app/#waitlist"') && studioOutsideRow.length <= 1, "outside the family row, Studio is linked only by the Next step waitlist CTA");
 
@@ -112,13 +114,47 @@ const footerCols = (footer.match(/<nav class="ac-footer-col"/g) || []).length;
 const baseCols = ((css.match(/\.ac-footer-grid \{[^}]*grid-template-columns:\s*([^;]+);/) || [])[1] || "").replace(/minmax\([^)]*\)/g, "M").trim().split(/\s+/).filter(Boolean).length;
 const midCols = Number((css.match(/@media \(max-width: 1080px\) \{\s*\.ac-footer-grid \{ grid-template-columns: repeat\((\d+), 1fr\); \}\s*\.ac-footer-brand \{ grid-column: 1 \/ -1; \}/) || [])[1]);
 ok(footerCols >= 1 && baseCols === footerCols + 1, `the footer grid has one track per child above 1080px (${baseCols} tracks, brand + ${footerCols} columns)`);
-ok(midCols === footerCols, `at 721–1080px the brand takes its own row and the ${footerCols} link columns share the next (${midCols} tracks)`);
+ok(midCols === footerCols, `at 1001–1080px the brand takes its own row and the ${footerCols} link columns share the next (${midCols} tracks)`);
+// 721–1000px: four link columns were ~148px each at 721px, so they go two per
+// row there (~320px), and two per row must fill whole rows.
+ok(/@media \(max-width: 1000px\) \{ \.ac-footer-grid \{ grid-template-columns: 1fr 1fr; \} \}/.test(css) && footerCols % 2 === 0, `at 561–1000px the ${footerCols} link columns sit two per row under the brand`);
+ok(!/@media \(max-width: 720px\) \{ \.ac-footer-grid/.test(css), "no 720px footer rule left to undercut the 1000px one");
 
-// Footer clicks on automatos.app hosts that are not the conversion CTA: the
-// family row counts as footer_family_click, the Legal column is not counted.
-const analytics = read("public/js/analytics.js");
-ok(/const FAMILY_ROW = "\.ac-family";/.test(analytics) && analytics.includes('track("footer_family_click"') && read("server/events.js").includes('"footer_family_click"'), "family-row clicks are footer_family_click (allowlisted in server/events.js), not cta_automatos_click");
-ok(analytics.includes(`const NOT_A_CTA = ".ac-footer-col[aria-label='Legal']";`) && footer.includes('<nav class="ac-footer-col" aria-label="Legal">'), "the Legal column's automatos.app links are not counted as cta_automatos_click");
+// cta_automatos_click is the loop's conversion: in the footer only the link
+// marked data-cta (the Next step link into Studio) sends it; family-row clicks
+// are footer_family_click; the Powered by pill and the Legal links send
+// nothing; the Academy's own links never count, though their production host
+// (academy.automatos.app) matches automatos.app. Stand-in elements: `is` lists
+// the selectors the element itself matches, closest() walks up its parents.
+const fakeEl = (is, parent = null, hostname = "") => {
+  const node = { hostname, parent, matches: (sel) => is.includes(sel) };
+  node.closest = (sel) => { for (let n = node; n; n = n.parent) if (n.matches(sel)) return n; return null; };
+  return node;
+};
+const footerEl = fakeEl([FOOTER]);
+const PAGE_HOST = "academy.automatos.app";
+for (const [what, a, want, pageHost = PAGE_HOST] of [
+  ["the footer's Next step link (data-cta)", fakeEl([FOOTER_CTA], fakeEl([], footerEl), "studio.automatos.app"), "cta_automatos_click"],
+  ["a family-row link", fakeEl([], fakeEl([FAMILY_ROW], footerEl), "studio.automatos.app"), "footer_family_click"],
+  ["a Legal link (Terms on automatos.app)", fakeEl([], fakeEl([], footerEl), "automatos.app"), null],
+  ["the footer's Powered by pill", fakeEl([], fakeEl([], footerEl), "automatos.app"), null],
+  ["an in-lesson Apply it link (docs.automatos.app)", fakeEl([], fakeEl([".prose"]), "docs.automatos.app"), "cta_automatos_click"],
+  ["the tutor's Studio waitlist link", fakeEl([], fakeEl([".tut-page-head"]), "studio.automatos.app"), "cta_automatos_click"],
+  ["an Academy navigation link (same host)", fakeEl([], fakeEl([".ac-topnav"]), PAGE_HOST), null],
+  ["a navigation link on a staging host under automatos.app (same host)", fakeEl([], fakeEl([".ac-topnav"]), "academy-staging.automatos.app"), null, "academy-staging.automatos.app"],
+  ["an absolute academy.automatos.app link on a Railway host", fakeEl([], null, "academy.automatos.app"), null, "automatos-academy-production.up.railway.app"],
+  ["a link to another site", fakeEl([], null, "example.com"), null],
+  ["a look-alike host", fakeEl([], null, "automatos.app.example.com"), null],
+]) {
+  const got = ctaEvent(a, pageHost);
+  ok(got === want, `analytics: ${what} → ${want || "no event"}${got === want ? "" : " (got " + got + ")"}`);
+}
+ok(read("server/events.js").includes('"footer_family_click"'), "footer_family_click is allowlisted in server/events.js");
+const ctaLinks = footer.match(/<a [^>]*data-cta[^>]*>/g) || [];
+ok(ctaLinks.length === 1 && ctaLinks[0].includes('href="https://studio.automatos.app/#waitlist"')
+  && /<nav class="ac-footer-col" aria-label="Next step">\s*<span class="mono-label">Next step<\/span>\s*<a [^>]*data-cta=/.test(footer),
+  "the footer marks exactly one link data-cta: the Next step Studio waitlist link");
+ok(!/data-cta/.test(spaRow + FAMILY_ROW_HTML), "no family-row link carries data-cta");
 ok(BRAND_FOOTER_HTML.trim().endsWith(FAMILY_ROW_HTML), "standalone pages (BRAND_FOOTER_HTML) end with the family row");
 ok(FAMILY_ROW_INLINE_HTML.includes(`${FAMILY_LABEL}:`) && FAMILY_SITES.every(({ name, href }) => name === "Automatos Academy"
   ? FAMILY_ROW_INLINE_HTML.includes(`aria-current="page" style="font-weight:600;color:#1c2740;">${name}</span>`)
@@ -135,7 +171,12 @@ const org = AUTOMATOS_ORGANIZATION;
 ok(org["@type"] === "Organization" && org["@id"] === "https://automatos.app/#organization" && AUTOMATOS_ORG_ID === org["@id"]
   && org.name === "Automatos AI" && org.url === "https://automatos.app", "the Organization is https://automatos.app/#organization, Automatos AI, https://automatos.app");
 ok(/^https:\/\/automatos\.app\/\S+\.(?:png|svg|jpg)$/.test(org.logo), "the Organization logo is an absolute image URL on automatos.app");
-ok(org.sameAs.length > 0 && org.sameAs.every((u) => /^https:\/\//.test(u) && !/discord/i.test(u)), "sameAs lists public https profiles, never a Discord link");
+ok(isDeepStrictEqual([...org.sameAs], [
+  "https://x.com/automatosai",
+  "https://www.instagram.com/automatosai",
+  "https://www.linkedin.com/company/automatos-ai",
+  "https://github.com/AutomatosAI",
+]), "sameAs is the four profiles every family site lists, in the same order and spelling as automatos.app (automatos-ai-landingV2#6)");
 ok(!["legalName", "address", "foundingDate", "foundingLocation", "founder"].some((k) => k in org) && !/\b(?:Ltd|Lda|Labs)\b/.test(JSON.stringify(org)), "no legal name, address or founding claims, never Ltd, Lda or Labs");
 
 // Every JSON-LD block the Academy emits defines the shared Organization once

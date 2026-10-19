@@ -150,17 +150,19 @@
         <a href="/support">Help &amp; support</a>
         <a href="/privacy">Privacy policy</a>
       </nav>
-      <!-- Next step: the one call to action into Studio, because a learner's
-           natural next step is putting it to work. It points at the Studio
+      <!-- Next step: the Academy's funnel into Studio, its one call to
+           action, because a learner's natural next step is putting it to
+           work. It is not a family column: the four family sites are listed
+           once, in the family row at the bottom, so Studio is linked twice in
+           this footer (this CTA and the row). The link points at the Studio
            waitlist in the public facts wording of 19 Oct 2026 (hosted beta,
-           waitlist); the four family sites are listed once, in the family row
-           at the bottom, so Studio is linked twice in this footer (this CTA
-           and the row) until Gerard decides whether the column stays. The
-           legal links (facts 8b: Terms, Cookies, EU AI Act on automatos.app)
-           sit in their own column. -->
+           waitlist). data-cta marks it as the footer's only
+           cta_automatos_click (js/analytics.js ctaEvent). The legal links
+           (facts 8b: Terms, Cookies, EU AI Act on automatos.app) sit in their
+           own column. -->
       <nav class="ac-footer-col" aria-label="Next step">
         <span class="mono-label">Next step</span>
-        <a href="https://studio.automatos.app/#waitlist" target="_blank" rel="noopener" class="ac-ext">Put it to work in Automatos Studio · Hosted beta opens November 2026 · Join the waitlist ↗</a>
+        <a href="https://studio.automatos.app/#waitlist" target="_blank" rel="noopener" class="ac-ext" data-cta="studio">Put it to work in Automatos Studio · Hosted beta opens November 2026 · Join the waitlist ↗</a>
         <span class="ac-footer-note">From the team that built this Academy.</span>
       </nav>
       <nav class="ac-footer-col" aria-label="Legal">
