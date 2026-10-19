@@ -42,11 +42,26 @@ function spine() {
 }
 
 // "Notify me" on coming-soon cards — the highest-intent demand signal we can
-// capture (PRD-GROWTH §4.2). POSTs to /api/notify; on any failure (an
-// unconfigured server answers 503) we say the save failed, let them retry, and
-// point at the Studio waitlist in the public facts wording (no "sign up now").
+// capture (PRD-GROWTH §4.2). POSTs to /api/notify. The server answers 503 when
+// NOTIFY_WEBHOOK_URL is unset (server.js): retrying can never succeed, so we
+// say notifications aren't on and stop. A 502 or a network error is
+// transient: we say the save failed and let them retry. Either way the Studio
+// waitlist link uses the public facts wording (no "sign up now") and is
+// labelled as Studio, a different product from this Academy track.
 const STUDIO_WAITLIST_URL = "https://studio.automatos.app/#waitlist";
 const STUDIO_WAITLIST_LABEL = "Hosted beta opens November 2026 · Join the waitlist ↗";
+const NOTIFY_NOT_CONFIGURED = 503;
+const studioWaitlistLink = () => el("a", { href: STUDIO_WAITLIST_URL, target: "_blank", rel: "noopener", text: STUDIO_WAITLIST_LABEL });
+
+async function postNotify(email, trackId) {
+  try {
+    const r = await fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, trackId }) });
+    return r.status;
+  } catch (_) {
+    return 0; // network error: transient, worth a retry
+  }
+}
+
 function notifyForm(t) {
   const input = el("input", { class: "claim-input", type: "email", placeholder: "you@company.com", "aria-label": `Email me when ${t.name} launches` });
   const btn = el("button", { class: "ac-btn", type: "button" }, ["Notify me"]);
@@ -56,19 +71,25 @@ function notifyForm(t) {
     const email = input.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.focus(); return; }
     btn.disabled = true; btn.textContent = "…";
-    try {
-      const r = await fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, trackId: t.trackId }) });
-      if (!r.ok) throw new Error(String(r.status));
+    const status = await postNotify(email, t.trackId);
+    if (status >= 200 && status < 300) {
       tk("notify_me", { track: t.trackId });
       row.replaceChildren(el("span", { class: "mono-label", style: { color: "var(--accent)" }, text: "✓ You're on the list" }));
-    } catch (_) {
-      btn.disabled = false; btn.textContent = "Notify me";
-      row.querySelector(".notify-error")?.remove();
-      row.appendChild(el("span", { class: "mono-label notify-error", role: "status" }, [
-        "Couldn't save that. Please try again. Meanwhile: ",
-        el("a", { href: STUDIO_WAITLIST_URL, target: "_blank", rel: "noopener", text: STUDIO_WAITLIST_LABEL }),
-      ]));
+      return;
     }
+    if (status === NOTIFY_NOT_CONFIGURED) {
+      row.replaceChildren(el("span", { class: "mono-label notify-error", role: "status" }, [
+        "Notifications for this track aren't switched on yet. Automatos Studio: ",
+        studioWaitlistLink(),
+      ]));
+      return;
+    }
+    btn.disabled = false; btn.textContent = "Notify me";
+    row.querySelector(".notify-error")?.remove();
+    row.appendChild(el("span", { class: "mono-label notify-error", role: "status" }, [
+      "Couldn't save that. Please try again. Automatos Studio: ",
+      studioWaitlistLink(),
+    ]));
   });
   return row;
 }
