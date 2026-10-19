@@ -1,4 +1,5 @@
-// The family line every standalone Academy page carries: the SEO track shells
+// The footer every standalone Academy page carries (pill, copyright, the
+// legal links, then the family row): the SEO track shells
 // (scripts/generate-shells.mjs), /cert (server.js), the /s share pages
 // (server/share-routes.js) and the Wire post shells (server/wire/shell.js).
 // /digest/unsubscribe (server/digest/routes.js) does not load academy.css, so
@@ -46,8 +47,39 @@ export function familyRowInlineHtml(current = CURRENT_SITE) {
 export const FAMILY_ROW_HTML = familyRowHtml();
 export const FAMILY_ROW_INLINE_HTML = familyRowInlineHtml();
 
+// The legal links (public facts sheet 8b): Terms, Privacy, Cookies and EU AI
+// Act on every site, on automatos.app where a site has no page of its own.
+// The Academy has its own privacy policy (the App Store and Play listings
+// link it), so Privacy stays on /privacy; Terms, Cookies and the EU AI Act
+// page are automatos.app's. The SPA footer's Legal column (public/index.html)
+// carries the same links, labels and order as static markup;
+// tests/public-facts.test.mjs pins the two together. The ↗ that marks a new
+// tab is aria-hidden, so each link's name is its label ("EU AI Act").
+export const LEGAL_LINKS = Object.freeze([
+  Object.freeze({ label: "Privacy", href: "/privacy" }),
+  Object.freeze({ label: "Terms", href: "https://automatos.app/terms" }),
+  Object.freeze({ label: "Cookies", href: "https://automatos.app/cookies" }),
+  Object.freeze({ label: "EU AI Act", href: "https://automatos.app/eu-ai-act" }),
+]);
+
+/** One legal link: off-site ones open a new tab with the ↗ mark. */
+export function legalLinkHtml({ label, href }) {
+  return href.startsWith("https://")
+    ? `<a href="${href}" target="_blank" rel="noopener">${label}<span aria-hidden="true"> ↗</span></a>`
+    : `<a href="${href}">${label}</a>`;
+}
+
+/** The legal row for the standalone pages, styled by .ac-legal in academy.css. */
+export function legalRowHtml() {
+  const items = LEGAL_LINKS.map((link) => `<li>${legalLinkHtml(link)}</li>`).join("");
+  return `<nav class="ac-legal" aria-label="Legal"><ul class="ac-legal-links">${items}</ul></nav>`;
+}
+
+export const LEGAL_ROW_HTML = legalRowHtml();
+
 export const BRAND_FOOTER_HTML =
   '<p><a class="ac-powered" href="https://automatos.app" target="_blank" rel="noopener">' +
   '<span class="ac-brand-mark" aria-hidden="true"></span>Powered by <strong>Automatos AI</strong></a></p>\n' +
   '  <p class="mono-label" style="margin-top:12px;text-transform:none;letter-spacing:0">© 2026 Automatos AI</p>\n' +
+  `  ${LEGAL_ROW_HTML}\n` +
   `  ${FAMILY_ROW_HTML}`;

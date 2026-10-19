@@ -5,7 +5,10 @@
 import { el } from "../ui.js";
 import { setTitle } from "../router.js";
 import { md } from "../markdown.js";
-import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL } from "../legal-copy.js";
+import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL, CONTACT_URL } from "../legal-copy.js";
+
+// The company contact form, the one contact route on every Automatos site.
+const contactButton = () => el("a", { class: "ac-btn ac-btn-solid", href: CONTACT_URL, target: "_blank", rel: "noopener" }, ["Contact form ↗"]);
 
 function page(kicker, title, body, actions) {
   return el("section", { class: "section" }, [el("div", { class: "wrap" }, [
@@ -19,7 +22,8 @@ function page(kicker, title, body, actions) {
 export async function privacyView() {
   setTitle("Privacy policy");
   return page("Privacy", "Privacy policy", PRIVACY_MD, [
-    el("a", { class: "ac-btn ac-btn-solid", href: `mailto:${SUPPORT_EMAIL}` }, ["Email us"]),
+    contactButton(),
+    el("a", { class: "ac-btn", href: `mailto:${SUPPORT_EMAIL}` }, ["Email us"]),
     el("a", { class: "ac-btn", href: "/support" }, ["Help & support"]),
   ]);
 }
@@ -27,7 +31,8 @@ export async function privacyView() {
 export async function supportView() {
   setTitle("Help & support");
   return page("Support", "Help & support", SUPPORT_MD, [
-    el("a", { class: "ac-btn ac-btn-solid", href: `mailto:${SUPPORT_EMAIL}` }, [`Email ${SUPPORT_EMAIL}`]),
+    contactButton(),
+    el("a", { class: "ac-btn", href: `mailto:${SUPPORT_EMAIL}` }, [`Email ${SUPPORT_EMAIL}`]),
     el("a", { class: "ac-btn", href: "/privacy" }, ["Privacy policy"]),
   ]);
 }

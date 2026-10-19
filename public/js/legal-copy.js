@@ -11,10 +11,15 @@
 // same PR and move POLICY_UPDATED.
 
 export const SUPPORT_EMAIL = "support@automatos.app";
+// The one contact route on every Automatos site (public facts sheet 8b). The
+// role address above stays as the second option: data-rights requests need a
+// direct contact for the controller.
+export const CONTACT_URL = "https://automatos.app/contact";
+const CONTACT_FORM = `the contact form at [automatos.app/contact](${CONTACT_URL})`;
 export const POLICY_UPDATED = "19 October 2026";
 
 export const PRIVACY_MD = `
-This policy covers **Automatos Academy**: the website at academy.automatos.app and the Automatos Academy app for iPhone and Android. It explains what we collect, why, who helps us run the service, and the controls you have. Questions go to **${SUPPORT_EMAIL}**.
+This policy covers **Automatos Academy**: the website at academy.automatos.app and the Automatos Academy app for iPhone and Android. It explains what we collect, why, who helps us run the service, and the controls you have. Questions: use ${CONTACT_FORM}, or email **${SUPPORT_EMAIL}**.
 
 ## The short version
 
@@ -25,7 +30,7 @@ This policy covers **Automatos Academy**: the website at academy.automatos.app a
 
 ## Who we are
 
-Automatos Academy is run by Automatos, which is the data controller for the personal data described here. Contact: **${SUPPORT_EMAIL}**.
+Automatos Academy is run by Automatos, which is the data controller for the personal data described here. Contact: ${CONTACT_FORM}, or **${SUPPORT_EMAIL}**.
 
 ## What we collect
 
@@ -100,7 +105,7 @@ Some of these providers are in the United States. Where data leaves the UK or EE
 
 - **Account and learning data:** for as long as you have an account. Deleting your data or your account removes it from our database straight away.
 - **Anonymous usage events:** kept to understand how the site is used. They cannot be linked back to you.
-- **Tutor conversations:** kept on the Automatos platform. Email us to have yours deleted.
+- **Tutor conversations:** kept on the Automatos platform. Use the contact form or email us to have yours deleted.
 - **Administrative records:** if we take an administrative action on an account, a record of that action is kept for security and accountability.
 
 ## Your choices and rights
@@ -109,11 +114,11 @@ Some of these providers are in the United States. Where data leaves the UK or EE
 - **Delete your learning data:** this keeps your sign-in. It is in the app's Settings, under Account & data, and on your profile page.
 - **Delete your account:** this removes your sign-in and all your learning data, in the app and on the website. It is in the same places.
 - **Stop emails:** use the unsubscribe link in any email, or turn the weekly email off on your profile page.
-- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, by emailing **${SUPPORT_EMAIL}**. We reply within two working days. We complete data-rights requests within one month. You can also complain to your local data protection authority.
+- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, through ${CONTACT_FORM} or by emailing **${SUPPORT_EMAIL}**. We reply within two working days. We complete data-rights requests within one month. You can also complain to your local data protection authority.
 
 ## Children
 
-The Academy is for people aged **16 and over**. The app asks your age and does not let anyone under 16 create an account. If you believe someone under 16 has given us personal data, email us and we will delete it.
+The Academy is for people aged **16 and over**. The app asks your age and does not let anyone under 16 create an account. If you believe someone under 16 has given us personal data, use the contact form or email us and we will delete it.
 
 ## Security
 
@@ -127,7 +132,7 @@ If this policy changes, we update it here and change the date below. If the chan
 `;
 
 export const SUPPORT_MD = `
-Need help with Automatos Academy, on the website or in the app? Email **${SUPPORT_EMAIL}**. We read every message. We reply within two working days.
+Need help with Automatos Academy, on the website or in the app? Use ${CONTACT_FORM}, or email **${SUPPORT_EMAIL}**. We read every message. We reply within two working days.
 
 ## Common questions
 
@@ -141,7 +146,7 @@ Not on the website: everything works signed out, and your progress stays in your
 
 ### Something in a question or lesson is wrong
 
-In the app, use **Report an issue** in Settings or on the lesson page. On the website, email us with the track and question. Corrections are how the content gets better, so thank you.
+In the app, use **Report an issue** in Settings or on the lesson page. On the website, use the contact form or email us with the track and question. Corrections are how the content gets better, so thank you.
 
 ### How do I delete my data or my account?
 
@@ -149,7 +154,7 @@ In the app: **Settings → Account & data**. On the website: your **profile page
 
 ### I can't sign in
 
-Check that you are using the same method you signed up with (email, Apple, Google or GitHub). If you are still stuck, email us from the address on your account.
+Check that you are using the same method you signed up with (email, Apple, Google or GitHub). If you are still stuck, email us from the address on your account, or use the contact form.
 
 ### Is this official certification training?
 
