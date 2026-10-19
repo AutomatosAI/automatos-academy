@@ -1,13 +1,13 @@
 # Automatos · Module 02 — Skills: the library, the signature agents, authoring a `SKILL.md`
 
-**Type:** Free training (no exam)  ·  **Goal:** understand what a skill is, browse the 128-skill
+**Type:** Free training (no exam)  ·  **Goal:** understand what a skill is, browse the 140-skill
 library and the 9 signature agents, assign a skill to an agent, and author a minimal `SKILL.md`.
 
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/marketplace/capabilities.md` — Plugins vs Skills; what a skill is; installing/assigning
 - `automatos-gitbook/marketplace/agents.md` — pre-built agent configs (prompt + model + skills)
 - `automatos-gitbook/agents/README.md` + `automatos-gitbook/agents/creating.md` — where skills attach to an agent
-- Repo for grounding: `automatos-skills` — `README.md` (128 skills, 16 groups, the 9 signature agents) + `SKILL-GUIDE.md` (the author format)
+- Repo for grounding: `automatos-skills` — `README.md` (the open library of 140 skills, its groups, the 9 signature agents) + `SKILL-GUIDE.md` (the author format)
 
 ## 🎬 Video (~8 min) — NotebookLM → Video → Customize
 ```
@@ -19,7 +19,7 @@ Cover ONLY, in order:
    formats, and guardrails that get injected into an agent's system prompt. It teaches an agent HOW
    to do a job without a playbook micromanaging every tool call. Contrast with a Plugin (a bundle:
    skills + commands + agent configs + prompt templates) and a Tool (an external app action).
-2. The library: 128 skills organised into 16 groups (engineering, quality, design, content, social,
+2. The library: 140 skills organised into top-level groups (engineering, quality, design, content, social,
    marketing, sales, product, analytics, devops, research, support, people-ops, integrations,
    shopify, and the signature team). You install a skill from the Marketplace → Capabilities → Skills
    tab, then assign it to agents.
@@ -52,7 +52,7 @@ agent create flow (Step 5: tools and skills). Ground strictly in automatos-skill
 SKILL-GUIDE.md, and the agents docs.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Give an agent a skill, then draft your own:
 1. **Marketplace → Capabilities → Skills.** Browse and **Install** a skill that matches your Code
    Reviewer (something engineering/quality-flavoured).

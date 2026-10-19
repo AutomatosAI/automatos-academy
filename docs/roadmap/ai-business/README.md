@@ -45,7 +45,7 @@ Automatos platform. Blueprint: [PRD-B1-AI-BUSINESS.md](../../prds/PRD-B1-AI-BUSI
 3. **Video:** paste the *Video* prompt → Customize → generate → tune to **~6–8 min** (shorter
    than cert tracks — this audience won't sit twelve minutes).
 4. **Audio:** paste the *Deep Dive* prompt (every module) and the *Debate* prompt (01, 05, 07).
-5. **Do it:** complete the **🛠 Do it now** task on the free platform — that's the real learning.
+5. **Do it:** complete the **🛠 Do it now** task on Automatos — that's the real learning.
 6. Download the media → host → register in the track's `videos[]`. Tick the module off below.
 
 ## Media per module
@@ -72,5 +72,5 @@ Automatos platform. Blueprint: [PRD-B1-AI-BUSINESS.md](../../prds/PRD-B1-AI-BUSI
 ---
 
 _ABF is free training for the people Automatos actually serves. There is no paid tier and nothing
-to convert to — teach what AI can do, let them do it on the free platform, and let the shipped
+to convert to — teach what AI can do, let them do it on Automatos, and let the shipped
 automation make the argument._

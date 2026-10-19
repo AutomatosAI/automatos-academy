@@ -1,5 +1,7 @@
 # APA source survey — 2026-07-02 (grounding map for track authoring)
 
+> **Counts superseded 19 Oct 2026:** the open automatos-skills library has 140 skills; 400+ models through OpenRouter; the chat channels are Telegram, Slack, Discord and WhatsApp, plus a generic webhook; a new hosted workspace starts with Auto and a Brand Designer (a fresh local install starts with five agents). The survey below is kept as dated history.
+
 **Method:** read-only Opus survey across five repos — `automatos-gitbook` (56 md; the ONLY proof of
 LIVE), `automatos-ai/docs` (~26 topical dirs + ~155 PRDs; WHY/architecture only, never shipped-proof),
 `automatos-shopify`, `automatos-skills`, `automatos-widget-sdk` — plus a dedicated Shopify status

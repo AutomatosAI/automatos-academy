@@ -42,7 +42,7 @@ End with the artifact: a grounded assistant that answers your ten most common qu
 with citations. Ground strictly in the sources; do not invent platform features.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Build your grounded assistant. In Automatos, upload 3–5 core documents (price list, main policy,
 product/service sheet, one great past proposal or email) to the knowledge base. Then ask the ten
 questions customers and staff actually ask you, and check each answer against the source it cites.

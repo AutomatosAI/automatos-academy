@@ -57,7 +57,7 @@ clean weeks? Land honestly: they agree on budgets, logs, and never-alone-for-mon
 on where the approval line settles. Ground in the sources.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Run your first mission. Give Automatos a real, bounded goal (chase overdue invoices, prep the
 weekly social drafts, summarise this week's reviews and propose replies) — read the plan it
 proposes, edit it, approve it, and set a budget cap before it runs. Read the report and the

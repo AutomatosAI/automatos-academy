@@ -75,7 +75,7 @@ surface in a sentence. Ground strictly in tools/channels.md, chat/routing.md's c
 Widgets API group, EMBEDDING.md, and automatos-shopify's ARCHITECTURE.md + SHOPIFY-WIDGET-AGENTS.md.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Reach your agents from your phone:
 1. **Create a Telegram bot** via @BotFather and copy the bot token.
 2. **Tools & Integrations → search Telegram →** paste the token and save. Confirm it shows **"Live"**

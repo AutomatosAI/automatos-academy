@@ -55,7 +55,7 @@ limits) with failures showing in the Activity Feed. Ground strictly in the knowl
 sources.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Ground an agent and give it a tool:
 1. **Knowledge Bases → Documents → Upload.** Drop in 2–3 real files (a README, a spec, a CSV). Wait
    for processing (chunked + embedded).

@@ -43,7 +43,7 @@ assistant — and most people discover their briefs were the problem all along. 
 the sources.
 ```
 
-## 🛠 Do it now (on the free platform)
+## 🛠 Do it now (on Automatos)
 Build your delegation library. Take your five most repeated writing tasks (from your Module 01
 opportunity map), and in Automatos chat craft the five-part brief for each — role, task, raw
 material, shape, example. Run each one, iterate once, and save the versions that produced usable

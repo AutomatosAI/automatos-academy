@@ -47,13 +47,14 @@ Knowledge Bases (feed it), Tools (connect apps). End with the Quick Start as a c
 strictly in README.md, about.md, and activity/README.md — no speculation about internals.
 ```
 
-## 🛠 Try it now (on the free platform)
+## 🛠 Try it now (on Automatos)
 Sign in (a personal workspace is created automatically on first login) and take the tour:
 1. Open **Activity** (the Command Centre). Read the four status cards and click one to drill in.
 2. Click through the five tabs: **Dashboard**, **Feed**, **Reports**, **Memory**, **Missions** — just
    to see what lives where.
-3. Open **Agents** and look at the starter roster that ships with a new workspace (Code Reviewer, QA
-   Engineer, Sentinel, Scribe, Scout, Comms…). Don't create anything yet — Module 01 does that.
+3. Open **Agents** and look at the agents your workspace starts with (hosted: Auto and a Brand
+   Designer; a fresh local install: Auto, a Brand Designer, Researcher, Writer and Analyst). Don't
+   create anything yet — Module 01 does that.
 4. Open **Chat** and send one message: *"What can you help me with?"* Watch which agent the Router
    picks (shown in the response header). That's the whole platform in one gesture.
 
@@ -63,6 +64,6 @@ You now have the map. Everything from here is "how do I do X" — one module at 
 - [ ] Load `README.md`, `about.md`, `activity/README.md` into a new NotebookLM notebook
 - [ ] Generate the Video (tune to ~8 min)
 - [ ] Generate the Deep Dive audio
-- [ ] Complete the 🛠 Command Centre tour on the free platform
+- [ ] Complete the 🛠 Command Centre tour on Automatos
 - [ ] Download → host → register in the track `videos[]`
 - [ ] Tick this module off in the track README
