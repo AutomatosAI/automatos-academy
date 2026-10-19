@@ -36,7 +36,8 @@
 # DATABASE_URL the server uses — so every deploy publishes the content tree it
 # ships with, unless that exact tree was published before, in which case the
 # pointer is left alone (see DEPLOY.md → Rollback). That includes a git revert
-# to an earlier tree: the publish logs a WARNING and the pointer stays put.
+# to an earlier tree: the publish logs a WARNING inside a "THIS DEPLOY'S COURSE
+# CONTENT IS NOT LIVE" banner and the pointer stays put.
 #
 # `npm run publish-content` validates first (the same gate as
 # `npm run validate`), writes the whole version in one transaction, and is
@@ -49,8 +50,9 @@
 # would take the site down over a content problem. If no version has EVER been
 # published, the server itself refuses to boot (server/catalog-db.js), so a
 # failed first publish still fails loudly. The publish's connection carries
-# connect, lock and statement timeouts, so a held lock fails it rather than
-# hanging the boot.
+# connect, lock and statement timeouts plus a client-side query timeout, and
+# the whole run is capped at 180 s, so a held lock or a connection that goes
+# silent fails it rather than hanging the boot.
 #
 # Runs only when DATABASE_URL is set AND CONTENT_SOURCE=db. Files-mode deploys
 # serve public/content straight from disk and have nothing to publish.

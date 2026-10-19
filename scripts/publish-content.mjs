@@ -53,17 +53,35 @@ const UNIQUE_VIOLATION = "23505";
 const VERSION_PK = "content_versions_pkey";
 const isLostPublishRace = (e) => e?.code === UNIQUE_VIOLATION && e?.constraint === VERSION_PK;
 
-// Bounds for the boot-time publish. A publish that cannot connect, or waits
-// on a lock someone else holds (an operator's open psql transaction, a stuck
-// replica), must FAIL rather than hang: a failure prints the entrypoint's
-// banner and the server boots on the last published version, while a hang
-// blocks `exec node server.js` until Railway's healthcheck gives up.
+// Bounds for the boot-time publish. A publish that cannot connect, waits on a
+// lock someone else holds (an operator's open psql transaction, a stuck
+// replica), or loses its connection mid-query must FAIL rather than hang: a
+// failure prints the entrypoint's banner and the server boots on the last
+// published version, while a hang blocks `exec node server.js` until
+// Railway's healthcheck gives up.
 // LOCK_TIMEOUT_MS stays well above a normal publish transaction, so a replica
 // that loses the insert race still waits for the winner's COMMIT and gets
 // 23505 (handled above), not 55P03.
+// lock_timeout and statement_timeout are enforced by the Postgres server.
+// query_timeout is the client-side backstop for a dead socket, which the
+// server-side statement_timeout cannot see; it sits above statement_timeout so
+// a slow statement still fails with the server's own error.
+// PUBLISH_DEADLINE_MS caps the whole CLI run (validate, connect, every
+// statement), because the per-statement bounds add up across a publish's
+// statements (one INSERT per document, ~85 in all today). It sits above
+// CONNECT + QUERY, so a single dead query still reports its own error first.
 const CONNECT_TIMEOUT_MS = 15_000;
 const LOCK_TIMEOUT_MS = 60_000;
 const STATEMENT_TIMEOUT_MS = 120_000;
+const QUERY_TIMEOUT_MS = STATEMENT_TIMEOUT_MS + 15_000;
+const PUBLISH_DEADLINE_MS = 180_000;
+
+// pg's error when query_timeout fires. The socket is then presumed dead: a
+// ROLLBACK would queue behind the hung query and wait out a second
+// query_timeout, and closing the connection (finally → client.end(), which
+// destroys the socket under an active query) rolls the transaction back on
+// the server anyway.
+const isClientQueryTimeout = (e) => e?.message === "Query read timeout";
 
 /**
  * The deployed tree's version already exists in content_versions. Leave the
@@ -92,10 +110,16 @@ async function reconcileExistingVersion(client, version, { repoint, log }) {
     log(`[publish] --repoint: content_current moved from ${current} to ${version}`);
     return;
   }
+  // The entrypoint prints its normal "publish finished" line after this (the
+  // publish exits 0), so the banner is what makes it as visible in the
+  // Railway log as a failed publish.
+  log("[publish] ===================================================================");
+  log("[publish] THIS DEPLOY'S COURSE CONTENT IS NOT LIVE — content_current points at another version");
   log(`[publish] WARNING ${version} is already published but content_current is ${current} — pointer left alone ` +
     "(deliberate rollback, or a git revert to an earlier tree?). To serve this deploy's tree: " +
     'railway ssh --service automatos-academy -- "npm run publish-content -- --repoint", or ' +
     `UPDATE content_current SET content_version = '${version}', updated_at = now() WHERE id = true;`);
+  log("[publish] ===================================================================");
 }
 
 /**
@@ -104,8 +128,12 @@ async function reconcileExistingVersion(client, version, { repoint, log }) {
  * --repoint or an empty-pointer fill, which write no version). Exported so the CI
  * equivalence test (tests/content-db.test.mjs) publishes through the same
  * code path as the boot-time publish — no spawn, no duplicate SQL.
+ * `queryTimeoutMs` exists only so tests/deploy-lane.test.mjs can prove a dead
+ * connection fails fast; the boot publish always uses QUERY_TIMEOUT_MS.
  */
-export async function publishContent({ databaseUrl, dryRun = false, repoint = false, log = console.log } = {}) {
+export async function publishContent({
+  databaseUrl, dryRun = false, repoint = false, log = console.log, queryTimeoutMs = QUERY_TIMEOUT_MS,
+} = {}) {
   // 1. Hard validation gate — the same judge as `npm run validate`. The
   //    validator is a top-level script: importing it runs it, it prints its
   //    report, and it process.exit(1)s on any error, so nothing below ever
@@ -134,6 +162,7 @@ export async function publishContent({ databaseUrl, dryRun = false, repoint = fa
     connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
     lock_timeout: LOCK_TIMEOUT_MS,
     statement_timeout: STATEMENT_TIMEOUT_MS,
+    query_timeout: queryTimeoutMs,
   });
   await client.connect();
   try {
@@ -169,7 +198,7 @@ export async function publishContent({ databaseUrl, dryRun = false, repoint = fa
     log(`[publish] ${idx.contentVersion} published — ${idx.documents.length} documents (${summary}); current pointer flipped`);
     return { contentVersion: idx.contentVersion, published: true, counts };
   } catch (e) {
-    await client.query("ROLLBACK").catch(() => {});
+    if (!isClientQueryTimeout(e)) await client.query("ROLLBACK").catch(() => {});
     if (isLostPublishRace(e)) {
       log(`[publish] ${idx.contentVersion} was published by a concurrent run (another replica booting?) — nothing to do`);
       return { contentVersion: idx.contentVersion, published: false, counts };
@@ -184,6 +213,13 @@ export async function publishContent({ databaseUrl, dryRun = false, repoint = fa
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dryRun = process.argv.includes("--dry-run");
   const repoint = process.argv.includes("--repoint");
+  // unref(): the cap never keeps a finished publish alive.
+  const deadline = setTimeout(() => {
+    console.error(`[publish] gave up after ${PUBLISH_DEADLINE_MS / 1000} s — the database stopped answering ` +
+      "or the publish is stuck; an open publish transaction rolls back when this process exits");
+    process.exit(1);
+  }, PUBLISH_DEADLINE_MS);
+  deadline.unref();
   try {
     await publishContent({ databaseUrl: process.env.DATABASE_URL, dryRun, repoint });
   } catch (e) {

@@ -13,8 +13,11 @@
 //      publish still starts the server while a failed migration does not;
 //   B. the workflow holds no database credentials and never writes;
 //   C. everything the publish imports ships in the production image
-//      (--omit=dev install, nothing the Dockerfile copy excludes).
+//      (--omit=dev install, nothing the Dockerfile copy excludes);
+//   D. a database connection that goes silent mid-session fails the publish
+//      within one client-side query timeout instead of hanging the boot.
 import { builtinModules } from "node:module";
+import { createServer as createTcpServer } from "node:net";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -181,6 +184,45 @@ const covered = (file) => prGlobs.some((g) => (g.endsWith("/**") ? file.startsWi
 const uncovered = [...seen].filter((f) => !covered(f));
 ok(prGlobs.length > 0 && uncovered.length === 0,
   `content-publish.yml's pull_request paths cover the whole publish import graph${uncovered.length ? ` — missing: ${uncovered.join(", ")}` : ""}`);
+
+// ── D. a dead connection fails the publish, it does not hang the boot ────
+// lock_timeout and statement_timeout are enforced by the Postgres server, so
+// they cannot fire on a socket that stopped answering. This fake Postgres
+// completes the startup handshake (AuthenticationOk, ReadyForQuery idle) and
+// then never answers again; the publish must fail on pg's client-side
+// query_timeout, without queueing a ROLLBACK behind the hung query (which
+// would double the wait).
+console.log("dead database connection");
+const { publishContent } = await import("../scripts/publish-content.mjs");
+const HANDSHAKE = Buffer.from([0x52, 0, 0, 0, 8, 0, 0, 0, 0, 0x5a, 0, 0, 0, 5, 0x49]); // 'R' auth ok, 'Z' idle
+let firstQueryAt = null; // when the first query reached the silent server
+const silentPg = createTcpServer((sock) => {
+  let greeted = false;
+  sock.on("error", () => {});
+  sock.on("data", () => {
+    if (!greeted) { greeted = true; sock.write(HANDSHAKE); return; }
+    firstQueryAt ??= Date.now();
+  });
+});
+await new Promise((resolve) => silentPg.listen(0, "127.0.0.1", resolve));
+const QUERY_TIMEOUT_MS = 1_000;
+const TEST_GIVE_UP_MS = 15_000;
+let giveUp;
+const outcome = await Promise.race([
+  publishContent({
+    databaseUrl: `postgres://stub@127.0.0.1:${silentPg.address().port}/never-answers?sslmode=disable`,
+    queryTimeoutMs: QUERY_TIMEOUT_MS,
+    log: () => {},
+  }).then(() => ({ error: null }), (error) => ({ error, at: Date.now() })),
+  new Promise((resolve) => { giveUp = setTimeout(() => resolve({ hung: true }), TEST_GIVE_UP_MS); }),
+]);
+clearTimeout(giveUp);
+silentPg.close();
+ok(!outcome.hung && outcome.error?.message === "Query read timeout",
+  `a silent connection fails the publish with pg's query timeout (${outcome.hung ? `still hanging after ${TEST_GIVE_UP_MS / 1000} s` : outcome.error?.message ?? "no error"})`);
+const waited = outcome.at && firstQueryAt ? outcome.at - firstQueryAt : null;
+ok(waited !== null && waited < QUERY_TIMEOUT_MS * 1.8,
+  `…after one query timeout, not two: no ROLLBACK is queued behind the dead query (${waited} ms for a ${QUERY_TIMEOUT_MS} ms timeout)`);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

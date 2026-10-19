@@ -218,6 +218,13 @@ ok(redeploy.published === false && await readCurrentVersion(pool) === v3,
 ok(redeployLogs.some((l) => l.startsWith(`[publish] WARNING ${v1} is already published but content_current is ${v3}`)
   && l.includes("--repoint") && l.includes(`SET content_version = '${v1}'`)),
   "…and warns that the deployed tree is not the one being served, naming both fixes (a git revert lands here)");
+// The publish exits 0 here, so the entrypoint prints its normal "finished"
+// line after it; the banner is what keeps this as visible as a failed publish.
+const warnAt = redeployLogs.findIndex((l) => l.startsWith("[publish] WARNING "));
+const isRule = (l) => /^\[publish\] =+$/.test(l ?? "");
+ok(warnAt >= 2 && isRule(redeployLogs[warnAt - 2]) && isRule(redeployLogs[warnAt + 1])
+  && redeployLogs[warnAt - 1] === "[publish] THIS DEPLOY'S COURSE CONTENT IS NOT LIVE — content_current points at another version",
+  "…inside a THIS DEPLOY'S COURSE CONTENT IS NOT LIVE banner, so it stands out in the deploy log");
 const repointLogs = [];
 const repointed = await publishContent({ databaseUrl: process.env.DATABASE_URL, repoint: true, log: (l) => repointLogs.push(l) });
 ok(repointed.published === false && await readCurrentVersion(pool) === v1
