@@ -1,6 +1,6 @@
 # Automatos Platform (APA) — Free platform training
 
-**Learn to actually *use* Automatos, end to end — on Automatos.** APA is a self-learning,
+**Learn to actually *use* Automatos, end to end.** APA is a self-learning,
 awareness track: no proctored exam, no A+ gate, no paid tier to convert to. Progress = modules
 completed + the capstone build. Every module teaches one capability from the real product and ends
 with a **🛠 Try it now** task you do on Automatos. Blueprint: [PRD-S1-APA.md](../../prds/PRD-S1-APA.md).
