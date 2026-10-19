@@ -500,7 +500,7 @@ export function tutorPageView() {
         el("h1", { class: "serif", style: { fontSize: "clamp(28px,4vw,44px)", marginTop: "8px" }, text: "Study with the tutor" }),
         el("p", { class: "lede muted", style: { maxWidth: "60ch", marginTop: "10px" }, text: "Grounded in every live Academy track — the lessons, the official docs, and each track's exam blueprint where it has one. Ask it to explain, quiz you, grade your reasoning, or draw a flow." }),
         el("p", { class: "mono-label", style: { marginTop: "12px" } }, [
-          "Dogfood, live: this AI tutor is an Automatos workspace agent — the kind you can build in Automatos Studio. ",
+          "Dogfood, live: this AI tutor is an Automatos workspace agent — the kind you'll be able to build in Automatos Studio. ",
           el("a", { href: "https://studio.automatos.app/#waitlist", target: "_blank", rel: "noopener", style: { color: "var(--accent)" }, text: "Hosted beta opens November 2026 · Join the waitlist" }),
           ".",
         ]),
