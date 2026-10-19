@@ -25,6 +25,7 @@ ok(CONTACT_URL === "https://automatos.app/contact" && privacy.includes(contactLi
 ok(/through the contact form at <a [^>]+>automatos\.app\/contact<\/a> or by emailing/.test(privacy), "data-rights requests: the contact form, or the email address");
 const views = readFileSync(new URL("../public/js/views/legal.js", import.meta.url), "utf8");
 ok((views.match(/contactButton\(\)/g) || []).length === 2, "/privacy and /support both lead with the contact form button");
+ok(/"Contact form",\s*el\("span", \{ "aria-hidden": "true", text: " ↗" \}\)/.test(views) && !views.includes("Contact form ↗"), 'the contact button\'s new-tab ↗ is aria-hidden, so the button is named "Contact form"');
 ok(privacy.includes(POLICY_UPDATED), "policy states its last-updated date");
 ok(support.includes("We reply within two working days.") && privacy.includes("We reply within two working days."), "reply-time line is the facts-sheet wording on both pages");
 

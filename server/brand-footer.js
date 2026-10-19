@@ -3,8 +3,8 @@
 // (scripts/generate-shells.mjs), /cert (server.js), the /s share pages
 // (server/share-routes.js) and the Wire post shells (server/wire/shell.js).
 // /digest/unsubscribe (server/digest/routes.js) does not load academy.css, so
-// it carries the same line as inline-styled text (FAMILY_ROW_INLINE_HTML)
-// instead of this markup.
+// it carries the same links as inline-styled rows (LEGAL_ROW_INLINE_HTML, then
+// FAMILY_ROW_INLINE_HTML) instead of this markup.
 // Public facts sheet of 19 Oct 2026, section 2: every outlet shows the
 // "Powered by Automatos AI" pill, and every site carries the one copyright
 // form, "© 2026 Automatos AI". Same pill markup as the SPA footer in
@@ -62,20 +62,32 @@ export const LEGAL_LINKS = Object.freeze([
   Object.freeze({ label: "EU AI Act", href: "https://automatos.app/eu-ai-act" }),
 ]);
 
-/** One legal link: off-site ones open a new tab with the ↗ mark. */
-export function legalLinkHtml({ label, href }) {
+/** One legal link: off-site ones open a new tab with the ↗ mark. `style` is
+ *  for pages without academy.css; only a non-empty string adds the attribute,
+ *  so `.map(legalLinkHtml)` (index as the 2nd argument) stays unstyled. */
+export function legalLinkHtml({ label, href }, style = "") {
+  const css = typeof style === "string" && style ? ` style="${style}"` : "";
   return href.startsWith("https://")
-    ? `<a href="${href}" target="_blank" rel="noopener">${label}<span aria-hidden="true"> ↗</span></a>`
-    : `<a href="${href}">${label}</a>`;
+    ? `<a href="${href}" target="_blank" rel="noopener"${css}>${label}<span aria-hidden="true"> ↗</span></a>`
+    : `<a href="${href}"${css}>${label}</a>`;
 }
 
-/** The legal row for the standalone pages, styled by .ac-legal in academy.css. */
+/** The legal row for the standalone pages, styled by .ac-legal-links in academy.css. */
 export function legalRowHtml() {
   const items = LEGAL_LINKS.map((link) => `<li>${legalLinkHtml(link)}</li>`).join("");
   return `<nav class="ac-legal" aria-label="Legal"><ul class="ac-legal-links">${items}</ul></nav>`;
 }
 
 export const LEGAL_ROW_HTML = legalRowHtml();
+
+/** The same links for pages without academy.css: inline styles, white card,
+ *  set like the inline family row below it. */
+export function legalRowInlineHtml() {
+  const items = LEGAL_LINKS.map((link) => legalLinkHtml(link, "color:#40506e;")).join(" · ");
+  return `<nav aria-label="Legal" style="margin:8px 0 0;font-size:12px;line-height:1.6;color:#5d6b85;">${items}</nav>`;
+}
+
+export const LEGAL_ROW_INLINE_HTML = legalRowInlineHtml();
 
 export const BRAND_FOOTER_HTML =
   '<p><a class="ac-powered" href="https://automatos.app" target="_blank" rel="noopener">' +

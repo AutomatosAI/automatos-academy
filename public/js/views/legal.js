@@ -8,7 +8,12 @@ import { md } from "../markdown.js";
 import { PRIVACY_MD, SUPPORT_MD, SUPPORT_EMAIL, CONTACT_URL } from "../legal-copy.js";
 
 // The company contact form, the one contact route on every Automatos site.
-const contactButton = () => el("a", { class: "ac-btn ac-btn-solid", href: CONTACT_URL, target: "_blank", rel: "noopener" }, ["Contact form ↗"]);
+// The new-tab ↗ is aria-hidden, as in the footer, so the button is named
+// "Contact form".
+const contactButton = () => el("a", { class: "ac-btn ac-btn-solid", href: CONTACT_URL, target: "_blank", rel: "noopener" }, [
+  "Contact form",
+  el("span", { "aria-hidden": "true", text: " ↗" }),
+]);
 
 function page(kicker, title, body, actions) {
   return el("section", { class: "section" }, [el("div", { class: "wrap" }, [
