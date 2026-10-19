@@ -284,7 +284,8 @@ export async function wirePostView(ctx) {
         // The byline names a real agent (author_name on the platform post),
         // so saying what it is costs the reader nothing and is the honest
         // answer to "who wrote this". mountCtaTracking picks the link up as
-        // cta_automatos_click automatically — any automatos.app href does.
+        // cta_automatos_click automatically — any automatos.app href outside
+        // the footer does (analytics.js ctaEvent).
         el("a", { class: "wire-agent-link", href: "https://automatos.app", target: "_blank",
                   rel: "noopener", text: "an Automatos agent \u2197" }),
       ]),

@@ -554,10 +554,10 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
    Brand column + four link columns (Learn / Account / Next step / Legal)
    over a dashed legal strip that ends with the Automatos AI family row
    (.ac-family); automatos.app is linked from the Powered by pill and the
-   family row. Static HTML in index.html — no JS, tokens only. Analytics'
-   delegated hostname listener counts the pill and the Next step link as
-   cta_automatos_click; family-row clicks are footer_family_click and the
-   Legal links are not counted (js/analytics.js mountCtaTracking).
+   family row. Static HTML in index.html — no JS, tokens only. Analytics
+   counts only the Next step link (data-cta) as cta_automatos_click;
+   family-row clicks are footer_family_click; the Powered by pill and the
+   Legal links are not counted (js/analytics.js ctaEvent).
    No mood toggle down here — the topbar pill / drawer row stay the only two. */
 .ac-footer { border-top: 1px solid var(--glass-border); margin-top: 40px; background: color-mix(in srgb, var(--bg-2) 38%, transparent); }
 .ac-footer-grid {
@@ -593,15 +593,17 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-family-links a:hover { text-decoration-color: currentColor; }
 .ac-family-links [aria-current="page"] { font-weight: 700; }
 .ac-footer-legal .ac-family { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px,4vw,40px) 24px; }
-/* 721–1080px: five tracks squeeze each link column to ~87px at 721px, so the
-   brand block takes its own row and the four link columns share the next.
-   The 720px and 560px rules below still set the columns; the brand keeps
-   spanning the full row there too. */
+/* Below 1080px five tracks squeeze each link column (~87px at 721px), so the
+   brand block takes its own row. 1001–1080px: the four link columns share
+   the next row (~212px each at 1001px). 561–1000px: two link columns per row
+   (Learn | Account, then Next step | Legal; ~320px each at 721px, against
+   ~148px with four), so the long Next step link wraps to about three lines.
+   560px and below: one column. The brand spans the full row throughout. */
 @media (max-width: 1080px) {
   .ac-footer-grid { grid-template-columns: repeat(4, 1fr); }
   .ac-footer-brand { grid-column: 1 / -1; }
 }
-@media (max-width: 720px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1000px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .ac-footer-grid { grid-template-columns: 1fr; gap: 24px; } }
 
 /* ── misc ───────────────────────────────────────────────────────────── */

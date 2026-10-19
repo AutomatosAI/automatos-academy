@@ -56,26 +56,37 @@ export function trackOnce(key, event, props = {}) {
   track(event, props);
 }
 
-// Footer links that go to an automatos.app host but are not the loop's
-// conversion: the family row (counted on its own) and the Legal column
-// (Terms, Cookies, EU AI Act on automatos.app; not counted).
-const FAMILY_ROW = ".ac-family";
-const NOT_A_CTA = ".ac-footer-col[aria-label='Legal']";
+// Which event a click on a link sends, or null. Only links out to another
+// automatos.app host count: the Academy's own links are navigation, and in
+// production their hostname (academy.automatos.app) matches automatos.app
+// too, so the page's own host and the Academy host never count.
+// The footer counts only what it marks: a link with data-cta (the Next step
+// link into Studio) is the loop's conversion, the family row is
+// footer_family_click, and every other footer link (the Powered by pill, the
+// Legal column's Terms, Cookies and EU AI Act) sends nothing. Outside the
+// footer every such link is an explicit call to action: the lessons' "Apply
+// it in Automatos" and "Do it now" links, the tutor's and the home page's
+// Studio waitlist links, the Wire's agent link.
+export const AUTOMATOS_HOST = /(^|\.)automatos\.app$/;
+export const ACADEMY_HOST = "academy.automatos.app";
+export const FOOTER = ".ac-footer";
+export const FAMILY_ROW = ".ac-family";
+export const FOOTER_CTA = "[data-cta]";
 
-// Delegated listener: any other link out to the Automatos platform is the
-// loop's conversion click ("Apply it in Automatos" boxes, header link, tutor
-// label, the footer's Powered by pill and Next step link).
+export function ctaEvent(a, pageHost) {
+  const host = a.hostname || "";
+  if (!AUTOMATOS_HOST.test(host) || host === pageHost || host === ACADEMY_HOST) return null;
+  if (!a.closest(FOOTER)) return "cta_automatos_click";
+  if (a.closest(FAMILY_ROW)) return "footer_family_click";
+  return a.matches(FOOTER_CTA) ? "cta_automatos_click" : null;
+}
+
+// Delegated listener for every link on the page; ctaEvent decides.
 export function mountCtaTracking() {
   document.addEventListener("click", (e) => {
     const a = e.target && e.target.closest && e.target.closest("a[href]");
     if (!a) return;
-    if (!/(^|\.)automatos\.app/.test((a.hostname || ""))) return;
-    const from = location.pathname + (location.hash || "");
-    if (a.closest(NOT_A_CTA)) return;
-    if (a.closest(FAMILY_ROW)) {
-      track("footer_family_click", { href: a.href, from });
-      return;
-    }
-    track("cta_automatos_click", { href: a.href, from });
+    const event = ctaEvent(a, location.hostname);
+    if (event) track(event, { href: a.href, from: location.pathname + (location.hash || "") });
   }, { capture: true });
 }
