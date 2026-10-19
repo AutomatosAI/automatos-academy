@@ -85,8 +85,8 @@
        only (#/profile handles signed-out itself); the mood toggle is NOT
        duplicated here — the topbar pill / drawer Appearance row own it.
        Note: the SEO track shells (scripts/generate-shells.mjs) are standalone
-       minimal pages with their own inline disclaimer — they do not share this
-       skeleton, so no footer there. -->
+       minimal pages with their own inline disclaimer plus the shared brand
+       footer (server/brand-footer.js) — they do not share this skeleton. -->
   <footer class="ac-footer">
     <div class="ac-footer-grid">
       <div class="ac-footer-brand">
@@ -126,7 +126,7 @@
     <div class="ac-footer-legal">
       <div class="ac-footer-row">
         <span class="mono-label">Independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.</span>
-        <span class="mono-label">© 2026 Automatos AI</span>
+        <span class="mono-label" style="text-transform:none;letter-spacing:0">© 2026 Automatos AI</span>
       </div>
     </div>
   </footer>
