@@ -42,8 +42,11 @@ function spine() {
 }
 
 // "Notify me" on coming-soon cards — the highest-intent demand signal we can
-// capture (PRD-GROWTH §4.2). POSTs to /api/notify; unconfigured server → 503
-// and we fall back to pointing at the platform site.
+// capture (PRD-GROWTH §4.2). POSTs to /api/notify; on any failure (an
+// unconfigured server answers 503) we say the save failed, let them retry, and
+// point at the Studio waitlist in the public facts wording (no "sign up now").
+const STUDIO_WAITLIST_URL = "https://studio.automatos.app/#waitlist";
+const STUDIO_WAITLIST_LABEL = "Hosted beta opens November 2026 · Join the waitlist ↗";
 function notifyForm(t) {
   const input = el("input", { class: "claim-input", type: "email", placeholder: "you@company.com", "aria-label": `Email me when ${t.name} launches` });
   const btn = el("button", { class: "ac-btn", type: "button" }, ["Notify me"]);
@@ -59,7 +62,12 @@ function notifyForm(t) {
       tk("notify_me", { track: t.trackId });
       row.replaceChildren(el("span", { class: "mono-label", style: { color: "var(--accent)" }, text: "✓ You're on the list" }));
     } catch (_) {
-      row.replaceChildren(el("a", { class: "mono-label", href: "https://automatos.app", target: "_blank", rel: "noopener", text: "Sign-ups open soon — meanwhile: automatos.app ↗" }));
+      btn.disabled = false; btn.textContent = "Notify me";
+      row.querySelector(".notify-error")?.remove();
+      row.appendChild(el("span", { class: "mono-label notify-error", role: "status" }, [
+        "Couldn't save that. Please try again. Meanwhile: ",
+        el("a", { href: STUDIO_WAITLIST_URL, target: "_blank", rel: "noopener", text: STUDIO_WAITLIST_LABEL }),
+      ]));
     }
   });
   return row;

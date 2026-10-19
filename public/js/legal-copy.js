@@ -14,7 +14,7 @@ export const SUPPORT_EMAIL = "support@automatos.app";
 export const POLICY_UPDATED = "19 October 2026";
 
 export const PRIVACY_MD = `
-This policy covers **Automatos AI Academy**: the website at academy.automatos.app and the Automatos AI Academy app for iPhone and Android. It explains what we collect, why, who helps us run the service, and the controls you have. Questions go to **${SUPPORT_EMAIL}**.
+This policy covers **Automatos Academy**: the website at academy.automatos.app and the Automatos Academy app for iPhone and Android. It explains what we collect, why, who helps us run the service, and the controls you have. Questions go to **${SUPPORT_EMAIL}**.
 
 ## The short version
 
@@ -25,7 +25,7 @@ This policy covers **Automatos AI Academy**: the website at academy.automatos.ap
 
 ## Who we are
 
-Automatos AI Academy is run by Automatos, which is the data controller for the personal data described here. Contact: **${SUPPORT_EMAIL}**.
+Automatos Academy is run by Automatos, which is the data controller for the personal data described here. Contact: **${SUPPORT_EMAIL}**.
 
 ## What we collect
 
@@ -127,7 +127,7 @@ If this policy changes, we update it here and change the date below. If the chan
 `;
 
 export const SUPPORT_MD = `
-Need help with Automatos AI Academy, on the website or in the app? Email **${SUPPORT_EMAIL}**. We read every message. We reply within two working days.
+Need help with Automatos Academy, on the website or in the app? Email **${SUPPORT_EMAIL}**. We read every message. We reply within two working days.
 
 ## Common questions
 
