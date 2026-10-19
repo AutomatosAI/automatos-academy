@@ -17,6 +17,7 @@ import {
   cardsAvailable, renderCardPng,
   streakCardSvg, readinessCardSvg, certCardSvg,
 } from "./share-cards.js";
+import { BRAND_FOOTER_HTML } from "./brand-footer.js";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -105,6 +106,7 @@ export function sharePageHtml({ share, meta, pageUrl, imageUrl, signed }) {
   <p style="margin-top:22px"><a class="ac-btn ac-btn-solid" href="${esc(c.ctaHref)}">${esc(c.ctaLabel)}</a>
   <a class="ac-btn" href="/">Browse all tracks</a></p>
   <p class="mono-label" style="margin-top:18px;max-width:70ch">${esc(SHARE_FOOTER)}</p>
+  ${BRAND_FOOTER_HTML}
 </main></body></html>`;
 }
 
