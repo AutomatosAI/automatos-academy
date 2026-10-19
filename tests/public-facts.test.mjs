@@ -38,6 +38,7 @@ const RETIRED = [
   [/confirmed live on production|live production store today|Live today: partner app/, "the Shopify app is next, not in the App Store; the 12 Shopify agent templates ship (section 6)"],
   [/six-step create flow|From Template → Code Reviewer|Settings → Voice Profiles/, "the create dialog ships five steps (create-agent-modal.tsx); voice is the chat's Live button, Business plan on hosted Studio (section 4)"],
   [/verify-in-product|roadmap edge/, "branded documents and templates ship: generate_document renders PDF, DOCX and XLSX from the Brand Kit (facts 8b)"],
+  [/\/Users\//, "no local machine paths in served content (track verification.sourceOfTruth)"],
   [/Activity → (?:Dashboard|Feed|Reports|Memory|Missions)|Agents → Playbooks|Analytics → Workflows/, "retired UI paths: the Command Centre's Calendar and Activity tab, Knowledge Base → Memory, Agent Details → Reports, Assignments → Playbooks/Missions, Analytics → Missions"],
 ];
 for (const [rx, rule] of RETIRED) {
