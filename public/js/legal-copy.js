@@ -109,7 +109,7 @@ Some of these providers are in the United States. Where data leaves the UK or EE
 - **Delete your learning data:** this keeps your sign-in. It is in the app's Settings, under Account & data, and on your profile page.
 - **Delete your account:** this removes your sign-in and all your learning data, in the app and on the website. It is in the same places.
 - **Stop emails:** use the unsubscribe link in any email, or turn the weekly email off on your profile page.
-- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, by emailing **${SUPPORT_EMAIL}**. We reply within one month. You can also complain to your local data protection authority.
+- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, by emailing **${SUPPORT_EMAIL}**. We reply within two working days and complete data-rights requests within one month. You can also complain to your local data protection authority.
 
 ## Children
 
