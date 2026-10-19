@@ -12,7 +12,7 @@ doc graph for Anthropic-stack depth.
 - **Knowledge base:** the **tutor corpus** (`npm run tutor-corpus` → one markdown doc per domain/module of every live track: lessons, Q&A with why-explanations, scenarios, labs) + the everything-Claude corpus and graph (Anthropic docs, SDKs, MCP) + the official exam-guide PDFs. Retrieval **on**.
 - **Model:** `claude-opus-4-8` (default) — strong tutoring + reasoning. `claude-fable-5` if you want the most capable.
 - **Tools:** knowledge-base retrieval (required). Web search optional, as a fallback for things newer than the last crawl.
-- **Public key:** an `ak_pub_*` key for this workspace with `allowed_domains` = `academy.automatos.app`, the Railway URL, and `localhost:4321` (dev). Set it as the Railway env var `ACADEMY_CHAT_PUBLIC_KEY`; set the agent's id as `ACADEMY_CHAT_AGENT_ID` (optional — omit to use the workspace default agent).
+- **Public key:** an `ak_pub_*` key for this workspace with `allowed_domains` = `academy.automatos.app`, the Railway URL, and `localhost:4321` (dev). Set it as the Railway env var `ACADEMY_CHAT_PUBLIC_KEY`; set the agent's id as `ACADEMY_CHAT_AGENT_ID` (optional — omit to use the workspace default agent). Spine deploys call the platform server-side through the tutor proxy (`server/tutor.js`), which sends `Origin`/`Referer` = `ACADEMY_CHAT_ORIGIN` (default `https://academy.automatos.app`) because Node adds no Origin and the platform refuses a public key without one; that host must stay in the key's `allowed_domains`.
 
 > **Keep it current:** the prompt below names the live track set. When
 > `public/content/manifest.json` changes (a track goes live or retires),

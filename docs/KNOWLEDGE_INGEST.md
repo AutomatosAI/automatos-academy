@@ -110,6 +110,7 @@ for graph-aware retrieval (concepts → related concepts → source chunks).
    ```
    ACADEMY_CHAT_PUBLIC_KEY = ak_pub_…
    ACADEMY_CHAT_AGENT_ID   = <tutor agent uuid>   # optional
+   ACADEMY_CHAT_ORIGIN     = https://academy.automatos.app   # optional; the proxy's upstream Origin
    ```
 
 The Academy widget reads those at container start (`chat-config.js`), and the
