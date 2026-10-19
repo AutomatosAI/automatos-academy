@@ -38,6 +38,26 @@ const index = readFileSync(new URL("../public/index.html", import.meta.url), "ut
 const footer = index.slice(index.indexOf("<footer"), index.indexOf("</footer>"));
 ok(footer.includes('href="/privacy"') && footer.includes('href="/support"'), "footer links both pages");
 
+// public facts sheet of 19 Oct 2026: the SPA footer carries the outlet pill
+// and the one copyright form, labels the legal link "EU AI Act", and points
+// Terms and Cookies at automatos.app (the Academy has no pages of its own).
+ok(footer.includes('class="ac-powered"') && footer.includes("Powered by <strong>Automatos AI</strong>"), "footer carries the Powered by pill");
+ok(footer.includes("© 2026 Automatos AI") && !/Ltd|Lda|Labs/.test(footer), "footer uses the one copyright form");
+ok(/<a href="https:\/\/automatos\.app\/eu-ai-act"[^>]*>EU AI Act ↗<\/a>/.test(footer) && !/EU AI Act posture/i.test(footer), 'footer labels the EU AI Act link "EU AI Act"');
+ok(footer.includes('href="https://automatos.app/terms"') && footer.includes('href="https://automatos.app/cookies"'), "footer links Terms and Cookies on automatos.app");
+ok(!footer.includes("Built on Automatos agents"), "footer drops the old 'Built on Automatos agents' line (the pill replaces it)");
+ok(!/Automatos AI Academy/.test(PRIVACY_MD + SUPPORT_MD) && PRIVACY_MD.includes("**Automatos Academy**"), 'legal copy names the product "Automatos Academy"');
+
+// EU AI Act Article 50(1) (applies since 2 Aug 2026, taught in the AIGP
+// track): every widget-embed example the course teaches opens by saying the
+// bot is an AI.
+const strings = (o) => (typeof o === "string" ? [o] : o && typeof o === "object" ? Object.values(o).flatMap(strings) : []);
+for (const file of ["m08-channels-surfaces.json", "m10-marketplace.json"]) {
+  const doc = JSON.parse(readFileSync(new URL(`../public/content/automatos/platform-architect/${file}`, import.meta.url), "utf8"));
+  const greetings = strings(doc).flatMap((s) => [...s.matchAll(/greeting:\s*(["'])(.*?)\1/g)].map((m) => m[2]));
+  ok(greetings.length > 0 && greetings.every((g) => /\bAI\b/.test(g)), `${file}: every widget greeting example says the bot is an AI`);
+}
+
 // generateShells writes the (gitignored) public/sitemap.xml — an empty
 // index is enough to see the static pages listed.
 generateShells({ manifest: { data: { vendors: [] } }, tracks: new Map() }, {});
