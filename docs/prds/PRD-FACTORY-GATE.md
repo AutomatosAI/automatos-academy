@@ -129,6 +129,11 @@ render workflow, so media renders start without the workspace holding a GitHub t
 - [ ] Hard allowlist of dispatchable workflows (the seven that exist:
       `deploy-media`, `render-infographic`, `render-minivideo`, `voice-catalog`,
       `voice-sample`, `content-publish`, `sync-tutor-corpus`); anything else → 400.
+
+  *2026-10-19: `content-publish.yml` (now named `content-validate`) only validates and
+  dry-runs; dispatching it never publishes. Content goes live on deploy
+  (`docker-entrypoint.sh`) or through the `railway ssh` manual lane, see
+  [DEPLOY.md → Course content publishing](../DEPLOY.md#course-content-publishing).*
 - [ ] Server-held `GITHUB_DISPATCH_TOKEN` (fine-grained, actions:write only) calls the
       GitHub `workflow_dispatch` API; token unset → `503 not_configured` (fail closed,
       the repo's standard posture) — never a silent success.

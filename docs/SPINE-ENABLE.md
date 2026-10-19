@@ -26,17 +26,15 @@ Railway project → the academy service → **Add → Database → PostgreSQL** 
 `gen_random_uuid()` is used by the schema). Attaching injects `DATABASE_URL` into the
 service's environment automatically; no manual value needed.
 
-## 2. Migrations as a pre-deploy command (D-U3, option a)
+## 2. Migrations run on boot
 
-Railway service → **Settings → Deploy → Pre-deploy command**:
-
-```bash
-npm run migrate
-```
-
-This runs `node-pg-migrate -m migrations up` against `DATABASE_URL` before each new deploy
-goes live: the 7-table Spine schema on the first run, no-ops after, and any future migration
-automatically. Boot itself never migrates — the fail-loud boot contract stays intact.
+Nothing to configure, and no Railway pre-deploy command is needed. The image boots through
+`docker-entrypoint.sh`, which runs `npm run migrate` (`node-pg-migrate -m migrations up`)
+against `DATABASE_URL` before the server starts: the 7-table Spine schema on the first run,
+no-ops after, and any future migration automatically. A failed migration stops the boot on
+purpose (Gerard's call, 2026-07-24; the reasons are in the entrypoint's comments). With
+`CONTENT_SOURCE=db` the entrypoint then publishes the course content — see
+[DEPLOY.md → Course content publishing](DEPLOY.md#course-content-publishing).
 
 ## 3. Set the environment (service → Variables)
 

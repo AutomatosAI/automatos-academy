@@ -3,8 +3,10 @@
 # disposable Postgres service container. The same job runs the PRD-U3 content
 # equivalence gate (tests/content-db.test.mjs): publish the real tree into the
 # service Postgres, then prove db-index ≡ file-index byte-for-byte — the
-# mandatory dual-run tripwire (D-U9). deploy-media.yml stays manual-only;
-# content-publish.yml ingests main's content into the live DB (D-U6).
+# mandatory dual-run tripwire (D-U9). deploy-media.yml stays manual-only.
+# Course content reaches the live DB through docker-entrypoint.sh, which runs
+# `npm run publish-content` on every Railway boot (CONTENT_SOURCE=db);
+# content-publish.yml is now only the validate + dry-run gate in front of it.
 #
 # NOTE `npm install` (not `npm ci`) in both jobs, TEMPORARILY: PRD-MT-02 adds
 # pg/@clerk/backend/node-pg-migrate and this change shipped from a no-local-

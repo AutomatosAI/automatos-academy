@@ -197,7 +197,7 @@ Analytics (extend the single vocabulary in `public/js/analytics.js`): `wire_view
 Question refreshes are **course content**, so they take the canonical road: the cert-watch mission
 (OPS-FRESHNESS §6, extended per D-W6) opens a GitHub PR against the content tree; `npm run
 validate` + CI + human review gate it; the existing publish path
-(`scripts/publish-content.mjs` on main merge, PRD-U3) ships it. The Wire's role is the
+(`scripts/publish-content.mjs` on every deploy, PRD-U3) ships it. The Wire's role is the
 **announcement**: a `question-refresh` post citing the merged PR ("47 GH-500 questions re-verified
 against the July study-guide refresh — what changed"), giving learners the "on your toes" signal
 without ever creating a second write path into course content.

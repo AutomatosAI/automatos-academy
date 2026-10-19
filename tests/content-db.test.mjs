@@ -205,6 +205,74 @@ await pool.query("UPDATE content_current SET content_version = $1, updated_at = 
 const rolledBack = await buildContentIndexFromDb(pool);
 ok(rolledBack.contentVersion === v1 && rolledBack.journal[rolledBack.journal.length - 1].version === v1,
   "rollback = one pointer UPDATE; old version loads clean with itself at the journal tail");
+// The boot-time publish runs on EVERY deploy, so a deliberate repoint must
+// survive a redeploy of an already-published tree: point at another version,
+// publish the same tree again, and the pointer must not move back.
+await pool.query("UPDATE content_current SET content_version = $1, updated_at = now() WHERE id = true", [v3]);
+const redeployLogs = [];
+const redeploy = await publishContent({ databaseUrl: process.env.DATABASE_URL, log: (l) => redeployLogs.push(l) });
+ok(redeploy.published === false && await readCurrentVersion(pool) === v3,
+  "a redeploy of an already-published tree leaves a deliberately repointed content_current alone");
+// The same path is what a git revert hits: the reverted tree hashes to an
+// existing version, so the deploy must say loudly that it is not serving it.
+ok(redeployLogs.some((l) => l.startsWith(`[publish] WARNING ${v1} is already published but content_current is ${v3}`)
+  && l.includes("--repoint") && l.includes(`SET content_version = '${v1}'`)),
+  "…and warns that the deployed tree is not the one being served, naming both fixes (a git revert lands here)");
+// The publish exits 0 here, so the entrypoint prints its normal "finished"
+// line after it; the banner is what keeps this as visible as a failed publish.
+const warnAt = redeployLogs.findIndex((l) => l.startsWith("[publish] WARNING "));
+const isRule = (l) => /^\[publish\] =+$/.test(l ?? "");
+ok(warnAt >= 2 && isRule(redeployLogs[warnAt - 2]) && isRule(redeployLogs[warnAt + 1])
+  && redeployLogs[warnAt - 1] === "[publish] THIS DEPLOY'S COURSE CONTENT IS NOT LIVE — content_current points at another version",
+  "…inside a THIS DEPLOY'S COURSE CONTENT IS NOT LIVE banner, so it stands out in the deploy log");
+const repointLogs = [];
+const repointed = await publishContent({ databaseUrl: process.env.DATABASE_URL, repoint: true, log: (l) => repointLogs.push(l) });
+ok(repointed.published === false && await readCurrentVersion(pool) === v1
+  && repointLogs.some((l) => l === `[publish] --repoint: content_current moved from ${v3} to ${v1}`),
+  "--repoint moves content_current to the deployed tree's existing version, writing no new version");
+// A half-cleaned database: the version row exists but the pointer is gone.
+// Skipping would leave the server refusing to boot on every restart.
+await pool.query("DELETE FROM content_current");
+const healLogs = [];
+const healed = await publishContent({ databaseUrl: process.env.DATABASE_URL, log: (l) => healLogs.push(l) });
+ok(healed.published === false && await readCurrentVersion(pool) === v1
+  && healLogs.some((l) => l === `[publish] content_current was empty — pointed it at ${v1}`),
+  "an empty content_current is filled in with the already-published tree, not skipped");
+
+// ── concurrent publishers: two replicas booting the same tree at once ───
+// docker-entrypoint.sh publishes on every boot, so replicas can race. Hold the
+// version row in an open transaction, start a publish (its idempotency SELECT
+// cannot see the uncommitted row, so it proceeds and parks on the primary
+// key), then commit: the publish must lose cleanly — no throw, nothing
+// written, a log line saying so — so the entrypoint never prints a failure
+// banner for a race.
+console.log("concurrent publish race");
+await pool.query("TRUNCATE content_current, content_documents, content_versions");
+const holder = await pool.connect();
+await holder.query("BEGIN");
+await holder.query("INSERT INTO content_versions (content_version, scopes) VALUES ($1, $2)",
+  [v1, JSON.stringify(fileIdx.scopes)]);
+const raceLogs = [];
+const racing = publishContent({ databaseUrl: process.env.DATABASE_URL, log: (l) => raceLogs.push(l) })
+  .then((result) => ({ result }), (error) => ({ error }));
+const RACE_POLL_MS = 50, RACE_POLL_MAX = 200; // up to 10 s for the publish to reach its insert
+let parked = false;
+for (let i = 0; i < RACE_POLL_MAX && !parked; i++) {
+  const { rows } = await pool.query(
+    "SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock'");
+  parked = rows[0].n > 0;
+  if (!parked) await new Promise((r) => setTimeout(r, RACE_POLL_MS));
+}
+ok(parked, "the racing publish reached its insert and is waiting on the version's primary key");
+await holder.query("COMMIT");
+holder.release();
+const raced = await racing;
+ok(!raced.error && raced.result.published === false && raced.result.contentVersion === v1,
+  `the loser returns published:false instead of throwing${raced.error ? ` (threw: ${raced.error.message})` : ""}`);
+ok(raceLogs.some((l) => /concurrent run/.test(l)), "…and logs that a concurrent run published it");
+const { rows: raceDocs } = await pool.query("SELECT count(*)::int AS n FROM content_documents");
+ok(raceDocs[0].n === 0, "…and wrote nothing (its transaction rolled back whole)");
+await pool.query("TRUNCATE content_current, content_documents, content_versions"); // leave no half-made version behind
 
 fileSrv.server.close();
 dbSrv.server.close();
