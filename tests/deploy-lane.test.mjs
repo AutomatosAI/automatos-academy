@@ -10,7 +10,8 @@
 // building the image:
 //   A. the entrypoint's control flow, run under sh with stub `npm`/`node`
 //      binaries — which commands run, in what order, and that a failed
-//      publish still starts the server while a failed migration does not;
+//      publish still starts the server while a failed migration does not,
+//      and a SIGTERM during either step stops it instead of waiting for it;
 //   B. the workflow holds no database credentials and never writes;
 //   C. everything the publish imports ships in the production image
 //      (--omit=dev install, nothing the Dockerfile copy excludes);
@@ -18,7 +19,7 @@
 //      within one client-side query timeout instead of hanging the boot.
 import { builtinModules } from "node:module";
 import { createServer as createTcpServer } from "node:net";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, normalize } from "node:path";
@@ -38,8 +39,19 @@ mkdirSync(bin);
 const callLog = join(scratch, "calls.log");
 // Stubs record every call. `npm run <script>` exits with the code the test
 // asks for; `node` records its own PID so the test can prove it was exec'd.
+// FAKE_HANG=<script> makes that step hang until it gets SIGTERM, which it
+// records (the stop-during-boot case). Its trap is set before the call is
+// logged, so once the test sees the call the step is ready for the signal.
 writeFileSync(join(bin, "npm"), [
   "#!/bin/sh",
+  'if [ -n "$FAKE_HANG" ] && [ "$2" = "$FAKE_HANG" ]; then',
+  '  trap \'kill "$sleeper" 2>/dev/null; echo "npm $2 got SIGTERM" >> "$FAKE_CALL_LOG"; exit 143\' TERM',
+  '  echo "npm $*" >> "$FAKE_CALL_LOG"',
+  "  sleep 30 >/dev/null 2>&1 &",
+  "  sleeper=$!",
+  '  wait "$sleeper"',
+  "  exit 0",
+  "fi",
   'echo "npm $*" >> "$FAKE_CALL_LOG"',
   'case "$2" in',
   '  migrate) exit "${FAKE_MIGRATE_EXIT:-0}" ;;',
@@ -106,6 +118,54 @@ const migrateFails = boot({ DATABASE_URL: DB, CONTENT_SOURCE: "db", FAKE_MIGRATE
 ok(migrateFails.status === 1 && same(migrateFails.calls, ["npm run migrate"]),
   `a failed migration still blocks the boot — no publish, no server, exit 1 (${migrateFails.calls.join(" | ")})`);
 ok(migrateFails.out.includes("MIGRATION FAILED"), "…with the MIGRATION FAILED banner");
+
+// A stop (SIGTERM) that lands while a boot step runs must interrupt it, not
+// wait for it. In production the shell is PID 1 and would ignore an untrapped
+// SIGTERM; here it is not PID 1, so an untrapped SIGTERM would kill the shell
+// by signal and orphan the step. Either way the step would never hear about
+// it. The trap's contract is checked instead: exit code 143 (not death by
+// signal), the step receives SIGTERM, and the server never starts.
+const STOP_WAIT_MS = 10_000;
+async function stopDuring(step) {
+  rmSync(callLog, { force: true });
+  const child = spawn("sh", [ENTRYPOINT], {
+    cwd: scratch,
+    env: { PATH: `${bin}:${process.env.PATH}`, FAKE_CALL_LOG: callLog, DATABASE_URL: DB, CONTENT_SOURCE: "db", FAKE_HANG: step },
+  });
+  let out = "";
+  child.stdout.on("data", (b) => { out += b; });
+  child.stderr.on("data", (b) => { out += b; });
+  const exited = new Promise((resolve) => child.on("exit", (code, signal) => resolve({ code, signal })));
+  const calls = () => (existsSync(callLog) ? readFileSync(callLog, "utf8").trim().split("\n").filter(Boolean) : []);
+  const started = Date.now();
+  while (!calls().includes(`npm run ${step}`) && Date.now() - started < STOP_WAIT_MS) {
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  const reached = calls().includes(`npm run ${step}`);
+  const sentAt = Date.now();
+  child.kill("SIGTERM");
+  let timer;
+  const result = await Promise.race([
+    exited,
+    new Promise((resolve) => { timer = setTimeout(() => resolve({ hung: true }), STOP_WAIT_MS); }),
+  ]);
+  clearTimeout(timer);
+  if (result.hung) child.kill("SIGKILL");
+  return { ...result, reached, tookMs: Date.now() - sentAt, out, calls: calls().map((l) => l.replace(/ pid=\d+$/, "")) };
+}
+
+const stopPublish = await stopDuring("publish-content");
+ok(stopPublish.reached && !stopPublish.hung && stopPublish.code === 143,
+  `SIGTERM during the publish → the entrypoint exits 143 within ${STOP_WAIT_MS / 1000} s ` +
+  `(${stopPublish.hung ? "still running" : `code ${stopPublish.code}, signal ${stopPublish.signal}, ${stopPublish.tookMs} ms`})`);
+ok(same(stopPublish.calls, ["npm run migrate", "npm run publish-content", "npm publish-content got SIGTERM"]),
+  `…the publish step receives the SIGTERM and the server never starts (${stopPublish.calls.join(" | ")})`);
+ok(stopPublish.out.includes("[entrypoint] SIGTERM during boot"), "…and the log says the boot was stopped");
+
+const stopMigrate = await stopDuring("migrate");
+ok(stopMigrate.reached && !stopMigrate.hung && stopMigrate.code === 143 &&
+  same(stopMigrate.calls, ["npm run migrate", "npm migrate got SIGTERM"]),
+  `SIGTERM during migrations → the same: step stopped, no publish, no server, exit 143 (${stopMigrate.calls.join(" | ")})`);
 
 rmSync(scratch, { recursive: true, force: true });
 

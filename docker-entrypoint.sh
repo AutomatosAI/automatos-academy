@@ -56,14 +56,52 @@
 #
 # Runs only when DATABASE_URL is set AND CONTENT_SOURCE=db. Files-mode deploys
 # serve public/content straight from disk and have nothing to publish.
+#
+# ── Stops during boot (2026-10-19) ───────────────────────────────────────
+#
+# Until `exec node server.js`, this shell is PID 1, and PID 1 ignores any
+# signal it has no handler for. Without the trap below, a Railway stop or
+# redeploy that lands during migrate or publish would be held until the step
+# finished, or until the grace period ran out and SIGKILL ended it. The trap
+# forwards SIGTERM to the running step (npm forwards it on to the node
+# process), waits for it, and exits 143 (130 for SIGINT) without starting the
+# server. An open migration or publish transaction rolls back when its
+# connection closes, so the next boot starts clean.
+#
+# run_step runs each step in the background and `wait`s for it, because sh
+# runs a trap only after a FOREGROUND command finishes, while `wait` returns
+# as soon as a trapped signal arrives. The step's output still goes to the
+# deploy log; its stdin is /dev/null, and neither step reads stdin. exec
+# replaces this shell, so the server keeps its own signal handling.
 
 set -e
+
+step_pid=""
+on_signal() {
+  echo "[entrypoint] $1 during boot — stopping the running step; the server will not start"
+  if [ -n "$step_pid" ]; then
+    kill -TERM "$step_pid" 2>/dev/null || true
+    wait "$step_pid" 2>/dev/null || true
+  fi
+  exit "$2"
+}
+trap 'on_signal SIGTERM 143' TERM
+trap 'on_signal SIGINT 130' INT
+
+run_step() {
+  "$@" &
+  step_pid=$!
+  step_status=0
+  wait "$step_pid" || step_status=$?
+  step_pid=""
+  return "$step_status"
+}
 
 if [ -z "$DATABASE_URL" ]; then
   echo "[entrypoint] no DATABASE_URL — skipping migrations (file-mode / spine-less deploy)"
 else
   echo "[entrypoint] applying migrations…"
-  if ! npm run migrate; then
+  if ! run_step npm run migrate; then
     echo "[entrypoint] ==================================================================="
     echo "[entrypoint] MIGRATION FAILED — refusing to boot against a mismatched schema."
     echo "[entrypoint] The server is NOT starting. Fix or revert the migration and"
@@ -75,7 +113,7 @@ else
 
   if [ "$CONTENT_SOURCE" = "db" ]; then
     echo "[entrypoint] publishing course content (CONTENT_SOURCE=db)…"
-    if npm run publish-content; then
+    if run_step npm run publish-content; then
       echo "[entrypoint] content publish finished — the [publish] line above says what it did"
     else
       echo "[entrypoint] ==================================================================="

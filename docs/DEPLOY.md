@@ -42,6 +42,8 @@ Production serves course content from Postgres (`CONTENT_SOURCE=db`). Git (`publ
    The pointer flips before the new server starts. If the deploy then fails, the previous deployment keeps running and picks up the new content on its next poll. To undo, repoint `content_current` to the previous version (see [Rollback and reverts](#rollback-and-reverts)).
 3. `exec node server.js`.
 
+A stop or redeploy (SIGTERM) that arrives during step 1 or 2 is forwarded to the running step. The entrypoint logs `[entrypoint] SIGTERM during boot`, exits 143 and does not start the server. An open migration or publish transaction rolls back when its connection closes, and the next boot runs both steps again.
+
 The publish has to run inside Railway: production Postgres is reachable only on Railway's private network (`DATABASE_URL`), not from GitHub Actions. `.github/workflows/content-publish.yml` therefore only validates content PRs (`npm run validate` and `npm run publish-content -- --dry-run`) and holds no database secret.
 
 **Manual lane** (re-run the publish in the running container, e.g. after a transient database error at boot; a content fix needs a new deploy, which publishes on boot):
