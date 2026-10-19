@@ -576,6 +576,20 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: 
 .ac-powered .ac-brand-mark { width: 14px; height: 14px; }
 .ac-footer-legal { border-top: 1px dashed var(--rule); }
 .ac-footer-row { max-width: var(--maxw); margin: 0 auto; padding: 18px clamp(16px,4vw,40px) 24px; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
+/* The Automatos AI family row (19 Oct 2026): the last line of every footer,
+   in the SPA (index.html) and on the standalone pages (BRAND_FOOTER_HTML in
+   server/brand-footer.js). Label and links in --fg, not --muted/--fg-2
+   (those fall under 4.5:1 on the Mist footer at this size); links are
+   underlined so they read as links without relying on colour. This site is
+   plain text marked aria-current="page". Wraps on phones. */
+.ac-family { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-top: 14px; }
+.ac-family-label { font: 500 var(--t-meta)/1.4 var(--label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg); }
+.ac-family-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.ac-family-links a, .ac-family-links [aria-current="page"] { font: 500 13px/1.4 var(--sans); color: var(--fg); }
+.ac-family-links a { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; transition: text-decoration-color .15s; }
+.ac-family-links a:hover { text-decoration-color: currentColor; }
+.ac-family-links [aria-current="page"] { font-weight: 700; }
+.ac-footer-legal .ac-family { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px,4vw,40px) 24px; }
 @media (max-width: 720px) { .ac-footer-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .ac-footer-grid { grid-template-columns: 1fr; gap: 24px; } }
 
@@ -1291,6 +1305,7 @@ a.ac-hero__insights:hover { border-color: rgba(255,255,255,0.5); background: rgb
   .mono-label { font-size: 12px; }
   .subnav a { padding: 15px 16px; }
   .ac-footer-col a { padding: 6px 0; }
+  .ac-family-links a { display: inline-block; padding: 6px 0; }
   .media-mark-btn { padding: 10px 4px; }
 }
 

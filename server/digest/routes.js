@@ -4,6 +4,7 @@
 //   POST /api/digest/run             — admin-secret manual/backfill trigger;
 //     same ledger as the tick, so it can never double-send.
 import { timingSafeEqual } from "crypto";
+import { FAMILY_ROW_INLINE_HTML } from "../brand-footer.js";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -16,6 +17,7 @@ const page = (title, body) => `<!doctype html>
 <h1 style="margin:0 0 12px;font-size:20px;">${title}</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:#40506e;">${body}</p>
 <p style="margin:16px 0 0;font-size:12px;color:#5d6b85;">Powered by <a href="https://automatos.app" style="color:#5d6b85;">Automatos AI</a> · © 2026 Automatos AI</p>
+${FAMILY_ROW_INLINE_HTML}
 </div></body>`;
 
 function safeEqual(a, b) {

@@ -6,6 +6,11 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
+import { BRAND_FOOTER_HTML, FAMILY_LABEL, FAMILY_SITES, FAMILY_ROW_HTML, FAMILY_ROW_INLINE_HTML } from "../server/brand-footer.js";
+import { AUTOMATOS_ORG_ID, AUTOMATOS_ORGANIZATION, siteJsonLd } from "../server/structured-data.js";
+import { shellHtml } from "../scripts/generate-shells.mjs";
+import { buildPostShellHtml } from "../server/wire/shell.js";
 
 let pass = 0, fail = 0;
 const ok = (cond, msg) => (cond ? (pass++, console.log("  ✓ " + msg)) : (fail++, console.error("  ✗ " + msg)));
@@ -67,6 +72,84 @@ ok(m08.includes("12 Shopify agent templates") && m08.includes("Shopify Managemen
 ok(m08.includes("Settings → Channels"), "m08 connects and watches channels in Settings → Channels");
 const m09 = read("public/content/automatos/platform-architect/m09-governance-ops.json");
 ok(m09.includes("Command Centre → Governance → Policy") && /ships off/.test(m09), "m09 teaches the workspace spend ceiling and that enforcement ships off");
+
+// The Automatos AI family row (Gerard, 19 Oct 2026; reverses the 6 Oct "no
+// family column on product sites" rule): the last line of every footer, the
+// four family sites in a fixed order, this site shown but not linked.
+const index = read("public/index.html");
+const footer = index.slice(index.indexOf("<footer"), index.indexOf("</footer>"));
+const squash = (html) => html.replace(/<!--[\s\S]*?-->/g, "").replace(/>\s+</g, "><").trim();
+const spaRow = (footer.match(/<nav class="ac-family"[\s\S]*?<\/nav>/) || [""])[0];
+ok(FAMILY_LABEL === "The Automatos AI family" && FAMILY_ROW_HTML.includes(`>${FAMILY_LABEL}</span>`), 'family row is labelled "The Automatos AI family"');
+ok(isDeepStrictEqual(FAMILY_SITES.map(({ name, href }) => [name, href]), [
+  ["Automatos AI", "https://automatos.app"],
+  ["Automatos Studio", "https://studio.automatos.app"],
+  ["Automatos Academy", "https://academy.automatos.app"],
+  ["Automatos Markets", "https://markets.automatos.app"],
+]), "family sites in order: Automatos AI, Automatos Studio, Automatos Academy, Automatos Markets");
+const rowEntries = [...FAMILY_ROW_HTML.matchAll(/<li>(?:<a href="([^"]+)">|<span aria-current="page">)([^<]+)</g)].map((m) => [m[2], m[1] || null]);
+ok(isDeepStrictEqual(rowEntries, [
+  ["Automatos AI", "https://automatos.app"],
+  ["Automatos Studio", "https://studio.automatos.app"],
+  ["Automatos Academy", null],
+  ["Automatos Markets", "https://markets.automatos.app"],
+]), 'the row links the other three and shows Automatos Academy as aria-current="page", not a self-link');
+ok(!/nofollow|target=|rel=/.test(FAMILY_ROW_HTML + FAMILY_ROW_INLINE_HTML), "family links are plain <a> links (no rel, no target)");
+ok(spaRow !== "" && squash(spaRow) === FAMILY_ROW_HTML, "the SPA footer's family row is the same markup as FAMILY_ROW_HTML");
+ok(footer.lastIndexOf("© 2026 Automatos AI") < footer.indexOf('class="ac-family"') && squash(footer).endsWith("</ul></nav></div>"), "the family row is the last line of the SPA footer");
+ok((footer.match(/class="ac-family"/g) || []).length === 1 && (footer.match(/href="https:\/\/markets\.automatos\.app"/g) || []).length === 1, "the family is listed once in the SPA footer");
+ok(BRAND_FOOTER_HTML.trim().endsWith(FAMILY_ROW_HTML), "standalone pages (BRAND_FOOTER_HTML) end with the family row");
+ok(FAMILY_ROW_INLINE_HTML.includes(`${FAMILY_LABEL}:`) && FAMILY_SITES.every(({ name, href }) => name === "Automatos Academy"
+  ? FAMILY_ROW_INLINE_HTML.includes(`aria-current="page" style="font-weight:600;color:#1c2740;">${name}</span>`)
+  : FAMILY_ROW_INLINE_HTML.includes(`<a href="${href}" style="color:#40506e;">${name}</a>`)), "the inline row (unsubscribe page) carries the same four entries");
+
+// One Organization across the family sites, shared by @id; the Academy is an
+// EducationalOrganization under it (public facts sheet, section 2: no legal
+// name, no address, never Ltd, Lda or Labs).
+const plain = (o) => JSON.parse(JSON.stringify(o));
+const ldBlocks = (html) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => {
+  try { return JSON.parse(m[1]); } catch (e) { return { parseError: e.message }; }
+});
+const org = AUTOMATOS_ORGANIZATION;
+ok(org["@type"] === "Organization" && org["@id"] === "https://automatos.app/#organization" && AUTOMATOS_ORG_ID === org["@id"]
+  && org.name === "Automatos AI" && org.url === "https://automatos.app", "the Organization is https://automatos.app/#organization, Automatos AI, https://automatos.app");
+ok(/^https:\/\/automatos\.app\/\S+\.(?:png|svg|jpg)$/.test(org.logo), "the Organization logo is an absolute image URL on automatos.app");
+ok(org.sameAs.length > 0 && org.sameAs.every((u) => /^https:\/\//.test(u) && !/discord/i.test(u)), "sameAs lists public https profiles, never a Discord link");
+ok(!["legalName", "address", "foundingDate", "foundingLocation", "founder"].some((k) => k in org) && !/\b(?:Ltd|Lda|Labs)\b/.test(JSON.stringify(org)), "no legal name, address or founding claims, never Ltd, Lda or Labs");
+
+// Every JSON-LD block the Academy emits defines the shared Organization once
+// and names the Academy only as an EducationalOrganization under it.
+const nodesNamed = (o, name) => (o && typeof o === "object"
+  ? [...(o.name === name ? [o] : []), ...Object.values(o).flatMap((v) => nodesNamed(v, name))]
+  : []);
+function checkGraph(ld, where) {
+  const graph = Array.isArray(ld["@graph"]) ? ld["@graph"] : [];
+  const orgs = graph.filter((n) => n["@id"] === AUTOMATOS_ORG_ID);
+  ok(!ld.parseError && ld["@context"] === "https://schema.org" && orgs.length === 1 && isDeepStrictEqual(orgs[0], plain(org)), `${where}: JSON-LD parses and defines the shared Organization once`);
+  const academy = nodesNamed(ld, "Automatos Academy");
+  ok(academy.length > 0 && academy.every((n) => n["@type"] === "EducationalOrganization" && isDeepStrictEqual(n.parentOrganization, { "@id": AUTOMATOS_ORG_ID })), `${where}: Automatos Academy is an EducationalOrganization whose parentOrganization is the shared @id`);
+  ok(nodesNamed(ld, "Automatos AI").length === 1, `${where}: no second Automatos AI Organization`);
+  return graph;
+}
+
+const spaLd = ldBlocks(index);
+ok(spaLd.length === 1 && isDeepStrictEqual(spaLd[0], plain(siteJsonLd())), "the SPA shell's JSON-LD is siteJsonLd() from server/structured-data.js");
+if (spaLd.length) checkGraph(spaLd[0], "SPA shell");
+
+const trackShell = shellHtml({ trackId: "facts", vendorId: "automatos", vendorName: "Automatos" }, { name: "Facts track", summary: "A track.", domainFiles: [] });
+const trackLd = ldBlocks(trackShell);
+const course = trackLd.length ? checkGraph(trackLd[0], "track shell").find((n) => n["@type"] === "Course") : null;
+ok(!!course && course.provider.name === "Automatos Academy" && course.isAccessibleForFree === true, "track shell: the Course is provided by Automatos Academy, free");
+ok(trackShell.includes(FAMILY_ROW_HTML), "track shell carries the family row");
+
+const wireShell = buildPostShellHtml({
+  post: { slug: "facts", title: "Facts", summary: "S", type: "trend", byline: { agents: ["QUILL"] }, published_at: "2026-10-19T00:00:00Z", updated_at: "2026-10-19T00:00:00Z", sources: [], corrections: [], tags: [], body_html: "<p>b</p>" },
+  baseUrl: "https://academy.automatos.app", label: "L",
+});
+const wireLd = ldBlocks(wireShell);
+const posting = wireLd.length ? checkGraph(wireLd[0], "Wire post shell").find((n) => n["@type"] === "BlogPosting") : null;
+ok(!!posting && posting.publisher.name === "Automatos Academy", "Wire post shell: the BlogPosting is published by Automatos Academy");
+ok(wireShell.includes(FAMILY_ROW_HTML), "Wire post shell carries the family row");
 
 console.log(`\npublic-facts: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

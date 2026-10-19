@@ -21,6 +21,7 @@ import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { buildContentIndex } from "../server/catalog.js";
 import { BRAND_FOOTER_HTML } from "../server/brand-footer.js";
+import { academyOrganization, pageJsonLd } from "../server/structured-data.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const BASE = (process.env.ACADEMY_BASE_URL || "https://academy.automatos.app").replace(/\/$/, "");
@@ -28,7 +29,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 
 const DISCLAIMER = "Automatos Academy is independent, free training — not affiliated with or endorsed by any certification body. Exam names are trademarks of their respective owners.";
 
-function shellHtml(t, track) {
+export function shellHtml(t, track) {
   const isExam = !!(track.exam && track.exam.questionCount);
   const pageUrl = `${BASE}/tracks/${t.trackId}/`;
   const appUrl = `/#/t/${t.vendorId}/${t.trackId}`;
@@ -36,17 +37,20 @@ function shellHtml(t, track) {
   const desc = (track.summary || t.summary || "").slice(0, 300);
   const domains = (track.domainNames || []).length ? track.domainNames : null;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
+  // The Course's provider is the Academy as an EducationalOrganization whose
+  // parentOrganization is the one Automatos AI Organization every family site
+  // shares by @id; pageJsonLd puts that node in the same graph so the
+  // reference resolves on this page (server/structured-data.js).
+  const jsonLd = pageJsonLd({
     "@type": "Course",
     name: track.name,
     description: desc,
-    provider: { "@type": "EducationalOrganization", name: "Automatos Academy", url: BASE },
+    provider: academyOrganization(BASE),
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", courseWorkload: "PT20H" },
     url: pageUrl,
-  };
+  });
 
   const examRow = isExam
     ? `<p class="mono-label">Real exam: ${track.exam.questionCount} questions · ${track.exam.durationMinutes} min · ${track.exam.passingScore}/${track.exam.scoreScale} to pass</p>`
