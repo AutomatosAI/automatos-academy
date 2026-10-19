@@ -37,6 +37,8 @@ const RETIRED = [
   [/Channels Live/, "a connected channel shows on its card in Settings → Channels; the Command Centre has no 'Channels Live' card (facts 8b: no unrunning features as running)"],
   [/confirmed live on production|live production store today|Live today: partner app/, "the Shopify app is next, not in the App Store; the 12 Shopify agent templates ship (section 6)"],
   [/six-step create flow|From Template → Code Reviewer|Settings → Voice Profiles/, "the create dialog ships five steps (create-agent-modal.tsx); voice is the chat's Live button, Business plan on hosted Studio (section 4)"],
+  [/verify-in-product|roadmap edge/, "branded documents and templates ship: generate_document renders PDF, DOCX and XLSX from the Brand Kit (facts 8b)"],
+  [/Activity → (?:Dashboard|Feed|Reports|Memory|Missions)|Agents → Playbooks|Analytics → Workflows/, "retired UI paths: the Command Centre's Calendar and Activity tab, Knowledge Base → Memory, Agent Details → Reports, Assignments → Playbooks/Missions, Analytics → Missions"],
 ];
 for (const [rx, rule] of RETIRED) {
   const hits = corpus.filter(({ text }) => rx.test(text)).map(({ p }) => p);
@@ -57,6 +59,8 @@ ok(!/Agent Details → Plugins/.test(m02), "m02 assigns skills in the Configure 
 const m01 = read("public/content/automatos/platform-architect/m01-chat-first-agent.json");
 ok(m01.includes("Config, Persona, Model, Tools, Capabilities"), "m01 teaches the five create steps as the dialog ships them");
 ok(/voice is part of the \*\*Business\*\* plan/.test(m01), "m01 names the plan voice comes with on hosted Studio");
+const m07 = read("public/content/automatos/platform-architect/m07-deliverables.json");
+ok(/generate_document/.test(m07) && /branded PDF, DOCX and XLSX/.test(m07) && m07.includes("Deliverables → Templates"), "m07 teaches branded PDF, DOCX and XLSX generation from the Template Studio as shipped");
 const m08 = read("public/content/automatos/platform-architect/m08-channels-surfaces.json");
 ok(m08.includes("12 Shopify agent templates") && m08.includes("Shopify Management") && /Shopify app[^.]*next/.test(m08), "m08 teaches the 12 Shopify agent templates as shipped and the Shopify app as next");
 ok(m08.includes("Settings → Channels"), "m08 connects and watches channels in Settings → Channels");
