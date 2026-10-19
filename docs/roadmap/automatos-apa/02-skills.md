@@ -1,13 +1,13 @@
 # Automatos · Module 02 — Skills: the library, the signature agents, authoring a `SKILL.md`
 
 **Type:** Free training (no exam)  ·  **Goal:** understand what a skill is, browse the 140-skill
-library and the 9 signature agents, assign a skill to an agent, and author a minimal `SKILL.md`.
+library and its signature agents, assign a skill to an agent, and author a minimal `SKILL.md`.
 
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/marketplace/capabilities.md` — Plugins vs Skills; what a skill is; installing/assigning
 - `automatos-gitbook/marketplace/agents.md` — pre-built agent configs (prompt + model + skills)
 - `automatos-gitbook/agents/README.md` + `automatos-gitbook/agents/creating.md` — where skills attach to an agent
-- Repo for grounding: `automatos-skills` — `README.md` (the open library of 140 skills, its groups, the 9 signature agents) + `SKILL-GUIDE.md` (the author format)
+- Repo for grounding: `automatos-skills` — `README.md` (the open library of 140 skills, its groups, the signature agents; its headline still says 130 skills in 16 groups, while main holds 140 SKILL.md files in 18 top-level folders, 14 of them under `team/`) + `SKILL-GUIDE.md` (the author format)
 
 ## 🎬 Video (~8 min) — NotebookLM → Video → Customize
 ```
@@ -19,13 +19,14 @@ Cover ONLY, in order:
    formats, and guardrails that get injected into an agent's system prompt. It teaches an agent HOW
    to do a job without a playbook micromanaging every tool call. Contrast with a Plugin (a bundle:
    skills + commands + agent configs + prompt templates) and a Tool (an external app action).
-2. The library: 140 skills organised into top-level groups (engineering, quality, design, content, social,
+2. The library: 140 skills organised into 18 top-level groups (engineering, quality, design, content, social,
    marketing, sales, product, analytics, devops, research, support, people-ops, integrations,
-   shopify, and the signature team). You install a skill from the Marketplace → Capabilities → Skills
+   shopify, generic, image-palette, and the team personas). You install a skill from the Marketplace → Capabilities → Skills
    tab, then assign it to agents.
-3. The 9 signature agents (from automatos-skills/README.md) — say each one's beat in a sentence:
-   SENTINEL (infra watchdog, 15-min heartbeat), PATCHER (end-to-end bug fixing), SCOUT (lead
-   intelligence), HARPER (content machine), ECHO (customer support), ATLAS (business intelligence),
+3. Nine signature agents (persona skills under `team/`, which holds 14) — say each one's beat in a sentence:
+   SENTINEL (workspace watchdog), PATCHER (end-to-end bug fixing; folder `team/bug-fixer`), SCOUT (lead
+   intelligence), HARPER (content machine), ECHO (customer support), ATLAS (platform architect: reviews
+   a workspace's architecture; the README's "business intelligence" blurb is out of date),
    FORGE (playbook builder), ORACLE (knowledge curator), RALLY (community growth).
 4. Authoring a SKILL.md (SKILL-GUIDE.md): the YAML frontmatter (name, description, version, tags,
    category: agent-role, and a tools list where each tool has a real Automatos tool name +
@@ -56,7 +57,7 @@ SKILL-GUIDE.md, and the agents docs.
 Give an agent a skill, then draft your own:
 1. **Marketplace → Capabilities → Skills.** Browse and **Install** a skill that matches your Code
    Reviewer (something engineering/quality-flavoured).
-2. Open your agent (**Agent Details → Plugins/Skills**) and **assign** the installed skill. Chat-test
+2. Open your agent's **Configure** panel → **Capabilities** tab and **assign** the installed skill (Skill Assignment). Chat-test
    it and notice the sharper, more structured behaviour.
 3. Author a **minimal `SKILL.md`** for a role you care about (say a "Release Notes Writer"), following
    `SKILL-GUIDE.md`: YAML frontmatter (name, description, version, `tags`, `category: agent-role`, a

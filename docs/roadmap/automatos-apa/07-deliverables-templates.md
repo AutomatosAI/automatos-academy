@@ -7,11 +7,12 @@ reports, audits, summaries — from templates, and find them in your workspace.
 > user-facing terms). Agents build deliverables via the `generate_document` tool, usually from a
 > **Template**.
 
-> **Currency note (2026-07-02):** the user docs document **markdown templates** ({{placeholder}}
-> variables) and markdown reports; DOCX/XLSX/PDF appear in the docs as *upload* formats. The
-> **branded rich-format generation** (block templates, brand kit, PDF/DOCX output — PRD-167) is
-> recent build work with no gitbook page yet — **verify it in the product before demoing**, and
-> teach markdown templates as the live baseline.
+> **Currency note (updated 19 Oct 2026):** the user docs describe **markdown templates**
+> ({{placeholder}} variables) and markdown reports. The product ships the **Template Studio**
+> (Deliverables → Templates: Brand Kit, New template from a layout, blocks and variable chips) and
+> `generate_document` renders **branded PDF, DOCX and XLSX** saved to Deliverables (PRD-167). Teach
+> the product. Agent reports live on **Agent Details → Reports** (status, title, time, 1–5 star
+> grade; average grade and ungraded count), not on an Activity → Reports page.
 
 ## 📥 Sources to load into NotebookLM
 - `automatos-gitbook/knowledge/templates.md` — what templates are, example templates, using them, creating them (structure + placeholder variables)
@@ -27,28 +28,27 @@ report" walkthrough.
 
 Cover ONLY, in order:
 1. Why templates: a template defines the structure, sections, and formatting for a type of document,
-   so an agent's reports/summaries/analyses come out consistent every time. Show the example templates
-   from templates.md — Daily Standup, Security Audit, Code Review, Research Summary.
+   so an agent's reports/summaries/analyses come out consistent every time. Show the Template Studio's
+   starters (Basic Report, Invoice, Executive Summary, Meeting Notes, Data Export) and the docs' ideas
+   for your own (Daily Standup, Security Audit, Code Review, Research Summary).
 2. Using a template from chat: you can just ask — "Write a security audit report for the auth module
    using the Security Audit template." Templates are automatically available to agents; when a task or
    Playbook calls for a specific format, the agent references the matching template.
-3. Creating a template (templates.md): + New Template → name + description → write the structure in
-   markdown (headings, tables) → set placeholder variables like {{agent_name}} and {{date}} that get
-   filled at generation time → Save.
-4. Deliverables: agents build the actual document with the generate_document tool — markdown
-   deliverables from your templates are the documented baseline. Frame this as "template = the shape,
-   generate_document = produces the file." If richer branded formats (PDF/DOCX) appear in your
-   product build, show them — but only claim what you can see working; the docs' file-format list
-   (DOCX/XLSX/PDF/MD) describes what you can UPLOAD, not what generation promises.
-5. Where deliverables live: agent reports show up in Activity → Reports as cards (agent, title,
-   timestamp, status, preview); open one in the viewer (full markdown render + linked artifacts) and
-   grade it 1–5 stars, which feeds Analytics → Agents. Reports are stored in the workspace filesystem
-   and the database.
+3. Creating a template (the Template Studio, Deliverables → Templates): set the Brand Kit once → New
+   template → start from a layout → edit the blocks → place variable chips ({{date.long}}, {{brand.*}},
+   and data.* fields the agent supplies) that get filled at generation time → Save template.
+4. Deliverables: agents build the actual document with the generate_document tool — a branded PDF,
+   DOCX or XLSX from your template and Brand Kit, saved to Deliverables. Frame this as "template = the
+   shape, generate_document = produces the file." The docs' file-format list (DOCX/XLSX/PDF/MD)
+   describes what you can UPLOAD; what agents generate is decided by their tools.
+5. Where the work lands: generated documents on the Deliverables page; agent reports on Agent
+   Details → Reports (status, title, time, grade); open one in the viewer and grade it 1–5 stars,
+   which moves the agent's average grade.
 
 ~8 minutes: open with "agents should hand you a document," create a small template on screen, ask an
-agent to generate from it, then find and grade the result in Reports. Stay strictly in the sources;
-do not invent template fields, and do not promise generated file formats beyond what you verified
-in the product (markdown is the documented baseline).
+agent to generate from it, open the branded file on Deliverables, then grade a report on the agent's
+Reports tab. Stay strictly in the sources; do not invent template fields, and do not promise generated
+formats beyond what generate_document makes (PDF, DOCX, XLSX).
 ```
 
 ## 🎧 Deep Dive (learn) — NotebookLM → Audio → Customize
@@ -56,25 +56,23 @@ in the product (markdown is the documented baseline).
 Two hosts, practical, teaching a user to standardise agent output. Go deep on: designing a good
 template (sections, tables, placeholder variables filled at generation time); the difference between
 a template (structure) and a generated deliverable (the document the agent produces via
-generate_document — markdown per the docs; richer branded formats only as verified in-product);
-requesting a specific template from chat; and how reports flow into Activity →
-Reports — the card fields, the viewer, grading for quality, and where they're stored (workspace
-filesystem + database). Connect to earlier modules: a Playbook or Mission can end by generating a
+generate_document — a branded PDF, DOCX or XLSX saved to Deliverables); requesting a specific
+template from chat; and how agent reports land on Agent Details → Reports — the row fields, the
+viewer, grading for quality, and where they're stored (workspace filesystem + database). Connect to earlier modules: a Playbook or Mission can end by generating a
 templated deliverable. Ground strictly in knowledge/templates.md, activity/reports.md, and the
 supported file types in knowledge/documents.md.
 ```
 
 ## 🛠 Try it now (on Automatos)
 Produce your first branded deliverable:
-1. **Knowledge Bases → Templates → + New Template.** Name it *"Weekly Review,"* write a markdown
-   structure (Summary / Findings / Actions), and add placeholders like `{{agent_name}}` and
-   `{{date}}`. Save.
+1. **Deliverables → Templates → New template** (start from a layout). Name it *"Weekly Review,"*
+   shape the blocks (Summary / Findings / Actions), and add variables like `{{date.long}}` and a
+   `data.*` field. Save template.
 2. In **Chat**, ask an agent: *"Write this week's review using the Weekly Review template, based on my
    uploaded documents,"* — let it generate the deliverable.
-3. Open **Activity → Reports**, find the report card, open it in the **viewer**, and read the rendered
-   output.
-4. **Grade it** 1–5 stars (this feeds agent quality analytics). Iterate the template until the shape
-   is exactly what you want.
+3. Open the deliverable from the agent's reply (or the **Deliverables** page) and check it.
+4. On the agent's **Agent Details → Reports** tab, open a report in the **viewer** and **grade it**
+   1–5 stars. Iterate the template until the shape is exactly what you want.
 
 ## ✅ Do
 - [ ] Load `knowledge/templates.md`, `activity/reports.md`, and the file-types part of `knowledge/documents.md`

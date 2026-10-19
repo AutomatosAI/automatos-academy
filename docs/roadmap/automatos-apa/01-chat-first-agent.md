@@ -7,7 +7,7 @@ understand how the Universal Router decides who answers.
 - `automatos-gitbook/chat/README.md` — the Chat interface, quick actions, streaming, file attachments
 - `automatos-gitbook/chat/routing.md` — the Universal Router (the multi-tier system + overrides + corrections)
 - `automatos-gitbook/agents/README.md` — the Agent Management page, tabs, stats bar, starter agents
-- `automatos-gitbook/agents/creating.md` — the 6-step create flow, testing, prompt-engineering tips
+- `automatos-gitbook/agents/creating.md` — the create flow (the docs list 6 steps; the dialog ships 5: Config, Persona, Model, Tools, Capabilities), testing, prompt-engineering tips
 - Repo for grounding: `automatos-ai` — the platform
 
 ## 🎬 Video (~8 min) — NotebookLM → Video → Customize
@@ -22,12 +22,12 @@ Cover ONLY, in order:
    (Code, Create an Agent, Knowledge Base, Playbooks, Edit Tools). Mention file attachments (up to
    20 MB) and that each conversation has a ~60,000-token context budget that auto-summarises.
 2. Create your first agent (agents/creating.md), step by step:
-   - Start from a template (Code Reviewer) vs from scratch — recommend template.
-   - Basic info: name, category, and a SPECIFIC description ("Handles code reviews for JS/TS" beats
+   - The dialog's five steps, in order: Config, Persona, Model, Tools, Capabilities.
+   - Config: category, name, and a SPECIFIC description ("Handles code reviews for JS/TS" beats
      "Code stuff") — and explain WHY: the Router uses the description to route.
-   - Model: provider (OpenRouter/OpenAI/Anthropic/DeepSeek), model, temperature, max tokens.
-   - Persona (Professional / Casual / Technical / Custom) and tools + skills.
-   - Click Create → it lands on the roster immediately.
+   - Persona: No Persona, Predefined (from the persona library, e.g. Code Reviewer) or Custom.
+   - Model: provider (OpenRouter/OpenAI/Anthropic/DeepSeek), model, temperature, max output tokens.
+   - Tools (least privilege), then Capabilities (plugins) → create → it lands on the roster immediately.
 3. Test it: chat-test by selecting it from the Auto dropdown; run a Capability Test for a scored
    report (quality, tool usage, persona, error handling).
 4. The Router, made concrete: Auto mode's tiers — Tier 0 user override, Tier 1 cache (fast, free),
@@ -65,10 +65,11 @@ thumb for a beginner. Ground strictly in the provided sources; no invented bench
 
 ## 🛠 Try it now (on Automatos)
 Create your first working agent and prove it routes:
-1. **Agents → + Create Agent → From Template → Code Reviewer.**
-2. Give it a **specific description**: *"Reviews GitHub pull requests and code for bugs, security
-   issues, and style problems in TypeScript and Python."* Pick a model, set temperature ~0.3, choose
-   the **Technical** persona. Click **Create**.
+1. **Agent Management → + Create Agent.** At **Config**, pick the Custom category and give it a
+   **specific description**: *"Reviews GitHub pull requests and code for bugs, security issues, and
+   style problems in TypeScript and Python."*
+2. At **Persona**, choose **Predefined → Code Reviewer**. At **Model**, pick a model and set
+   temperature ~0.3. At **Tools**, assign only a GitHub tool. Then create the agent.
 3. Open **Chat**, select your Code Reviewer from the **Auto** dropdown, and paste a public GitHub
    file or PR link with: *"Review this for bugs and security issues."* Watch the response stream.
 4. Start a **new** chat, switch back to **Auto**, and send *"Can you review some code for me?"* — check

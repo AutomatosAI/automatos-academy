@@ -25,9 +25,11 @@ Cover ONLY, in this order:
 5. The vocabulary the learner MUST internalise now — read these straight off the Key concepts table:
    Agent, Workspace, Playbook, Skill, Tool, Knowledge Base, Universal Router, Mission, Channel,
    Knowledge Graph, Memory. One crisp sentence each.
-6. The tour: walk the Command Centre (Activity) — the four status cards (Working Now, Channels Live,
-   Completed Today, Needs Attention) and the five tabs (Dashboard, Feed, Reports, Memory, Missions).
-   Point out where the learner will spend their time.
+6. The tour: walk the Command Centre — the live counts across the top (Working now, Agents active,
+   Tasks in queue, Needs attention) and the seven tabs as the product ships them (Summary, Board,
+   Calendar, Activity, Watchlist, Questions, Governance). The docs page still shows an older layout
+   (Dashboard, Feed, Reports, Memory, Missions); teach the product. Point out where the learner will
+   spend their time.
 
 ~8 minutes. Open with the "workers not chatbots" idea, do a quick Quick-Start walkthrough (sign in →
 create an agent → give it tools → add knowledge → chat), and close with a one-line map: "Agents do
@@ -49,9 +51,10 @@ strictly in README.md, about.md, and activity/README.md — no speculation about
 
 ## 🛠 Try it now (on Automatos)
 Sign in (a personal workspace is created automatically on first login) and take the tour:
-1. Open **Activity** (the Command Centre). Read the four status cards and click one to drill in.
-2. Click through the five tabs: **Dashboard**, **Feed**, **Reports**, **Memory**, **Missions** — just
-   to see what lives where.
+1. Open the **Command Centre** (**Command Center** in the sidebar). Read the live counts along the top
+   and open what the Summary's **Needs you** widget lists.
+2. Click through the seven tabs: **Summary**, **Board**, **Calendar**, **Activity**, **Watchlist**,
+   **Questions**, **Governance** — just to see what lives where.
 3. Open **Agents** and look at the agents your workspace starts with (hosted: Auto and a Brand
    Designer; a fresh local install: Auto, a Brand Designer, Researcher, Writer and Analyst). Don't
    create anything yet — Module 01 does that.

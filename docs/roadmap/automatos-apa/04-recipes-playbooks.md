@@ -31,8 +31,9 @@ Cover ONLY, in order:
    playbook" and the Router triggers it).
 4. Webhook triggers: an external event fires a Playbook automatically — Jira issue created, GitHub
    push/PR, Slack message. The platform registers the webhook URL with the service for you.
-5. Monitoring: active runs appear in Activity → Dashboard (schedule + live status) and Activity → Feed
-   (step-by-step log); success rates and duration live in Analytics → Workflows.
+5. Monitoring: scheduled runs appear on the Command Centre's Calendar, every run on its Activity tab
+   (open one for the step-by-step execution view), and each playbook's executions, average quality
+   and success rate on the Missions tab of Analytics.
 
 ~8 minutes: open with "do it once, then let it run," build the 5-step example, then show scheduled +
 webhook triggers and where to watch it. Stay strictly in the sources; do not invent step types, cron
@@ -45,7 +46,7 @@ Two hosts, practical, coaching a builder to design a reliable multi-agent Playbo
 design and agent assignment; passing data between steps through the pipeline scratchpad; flow control
 and error handling; the three run modes (manual, cron-scheduled, from-chat) with real cron patterns;
 and webhook triggers (Jira/GitHub/Slack) including that the platform auto-registers the webhook URL.
-Cover where runs surface (Dashboard schedule, Feed log, Analytics → Workflows). Bring in FORGE — the
+Cover where runs surface (the Command Centre's Calendar and Activity tab, and Analytics → Missions). Bring in FORGE — the
 signature agent that turns natural language into a multi-step workflow with agent assignments and
 triggers — as the "describe it and it drafts the Playbook" path. Ground strictly in
 agents/playbooks.md, tools/README.md, activity/README.md.
@@ -65,13 +66,13 @@ user can apply. Ground strictly in agents/playbooks.md and activity/missions.md.
 
 ## 🛠 Try it now (on Automatos)
 Build and run a real 3-step Playbook:
-1. **Agents → Playbooks → + Create Playbook.** Name it *"Daily Repo Digest."*
+1. **Assignments → the Playbook card (+).** Name it *"Daily Repo Digest."*
 2. Add three steps: **Step 1 (Scout)** — pull the latest commits from your connected GitHub repo;
    **Step 2 (Code Reviewer)** — review them for issues; **Step 3 (Scribe)** — write a short summary
    report. Save.
-3. **Run it manually** first (click **Run**, fill any inputs). Watch it execute in **Activity → Feed**.
+3. **Run it manually** first (click **Run**, fill any inputs). Watch it execute on the Command Centre's **Activity** tab.
 4. Now give it a **cron schedule** (e.g. `0 9 * * 1-5` for weekday mornings). Confirm it appears on the
-   **Activity → Dashboard** schedule.
+   Command Centre's **Calendar**.
 5. Bonus: ask in **Chat** — *"Run the Daily Repo Digest playbook"* — and confirm the Router triggers it.
 
 ## ✅ Do

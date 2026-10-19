@@ -67,7 +67,7 @@ activity/memory.md, the five-layer doc, and PRD-166.
 
 ## 🛠 Try it now (on Automatos)
 Explore and shape what your agents remember:
-1. **Activity → Memory.** Browse the entries and note the **source agent**, **timestamp**, and
+1. **Knowledge Base → Memory.** Browse the entries and note the **source agent**, **timestamp**, and
    **relevance** on each.
 2. Run a **natural-language search** across memory, e.g. *"What do we know about the documents I
    uploaded?"* — confirm vector search returns relevant memories.
