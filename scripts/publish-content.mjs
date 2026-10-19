@@ -17,14 +17,26 @@
 // once) race on the content_versions primary key: the loser's transaction
 // rolls back whole and it logs and exits 0, exactly like the skip above.
 //
+// The flip side of that skip: contentVersion is a pure hash of the tree, so a
+// git revert (or a Railway rollback to an earlier image) rebuilds a version
+// that already exists and the pointer stays on the newer one. The skip then
+// logs a WARNING naming both versions; `--repoint` moves the pointer to the
+// deployed tree's version. An EMPTY pointer is always filled in (there is no
+// rollback to preserve), or the server would refuse to boot on every restart.
+//
 // Usage:
 //   DATABASE_URL=postgres://… npm run publish-content
+//   npm run publish-content -- --repoint   (also point content_current at
+//                                           this tree when it is already
+//                                           published — the fix for a revert)
 //   npm run publish-content -- --dry-run   (validate + print version/counts;
 //                                           no DATABASE_URL needed)
 //
 // Trigger (2026-10-19): docker-entrypoint.sh runs it on every boot of a
 // CONTENT_SOURCE=db deploy, after migrations, inside Railway — production
-// Postgres is only reachable on Railway's private network. Manual lane:
+// Postgres is only reachable on Railway's private network. Manual lane (it
+// re-runs the publish of the running image's tree, so it helps after a
+// transient database error at boot; a content fix needs a new deploy):
 //   railway ssh --service automatos-academy -- "npm run publish-content"
 // .github/workflows/content-publish.yml runs only the --dry-run, as a gate.
 import { join, dirname } from "path";
@@ -41,13 +53,59 @@ const UNIQUE_VIOLATION = "23505";
 const VERSION_PK = "content_versions_pkey";
 const isLostPublishRace = (e) => e?.code === UNIQUE_VIOLATION && e?.constraint === VERSION_PK;
 
+// Bounds for the boot-time publish. A publish that cannot connect, or waits
+// on a lock someone else holds (an operator's open psql transaction, a stuck
+// replica), must FAIL rather than hang: a failure prints the entrypoint's
+// banner and the server boots on the last published version, while a hang
+// blocks `exec node server.js` until Railway's healthcheck gives up.
+// LOCK_TIMEOUT_MS stays well above a normal publish transaction, so a replica
+// that loses the insert race still waits for the winner's COMMIT and gets
+// 23505 (handled above), not 55P03.
+const CONNECT_TIMEOUT_MS = 15_000;
+const LOCK_TIMEOUT_MS = 60_000;
+const STATEMENT_TIMEOUT_MS = 120_000;
+
+/**
+ * The deployed tree's version already exists in content_versions. Leave the
+ * pointer alone (that is what keeps a deliberate rollback across redeploys),
+ * except: an empty pointer is filled in, and `repoint` moves it here. When it
+ * points elsewhere and `repoint` is off, warn — a git revert lands here.
+ */
+async function reconcileExistingVersion(client, version, { repoint, log }) {
+  const { rows } = await client.query("SELECT content_version FROM content_current WHERE id = true");
+  const current = rows[0]?.content_version ?? null;
+  if (current === null) {
+    const { rowCount } = await client.query(
+      "INSERT INTO content_current (id, content_version) VALUES (true, $1) ON CONFLICT (id) DO NOTHING", [version]);
+    log(rowCount
+      ? `[publish] content_current was empty — pointed it at ${version}`
+      : `[publish] content_current was empty and a concurrent run filled it — left alone`);
+    return;
+  }
+  if (current === version) {
+    log(`[publish] ${version} already published — nothing to do (pointer untouched, so rollbacks survive re-runs)`);
+    return;
+  }
+  if (repoint) {
+    await client.query(
+      "UPDATE content_current SET content_version = $1, updated_at = now() WHERE id = true", [version]);
+    log(`[publish] --repoint: content_current moved from ${current} to ${version}`);
+    return;
+  }
+  log(`[publish] WARNING ${version} is already published but content_current is ${current} — pointer left alone ` +
+    "(deliberate rollback, or a git revert to an earlier tree?). To serve this deploy's tree: " +
+    'railway ssh --service automatos-academy -- "npm run publish-content -- --repoint", or ' +
+    `UPDATE content_current SET content_version = '${version}', updated_at = now() WHERE id = true;`);
+}
+
 /**
  * Publish CONTENT_DIR's tree. Returns { contentVersion, published, counts };
- * `published` is false for dry runs and idempotent skips. Exported so the CI
+ * `published` is false for dry runs and idempotent skips (including a
+ * --repoint or an empty-pointer fill, which write no version). Exported so the CI
  * equivalence test (tests/content-db.test.mjs) publishes through the same
  * code path as the boot-time publish — no spawn, no duplicate SQL.
  */
-export async function publishContent({ databaseUrl, dryRun = false, log = console.log } = {}) {
+export async function publishContent({ databaseUrl, dryRun = false, repoint = false, log = console.log } = {}) {
   // 1. Hard validation gate — the same judge as `npm run validate`. The
   //    validator is a top-level script: importing it runs it, it prints its
   //    report, and it process.exit(1)s on any error, so nothing below ever
@@ -71,14 +129,19 @@ export async function publishContent({ databaseUrl, dryRun = false, log = consol
   }
 
   const { default: pg } = await import("pg");
-  const client = new pg.Client({ connectionString: databaseUrl });
+  const client = new pg.Client({
+    connectionString: databaseUrl,
+    connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
+    lock_timeout: LOCK_TIMEOUT_MS,
+    statement_timeout: STATEMENT_TIMEOUT_MS,
+  });
   await client.connect();
   try {
     // 3. Idempotency — this exact tree is already published.
     const { rows } = await client.query(
       "SELECT 1 FROM content_versions WHERE content_version = $1", [idx.contentVersion]);
     if (rows.length) {
-      log(`[publish] ${idx.contentVersion} already published — nothing to do (pointer untouched, so rollbacks survive re-runs)`);
+      await reconcileExistingVersion(client, idx.contentVersion, { repoint, log });
       return { contentVersion: idx.contentVersion, published: false, counts };
     }
 
@@ -120,8 +183,9 @@ export async function publishContent({ databaseUrl, dryRun = false, log = consol
 // ── CLI ─────────────────────────────────────────────────────────────────
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dryRun = process.argv.includes("--dry-run");
+  const repoint = process.argv.includes("--repoint");
   try {
-    await publishContent({ databaseUrl: process.env.DATABASE_URL, dryRun });
+    await publishContent({ databaseUrl: process.env.DATABASE_URL, dryRun, repoint });
   } catch (e) {
     console.error(e.message);
     process.exit(1);

@@ -209,9 +209,28 @@ ok(rolledBack.contentVersion === v1 && rolledBack.journal[rolledBack.journal.len
 // survive a redeploy of an already-published tree: point at another version,
 // publish the same tree again, and the pointer must not move back.
 await pool.query("UPDATE content_current SET content_version = $1, updated_at = now() WHERE id = true", [v3]);
-const redeploy = await publishContent({ databaseUrl: process.env.DATABASE_URL, log: () => {} });
+const redeployLogs = [];
+const redeploy = await publishContent({ databaseUrl: process.env.DATABASE_URL, log: (l) => redeployLogs.push(l) });
 ok(redeploy.published === false && await readCurrentVersion(pool) === v3,
   "a redeploy of an already-published tree leaves a deliberately repointed content_current alone");
+// The same path is what a git revert hits: the reverted tree hashes to an
+// existing version, so the deploy must say loudly that it is not serving it.
+ok(redeployLogs.some((l) => l.startsWith(`[publish] WARNING ${v1} is already published but content_current is ${v3}`)
+  && l.includes("--repoint") && l.includes(`SET content_version = '${v1}'`)),
+  "…and warns that the deployed tree is not the one being served, naming both fixes (a git revert lands here)");
+const repointLogs = [];
+const repointed = await publishContent({ databaseUrl: process.env.DATABASE_URL, repoint: true, log: (l) => repointLogs.push(l) });
+ok(repointed.published === false && await readCurrentVersion(pool) === v1
+  && repointLogs.some((l) => l === `[publish] --repoint: content_current moved from ${v3} to ${v1}`),
+  "--repoint moves content_current to the deployed tree's existing version, writing no new version");
+// A half-cleaned database: the version row exists but the pointer is gone.
+// Skipping would leave the server refusing to boot on every restart.
+await pool.query("DELETE FROM content_current");
+const healLogs = [];
+const healed = await publishContent({ databaseUrl: process.env.DATABASE_URL, log: (l) => healLogs.push(l) });
+ok(healed.published === false && await readCurrentVersion(pool) === v1
+  && healLogs.some((l) => l === `[publish] content_current was empty — pointed it at ${v1}`),
+  "an empty content_current is filled in with the already-published tree, not skipped");
 
 // ── concurrent publishers: two replicas booting the same tree at once ───
 // docker-entrypoint.sh publishes on every boot, so replicas can race. Hold the

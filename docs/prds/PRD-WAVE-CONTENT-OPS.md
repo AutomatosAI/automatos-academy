@@ -57,7 +57,7 @@
 | C2-S1 | **Seed** | Gerard adds the `DATABASE_URL` repo secret (PUBLIC proxied Railway URL — internal `.railway.internal` is unreachable from CI) → dispatch `content-publish.yml` | `content_versions` row exists; server log shows db index adopted on poll | S (Gerard + one dispatch) |
 | C2-S2 | **Dual-run → flip** | 7 days `CONTENT_SOURCE=files` with publishes flowing; equivalence suite already gates CI → flip `CONTENT_SOURCE=db` on Railway | Site serves from Postgres; rollback documented (repoint `content_current`) | S |
 
-> **Superseded 2026-10-19 (C2-S1's CI lane):** production Postgres is reachable only on Railway's private network, so a repo secret pointing CI at it does not work (the public URL the job used pointed at a different database; the job failed on every content merge after 19 Aug). Content now publishes on every deploy from `docker-entrypoint.sh`; the manual lane is `railway ssh --service automatos-academy -- "npm run publish-content"`.
+> **Superseded 2026-10-19 (C2-S1's CI lane):** production Postgres is reachable only on Railway's private network, so a repo secret pointing CI at it does not work (the public URL the job used pointed at a different database; the job failed on every content merge after 19 Aug). Content now publishes on every deploy from `docker-entrypoint.sh`; the manual lane (re-runs the publish in the running container, e.g. after a transient database error at boot; a content fix needs a new deploy, which publishes on boot) is `railway ssh --service automatos-academy -- "npm run publish-content"`.
 
 ### C3 — Media bindings + the admin surface (your placeholder-upload, as UI **and** API)
 The core new build. One plane, two callers (browser admin + Automatos):
@@ -73,7 +73,7 @@ The core new build. One plane, two callers (browser admin + Automatos):
 
 ### C4 — Voice generation, operationalized (PRD-VOICE-PIPELINE S2/S3 land here)
 - `scripts/generate-audio.mjs` + `KokoroProvider`/`ElevenLabsProvider` + the ported `speakable` segmenter (golden-fixture test vs the app's) — as specced in PRD-VOICE-PIPELINE.
-- **Triggers, all three:** (a) CLI/workflow_dispatch (backfill: whole library ≈ $2 Kokoro); (b) `content-publish.yml` hook — diff-only via content-hash HEADs, so new Automatos content self-voices; (c) **admin button** "Generate audio" per lesson/track → academy server endpoint runs single-item generation in-process (seconds) — full runs stay in CI.
+- **Triggers, all three:** (a) CLI/workflow_dispatch (backfill: whole library ≈ $2 Kokoro); (b) `content-publish.yml` hook — diff-only via content-hash HEADs, so new Automatos content self-voices; (c) **admin button** "Generate audio" per lesson/track → academy server endpoint runs single-item generation in-process (seconds) — full runs stay in CI. *2026-10-19: content-publish.yml is validate-only; a publish-time audio hook would have to run from docker-entrypoint.sh / the boot publish, or as its own workflow.*
 - Languages later: namespace `academy/audio/<voiceKey>/…` where `voiceKey` encodes voice+lang (`kokoro-en-af-v1`, `elevenlabs-es-auto-v1`); gated on *translated content*, not pipeline work.
 - **Blockers:** the `automatos-voice` pod URL (probe 404'd — deploy/confirm) + C1 secrets + the voice pick (D-CO3).
 

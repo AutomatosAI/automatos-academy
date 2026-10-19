@@ -34,7 +34,9 @@
 # failed on every content merge (last success: 19 Aug 2026) and new content
 # never went live. The publish now runs here, inside Railway, on the same
 # DATABASE_URL the server uses — so every deploy publishes the content tree it
-# ships with.
+# ships with, unless that exact tree was published before, in which case the
+# pointer is left alone (see DEPLOY.md → Rollback). That includes a git revert
+# to an earlier tree: the publish logs a WARNING and the pointer stays put.
 #
 # `npm run publish-content` validates first (the same gate as
 # `npm run validate`), writes the whole version in one transaction, and is
@@ -46,7 +48,9 @@
 # polls for a new one every 60 s), which is a safe state; refusing to boot
 # would take the site down over a content problem. If no version has EVER been
 # published, the server itself refuses to boot (server/catalog-db.js), so a
-# failed first publish still fails loudly.
+# failed first publish still fails loudly. The publish's connection carries
+# connect, lock and statement timeouts, so a held lock fails it rather than
+# hanging the boot.
 #
 # Runs only when DATABASE_URL is set AND CONTENT_SOURCE=db. Files-mode deploys
 # serve public/content straight from disk and have nothing to publish.
@@ -70,13 +74,14 @@ else
   if [ "$CONTENT_SOURCE" = "db" ]; then
     echo "[entrypoint] publishing course content (CONTENT_SOURCE=db)…"
     if npm run publish-content; then
-      echo "[entrypoint] course content published (or already current)"
+      echo "[entrypoint] content publish finished — the [publish] line above says what it did"
     else
       echo "[entrypoint] ==================================================================="
       echo "[entrypoint] CONTENT PUBLISH FAILED — serving the last published version."
       echo "[entrypoint] The server IS starting. New course content from this deploy is"
-      echo "[entrypoint] NOT live. Read the publish output above, fix the content, and"
-      echo "[entrypoint] redeploy (or run the manual lane once fixed):"
+      echo "[entrypoint] NOT live. Read the publish output above. Invalid content: fix it"
+      echo "[entrypoint] in git and redeploy (the new deploy publishes on boot). Transient"
+      echo "[entrypoint] failure (database/network): re-run in place:"
       echo "[entrypoint]   railway ssh --service automatos-academy -- \"npm run publish-content\""
       echo "[entrypoint] ==================================================================="
     fi

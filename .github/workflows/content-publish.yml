@@ -15,7 +15,9 @@
 # Dependencies install the way the Dockerfile installs them (--omit=dev), so
 # a publish path that needs a dev-only package goes red here too.
 #
-# Manual publish lane (production, inside Railway):
+# Manual publish lane (production, inside Railway; it re-runs the publish of
+# the running image's tree, so it helps after a transient database error at
+# boot; a content fix needs a new deploy, which publishes on boot):
 #   railway ssh --service automatos-academy -- "npm run publish-content"
 #
 # No secrets, no database: this job must never be given DATABASE_URL again.
@@ -27,9 +29,14 @@ on:
       - "public/content/**"
       - "scripts/publish-content.mjs"
       - "scripts/validate-content.mjs"
+      # Every module in the publish's import graph (tests/deploy-lane.test.mjs
+      # fails when one is missing here).
       - "server/catalog.js"
       - "server/podcasts.js"
       - "server/content/**"
+      - "server/cards/**"
+      - "server/concepts/**"
+      - "server/media/**"
       - "docker-entrypoint.sh"
       - "Dockerfile"
       - "package.json"

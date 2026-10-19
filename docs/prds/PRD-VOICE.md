@@ -210,6 +210,8 @@ replayable offline · service failure degrades silently to the device voice mid-
   episodes already do (manifest → stream/download); best quality (the NotebookLM lane already
   produces podcast-grade track audio), real files = real transport controls; costs storage/CDN and
   only covers *published* content, never dynamic text (verdicts, tutor answers).
+  *2026-10-19: content-publish.yml is validate-only; a publish-time audio hook would have to run
+  from docker-entrypoint.sh / the boot publish, or as its own workflow.*
 
 **Recommendation: v1 = (a)** for quick-fire + read-aloud (ship now, label honestly) · **v2 = (c)**
 for flagship-track lesson audio (quality where it's felt most, dynamic glue stays on-device) ·

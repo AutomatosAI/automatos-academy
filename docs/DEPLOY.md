@@ -35,22 +35,40 @@ Production serves course content from Postgres (`CONTENT_SOURCE=db`). Git (`publ
 **Content publishes on every deploy, inside Railway.** `docker-entrypoint.sh` runs, in order:
 
 1. `npm run migrate` — a failed migration stops the boot.
-2. `npm run publish-content` — only when `DATABASE_URL` is set and `CONTENT_SOURCE=db`. It validates the tree (the same gate as `npm run validate`), writes the whole version in one transaction and flips `content_current`. An unchanged tree is a no-op, so a code-only deploy leaves the pointer alone, including a deliberate rollback. Two replicas booting at once are safe: the one that loses the insert race logs it and moves on.
+2. `npm run publish-content` — only when `DATABASE_URL` is set and `CONTENT_SOURCE=db`. It validates the tree (the same gate as `npm run validate`), writes the whole version in one transaction and flips `content_current`. An unchanged tree is a no-op, so a code-only deploy leaves the pointer alone, including a deliberate rollback (but see [Rollback and reverts](#rollback-and-reverts)). If `content_current` is empty, it is pointed at the deployed tree. Two replicas booting at once are safe: the one that loses the insert race logs it and moves on.
 
-   A failed publish does **not** stop the boot. The deploy log shows a `CONTENT PUBLISH FAILED — serving the last published version` banner and the server keeps serving the previous version. If nothing has ever been published, the server refuses to boot (`no content published`).
+   A failed publish does **not** stop the boot. The deploy log shows a `CONTENT PUBLISH FAILED — serving the last published version` banner and the server keeps serving the previous version. If nothing has ever been published, the server refuses to boot (`no content published`). The publish's connection has a 15 s connect timeout, a 60 s lock timeout and a 120 s statement timeout, so a held lock fails the publish instead of hanging the boot.
+
+   The pointer flips before the new server starts. If the deploy then fails, the previous deployment keeps running and picks up the new content on its next poll. To undo, repoint `content_current` to the previous version (see [Rollback and reverts](#rollback-and-reverts)).
 3. `exec node server.js`.
 
 The publish has to run inside Railway: production Postgres is reachable only on Railway's private network (`DATABASE_URL`), not from GitHub Actions. `.github/workflows/content-publish.yml` therefore only validates content PRs (`npm run validate` and `npm run publish-content -- --dry-run`) and holds no database secret.
 
-**Manual lane** (publish without a redeploy, e.g. after fixing a failed publish):
+**Manual lane** (re-run the publish in the running container, e.g. after a transient database error at boot; a content fix needs a new deploy, which publishes on boot):
 
 ```bash
 railway ssh --service automatos-academy -- "npm run publish-content"
 ```
 
-**Rollback:** point `content_current` at an earlier row in `content_versions`; the server picks it up within 60 s. Redeploying the same tree keeps the rollback. A deploy with a changed tree publishes the new version and moves the pointer forward.
+### Rollback and reverts
 
-**Check after a deploy:** the deploy log has a `[publish]` line (`… published` or `… already published`), and `GET /api/catalog/version` returns the `contentVersion` that `npm run publish-content -- --dry-run` prints for the deployed commit.
+**Rollback:** point `content_current` at an earlier row in `content_versions`; the server picks it up within 60 s. Redeploying the same tree keeps the rollback.
+
+```sql
+UPDATE content_current SET content_version = '<earlier v_…>', updated_at = now() WHERE id = true;
+```
+
+**Reverts:** a deploy never moves the pointer to a version that already exists in `content_versions`; that is what lets a deliberate rollback survive redeploys. The flip side: a git revert, or a Railway rollback to an earlier image, that restores an earlier, already-published tree does **not** go live on deploy. The deploy log prints a `[publish] WARNING <v> is already published but content_current is <v'>` line instead. Repoint by hand, either with the SQL the WARNING line prints or by pointing at the running image's tree:
+
+```bash
+railway ssh --service automatos-academy -- "npm run publish-content -- --repoint"
+```
+
+Only a tree that has never been published moves the pointer forward on deploy.
+
+### Check after a deploy
+
+The deploy log has a `[publish]` line (`… published` or `… already published`) and no `[publish] WARNING` line, and `GET /api/catalog/version` returns the `contentVersion` that `npm run publish-content -- --dry-run` prints for the deployed commit.
 
 ## DNS — point the subdomain
 

@@ -82,7 +82,9 @@ runs are possible but never required.
 > **Superseded 2026-10-19:** production Postgres is reachable only on Railway's private network,
 > so the CI job could not publish. `docker-entrypoint.sh` now runs `npm run publish-content` on
 > every deploy (`CONTENT_SOURCE=db`), after migrations; a failed publish logs a banner and the
-> server keeps serving the last published version. CI runs only `--dry-run`. Manual lane:
+> server keeps serving the last published version. CI runs only `--dry-run`. Manual lane (re-runs
+> the publish in the running container, e.g. after a transient database error at boot; a content
+> fix needs a new deploy, which publishes on boot):
 > `railway ssh --service automatos-academy -- "npm run publish-content"`.
 
 ### 4.3 Serving

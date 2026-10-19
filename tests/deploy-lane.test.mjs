@@ -172,5 +172,15 @@ ok(seen.size > 5 && missing.length === 0, `publish import graph resolves (${seen
 ok(notShipped.length === 0,
   `every package the publish imports is a production dependency (${[...bare.keys()].filter((s) => !builtins.has(s)).join(", ")})${notShipped.length ? ` — NOT shipped: ${notShipped.join(", ")}` : ""}`);
 
+// The gate must run on any PR that can change what the publish does: every
+// module in its import graph has to match content-publish.yml's
+// pull_request paths filter ("dir/**" = prefix, anything else = exact path).
+const prPaths = code.match(/^\s*pull_request:\s*\n\s*paths:\s*\n((?:\s*(?:-\s*"[^"]+"|#.*)\s*\n)+)/m);
+const prGlobs = prPaths ? [...prPaths[1].matchAll(/-\s*"([^"]+)"/g)].map((m) => m[1]) : [];
+const covered = (file) => prGlobs.some((g) => (g.endsWith("/**") ? file.startsWith(g.slice(0, -2)) : file === g));
+const uncovered = [...seen].filter((f) => !covered(f));
+ok(prGlobs.length > 0 && uncovered.length === 0,
+  `content-publish.yml's pull_request paths cover the whole publish import graph${uncovered.length ? ` — missing: ${uncovered.join(", ")}` : ""}`);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
