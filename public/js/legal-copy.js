@@ -11,7 +11,7 @@
 // same PR and move POLICY_UPDATED.
 
 export const SUPPORT_EMAIL = "support@automatos.app";
-export const POLICY_UPDATED = "1 October 2026";
+export const POLICY_UPDATED = "19 October 2026";
 
 export const PRIVACY_MD = `
 This policy covers **Automatos AI Academy**: the website at academy.automatos.app and the Automatos AI Academy app for iPhone and Android. It explains what we collect, why, who helps us run the service, and the controls you have. Questions go to **${SUPPORT_EMAIL}**.
@@ -109,7 +109,7 @@ Some of these providers are in the United States. Where data leaves the UK or EE
 - **Delete your learning data:** this keeps your sign-in. It is in the app's Settings, under Account & data, and on your profile page.
 - **Delete your account:** this removes your sign-in and all your learning data, in the app and on the website. It is in the same places.
 - **Stop emails:** use the unsubscribe link in any email, or turn the weekly email off on your profile page.
-- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, by emailing **${SUPPORT_EMAIL}**. We reply within two working days and complete data-rights requests within one month. You can also complain to your local data protection authority.
+- **Everything else:** you can ask us to access, correct, delete, restrict or port your data, or object to how we use it, by emailing **${SUPPORT_EMAIL}**. We reply within two working days. We complete data-rights requests within one month. You can also complain to your local data protection authority.
 
 ## Children
 
