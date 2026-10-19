@@ -97,7 +97,28 @@ ok(isDeepStrictEqual(rowEntries, [
 ok(!/nofollow|target=|rel=/.test(FAMILY_ROW_HTML + FAMILY_ROW_INLINE_HTML), "family links are plain <a> links (no rel, no target)");
 ok(spaRow !== "" && squash(spaRow) === FAMILY_ROW_HTML, "the SPA footer's family row is the same markup as FAMILY_ROW_HTML");
 ok(footer.lastIndexOf("© 2026 Automatos AI") < footer.indexOf('class="ac-family"') && squash(footer).endsWith("</ul></nav></div>"), "the family row is the last line of the SPA footer");
-ok((footer.match(/class="ac-family"/g) || []).length === 1 && (footer.match(/href="https:\/\/markets\.automatos\.app"/g) || []).length === 1, "the family is listed once in the SPA footer");
+ok((footer.match(/class="ac-family"/g) || []).length === 1 && (footer.match(/href="https:\/\/markets\.automatos\.app"/g) || []).length === 1, "one family row in the SPA footer; Markets linked once");
+// Studio is also linked from the Next step column, the Academy's one CTA into
+// Studio (pending Gerard's call on keeping it). Outside the row, a Studio link
+// may only be that waitlist CTA, so no second family listing creeps in.
+const studioOutsideRow = footer.replace(spaRow, "").match(/href="https:\/\/studio\.automatos\.app[^"]*"/g) || [];
+ok(studioOutsideRow.every((h) => h === 'href="https://studio.automatos.app/#waitlist"') && studioOutsideRow.length <= 1, "outside the family row, Studio is linked only by the Next step waitlist CTA");
+
+// The footer grid has one track per child (brand + link columns), at every
+// width: removing or adding a column must change the CSS with it, or the grid
+// leaves an empty track (or wraps a column onto a second row).
+const css = read("public/academy.css");
+const footerCols = (footer.match(/<nav class="ac-footer-col"/g) || []).length;
+const baseCols = ((css.match(/\.ac-footer-grid \{[^}]*grid-template-columns:\s*([^;]+);/) || [])[1] || "").replace(/minmax\([^)]*\)/g, "M").trim().split(/\s+/).filter(Boolean).length;
+const midCols = Number((css.match(/@media \(max-width: 1080px\) \{\s*\.ac-footer-grid \{ grid-template-columns: repeat\((\d+), 1fr\); \}\s*\.ac-footer-brand \{ grid-column: 1 \/ -1; \}/) || [])[1]);
+ok(footerCols >= 1 && baseCols === footerCols + 1, `the footer grid has one track per child above 1080px (${baseCols} tracks, brand + ${footerCols} columns)`);
+ok(midCols === footerCols, `at 721–1080px the brand takes its own row and the ${footerCols} link columns share the next (${midCols} tracks)`);
+
+// Footer clicks on automatos.app hosts that are not the conversion CTA: the
+// family row counts as footer_family_click, the Legal column is not counted.
+const analytics = read("public/js/analytics.js");
+ok(/const FAMILY_ROW = "\.ac-family";/.test(analytics) && analytics.includes('track("footer_family_click"') && read("server/events.js").includes('"footer_family_click"'), "family-row clicks are footer_family_click (allowlisted in server/events.js), not cta_automatos_click");
+ok(analytics.includes(`const NOT_A_CTA = ".ac-footer-col[aria-label='Legal']";`) && footer.includes('<nav class="ac-footer-col" aria-label="Legal">'), "the Legal column's automatos.app links are not counted as cta_automatos_click");
 ok(BRAND_FOOTER_HTML.trim().endsWith(FAMILY_ROW_HTML), "standalone pages (BRAND_FOOTER_HTML) end with the family row");
 ok(FAMILY_ROW_INLINE_HTML.includes(`${FAMILY_LABEL}:`) && FAMILY_SITES.every(({ name, href }) => name === "Automatos Academy"
   ? FAMILY_ROW_INLINE_HTML.includes(`aria-current="page" style="font-weight:600;color:#1c2740;">${name}</span>`)
@@ -142,6 +163,9 @@ const trackLd = ldBlocks(trackShell);
 const course = trackLd.length ? checkGraph(trackLd[0], "track shell").find((n) => n["@type"] === "Course") : null;
 ok(!!course && course.provider.name === "Automatos Academy" && course.isAccessibleForFree === true, "track shell: the Course is provided by Automatos Academy, free");
 ok(trackShell.includes(FAMILY_ROW_HTML), "track shell carries the family row");
+const hostileShell = shellHtml({ trackId: "facts", vendorId: "automatos", vendorName: "Automatos" }, { name: "Bad </script><script>alert(1)</script>", summary: "A track.", domainFiles: [] });
+const hostileLd = ldBlocks(hostileShell);
+ok(hostileLd.length === 1 && !hostileLd[0].parseError && (hostileLd[0]["@graph"] || []).some((n) => n.name === "Bad </script><script>alert(1)</script>"), "track shell: a '</script>' in a track name stays inside the JSON-LD string (escaped as \\u003c)");
 
 const wireShell = buildPostShellHtml({
   post: { slug: "facts", title: "Facts", summary: "S", type: "trend", byline: { agents: ["QUILL"] }, published_at: "2026-10-19T00:00:00Z", updated_at: "2026-10-19T00:00:00Z", sources: [], corrections: [], tags: [], body_html: "<p>b</p>" },

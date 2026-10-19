@@ -40,7 +40,9 @@ export function shellHtml(t, track) {
   // The Course's provider is the Academy as an EducationalOrganization whose
   // parentOrganization is the one Automatos AI Organization every family site
   // shares by @id; pageJsonLd puts that node in the same graph so the
-  // reference resolves on this page (server/structured-data.js).
+  // reference resolves on this page (server/structured-data.js). Rendered
+  // with `<` escaped (as server/wire/shell.js does) so a track name or
+  // summary from the content index can never close the <script> element.
   const jsonLd = pageJsonLd({
     "@type": "Course",
     name: track.name,
@@ -87,7 +89,7 @@ export function shellHtml(t, track) {
 <meta property="og:url" content="${esc(pageUrl)}"><meta property="og:image" content="${BASE}/og-academy.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>
 </head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <p class="mono-label">Automatos Academy · ${esc(t.vendorName)}</p>

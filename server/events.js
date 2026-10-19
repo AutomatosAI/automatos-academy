@@ -17,7 +17,7 @@ import express from "express";
 const EVENTS = new Set([
   "page_view", "track_start", "module_complete", "mock_start", "mock_score",
   "readiness_a_plus", "badge_claim", "badge_view", "cta_automatos_click",
-  "notify_me", "tutor_message", "tutor_error", "tutor_consent",
+  "footer_family_click", "notify_me", "tutor_message", "tutor_error", "tutor_consent",
   "tutor_deep_link", "path_finder", "pace_line_shown", "exam_date_set",
   "account_ask_shown", "account_ask_clicked", "account_ask_dismissed",
   // LX-5 additions — the funnel's missing steps
