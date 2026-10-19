@@ -16,7 +16,7 @@ with a **🛠 Try it now** task you do on Automatos. Blueprint: [PRD-S1-APA.md](
 |---|---|---|---|
 | 00 | What is Automatos? — concepts, vocabulary & the Command Centre tour | `README`, `about`, `activity` | [`00-overview.md`](./00-overview.md) |
 | 01 | Chat, your first agent & the Universal Router | `chat`, `agents` | [`01-chat-first-agent.md`](./01-chat-first-agent.md) |
-| 02 | Skills — the 140-skill library, the 9 signature agents, authoring a `SKILL.md` | `marketplace/capabilities`, `agents` | [`02-skills.md`](./02-skills.md) |
+| 02 | Skills — the 140-skill library, the signature agents, authoring a `SKILL.md` | `marketplace/capabilities`, `agents` | [`02-skills.md`](./02-skills.md) |
 | 03 | Knowledge & tools — RAG, Knowledge Graph, CodeGraph, NL2SQL, connect Composio tools | `knowledge/*`, `tools/*` | [`03-knowledge-tools.md`](./03-knowledge-tools.md) |
 | 04 | Playbooks & workflows — build, schedule, trigger | `agents/playbooks`, `tools` | [`04-recipes-playbooks.md`](./04-recipes-playbooks.md) |
 | 05 | Missions — goal → plan → approve → run | `activity/missions` | [`05-missions.md`](./05-missions.md) |
