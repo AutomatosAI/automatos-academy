@@ -49,13 +49,16 @@ ok(!footer.includes("Built on Automatos agents"), "footer drops the old 'Built o
 ok(!/Automatos AI Academy/.test(PRIVACY_MD + SUPPORT_MD) && PRIVACY_MD.includes("**Automatos Academy**"), 'legal copy names the product "Automatos Academy"');
 
 // EU AI Act Article 50(1) (applies since 2 Aug 2026, taught in the AIGP
-// track): every widget-embed example the course teaches opens by saying the
-// bot is an AI.
+// track): every widget-embed example the course teaches labels the bot as an
+// AI in the header `title` (what visitors see). The chat widget never renders
+// `greeting` (automatos-widget-sdk packages/chat-widget passes only
+// config.title to the header), so a greeting cannot carry the disclosure.
 const strings = (o) => (typeof o === "string" ? [o] : o && typeof o === "object" ? Object.values(o).flatMap(strings) : []);
 for (const file of ["m08-channels-surfaces.json", "m10-marketplace.json"]) {
   const doc = JSON.parse(readFileSync(new URL(`../public/content/automatos/platform-architect/${file}`, import.meta.url), "utf8"));
-  const greetings = strings(doc).flatMap((s) => [...s.matchAll(/greeting:\s*(["'])(.*?)\1/g)].map((m) => m[2]));
-  ok(greetings.length > 0 && greetings.every((g) => /\bAI\b/.test(g)), `${file}: every widget greeting example says the bot is an AI`);
+  const inits = strings(doc).flatMap((s) => [...s.matchAll(/AutomatosWidget\.init\(\{([\s\S]*?)\}\)/g)].map((m) => m[1])).filter((b) => b.includes("apiKey:"));
+  ok(inits.length > 0 && inits.every((b) => /title:\s*(["'])[^"']*\bAI\b[^"']*\1/.test(b)), `${file}: every widget embed example puts "AI" in the header title`);
+  ok(inits.every((b) => !/greeting:/.test(b)), `${file}: no widget embed example relies on greeting (the chat widget never displays it)`);
 }
 
 // generateShells writes the (gitignored) public/sitemap.xml — an empty
