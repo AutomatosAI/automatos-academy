@@ -46,7 +46,7 @@ const RETIRED = [
   [/verify-in-product|roadmap edge/, "branded documents and templates ship: generate_document renders PDF, DOCX and XLSX from the Brand Kit (facts 8b)"],
   [/\/Users\//, "no local machine paths in served content (track verification.sourceOfTruth)"],
   [/Activity → (?:Dashboard|Feed|Reports|Memory|Missions)|Agents → Playbooks|Analytics → Workflows/, "retired UI paths: the Command Centre's Calendar and Activity tab, Knowledge Base → Memory, Agent Details → Reports, Assignments → Playbooks/Missions, Analytics → Missions"],
-  [/(?:leaves|leaving) the building (?:gets your sign-off|without your)|nothing leaves the building|nothing (?:executes|runs) until you|nothing runs unseen|runs? unapproved anyway|never starts unapproved|only run after you approve|before anything runs|nothing is sent, posted or paid|a board that asks before it acts|everything waits for (?:your )?approval/i,
+  [/(?:leaves|leaving) the building (?:gets your sign-off|without your)|nothing leaves the building|nothing (?:executes|runs) until you|nothing runs unseen|runs? unapproved anyway|never starts unapproved|only run after you approve|before anything (?:runs|executes|happens)|nothing is sent, posted or paid|a board that asks before it acts|everything waits for (?:your )?approval|waits for your yes|human approval before anything|can be told to skip the wait\b(?!\s+too,\s+but)/i,
     "no absolute approval claims: a mission plan waits for approval by default, but the workspace approval policy (dollar ceiling, full autonomy, countdown) and a chat request can start one unapproved (section 8b)"],
 ];
 for (const [rx, rule] of RETIRED) {
@@ -80,8 +80,10 @@ ok(m09.includes("Command Centre → Governance → Policy") && /ships off/.test(
 // full_auto and the auto-proceed countdown start plans unapproved).
 const m05 = read("public/content/automatos/platform-architect/m05-missions.json");
 const m5 = read("public/content/automatos/ai-business/m5-delegation-guardrails.json");
-ok([m05, m5].every((t) => t.includes("mission approval policy") && t.includes("auto-approve plans under a dollar ceiling") && t.includes("countdown") && t.includes("a mission started from chat can be told to skip the wait")),
-  "m05 and AI Business m5 teach the plan gate as the default the workspace approval policy can change");
+ok([m05, m5].every((t) => t.includes("mission approval policy") && t.includes("auto-approve plans under a dollar ceiling") && t.includes("countdown")
+    && t.includes("A mission started from chat can ask to skip the wait too, but that request only takes effect if the workspace's own policy already allows it")
+    && t.includes("a request from the public widget never counts as approval")),
+  "m05 and AI Business m5 teach the plan gate as the default the workspace approval policy can change, and that a chat auto_approve request cannot override an always-ask workspace on its own");
 
 // The Automatos AI family row (Gerard, 19 Oct 2026; reverses the 6 Oct "no
 // family column on product sites" rule): the last line of every footer, the
