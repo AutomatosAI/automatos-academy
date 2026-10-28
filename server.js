@@ -482,7 +482,7 @@ app.get("/cert/:payload", (req, res) => {
 <meta property="og:url" content="${esc(certUrl)}"><meta property="og:image" content="${esc(ogImage)}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48" /><link rel="icon" href="/favicon.svg" type="image/svg+xml" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link rel="manifest" href="/site.webmanifest" /><link rel="stylesheet" href="/academy.css">
 </head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
   <div class="cert-card">
