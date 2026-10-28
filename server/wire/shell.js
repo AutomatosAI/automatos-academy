@@ -119,7 +119,7 @@ export function buildPostShellHtml({ post, baseUrl, label }) {
 ${tagsMeta}
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/atom+xml" title="The Wire — Automatos Academy" href="/wire/rss.xml">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/academy.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48" /><link rel="icon" href="/favicon.svg" type="image/svg+xml" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link rel="manifest" href="/site.webmanifest" /><link rel="stylesheet" href="/academy.css">
 <script type="application/ld+json">${jsonLd(post, pageUrl)}</script>
 </head><body data-mood="mist" style="display:block">
 <main style="max-width:820px;margin:0 auto;padding:64px 22px">
